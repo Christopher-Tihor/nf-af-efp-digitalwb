@@ -10,6 +10,7 @@ export const Environment = {
 export const Hosts = {
   [Environment.DEV]: [
     'af-pods-dev.powerappsportals.com',
+    'af-efp-dev.powerappsportals.com',
     'af-pods-dev.crm3.dynamics.com',
   ],
   [Environment.TEST]: ['af-pods-test.powerappsportals.com'],
@@ -18,7 +19,7 @@ export const Hosts = {
 export const ClaimPaths = ['/claim/', '/claim-dev/'];
 export const ApplicationPaths = ['/application/', '/application-dev/'];
 export const HomePaths = ['/', '/home-dev/'];
-export const WorkbookPaths = ['/efpworkbook/'];
+export const WorkbookPaths = ['/efpworkbook/', '/efpworkbook-dev/'];
 
 export const Form = {
   Application: 'Application',

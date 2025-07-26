@@ -11,10 +11,12 @@ export const Hosts: {
 export const ClaimPaths: string[];
 export const ApplicationPaths: string[];
 export const HomePaths: string[];
+export const WorkbookPaths: string[];
 export namespace Form {
     let Application: string;
     let Claim: string;
     let StaffPortalClaim: string;
+    let Workbook: string;
 }
 export namespace Page {
     let Home: string;

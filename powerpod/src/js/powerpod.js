@@ -94,18 +94,6 @@ export default function powerpod(options) {
       break;
   }
 
-  switch (getOptions().page) {
-    case Page.Home:
-      logger.info({ message: `initializing ${Page.Home}` });
-      initHome();
-      break;
-    default:
-      logger.warn({
-        message: 'init with no page defined in options',
-      });
-      break;
-  }
-
   // @ts-ignore
   return window.powerpod;
 }
@@ -118,7 +106,7 @@ function setAPI() {
     };
   };
   // @ts-ignore
-  POWERPOD.version = '4.1.9';
+  POWERPOD.version = '4.2.0';
   // @ts-ignore
   window.powerpod = POWERPOD;
 }

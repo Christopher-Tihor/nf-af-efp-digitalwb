@@ -139,4 +139,5 @@ export namespace ENDPOINT_URL {
     let get_commodities_data: string;
     let get_program_intake_data: string;
     let get_program_home_page_content_data: string;
+    function get_workbook_data_by_id(id: any): string;
 }

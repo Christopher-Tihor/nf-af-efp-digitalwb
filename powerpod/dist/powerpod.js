@@ -1,5 +1,5 @@
 /*!
-* powerpod 4.1.7
+* powerpod 4.1.9
 * https://github.com/bcgov/nr-af-pods/powerpod
 *
 * @license GPLv3 for open source use only
@@ -588,14 +588,16 @@
     TEST: 'test',
     PROD: 'prod'
   };
-  var Hosts = _defineProperty(_defineProperty(_defineProperty({}, Environment.DEV, ['af-pods-dev.powerappsportals.com', 'af-pods-dev.crm3.dynamics.com']), Environment.TEST, ['af-pods-test.powerappsportals.com']), Environment.PROD, ['af-pods.powerappsportals.com']);
+  var Hosts = _defineProperty(_defineProperty(_defineProperty({}, Environment.DEV, ['af-pods-dev.powerappsportals.com', 'af-efp-dev.powerappsportals.com', 'af-pods-dev.crm3.dynamics.com']), Environment.TEST, ['af-pods-test.powerappsportals.com']), Environment.PROD, ['af-pods.powerappsportals.com']);
   var ClaimPaths = ['/claim/', '/claim-dev/'];
   var ApplicationPaths = ['/application/', '/application-dev/'];
   var HomePaths = ['/', '/home-dev/'];
+  var WorkbookPaths = ['/efpworkbook/', '/efpworkbook-dev/'];
   var Form = {
     Application: 'Application',
     Claim: 'Claim',
-    StaffPortalClaim: 'StaffPortalClaim'
+    StaffPortalClaim: 'StaffPortalClaim',
+    Workbook: 'Workbook'
   };
   var Page = {
     Home: 'Home'
@@ -1376,7 +1378,10 @@
     get_types_of_food_data: "/_api/quartech_typeoffoods?$select=quartech_name",
     get_commodities_data: "/_api/quartech_commodities?$select=quartech_name,_quartech_naicscode_value,quartech_category",
     get_program_intake_data: "/_api/quartech_programintakes?$select=quartech_intakeenddate,quartech_intakestartdate,quartech_openintakedescription,quartech_closedintakedescription",
-    get_program_home_page_content_data: "/_api/quartech_programhomepagecontents"
+    get_program_home_page_content_data: "/_api/quartech_programhomepagecontents",
+    get_workbook_data_by_id: function get_workbook_data_by_id(id) {
+      return "/_api/quartech_workbooks(".concat(id, ")");
+    }
   };
   POWERPOD.fetch = {
     fetch: fetch$1,
@@ -30797,106 +30802,13 @@
       t$1('commodities-multiselect')
   ], CommoditiesMultiSelect);
 
-  var logger$3 = Logger('pages/home');
-  function initHome() {
-    return _initHome.apply(this, arguments);
-  }
-  function _initHome() {
-    _initHome = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee() {
-      return _regeneratorRuntime().wrap(function _callee$(_context) {
-        while (1) switch (_context.prev = _context.next) {
-          case 0:
-            logger$3.info({
-              fn: initHome,
-              message: "initializing home page"
-            });
-            updateHomePageWithContent();
-          case 2:
-          case "end":
-            return _context.stop();
-        }
-      }, _callee);
-    }));
-    return _initHome.apply(this, arguments);
-  }
-  function updateHomePageWithContent() {
-    return _updateHomePageWithContent.apply(this, arguments);
-  }
-  function _updateHomePageWithContent() {
-    _updateHomePageWithContent = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee2() {
-      var contentData, html;
-      return _regeneratorRuntime().wrap(function _callee2$(_context2) {
-        while (1) switch (_context2.prev = _context2.next) {
-          case 0:
-            _context2.next = 2;
-            return getProgramHomePageContentData();
-          case 2:
-            contentData = _context2.sent;
-            logger$3.info({
-              fn: updateHomePageWithContent,
-              message: "received program home page content data",
-              data: {
-                contentData: contentData
-              }
-            });
-            html = generateProgramHtml(contentData);
-            logger$3.info({
-              fn: updateHomePageWithContent,
-              message: "generated program html content",
-              data: {
-                html: html
-              }
-            });
-            injectProgramHtml(html);
-          case 7:
-          case "end":
-            return _context2.stop();
-        }
-      }, _callee2);
-    }));
-    return _updateHomePageWithContent.apply(this, arguments);
-  }
-  function injectProgramHtml(htmlString) {
-    var container = document.getElementById('programHomePageContent');
-    if (container) {
-      container.innerHTML = htmlString;
-    } else {
-      logger$3.warn({
-        fn: injectProgramHtml,
-        message: "Element with id \"programHomePageContent\" not found."
-      });
-    }
-  }
-  function generateProgramHtml(contentData) {
-    var _contentData$data;
-    var programs = ((_contentData$data = contentData.data) === null || _contentData$data === void 0 ? void 0 : _contentData$data.value) || [];
-    var now = new Date();
-
-    // Sort: by most recent open date (if exists), then by most recent close date
-    programs.sort(function (a, b) {
-      var aOpen = a.quartech_programopendate ? new Date(a.quartech_programopendate).getTime() : 0;
-      var bOpen = b.quartech_programopendate ? new Date(b.quartech_programopendate).getTime() : 0;
-      if (bOpen !== aOpen) return bOpen - aOpen;
-      var aClose = a.quartech_programclosedate ? new Date(a.quartech_programclosedate).getTime() : 0;
-      var bClose = b.quartech_programclosedate ? new Date(b.quartech_programclosedate).getTime() : 0;
-      return bClose - aClose;
+  var logger$3 = Logger('workbook/workbook');
+  function initWorkbook() {
+    preloadRequestVerificationToken();
+    logger$3.info({
+      fn: initWorkbook,
+      message: "workbook initialized!"
     });
-    var resultHtml = '';
-    programs.forEach(function (program) {
-      var openDate = program.quartech_programopendate ? new Date(program.quartech_programopendate) : null;
-      var closeDate = program.quartech_programclosedate ? new Date(program.quartech_programclosedate) : null;
-      var openHtml = program.quartech_openhtmlcontent;
-      var closedHtml = program.quartech_closedhtmlcontent;
-      var hasOpenDateOnly = openDate && !closeDate && now >= openDate;
-      var isOpenRange = openDate && closeDate && now >= openDate && now <= closeDate;
-      var isClosed = closeDate && now > closeDate;
-      if ((isOpenRange || hasOpenDateOnly) && openHtml) {
-        resultHtml += openHtml;
-      } else if (isClosed && closedHtml) {
-        resultHtml += closedHtml;
-      }
-    });
-    return resultHtml;
   }
 
   var logger$2 = Logger('powerpod');
@@ -30904,7 +30816,14 @@
     // try to autodetect the form type if not passed
     if (!(options !== null && options !== void 0 && options.form)) {
       var path = window.location.pathname;
-      if (ClaimPaths.some(function (claimPath) {
+      if (WorkbookPaths.some(function (workbookPath) {
+        return path.includes(workbookPath);
+      })) {
+        logger$2.info({
+          message: "auto-detected ".concat(Form.Workbook, " form")
+        });
+        setOption('form', Form.Workbook);
+      } else if (ClaimPaths.some(function (claimPath) {
         return path.includes(claimPath);
       })) {
         logger$2.info({
@@ -30970,22 +30889,14 @@
         });
         initClaim();
         break;
+      case Form.Workbook:
+        logger$2.info({
+          message: "initializing ".concat(Form.Workbook)
+        });
+        initWorkbook();
       default:
         logger$2.warn({
           message: 'init with no form type defined in options'
-        });
-        break;
-    }
-    switch (getOptions$1().page) {
-      case Page.Home:
-        logger$2.info({
-          message: "initializing ".concat(Page.Home)
-        });
-        initHome();
-        break;
-      default:
-        logger$2.warn({
-          message: 'init with no page defined in options'
         });
         break;
     }
@@ -31001,7 +30912,7 @@
       };
     };
     // @ts-ignore
-    POWERPOD.version = '4.1.7';
+    POWERPOD.version = '4.1.9';
     // @ts-ignore
     window.powerpod = POWERPOD;
   }
