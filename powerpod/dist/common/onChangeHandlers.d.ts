@@ -1,0 +1,15 @@
+export function setOnChangeHandler(fieldName: any, elemType: any, onChangeHandlerName: any): void;
+export function calculateTotalRequestedAmountForKTTP(): void;
+export function calculateTFCRBudgets(): void;
+export function checkAndSetTFCCRFEligbilityNotice(): void;
+export function checkAndSetTFCREligbilityNotice(): void;
+export function calculateAndPopulateRequestedClaimAmountForVLB(): void;
+export function calculateAndPopulateRequestedClaimAmountForTFCR(): void;
+export function setBusinessOrPersonalAddressLabels(): void;
+export function setBusinessOrPersonalStateForVLB(): void;
+export function populatePhoneNumberEmailAndCityOnChangeVLB(): void;
+export function populateTotalPercent(): void;
+export function populateBusinessNameOnChangeFirstOrLastNameVLB(): void;
+export function displayOrHideAdministrationCostsNoticeForKTTP(): boolean | undefined;
+export function updateSMEDesignationExplanationFieldLabelForKTTP1(): void;
+export function updateSMEDesignationExplanationFieldLabelForKTTP2(): void;

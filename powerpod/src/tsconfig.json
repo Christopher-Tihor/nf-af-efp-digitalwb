@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "target": "es2018",
+    "resolveJsonModule": true,
+    "module": "esnext",
+    "lib": ["es2017", "dom"],
+    "allowJs": true,
+    "checkJs": true,
+    "strict": true,
+    "esModuleInterop": true,
+    "outDir": "../dist",
+    "declaration": true,
+    "moduleResolution": "node",
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
+    "experimentalDecorators": true,
+    "useDefineForClassFields": false
+  },
+  "updateImportsOnFileMove": "prompt",
+  "include": ["js/**/*"],
+  "exclude": ["node_modules"]
+}

@@ -1,0 +1,160 @@
+export const win = window;
+export const doc = document;
+
+export const Environment = {
+  DEV: 'dev',
+  TEST: 'test',
+  PROD: 'prod',
+};
+
+export const Hosts = {
+  [Environment.DEV]: [
+    'af-pods-dev.powerappsportals.com',
+    'af-pods-dev.crm3.dynamics.com',
+  ],
+  [Environment.TEST]: ['af-pods-test.powerappsportals.com'],
+  [Environment.PROD]: ['af-pods.powerappsportals.com'],
+};
+export const ClaimPaths = ['/claim/', '/claim-dev/'];
+export const ApplicationPaths = ['/application/', '/application-dev/'];
+export const HomePaths = ['/', '/home-dev/'];
+export const WorkbookPaths = ['/efpworkbook/'];
+
+export const Form = {
+  Application: 'Application',
+  Claim: 'Claim',
+  StaffPortalClaim: 'StaffPortalClaim',
+  Workbook: 'Workbook',
+};
+
+export const Page = {
+  Home: 'Home',
+};
+
+export const BrowserInformationType = {
+  Information: 255550000,
+  Warning: 255550001,
+  Error: 255550002,
+};
+
+export const BrowserInformationAction = {
+  Load: 'Load',
+  Save: 'Save',
+  Next: 'Next',
+};
+
+export const HtmlElementType = {
+  Input: 'Input',
+  CurrencyInput: 'CurrencyInput',
+  TextArea: 'TextArea',
+  FileInput: 'FileInput',
+  SingleOptionSet: 'SingleOptionSet',
+  MultiOptionSet: 'MultiOptionSet',
+  MultiSelectPicklist: 'MultiSelectPicklist',
+  DropdownSelect: 'DropdownSelect',
+  DatePicker: 'DatePicker',
+  Checkbox: 'Checkbox',
+  NotesControl: 'NotesControl',
+  Unknown: 'Unknown',
+  SignatureControl: 'SignatureControl',
+};
+
+export const FormStep = {
+  // Shared Steps:
+  Documents: 'DocumentsStep',
+  DeclarationAndConsent: 'DeclarationAndConsentStep',
+  // Application Steps:
+  ApplicantInfo: 'ApplicantInfoStep',
+  Eligibility: 'EligibilityStep',
+  Project: 'ProjectStep',
+  DeliverablesBudget: 'DeliverablesBudgetStep',
+  DemographicInfo: 'DemographicInfoStep',
+  // Claim Steps:
+  ProjectResults: 'ProjectResultsStep',
+  ClaimInfo: 'ClaimInfoStep',
+  // Unknown
+  Unknown: 'UnknownStep',
+  Success: 'Success',
+};
+
+export const TabDisplayNames = {
+  // Shared Steps:
+  [FormStep.Documents]: 'Documents',
+  [FormStep.DeclarationAndConsent]: [
+    'Application Declaration and Consent',
+    'Declaration and Consent',
+  ],
+  // Application Steps:
+  [FormStep.ApplicantInfo]: 'Applicant Information',
+  [FormStep.Eligibility]: ['Eligibility', 'Availability', 'Practice'],
+  [FormStep.Project]: ['Project', 'Scope of Practice', 'Student Candidates'],
+  [FormStep.DeliverablesBudget]: ['Deliverables & Budget', 'EFT Form'],
+  [FormStep.DemographicInfo]: 'Demographic Information',
+  // Claim Steps:
+  [FormStep.ClaimInfo]: 'Claim Information',
+  [FormStep.ProjectResults]: 'Project Results',
+};
+
+export const TabNames = {
+  // Shared Steps:
+  [FormStep.Documents]: 'tab_Supporting_Documentation',
+  [FormStep.DeclarationAndConsent]: ['tab_Declaration_Consent', 'consentTab'],
+  // Application Steps:
+  [FormStep.ApplicantInfo]: ['tab_ApplicantInfo', 'applicantInfoTab'],
+  [FormStep.Eligibility]: 'tab_eligibility',
+  [FormStep.Project]: 'tab_Project',
+  [FormStep.DeliverablesBudget]: 'tab_Deliverables_Budget',
+  // [FormStep.DemographicInfo]: '', // no tab name declared
+  // Claim Steps:
+  [FormStep.ClaimInfo]: 'claimInfoTab',
+  [FormStep.ProjectResults]: 'projectResultsTab',
+};
+
+export const ProgramIds = {
+  VLB: '8806d490-8f44-ef11-a316-002248ae4517',
+};
+
+export const YES_VALUE = '255550000';
+export const NO_VALUE = '255550001';
+export const OTHER_VALUE = '255550010';
+export const GROUP_APPLICATION_VALUE = '255550001';
+export const SECTOR_WIDE_ID_VALUE = '6ce2584f-4740-ee11-be6e-000d3af3ac95';
+
+// TODO: move this to some kind of state management module
+// cache common elements
+export const POWERPOD = {
+  state: {},
+  program: {},
+  applicationUtils: {},
+  test: {},
+  shared: {},
+  validation: {
+    enableIntervalBased: true,
+    errorHtml: '',
+  },
+  fieldValidation: {},
+  documents: {},
+  docUtils: {},
+  fetch: {},
+  dynamics: {},
+  options: {},
+  logger: {},
+  saveButton: {},
+  doNotUnhideLoader: false,
+  redirectToNewId: false,
+  components: {},
+  onChangeHandlers: {},
+  customEventHandlers: {},
+  initValuesFns: {},
+  valueGeneration: {},
+  loading: true,
+  loadingFieldsIntoState: true,
+  configuringFields: true,
+  dateUtils: {},
+  utils: {},
+  typesOfFood: {},
+  fieldConditionalLogic: {},
+  fieldConfiguration: {},
+  commodities: {},
+  expenseTypes: {},
+};
