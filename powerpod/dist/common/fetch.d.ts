@@ -112,6 +112,12 @@ export function getProgramIntakeData({ onSuccess, ...options }: {
     onSuccess?: null | undefined;
 }): Promise<any>;
 export function getProgramHomePageContentData({ ...options }?: {}): Promise<any>;
+export function getWorkbookDataById({ id, ...options }: {
+    [x: string]: any;
+    id: any;
+}): Promise<any>;
+export function getChaptersData({ ...options }?: {}): Promise<any>;
+export function getWorkbookQuestionsData({ ...options }?: {}): Promise<any>;
 export namespace ENDPOINT_URL {
     let get_env_vars_data: string;
     function get_application_form_data(programId: any): string;
@@ -140,4 +146,6 @@ export namespace ENDPOINT_URL {
     let get_program_intake_data: string;
     let get_program_home_page_content_data: string;
     function get_workbook_data_by_id(id: any): string;
+    let get_chapters_data: string;
+    let get_workbookquestions_data: string;
 }

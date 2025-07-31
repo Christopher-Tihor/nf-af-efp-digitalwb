@@ -87,6 +87,7 @@ export default function powerpod(options) {
     case Form.Workbook:
       logger.info({ message: `initializing ${Form.Workbook}` });
       initWorkbook();
+      break;
     default:
       logger.warn({
         message: 'init with no form type defined in options',

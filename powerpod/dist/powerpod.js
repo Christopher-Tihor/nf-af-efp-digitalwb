@@ -1,5 +1,5 @@
 /*!
-* powerpod 4.1.9
+* powerpod 4.2.0
 * https://github.com/bcgov/nr-af-pods/powerpod
 *
 * @license GPLv3 for open source use only
@@ -799,10 +799,10 @@
     }
   };
 
-  var logger$K = Logger('store/mutations');
+  var logger$M = Logger('store/mutations');
   var mutations = {
     setFieldData: function setFieldData(state, payload) {
-      logger$K.info({
+      logger$M.info({
         fn: this.setFieldData,
         message: 'Updated field config in state',
         data: {
@@ -814,7 +814,7 @@
       return state;
     },
     addFieldData: function addFieldData(state, payload) {
-      logger$K.info({
+      logger$M.info({
         fn: this.addFieldData,
         message: 'Add field data to state',
         data: {
@@ -832,7 +832,7 @@
     },
     setValidationError: function setValidationError(state, payload) {
       if (state.validationError === payload) {
-        logger$K.warn({
+        logger$M.warn({
           fn: this.setValidationError,
           message: 'Previous validationError state matches payload, no need to update',
           data: {
@@ -848,7 +848,7 @@
     },
     addValidationError: function addValidationError(state, payload) {
       if (state.validationError.includes(payload)) {
-        logger$K.warn({
+        logger$M.warn({
           fn: this.addValidationError,
           message: 'Added validationError message already included in currently displayed message',
           data: {
@@ -865,7 +865,7 @@
     },
     removeValidationError: function removeValidationError(state, payload) {
       if (!state.validationError.includes(payload)) {
-        logger$K.error({
+        logger$M.error({
           fn: this.addValidationError,
           message: 'Requested validationError paylaod does not exist in current state',
           data: {
@@ -881,7 +881,7 @@
       return state;
     },
     addToFieldOrder: function addToFieldOrder(state, payload) {
-      logger$K.info({
+      logger$M.info({
         fn: this.addToFieldOrder,
         message: 'Add field to fieldOrder array',
         data: {
@@ -1202,7 +1202,7 @@
     return validationErrorHtml;
   }
 
-  const logger$J = Logger('common/dynamics');
+  const logger$L = Logger('common/dynamics');
   POWERPOD.dynamics = {
       getCurrentUser,
       getRequestVerificationToken,
@@ -1210,21 +1210,21 @@
   };
   function getCurrentUser() {
       var _a, _b, _c;
-      logger$J.info({
+      logger$L.info({
           fn: getCurrentUser,
           message: 'Start getting current user',
       });
       // @ts-ignore
       const { User } = (_b = (_a = win === null || win === void 0 ? void 0 : win.Microsoft) === null || _a === void 0 ? void 0 : _a.Dynamic365) === null || _b === void 0 ? void 0 : _b.Portal;
       if (!User) {
-          logger$J.error({
+          logger$L.error({
               fn: getCurrentUser,
               message: 'Could not get current user',
               // @ts-ignore
               data: { dynamic365: (_c = win === null || win === void 0 ? void 0 : win.Microsoft) === null || _c === void 0 ? void 0 : _c.Dynamic365 },
           });
       }
-      logger$J.info({
+      logger$L.info({
           fn: getCurrentUser,
           message: 'Successfully retrieved current user data',
           data: { currentUser: User },
@@ -1234,20 +1234,20 @@
   async function preloadRequestVerificationToken() {
       let requestVerificationToken = $('input[name=__RequestVerificationToken]').val();
       if (requestVerificationToken) {
-          logger$J.info({
+          logger$L.info({
               fn: preloadRequestVerificationToken,
               message: `No need to preload token, exists already, __RequestVerificationToken: ${requestVerificationToken}`,
           });
           saveBrowserInfo(BrowserInformationAction.Load);
           return;
       }
-      logger$J.info({
+      logger$L.info({
           fn: preloadRequestVerificationToken,
           message: 'Could not find input[name=__RequestVerificationToken], attempt finding antiforgerytoken div',
       });
       const tokenUrlDiv = document.getElementById('antiforgerytoken');
       if (!tokenUrlDiv) {
-          logger$J.error({
+          logger$L.error({
               fn: preloadRequestVerificationToken,
               message: 'Could not find antiforgerytoken, failed to find verificationtoken',
           });
@@ -1255,7 +1255,7 @@
       }
       const tokenUrl = tokenUrlDiv.getAttribute('data-url');
       if (!tokenUrl) {
-          logger$J.error({
+          logger$L.error({
               fn: preloadRequestVerificationToken,
               message: 'Could not find antiforgerytoken URL, failed to find verificationtoken',
           });
@@ -1271,7 +1271,7 @@
       const inputElement = tempDiv.querySelector('input');
       const token = inputElement === null || inputElement === void 0 ? void 0 : inputElement.getAttribute('value');
       if (!token) {
-          logger$J.error({
+          logger$L.error({
               fn: preloadRequestVerificationToken,
               message: 'Failed to load verification token from antiforgery url',
           });
@@ -1281,7 +1281,7 @@
       // set DOM HTML content for easy/immediate fetching later
       tokenUrlDiv.innerHTML = `<input name="__RequestVerificationToken" type="hidden" value="${requestVerificationToken}">`;
       saveBrowserInfo(BrowserInformationAction.Load);
-      logger$J.info({
+      logger$L.info({
           fn: preloadRequestVerificationToken,
           message: `Successfully created token input element with __RequestVerificationToken: ${requestVerificationToken}`,
       });
@@ -1289,12 +1289,12 @@
   function getRequestVerificationToken() {
       let requestVerificationToken = $('input[name=__RequestVerificationToken]').val();
       if (!requestVerificationToken) {
-          logger$J.error({
+          logger$L.error({
               fn: getRequestVerificationToken,
               message: 'Could not find input[name=__RequestVerificationToken]',
           });
       }
-      logger$J.info({
+      logger$L.info({
           fn: getRequestVerificationToken,
           message: `Successfully found __RequestVerificationToken: ${requestVerificationToken}`,
       });
@@ -1322,8 +1322,9 @@
     _excluded19 = ["id"],
     _excluded20 = ["id", "fieldData"],
     _excluded21 = ["onSuccess"],
-    _excluded22 = ["onSuccess"];
-  var logger$I = Logger('common/fetch');
+    _excluded22 = ["onSuccess"],
+    _excluded23 = ["id"];
+  var logger$K = Logger('common/fetch');
   var ENDPOINT_URL = {
     get_env_vars_data: "/_api/environmentvariabledefinitions?$filter=contains(schemaname,'quartech_')&$select=schemaname,environmentvariabledefinitionid&$expand=environmentvariabledefinition_environmentvariablevalue($select=value)",
     get_application_form_data: function get_application_form_data(programId) {
@@ -1381,7 +1382,9 @@
     get_program_home_page_content_data: "/_api/quartech_programhomepagecontents",
     get_workbook_data_by_id: function get_workbook_data_by_id(id) {
       return "/_api/quartech_workbooks(".concat(id, ")");
-    }
+    },
+    get_chapters_data: "/_api/quartech_chapters",
+    get_workbookquestions_data: "/_api/quartech_workbookquestions"
   };
   POWERPOD.fetch = {
     fetch: fetch$1,
@@ -1411,7 +1414,10 @@
     getCommoditiesData: getCommoditiesData,
     getClaimData: getClaimData,
     getProgramIntakeData: getProgramIntakeData,
-    getProgramHomePageContentData: getProgramHomePageContentData
+    getProgramHomePageContentData: getProgramHomePageContentData,
+    getWorkbookDataById: getWorkbookDataById,
+    getChaptersData: getChaptersData,
+    getWorkbookQuestionsData: getWorkbookQuestionsData
   };
   var CONTENT_TYPE = {
     json: 'application/json; charset=utf-8'
@@ -1428,13 +1434,13 @@
   var _setReqVerificationHeaderToken = function setReqVerificationHeaderToken(XMLHttpRequest) {
     var requestVerificationToken = getRequestVerificationToken();
     if (!requestVerificationToken) {
-      logger$I.warn({
+      logger$K.warn({
         fn: _setReqVerificationHeaderToken,
         message: 'Failed to set request verification token header'
       });
     }
     XMLHttpRequest.setRequestHeader('__RequestVerificationToken', requestVerificationToken);
-    logger$I.info({
+    logger$K.info({
       fn: _setReqVerificationHeaderToken,
       message: "Successfully set header __RequestVerificationToken=".concat(requestVerificationToken)
     });
@@ -1463,7 +1469,7 @@
             if (window.location.hostname === 'localhost') {
               url = 'https://af-pods-dev.powerappsportals.com' + endpointUrl;
             }
-            logger$I.info({
+            logger$K.info({
               fn: fetch$1,
               message: 'Starting fetch request...',
               data: _objectSpread2(_objectSpread2({}, params), {}, {
@@ -1477,7 +1483,7 @@
               break;
             }
             _POWERPOD$fetch$CACHE = POWERPOD.fetch.CACHED_RESULTS[reqHash], _data = _POWERPOD$fetch$CACHE.data, textStatus = _POWERPOD$fetch$CACHE.textStatus, jqXHR = _POWERPOD$fetch$CACHE.jqXHR;
-            logger$I.info({
+            logger$K.info({
               fn: fetch$1,
               message: "returning cached data for url: ".concat(url),
               data: {
@@ -1514,7 +1520,7 @@
                 if (_beforeSend && typeof _beforeSend === 'function') _beforeSend();
               },
               success: function success(data, textStatus, jqXHR) {
-                logger$I.info({
+                logger$K.info({
                   fn: fetch$1,
                   message: 'success handler called',
                   data: {
@@ -1529,7 +1535,7 @@
                   jqXHR: jqXHR
                 };
                 if (returnData) {
-                  logger$I.info({
+                  logger$K.info({
                     fn: fetch$1,
                     message: "skipping onSuccess handler call: ".concat(url),
                     data: {
@@ -1544,7 +1550,7 @@
                 }
               },
               error: function error(jqXHR, textStatus, errorThrown) {
-                logger$I.error({
+                logger$K.error({
                   fn: fetch$1,
                   message: "Error handler called for url: ".concat(url),
                   data: {
@@ -1559,7 +1565,7 @@
               }
             }).then(function (data, textStatus, jqXHR) {
               if (returnData) {
-                logger$I.info({
+                logger$K.info({
                   fn: fetch$1,
                   message: "returning data for url: ".concat(url),
                   data: {
@@ -1653,7 +1659,7 @@
               _context4.next = 4;
               break;
             }
-            logger$I.error({
+            logger$K.error({
               fn: getClaimFormData,
               message: 'Missing required params',
               data: {
@@ -1861,7 +1867,7 @@
         while (1) switch (_context12.prev = _context12.next) {
           case 0:
             formId = _ref11.formId, subject = _ref11.subject, filename = _ref11.filename, documentbody = _ref11.documentbody, mimetype = _ref11.mimetype, formType = _ref11.formType, options = _objectWithoutProperties(_ref11, _excluded9);
-            logger$I.info({
+            logger$K.info({
               fn: postDocumentData,
               message: "postDocumentData called with payload:",
               data: _objectSpread2({
@@ -1889,7 +1895,7 @@
             };
             return _context12.abrupt("break", 12);
           case 12:
-            logger$I.info({
+            logger$K.info({
               fn: postDocumentData,
               message: "postDocumentData called with objecttypecode: ".concat(objecttypecode, ", objecttypecode_databind: ").concat(JSON.stringify(objecttypecode_databind)),
               data: _objectSpread2({
@@ -2337,8 +2343,89 @@
     }));
     return _getProgramHomePageContentData.apply(this, arguments);
   }
+  function getWorkbookDataById(_x24) {
+    return _getWorkbookDataById.apply(this, arguments);
+  }
+  function _getWorkbookDataById() {
+    _getWorkbookDataById = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee28(_ref27) {
+      var id, options;
+      return _regeneratorRuntime().wrap(function _callee28$(_context28) {
+        while (1) switch (_context28.prev = _context28.next) {
+          case 0:
+            id = _ref27.id, options = _objectWithoutProperties(_ref27, _excluded23);
+            return _context28.abrupt("return", fetch$1(_objectSpread2({
+              url: ENDPOINT_URL.get_workbook_data_by_id(id),
+              contentType: CONTENT_TYPE.json,
+              datatype: DATATYPE.json,
+              includeODataHeaders: true,
+              returnData: true
+            }, options)));
+          case 2:
+          case "end":
+            return _context28.stop();
+        }
+      }, _callee28);
+    }));
+    return _getWorkbookDataById.apply(this, arguments);
+  }
+  function getChaptersData() {
+    return _getChaptersData.apply(this, arguments);
+  }
+  function _getChaptersData() {
+    _getChaptersData = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee29() {
+      var _ref28,
+        options,
+        _args29 = arguments;
+      return _regeneratorRuntime().wrap(function _callee29$(_context29) {
+        while (1) switch (_context29.prev = _context29.next) {
+          case 0:
+            _ref28 = _args29.length > 0 && _args29[0] !== undefined ? _args29[0] : {}, options = _extends({}, (_objectDestructuringEmpty(_ref28), _ref28));
+            return _context29.abrupt("return", fetch$1(_objectSpread2({
+              url: ENDPOINT_URL.get_chapters_data,
+              contentType: CONTENT_TYPE.json,
+              datatype: DATATYPE.json,
+              includeODataHeaders: true,
+              async: false,
+              returnData: true
+            }, options)));
+          case 2:
+          case "end":
+            return _context29.stop();
+        }
+      }, _callee29);
+    }));
+    return _getChaptersData.apply(this, arguments);
+  }
+  function getWorkbookQuestionsData() {
+    return _getWorkbookQuestionsData.apply(this, arguments);
+  }
+  function _getWorkbookQuestionsData() {
+    _getWorkbookQuestionsData = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee30() {
+      var _ref29,
+        options,
+        _args30 = arguments;
+      return _regeneratorRuntime().wrap(function _callee30$(_context30) {
+        while (1) switch (_context30.prev = _context30.next) {
+          case 0:
+            _ref29 = _args30.length > 0 && _args30[0] !== undefined ? _args30[0] : {}, options = _extends({}, (_objectDestructuringEmpty(_ref29), _ref29));
+            return _context30.abrupt("return", fetch$1(_objectSpread2({
+              url: ENDPOINT_URL.get_workbookquestions_data,
+              contentType: CONTENT_TYPE.json,
+              datatype: DATATYPE.json,
+              includeODataHeaders: true,
+              async: false,
+              returnData: true
+            }, options)));
+          case 2:
+          case "end":
+            return _context30.stop();
+        }
+      }, _callee30);
+    }));
+    return _getWorkbookQuestionsData.apply(this, arguments);
+  }
 
-  const logger$H = Logger('common/env');
+  const logger$J = Logger('common/env');
   POWERPOD.env = {
       getEnvVars,
       getEnv,
@@ -2347,14 +2434,14 @@
       const { host } = window.location;
       const env = Object.keys(Hosts).find((key) => Hosts[key].includes(host));
       if (!env) {
-          logger$H.error({
+          logger$J.error({
               fn: getEnv,
               message: 'Unable to determine current env',
               data: { host, Hosts },
           });
           return;
       }
-      logger$H.info({
+      logger$J.info({
           fn: getEnv,
           message: `successfully determined current env: ${env}`,
       });
@@ -2364,7 +2451,7 @@
       const { data } = await getEnvVarsData();
       if (data) {
           const res = processEnvVarsData(data);
-          logger$H.info({
+          logger$J.info({
               fn: getEnvVars,
               message: 'successfully extracted env vars:',
               data: res,
@@ -2372,7 +2459,7 @@
           return Promise.resolve(res);
       }
       let errorMsg = 'failed to extract env vars from data';
-      logger$H.warn({
+      logger$J.warn({
           fn: getEnvVars,
           message: errorMsg,
           data,
@@ -2433,7 +2520,7 @@
   // Claim TFCR:
   // import localConfigJson from '../../../../assets/claim/json/quartech_applicantportalclaimformjson_tfcr.json';
 
-  var logger$G = Logger('common/config');
+  var logger$I = Logger('common/config');
   POWERPOD.config = {
     getGlobalConfigData: getGlobalConfigData,
     getClaimConfigData: getClaimConfigData,
@@ -2442,7 +2529,7 @@
   function getGlobalConfigData() {
     var _JSON$parse;
     var path = window.location.pathname;
-    logger$G.info({
+    logger$I.info({
       fn: getGlobalConfigData,
       message: 'checking path to determine if we should use localhost or hosted data',
       data: {
@@ -2466,7 +2553,7 @@
     var programData = localStorage.getItem('programData');
     var configDataJSON = (_JSON$parse = JSON.parse(programData)) === null || _JSON$parse === void 0 || (_JSON$parse = _JSON$parse.quartech_ApplicantPortalConfig) === null || _JSON$parse === void 0 ? void 0 : _JSON$parse.quartech_configdata;
     if (!configDataJSON) {
-      logger$G.error({
+      logger$I.error({
         fn: getGlobalConfigData,
         message: 'Could not find config data json, check global JSON config data',
         data: {
@@ -2477,7 +2564,7 @@
       return;
     }
     var podsConfigData = JSON.parse(configDataJSON);
-    logger$G.info({
+    logger$I.info({
       fn: getApplicationConfigData,
       message: 'successfully fetched global config data from storage',
       data: podsConfigData
@@ -2487,7 +2574,7 @@
   function getClaimConfigData() {
     var _JSON$parse2;
     var path = window.location.pathname;
-    logger$G.info({
+    logger$I.info({
       fn: getClaimConfigData,
       message: 'checking path to determine if we should use localhost or hosted data',
       data: {
@@ -2508,7 +2595,7 @@
     var programData = localStorage.getItem('programData');
     var configDataJSON = (_JSON$parse2 = JSON.parse(programData)) === null || _JSON$parse2 === void 0 ? void 0 : _JSON$parse2.quartech_applicantportalclaimformjson;
     if (!configDataJSON) {
-      logger$G.error({
+      logger$I.error({
         fn: getClaimConfigData,
         message: 'Failed to get Claim config data, check quartech_applicantportalclaimformjson for the program in MS Dynamics.',
         data: {
@@ -2519,7 +2606,7 @@
       return;
     }
     var podsConfigData = JSON.parse(configDataJSON);
-    logger$G.info({
+    logger$I.info({
       fn: getApplicationConfigData,
       message: 'successfully fetched claim config data from storage',
       data: podsConfigData
@@ -2529,7 +2616,7 @@
   function getApplicationConfigData(programId) {
     var _JSON$parse3;
     var path = window.location.pathname;
-    logger$G.info({
+    logger$I.info({
       fn: getApplicationConfigData,
       message: 'checking path to determine if we should use localhost or hosted data',
       data: {
@@ -2549,7 +2636,7 @@
     // UNCOMMENT THIS IF YOU WANT TO FORCE TO USE LOCAL JSON CONFIG
 
     var programData = localStorage.getItem('programData');
-    logger$G.info({
+    logger$I.info({
       fn: getApplicationConfigData,
       message: "got applicationConfigData from storage, programData",
       data: {
@@ -2557,7 +2644,7 @@
       }
     });
     var configDataJSON = (_JSON$parse3 = JSON.parse(programData)) === null || _JSON$parse3 === void 0 ? void 0 : _JSON$parse3.quartech_applicantportalapplicationformconfigjson;
-    logger$G.info({
+    logger$I.info({
       fn: getApplicationConfigData,
       message: "got applicationConfigData from storage, configDataJSON",
       data: {
@@ -2566,7 +2653,7 @@
       }
     });
     var podsConfigData = JSON.parse(configDataJSON);
-    logger$G.info({
+    logger$I.info({
       fn: getApplicationConfigData,
       message: "got applicationConfigData from storage, podsConfigData",
       data: {
@@ -2575,7 +2662,7 @@
         podsConfigData: podsConfigData
       }
     });
-    logger$G.info({
+    logger$I.info({
       fn: getApplicationConfigData,
       message: 'successfully fetched application config data from storage',
       data: podsConfigData
@@ -2583,7 +2670,7 @@
     return podsConfigData;
   }
 
-  var logger$F = Logger('application/steps/deliverablesBudget');
+  var logger$H = Logger('application/steps/deliverablesBudget');
   function customizeDeliverablesBudgetStep() {
     var _deliverablesBudgetTa;
     configureFields();
@@ -2682,7 +2769,7 @@
   function getCurrencyFieldValue(valueElementId) {
     var valueElement = $("#".concat(valueElementId));
     if (!valueElement) {
-      logger$F.error({
+      logger$H.error({
         fn: getCurrencyFieldValue,
         message: "Unable to find element for valueElementId: ".concat(valueElementId)
       });
@@ -2761,7 +2848,7 @@
   }
   function calculateEstimatedActivityBudget() {
     var _document$getElementB;
-    logger$F.info({
+    logger$H.info({
       fn: calculateEstimatedActivityBudget,
       message: "Calculating estimated activity budget..."
     });
@@ -2803,18 +2890,18 @@
     var estimatedNumberOfAttendeesId = 'quartech_estimatednumberofattendees';
     var estimatedNumberOfAttendees = ((_document$getElementB = document.getElementById(estimatedNumberOfAttendeesId)) === null || _document$getElementB === void 0 ? void 0 : _document$getElementB.value) || 1;
     var estimatedNumberOfAttendeesVal = parseFloat(estimatedNumberOfAttendees) || 1;
-    logger$F.info({
+    logger$H.info({
       fn: calculateEstimatedActivityBudget,
       message: "estimatedNumberOfAttendees: ".concat(estimatedNumberOfAttendees, ", estimatedNumberOfAttendeesVal: ").concat(estimatedNumberOfAttendeesVal)
     });
     var estimatedCostPerAttendeeId = 'quartech_estimatedcostperattendee';
     var estimatedCostPerAttendee = totalActivityCost / estimatedNumberOfAttendeesVal;
-    logger$F.info({
+    logger$H.info({
       fn: calculateEstimatedActivityBudget,
       message: "estimatedCostPerAttendee: ".concat(estimatedCostPerAttendee)
     });
     var estimatedCostPerAttendeeWithCurrencyFormat = CURRENCY_FORMAT.format(estimatedCostPerAttendee);
-    logger$F.info({
+    logger$H.info({
       fn: calculateEstimatedActivityBudget,
       message: "estimatedCostPerAttendeeWithCurrencyFormat: ".concat(estimatedCostPerAttendeeWithCurrencyFormat)
     });
@@ -2842,7 +2929,7 @@
     // validateStepFields();
   }
 
-  var logger$E = Logger('common/currency');
+  var logger$G = Logger('common/currency');
   function formatCurrencyOnBlur(inputValue, allowNegatives) {
     // Remove any non-numeric characters except for decimals and negative signs
     var cleanedValue = inputValue.replace(/[^0-9.-]/g, '');
@@ -2881,7 +2968,7 @@
       initialValue = _ref$initialValue === void 0 ? undefined : _ref$initialValue,
       _ref$allowNegatives = _ref.allowNegatives,
       allowNegatives = _ref$allowNegatives === void 0 ? false : _ref$allowNegatives;
-    logger$E.info({
+    logger$G.info({
       fn: customizeCurrencyInput,
       message: "customizeCurrencyInput called with the following params",
       data: {
@@ -2911,12 +2998,12 @@
       var inputValue = inputCtr.val();
       var pressedKeyCode = event.which; // pressed key on the keyboard.
 
-      logger$E.info({
+      logger$G.info({
         fn: customizeCurrencyInput,
         message: "KEYDOWN ACTION: Detected pressedKeyCode: ".concat(pressedKeyCode)
       });
       if (pressedKeyCode <= 40 && pressedKeyCode >= 37) {
-        logger$E.info({
+        logger$G.info({
           fn: customizeCurrencyInput,
           message: 'KEYDOWN ACTION: Arrow keys pressed, allowing default event behaviour'
         });
@@ -2963,7 +3050,7 @@
         }
         var isDecimalPlace = false;
         // @ts-ignore
-        logger$E.info({
+        logger$G.info({
           fn: customizeCurrencyInput,
           message: 'DELETE ACTION: Attempting to detect if decimal place',
           data: {
@@ -2978,7 +3065,7 @@
         // @ts-ignore
         if (isDecimalPlace && currentInputCursor !== inputValue.length) {
           var _document$getElementB5;
-          logger$E.info({
+          logger$G.info({
             fn: customizeCurrencyInput,
             message: 'DELETE ACTION: Decimal place input detected',
             data: {
@@ -2995,7 +3082,7 @@
           // @ts-ignore
           ) === null || _document$getElementB5 === void 0 || _document$getElementB5.setSelectionRange(currentInputCursor + 1, currentInputCursor + 1);
           event.preventDefault();
-          logger$E.info({
+          logger$G.info({
             fn: customizeCurrencyInput,
             message: 'DELETE ACTION: Decimal place value updated',
             data: {
@@ -3129,7 +3216,7 @@
         currentInputCursor >= inputValue.length - 2 // || adding number after decimal place
         /*             inputValue.length <= totalMaxDigits */) {
           var _document$getElementB10;
-          logger$E.info({
+          logger$G.info({
             fn: customizeCurrencyInput,
             message: 'KEYDOWN ACTION: Decimal input detected',
             data: {
@@ -3149,7 +3236,7 @@
           // }
           event.preventDefault();
           event.stopImmediatePropagation();
-          logger$E.info({
+          logger$G.info({
             fn: customizeCurrencyInput,
             message: 'KEYDOWN ACTION: Decimal input detected... set new value',
             data: {
@@ -3186,7 +3273,7 @@
     if (isNaN(cleanDecimalValue)) cleanDecimalValue = 0.0;
     var newAmountWithCurrencyFormat = CURRENCY_FORMAT.format(cleanDecimalValue);
     if (newAmountWithCurrencyFormat) {
-      logger$E.info({
+      logger$G.info({
         fn: handleNewValueEntered,
         message: "newAmountWithCurrencyFormat: ".concat(newAmountWithCurrencyFormat)
       });
@@ -3227,7 +3314,7 @@
     inputCtr.data('val', inputCtr.val());
   }
 
-  var logger$D = Logger('common/scripts');
+  var logger$F = Logger('common/scripts');
   POWERPOD.useScript = useScript;
   var Scripts = {
     jquerymask: 'jquerymask',
@@ -3301,12 +3388,12 @@
     if (isScriptAdded(id)) {
       // If script already loaded successfully, trigger the callback function
       if (isScriptFullyLoaded(id)) {
-        logger$D.warn({
+        logger$F.warn({
           fn: useScript,
           message: "Script already loaded. Skipping: ".concat(id)
         });
         if (onload) {
-          logger$D.warn({
+          logger$F.warn({
             fn: useScript,
             message: "Script already loaded. Calling onload for: ".concat(id)
           });
@@ -3316,14 +3403,14 @@
       }
       if (onload) {
         var _script$callstack, _script$callstack2;
-        logger$D.warn({
+        logger$F.warn({
           fn: useScript,
           message: "Script still loading, adding to call stack: ".concat(id),
           data: script
         });
         script.callstack = _objectSpread2(_objectSpread2({}, script.callstack ? script.callstack : {}), {}, _defineProperty({}, id, [].concat(_toConsumableArray((_script$callstack = script.callstack) !== null && _script$callstack !== void 0 && _script$callstack[id] ? (_script$callstack2 = script.callstack) === null || _script$callstack2 === void 0 ? void 0 : _script$callstack2[id] : []), [onload])));
       } else {
-        logger$D.warn({
+        logger$F.warn({
           fn: useScript,
           message: "Script still loading: ".concat(id)
         });
@@ -3341,7 +3428,7 @@
     }
     scriptEl.onload = function () {
       var _script$callstack3;
-      logger$D.info({
+      logger$F.info({
         fn: useScript,
         message: "script onload successfully called ".concat(id),
         data: script
@@ -3356,7 +3443,7 @@
       }
     };
     scriptEl.onerror = function () {
-      logger$D.error({
+      logger$F.error({
         fn: useScript,
         message: "Failed to load: ".concat(id)
       });
@@ -3366,7 +3453,7 @@
     };
   }
 
-  var logger$C = Logger('common/masking');
+  var logger$E = Logger('common/masking');
 
   // supported masking types
   var FieldMaskType = {
@@ -3384,12 +3471,12 @@
     PhoneNumber: '(000) 000-0000'
   };
   function maskInput(fieldName, type) {
-    logger$C.info({
+    logger$E.info({
       fn: maskInput,
       message: "applying mask input to fieldName: ".concat(fieldName, " of type: ").concat(type)
     });
     if (!Object.keys(FieldMaskType).includes(type)) {
-      logger$C.error({
+      logger$E.error({
         fn: maskInput,
         message: "unsupported mask, cannot mask input for fieldName: ".concat(fieldName, " and type: ").concat(type)
       });
@@ -3426,20 +3513,20 @@
           });
           break;
         default:
-          logger$C.error({
+          logger$E.error({
             fn: maskInput,
             message: "did NOT apply masking to fieldName: ".concat(fieldName, " of type: ").concat(type)
           });
           return;
       }
-      logger$C.info({
+      logger$E.info({
         fn: maskInput,
         message: "successfully applied mask input to fieldName: ".concat(fieldName, " of type: ").concat(type)
       });
     });
   }
 
-  var logger$B = Logger('common/tooltip');
+  var logger$D = Logger('common/tooltip');
   function setupTooltip(field) {
     var name = field.name,
       tooltipText = field.tooltipText,
@@ -3453,7 +3540,7 @@
         tooltipTargetElement = tooltipTargetElement.parent();
       }
       if (!tooltipTargetElement) {
-        logger$B.error({
+        logger$D.error({
           fn: setupTooltip,
           message: 'Could not find tooltipTargetElement',
           data: {
@@ -3461,7 +3548,7 @@
           }
         });
       }
-      logger$B.info({
+      logger$D.info({
         fn: setupTooltip,
         message: "Start configuring tooltip for fieldName: ".concat(name),
         data: {
@@ -3500,14 +3587,14 @@
     }
   }
 
-  var logger$A = Logger('common/fieldConditionalLogic');
+  var logger$C = Logger('common/fieldConditionalLogic');
   POWERPOD.fieldConditionalLogic = {
     setFieldVisibility: setFieldVisibility
   };
   function assignDependentFields(fieldConfig) {
     var name = fieldConfig.name,
       visibleIf = fieldConfig.visibleIf;
-    logger$A.info({
+    logger$C.info({
       fn: assignDependentFields,
       message: "starting to set dependent fields for name: ".concat(name),
       data: {
@@ -3515,7 +3602,7 @@
       }
     });
     if (!visibleIf) {
-      logger$A.warn({
+      logger$C.warn({
         fn: assignDependentFields,
         message: "could not find visibleIf configuration for field with name: ".concat(name),
         data: {
@@ -3528,7 +3615,7 @@
     fieldNames.forEach(function (controlFieldName) {
       var controlFieldConfig = getFieldConfig(controlFieldName);
       if (!controlFieldConfig) {
-        logger$A.warn({
+        logger$C.warn({
           fn: assignDependentFields,
           message: "control field config not found for: ".concat(controlFieldName),
           data: {
@@ -3568,7 +3655,7 @@
       fieldConfig = params.fieldConfig,
       controlFieldName = params.controlFieldName;
     if (controlFieldConfig.dependentFields && Array.isArray(controlFieldConfig.dependentFields) && (_controlFieldConfig$d = controlFieldConfig.dependentFields) !== null && _controlFieldConfig$d !== void 0 && _controlFieldConfig$d.includes(name)) {
-      logger$A.info({
+      logger$C.info({
         fn: checkControlDependentFields,
         message: "dependent field name: ".concat(name, " already assigned to controlFieldName: ").concat(controlFieldName),
         data: {
@@ -3588,7 +3675,7 @@
   function setFieldVisibility(name) {
     var visibleIf = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
     var condition = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : undefined;
-    logger$A.info({
+    logger$C.info({
       fn: setFieldVisibility,
       message: "starting to set field visibility for name: ".concat(name)
     });
@@ -3603,7 +3690,7 @@
     }
     var matchesCondition = false;
     if (!visibleIf) {
-      logger$A.warn({
+      logger$C.warn({
         fn: setFieldVisibility,
         message: "no visibleIf config found for field: ".concat(name),
         data: {
@@ -3851,7 +3938,7 @@
       comparison: comparison,
       value: value
     };
-    logger$A.info({
+    logger$C.info({
       fn: checkVisibleIfComparison,
       message: "for name: ".concat(name, ", doing a comparison: ").concat(comparison, ", controlValue: ").concat(controlValue),
       data: {
@@ -3859,7 +3946,7 @@
       }
     });
     if (controlValue === '') {
-      logger$A.info({
+      logger$C.info({
         fn: checkVisibleIfComparison,
         message: "for name: ".concat(name, ", cannot compare an empty value, DOES NOT match visibleIf condition"),
         data: {
@@ -3874,7 +3961,7 @@
       operator: comparison,
       forceRequired: true
     });
-    logger$A.info({
+    logger$C.info({
       fn: checkVisibleIfComparison,
       message: "for name: ".concat(name, ", comparison: ").concat(comparison, " returned numericValidationResult: ").concat(getNumericValidationError, ", controlValue: ").concat(controlValue),
       data: {
@@ -3899,7 +3986,7 @@
       selectedValueIn: selectedValueIn
     };
     if (controlValue === selectedValue || controlValue === "".concat(selectedValue) || selectedValueIn !== null && selectedValueIn !== void 0 && selectedValueIn.includes(controlValue) || controlValue !== null && controlValue !== void 0 && controlValue.includes && controlValue !== null && controlValue !== void 0 && controlValue.includes(selectedValue) || Number(controlValue) && selectedValueIn !== null && selectedValueIn !== void 0 && selectedValueIn.includes(Number(controlValue))) {
-      logger$A.info({
+      logger$C.info({
         fn: checkVisibleIfCondition,
         message: "for name: ".concat(name, ", FOUND matching condition"),
         data: {
@@ -3913,7 +4000,7 @@
       var _POWERPOD$state;
       var loadingAllFieldConfig = POWERPOD.configuringFields;
       var loadingFieldConfig = (_POWERPOD$state = POWERPOD.state) === null || _POWERPOD$state === void 0 || (_POWERPOD$state = _POWERPOD$state.fields) === null || _POWERPOD$state === void 0 || (_POWERPOD$state = _POWERPOD$state[name]) === null || _POWERPOD$state === void 0 ? void 0 : _POWERPOD$state.loading;
-      logger$A.info({
+      logger$C.info({
         fn: checkVisibleIfCondition,
         message: "for name: ".concat(name, ", found did NOT find matching condition"),
         data: {
@@ -3963,7 +4050,7 @@
         return evaluateVisibilityConditions(subCond, name);
       });
     }
-    logger$A.warn({
+    logger$C.warn({
       fn: evaluateVisibilityConditions,
       message: 'Invalid visibleIf structure',
       data: {
@@ -3974,7 +4061,7 @@
     return false;
   }
 
-  const logger$z = Logger('common/components');
+  const logger$B = Logger('common/components');
   POWERPOD.components = {
       renderCustomComponent,
   };
@@ -3990,13 +4077,13 @@
       const { fieldId, customElementTag, attributes = {}, customEvent, customEventHandler = () => { }, mappedValueKey, // internal element property that should map to the dynamics field, e.g. in this case "rows" maps to quartech_eligibleexpenses
       initValuesFn, // additional function to load initial values
       customSetupFn, } = params;
-      logger$z.info({
+      logger$B.info({
           fn: renderCustomComponent,
           message: `Start adding custom component: ${customElementTag}`,
           data: { params },
       });
       if (!$(`#${fieldId}`)) {
-          logger$z.error({
+          logger$B.error({
               fn: renderCustomComponent,
               message: `Failed to add custom element, could not find fieldId: ${fieldId}`,
           });
@@ -4018,14 +4105,14 @@
       // hide dynamics field
       $(`#${fieldId}`).css({ display: 'none' });
       customElement.addEventListener(customEvent, (event) => {
-          logger$z.info({
+          logger$B.info({
               fn: renderCustomComponent,
               message: `Detected event from custom element: ${customElementTag}`,
               data: { event, customElement, params },
           });
           customEventHandler(event, customElement);
       });
-      logger$z.info({
+      logger$B.info({
           fn: renderCustomComponent,
           message: `Successfully added custom component: ${customElementTag}`,
           data: { params },
@@ -4037,13 +4124,13 @@
           tr,
           raw: true,
       });
-      logger$z.info({
+      logger$B.info({
           fn: renderCustomComponent,
           message: `For fieldId: ${fieldId}, found existingValue: ${existingValue}`,
           data: { params, existingValue, tr },
       });
       if (existingValue !== null && existingValue !== '[]') {
-          logger$z.info({
+          logger$B.info({
               fn: renderCustomComponent,
               message: `Setting existing value for mappedValueKey: ${mappedValueKey} to existingValue: ${existingValue}`,
               data: { params },
@@ -4057,7 +4144,7 @@
           customSetupFn();
       }
       const id = customElement.getAttribute('id');
-      logger$z.info({
+      logger$B.info({
           fn: renderCustomComponent,
           message: `Looking for id for fieldId: ${fieldId}`,
           data: { customElement, id },
@@ -4105,20 +4192,20 @@
    * Copyright 2019 Google LLC
    * SPDX-License-Identifier: BSD-3-Clause
    */
-  const t$3=globalThis,e$9=t$3.ShadowRoot&&(void 0===t$3.ShadyCSS||t$3.ShadyCSS.nativeShadow)&&"adoptedStyleSheets"in Document.prototype&&"replace"in CSSStyleSheet.prototype,s$3=Symbol(),o$6=new WeakMap;class n$4{constructor(t,e,o){if(this._$cssResult$=!0,o!==s$3)throw Error("CSSResult is not constructable. Use `unsafeCSS` or `css` instead.");this.cssText=t,this.t=e;}get styleSheet(){let t=this.o;const s=this.t;if(e$9&&void 0===t){const e=void 0!==s&&1===s.length;e&&(t=o$6.get(s)),void 0===t&&((this.o=t=new CSSStyleSheet).replaceSync(this.cssText),e&&o$6.set(s,t));}return t}toString(){return this.cssText}}const r$5=t=>new n$4("string"==typeof t?t:t+"",void 0,s$3),i$3=(t,...e)=>{const o=1===t.length?t[0]:e.reduce(((e,s,o)=>e+(t=>{if(!0===t._$cssResult$)return t.cssText;if("number"==typeof t)return t;throw Error("Value passed to 'css' function must be a 'css' function result: "+t+". Use 'unsafeCSS' to pass non-literal values, but take care to ensure page security.")})(s)+t[o+1]),t[0]);return new n$4(o,t,s$3)},S$1=(s,o)=>{if(e$9)s.adoptedStyleSheets=o.map((t=>t instanceof CSSStyleSheet?t:t.styleSheet));else for(const e of o){const o=document.createElement("style"),n=t$3.litNonce;void 0!==n&&o.setAttribute("nonce",n),o.textContent=e.cssText,s.appendChild(o);}},c$2=e$9?t=>t:t=>t instanceof CSSStyleSheet?(t=>{let e="";for(const s of t.cssRules)e+=s.cssText;return r$5(e)})(t):t;
+  const t$3=globalThis,e$9=t$3.ShadowRoot&&(void 0===t$3.ShadyCSS||t$3.ShadyCSS.nativeShadow)&&"adoptedStyleSheets"in Document.prototype&&"replace"in CSSStyleSheet.prototype,s$3=Symbol(),o$7=new WeakMap;class n$5{constructor(t,e,o){if(this._$cssResult$=!0,o!==s$3)throw Error("CSSResult is not constructable. Use `unsafeCSS` or `css` instead.");this.cssText=t,this.t=e;}get styleSheet(){let t=this.o;const s=this.t;if(e$9&&void 0===t){const e=void 0!==s&&1===s.length;e&&(t=o$7.get(s)),void 0===t&&((this.o=t=new CSSStyleSheet).replaceSync(this.cssText),e&&o$7.set(s,t));}return t}toString(){return this.cssText}}const r$5=t=>new n$5("string"==typeof t?t:t+"",void 0,s$3),i$4=(t,...e)=>{const o=1===t.length?t[0]:e.reduce(((e,s,o)=>e+(t=>{if(!0===t._$cssResult$)return t.cssText;if("number"==typeof t)return t;throw Error("Value passed to 'css' function must be a 'css' function result: "+t+". Use 'unsafeCSS' to pass non-literal values, but take care to ensure page security.")})(s)+t[o+1]),t[0]);return new n$5(o,t,s$3)},S$1=(s,o)=>{if(e$9)s.adoptedStyleSheets=o.map((t=>t instanceof CSSStyleSheet?t:t.styleSheet));else for(const e of o){const o=document.createElement("style"),n=t$3.litNonce;void 0!==n&&o.setAttribute("nonce",n),o.textContent=e.cssText,s.appendChild(o);}},c$2=e$9?t=>t:t=>t instanceof CSSStyleSheet?(t=>{let e="";for(const s of t.cssRules)e+=s.cssText;return r$5(e)})(t):t;
 
   /**
    * @license
    * Copyright 2017 Google LLC
    * SPDX-License-Identifier: BSD-3-Clause
-   */const{is:i$2,defineProperty:e$8,getOwnPropertyDescriptor:r$4,getOwnPropertyNames:h$1,getOwnPropertySymbols:o$5,getPrototypeOf:n$3}=Object,a$2=globalThis,c$1=a$2.trustedTypes,l$2=c$1?c$1.emptyScript:"",p$1=a$2.reactiveElementPolyfillSupport,d$1=(t,s)=>t,u$1={toAttribute(t,s){switch(s){case Boolean:t=t?l$2:null;break;case Object:case Array:t=null==t?t:JSON.stringify(t);}return t},fromAttribute(t,s){let i=t;switch(s){case Boolean:i=null!==t;break;case Number:i=null===t?null:Number(t);break;case Object:case Array:try{i=JSON.parse(t);}catch(t){i=null;}}return i}},f$1=(t,s)=>!i$2(t,s),y$1={attribute:!0,type:String,converter:u$1,reflect:!1,hasChanged:f$1};Symbol.metadata??=Symbol("metadata"),a$2.litPropertyMetadata??=new WeakMap;class b extends HTMLElement{static addInitializer(t){this._$Ei(),(this.l??=[]).push(t);}static get observedAttributes(){return this.finalize(),this._$Eh&&[...this._$Eh.keys()]}static createProperty(t,s=y$1){if(s.state&&(s.attribute=!1),this._$Ei(),this.elementProperties.set(t,s),!s.noAccessor){const i=Symbol(),r=this.getPropertyDescriptor(t,i,s);void 0!==r&&e$8(this.prototype,t,r);}}static getPropertyDescriptor(t,s,i){const{get:e,set:h}=r$4(this.prototype,t)??{get(){return this[s]},set(t){this[s]=t;}};return {get(){return e?.call(this)},set(s){const r=e?.call(this);h.call(this,s),this.requestUpdate(t,r,i);},configurable:!0,enumerable:!0}}static getPropertyOptions(t){return this.elementProperties.get(t)??y$1}static _$Ei(){if(this.hasOwnProperty(d$1("elementProperties")))return;const t=n$3(this);t.finalize(),void 0!==t.l&&(this.l=[...t.l]),this.elementProperties=new Map(t.elementProperties);}static finalize(){if(this.hasOwnProperty(d$1("finalized")))return;if(this.finalized=!0,this._$Ei(),this.hasOwnProperty(d$1("properties"))){const t=this.properties,s=[...h$1(t),...o$5(t)];for(const i of s)this.createProperty(i,t[i]);}const t=this[Symbol.metadata];if(null!==t){const s=litPropertyMetadata.get(t);if(void 0!==s)for(const[t,i]of s)this.elementProperties.set(t,i);}this._$Eh=new Map;for(const[t,s]of this.elementProperties){const i=this._$Eu(t,s);void 0!==i&&this._$Eh.set(i,t);}this.elementStyles=this.finalizeStyles(this.styles);}static finalizeStyles(s){const i=[];if(Array.isArray(s)){const e=new Set(s.flat(1/0).reverse());for(const s of e)i.unshift(c$2(s));}else void 0!==s&&i.push(c$2(s));return i}static _$Eu(t,s){const i=s.attribute;return !1===i?void 0:"string"==typeof i?i:"string"==typeof t?t.toLowerCase():void 0}constructor(){super(),this._$Ep=void 0,this.isUpdatePending=!1,this.hasUpdated=!1,this._$Em=null,this._$Ev();}_$Ev(){this._$ES=new Promise((t=>this.enableUpdating=t)),this._$AL=new Map,this._$E_(),this.requestUpdate(),this.constructor.l?.forEach((t=>t(this)));}addController(t){(this._$EO??=new Set).add(t),void 0!==this.renderRoot&&this.isConnected&&t.hostConnected?.();}removeController(t){this._$EO?.delete(t);}_$E_(){const t=new Map,s=this.constructor.elementProperties;for(const i of s.keys())this.hasOwnProperty(i)&&(t.set(i,this[i]),delete this[i]);t.size>0&&(this._$Ep=t);}createRenderRoot(){const t=this.shadowRoot??this.attachShadow(this.constructor.shadowRootOptions);return S$1(t,this.constructor.elementStyles),t}connectedCallback(){this.renderRoot??=this.createRenderRoot(),this.enableUpdating(!0),this._$EO?.forEach((t=>t.hostConnected?.()));}enableUpdating(t){}disconnectedCallback(){this._$EO?.forEach((t=>t.hostDisconnected?.()));}attributeChangedCallback(t,s,i){this._$AK(t,i);}_$EC(t,s){const i=this.constructor.elementProperties.get(t),e=this.constructor._$Eu(t,i);if(void 0!==e&&!0===i.reflect){const r=(void 0!==i.converter?.toAttribute?i.converter:u$1).toAttribute(s,i.type);this._$Em=t,null==r?this.removeAttribute(e):this.setAttribute(e,r),this._$Em=null;}}_$AK(t,s){const i=this.constructor,e=i._$Eh.get(t);if(void 0!==e&&this._$Em!==e){const t=i.getPropertyOptions(e),r="function"==typeof t.converter?{fromAttribute:t.converter}:void 0!==t.converter?.fromAttribute?t.converter:u$1;this._$Em=e,this[e]=r.fromAttribute(s,t.type),this._$Em=null;}}requestUpdate(t,s,i){if(void 0!==t){if(i??=this.constructor.getPropertyOptions(t),!(i.hasChanged??f$1)(this[t],s))return;this.P(t,s,i);}!1===this.isUpdatePending&&(this._$ES=this._$ET());}P(t,s,i){this._$AL.has(t)||this._$AL.set(t,s),!0===i.reflect&&this._$Em!==t&&(this._$Ej??=new Set).add(t);}async _$ET(){this.isUpdatePending=!0;try{await this._$ES;}catch(t){Promise.reject(t);}const t=this.scheduleUpdate();return null!=t&&await t,!this.isUpdatePending}scheduleUpdate(){return this.performUpdate()}performUpdate(){if(!this.isUpdatePending)return;if(!this.hasUpdated){if(this.renderRoot??=this.createRenderRoot(),this._$Ep){for(const[t,s]of this._$Ep)this[t]=s;this._$Ep=void 0;}const t=this.constructor.elementProperties;if(t.size>0)for(const[s,i]of t)!0!==i.wrapped||this._$AL.has(s)||void 0===this[s]||this.P(s,this[s],i);}let t=!1;const s=this._$AL;try{t=this.shouldUpdate(s),t?(this.willUpdate(s),this._$EO?.forEach((t=>t.hostUpdate?.())),this.update(s)):this._$EU();}catch(s){throw t=!1,this._$EU(),s}t&&this._$AE(s);}willUpdate(t){}_$AE(t){this._$EO?.forEach((t=>t.hostUpdated?.())),this.hasUpdated||(this.hasUpdated=!0,this.firstUpdated(t)),this.updated(t);}_$EU(){this._$AL=new Map,this.isUpdatePending=!1;}get updateComplete(){return this.getUpdateComplete()}getUpdateComplete(){return this._$ES}shouldUpdate(t){return !0}update(t){this._$Ej&&=this._$Ej.forEach((t=>this._$EC(t,this[t]))),this._$EU();}updated(t){}firstUpdated(t){}}b.elementStyles=[],b.shadowRootOptions={mode:"open"},b[d$1("elementProperties")]=new Map,b[d$1("finalized")]=new Map,p$1?.({ReactiveElement:b}),(a$2.reactiveElementVersions??=[]).push("2.0.4");
+   */const{is:i$3,defineProperty:e$8,getOwnPropertyDescriptor:r$4,getOwnPropertyNames:h$1,getOwnPropertySymbols:o$6,getPrototypeOf:n$4}=Object,a$2=globalThis,c$1=a$2.trustedTypes,l$3=c$1?c$1.emptyScript:"",p$1=a$2.reactiveElementPolyfillSupport,d$1=(t,s)=>t,u$2={toAttribute(t,s){switch(s){case Boolean:t=t?l$3:null;break;case Object:case Array:t=null==t?t:JSON.stringify(t);}return t},fromAttribute(t,s){let i=t;switch(s){case Boolean:i=null!==t;break;case Number:i=null===t?null:Number(t);break;case Object:case Array:try{i=JSON.parse(t);}catch(t){i=null;}}return i}},f$2=(t,s)=>!i$3(t,s),y$1={attribute:!0,type:String,converter:u$2,reflect:!1,hasChanged:f$2};Symbol.metadata??=Symbol("metadata"),a$2.litPropertyMetadata??=new WeakMap;class b extends HTMLElement{static addInitializer(t){this._$Ei(),(this.l??=[]).push(t);}static get observedAttributes(){return this.finalize(),this._$Eh&&[...this._$Eh.keys()]}static createProperty(t,s=y$1){if(s.state&&(s.attribute=!1),this._$Ei(),this.elementProperties.set(t,s),!s.noAccessor){const i=Symbol(),r=this.getPropertyDescriptor(t,i,s);void 0!==r&&e$8(this.prototype,t,r);}}static getPropertyDescriptor(t,s,i){const{get:e,set:h}=r$4(this.prototype,t)??{get(){return this[s]},set(t){this[s]=t;}};return {get(){return e?.call(this)},set(s){const r=e?.call(this);h.call(this,s),this.requestUpdate(t,r,i);},configurable:!0,enumerable:!0}}static getPropertyOptions(t){return this.elementProperties.get(t)??y$1}static _$Ei(){if(this.hasOwnProperty(d$1("elementProperties")))return;const t=n$4(this);t.finalize(),void 0!==t.l&&(this.l=[...t.l]),this.elementProperties=new Map(t.elementProperties);}static finalize(){if(this.hasOwnProperty(d$1("finalized")))return;if(this.finalized=!0,this._$Ei(),this.hasOwnProperty(d$1("properties"))){const t=this.properties,s=[...h$1(t),...o$6(t)];for(const i of s)this.createProperty(i,t[i]);}const t=this[Symbol.metadata];if(null!==t){const s=litPropertyMetadata.get(t);if(void 0!==s)for(const[t,i]of s)this.elementProperties.set(t,i);}this._$Eh=new Map;for(const[t,s]of this.elementProperties){const i=this._$Eu(t,s);void 0!==i&&this._$Eh.set(i,t);}this.elementStyles=this.finalizeStyles(this.styles);}static finalizeStyles(s){const i=[];if(Array.isArray(s)){const e=new Set(s.flat(1/0).reverse());for(const s of e)i.unshift(c$2(s));}else void 0!==s&&i.push(c$2(s));return i}static _$Eu(t,s){const i=s.attribute;return !1===i?void 0:"string"==typeof i?i:"string"==typeof t?t.toLowerCase():void 0}constructor(){super(),this._$Ep=void 0,this.isUpdatePending=!1,this.hasUpdated=!1,this._$Em=null,this._$Ev();}_$Ev(){this._$ES=new Promise((t=>this.enableUpdating=t)),this._$AL=new Map,this._$E_(),this.requestUpdate(),this.constructor.l?.forEach((t=>t(this)));}addController(t){(this._$EO??=new Set).add(t),void 0!==this.renderRoot&&this.isConnected&&t.hostConnected?.();}removeController(t){this._$EO?.delete(t);}_$E_(){const t=new Map,s=this.constructor.elementProperties;for(const i of s.keys())this.hasOwnProperty(i)&&(t.set(i,this[i]),delete this[i]);t.size>0&&(this._$Ep=t);}createRenderRoot(){const t=this.shadowRoot??this.attachShadow(this.constructor.shadowRootOptions);return S$1(t,this.constructor.elementStyles),t}connectedCallback(){this.renderRoot??=this.createRenderRoot(),this.enableUpdating(!0),this._$EO?.forEach((t=>t.hostConnected?.()));}enableUpdating(t){}disconnectedCallback(){this._$EO?.forEach((t=>t.hostDisconnected?.()));}attributeChangedCallback(t,s,i){this._$AK(t,i);}_$EC(t,s){const i=this.constructor.elementProperties.get(t),e=this.constructor._$Eu(t,i);if(void 0!==e&&!0===i.reflect){const r=(void 0!==i.converter?.toAttribute?i.converter:u$2).toAttribute(s,i.type);this._$Em=t,null==r?this.removeAttribute(e):this.setAttribute(e,r),this._$Em=null;}}_$AK(t,s){const i=this.constructor,e=i._$Eh.get(t);if(void 0!==e&&this._$Em!==e){const t=i.getPropertyOptions(e),r="function"==typeof t.converter?{fromAttribute:t.converter}:void 0!==t.converter?.fromAttribute?t.converter:u$2;this._$Em=e,this[e]=r.fromAttribute(s,t.type),this._$Em=null;}}requestUpdate(t,s,i){if(void 0!==t){if(i??=this.constructor.getPropertyOptions(t),!(i.hasChanged??f$2)(this[t],s))return;this.P(t,s,i);}!1===this.isUpdatePending&&(this._$ES=this._$ET());}P(t,s,i){this._$AL.has(t)||this._$AL.set(t,s),!0===i.reflect&&this._$Em!==t&&(this._$Ej??=new Set).add(t);}async _$ET(){this.isUpdatePending=!0;try{await this._$ES;}catch(t){Promise.reject(t);}const t=this.scheduleUpdate();return null!=t&&await t,!this.isUpdatePending}scheduleUpdate(){return this.performUpdate()}performUpdate(){if(!this.isUpdatePending)return;if(!this.hasUpdated){if(this.renderRoot??=this.createRenderRoot(),this._$Ep){for(const[t,s]of this._$Ep)this[t]=s;this._$Ep=void 0;}const t=this.constructor.elementProperties;if(t.size>0)for(const[s,i]of t)!0!==i.wrapped||this._$AL.has(s)||void 0===this[s]||this.P(s,this[s],i);}let t=!1;const s=this._$AL;try{t=this.shouldUpdate(s),t?(this.willUpdate(s),this._$EO?.forEach((t=>t.hostUpdate?.())),this.update(s)):this._$EU();}catch(s){throw t=!1,this._$EU(),s}t&&this._$AE(s);}willUpdate(t){}_$AE(t){this._$EO?.forEach((t=>t.hostUpdated?.())),this.hasUpdated||(this.hasUpdated=!0,this.firstUpdated(t)),this.updated(t);}_$EU(){this._$AL=new Map,this.isUpdatePending=!1;}get updateComplete(){return this.getUpdateComplete()}getUpdateComplete(){return this._$ES}shouldUpdate(t){return !0}update(t){this._$Ej&&=this._$Ej.forEach((t=>this._$EC(t,this[t]))),this._$EU();}updated(t){}firstUpdated(t){}}b.elementStyles=[],b.shadowRootOptions={mode:"open"},b[d$1("elementProperties")]=new Map,b[d$1("finalized")]=new Map,p$1?.({ReactiveElement:b}),(a$2.reactiveElementVersions??=[]).push("2.0.4");
 
   /**
    * @license
    * Copyright 2017 Google LLC
    * SPDX-License-Identifier: BSD-3-Clause
    */
-  const t$2=globalThis,i$1=t$2.trustedTypes,s$2=i$1?i$1.createPolicy("lit-html",{createHTML:t=>t}):void 0,e$7="$lit$",h=`lit$${(Math.random()+"").slice(9)}$`,o$4="?"+h,n$2=`<${o$4}>`,r$3=document,l$1=()=>r$3.createComment(""),c=t=>null===t||"object"!=typeof t&&"function"!=typeof t,a$1=Array.isArray,u=t=>a$1(t)||"function"==typeof t?.[Symbol.iterator],d="[ \t\n\f\r]",f=/<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g,v=/-->/g,_=/>/g,m=RegExp(`>|${d}(?:([^\\s"'>=/]+)(${d}*=${d}*(?:[^ \t\n\f\r"'\`<>=]|("|')|))|$)`,"g"),p=/'/g,g=/"/g,$$1=/^(?:script|style|textarea|title)$/i,y=t=>(i,...s)=>({_$litType$:t,strings:i,values:s}),x=y(1),w=Symbol.for("lit-noChange"),T=Symbol.for("lit-nothing"),A=new WeakMap,E=r$3.createTreeWalker(r$3,129);function C(t,i){if(!Array.isArray(t)||!t.hasOwnProperty("raw"))throw Error("invalid template strings array");return void 0!==s$2?s$2.createHTML(i):i}const P=(t,i)=>{const s=t.length-1,o=[];let r,l=2===i?"<svg>":"",c=f;for(let i=0;i<s;i++){const s=t[i];let a,u,d=-1,y=0;for(;y<s.length&&(c.lastIndex=y,u=c.exec(s),null!==u);)y=c.lastIndex,c===f?"!--"===u[1]?c=v:void 0!==u[1]?c=_:void 0!==u[2]?($$1.test(u[2])&&(r=RegExp("</"+u[2],"g")),c=m):void 0!==u[3]&&(c=m):c===m?">"===u[0]?(c=r??f,d=-1):void 0===u[1]?d=-2:(d=c.lastIndex-u[2].length,a=u[1],c=void 0===u[3]?m:'"'===u[3]?g:p):c===g||c===p?c=m:c===v||c===_?c=f:(c=m,r=void 0);const x=c===m&&t[i+1].startsWith("/>")?" ":"";l+=c===f?s+n$2:d>=0?(o.push(a),s.slice(0,d)+e$7+s.slice(d)+h+x):s+h+(-2===d?i:x);}return [C(t,l+(t[s]||"<?>")+(2===i?"</svg>":"")),o]};class V{constructor({strings:t,_$litType$:s},n){let r;this.parts=[];let c=0,a=0;const u=t.length-1,d=this.parts,[f,v]=P(t,s);if(this.el=V.createElement(f,n),E.currentNode=this.el.content,2===s){const t=this.el.content.firstChild;t.replaceWith(...t.childNodes);}for(;null!==(r=E.nextNode())&&d.length<u;){if(1===r.nodeType){if(r.hasAttributes())for(const t of r.getAttributeNames())if(t.endsWith(e$7)){const i=v[a++],s=r.getAttribute(t).split(h),e=/([.?@])?(.*)/.exec(i);d.push({type:1,index:c,name:e[2],strings:s,ctor:"."===e[1]?k:"?"===e[1]?H:"@"===e[1]?I:R}),r.removeAttribute(t);}else t.startsWith(h)&&(d.push({type:6,index:c}),r.removeAttribute(t));if($$1.test(r.tagName)){const t=r.textContent.split(h),s=t.length-1;if(s>0){r.textContent=i$1?i$1.emptyScript:"";for(let i=0;i<s;i++)r.append(t[i],l$1()),E.nextNode(),d.push({type:2,index:++c});r.append(t[s],l$1());}}}else if(8===r.nodeType)if(r.data===o$4)d.push({type:2,index:c});else {let t=-1;for(;-1!==(t=r.data.indexOf(h,t+1));)d.push({type:7,index:c}),t+=h.length-1;}c++;}}static createElement(t,i){const s=r$3.createElement("template");return s.innerHTML=t,s}}function N(t,i,s=t,e){if(i===w)return i;let h=void 0!==e?s._$Co?.[e]:s._$Cl;const o=c(i)?void 0:i._$litDirective$;return h?.constructor!==o&&(h?._$AO?.(!1),void 0===o?h=void 0:(h=new o(t),h._$AT(t,s,e)),void 0!==e?(s._$Co??=[])[e]=h:s._$Cl=h),void 0!==h&&(i=N(t,h._$AS(t,i.values),h,e)),i}class S{constructor(t,i){this._$AV=[],this._$AN=void 0,this._$AD=t,this._$AM=i;}get parentNode(){return this._$AM.parentNode}get _$AU(){return this._$AM._$AU}u(t){const{el:{content:i},parts:s}=this._$AD,e=(t?.creationScope??r$3).importNode(i,!0);E.currentNode=e;let h=E.nextNode(),o=0,n=0,l=s[0];for(;void 0!==l;){if(o===l.index){let i;2===l.type?i=new M(h,h.nextSibling,this,t):1===l.type?i=new l.ctor(h,l.name,l.strings,this,t):6===l.type&&(i=new L(h,this,t)),this._$AV.push(i),l=s[++n];}o!==l?.index&&(h=E.nextNode(),o++);}return E.currentNode=r$3,e}p(t){let i=0;for(const s of this._$AV)void 0!==s&&(void 0!==s.strings?(s._$AI(t,s,i),i+=s.strings.length-2):s._$AI(t[i])),i++;}}class M{get _$AU(){return this._$AM?._$AU??this._$Cv}constructor(t,i,s,e){this.type=2,this._$AH=T,this._$AN=void 0,this._$AA=t,this._$AB=i,this._$AM=s,this.options=e,this._$Cv=e?.isConnected??!0;}get parentNode(){let t=this._$AA.parentNode;const i=this._$AM;return void 0!==i&&11===t?.nodeType&&(t=i.parentNode),t}get startNode(){return this._$AA}get endNode(){return this._$AB}_$AI(t,i=this){t=N(this,t,i),c(t)?t===T||null==t||""===t?(this._$AH!==T&&this._$AR(),this._$AH=T):t!==this._$AH&&t!==w&&this._(t):void 0!==t._$litType$?this.$(t):void 0!==t.nodeType?this.T(t):u(t)?this.k(t):this._(t);}S(t){return this._$AA.parentNode.insertBefore(t,this._$AB)}T(t){this._$AH!==t&&(this._$AR(),this._$AH=this.S(t));}_(t){this._$AH!==T&&c(this._$AH)?this._$AA.nextSibling.data=t:this.T(r$3.createTextNode(t)),this._$AH=t;}$(t){const{values:i,_$litType$:s}=t,e="number"==typeof s?this._$AC(t):(void 0===s.el&&(s.el=V.createElement(C(s.h,s.h[0]),this.options)),s);if(this._$AH?._$AD===e)this._$AH.p(i);else {const t=new S(e,this),s=t.u(this.options);t.p(i),this.T(s),this._$AH=t;}}_$AC(t){let i=A.get(t.strings);return void 0===i&&A.set(t.strings,i=new V(t)),i}k(t){a$1(this._$AH)||(this._$AH=[],this._$AR());const i=this._$AH;let s,e=0;for(const h of t)e===i.length?i.push(s=new M(this.S(l$1()),this.S(l$1()),this,this.options)):s=i[e],s._$AI(h),e++;e<i.length&&(this._$AR(s&&s._$AB.nextSibling,e),i.length=e);}_$AR(t=this._$AA.nextSibling,i){for(this._$AP?.(!1,!0,i);t&&t!==this._$AB;){const i=t.nextSibling;t.remove(),t=i;}}setConnected(t){void 0===this._$AM&&(this._$Cv=t,this._$AP?.(t));}}class R{get tagName(){return this.element.tagName}get _$AU(){return this._$AM._$AU}constructor(t,i,s,e,h){this.type=1,this._$AH=T,this._$AN=void 0,this.element=t,this.name=i,this._$AM=e,this.options=h,s.length>2||""!==s[0]||""!==s[1]?(this._$AH=Array(s.length-1).fill(new String),this.strings=s):this._$AH=T;}_$AI(t,i=this,s,e){const h=this.strings;let o=!1;if(void 0===h)t=N(this,t,i,0),o=!c(t)||t!==this._$AH&&t!==w,o&&(this._$AH=t);else {const e=t;let n,r;for(t=h[0],n=0;n<h.length-1;n++)r=N(this,e[s+n],i,n),r===w&&(r=this._$AH[n]),o||=!c(r)||r!==this._$AH[n],r===T?t=T:t!==T&&(t+=(r??"")+h[n+1]),this._$AH[n]=r;}o&&!e&&this.j(t);}j(t){t===T?this.element.removeAttribute(this.name):this.element.setAttribute(this.name,t??"");}}class k extends R{constructor(){super(...arguments),this.type=3;}j(t){this.element[this.name]=t===T?void 0:t;}}class H extends R{constructor(){super(...arguments),this.type=4;}j(t){this.element.toggleAttribute(this.name,!!t&&t!==T);}}class I extends R{constructor(t,i,s,e,h){super(t,i,s,e,h),this.type=5;}_$AI(t,i=this){if((t=N(this,t,i,0)??T)===w)return;const s=this._$AH,e=t===T&&s!==T||t.capture!==s.capture||t.once!==s.once||t.passive!==s.passive,h=t!==T&&(s===T||e);e&&this.element.removeEventListener(this.name,this,s),h&&this.element.addEventListener(this.name,this,t),this._$AH=t;}handleEvent(t){"function"==typeof this._$AH?this._$AH.call(this.options?.host??this.element,t):this._$AH.handleEvent(t);}}class L{constructor(t,i,s){this.element=t,this.type=6,this._$AN=void 0,this._$AM=i,this.options=s;}get _$AU(){return this._$AM._$AU}_$AI(t){N(this,t);}}const Z=t$2.litHtmlPolyfillSupport;Z?.(V,M),(t$2.litHtmlVersions??=[]).push("3.1.2");const j=(t,i,s)=>{const e=s?.renderBefore??i;let h=e._$litPart$;if(void 0===h){const t=s?.renderBefore??null;e._$litPart$=h=new M(i.insertBefore(l$1(),t),t,void 0,s??{});}return h._$AI(t),h};
+  const t$2=globalThis,i$2=t$2.trustedTypes,s$2=i$2?i$2.createPolicy("lit-html",{createHTML:t=>t}):void 0,e$7="$lit$",h=`lit$${(Math.random()+"").slice(9)}$`,o$5="?"+h,n$3=`<${o$5}>`,r$3=document,l$2=()=>r$3.createComment(""),c=t=>null===t||"object"!=typeof t&&"function"!=typeof t,a$1=Array.isArray,u$1=t=>a$1(t)||"function"==typeof t?.[Symbol.iterator],d="[ \t\n\f\r]",f$1=/<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g,v=/-->/g,_=/>/g,m$1=RegExp(`>|${d}(?:([^\\s"'>=/]+)(${d}*=${d}*(?:[^ \t\n\f\r"'\`<>=]|("|')|))|$)`,"g"),p=/'/g,g=/"/g,$$1=/^(?:script|style|textarea|title)$/i,y=t=>(i,...s)=>({_$litType$:t,strings:i,values:s}),x=y(1),w=Symbol.for("lit-noChange"),T=Symbol.for("lit-nothing"),A=new WeakMap,E=r$3.createTreeWalker(r$3,129);function C(t,i){if(!Array.isArray(t)||!t.hasOwnProperty("raw"))throw Error("invalid template strings array");return void 0!==s$2?s$2.createHTML(i):i}const P=(t,i)=>{const s=t.length-1,o=[];let r,l=2===i?"<svg>":"",c=f$1;for(let i=0;i<s;i++){const s=t[i];let a,u,d=-1,y=0;for(;y<s.length&&(c.lastIndex=y,u=c.exec(s),null!==u);)y=c.lastIndex,c===f$1?"!--"===u[1]?c=v:void 0!==u[1]?c=_:void 0!==u[2]?($$1.test(u[2])&&(r=RegExp("</"+u[2],"g")),c=m$1):void 0!==u[3]&&(c=m$1):c===m$1?">"===u[0]?(c=r??f$1,d=-1):void 0===u[1]?d=-2:(d=c.lastIndex-u[2].length,a=u[1],c=void 0===u[3]?m$1:'"'===u[3]?g:p):c===g||c===p?c=m$1:c===v||c===_?c=f$1:(c=m$1,r=void 0);const x=c===m$1&&t[i+1].startsWith("/>")?" ":"";l+=c===f$1?s+n$3:d>=0?(o.push(a),s.slice(0,d)+e$7+s.slice(d)+h+x):s+h+(-2===d?i:x);}return [C(t,l+(t[s]||"<?>")+(2===i?"</svg>":"")),o]};class V{constructor({strings:t,_$litType$:s},n){let r;this.parts=[];let c=0,a=0;const u=t.length-1,d=this.parts,[f,v]=P(t,s);if(this.el=V.createElement(f,n),E.currentNode=this.el.content,2===s){const t=this.el.content.firstChild;t.replaceWith(...t.childNodes);}for(;null!==(r=E.nextNode())&&d.length<u;){if(1===r.nodeType){if(r.hasAttributes())for(const t of r.getAttributeNames())if(t.endsWith(e$7)){const i=v[a++],s=r.getAttribute(t).split(h),e=/([.?@])?(.*)/.exec(i);d.push({type:1,index:c,name:e[2],strings:s,ctor:"."===e[1]?k:"?"===e[1]?H:"@"===e[1]?I:R}),r.removeAttribute(t);}else t.startsWith(h)&&(d.push({type:6,index:c}),r.removeAttribute(t));if($$1.test(r.tagName)){const t=r.textContent.split(h),s=t.length-1;if(s>0){r.textContent=i$2?i$2.emptyScript:"";for(let i=0;i<s;i++)r.append(t[i],l$2()),E.nextNode(),d.push({type:2,index:++c});r.append(t[s],l$2());}}}else if(8===r.nodeType)if(r.data===o$5)d.push({type:2,index:c});else {let t=-1;for(;-1!==(t=r.data.indexOf(h,t+1));)d.push({type:7,index:c}),t+=h.length-1;}c++;}}static createElement(t,i){const s=r$3.createElement("template");return s.innerHTML=t,s}}function N(t,i,s=t,e){if(i===w)return i;let h=void 0!==e?s._$Co?.[e]:s._$Cl;const o=c(i)?void 0:i._$litDirective$;return h?.constructor!==o&&(h?._$AO?.(!1),void 0===o?h=void 0:(h=new o(t),h._$AT(t,s,e)),void 0!==e?(s._$Co??=[])[e]=h:s._$Cl=h),void 0!==h&&(i=N(t,h._$AS(t,i.values),h,e)),i}class S{constructor(t,i){this._$AV=[],this._$AN=void 0,this._$AD=t,this._$AM=i;}get parentNode(){return this._$AM.parentNode}get _$AU(){return this._$AM._$AU}u(t){const{el:{content:i},parts:s}=this._$AD,e=(t?.creationScope??r$3).importNode(i,!0);E.currentNode=e;let h=E.nextNode(),o=0,n=0,l=s[0];for(;void 0!==l;){if(o===l.index){let i;2===l.type?i=new M(h,h.nextSibling,this,t):1===l.type?i=new l.ctor(h,l.name,l.strings,this,t):6===l.type&&(i=new L(h,this,t)),this._$AV.push(i),l=s[++n];}o!==l?.index&&(h=E.nextNode(),o++);}return E.currentNode=r$3,e}p(t){let i=0;for(const s of this._$AV)void 0!==s&&(void 0!==s.strings?(s._$AI(t,s,i),i+=s.strings.length-2):s._$AI(t[i])),i++;}}class M{get _$AU(){return this._$AM?._$AU??this._$Cv}constructor(t,i,s,e){this.type=2,this._$AH=T,this._$AN=void 0,this._$AA=t,this._$AB=i,this._$AM=s,this.options=e,this._$Cv=e?.isConnected??!0;}get parentNode(){let t=this._$AA.parentNode;const i=this._$AM;return void 0!==i&&11===t?.nodeType&&(t=i.parentNode),t}get startNode(){return this._$AA}get endNode(){return this._$AB}_$AI(t,i=this){t=N(this,t,i),c(t)?t===T||null==t||""===t?(this._$AH!==T&&this._$AR(),this._$AH=T):t!==this._$AH&&t!==w&&this._(t):void 0!==t._$litType$?this.$(t):void 0!==t.nodeType?this.T(t):u$1(t)?this.k(t):this._(t);}S(t){return this._$AA.parentNode.insertBefore(t,this._$AB)}T(t){this._$AH!==t&&(this._$AR(),this._$AH=this.S(t));}_(t){this._$AH!==T&&c(this._$AH)?this._$AA.nextSibling.data=t:this.T(r$3.createTextNode(t)),this._$AH=t;}$(t){const{values:i,_$litType$:s}=t,e="number"==typeof s?this._$AC(t):(void 0===s.el&&(s.el=V.createElement(C(s.h,s.h[0]),this.options)),s);if(this._$AH?._$AD===e)this._$AH.p(i);else {const t=new S(e,this),s=t.u(this.options);t.p(i),this.T(s),this._$AH=t;}}_$AC(t){let i=A.get(t.strings);return void 0===i&&A.set(t.strings,i=new V(t)),i}k(t){a$1(this._$AH)||(this._$AH=[],this._$AR());const i=this._$AH;let s,e=0;for(const h of t)e===i.length?i.push(s=new M(this.S(l$2()),this.S(l$2()),this,this.options)):s=i[e],s._$AI(h),e++;e<i.length&&(this._$AR(s&&s._$AB.nextSibling,e),i.length=e);}_$AR(t=this._$AA.nextSibling,i){for(this._$AP?.(!1,!0,i);t&&t!==this._$AB;){const i=t.nextSibling;t.remove(),t=i;}}setConnected(t){void 0===this._$AM&&(this._$Cv=t,this._$AP?.(t));}}class R{get tagName(){return this.element.tagName}get _$AU(){return this._$AM._$AU}constructor(t,i,s,e,h){this.type=1,this._$AH=T,this._$AN=void 0,this.element=t,this.name=i,this._$AM=e,this.options=h,s.length>2||""!==s[0]||""!==s[1]?(this._$AH=Array(s.length-1).fill(new String),this.strings=s):this._$AH=T;}_$AI(t,i=this,s,e){const h=this.strings;let o=!1;if(void 0===h)t=N(this,t,i,0),o=!c(t)||t!==this._$AH&&t!==w,o&&(this._$AH=t);else {const e=t;let n,r;for(t=h[0],n=0;n<h.length-1;n++)r=N(this,e[s+n],i,n),r===w&&(r=this._$AH[n]),o||=!c(r)||r!==this._$AH[n],r===T?t=T:t!==T&&(t+=(r??"")+h[n+1]),this._$AH[n]=r;}o&&!e&&this.j(t);}j(t){t===T?this.element.removeAttribute(this.name):this.element.setAttribute(this.name,t??"");}}class k extends R{constructor(){super(...arguments),this.type=3;}j(t){this.element[this.name]=t===T?void 0:t;}}class H extends R{constructor(){super(...arguments),this.type=4;}j(t){this.element.toggleAttribute(this.name,!!t&&t!==T);}}class I extends R{constructor(t,i,s,e,h){super(t,i,s,e,h),this.type=5;}_$AI(t,i=this){if((t=N(this,t,i,0)??T)===w)return;const s=this._$AH,e=t===T&&s!==T||t.capture!==s.capture||t.once!==s.once||t.passive!==s.passive,h=t!==T&&(s===T||e);e&&this.element.removeEventListener(this.name,this,s),h&&this.element.addEventListener(this.name,this,t),this._$AH=t;}handleEvent(t){"function"==typeof this._$AH?this._$AH.call(this.options?.host??this.element,t):this._$AH.handleEvent(t);}}class L{constructor(t,i,s){this.element=t,this.type=6,this._$AN=void 0,this._$AM=i,this.options=s;}get _$AU(){return this._$AM._$AU}_$AI(t){N(this,t);}}const Z=t$2.litHtmlPolyfillSupport;Z?.(V,M),(t$2.litHtmlVersions??=[]).push("3.1.2");const j=(t,i,s)=>{const e=s?.renderBefore??i;let h=e._$litPart$;if(void 0===h){const t=s?.renderBefore??null;e._$litPart$=h=new M(i.insertBefore(l$2(),t),t,void 0,s??{});}return h._$AI(t),h};
 
   /**
    * @license
@@ -4127,7 +4214,7 @@
    */class s$1 extends b{constructor(){super(...arguments),this.renderOptions={host:this},this._$Do=void 0;}createRenderRoot(){const t=super.createRenderRoot();return this.renderOptions.renderBefore??=t.firstChild,t}update(t){const i=this.render();this.hasUpdated||(this.renderOptions.isConnected=this.isConnected),super.update(t),this._$Do=j(i,this.renderRoot,this.renderOptions);}connectedCallback(){super.connectedCallback(),this._$Do?.setConnected(!0);}disconnectedCallback(){super.disconnectedCallback(),this._$Do?.setConnected(!1);}render(){return w}}s$1._$litElement$=!0,s$1[("finalized")]=!0,globalThis.litElementHydrateSupport?.({LitElement:s$1});const r$2=globalThis.litElementPolyfillSupport;r$2?.({LitElement:s$1});(globalThis.litElementVersions??=[]).push("4.0.4");
 
   // src/components/card/card.styles.ts
-  var card_styles_default = i$3`
+  var card_styles_default = i$4`
   :host {
     --border-color: var(--sl-color-neutral-200);
     --border-radius: var(--sl-border-radius-medium);
@@ -4240,7 +4327,7 @@
   };
 
   // src/styles/component.styles.ts
-  var component_styles_default = i$3`
+  var component_styles_default = i$4`
   :host {
     box-sizing: border-box;
   }
@@ -4297,13 +4384,13 @@
    * @license
    * Copyright 2017 Google LLC
    * SPDX-License-Identifier: BSD-3-Clause
-   */const o$3={attribute:!0,type:String,converter:u$1,reflect:!1,hasChanged:f$1},r$1=(t=o$3,e,r)=>{const{kind:n,metadata:i}=r;let s=globalThis.litPropertyMetadata.get(i);if(void 0===s&&globalThis.litPropertyMetadata.set(i,s=new Map),s.set(r.name,t),"accessor"===n){const{name:o}=r;return {set(r){const n=e.get.call(this);e.set.call(this,r),this.requestUpdate(o,n,t);},init(e){return void 0!==e&&this.P(o,void 0,t),e}}}if("setter"===n){const{name:o}=r;return function(r){const n=this[o];e.call(this,r),this.requestUpdate(o,n,t);}}throw Error("Unsupported decorator location: "+n)};function n$1(t){return (e,o)=>"object"==typeof o?r$1(t,e,o):((t,e,o)=>{const r=e.hasOwnProperty(o);return e.constructor.createProperty(o,r?{...t,wrapped:!0}:t),r?Object.getOwnPropertyDescriptor(e,o):void 0})(t,e,o)}
+   */const o$4={attribute:!0,type:String,converter:u$2,reflect:!1,hasChanged:f$2},r$1=(t=o$4,e,r)=>{const{kind:n,metadata:i}=r;let s=globalThis.litPropertyMetadata.get(i);if(void 0===s&&globalThis.litPropertyMetadata.set(i,s=new Map),s.set(r.name,t),"accessor"===n){const{name:o}=r;return {set(r){const n=e.get.call(this);e.set.call(this,r),this.requestUpdate(o,n,t);},init(e){return void 0!==e&&this.P(o,void 0,t),e}}}if("setter"===n){const{name:o}=r;return function(r){const n=this[o];e.call(this,r),this.requestUpdate(o,n,t);}}throw Error("Unsupported decorator location: "+n)};function n$2(t){return (e,o)=>"object"==typeof o?r$1(t,e,o):((t,e,o)=>{const r=e.hasOwnProperty(o);return e.constructor.createProperty(o,r?{...t,wrapped:!0}:t),r?Object.getOwnPropertyDescriptor(e,o):void 0})(t,e,o)}
 
   /**
    * @license
    * Copyright 2017 Google LLC
    * SPDX-License-Identifier: BSD-3-Clause
-   */function r(r){return n$1({...r,state:!0,attribute:!1})}
+   */function r(r){return n$2({...r,state:!0,attribute:!1})}
 
   /**
    * @license
@@ -4364,10 +4451,10 @@
   ShoelaceElement.version = "2.15.0";
   ShoelaceElement.dependencies = {};
   __decorateClass([
-    n$1()
+    n$2()
   ], ShoelaceElement.prototype, "dir", 2);
   __decorateClass([
-    n$1()
+    n$2()
   ], ShoelaceElement.prototype, "lang", 2);
 
   /**
@@ -4375,13 +4462,13 @@
    * Copyright 2017 Google LLC
    * SPDX-License-Identifier: BSD-3-Clause
    */
-  const t={ATTRIBUTE:1,CHILD:2,PROPERTY:3,BOOLEAN_ATTRIBUTE:4,EVENT:5,ELEMENT:6},e$4=t=>(...e)=>({_$litDirective$:t,values:e});class i{constructor(t){}get _$AU(){return this._$AM._$AU}_$AT(t,e,i){this._$Ct=t,this._$AM=e,this._$Ci=i;}_$AS(t,e){return this.update(t,e)}update(t,e){return this.render(...e)}}
+  const t={ATTRIBUTE:1,CHILD:2,PROPERTY:3,BOOLEAN_ATTRIBUTE:4,EVENT:5,ELEMENT:6},e$4=t=>(...e)=>({_$litDirective$:t,values:e});class i$1{constructor(t){}get _$AU(){return this._$AM._$AU}_$AT(t,e,i){this._$Ct=t,this._$AM=e,this._$Ci=i;}_$AS(t,e){return this.update(t,e)}update(t,e){return this.render(...e)}}
 
   /**
    * @license
    * Copyright 2018 Google LLC
    * SPDX-License-Identifier: BSD-3-Clause
-   */const e$3=e$4(class extends i{constructor(t$1){if(super(t$1),t$1.type!==t.ATTRIBUTE||"class"!==t$1.name||t$1.strings?.length>2)throw Error("`classMap()` can only be used in the `class` attribute and must be the only part in the attribute.")}render(t){return " "+Object.keys(t).filter((s=>t[s])).join(" ")+" "}update(s,[i]){if(void 0===this.st){this.st=new Set,void 0!==s.strings&&(this.nt=new Set(s.strings.join(" ").split(/\s/).filter((t=>""!==t))));for(const t in i)i[t]&&!this.nt?.has(t)&&this.st.add(t);return this.render(i)}const r=s.element.classList;for(const t of this.st)t in i||(r.remove(t),this.st.delete(t));for(const t in i){const s=!!i[t];s===this.st.has(t)||this.nt?.has(t)||(s?(r.add(t),this.st.add(t)):(r.remove(t),this.st.delete(t)));}return w}});
+   */const e$3=e$4(class extends i$1{constructor(t$1){if(super(t$1),t$1.type!==t.ATTRIBUTE||"class"!==t$1.name||t$1.strings?.length>2)throw Error("`classMap()` can only be used in the `class` attribute and must be the only part in the attribute.")}render(t){return " "+Object.keys(t).filter((s=>t[s])).join(" ")+" "}update(s,[i]){if(void 0===this.st){this.st=new Set,void 0!==s.strings&&(this.nt=new Set(s.strings.join(" ").split(/\s/).filter((t=>""!==t))));for(const t in i)i[t]&&!this.nt?.has(t)&&this.st.add(t);return this.render(i)}const r=s.element.classList;for(const t of this.st)t in i||(r.remove(t),this.st.delete(t));for(const t in i){const s=!!i[t];s===this.st.has(t)||this.nt?.has(t)||(s?(r.add(t),this.st.add(t)):(r.remove(t),this.st.delete(t)));}return w}});
 
   var SlCard = class extends ShoelaceElement {
     constructor() {
@@ -4412,7 +4499,7 @@
   SlCard.define("sl-card");
 
   // src/components/spinner/spinner.styles.ts
-  var spinner_styles_default = i$3`
+  var spinner_styles_default = i$4`
   :host {
     --track-width: 2px;
     --track-color: rgb(128 128 128 / 25%);
@@ -4915,17 +5002,17 @@
     valid: true,
     valueMissing: false
   });
-  Object.freeze(__spreadProps(__spreadValues({}, validValidityState), {
+  var valueMissingValidityState = Object.freeze(__spreadProps(__spreadValues({}, validValidityState), {
     valid: false,
     valueMissing: true
   }));
-  Object.freeze(__spreadProps(__spreadValues({}, validValidityState), {
+  var customErrorValidityState = Object.freeze(__spreadProps(__spreadValues({}, validValidityState), {
     valid: false,
     customError: true
   }));
 
   // src/components/button/button.styles.ts
-  var button_styles_default = i$3`
+  var button_styles_default = i$4`
   :host {
     display: inline-block;
     position: relative;
@@ -5690,7 +5777,7 @@
   }
 
   // src/components/icon/icon.styles.ts
-  var icon_styles_default = i$3`
+  var icon_styles_default = i$4`
   :host {
     display: inline-block;
     width: 1em;
@@ -5735,7 +5822,7 @@
    * @license
    * Copyright 2020 Google LLC
    * SPDX-License-Identifier: BSD-3-Clause
-   */const e$2=(o,t)=>void 0===t?void 0!==o?._$litType$:o?._$litType$===t;
+   */const e$2=(o,t)=>void 0===t?void 0!==o?._$litType$:o?._$litType$===t,f=o=>void 0===o.strings,u={},m=(o,t=u)=>o._$AH=t;
 
   var CACHEABLE_ERROR = Symbol();
   var RETRYABLE_ERROR = Symbol();
@@ -5874,16 +5961,16 @@
     r()
   ], SlIcon.prototype, "svg", 2);
   __decorateClass([
-    n$1({ reflect: true })
+    n$2({ reflect: true })
   ], SlIcon.prototype, "name", 2);
   __decorateClass([
-    n$1()
+    n$2()
   ], SlIcon.prototype, "src", 2);
   __decorateClass([
-    n$1()
+    n$2()
   ], SlIcon.prototype, "label", 2);
   __decorateClass([
-    n$1({ reflect: true })
+    n$2({ reflect: true })
   ], SlIcon.prototype, "library", 2);
   __decorateClass([
     watch("label")
@@ -5896,13 +5983,13 @@
    * @license
    * Copyright 2020 Google LLC
    * SPDX-License-Identifier: BSD-3-Clause
-   */const e$1=Symbol.for(""),o$2=t=>{if(t?.r===e$1)return t?._$litStatic$},s=(t,...r)=>({_$litStatic$:r.reduce(((r,e,o)=>r+(t=>{if(void 0!==t._$litStatic$)return t._$litStatic$;throw Error(`Value passed to 'literal' function must be a 'literal' result: ${t}. Use 'unsafeStatic' to pass non-literal values, but\n            take care to ensure page security.`)})(e)+t[o+1]),t[0]),r:e$1}),a=new Map,l=t=>(r,...e)=>{const i=e.length;let s,l;const n=[],u=[];let c,$=0,f=!1;for(;$<i;){for(c=r[$];$<i&&void 0!==(l=e[$],s=o$2(l));)c+=s+r[++$],f=!0;$!==i&&u.push(l),n.push(c),$++;}if($===i&&n.push(r[i]),f){const t=n.join("$$lit$$");void 0===(r=a.get(t))&&(n.raw=n,a.set(t,r=n)),e=u;}return t(r,...e)},n=l(x);
+   */const e$1=Symbol.for(""),o$3=t=>{if(t?.r===e$1)return t?._$litStatic$},s=(t,...r)=>({_$litStatic$:r.reduce(((r,e,o)=>r+(t=>{if(void 0!==t._$litStatic$)return t._$litStatic$;throw Error(`Value passed to 'literal' function must be a 'literal' result: ${t}. Use 'unsafeStatic' to pass non-literal values, but\n            take care to ensure page security.`)})(e)+t[o+1]),t[0]),r:e$1}),a=new Map,l$1=t=>(r,...e)=>{const i=e.length;let s,l;const n=[],u=[];let c,$=0,f=!1;for(;$<i;){for(c=r[$];$<i&&void 0!==(l=e[$],s=o$3(l));)c+=s+r[++$],f=!0;$!==i&&u.push(l),n.push(c),$++;}if($===i&&n.push(r[i]),f){const t=n.join("$$lit$$");void 0===(r=a.get(t))&&(n.raw=n,a.set(t,r=n)),e=u;}return t(r,...e)},n$1=l$1(x);
 
   /**
    * @license
    * Copyright 2018 Google LLC
    * SPDX-License-Identifier: BSD-3-Clause
-   */const o$1=o=>o??T;
+   */const o$2=o=>o??T;
 
   var SlButton = class extends ShoelaceElement {
     constructor() {
@@ -6019,7 +6106,7 @@
     render() {
       const isLink = this.isLink();
       const tag = isLink ? s`a` : s`button`;
-      return n`
+      return n$1`
       <${tag}
         part="base"
         class=${e$3({
@@ -6047,16 +6134,16 @@
       "button--has-prefix": this.hasSlotController.test("prefix"),
       "button--has-suffix": this.hasSlotController.test("suffix")
     })}
-        ?disabled=${o$1(isLink ? void 0 : this.disabled)}
-        type=${o$1(isLink ? void 0 : this.type)}
+        ?disabled=${o$2(isLink ? void 0 : this.disabled)}
+        type=${o$2(isLink ? void 0 : this.type)}
         title=${this.title}
-        name=${o$1(isLink ? void 0 : this.name)}
-        value=${o$1(isLink ? void 0 : this.value)}
-        href=${o$1(isLink ? this.href : void 0)}
-        target=${o$1(isLink ? this.target : void 0)}
-        download=${o$1(isLink ? this.download : void 0)}
-        rel=${o$1(isLink ? this.rel : void 0)}
-        role=${o$1(isLink ? void 0 : "button")}
+        name=${o$2(isLink ? void 0 : this.name)}
+        value=${o$2(isLink ? void 0 : this.value)}
+        href=${o$2(isLink ? this.href : void 0)}
+        target=${o$2(isLink ? this.target : void 0)}
+        download=${o$2(isLink ? this.download : void 0)}
+        rel=${o$2(isLink ? this.rel : void 0)}
+        role=${o$2(isLink ? void 0 : "button")}
         aria-disabled=${this.disabled ? "true" : "false"}
         tabindex=${this.disabled ? "-1" : "0"}
         @blur=${this.handleBlur}
@@ -6067,8 +6154,8 @@
         <slot name="prefix" part="prefix" class="button__prefix"></slot>
         <slot part="label" class="button__label"></slot>
         <slot name="suffix" part="suffix" class="button__suffix"></slot>
-        ${this.caret ? n` <sl-icon part="caret" class="button__caret" library="system" name="caret"></sl-icon> ` : ""}
-        ${this.loading ? n`<sl-spinner part="spinner"></sl-spinner>` : ""}
+        ${this.caret ? n$1` <sl-icon part="caret" class="button__caret" library="system" name="caret"></sl-icon> ` : ""}
+        ${this.loading ? n$1`<sl-spinner part="spinner"></sl-spinner>` : ""}
       </${tag}>
     `;
     }
@@ -6088,70 +6175,70 @@
     r()
   ], SlButton.prototype, "invalid", 2);
   __decorateClass([
-    n$1()
+    n$2()
   ], SlButton.prototype, "title", 2);
   __decorateClass([
-    n$1({ reflect: true })
+    n$2({ reflect: true })
   ], SlButton.prototype, "variant", 2);
   __decorateClass([
-    n$1({ reflect: true })
+    n$2({ reflect: true })
   ], SlButton.prototype, "size", 2);
   __decorateClass([
-    n$1({ type: Boolean, reflect: true })
+    n$2({ type: Boolean, reflect: true })
   ], SlButton.prototype, "caret", 2);
   __decorateClass([
-    n$1({ type: Boolean, reflect: true })
+    n$2({ type: Boolean, reflect: true })
   ], SlButton.prototype, "disabled", 2);
   __decorateClass([
-    n$1({ type: Boolean, reflect: true })
+    n$2({ type: Boolean, reflect: true })
   ], SlButton.prototype, "loading", 2);
   __decorateClass([
-    n$1({ type: Boolean, reflect: true })
+    n$2({ type: Boolean, reflect: true })
   ], SlButton.prototype, "outline", 2);
   __decorateClass([
-    n$1({ type: Boolean, reflect: true })
+    n$2({ type: Boolean, reflect: true })
   ], SlButton.prototype, "pill", 2);
   __decorateClass([
-    n$1({ type: Boolean, reflect: true })
+    n$2({ type: Boolean, reflect: true })
   ], SlButton.prototype, "circle", 2);
   __decorateClass([
-    n$1()
+    n$2()
   ], SlButton.prototype, "type", 2);
   __decorateClass([
-    n$1()
+    n$2()
   ], SlButton.prototype, "name", 2);
   __decorateClass([
-    n$1()
+    n$2()
   ], SlButton.prototype, "value", 2);
   __decorateClass([
-    n$1()
+    n$2()
   ], SlButton.prototype, "href", 2);
   __decorateClass([
-    n$1()
+    n$2()
   ], SlButton.prototype, "target", 2);
   __decorateClass([
-    n$1()
+    n$2()
   ], SlButton.prototype, "rel", 2);
   __decorateClass([
-    n$1()
+    n$2()
   ], SlButton.prototype, "download", 2);
   __decorateClass([
-    n$1()
+    n$2()
   ], SlButton.prototype, "form", 2);
   __decorateClass([
-    n$1({ attribute: "formaction" })
+    n$2({ attribute: "formaction" })
   ], SlButton.prototype, "formAction", 2);
   __decorateClass([
-    n$1({ attribute: "formenctype" })
+    n$2({ attribute: "formenctype" })
   ], SlButton.prototype, "formEnctype", 2);
   __decorateClass([
-    n$1({ attribute: "formmethod" })
+    n$2({ attribute: "formmethod" })
   ], SlButton.prototype, "formMethod", 2);
   __decorateClass([
-    n$1({ attribute: "formnovalidate", type: Boolean })
+    n$2({ attribute: "formnovalidate", type: Boolean })
   ], SlButton.prototype, "formNoValidate", 2);
   __decorateClass([
-    n$1({ attribute: "formtarget" })
+    n$2({ attribute: "formtarget" })
   ], SlButton.prototype, "formTarget", 2);
   __decorateClass([
     watch("disabled", { waitUntilFirstUpdate: true })
@@ -6162,7 +6249,7 @@
   SlIcon.define("sl-icon");
 
   // src/components/tooltip/tooltip.styles.ts
-  var tooltip_styles_default = i$3`
+  var tooltip_styles_default = i$4`
   :host {
     --max-width: 20rem;
     --hide-delay: 0ms;
@@ -6215,7 +6302,7 @@
 `;
 
   // src/components/popup/popup.styles.ts
-  var popup_styles_default = i$3`
+  var popup_styles_default = i$4`
   :host {
     --arrow-color: var(--sl-color-neutral-1000);
     --arrow-size: 6px;
@@ -8173,37 +8260,37 @@
     e$5(".popup__arrow")
   ], SlPopup.prototype, "arrowEl", 2);
   __decorateClass([
-    n$1()
+    n$2()
   ], SlPopup.prototype, "anchor", 2);
   __decorateClass([
-    n$1({ type: Boolean, reflect: true })
+    n$2({ type: Boolean, reflect: true })
   ], SlPopup.prototype, "active", 2);
   __decorateClass([
-    n$1({ reflect: true })
+    n$2({ reflect: true })
   ], SlPopup.prototype, "placement", 2);
   __decorateClass([
-    n$1({ reflect: true })
+    n$2({ reflect: true })
   ], SlPopup.prototype, "strategy", 2);
   __decorateClass([
-    n$1({ type: Number })
+    n$2({ type: Number })
   ], SlPopup.prototype, "distance", 2);
   __decorateClass([
-    n$1({ type: Number })
+    n$2({ type: Number })
   ], SlPopup.prototype, "skidding", 2);
   __decorateClass([
-    n$1({ type: Boolean })
+    n$2({ type: Boolean })
   ], SlPopup.prototype, "arrow", 2);
   __decorateClass([
-    n$1({ attribute: "arrow-placement" })
+    n$2({ attribute: "arrow-placement" })
   ], SlPopup.prototype, "arrowPlacement", 2);
   __decorateClass([
-    n$1({ attribute: "arrow-padding", type: Number })
+    n$2({ attribute: "arrow-padding", type: Number })
   ], SlPopup.prototype, "arrowPadding", 2);
   __decorateClass([
-    n$1({ type: Boolean })
+    n$2({ type: Boolean })
   ], SlPopup.prototype, "flip", 2);
   __decorateClass([
-    n$1({
+    n$2({
       attribute: "flip-fallback-placements",
       converter: {
         fromAttribute: (value) => {
@@ -8216,37 +8303,37 @@
     })
   ], SlPopup.prototype, "flipFallbackPlacements", 2);
   __decorateClass([
-    n$1({ attribute: "flip-fallback-strategy" })
+    n$2({ attribute: "flip-fallback-strategy" })
   ], SlPopup.prototype, "flipFallbackStrategy", 2);
   __decorateClass([
-    n$1({ type: Object })
+    n$2({ type: Object })
   ], SlPopup.prototype, "flipBoundary", 2);
   __decorateClass([
-    n$1({ attribute: "flip-padding", type: Number })
+    n$2({ attribute: "flip-padding", type: Number })
   ], SlPopup.prototype, "flipPadding", 2);
   __decorateClass([
-    n$1({ type: Boolean })
+    n$2({ type: Boolean })
   ], SlPopup.prototype, "shift", 2);
   __decorateClass([
-    n$1({ type: Object })
+    n$2({ type: Object })
   ], SlPopup.prototype, "shiftBoundary", 2);
   __decorateClass([
-    n$1({ attribute: "shift-padding", type: Number })
+    n$2({ attribute: "shift-padding", type: Number })
   ], SlPopup.prototype, "shiftPadding", 2);
   __decorateClass([
-    n$1({ attribute: "auto-size" })
+    n$2({ attribute: "auto-size" })
   ], SlPopup.prototype, "autoSize", 2);
   __decorateClass([
-    n$1()
+    n$2()
   ], SlPopup.prototype, "sync", 2);
   __decorateClass([
-    n$1({ type: Object })
+    n$2({ type: Object })
   ], SlPopup.prototype, "autoSizeBoundary", 2);
   __decorateClass([
-    n$1({ attribute: "auto-size-padding", type: Number })
+    n$2({ attribute: "auto-size-padding", type: Number })
   ], SlPopup.prototype, "autoSizePadding", 2);
   __decorateClass([
-    n$1({ attribute: "hover-bridge", type: Boolean })
+    n$2({ attribute: "hover-bridge", type: Boolean })
   ], SlPopup.prototype, "hoverBridge", 2);
 
   // src/utilities/animation-registry.ts
@@ -8331,6 +8418,11 @@
         });
       })
     );
+  }
+  function shimKeyframesHeightAuto(keyframes, calculatedHeight) {
+    return keyframes.map((keyframe) => __spreadProps(__spreadValues({}, keyframe), {
+      height: keyframe.height === "auto" ? `${calculatedHeight}px` : keyframe.height
+    }));
   }
 
   var SlTooltip = class extends ShoelaceElement {
@@ -8518,28 +8610,28 @@
     e$5("sl-popup")
   ], SlTooltip.prototype, "popup", 2);
   __decorateClass([
-    n$1()
+    n$2()
   ], SlTooltip.prototype, "content", 2);
   __decorateClass([
-    n$1()
+    n$2()
   ], SlTooltip.prototype, "placement", 2);
   __decorateClass([
-    n$1({ type: Boolean, reflect: true })
+    n$2({ type: Boolean, reflect: true })
   ], SlTooltip.prototype, "disabled", 2);
   __decorateClass([
-    n$1({ type: Number })
+    n$2({ type: Number })
   ], SlTooltip.prototype, "distance", 2);
   __decorateClass([
-    n$1({ type: Boolean, reflect: true })
+    n$2({ type: Boolean, reflect: true })
   ], SlTooltip.prototype, "open", 2);
   __decorateClass([
-    n$1({ type: Number })
+    n$2({ type: Number })
   ], SlTooltip.prototype, "skidding", 2);
   __decorateClass([
-    n$1()
+    n$2()
   ], SlTooltip.prototype, "trigger", 2);
   __decorateClass([
-    n$1({ type: Boolean })
+    n$2({ type: Boolean })
   ], SlTooltip.prototype, "hoist", 2);
   __decorateClass([
     watch("open", { waitUntilFirstUpdate: true })
@@ -8568,7 +8660,7 @@
   SlTooltip.define("sl-tooltip");
 
   // src/components/icon-button/icon-button.styles.ts
-  var icon_button_styles_default = i$3`
+  var icon_button_styles_default = i$4`
   :host {
     display: inline-block;
     color: var(--sl-color-neutral-600);
@@ -8653,7 +8745,7 @@
     render() {
       const isLink = this.href ? true : false;
       const tag = isLink ? s`a` : s`button`;
-      return n`
+      return n$1`
       <${tag}
         part="base"
         class=${e$3({
@@ -8661,13 +8753,13 @@
       "icon-button--disabled": !isLink && this.disabled,
       "icon-button--focused": this.hasFocus
     })}
-        ?disabled=${o$1(isLink ? void 0 : this.disabled)}
-        type=${o$1(isLink ? void 0 : "button")}
-        href=${o$1(isLink ? this.href : void 0)}
-        target=${o$1(isLink ? this.target : void 0)}
-        download=${o$1(isLink ? this.download : void 0)}
-        rel=${o$1(isLink && this.target ? "noreferrer noopener" : void 0)}
-        role=${o$1(isLink ? void 0 : "button")}
+        ?disabled=${o$2(isLink ? void 0 : this.disabled)}
+        type=${o$2(isLink ? void 0 : "button")}
+        href=${o$2(isLink ? this.href : void 0)}
+        target=${o$2(isLink ? this.target : void 0)}
+        download=${o$2(isLink ? this.download : void 0)}
+        rel=${o$2(isLink && this.target ? "noreferrer noopener" : void 0)}
+        role=${o$2(isLink ? void 0 : "button")}
         aria-disabled=${this.disabled ? "true" : "false"}
         aria-label="${this.label}"
         tabindex=${this.disabled ? "-1" : "0"}
@@ -8677,9 +8769,9 @@
       >
         <sl-icon
           class="icon-button__icon"
-          name=${o$1(this.name)}
-          library=${o$1(this.library)}
-          src=${o$1(this.src)}
+          name=${o$2(this.name)}
+          library=${o$2(this.library)}
+          src=${o$2(this.src)}
           aria-hidden="true"
         ></sl-icon>
       </${tag}>
@@ -8695,32 +8787,32 @@
     r()
   ], SlIconButton.prototype, "hasFocus", 2);
   __decorateClass([
-    n$1()
+    n$2()
   ], SlIconButton.prototype, "name", 2);
   __decorateClass([
-    n$1()
+    n$2()
   ], SlIconButton.prototype, "library", 2);
   __decorateClass([
-    n$1()
+    n$2()
   ], SlIconButton.prototype, "src", 2);
   __decorateClass([
-    n$1()
+    n$2()
   ], SlIconButton.prototype, "href", 2);
   __decorateClass([
-    n$1()
+    n$2()
   ], SlIconButton.prototype, "target", 2);
   __decorateClass([
-    n$1()
+    n$2()
   ], SlIconButton.prototype, "download", 2);
   __decorateClass([
-    n$1()
+    n$2()
   ], SlIconButton.prototype, "label", 2);
   __decorateClass([
-    n$1({ type: Boolean, reflect: true })
+    n$2({ type: Boolean, reflect: true })
   ], SlIconButton.prototype, "disabled", 2);
 
   // src/components/alert/alert.styles.ts
-  var alert_styles_default = i$3`
+  var alert_styles_default = i$4`
   :host {
     display: contents;
 
@@ -8955,16 +9047,16 @@
     e$5('[part~="base"]')
   ], SlAlert.prototype, "base", 2);
   __decorateClass([
-    n$1({ type: Boolean, reflect: true })
+    n$2({ type: Boolean, reflect: true })
   ], SlAlert.prototype, "open", 2);
   __decorateClass([
-    n$1({ type: Boolean, reflect: true })
+    n$2({ type: Boolean, reflect: true })
   ], SlAlert.prototype, "closable", 2);
   __decorateClass([
-    n$1({ reflect: true })
+    n$2({ reflect: true })
   ], SlAlert.prototype, "variant", 2);
   __decorateClass([
-    n$1({ type: Number })
+    n$2({ type: Number })
   ], SlAlert.prototype, "duration", 2);
   __decorateClass([
     watch("open", { waitUntilFirstUpdate: true })
@@ -9039,7 +9131,7 @@
     return formattedDate;
   }
 
-  var logger$y = Logger('common/contacts');
+  var logger$A = Logger('common/contacts');
   POWERPOD.contacts = {
     getContactName: getContactName
   };
@@ -9064,7 +9156,7 @@
               _context.next = 7;
               break;
             }
-            logger$y.error({
+            logger$A.error({
               fn: getContactName,
               message: 'Failed to get contact'
             });
@@ -9075,13 +9167,13 @@
               _context.next = 11;
               break;
             }
-            logger$y.error({
+            logger$A.error({
               fn: getContactName,
               message: 'Failed to get contact name'
             });
             return _context.abrupt("return");
           case 11:
-            logger$y.info({
+            logger$A.info({
               fn: getContactName,
               message: "Successfully retrieved fullname: ".concat(fullname)
             });
@@ -9115,7 +9207,7 @@
     });
   }
 
-  const logger$x = Logger('common/documents');
+  const logger$z = Logger('common/documents');
   POWERPOD.docUtils = {
       getFilenamesFromDocData,
       getFilenamesFromFieldData,
@@ -9146,7 +9238,7 @@
   function getFilenamesFromDocData(data, fieldName = 'ALL FIELDS') {
       const { value } = data;
       const filenames = value.map((item) => item.filename);
-      logger$x.info({
+      logger$z.info({
           fn: getFilenamesFromDocData,
           message: `Returning filenames string from documents data for fieldName: ${fieldName}`,
           data: { data, filenames },
@@ -9170,7 +9262,7 @@
       if (fileName && !fileNames.includes(fileName)) {
           fileNames.push(fileName);
       }
-      logger$x.info({
+      logger$z.info({
           fn: getFilenamesFromFieldData,
           message: `Returning filename list from upload field content for fieldName: ${fieldName}`,
           data: { fileNames },
@@ -9248,7 +9340,7 @@
               const startIndex = fileString.lastIndexOf('(', endIndex); // Find the preceding opening parenthesis
               if (startIndex !== -1 && endIndex !== -1 && endIndex > startIndex) {
                   const filename = fileString.substring(0, startIndex).trim(); // Extract filename
-                  logger$x.info({
+                  logger$z.info({
                       fn: readFileInputStr,
                       message: `Found filename: ${filename}`,
                   });
@@ -9259,7 +9351,7 @@
               }
           }
       });
-      logger$x.info({
+      logger$z.info({
           fn: readFileInputStr,
           message: `Found ${(_a = matchingDocs === null || matchingDocs === void 0 ? void 0 : matchingDocs.length) !== null && _a !== void 0 ? _a : 0} matching docs`,
           data: { fileInputStr, docs, matchingDocs },
@@ -9267,7 +9359,7 @@
       return matchingDocs;
   }
   function generateFileInputStr(docs) {
-      logger$x.info({
+      logger$z.info({
           fn: generateFileInputStr,
           message: 'Start generating file input str',
           data: { docs },
@@ -9276,7 +9368,7 @@
       docs.forEach((doc) => {
           const { filename, fileId, filesize, status } = doc;
           if (status !== 'uploaded') {
-              logger$x.warn({
+              logger$z.warn({
                   fn: generateFileInputStr,
                   message: `File not uploaded yet, filename: ${filename}`,
                   data: { doc },
@@ -9290,7 +9382,7 @@
           }
           inputStr += fileStr + '\n';
       });
-      logger$x.info({
+      logger$z.info({
           fn: generateFileInputStr,
           message: 'Successfully generated file input str',
           data: { docs, inputStr },
@@ -9302,7 +9394,7 @@
       const filename = convertExtensionToLowerCase(name);
       const { contactId } = getCurrentUser();
       if (!contactId) {
-          logger$x.error({
+          logger$z.error({
               fn: generateDocumentSubject,
               message: 'Could not find contactId for user',
           });
@@ -9313,7 +9405,7 @@
           fullname = await getContactName(contactId);
       }
       if (!fullname) {
-          logger$x.error({
+          logger$z.error({
               fn: generateDocumentSubject,
               message: 'Could not find fullname for user',
           });
@@ -9339,7 +9431,7 @@
   }
   async function postDocument(file, fieldName) {
       var _a;
-      logger$x.info({
+      logger$z.info({
           fn: postDocument,
           message: `Start uploading file for fieldName: ${fieldName}`,
           data: { file, fieldName },
@@ -9350,7 +9442,7 @@
       const { subject, fileId } = await generateDocumentSubject(file, fieldName);
       const formId = getFormId();
       if (!(documentbody === null || documentbody === void 0 ? void 0 : documentbody.length) || !(subject === null || subject === void 0 ? void 0 : subject.length) || !(formId === null || formId === void 0 ? void 0 : formId.length)) {
-          logger$x.error({
+          logger$z.error({
               fn: postDocument,
               message: `Failed to postDocument for fieldName: ${fieldName}`,
               data: { file, fieldName, documentbody, subject, formId },
@@ -9366,35 +9458,35 @@
           mimetype: type,
           formType,
       };
-      logger$x.info({
+      logger$z.info({
           fn: postDocument,
           message: `Posting document for fieldName: ${fieldName}`,
           data: { payload, file, fieldName, formType },
       });
       const response = await postDocumentData(payload);
       if (!response || ((_a = response.jqXHR) === null || _a === void 0 ? void 0 : _a.status) !== 204) {
-          logger$x.error({
+          logger$z.error({
               fn: postDocument,
               message: 'Failed to post document',
               data: { payload, response, file, fieldName },
           });
           return;
       }
-      logger$x.info({
+      logger$z.info({
           fn: postDocument,
           message: 'Successfully posted document',
           data: { payload, response, file, fieldName },
       });
   }
   function processDocumentsData(data) {
-      logger$x.info({
+      logger$z.info({
           fn: processDocumentsData,
           message: 'Start processing retrieved documents data',
           data: { data },
       });
       const { value: documentsDataArray } = data;
       const documents = documentsDataArray.map((docData) => mapDataToUploadedDoc(docData));
-      logger$x.info({
+      logger$z.info({
           fn: processDocumentsData,
           message: 'Successfully parsed documents data',
           data: { documents },
@@ -9403,7 +9495,7 @@
   }
   async function deleteDocuments(formId, documents = []) {
       if (!documents || !documents.length) {
-          logger$x.warn({
+          logger$z.warn({
               fn: deleteDocuments,
               message: 'No documents found to delete',
               data: { formId },
@@ -9411,7 +9503,7 @@
           return;
       }
       const startTime = Date.now();
-      logger$x.info({
+      logger$z.info({
           fn: deleteDocuments,
           message: `Start deleting all documents for formId: ${formId}`,
           data: { formId, documents },
@@ -9420,7 +9512,7 @@
           var _a;
           const { annotationid: annotationId } = doc;
           const startTime = Date.now();
-          logger$x.info({
+          logger$z.info({
               fn: deleteDocuments,
               message: `Start deleting document for for annotationId: ${annotationId}`,
               data: { formId, doc },
@@ -9430,7 +9522,7 @@
               returnData: true,
           });
           if (!response || ((_a = response.jqXHR) === null || _a === void 0 ? void 0 : _a.status) !== 204) {
-              logger$x.error({
+              logger$z.error({
                   fn: deleteDocuments,
                   message: `Failed to delete document for annotationId: ${annotationId}`,
                   data: { response, doc, formId, annotationId },
@@ -9438,14 +9530,14 @@
               return;
           }
           const elapsedTime = Date.now() - startTime;
-          logger$x.info({
+          logger$z.info({
               fn: deleteDocuments,
               message: `Successfully deleted document for annotationId: ${annotationId}, took ${elapsedTime} ms`,
               data: { response, doc, formId, annotationId },
           });
       });
       const elapsedTime = Date.now() - startTime;
-      logger$x.info({
+      logger$z.info({
           fn: deleteDocuments,
           message: `Successfully deleted all documents for formId: ${formId}, took ${elapsedTime} ms`,
           data: { formId, documents },
@@ -9453,7 +9545,7 @@
   }
   function validateFileUpload(file) {
       var _a;
-      logger$x.info({
+      logger$z.info({
           fn: validateFileUpload,
           message: 'Validating file upload file',
           data: { file },
@@ -9488,7 +9580,7 @@
       var _a;
       const allowedDocumentsTooltipText = (_a = getGlobalConfigData()) === null || _a === void 0 ? void 0 : _a.AllowedDocumentsTooltipText;
       if (!allowedDocumentsTooltipText) {
-          logger$x.error({
+          logger$z.error({
               fn: addDocumentsStepText,
               message: 'Failed to fetch AllowedDocumentsTooltipText',
           });
@@ -9548,7 +9640,7 @@
       return inputString.trim();
   }
 
-  const logger$w = Logger('components/fileUpload');
+  const logger$y = Logger('components/fileUpload');
   let FileUpload = class FileUpload extends s$1 {
       constructor() {
           super(...arguments);
@@ -9570,7 +9662,7 @@
           this.getDocuments(true);
       }
       setupTooltip(element, tooltipText) {
-          logger$w.info({
+          logger$y.info({
               fn: 'FileUpload.setupTooltip',
               message: `Start configuring tooltip for element`,
               data: { element, tooltipText },
@@ -9607,7 +9699,7 @@
           });
       }
       firstUpdated(props) {
-          logger$w.info({
+          logger$y.info({
               fn: 'FileUpload.firstUpdated',
               message: `this.tooltiptext: ${this.tooltiptext}`,
               data: {
@@ -9620,7 +9712,7 @@
               this.tooltiptext !== 'undefined' &&
               this.fileUploadElement) {
               const $fileUploadElement = $(this.fileUploadElement);
-              logger$w.info({
+              logger$y.info({
                   fn: 'FileUpload.firstUpdated',
                   message: `$fileUploadElement:`,
                   data: {
@@ -9653,7 +9745,7 @@
           }
       }
       async getDocuments(emitEvent = false) {
-          logger$w.info({
+          logger$y.info({
               fn: 'getDocuments',
               message: 'Calling getDocuments task',
               data: { fileInputStr: this.fileInputStr },
@@ -9668,7 +9760,7 @@
               this.emitEvent();
       }
       async getDocument(fileId) {
-          logger$w.info({
+          logger$y.info({
               fn: 'getDocument',
               message: 'Calling getDocument task',
               data: { fileId },
@@ -9681,7 +9773,7 @@
               const allDocs = processDocumentsData(data);
               const doc = allDocs.find((doc) => doc.subject.includes(fileId));
               if (!doc) {
-                  logger$w.error({
+                  logger$y.error({
                       fn: 'getDocument',
                       message: `Could not find doc to delete by fileId: ${fileId}`,
                   });
@@ -9690,7 +9782,7 @@
               return doc;
           }
           catch (e) {
-              logger$w.error({
+              logger$y.error({
                   fn: 'getDocument',
                   message: 'getDocument task failed',
                   data: { e, fileId },
@@ -9719,7 +9811,7 @@
           this.handleFiles(files);
       }
       handleFileSelect(e) {
-          logger$w.info({
+          logger$y.info({
               fn: 'handleFileSelect',
               message: 'Start handling file select',
               data: { e },
@@ -9738,7 +9830,7 @@
       }
       async uploadFile(file, fieldName) {
           var _a;
-          logger$w.info({
+          logger$y.info({
               fn: 'uploadFile',
               message: `Start uploading file for fieldName: ${fieldName}`,
               data: { file, fieldName },
@@ -9758,7 +9850,7 @@
               formType: this.formType,
           }) - 1;
           this.emitEvent();
-          logger$w.info({
+          logger$y.info({
               fn: 'uploadFile',
               message: `Added pending file to docs array for fieldName: ${fieldName}`,
               data: { file, fieldName, docs: this.docs, docIndex },
@@ -9768,7 +9860,7 @@
               const { subject, fileId } = await generateDocumentSubject(file, this.fieldName);
               const formId = getFormId();
               if (!(documentbody === null || documentbody === void 0 ? void 0 : documentbody.length) || !(subject === null || subject === void 0 ? void 0 : subject.length) || !(formId === null || formId === void 0 ? void 0 : formId.length)) {
-                  logger$w.error({
+                  logger$y.error({
                       fn: 'uploadFile',
                       message: `Failed to postDocument for fieldName: ${fieldName}`,
                       data: {
@@ -9789,7 +9881,7 @@
                   documentbody,
                   mimetype: type,
               };
-              logger$w.info({
+              logger$y.info({
                   fn: this.uploadFile,
                   message: `Posting document for fieldName: ${fieldName}`,
                   data: { payload, file, fieldName, formType },
@@ -9808,7 +9900,7 @@
                   timeout: 120 * 1000, // for file uploads allow 120 seconds
               });
               if (!response || ((_a = response.jqXHR) === null || _a === void 0 ? void 0 : _a.status) !== 204) {
-                  logger$w.error({
+                  logger$y.error({
                       fn: this.uploadFile,
                       message: 'Failed to post document',
                       data: { payload, response, file, fieldName },
@@ -9818,7 +9910,7 @@
                   return;
               }
               this.docs[docIndex].status = 'uploaded';
-              logger$w.info({
+              logger$y.info({
                   fn: 'uploadFile',
                   message: 'Successfully posted document',
                   data: {
@@ -9832,7 +9924,7 @@
               this.emitEvent();
           }
           catch (e) {
-              logger$w.error({
+              logger$y.error({
                   fn: 'uploadFile',
                   message: 'File upload encountered an error',
                   data: { e },
@@ -9843,7 +9935,7 @@
       }
       async deleteDocument(doc, docIndex) {
           var _a;
-          logger$w.info({
+          logger$y.info({
               fn: 'deleteDocument',
               message: `Start deleting document...`,
               data: { doc, docIndex },
@@ -9860,14 +9952,14 @@
               }
               if (!annotationId) {
                   let errorMsg = 'Could not find annotationid, likely file does not exist in dynamics';
-                  logger$w.error({
+                  logger$y.error({
                       fn: 'deleteDocument',
                       message: errorMsg,
                       data: { doc, docIndex, fileId },
                   });
                   throw new Error(errorMsg);
               }
-              logger$w.info({
+              logger$y.info({
                   fn: 'deleteDocument',
                   message: `Start deleting document for for annotationId: ${annotationId}`,
                   data: { doc },
@@ -9878,21 +9970,21 @@
               });
               // purposely do not "return" on fail, remove file from list of user's file, even if hard delete fails
               if (!response || ((_a = response.jqXHR) === null || _a === void 0 ? void 0 : _a.status) !== 204) {
-                  logger$w.error({
+                  logger$y.error({
                       fn: 'deleteDocument',
                       message: `Failed to delete document for annotationId: ${annotationId}`,
                       data: { response, doc, annotationId },
                   });
               }
               const elapsedTime = Date.now() - startTime;
-              logger$w.info({
+              logger$y.info({
                   fn: 'deleteDocument',
                   message: `Done deleting document for annotationId: ${annotationId}, took ${elapsedTime} ms`,
                   data: { response, doc, annotationId },
               });
           }
           catch (e) {
-              logger$w.error({
+              logger$y.error({
                   fn: 'deleteDocument',
                   message: 'File delete encountered an error, remove document anyway',
                   data: { e },
@@ -10108,7 +10200,7 @@
     `;
       }
   };
-  FileUpload.styles = i$3 `
+  FileUpload.styles = i$4 `
     .file-upload-card {
       width: 100%;
     }
@@ -10182,7 +10274,7 @@
       e$5('#fileUploadElement')
   ], FileUpload.prototype, "fileUploadElement", void 0);
   __decorate([
-      n$1({ type: String, reflect: true })
+      n$2({ type: String, reflect: true })
   ], FileUpload.prototype, "id", void 0);
   __decorate([
       e$5('#inputElement')
@@ -10191,31 +10283,31 @@
       e$5('#dropElement')
   ], FileUpload.prototype, "dropElement", void 0);
   __decorate([
-      n$1({ type: String })
+      n$2({ type: String })
   ], FileUpload.prototype, "fileInputStr", void 0);
   __decorate([
-      n$1({ type: String })
+      n$2({ type: String })
   ], FileUpload.prototype, "formType", void 0);
   __decorate([
-      n$1()
+      n$2()
   ], FileUpload.prototype, "fieldName", void 0);
   __decorate([
-      n$1()
+      n$2()
   ], FileUpload.prototype, "tooltiptext", void 0);
   __decorate([
-      n$1()
+      n$2()
   ], FileUpload.prototype, "customStyle", void 0);
   __decorate([
-      n$1({ type: Array })
+      n$2({ type: Array })
   ], FileUpload.prototype, "docs", void 0);
   __decorate([
-      n$1()
+      n$2()
   ], FileUpload.prototype, "handleDropHandler", void 0);
   __decorate([
-      n$1()
+      n$2()
   ], FileUpload.prototype, "highlightHandler", void 0);
   __decorate([
-      n$1()
+      n$2()
   ], FileUpload.prototype, "unhighlightHandler", void 0);
   FileUpload = __decorate([
       t$1('file-upload')
@@ -10298,13 +10390,13 @@
       e$5('#inputElement')
   ], Checkbox.prototype, "inputElement", void 0);
   __decorate([
-      n$1({ type: String })
+      n$2({ type: String })
   ], Checkbox.prototype, "inputValue", void 0);
   __decorate([
-      n$1()
+      n$2()
   ], Checkbox.prototype, "customStyle", void 0);
   __decorate([
-      n$1({ type: Boolean })
+      n$2({ type: Boolean })
   ], Checkbox.prototype, "readOnly", void 0);
   Checkbox = __decorate([
       t$1('quartech-checkbox')
@@ -10386,8 +10478,8 @@
           align-items: stretch;
           width: 100%;
           ${!this.readOnly
-            ? i$3 ``
-            : i$3 `
+            ? i$4 ``
+            : i$4 `
               cursor: not-allowed;
             `}
         }
@@ -10421,8 +10513,8 @@
           color: #000;
           font-size: 15px;
           ${!this.readOnly
-            ? i$3 ``
-            : i$3 `
+            ? i$4 ``
+            : i$4 `
               pointer-events: none;
               background-color: #f0f0f0;
             `}
@@ -10447,22 +10539,22 @@
       e$5('#inputElement')
   ], PercentageInput.prototype, "inputElement", void 0);
   __decorate([
-      n$1({ type: String, reflect: true })
+      n$2({ type: String, reflect: true })
   ], PercentageInput.prototype, "id", void 0);
   __decorate([
-      n$1({ type: String })
+      n$2({ type: String })
   ], PercentageInput.prototype, "inputValue", void 0);
   __decorate([
-      n$1({ type: Boolean })
+      n$2({ type: Boolean })
   ], PercentageInput.prototype, "allowNegatives", void 0);
   __decorate([
-      n$1({ type: Number })
+      n$2({ type: Number })
   ], PercentageInput.prototype, "maxValue", void 0);
   __decorate([
-      n$1({ type: Boolean })
+      n$2({ type: Boolean })
   ], PercentageInput.prototype, "readOnly", void 0);
   __decorate([
-      n$1({ type: String })
+      n$2({ type: String })
   ], PercentageInput.prototype, "mappedFieldId", void 0);
   PercentageInput = __decorate([
       t$1('percentage-input')
@@ -10484,11 +10576,11 @@
     updateSMEDesignationExplanationFieldLabelForKTTP2: updateSMEDesignationExplanationFieldLabelForKTTP2,
     calculateTotalRequestedAmountForKTTP: calculateTotalRequestedAmountForKTTP
   };
-  var logger$v = Logger('common/onChangeHandlers');
+  var logger$x = Logger('common/onChangeHandlers');
   function setOnChangeHandler(fieldName, elemType, onChangeHandlerName) {
     var onChangeHandler = POWERPOD.onChangeHandlers[onChangeHandlerName];
     if (!onChangeHandler || typeof onChangeHandler !== 'function') {
-      logger$v.error({
+      logger$x.error({
         fn: setOnChangeHandler,
         message: "Could not set onChangeHandler for fieldName: ".concat(fieldName, " with onChangeHandlerName: ").concat(onChangeHandlerName)
       });
@@ -10498,7 +10590,7 @@
       case HtmlElementType.FileInput:
         var textareaField = $("#".concat(fieldName));
         var attachFileField = $("input[id=".concat(fieldName, "_AttachFile]"));
-        logger$v.info({
+        logger$x.info({
           fn: setOnChangeHandler,
           message: "observe changes on file input element, setOnChangeHandler: ".concat(fieldName),
           data: {
@@ -10516,12 +10608,12 @@
         });
         break;
       case HtmlElementType.DatePicker:
-        logger$v.info({
+        logger$x.info({
           fn: setOnChangeHandler,
           message: "Configuring onChangeHandler for datepicker element, setOnChangeHandler: ".concat(fieldName)
         });
         var datePickerElement = $("input[id=".concat(fieldName, "_datepicker_description]")).parent()[0];
-        logger$v.info({
+        logger$x.info({
           fn: setOnChangeHandler,
           message: "observe changes on datepicker element, setOnChangeHandler: ".concat(fieldName),
           data: {
@@ -10535,20 +10627,20 @@
         break;
       case HtmlElementType.SingleOptionSet:
       case HtmlElementType.MultiOptionSet:
-        logger$v.info({
+        logger$x.info({
           fn: setOnChangeHandler,
           message: "Configuring onChangeHandler for Single/MultiOptionSet, setOnChangeHandler: ".concat(fieldName)
         });
         $("input[id*='".concat(fieldName, "']")).on('change', function () {
           onChangeHandler();
-          logger$v.info({
+          logger$x.info({
             fn: setOnChangeHandler,
             message: 'Q3 updated... validateRequiredFields...'
           });
         });
         break;
       case HtmlElementType.DropdownSelect:
-        logger$v.info({
+        logger$x.info({
           fn: setOnChangeHandler,
           message: "Configuring onChangeHandler for DropdownSelect, setOnChangeHandler: ".concat(fieldName)
         });
@@ -10558,7 +10650,7 @@
         break;
       default:
         // HtmlElementTypeEnum.Input
-        logger$v.info({
+        logger$x.info({
           fn: setOnChangeHandler,
           message: "Configuring onChangeHandler for default input, setOnChangeHandler: ".concat(fieldName)
         });
@@ -10567,7 +10659,7 @@
         });
         break;
     }
-    logger$v.info({
+    logger$x.info({
       fn: setOnChangeHandler,
       message: "Successfully set onChangeHandler for fieldName: ".concat(fieldName, ", elemType: ").concat(elemType, ", onChangeHandlerName: ").concat(onChangeHandlerName)
     });
@@ -10580,7 +10672,7 @@
     var _document$getElementB, _document$getElementB2;
     var totalSumOfReportedExpenses = ((_document$getElementB = document.getElementById('quartech_totalsumofreportedexpenses')) === null || _document$getElementB === void 0 ? void 0 : _document$getElementB.value) || 0;
     var costShareContribution = ((_document$getElementB2 = document.getElementById('quartech_costsharecontributioncashorinkind')) === null || _document$getElementB2 === void 0 ? void 0 : _document$getElementB2.value) || 0;
-    logger$v.info({
+    logger$x.info({
       fn: calculateTotalRequestedAmountForKTTP,
       message: "calculateTotalRequestedAmount returned the following data",
       data: {
@@ -10592,7 +10684,7 @@
     var totalExpenses = parseFloat(sanitizedTotalSumOfExpenses) || 0;
     var sanitizedCostShareContribution = typeof costShareContribution === 'string' ? costShareContribution.replace(',', '') : String(costShareContribution).replace(',', '');
     var contribution = parseFloat(sanitizedCostShareContribution) || 0;
-    logger$v.info({
+    logger$x.info({
       fn: calculateTotalRequestedAmountForKTTP,
       message: "calculateTotalRequestedAmount returned ".concat(totalExpenses, " for totalExpenses and ").concat(contribution, " for contribution")
     });
@@ -10605,14 +10697,14 @@
       name: 'quartech_totalfees',
       value: formattedResult
     });
-    logger$v.info({
+    logger$x.info({
       fn: calculateTotalRequestedAmountForKTTP,
       message: "Successfuly set field tag: quartech_totalfees to value: ".concat(result)
     });
   }
   function calculateTFCRBudgets() {
     var _document$getElementB3, _document$getElementB4, _document$getElementB5, _document$getElementB6, _document$getElementB7;
-    logger$v.info({
+    logger$x.info({
       fn: calculateTFCRBudgets,
       message: "calculateTFCRBudgets called, start calculating..."
     });
@@ -10623,7 +10715,7 @@
     var equipment = ((_document$getElementB5 = document.getElementById('quartech_facilityequipmenttechnologyrental')) === null || _document$getElementB5 === void 0 ? void 0 : _document$getElementB5.value) || 0;
     var materials = ((_document$getElementB6 = document.getElementById('quartech_materials')) === null || _document$getElementB6 === void 0 ? void 0 : _document$getElementB6.value) || 0;
     var other = ((_document$getElementB7 = document.getElementById('quartech_othercost')) === null || _document$getElementB7 === void 0 ? void 0 : _document$getElementB7.value) || 0;
-    logger$v.info({
+    logger$x.info({
       fn: calculateTFCRBudgets,
       message: "calculateTFCRBudgets returned the following values",
       data: {
@@ -10641,7 +10733,7 @@
     var equipmentCost = parseFloat(equipment.replaceAll(',', '')) || 0;
     var materialsCost = parseFloat(materials.replaceAll(',', '')) || 0;
     var otherCost = parseFloat(other.replaceAll(',', '')) || 0;
-    logger$v.info({
+    logger$x.info({
       fn: calculateTFCRBudgets,
       message: "calculateAndPopulateRequestedClaimAmountForVLB returned the following for expenses",
       data: {
@@ -10662,7 +10754,7 @@
       name: 'quartech_estimatedbudgettotalactivitycost',
       value: formattedTotalProposedBudgetCost
     });
-    logger$v.info({
+    logger$x.info({
       fn: calculateTFCRBudgets,
       message: "Successfuly set field tag: quartech_estimatedbudgettotalactivitycost to value: ".concat(formattedTotalProposedBudgetCost)
     });
@@ -10680,7 +10772,7 @@
       name: 'quartech_totalfundingrequiredfromtheprogram',
       value: formattedfinalTotalFundingRequired
     });
-    logger$v.info({
+    logger$x.info({
       fn: calculateTFCRBudgets,
       message: "Successfuly set field tag: quartech_totalfundingrequiredfromtheprogram to value: ".concat(formattedfinalTotalFundingRequired)
     });
@@ -10692,7 +10784,7 @@
   }
   function checkAndSetTFCCRFEligbilityNotice() {
     var _document$getElementB8, _document$getElementB9, _document$getElementB10, _document$getElementB11, _document$getElementB12, _document$getElementB13, _document$getElementB14;
-    logger$v.info({
+    logger$x.info({
       fn: checkAndSetTFCCRFEligbilityNotice,
       message: "checkAndSetTFCCRFEligbilityNotice called, start calculating..."
     });
@@ -10703,7 +10795,7 @@
     var taxReturnNotRequired = (_document$getElementB12 = document.getElementById('quartech_taxreturnnotrequired')) === null || _document$getElementB12 === void 0 ? void 0 : _document$getElementB12.value;
     var ownerOrLesseeOfTheLand = (_document$getElementB13 = document.getElementById('quartech_areyouanownerorlesseeoftheland')) === null || _document$getElementB13 === void 0 ? void 0 : _document$getElementB13.value;
     var notResearchStationOrGovernmentFundedAgency = (_document$getElementB14 = document.getElementById('quartech_notresearchstationorgovernmentfundedagency')) === null || _document$getElementB14 === void 0 ? void 0 : _document$getElementB14.value;
-    logger$v.info({
+    logger$x.info({
       fn: checkAndSetTFCCRFEligbilityNotice,
       message: "founds the following values...",
       data: {
@@ -10724,7 +10816,7 @@
     var areAllValuesYes = existingTreeFruit === YES_VALUE && treeFruitDensityEligibility === YES_VALUE && taxableEntity === YES_VALUE && (fileFarmIncomeTaxUnderTaxActInBC === YES_VALUE || fileFarmIncomeTaxUnderTaxActInBC === NO_VALUE && taxReturnNotRequired === YES_VALUE) && ownerOrLesseeOfTheLand === YES_VALUE && notResearchStationOrGovernmentFundedAgency === YES_VALUE;
     var noticeElement = document.getElementById('doesNotMeetTFCCRFEligibilityRequirements');
     if (!noticeElement) {
-      logger$v.warn({
+      logger$x.warn({
         fn: checkAndSetTFCCRFEligbilityNotice,
         message: "Could not fetch noticeElement by id doesNotMeetTFCCRFEligibilityRequirements"
       });
@@ -10771,7 +10863,7 @@
   }
   function checkAndSetTFCREligbilityNotice() {
     var _document$getElementB15, _document$getElementB16, _document$getElementB17, _document$getElementB18, _document$getElementB19;
-    logger$v.info({
+    logger$x.info({
       fn: checkAndSetTFCREligbilityNotice,
       message: "checkAndSetTFCREligbilityNotice called, start calculating..."
     });
@@ -10780,7 +10872,7 @@
     var taxableEntity = (_document$getElementB17 = document.getElementById('quartech_areyouataxableentity')) === null || _document$getElementB17 === void 0 ? void 0 : _document$getElementB17.value;
     var fileFarmIncomeTaxUnderTaxActInBC = (_document$getElementB18 = document.getElementById('quartech_doyoufilefarmincometaxundertaxactinbc')) === null || _document$getElementB18 === void 0 ? void 0 : _document$getElementB18.value;
     var commitToMaintainingTheProperty = (_document$getElementB19 = document.getElementById('quartech_doyoucommittomaintainingtheproperty')) === null || _document$getElementB19 === void 0 ? void 0 : _document$getElementB19.value;
-    logger$v.info({
+    logger$x.info({
       fn: checkAndSetTFCREligbilityNotice,
       message: "founds the following values...",
       data: {
@@ -10797,7 +10889,7 @@
     var areAllValuesYes = existingTreeFruit === YES_VALUE && ownerOrLesseeOfTheLand === YES_VALUE && taxableEntity === YES_VALUE && fileFarmIncomeTaxUnderTaxActInBC === YES_VALUE && commitToMaintainingTheProperty === YES_VALUE;
     var noticeElement = document.getElementById('doesNotMeetTFCREligibilityRequirements');
     if (!noticeElement) {
-      logger$v.error({
+      logger$x.error({
         fn: checkAndSetTFCREligbilityNotice,
         message: "Could not fetch noticeElement by id doesNotMeetTFCREligibilityRequirements"
       });
@@ -10840,7 +10932,7 @@
   }
   function calculateAndPopulateRequestedClaimAmountForVLB() {
     var _document$getElementB20, _document$getElementB21, _document$getElementB22, _document$getElementB23;
-    logger$v.info({
+    logger$x.info({
       fn: calculateAndPopulateRequestedClaimAmountForVLB,
       message: "calculateAndPopulateRequestedClaimAmountForVLB called, start calculating..."
     });
@@ -10849,7 +10941,7 @@
     var totalDaysAsAnRVT = ((_document$getElementB21 = document.getElementById('quartech_numberoffulldaysworkedasanrvt')) === null || _document$getElementB21 === void 0 ? void 0 : _document$getElementB21.value) || 0;
     var totalDaysAsTelemedicineSupport = ((_document$getElementB22 = document.getElementById('quartech_numberofdaysprovidingtelemedicinesupport')) === null || _document$getElementB22 === void 0 ? void 0 : _document$getElementB22.value) || 0;
     var totalExpensesForCVBCAndBCVTA = ((_document$getElementB23 = document.getElementById('quartech_totalsumofreportedexpenses')) === null || _document$getElementB23 === void 0 ? void 0 : _document$getElementB23.value) || 0;
-    logger$v.info({
+    logger$x.info({
       fn: calculateAndPopulateRequestedClaimAmountForVLB,
       message: "calculateAndPopulateRequestedClaimAmountForVLB returned ".concat(totalExpensesForCVBCAndBCVTA, " for totalExpensesForCVBCAndBCVTA")
     });
@@ -10860,7 +10952,7 @@
     var telemedicineDays = parseFloat(totalDaysAsTelemedicineSupport) || 0;
     var sanitizedtotalExpensesForCVBCAndBCVTA = typeof totalExpensesForCVBCAndBCVTA === 'string' ? totalExpensesForCVBCAndBCVTA.replace(',', '') : String(totalExpensesForCVBCAndBCVTA).replace(',', '');
     var expenses = parseFloat(sanitizedtotalExpensesForCVBCAndBCVTA) || 0;
-    logger$v.info({
+    logger$x.info({
       fn: calculateAndPopulateRequestedClaimAmountForVLB,
       message: "calculateAndPopulateRequestedClaimAmountForVLB returned ".concat(expenses, " for expenses")
     });
@@ -10874,21 +10966,21 @@
       name: 'quartech_totalfees',
       value: formattedResult
     });
-    logger$v.info({
+    logger$x.info({
       fn: calculateAndPopulateRequestedClaimAmountForVLB,
       message: "Successfuly set field tag: quartech_totalfees to value: ".concat(result)
     });
   }
   function calculateAndPopulateRequestedClaimAmountForTFCR() {
     var _document$getElementB24, _document$getElementB25;
-    logger$v.info({
+    logger$x.info({
       fn: calculateAndPopulateRequestedClaimAmountForTFCR,
       message: "calculateAndPopulateRequestedClaimAmountForTFCR called, start calculating..."
     });
     // Get input values from the elements
     var approvedAmountForTFCR = ((_document$getElementB24 = document.getElementById('quartech_authorizedclaimedamount')) === null || _document$getElementB24 === void 0 ? void 0 : _document$getElementB24.value) || 0;
     var sumOfTotalExpensesForTFCR = ((_document$getElementB25 = document.getElementById('quartech_totalsumofreportedexpenses')) === null || _document$getElementB25 === void 0 ? void 0 : _document$getElementB25.value) || 0;
-    logger$v.info({
+    logger$x.info({
       fn: calculateAndPopulateRequestedClaimAmountForTFCR,
       message: "calculateAndPopulateRequestedClaimAmountForTFCR returned ".concat(sumOfTotalExpensesForTFCR, " for totalExpensesForCVBCAndBCVTA")
     });
@@ -10896,7 +10988,7 @@
     // Convert input values to numbers (fallback to 0 if invalid)
     var sumOfTotalExpenses = parseFloat(sumOfTotalExpensesForTFCR.replace(',', '')) || 0;
     var approvedAmount = parseFloat(approvedAmountForTFCR.replace(',', '')) || 0;
-    logger$v.info({
+    logger$x.info({
       fn: calculateAndPopulateRequestedClaimAmountForTFCR,
       message: "calculateAndPopulateRequestedClaimAmountForTFCR returned ".concat(sumOfTotalExpenses, " for expenses, and approvedAmount: ").concat(approvedAmount)
     });
@@ -10910,7 +11002,7 @@
       name: 'quartech_totalfees',
       value: formattedResult
     });
-    logger$v.info({
+    logger$x.info({
       fn: calculateAndPopulateRequestedClaimAmountForTFCR,
       message: "Successfuly set field tag: quartech_totalfees to value: ".concat(result)
     });
@@ -10918,14 +11010,14 @@
   function setBusinessOrPersonalAddressLabels() {
     var noCraNumberCheckbox = document.getElementById('quartech_nocragstnumber');
     if (!noCraNumberCheckbox) {
-      logger$v.error({
+      logger$x.error({
         fn: setBusinessOrPersonalAddressLabels,
         message: "Could not find element by id 'quartech_nocragstnumber'"
       });
       return;
     }
     var noCraNumberCheckboxChecked = noCraNumberCheckbox.checked;
-    logger$v.info({
+    logger$x.info({
       fn: setBusinessOrPersonalAddressLabels,
       message: "Successfully found quartech_nocragstnumber with checked: ".concat(noCraNumberCheckboxChecked)
     });
@@ -10950,7 +11042,7 @@
         setFieldNameLabel(fName, businessAddressFieldLabels[index]);
       });
     }
-    logger$v.info({
+    logger$x.info({
       fn: setBusinessOrPersonalAddressLabels,
       message: "Successfully set labels for address fields based on quartech_nocragstnumber"
     });
@@ -10961,14 +11053,14 @@
   function setBusinessOrPersonalStateForVLB() {
     var noCraNumberCheckbox = document.getElementById('quartech_nocragstnumber');
     if (!noCraNumberCheckbox) {
-      logger$v.error({
+      logger$x.error({
         fn: setBusinessOrPersonalStateForVLB,
         message: "Could not find element by id 'quartech_nocragstnumber'"
       });
       return;
     }
     var noCraNumberCheckboxChecked = noCraNumberCheckbox.checked;
-    logger$v.info({
+    logger$x.info({
       fn: setBusinessOrPersonalStateForVLB,
       message: "Successfully found quartech_nocragstnumber with checked: ".concat(noCraNumberCheckboxChecked)
     });
@@ -11009,7 +11101,7 @@
         setFieldNameLabel(fName, businessAddressFieldLabels[index]);
       });
       var isScriptLoaded = isScriptFullyLoaded('jquerymask');
-      logger$v.info({
+      logger$x.info({
         fn: setBusinessOrPersonalStateForVLB,
         message: "Decide whether to empty fields: quartech_businessphonenumber, quartech_businessemailaddress, quartech_city, isScriptLoaded: ".concat(isScriptLoaded)
       });
@@ -11028,7 +11120,7 @@
         });
         copyFromFieldAToFieldB('quartech_businesscity', 'quartech_city');
       } else {
-        logger$v.info({
+        logger$x.info({
           fn: setBusinessOrPersonalStateForVLB,
           message: "Skip emptying fields since scripts are still loading... quartech_businessphonenumber, quartech_businessemailaddress, quartech_city, isScriptLoaded: ".concat(isScriptLoaded)
         });
@@ -11036,7 +11128,7 @@
       showFieldRow('quartech_businessphonenumber');
       showFieldRow('quartech_businessemailaddress');
     }
-    logger$v.info({
+    logger$x.info({
       fn: setBusinessOrPersonalStateForVLB,
       message: "Successfully set labels for address fields based on quartech_nocragstnumber"
     });
@@ -11048,7 +11140,7 @@
   function populatePhoneNumberEmailAndCityOnChangeVLB() {
     var noCraNumberCheckbox = document.getElementById('quartech_nocragstnumber');
     if (!noCraNumberCheckbox) {
-      logger$v.error({
+      logger$x.error({
         fn: populatePhoneNumberEmailAndCityOnChangeVLB,
         message: "Could not find element by id 'quartech_nocragstnumber'"
       });
@@ -11057,7 +11149,7 @@
     var isIndividual = noCraNumberCheckbox.checked;
     if (!isIndividual) {
       copyFromFieldAToFieldB('quartech_businesscity', 'quartech_city');
-      logger$v.info({
+      logger$x.info({
         fn: populatePhoneNumberEmailAndCityOnChangeVLB,
         message: "\"I do not have a Canada Revenue Agency (CRA) Business Number\" is not checked, isIndividual: ".concat(isIndividual)
       });
@@ -11071,7 +11163,7 @@
 
     // Note: in this case Business City field label is actually just "City" since it's for a person NOT a business
     copyFromFieldAToFieldB('quartech_businesscity', 'quartech_city');
-    logger$v.info({
+    logger$x.info({
       fn: populatePhoneNumberEmailAndCityOnChangeVLB,
       message: "Successfully ran onChangeHandler populateBusinessPhoneNumberOnChange, isIndividual: ".concat(isIndividual, ",")
     });
@@ -11090,7 +11182,7 @@
         }
       }
     });
-    logger$v.info({
+    logger$x.info({
       fn: populateTotalPercent,
       message: "Setting total percent to total: ".concat(total)
     });
@@ -11100,7 +11192,7 @@
       value: "".concat(total)
     });
     var fieldConfig = getFieldConfig('quartech_totalpercentageofpracticeserved');
-    logger$v.info({
+    logger$x.info({
       fn: populateTotalPercent,
       message: "Got fieldConfig for quartech_totalpercentageofpracticeserved:",
       data: {
@@ -11119,7 +11211,7 @@
     var legalBusinessOrgNameTag = 'quartech_legalbusinessororganizationname';
     var legalBusinessOrgNameTagElement = document.querySelector("#".concat(legalBusinessOrgNameTag));
     if (!legalBusinessOrgNameTagElement) {
-      logger$v.error({
+      logger$x.error({
         fn: populateBusinessNameOnChangeFirstOrLastNameVLB,
         message: "Could not find Legal Business or Organization Name field tag: ".concat(legalBusinessOrgNameTag)
       });
@@ -11127,7 +11219,7 @@
     }
     var tr = legalBusinessOrgNameTagElement.closest('tr');
     if (!isHiddenRow(tr)) {
-      logger$v.info({
+      logger$x.info({
         fn: populateBusinessNameOnChangeFirstOrLastNameVLB,
         message: "Only populate when hidden. Legal Business or Organization Name field tag: ".concat(legalBusinessOrgNameTag),
         data: {
@@ -11152,14 +11244,14 @@
       name: legalBusinessOrgNameTag,
       value: newValue
     });
-    logger$v.info({
+    logger$x.info({
       fn: populateBusinessNameOnChangeFirstOrLastNameVLB,
       message: "Successfuly set field tag: quartech_legalbusinessororganizationname to value: ".concat(newValue)
     });
   }
   function displayOrHideAdministrationCostsNoticeForKTTP() {
     var _document$getElementB30, _document$getElementB31;
-    logger$v.info({
+    logger$x.info({
       fn: displayOrHideAdministrationCostsNoticeForKTTP,
       message: "displayOrHideAdministrationCostsNoticeForKTTP called, start calculating..."
     });
@@ -11167,7 +11259,7 @@
     // Get input values from the elements
     var administration = ((_document$getElementB30 = document.getElementById('quartech_administrationcosts')) === null || _document$getElementB30 === void 0 ? void 0 : _document$getElementB30.value) || 0;
     var totalFundingRequested = ((_document$getElementB31 = document.getElementById('quartech_totalfundingrequiredfromtheprogram')) === null || _document$getElementB31 === void 0 ? void 0 : _document$getElementB31.value) || 0;
-    logger$v.info({
+    logger$x.info({
       fn: displayOrHideAdministrationCostsNoticeForKTTP,
       message: "displayOrHideAdministrationCostsNoticeForKTTP returned the following values",
       data: {
@@ -11176,7 +11268,7 @@
       }
     });
     if (!administration || !administration.replaceAll || !totalFundingRequested || !totalFundingRequested.replaceAll) {
-      logger$v.warn({
+      logger$x.warn({
         fn: displayOrHideAdministrationCostsNoticeForKTTP,
         message: "Could not retrieve administration or totalFundingRequested field values",
         data: {
@@ -11190,7 +11282,7 @@
     // Convert input values to numbers (fallback to 0 if invalid)
     var administrationCost = parseFloat(administration === null || administration === void 0 ? void 0 : administration.replaceAll(',', '')) || 0;
     var totalFundingRequestedCost = parseFloat(totalFundingRequested === null || totalFundingRequested === void 0 ? void 0 : totalFundingRequested.replaceAll(',', '')) || 0;
-    logger$v.info({
+    logger$x.info({
       fn: displayOrHideAdministrationCostsNoticeForKTTP,
       message: "displayOrHideAdministrationCostsNoticeForKTTP returned the following for expenses",
       data: {
@@ -11204,13 +11296,13 @@
     if (administrationCost > totalFundingRequestedCost * 0.1) {
       isAdministrationCostGreaterThan10PercentOfFundingRequired = true;
     }
-    logger$v.info({
+    logger$x.info({
       fn: displayOrHideAdministrationCostsNoticeForKTTP,
       message: "displayOrHideAdministrationCostsNoticeForKTTP isAdministrationCostGreaterThan10PercentOfFundingRequired: ".concat(isAdministrationCostGreaterThan10PercentOfFundingRequired)
     });
     var noticeElement = document.getElementById('doesNotMeetAdministrativeCostRequirementsNotice');
     if (!noticeElement) {
-      logger$v.error({
+      logger$x.error({
         fn: displayOrHideAdministrationCostsNoticeForKTTP,
         message: "Could not fetch noticeElement by id doesNotMeetAdministrativeCostRequirementsNotice"
       });
@@ -11227,7 +11319,7 @@
     }
   }
   function updateSMEDesignationExplanationFieldLabelForKTTP1() {
-    logger$v.info({
+    logger$x.info({
       fn: updateSMEDesignationExplanationFieldLabelForKTTP1,
       message: "updateSMEDesignationExplanationFieldLabelForKTTP1 called, start determing label to show..."
     });
@@ -11245,7 +11337,7 @@
     }
   }
   function updateSMEDesignationExplanationFieldLabelForKTTP2() {
-    logger$v.info({
+    logger$x.info({
       fn: updateSMEDesignationExplanationFieldLabelForKTTP2,
       message: "updateSMEDesignationExplanationFieldLabelForKTTP2 called, start determing label to show..."
     });
@@ -11269,10 +11361,10 @@
     customFieldEventHandler: customFieldEventHandler,
     handleIsBusinessContactInfoDropdownChangeHandler: handleIsBusinessContactInfoDropdownChangeHandler
   };
-  var logger$u = Logger('common/customEventHandlers');
+  var logger$w = Logger('common/customEventHandlers');
   function genericEventHandler(name) {
     return function (event, customElement) {
-      logger$u.info({
+      logger$w.info({
         fn: genericEventHandler,
         message: "Detected generic event handler for name: ".concat(name),
         data: {
@@ -11282,7 +11374,7 @@
         }
       });
       var value = event.detail.value;
-      logger$u.info({
+      logger$w.info({
         fn: hasCraNumberCheckboxEventHandler,
         message: "Setting attribute for name: ".concat(name, ", inputvalue: ").concat(value),
         data: {
@@ -11300,7 +11392,7 @@
   }
   function customFieldEventHandler(name) {
     return function (event, customElement) {
-      logger$u.info({
+      logger$w.info({
         fn: customFieldEventHandler,
         message: "Detected generic event handler for name: ".concat(name),
         data: {
@@ -11310,7 +11402,7 @@
         }
       });
       var value = event.detail.value;
-      logger$u.info({
+      logger$w.info({
         fn: customFieldEventHandler,
         message: "Setting attribute for name: ".concat(name, ", inputvalue: ").concat(value),
         data: {
@@ -11327,7 +11419,7 @@
   }
   function hasCraNumberCheckboxEventHandler(name) {
     return function (event, customElement) {
-      logger$u.info({
+      logger$w.info({
         fn: hasCraNumberCheckboxEventHandler,
         message: "Detected custom event handler for name: ".concat(name),
         data: {
@@ -11337,7 +11429,7 @@
         }
       });
       var checked = event.detail.value;
-      logger$u.info({
+      logger$w.info({
         fn: hasCraNumberCheckboxEventHandler,
         message: "Setting attribute for name: ".concat(name, ", checked: ").concat(checked),
         data: {
@@ -11363,7 +11455,7 @@
         return _regeneratorRuntime().wrap(function _callee$(_context) {
           while (1) switch (_context.prev = _context.next) {
             case 0:
-              logger$u.info({
+              logger$w.info({
                 fn: handleIsBusinessContactInfoDropdownChangeHandler,
                 message: "Detected generic event handler for name: ".concat(name),
                 data: {
@@ -11373,7 +11465,7 @@
                 }
               });
               value = event.detail.value;
-              logger$u.info({
+              logger$w.info({
                 fn: handleIsBusinessContactInfoDropdownChangeHandler,
                 message: "Setting attribute for name: ".concat(name, ", inputvalue: ").concat(value),
                 data: {
@@ -11398,13 +11490,13 @@
             case 8:
               applicationDataRes = _context.sent;
               if (!(applicationDataRes !== null && applicationDataRes !== void 0 && (_applicationDataRes$d = applicationDataRes.data) !== null && _applicationDataRes$d !== void 0 && (_applicationDataRes$d = _applicationDataRes$d.value) !== null && _applicationDataRes$d !== void 0 && _applicationDataRes$d[0])) {
-                logger$u.error({
+                logger$w.error({
                   fn: handleIsBusinessContactInfoDropdownChangeHandler,
                   message: "Could not get application data result to determine whether individual or business"
                 });
               }
               _applicationDataRes$d2 = applicationDataRes === null || applicationDataRes === void 0 || (_applicationDataRes$d3 = applicationDataRes.data) === null || _applicationDataRes$d3 === void 0 || (_applicationDataRes$d3 = _applicationDataRes$d3.value) === null || _applicationDataRes$d3 === void 0 ? void 0 : _applicationDataRes$d3[0], quartech_businesssuitenumberoptional = _applicationDataRes$d2.quartech_businesssuitenumberoptional, quartech_businessstreetnumber = _applicationDataRes$d2.quartech_businessstreetnumber, quartech_businessstreet = _applicationDataRes$d2.quartech_businessstreet, quartech_businesscity = _applicationDataRes$d2.quartech_businesscity, quartech_businessprovinceterritory = _applicationDataRes$d2.quartech_businessprovinceterritory, quartech_businesspostalcode = _applicationDataRes$d2.quartech_businesspostalcode, quartech_email = _applicationDataRes$d2.quartech_email;
-              logger$u.info({
+              logger$w.info({
                 fn: handleIsBusinessContactInfoDropdownChangeHandler,
                 message: "received the following data",
                 data: {
@@ -11467,10 +11559,10 @@
   POWERPOD.initValuesFns = {
     initCraNumberCheckbox: initCraNumberCheckbox
   };
-  var logger$t = Logger('common/initValuesFn');
+  var logger$v = Logger('common/initValuesFn');
   function initCraNumberCheckbox(mappedValueKey, existingValue, customElement) {
     customElement.setAttribute("".concat(mappedValueKey), !existingValue);
-    logger$t.info({
+    logger$v.info({
       fn: initCraNumberCheckbox,
       message: "Successfully set custom Checkbox value for mappedValueKey: ".concat(mappedValueKey, ", existingValue: ").concat(existingValue, ", final value: ").concat(!existingValue),
       data: {
@@ -11481,7 +11573,7 @@
     });
   }
 
-  var logger$s = Logger('common/fieldConfiguration');
+  var logger$u = Logger('common/fieldConfiguration');
   POWERPOD.fieldConfiguration = {
     updateFieldValue: updateFieldValue
   };
@@ -11526,7 +11618,7 @@
       reorderField = _field$reorderField === void 0 ? {} : _field$reorderField,
       hideNumberInputArrows = field.hideNumberInputArrows;
     var elementType = field.elementType;
-    logger$s.info({
+    logger$u.info({
       fn: configureField,
       message: "setting field definition for field name: ".concat(name),
       data: {
@@ -11534,7 +11626,7 @@
       }
     });
     if (!$("#".concat(name))) {
-      logger$s.error({
+      logger$u.error({
         fn: configureField,
         message: "could not find existing element for field name: ".concat(name)
       });
@@ -11566,7 +11658,7 @@
         doNotBlank: doNotBlank,
         hideOrShowAdditionalTextWithFieldVisibility: hideOrShowAdditionalTextWithFieldVisibility
       });
-      logger$s.info({
+      logger$u.info({
         fn: configureField,
         message: "aborting field config for fieldName: ".concat(name, ", since it is hidden")
       });
@@ -11591,7 +11683,7 @@
     }
     if (label) {
       var _$;
-      logger$s.info({
+      logger$u.info({
         fn: configureField,
         message: "Found field label configuration for name: ".concat(name, ", label: ").concat(label, ", existingLabel: ").concat((_$ = $("#".concat(name, "_label"))) === null || _$ === void 0 ? void 0 : _$.html())
       });
@@ -11601,7 +11693,7 @@
         name: name,
         label: updatedLabel
       });
-      logger$s.info({
+      logger$u.info({
         fn: configureField,
         message: "Successfully set field label for name: ".concat(name, ", label: ").concat(updatedLabel, ", selector: ", "#".concat(name, "_label")),
         data: {
@@ -11621,7 +11713,7 @@
       setOnChangeHandler(name, elementType, onChangeHandler);
     }
     if (hasUpperCase(name)) {
-      logger$s.warn({
+      logger$u.warn({
         fn: configureField,
         message: "Warning! Field name: ".concat(name, " contains an uppercase letter, please confirm if it was intentional or not.")
       });
@@ -11699,7 +11791,7 @@
     } else if (format === 'numbersOnly') {
       var input = document.getElementById(name);
       if (!input) {
-        logger$s.error({
+        logger$u.error({
           fn: configureField,
           message: "could not find input element for numbersOnly config"
         });
@@ -11737,7 +11829,7 @@
       boldLabelText(name);
     }
     if (customComponent && customComponent.customElementTag) {
-      logger$s.info({
+      logger$u.info({
         fn: configureField,
         message: "Start configuring custom component for field name: ".concat(name),
         data: {
@@ -11766,7 +11858,7 @@
         initValuesFn: customInitValuesFn,
         attributes: customComponent.attributes
       };
-      logger$s.info({
+      logger$u.info({
         fn: configureField,
         message: "Rendering custom component",
         data: {
@@ -11779,7 +11871,7 @@
       var _$3;
       var defaultFileTypes = '.csv,.doc,.docx,.odt,.pdf,.xls,.xlsx,.ods,.gif,.jpeg,.jpg,.png,.svg,.tif';
       (_$3 = $("#".concat(name, "_AttachFile"))) === null || _$3 === void 0 || _$3.attr('accept', fileTypes !== null && fileTypes !== void 0 ? fileTypes : defaultFileTypes);
-      logger$s.info({
+      logger$u.info({
         fn: configureField,
         message: "Start configuring custom component for FileInput"
       });
@@ -11792,7 +11884,7 @@
         },
         customEvent: 'onChangeFileUpload',
         customEventHandler: function customEventHandler(event, customElement) {
-          logger$s.info({
+          logger$u.info({
             fn: configureField,
             message: 'onChangeFileUpload event listener triggered',
             data: {
@@ -11836,7 +11928,7 @@
       name: name,
       loading: false
     });
-    logger$s.info({
+    logger$u.info({
       fn: configureField,
       message: "DONE configuring field: ".concat(name, ", setting POWERPOD.state.field['").concat(name, "'].loading = false")
     });
@@ -11845,7 +11937,7 @@
   }
   function configureFields() {
     var stepName = getCurrentStep();
-    logger$s.info({
+    logger$u.info({
       fn: configureFields,
       message: "configuring fields for step: ".concat(stepName, "...")
     });
@@ -11859,7 +11951,7 @@
     // Exit early if Success step
     if (stepName === FormStep.Success) return;
     if (!fields) return;
-    logger$s.info({
+    logger$u.info({
       fn: configureFields,
       message: 'configuring fields...',
       data: {
@@ -11876,7 +11968,7 @@
 
     generateFormJson(true);
     POWERPOD.configuringFields = false;
-    logger$s.info({
+    logger$u.info({
       fn: configureFields,
       message: "DONE configuring fields, setting POWERPOD.configuringFields = false"
     });
@@ -11884,18 +11976,18 @@
   function setupCanadaPostAddressComplete(fields) {
     var env = getEnv();
     if (window.debug_canadapost) {
-      logger$s.warn({
+      logger$u.warn({
         fn: setupCanadaPostAddressComplete,
         message: "Forcibly enabling Canada Post Address Complete using debug_canadapost flag, env: ".concat(env)
       });
     } else if (env !== Environment.PROD) {
-      logger$s.warn({
+      logger$u.warn({
         fn: setupCanadaPostAddressComplete,
         message: "Skipping Canada Post since env detected is not prod, but is env: ".concat(env)
       });
       return;
     }
-    logger$s.info({
+    logger$u.info({
       fn: setupCanadaPostAddressComplete,
       message: "Start setting up Canada Post Address Complete..."
     });
@@ -11907,7 +11999,7 @@
     var allCpFieldsPresent = cpFieldNames === null || cpFieldNames === void 0 ? void 0 : cpFieldNames.every(function (val) {
       return fieldKeys.includes(val);
     });
-    logger$s.info({
+    logger$u.info({
       fn: setupCanadaPostAddressComplete,
       message: "Checked if all Canada Post addresscomplete fields exist in fields data: allCpFieldsPresent: ".concat(allCpFieldsPresent),
       data: {
@@ -11917,14 +12009,14 @@
       }
     });
     if (allCpFieldsPresent) {
-      logger$s.info({
+      logger$u.info({
         fn: setupCanadaPostAddressComplete,
         message: "Start setting up Canada Post Address Complete... found all fields! Continue configuration..."
       });
       useScript('canadapost', function () {
         // @ts-ignore
         var pca = window.pca;
-        logger$s.info({
+        logger$u.info({
           fn: setupCanadaPostAddressComplete,
           message: 'Starting to setup Canada Post Address Complete',
           data: {
@@ -11961,14 +12053,14 @@
         scriptEl.setAttribute('type', 'text/javascript');
         scriptEl.innerHTML = "\n          var fields = ".concat(JSON.stringify(fieldConfig), ",\n          options = ").concat(JSON.stringify(options), ",\n          control = new pca.Address(fields, options);\n        ");
         doc.head.appendChild(scriptEl);
-        logger$s.info({
+        logger$u.info({
           fn: setupCanadaPostAddressComplete,
           message: 'Successfully configured Canada Post Address Complete'
         });
       });
       return;
     }
-    logger$s.info({
+    logger$u.info({
       fn: setupCanadaPostAddressComplete,
       message: 'Canadapost addresscomplete fields not found, no need to load script'
     });
@@ -11988,7 +12080,7 @@
       skipValidation: skipValidation,
       origin: origin
     };
-    logger$s.info({
+    logger$u.info({
       fn: updateFieldValue,
       message: "updateFieldValue called for name: ".concat(name, ", origin: ").concat(origin, ", is still configuringFields: ").concat(POWERPOD.configuringFields, ", loading: ").concat(POWERPOD.loading),
       data: params
@@ -12029,7 +12121,7 @@
       //     break;
       // }
       if (value === null || value === undefined) {
-        logger$s.warn({
+        logger$u.warn({
           fn: updateFieldValue,
           message: "nothing to save for name: ".concat(name, ", value: ").concat(value, ", format: ").concat(format),
           data: {
@@ -12057,7 +12149,7 @@
       }
     }
     if (!(fieldConfig !== null && fieldConfig !== void 0 && (_fieldConfig$customCo = fieldConfig.customComponent) !== null && _fieldConfig$customCo !== void 0 && _fieldConfig$customCo.customEventHandler) && fieldConfig.value === value) {
-      logger$s.info({
+      logger$u.info({
         fn: updateFieldValue,
         message: "No need to update state or validate new value as it is the same for name: ".concat(name),
         data: {
@@ -12073,7 +12165,7 @@
     if (elementType && elementType === HtmlElementType.DatePicker) {
       var datePickerElement = document.getElementById(name);
       if (!datePickerElement) {
-        logger$s.warn({
+        logger$u.warn({
           fn: updateFieldValue,
           message: "Could not find DatePicker element for name: ".concat(name)
         });
@@ -12084,7 +12176,7 @@
           controlId: name
         }); // returns in display value like M/D/YYY
         var formattedDate = (_formatDateToISOStrin = formatDateToISOString(dateValue)) !== null && _formatDateToISOStrin !== void 0 ? _formatDateToISOStrin : '';
-        logger$s.info({
+        logger$u.info({
           fn: updateFieldValue,
           message: "updateFieldValue called on DatePicker element of name: ".concat(name, ", with value: ").concat(formattedDate)
         });
@@ -12092,7 +12184,7 @@
         datePickerElement.value = formattedDate;
       }
     }
-    logger$s.info({
+    logger$u.info({
       fn: updateFieldValue,
       message: "Saving field data for name: ".concat(name, " and value: ").concat(value, ", format: ").concat(format),
       data: {
@@ -12119,14 +12211,14 @@
     });
   }
   function setDirtyField(name) {
-    logger$s.info({
+    logger$u.info({
       fn: setDirtyField,
       message: "set dirty field for name: ".concat(name)
     });
     var fieldConfig = getFieldConfig(name);
     // If field has never been touched before, always validate
     if (fieldConfig.touched === false) {
-      logger$s.info({
+      logger$u.info({
         fn: setDirtyField,
         message: "Setting dirty field name: ".concat(name, " to dirty status, touched: true")
       });
@@ -12142,19 +12234,19 @@
     var name = _ref2.name,
       _ref2$origin = _ref2.origin,
       origin = _ref2$origin === void 0 ? '' : _ref2$origin;
-    logger$s.info({
+    logger$u.info({
       fn: validateNeededFields,
       message: "called for name: ".concat(name, " from origin: ").concat(origin)
     });
     if (POWERPOD.configuringFields) {
-      logger$s.warn({
+      logger$u.warn({
         fn: validateNeededFields,
         message: "Still configuring fields, DO NOT validate yet"
       });
       return;
     }
     if (!((_POWERPOD$state$field = POWERPOD.state.fieldOrder) !== null && _POWERPOD$state$field !== void 0 && _POWERPOD$state$field.length)) {
-      logger$s.error({
+      logger$u.error({
         fn: validateNeededFields,
         message: "No fields found in powerpod.state.fieldOrder, unable to validate"
       });
@@ -12171,7 +12263,7 @@
     var fieldsToRevalidate = Object.keys(fieldsToSetDirty).map(function (key) {
       return fieldsToSetDirty[key].name;
     });
-    logger$s.info({
+    logger$u.info({
       fn: validateNeededFields,
       message: "for name: ".concat(name, ", validating the following fields: ").concat(JSON.stringify(fieldsToRevalidate)),
       data: {
@@ -12193,7 +12285,7 @@
     // set appropriate observer/on change listener depending on field type
     var fieldConfig = getFieldConfig(name);
     var elementType = fieldConfig.elementType;
-    logger$s.info({
+    logger$u.info({
       fn: setFieldObserver,
       message: "Watching for value changes on name: ".concat(name, ", elementType: ").concat(elementType, ", format: ").concat(format)
     });
@@ -12201,7 +12293,7 @@
       case HtmlElementType.SignatureControl:
         var canvas = document.querySelector('.drawCanvas');
         if (!canvas) {
-          logger$s.error({
+          logger$u.error({
             fn: setFieldObserver,
             message: "Could not find signature canvas"
           });
@@ -12254,7 +12346,7 @@
         var inputElementParent = inputElement.parent()[0];
         var datePickerElement = $("input[id=".concat(name, "_datepicker_description]"));
         var datePickerParentElement = datePickerElement.parent()[0];
-        logger$s.info({
+        logger$u.info({
           fn: setFieldObserver,
           message: 'datePickerElement:',
           data: {
@@ -12329,7 +12421,7 @@
       case HtmlElementType.SingleOptionSet:
       case HtmlElementType.MultiOptionSet:
         var inputElements = $("input[id*='".concat(name, "']")).parent();
-        logger$s.info({
+        logger$u.info({
           fn: setFieldObserver,
           message: "setting name: ".concat(name, " elementType: ").concat(HtmlElementType.MultiOptionSet, " observer"),
           data: {
@@ -12384,7 +12476,7 @@
   function setRequiredField(fieldName) {
     var elemType = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : HtmlElementType.Input;
     var validationErrorMessage = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 'Required field';
-    logger$s.info({
+    logger$u.info({
       fn: setRequiredField,
       message: "Start configuring required fieldName: ".concat(fieldName, ", elemType: ").concat(elemType),
       data: {
@@ -12401,7 +12493,7 @@
       case HtmlElementType.FileInput:
         var textareaField = $("#".concat(fieldName));
         var attachFileField = $("input[id=".concat(fieldName, "_AttachFile]"));
-        logger$s.info({
+        logger$u.info({
           fn: setRequiredField,
           message: 'observe changes on file input element',
           data: {
@@ -12412,7 +12504,7 @@
         });
         break;
       case HtmlElementType.DatePicker:
-        logger$s.info({
+        logger$u.info({
           fn: setRequiredField,
           message: "Configuring required datepicker element for fieldName: ".concat(fieldName)
         });
@@ -12432,20 +12524,20 @@
   }
 
   // @ts-nocheck
-  var logger$r = Logger('common/tabs');
+  var logger$t = Logger('common/tabs');
   POWERPOD.tabs = {
     setTabName: setTabName,
     getTabElement: getTabElement
   };
   function hideTabs(hiddenTabs) {
     if (!hiddenTabs || !hiddenTabs.length) {
-      logger$r.warn({
+      logger$t.warn({
         fn: hideTabs,
         message: 'Hide tabs called with empty data'
       });
     }
     if (hiddenTabs && !Array.isArray(hiddenTabs)) {
-      logger$r.error({
+      logger$t.error({
         fn: hideTabs,
         message: "check syntax for hiddenSteps in JSON",
         data: {
@@ -12454,7 +12546,7 @@
       });
       return;
     }
-    logger$r.info({
+    logger$t.info({
       fn: hideTabs,
       message: 'Attempting to hide tabs...',
       data: {
@@ -12470,7 +12562,7 @@
       });
       if (tabElement && tabElement.style) {
         tabElement.style.display = 'none';
-        logger$r.info({
+        logger$t.info({
           fn: hideTabs,
           message: "Successfully hid tab for given name: ".concat(name, ", displayName: ").concat(displayName)
         });
@@ -12483,7 +12575,7 @@
     var displayName = _ref2.displayName,
       name = _ref2.name;
     if (!displayName && !name) {
-      logger$r.error({
+      logger$t.error({
         fn: getTabElement,
         message: 'Need at least one param displayName or name to find tab element'
       });
@@ -12494,7 +12586,7 @@
         return tabNames.includes(name);
       });
       if (!formStepIndex) {
-        logger$r.error({
+        logger$t.error({
           fn: getTabElement,
           message: "Could not find form step index for name: ".concat(name)
         });
@@ -12504,7 +12596,7 @@
       displayName = TabDisplayNames[formStep];
     }
     if (!displayName) {
-      logger$r.error({
+      logger$t.error({
         fn: getTabElement,
         message: "Unable to find display name for tab name: ".concat(name)
       });
@@ -12532,7 +12624,7 @@
       });
     }
     if (!tabElement || !tabElement.length) {
-      logger$r.warn({
+      logger$t.warn({
         fn: getTabElement,
         message: 'Could not find tab element',
         data: {
@@ -12543,7 +12635,7 @@
       return;
     }
     if (tabElement.length !== 1) {
-      logger$r.error({
+      logger$t.error({
         fn: setTabName,
         message: 'Matched multiple elements for one given tab',
         data: {
@@ -12557,14 +12649,14 @@
   }
   function setTabName(name, displayName) {
     if (!name || !displayName) {
-      logger$r.warn({
+      logger$t.warn({
         fn: setTabName,
         message: 'Missing required params of name or displayName'
       });
       return;
     }
     if (!Object.values(FormStep).includes(name)) {
-      logger$r.warn({
+      logger$t.warn({
         fn: setTabName,
         message: "Invalid section name passed, name: ".concat(name, ", displayName: ").concat(displayName)
       });
@@ -12572,7 +12664,7 @@
     }
     var initialTabDisplayName = TabDisplayNames[name];
     if (!initialTabDisplayName) {
-      logger$r.warn({
+      logger$t.warn({
         fn: setTabName,
         message: 'Could not find original tab display name'
       });
@@ -12584,7 +12676,7 @@
     if (tabElement) {
       tabElement.firstChild.nodeValue = displayName; // Replace 'New Text' with your desired text
       tabElement.setAttribute('originalDisplayName', initialTabDisplayName);
-      logger$r.info({
+      logger$t.info({
         fn: setTabName,
         message: "Successfully updated tab name from ".concat(name, " to ").concat(displayName)
       });
@@ -12592,7 +12684,7 @@
   }
   function setHeadings(sectionName, headings) {
     if (!sectionName || !headings || !(headings !== null && headings !== void 0 && headings.length)) {
-      logger$r.error({
+      logger$t.error({
         fn: setHeadings,
         message: 'Missing required sectionName or headings',
         data: {
@@ -12606,7 +12698,7 @@
       var name = heading.name,
         displayName = heading.displayName;
       if (!name || !displayName) {
-        logger$r.error({
+        logger$t.error({
           fn: setHeadings,
           message: 'Failed to set heading, missing params',
           data: {
@@ -12624,7 +12716,7 @@
       return $(this).text().includes(name);
     });
     if (!headerElements || !headerElements.length) {
-      logger$r.warn({
+      logger$t.warn({
         fn: setTabName,
         message: 'Could not find header element to rename',
         data: {
@@ -12635,7 +12727,7 @@
       return;
     }
     if (headerElements.length > 1) {
-      logger$r.error({
+      logger$t.error({
         fn: setHeadingName,
         message: 'Matched more than one heading, could not update header',
         data: {
@@ -12647,16 +12739,16 @@
       return;
     }
     headerElements[0].innerHTML = displayName;
-    logger$r.info({
+    logger$t.info({
       fn: setTabName,
       message: "Successfully updated header from ".concat(name, " to ").concat(displayName)
     });
   }
 
   // @ts-nocheck
-  var logger$q = Logger('common/sections');
+  var logger$s = Logger('common/sections');
   function configureSections(sections, globalSections) {
-    logger$q.info({
+    logger$s.info({
       fn: configureSections,
       message: "configureSections called with:",
       data: {
@@ -12665,7 +12757,7 @@
       }
     });
     if (!sections || !sections.length) {
-      logger$q.warn({
+      logger$s.warn({
         fn: configureSections,
         message: 'Configure sections called with empty data'
       });
@@ -12688,7 +12780,7 @@
       //     data: { section },
       //   });
       // }
-      logger$q.info({
+      logger$s.info({
         fn: configureSubsections,
         message: "Start configuring section for section.name: ".concat(section.name, "..."),
         data: {
@@ -12705,7 +12797,7 @@
         _section$hideHeaderDe = section.hideHeaderDescription,
         hideHeaderDescription = _section$hideHeaderDe === void 0 ? false : _section$hideHeaderDe;
       if (!sectionName) {
-        logger$q.error({
+        logger$s.error({
           fn: configureSections,
           message: 'Could not find section name'
         });
@@ -12729,7 +12821,7 @@
       if (hideHeaderDescription) {
         hidePageDescription(hideHeaderDescription, sectionName);
       }
-      logger$q.info({
+      logger$s.info({
         fn: configureSections,
         message: "Successfully configured section for sectionName: ".concat(sectionName),
         data: {
@@ -12743,7 +12835,7 @@
     var currentStep = getCurrentStep();
     var pageDescriptionElement = document.querySelector('p#page-description');
     if (sectionName && currentStep !== sectionName) {
-      logger$q.warn({
+      logger$s.warn({
         fn: hidePageDescription,
         message: "Skip setting pageDescriptionElement for nonactive step sectionName: ".concat(sectionName)
       });
@@ -12755,12 +12847,12 @@
       } else {
         pageDescriptionElement.style.display = '';
       }
-      logger$q.info({
+      logger$s.info({
         fn: hidePageDescription,
         message: "Successfully set pageDescriptionElement to hideHeaderDescription: ".concat(hideHeaderDescription, " for sectionName: ").concat(sectionName)
       });
     } else {
-      logger$q.error({
+      logger$s.error({
         fn: hidePageDescription,
         message: "Failed to find pageDescriptionElement for configuring visibility"
       });
@@ -12768,7 +12860,7 @@
   }
   function configureSubsections(sectionName, subsections) {
     if (!subsections || !subsections.length) {
-      logger$q.error({
+      logger$s.error({
         fn: configureSubsections,
         message: 'Configure subsections called with empty data'
       });
@@ -12776,13 +12868,13 @@
     }
     var currentStep = getCurrentStep();
     if (currentStep !== sectionName) {
-      logger$q.warn({
+      logger$s.warn({
         fn: configureSubsections,
         message: "Skip configuring subsections for nonactive step sectionName: ".concat(sectionName)
       });
       return;
     }
-    logger$q.info({
+    logger$s.info({
       fn: configureSubsections,
       message: "Start configuring subsections currentStep: ".concat(currentStep, " for sectionName: ").concat(sectionName, "... ").concat(JSON.stringify(subsections)),
       data: {
@@ -12799,7 +12891,7 @@
         additionalTextAboveSubsection = subsection.additionalTextAboveSubsection,
         additionalTextBelowSubsection = subsection.additionalTextBelowSubsection;
       if (!name) {
-        logger$q.error({
+        logger$s.error({
           fn: configureSections,
           message: 'Could not find section name'
         });
@@ -12807,7 +12899,7 @@
       }
       var sectionElement = $("fieldset[aria-label=\"".concat(name, "\"]"));
       if (!sectionElement) {
-        logger$q.warn({
+        logger$s.warn({
           fn: configureSubsections,
           message: "Could not find sectionElement for name: ".concat(name)
         });
@@ -12825,7 +12917,7 @@
       if (newLabel) {
         var fieldset = document.querySelector("fieldset[aria-label=\"".concat(name, "\"]"));
         if (!fieldset) {
-          logger$q.error({
+          logger$s.error({
             fn: configureSubsections,
             message: "Failed to find fieldset for name: ".concat(name, ", newLabel: ").concat(newLabel)
           });
@@ -12834,7 +12926,7 @@
         fieldset.setAttribute('aria-label', newLabel);
         var h3Tag = fieldset.querySelector('h3');
         if (!h3Tag) {
-          logger$q.error({
+          logger$s.error({
             fn: configureSubsections,
             message: "Failed to find h3Tag for name: ".concat(name, ", newLabel: ").concat(newLabel)
           });
@@ -12848,7 +12940,7 @@
       if (additionalTextBelowSubsection && subsectionAriaLabel) {
         addTextBelowSubsection(subsectionAriaLabel, additionalTextBelowSubsection);
       }
-      logger$q.info({
+      logger$s.info({
         fn: configureSubsections,
         message: "Successfully configured sectionName: ".concat(sectionName, " subsection for subsection: ").concat(name),
         data: {
@@ -13015,7 +13107,7 @@
     $('#quartech_declarationandconsent_label').text('I / We agree to the above statement.');
   }
 
-  var logger$p = Logger('common/form');
+  var logger$r = Logger('common/form');
   POWERPOD.form = {
     generateFormJson: generateFormJson,
     getFormId: getFormId,
@@ -13025,7 +13117,7 @@
     var params = new URLSearchParams(doc.location.search);
     var formId = params.get('id');
     if (!formId) {
-      logger$p.info({
+      logger$r.info({
         fn: getFormIdFromURLParams,
         message: 'Form id not found in URL params'
       });
@@ -13041,7 +13133,7 @@
     if ((_POWERPOD$form = POWERPOD.form) !== null && _POWERPOD$form !== void 0 && _POWERPOD$form.id) {
       var _POWERPOD$form2;
       var _formId = (_POWERPOD$form2 = POWERPOD.form) === null || _POWERPOD$form2 === void 0 ? void 0 : _POWERPOD$form2.id;
-      logger$p.info({
+      logger$r.info({
         fn: getFormId,
         message: "Cached form submission id found, returning ".concat(_formId)
       });
@@ -13051,21 +13143,21 @@
     var formId = params.get('id');
     var formElement;
     if (formId) {
-      logger$p.info({
+      logger$r.info({
         fn: getFormId,
         message: "Successfully retrieved form submission id from url params: ".concat(formId)
       });
       POWERPOD.form.id = formId;
       return formId;
     }
-    logger$p.info({
+    logger$r.info({
       fn: getFormId,
       message: 'Could not find current form submission id from url params, try DOM element containing the value...'
     });
     // Get the element by ID
     formElement = document.getElementById('EntityFormView_EntityID');
     if (!formElement) {
-      logger$p.error({
+      logger$r.error({
         fn: getFormId,
         message: 'Unable to find "EntityFormView_EntityID" element, unable to retrieve app/claim submission id!'
       });
@@ -13075,7 +13167,7 @@
     // Get the value of the 'value' attribute
     formId = formElement.value;
     if (formId) {
-      logger$p.info({
+      logger$r.info({
         fn: getFormId,
         message: "Successfully retrieved form submission id from \"EntityFormView_EntityID\" element: ".concat(formId)
       });
@@ -13123,7 +13215,7 @@
     //   formId = match ? match[1] : null;
     // }
 
-    logger$p.error({
+    logger$r.error({
       fn: getFormId,
       message: 'Unable to retrieve form submission id from either url or form element',
       data: {
@@ -13136,7 +13228,7 @@
   function addFormDataOnClickHandler() {
     var nextButton = document.getElementById('NextButton');
     if (!(nextButton !== null && nextButton !== void 0 && nextButton.onclick)) {
-      logger$p.error({
+      logger$r.error({
         fn: addFormDataOnClickHandler,
         message: "Error getting existing next btn on click handler",
         data: {
@@ -13152,7 +13244,7 @@
       saveBrowserInfo(BrowserInformationAction.Next);
       formDataOnClickHandler(event, nextFn);
     });
-    logger$p.info({
+    logger$r.info({
       fn: addFormDataOnClickHandler,
       message: 'Successfully configured next button onclick handler for form data'
     });
@@ -13164,13 +13256,13 @@
     if (generateFormJson()) {
       nextFn();
     } else {
-      logger$p.error({
+      logger$r.error({
         fn: formDataOnClickHandler,
         message: 'Failed to generate form json data!'
       });
     }
     var elapsedTime = Date.now() - startTime;
-    logger$p.info({
+    logger$r.info({
       fn: formDataOnClickHandler,
       message: "Generating form data json took ".concat(elapsedTime, " ms")
     });
@@ -13180,7 +13272,7 @@
     var containerElement = document.querySelector('#EntityFormView');
     var wordTemplateDataElement = containerElement.querySelectorAll('textarea[id*="quartech_wordtemplatedata"]');
     if (!setFieldOrder && (!wordTemplateDataElement || !wordTemplateDataElement.length)) {
-      logger$p.info({
+      logger$r.info({
         fn: generateFormJson,
         message: 'No need to generate form json if no word template field exists'
       });
@@ -13189,7 +13281,7 @@
     var fieldsetArr = containerElement === null || containerElement === void 0 ? void 0 : containerElement.querySelectorAll('fieldset');
     var tabDivElement = containerElement === null || containerElement === void 0 ? void 0 : containerElement.querySelector('.tab');
     if (!containerElement || !fieldsetArr || !(fieldsetArr !== null && fieldsetArr !== void 0 && fieldsetArr.length) || !tabDivElement) {
-      logger$p.error({
+      logger$r.error({
         fn: generateFormJson,
         message: 'Unable to generate form JSON, could not find required elements'
       });
@@ -13198,7 +13290,7 @@
     var tabDataName = tabDivElement.getAttribute('data-name'); // e.g. "applicantInfoTab"
 
     if (!tabDataName) {
-      logger$p.error({
+      logger$r.error({
         fn: generateFormJson,
         message: 'Failed to get tab data-name',
         data: {
@@ -13207,7 +13299,7 @@
       });
       return false;
     }
-    logger$p.info({
+    logger$r.info({
       fn: generateFormJson,
       message: "Processing fieldSet array for tabDataName: ".concat(tabDataName)
     });
@@ -13228,14 +13320,14 @@
       var sectionId = tableElement === null || tableElement === void 0 ? void 0 : tableElement.getAttribute('data-name'); // e.g. "applicationInfoSection"
 
       if (sectionId && sectionId.toLowerCase().includes('codingsection')) {
-        logger$p.info({
+        logger$r.info({
           fn: generateFormJson,
           message: 'Skipping coding section...'
         });
         return;
       }
       if (((_fieldset$style = fieldset.style) === null || _fieldset$style === void 0 ? void 0 : _fieldset$style.display) === 'none') {
-        logger$p.info({
+        logger$r.info({
           fn: generateFormJson,
           message: 'Skipping hidden section...',
           data: {
@@ -13247,7 +13339,7 @@
       var trArray = tableElement === null || tableElement === void 0 ? void 0 : tableElement.querySelectorAll('tbody > tr');
       var currentStep = getCurrentStep();
       if ((!sectionId || !displayName || !trArray || !trArray.length) && currentStep !== FormStep.DeclarationAndConsent) {
-        logger$p.error({
+        logger$r.error({
           fn: generateFormJson,
           message: 'Unable to generate form JSON, could not find required section elements',
           data: {
@@ -13255,7 +13347,7 @@
           }
         });
       }
-      logger$p.info({
+      logger$r.info({
         fn: generateFormJson,
         message: "Processing tr array for sectionId: ".concat(sectionId, ", displayName: ").concat(displayName)
       });
@@ -13276,7 +13368,7 @@
           tr: tr
         });
         if (controlType === HtmlElementType.NotesControl) {
-          logger$p.info({
+          logger$r.info({
             fn: generateFormJson,
             message: 'Skipping notes control element',
             data: {
@@ -13307,7 +13399,7 @@
 
         // exit early if the intention is just to set the field order
         if (controlId && setFieldOrder) {
-          logger$p.info({
+          logger$r.info({
             fn: generateFormJson,
             message: "addToFieldOrder controlId: ".concat(controlId)
           });
@@ -13315,7 +13407,7 @@
           return;
         }
         if (skipWordTemplateGeneration) {
-          logger$p.info({
+          logger$r.info({
             fn: generateFormJson,
             message: "Skipping row since skipWordTemplateGeneration is set for controlId: ".concat(controlId),
             data: {
@@ -13326,7 +13418,7 @@
         }
         if (isHiddenRow(tr)) {
           if (!forceGenerateWordTemplateData) {
-            logger$p.info({
+            logger$r.info({
               fn: generateFormJson,
               message: "Skipping hidden row, controlId: ".concat(controlId),
               data: {
@@ -13335,7 +13427,7 @@
             });
             return;
           }
-          logger$p.info({
+          logger$r.info({
             fn: generateFormJson,
             message: "Hidden row, but forceGenerateWordTemplateData set to true for controlId: ".concat(controlId),
             data: {
@@ -13344,7 +13436,7 @@
           });
         }
         if (isEmptyRow(tr)) {
-          logger$p.info({
+          logger$r.info({
             fn: generateFormJson,
             message: "Skipping empty row, controlId: ".concat(controlId),
             data: {
@@ -13354,7 +13446,7 @@
           return;
         }
         if (controlId !== null && controlId !== void 0 && controlId.includes('subgrid_')) {
-          logger$p.info({
+          logger$r.info({
             fn: generateFormJson,
             message: "Skipping subgrid, controlId: ".concat(controlId),
             data: {
@@ -13364,7 +13456,7 @@
           return;
         }
         var questionText = getInfoValue(tr);
-        logger$p.info({
+        logger$r.info({
           fn: generateFormJson,
           message: "For controlId: ".concat(controlId, ", with controlType: ").concat(controlType, "; found questionText: ").concat(questionText, ", try finding answerText next..."),
           data: {
@@ -13376,7 +13468,7 @@
           controlId: controlId,
           forTemplateGeneration: true
         });
-        logger$p.info({
+        logger$r.info({
           fn: generateFormJson,
           message: "Converting controlId: ".concat(controlId, " form row to JSON..."),
           data: {
@@ -13386,7 +13478,7 @@
           }
         });
         if (!answerText || answerText === 'undefined') {
-          logger$p.warn({
+          logger$r.warn({
             fn: generateFormJson,
             message: "answerText for controlId: ".concat(controlId, " was missing or undefined, answerText: ").concat(answerText, ", setting it to an empty string")
           });
@@ -13397,7 +13489,7 @@
           questionText = (_POWERPOD$state4 = POWERPOD.state) === null || _POWERPOD$state4 === void 0 || (_POWERPOD$state4 = _POWERPOD$state4.fields) === null || _POWERPOD$state4 === void 0 || (_POWERPOD$state4 = _POWERPOD$state4[controlId]) === null || _POWERPOD$state4 === void 0 ? void 0 : _POWERPOD$state4.label;
         }
         if (!questionText || questionText === ' ') {
-          logger$p.warn({
+          logger$r.warn({
             fn: generateFormJson,
             message: "Could not find question text for controlId: ".concat(controlId, ", controlType: ").concat(controlType),
             data: {
@@ -13407,7 +13499,7 @@
           return; // skip this forEach loop
         }
         if (questionText.toLowerCase().includes('eligible expenses')) {
-          logger$p.info({
+          logger$r.info({
             fn: generateFormJson,
             message: 'Skipping Eligible Expenses question/answer',
             data: {
@@ -13424,7 +13516,7 @@
           var answerObj = JSON.parse(answerText);
           sectionToAppend = answerObj;
           appendSection = true;
-          logger$p.info({
+          logger$r.info({
             fn: generateFormJson,
             message: "For quartech_practiceswherelocumservicesweredelivered skipping adding to original object, instead append at the end",
             data: {
@@ -13437,7 +13529,7 @@
           var _answerObj = JSON.parse(answerText);
           sectionToAppend = _answerObj;
           appendSection = true;
-          logger$p.info({
+          logger$r.info({
             fn: generateFormJson,
             message: "For quartech_expensereceipts skipping adding to original object, instead append at the end",
             data: {
@@ -13451,7 +13543,7 @@
       });
     });
     if (appendSection && sectionToAppend) {
-      logger$p.info({
+      logger$r.info({
         fn: generateFormJson,
         message: "attempting to appendSection...",
         data: {
@@ -13461,7 +13553,7 @@
         }
       });
       formJsonObj = _objectSpread2(_objectSpread2({}, formJsonObj), sectionToAppend);
-      logger$p.info({
+      logger$r.info({
         fn: generateFormJson,
         message: "successfully appended Section to formJsonObj...",
         data: {
@@ -13472,7 +13564,7 @@
       });
     }
     if (setFieldOrder) {
-      logger$p.info({
+      logger$r.info({
         fn: generateFormJson,
         message: "Successfully generated field order state array, exiting...",
         data: {
@@ -13481,7 +13573,7 @@
       });
       return;
     }
-    logger$p.info({
+    logger$r.info({
       fn: generateFormJson,
       message: 'Setting word template field data: \n' + "".concat(JSON.stringify(formJsonObj)),
       data: {
@@ -13567,7 +13659,7 @@
             formId = getFormId();
             formType = getFormType();
             currentStep = getCurrentStep();
-            logger$p.info({
+            logger$r.info({
               fn: augmentFormDataForBUG6998,
               message: "start to getApplicationData: ".concat(formType),
               data: {
@@ -13586,7 +13678,7 @@
           case 9:
             _yield$getProgramId = _context.sent;
             programId = _yield$getProgramId.programId;
-            logger$p.info({
+            logger$r.info({
               fn: augmentFormDataForBUG6998,
               message: "start to getApplicationData: ".concat(formType),
               data: {
@@ -13604,7 +13696,7 @@
               _context.next = 29;
               break;
             }
-            logger$p.info({
+            logger$r.info({
               fn: augmentFormDataForBUG6998,
               message: "start to getApplicationData: ".concat(formType),
               data: {
@@ -13623,13 +13715,13 @@
           case 17:
             applicationDataRes = _context.sent;
             if (!(applicationDataRes !== null && applicationDataRes !== void 0 && (_applicationDataRes$d = applicationDataRes.data) !== null && _applicationDataRes$d !== void 0 && (_applicationDataRes$d = _applicationDataRes$d.value) !== null && _applicationDataRes$d !== void 0 && _applicationDataRes$d[0])) {
-              logger$p.error({
+              logger$r.error({
                 fn: augmentFormDataForBUG6998,
                 message: "Could not get application data result"
               });
             }
             _applicationDataRes$d2 = applicationDataRes === null || applicationDataRes === void 0 || (_applicationDataRes$d3 = applicationDataRes.data) === null || _applicationDataRes$d3 === void 0 || (_applicationDataRes$d3 = _applicationDataRes$d3.value) === null || _applicationDataRes$d3 === void 0 ? void 0 : _applicationDataRes$d3[0], quartech_originalsource = _applicationDataRes$d2.quartech_originalsource;
-            logger$p.info({
+            logger$r.info({
               fn: augmentFormDataForBUG6998,
               message: "successfully fetched application data and found quartech_originalsource: ".concat(quartech_originalsource),
               data: {
@@ -13640,7 +13732,7 @@
             });
             if (quartech_originalsource === 255550001) ; else {
               payload.quartech_originalsource = 255550002;
-              logger$p.info({
+              logger$r.info({
                 fn: augmentFormDataForBUG6998,
                 message: "successfully updated payload with payload.quartech_originalsource: ".concat(payload.quartech_originalsource),
                 data: {
@@ -13656,7 +13748,7 @@
           case 24:
             _context.prev = 24;
             _context.t0 = _context["catch"](14);
-            logger$p.error({
+            logger$r.error({
               fn: augmentFormDataForBUG6998,
               message: "failed to getApplicationData: ".concat(formType),
               data: {
@@ -13674,7 +13766,7 @@
           case 29:
             payload.quartech_originalsource = 255550002;
           case 30:
-            logger$p.info({
+            logger$r.info({
               fn: augmentFormDataForBUG6998,
               message: "payload.quartech_originalsource: ".concat(payload.quartech_originalsource),
               data: {
@@ -13716,7 +13808,7 @@
           case 42:
             _context.sent;
           case 43:
-            logger$p.info({
+            logger$r.info({
               fn: augmentFormDataForBUG6998,
               message: 'successfully patched form data with payload',
               data: {
@@ -13730,7 +13822,7 @@
           case 46:
             _context.prev = 46;
             _context.t1 = _context["catch"](32);
-            logger$p.error({
+            logger$r.error({
               fn: augmentFormDataForBUG6998,
               message: "failed to patch form data for formType: ".concat(formType),
               data: {
@@ -13751,7 +13843,7 @@
     return _augmentFormDataForBUG.apply(this, arguments);
   }
 
-  var logger$o = Logger('common/application');
+  var logger$q = Logger('common/application');
   POWERPOD.applicationUtils = {
     getFormType: getFormType,
     getExistingDraftApplicationId: getExistingDraftApplicationId,
@@ -13762,7 +13854,7 @@
     if (ClaimPaths.some(function (claimPath) {
       return path.includes(claimPath);
     })) {
-      logger$o.info({
+      logger$q.info({
         fn: getFormType,
         message: "auto-detected ".concat(Form.Claim, " form")
       });
@@ -13770,13 +13862,13 @@
     } else if (ApplicationPaths.some(function (appPath) {
       return path.includes(appPath);
     })) {
-      logger$o.info({
+      logger$q.info({
         fn: getFormType,
         message: "auto-detected ".concat(Form.Application, " form")
       });
       return Form.Application;
     } else {
-      logger$o.warn({
+      logger$q.warn({
         fn: getFormType,
         message: "Unable to autodetect form type, path: ".concat(path)
       });
@@ -13827,7 +13919,7 @@
               _context.next = 4;
               break;
             }
-            logger$o.info({
+            logger$q.info({
               fn: getExistingDraftApplicationId,
               message: 'No need to load drafts if specific form id passed by params'
             });
@@ -13838,13 +13930,13 @@
               _context.next = 8;
               break;
             }
-            logger$o.info({
+            logger$q.info({
               fn: getExistingDraftApplicationId,
               message: 'No programId found in URL params, no need to load existing drafts'
             });
             return _context.abrupt("return");
           case 8:
-            logger$o.info({
+            logger$q.info({
               fn: getExistingDraftApplicationId,
               message: "Querying for any existing draft applications for programId: ".concat(programId)
             });
@@ -13867,7 +13959,7 @@
               _context.next = 30;
               break;
             }
-            logger$o.info({
+            logger$q.info({
               fn: getExistingDraftApplicationId,
               message: "No existing draft application found for programid: ".concat(programId, ", create a new application record"),
               data: {
@@ -13878,7 +13970,7 @@
             _getCurrentUser = getCurrentUser(), contactId = _getCurrentUser.contactId;
             quartech_nocragstnumber = null;
             if (programId === ProgramIds.VLB) {
-              logger$o.info({
+              logger$q.info({
                 fn: getExistingDraftApplicationId,
                 message: "Detected VLB program id, starting app with quartech_nocragstnumber = true;"
               });
@@ -13899,7 +13991,7 @@
               _context.next = 28;
               break;
             }
-            logger$o.error({
+            logger$q.error({
               fn: getExistingDraftApplicationId,
               message: 'Failed to create new application',
               data: {
@@ -13909,7 +14001,7 @@
             });
             return _context.abrupt("return");
           case 28:
-            logger$o.info({
+            logger$q.info({
               fn: getExistingDraftApplicationId,
               message: "Successfully created new draft application found for programid: ".concat(programId, ", with id: ").concat(uuid),
               data: {
@@ -13924,7 +14016,7 @@
               break;
             }
             if (((_res$data5 = res.data) === null || _res$data5 === void 0 || (_res$data5 = _res$data5.value) === null || _res$data5 === void 0 ? void 0 : _res$data5.length) > 1) {
-              logger$o.warn({
+              logger$q.warn({
                 fn: getExistingDraftApplicationId,
                 message: "More than one draft application exists for programid: ".concat(programId),
                 data: {
@@ -13935,7 +14027,7 @@
             existingDraftApplications = res.data.value;
             existingDraft = existingDraftApplications[0];
             id = existingDraft.msgov_businessgrantapplicationid;
-            logger$o.info({
+            logger$q.info({
               fn: getExistingDraftApplicationId,
               message: "Found existing draft application for programid: ".concat(programId, " with id: ").concat(id)
             });
@@ -13947,7 +14039,7 @@
           case 40:
             _context.prev = 40;
             _context.t0 = _context["catch"](11);
-            logger$o.error({
+            logger$q.error({
               fn: getExistingDraftApplicationId,
               message: "Error getting draft applications for programid: ".concat(programId),
               data: {
@@ -13956,7 +14048,7 @@
             });
             return _context.abrupt("return");
           case 44:
-            logger$o.error({
+            logger$q.error({
               fn: getExistingDraftApplicationId,
               message: "Some issue occured trying to get existing draft applications for programid: ".concat(programId)
             });
@@ -13970,7 +14062,7 @@
     return _getExistingDraftApplicationId.apply(this, arguments);
   }
 
-  const logger$n = Logger('common/program');
+  const logger$p = Logger('common/program');
   POWERPOD.program = {
       programId: null,
       getProgramId,
@@ -13981,13 +14073,13 @@
       const params = new URLSearchParams(doc.location.search);
       const programIdParam = params.get('programid');
       if (!programIdParam) {
-          logger$n.info({
+          logger$p.info({
               fn: getProgramIdFromUrlParams,
               message: 'No programId found in URL params',
           });
           return;
       }
-      logger$n.info({
+      logger$p.info({
           fn: getProgramIdFromUrlParams,
           message: `Success! Found program id in URL path ${programIdParam}`,
           data: {
@@ -14006,14 +14098,14 @@
       if ((_a = POWERPOD.program) === null || _a === void 0 ? void 0 : _a.programId) {
           const programId = (_b = POWERPOD.program) === null || _b === void 0 ? void 0 : _b.programId;
           const formId = (_d = (_c = POWERPOD.form) === null || _c === void 0 ? void 0 : _c.id) !== null && _d !== void 0 ? _d : null;
-          logger$n.info({
+          logger$p.info({
               fn: getProgramId,
               message: `Cached programId found, returning ${programId}`,
           });
           return { programId, formId };
       }
       // Try and get it from URL path
-      logger$n.info({
+      logger$p.info({
           fn: getProgramId,
           message: 'attempting to get program id from URL path',
           data: {
@@ -14023,7 +14115,7 @@
       const params = new URLSearchParams(doc.location.search);
       const programIdParam = params.get('programid');
       if (programIdParam) {
-          logger$n.info({
+          logger$p.info({
               fn: getProgramId,
               message: `Success! Found program id in URL path ${programIdParam}`,
               data: {
@@ -14035,7 +14127,7 @@
       const hiddenProgramElement = $('#quartech_program');
       const programIdHiddenValue = hiddenProgramElement === null || hiddenProgramElement === void 0 ? void 0 : hiddenProgramElement.val();
       if (programIdHiddenValue) {
-          logger$n.info({
+          logger$p.info({
               fn: getProgramId,
               message: `Success! Found program id in hidden #quartech_program element ${programIdHiddenValue}`,
               data: {
@@ -14046,7 +14138,7 @@
           });
       }
       else {
-          logger$n.warn({
+          logger$p.warn({
               fn: getProgramId,
               message: `Could not find program id in hidden #quartech_program element ${programIdHiddenValue}`,
               data: {
@@ -14060,7 +14152,7 @@
           programIdParam &&
           programIdHiddenValue != programIdParam) ||
           (programIdHiddenValue == undefined && programIdParam)) {
-          logger$n.warn({
+          logger$p.warn({
               fn: getProgramId,
               message: `Program id in URL path differs from program id found in element, checking for existing draft applications with programid: ${programIdParam}`,
               data: {
@@ -14071,7 +14163,7 @@
           });
           const existingDraftApplicationId = await getExistingDraftApplicationId();
           if (existingDraftApplicationId && existingDraftApplicationId.length > 0) {
-              logger$n.info({
+              logger$p.info({
                   fn: getProgramId,
                   message: `Appending existing app id to URL, existingDraftApplicationId: ${existingDraftApplicationId}, for programid: ${programIdParam}`,
               });
@@ -14125,7 +14217,7 @@
       // const existingDraftApplicationId =
       let programId = programIdHiddenValue || programIdParam;
       if (!programId) {
-          logger$n.warn({
+          logger$p.warn({
               fn: getProgramId,
               message: `Could not find program id in either coding section or url params. ` +
                   `As a last resort, pull programId from config data`,
@@ -14134,13 +14226,13 @@
           programId = config.programId;
       }
       if (!programId) {
-          logger$n.error({
+          logger$p.error({
               fn: getProgramId,
               message: 'Could not find program id in either coding section or url params. ' +
                   'Check that HTML content and/or config programId is present in Portal Management.',
           });
       }
-      logger$n.info({
+      logger$p.info({
           fn: getProgramId,
           message: `No mismatch or drafts to look up, succesfully found programid: ${programId}`,
       });
@@ -14153,7 +14245,7 @@
       const programData = localStorage.getItem('programData');
       const programAbbreviation = (_a = JSON.parse(programData)) === null || _a === void 0 ? void 0 : _a.quartech_programabbreviation;
       if (!programAbbreviation) {
-          logger$n.error({
+          logger$p.error({
               fn: getProgramAbbreviation,
               message: 'Failed to get program abbreviation',
           });
@@ -14165,7 +14257,7 @@
       var _a, _b, _c;
       let activeStep = FormStep.Unknown;
       if ((_b = (_a = window === null || window === void 0 ? void 0 : window.location) === null || _a === void 0 ? void 0 : _a.search) === null || _b === void 0 ? void 0 : _b.includes('&msg=success')) {
-          logger$n.info({
+          logger$p.info({
               fn: getCurrentStep,
               message: `Determined that current step is Success page step`,
               data: {
@@ -14177,14 +14269,14 @@
       }
       const activeTabName = htmlDecode($('div > ol > li.list-group-item.active').html());
       if (!activeTabName || activeTabName.length === 0) {
-          logger$n.error({
+          logger$p.error({
               fn: getCurrentStep,
               message: 'Failed to get activeTabName',
               data: { activeTabName },
           });
           return activeStep;
       }
-      logger$n.info({
+      logger$p.info({
           fn: getCurrentStep,
           message: `Trying to find formStep for activeTabName: ${activeTabName}`,
           data: {
@@ -14197,7 +14289,7 @@
               return (tabDisplayName === activeTabName ||
                   tabDisplayName.includes(activeTabName));
           })) !== null && _c !== void 0 ? _c : activeStep;
-      logger$n.info({
+      logger$p.info({
           fn: getCurrentStep,
           message: `Validating current step ${activeStep}`,
           data: {
@@ -14209,14 +14301,14 @@
       if (activeStep &&
           activeStep !== FormStep.Unknown &&
           Object.values(FormStep).includes(activeStep)) {
-          logger$n.info({
+          logger$p.info({
               fn: getCurrentStep,
               message: `Successfully found current step ${activeStep}`,
           });
           return activeStep;
       }
       if (!activeStep || activeStep === FormStep.Unknown) {
-          logger$n.error({
+          logger$p.error({
               fn: getCurrentStep,
               message: 'Unable to determine current step',
               data: { activeStep, activeTabName, TabDisplayNames, FormStep },
@@ -14235,7 +14327,7 @@
     getFieldsBySectionClaim: getFieldsBySectionClaim,
     getFieldConfig: getFieldConfig
   };
-  var logger$m = Logger('common/fields');
+  var logger$o = Logger('common/fields');
 
   // To be used with new global & application level configs
   function getFieldsBySectionApplication(stepName) {
@@ -14256,7 +14348,7 @@
 
     if (!forceRefresh) {
       if (POWERPOD.loadingFieldsIntoState === false) {
-        logger$m.info({
+        logger$o.info({
           fn: getFieldsBySectionApplication,
           message: "returning cached state for fields",
           data: {
@@ -14266,24 +14358,24 @@
         return POWERPOD.state.fields;
       }
     }
-    logger$m.info({
+    logger$o.info({
       fn: getFieldsBySectionApplication,
       message: "start building initial fields state loading: ".concat(POWERPOD.loadingFieldsIntoState)
     });
     var globalConfigData = getGlobalFieldsConfig();
-    logger$m.info({
+    logger$o.info({
       fn: getFieldsBySectionApplication,
       message: 'globalConfigData:',
       data: globalConfigData
     });
     var applicationConfigData = getApplicationConfigData();
-    logger$m.info({
+    logger$o.info({
       fn: getFieldsBySectionApplication,
       message: 'applicationConfigData:',
       data: applicationConfigData
     });
     var globalSections = globalConfigData === null || globalConfigData === void 0 ? void 0 : globalConfigData.sections;
-    logger$m.info({
+    logger$o.info({
       fn: getFieldsBySectionApplication,
       message: "globalSections data:",
       data: {
@@ -14291,7 +14383,7 @@
       }
     });
     var applicationSections = applicationConfigData === null || applicationConfigData === void 0 ? void 0 : applicationConfigData.sections;
-    logger$m.info({
+    logger$o.info({
       fn: getFieldsBySectionApplication,
       message: "applicationSections data:",
       data: {
@@ -14313,7 +14405,7 @@
     var applicationSection = applicationSections === null || applicationSections === void 0 ? void 0 : applicationSections.find(function (s) {
       return s.name === stepName;
     });
-    logger$m.info({
+    logger$o.info({
       fn: getFieldsBySectionApplication,
       message: "found applicationSection data for stepName: ".concat(stepName),
       data: {
@@ -14324,7 +14416,7 @@
     var globalSection = globalSections.find(function (s) {
       return s.name === stepName;
     });
-    logger$m.info({
+    logger$o.info({
       fn: getFieldsBySectionApplication,
       message: "found globalSection data for stepName: ".concat(stepName),
       data: {
@@ -14334,7 +14426,7 @@
     });
     var fields = [];
     if (!applicationSection && !globalSection) {
-      logger$m.warn({
+      logger$o.warn({
         fn: getFieldsBySectionApplication,
         message: "no configuration section found by sectionName: ".concat(stepName),
         data: {
@@ -14347,7 +14439,7 @@
       return;
     }
     if (!applicationSection || !((_applicationSection$f = applicationSection.fields) !== null && _applicationSection$f !== void 0 && _applicationSection$f.length)) {
-      logger$m.warn({
+      logger$o.warn({
         fn: getFieldsBySectionApplication,
         message: "no applicationSection section found by sectionName: ".concat(stepName),
         data: {
@@ -14362,7 +14454,7 @@
       (_fields = fields).push.apply(_fields, _toConsumableArray(applicationSection.fields));
     }
     if (!globalSection || !((_globalSection$fields = globalSection.fields) !== null && _globalSection$fields !== void 0 && _globalSection$fields.length)) {
-      logger$m.warn({
+      logger$o.warn({
         fn: getFieldsBySectionApplication,
         message: "no globalSection section found by sectionName: ".concat(stepName),
         data: {
@@ -14381,7 +14473,7 @@
       localStorage.removeItem("fieldsData-".concat(programName, "-").concat(stepName), JSON.stringify(fields));
     }
     localStorage.setItem("fieldsData-".concat(programName, "-").concat(stepName), JSON.stringify(fields));
-    logger$m.info({
+    logger$o.info({
       fn: getFieldsBySectionApplication,
       message: "Start configuring fields for ".concat(programName, "-").concat(stepName, " with data:"),
       data: {
@@ -14390,14 +14482,14 @@
     });
     fields.forEach(function (s) {
       if (s.type && s.type === 'customField' && s.reorderField.position && (s.reorderField.fieldName || s.reorderField.sectionDataName)) {
-        logger$m.info({
+        logger$o.info({
           fn: getFieldsBySectionApplication,
           message: "Adding custom field, s.name: ".concat(s.name, ", s.label: ").concat(s.label, ", s.reorderField.fieldName: ").concat(s.reorderField.fieldName, ", s.reorderField.position: ").concat(s.reorderField.position)
         });
         addCustomField(s.name, s.label, s.reorderField.fieldName, s.reorderField.sectionDataName, s.reorderField.position);
       }
       if (document.getElementById(s.name) === null) {
-        logger$m.warn({
+        logger$o.warn({
           fn: getFieldsBySectionApplication,
           message: "Skipping non-exist field configured in JSON s.name: ".concat(s.name)
         });
@@ -14411,13 +14503,13 @@
       }
       // If elementType is not given, fill it out for future reference
       if (!s.elementType) {
-        logger$m.info({
+        logger$o.info({
           fn: getFieldsBySectionApplication,
           message: "Field elementType not set, try to determine it using getControlType func for s.name: ".concat(s.name)
         });
         var fieldRow = getFieldRow(s.name);
         if (!fieldRow) {
-          logger$m.error({
+          logger$o.error({
             fn: getFieldsBySectionApplication,
             message: "could not find fieldRow for fieldName: ".concat(s.name)
           });
@@ -14435,7 +14527,7 @@
         revalidate: true
       }));
       if (s.relocateField) {
-        logger$m.info({
+        logger$o.info({
           fn: getFieldsBySectionApplication,
           message: "relocating field name: ".concat(s.name)
         });
@@ -14457,7 +14549,7 @@
       // }
     });
     POWERPOD.loadingFieldsIntoState = false;
-    logger$m.info({
+    logger$o.info({
       fn: getFieldsBySectionApplication,
       message: 'done loading intial field state, fieldsData:',
       data: {
@@ -14484,7 +14576,7 @@
 
     if (!forceRefresh) {
       if (POWERPOD.loadingFieldsIntoState === false) {
-        logger$m.info({
+        logger$o.info({
           fn: getFieldsBySectionApplication,
           message: "returning cached state for fields",
           data: {
@@ -14494,7 +14586,7 @@
         return POWERPOD.state.fields;
       }
     }
-    logger$m.info({
+    logger$o.info({
       fn: getFieldsBySectionApplication,
       message: "call getClaimConfigData() to get fields data",
       data: {
@@ -14502,7 +14594,7 @@
       }
     });
     var claimConfigData = getClaimConfigData();
-    logger$m.info({
+    logger$o.info({
       fn: getFieldsBySectionClaim,
       message: 'claimConfigData:',
       data: claimConfigData
@@ -14520,7 +14612,7 @@
       return s.name === stepName;
     });
     if (!claimSection || !(claimSection !== null && claimSection !== void 0 && (_claimSection$fields = claimSection.fields) !== null && _claimSection$fields !== void 0 && _claimSection$fields.length)) {
-      logger$m.warn({
+      logger$o.warn({
         fn: getFieldsBySectionClaim,
         message: "no configuration section found by sectionName: ".concat(stepName),
         data: {
@@ -14534,13 +14626,13 @@
     var fields = claimSection.fields;
     fields.forEach(function (s) {
       if (document.getElementById(s.name) === null) {
-        logger$m.warn({
+        logger$o.warn({
           fn: getFieldsBySectionClaim,
           message: "Skipping non-exist field configured in JSON s.name: ".concat(s.name)
         });
         return;
       }
-      logger$m.info({
+      logger$o.info({
         fn: getFieldsBySectionClaim,
         message: "Getting field with fieldName: ".concat(s.name, "..."),
         data: {
@@ -14558,13 +14650,13 @@
       }
       // If elementType is not given, fill it out for future reference
       if (!s.elementType) {
-        logger$m.info({
+        logger$o.info({
           fn: getFieldsBySectionClaim,
           message: "Field elementType not set, try to determine it using getControlType func for s.name: ".concat(s.name)
         });
         var fieldRow = getFieldRow(s.name);
         if (!fieldRow) {
-          logger$m.error({
+          logger$o.error({
             fn: getFieldsBySectionClaim,
             message: "could not find fieldRow for fieldName: ".concat(s.name)
           });
@@ -14581,7 +14673,7 @@
         revalidate: true
       }));
       if (s.relocateField) {
-        logger$m.info({
+        logger$o.info({
           fn: getFieldsBySectionClaim,
           message: "relocating field name: ".concat(s.name)
         });
@@ -14594,7 +14686,7 @@
       //   });
       //   return;
       // }
-      logger$m.info({
+      logger$o.info({
         fn: getFieldsBySectionClaim,
         message: "showing field name: ".concat(s.name, ", for programName: ").concat(programName, ", stepName: ").concat(stepName)
       });
@@ -14607,7 +14699,7 @@
     //   JSON.stringify(fields)
     // );
 
-    logger$m.info({
+    logger$o.info({
       fn: getFieldsBySectionClaim,
       message: 'done loading intial field state, fieldsData:',
       data: {
@@ -14618,7 +14710,7 @@
   }
   function getGlobalFieldsConfig() {
     var _getGlobalConfigData;
-    logger$m.info({
+    logger$o.info({
       fn: getGlobalConfigData,
       data: getGlobalConfigData()
     });
@@ -14650,13 +14742,13 @@
     // }
 
     if (!fieldConfig) {
-      logger$m.error({
+      logger$o.error({
         fn: getFieldConfig,
         message: "Could not find fieldConfig for fieldName: ".concat(fieldName)
       });
       return;
     }
-    logger$m.info({
+    logger$o.info({
       fn: getFieldConfig,
       message: "Retrieved field config for name: ".concat(fieldName),
       data: {
@@ -14667,7 +14759,7 @@
   }
 
   // @ts-ignore
-  var logger$l = Logger('common/validation');
+  var logger$n = Logger('common/validation');
   POWERPOD.fieldValidation = {
     validateRequiredFields: validateRequiredFields,
     validateStepFields: validateStepFields,
@@ -14686,7 +14778,7 @@
   function validateStepField(fieldName) {
     var _fieldErrorHtml;
     var fieldConfig = getFieldConfig(fieldName);
-    logger$l.info({
+    logger$n.info({
       // @ts-ignore
       fn: validateStepField,
       message: "validateStepField called for fieldName: ".concat(fieldName),
@@ -14696,7 +14788,7 @@
       }
     });
     if (!fieldConfig) {
-      logger$l.error({
+      logger$n.error({
         // @ts-ignore
         fn: validateStepField,
         message: "failed to find fieldName: ".concat(fieldName, " in state")
@@ -14705,7 +14797,7 @@
     }
     if (fieldConfig.hidden) {
       var _fieldConfig$error;
-      logger$l.warn({
+      logger$n.warn({
         // @ts-ignore
         fn: validateStepField,
         message: "skip validating HIDDEN fieldName: ".concat(fieldName),
@@ -14724,7 +14816,7 @@
       }
       return;
     }
-    logger$l.info({
+    logger$n.info({
       // @ts-ignore
       fn: validateStepField,
       message: "start validating fieldName: ".concat(fieldName),
@@ -14741,7 +14833,7 @@
       errorMessage = fieldConfig.errorMessage;
     var needsValidation = required || validation || format;
     if (!needsValidation) {
-      logger$l.warn({
+      logger$n.warn({
         // @ts-ignore
         fn: validateStepField,
         message: "no validation options configured, skip validating fieldName: ".concat(fieldName),
@@ -14820,7 +14912,7 @@
         postfix = validation.postfix,
         overrideDisplayValue = validation.overrideDisplayValue;
       var _errorMsg4 = validateFieldLength(name, _value2, _comparison3, forceRequired, postfix, overrideDisplayValue);
-      logger$l.info({
+      logger$n.info({
         // @ts-ignore
         fn: validateStepField,
         message: 'Generate length validation error html...'
@@ -14828,7 +14920,7 @@
       // Display instant feedback on field input
       if (_errorMsg4 && _errorMsg4.length > 0) {
         errorMsgs.push(_errorMsg4);
-        logger$l.info({
+        logger$n.info({
           // @ts-ignore
           fn: validateStepField,
           message: 'Done generating length validation error html...'
@@ -14837,7 +14929,7 @@
     }
     if ((validation === null || validation === void 0 ? void 0 : validation.type) === 'signature') {
       var _errorMsg5 = validateSignatureField(name);
-      logger$l.info({
+      logger$n.info({
         // @ts-ignore
         fn: validateStepField,
         message: 'Generate signature validation error html...'
@@ -14845,7 +14937,7 @@
       // Display instant feedback on field input
       if (_errorMsg5 && _errorMsg5.length > 0) {
         errorMsgs.push(_errorMsg5);
-        logger$l.info({
+        logger$n.info({
           // @ts-ignore
           fn: validateStepField,
           message: 'Done generating signature validation error html...'
@@ -14854,7 +14946,7 @@
     }
     if (format === 'email') {
       var _errorMsg6 = validateEmailAddressField(name);
-      logger$l.info({
+      logger$n.info({
         // @ts-ignore
         fn: validateStepField,
         message: 'Generate email validation error html...'
@@ -14862,7 +14954,7 @@
       // Display instant feedback on field input
       if (_errorMsg6 && _errorMsg6.length > 0) {
         errorMsgs.push(_errorMsg6);
-        logger$l.info({
+        logger$n.info({
           // @ts-ignore
           fn: validateStepField,
           message: 'Done generating email validation error html...'
@@ -14871,7 +14963,7 @@
     }
     var errorMessageElement = getFieldErrorDiv(fieldName);
     if (!errorMessageElement) {
-      logger$l.error({
+      logger$n.error({
         // @ts-ignore
         fn: validateStepField,
         message: "Failed to find field error div, fieldName: ".concat(fieldName)
@@ -14882,7 +14974,7 @@
 
     // NO ERROR FOUND:
     if (!((_fieldErrorHtml = fieldErrorHtml) !== null && _fieldErrorHtml !== void 0 && _fieldErrorHtml.length)) {
-      logger$l.info({
+      logger$n.info({
         // @ts-ignore
         fn: validateStepField,
         message: "Did NOT find error message for field: ".concat(name)
@@ -14908,7 +15000,7 @@
     } else {
       var _errorMsgs$join;
       // IF THERE ARE ERRORS:
-      logger$l.info({
+      logger$n.info({
         // @ts-ignore
         fn: validateStepField,
         message: "Found error message for field: ".concat(name, ", fieldErrorHtml: ").concat(fieldErrorHtml)
@@ -14916,7 +15008,7 @@
 
       // only show error message ON FIELD if field has been touched
       if (fieldConfig.touched) {
-        logger$l.info({
+        logger$n.info({
           // @ts-ignore
           fn: validateStepField,
           message: "Field has been touched name: ".concat(name, ", show error message on field: ").concat(name, ", fieldErrorHtml: ").concat(fieldErrorHtml)
@@ -14934,7 +15026,7 @@
         }
       } else {
         // if FIELD NOT TOUCHED
-        logger$l.warn({
+        logger$n.warn({
           // @ts-ignore
           fn: validateStepField,
           message: "Field NOT touched yet name: ".concat(name, ", skip showing error message on field: ").concat(name, ", fieldErrorHtml: ").concat(fieldErrorHtml)
@@ -14977,7 +15069,7 @@
       fields = getFieldsBySectionClaim(stepName);
     }
     if (!fields) return '';
-    logger$l.info({
+    logger$n.info({
       // @ts-ignore
       fn: validateStepFields,
       message: 'loop through fields to get validation errors',
@@ -14995,7 +15087,7 @@
     //   validateStepField(fields[i].name);
     // }
 
-    logger$l.info({
+    logger$n.info({
       // @ts-ignore
       fn: validateStepFields,
       message: 'Go through dynamic fields to generate validation error html'
@@ -15029,7 +15121,7 @@
       }
       validationErrorHtml = validationErrorHtml.concat(errorMsg);
       fieldErrorHtml = fieldErrorHtml.concat(errorMsg);
-      logger$l.info({
+      logger$n.info({
         // @ts-ignore
         fn: validateStepFields,
         message: "Found error for field: ".concat(fieldId, ", errorMsg: ").concat(fieldErrorHtml)
@@ -15054,7 +15146,7 @@
       }
     }
     if (returnString) {
-      logger$l.info({
+      logger$n.info({
         // @ts-ignore
         fn: validateStepFields,
         message: 'returning string',
@@ -15123,7 +15215,7 @@
       elemType = _ref$elemType === void 0 ? HtmlElementType.Input : _ref$elemType,
       _ref$errorMessage = _ref.errorMessage,
       errorMessage = _ref$errorMessage === void 0 ? 'Please enter a value, this field is required.' : _ref$errorMessage;
-    logger$l.info({
+    logger$n.info({
       // @ts-ignore
       fn: validateRequiredField,
       message: "Start validating required fieldName: ".concat(fieldName, " of elemType: ").concat(elemType)
@@ -15154,7 +15246,7 @@
         raw: true
       });
     }
-    logger$l.info({
+    logger$n.info({
       // @ts-ignore
       fn: validateRequiredField,
       message: "Required field fieldName: ".concat(fieldName, ", elemType: ").concat(elemType, " isEmptyField: ").concat(!value || !value.length, ", value: ").concat(value)
@@ -15166,7 +15258,7 @@
       isEmpty = isValueEmpty(value, elemType);
     }
     if (isEmpty) {
-      logger$l.info({
+      logger$n.info({
         // @ts-ignore
         fn: validateRequiredField,
         message: "Required field fieldName: ".concat(fieldName, " is empty! Set validation error message")
@@ -15236,7 +15328,7 @@
     var element = document.querySelector("#".concat(fieldName));
     var comparisonElement = document.querySelector("#".concat(comparisonFieldName));
     if (!element || !comparisonElement) {
-      logger$l.error({
+      logger$n.error({
         // @ts-ignore
         fn: validateDateFieldValue,
         message: "Failed to find element for date field validation",
@@ -15267,7 +15359,7 @@
       console.error('Invalid date format');
       return false;
     }
-    logger$l.info({
+    logger$n.info({
       // @ts-ignore
       fn: validateDateFieldValue,
       message: "After cleaning values:",
@@ -15319,7 +15411,7 @@
         break;
       default:
         finalMessage = 'Invalid operator';
-        logger$l.error({
+        logger$n.error({
           // @ts-ignore
           fn: validateDateFieldValue,
           message: "Invalid operator"
@@ -15329,7 +15421,7 @@
     if ((errorMessage === null || errorMessage === void 0 ? void 0 : errorMessage.length) > 0 && ((_finalMessage = finalMessage) === null || _finalMessage === void 0 ? void 0 : _finalMessage.length) > 0) {
       finalMessage = errorMessage;
     }
-    logger$l.info({
+    logger$n.info({
       // @ts-ignore
       fn: validateDateFieldValue,
       message: "Returning error message: ".concat(((_finalMessage2 = finalMessage) === null || _finalMessage2 === void 0 ? void 0 : _finalMessage2.length) > 0 ? finalMessage : 'VALIDATION PASSED'),
@@ -15359,7 +15451,7 @@
     };
     var element = document.querySelector("#".concat(fieldName));
     if (!element) {
-      logger$l.error({
+      logger$n.error({
         // @ts-ignore
         fn: validateNumericFieldValue,
         message: "failed to find element for numeric field validation",
@@ -15371,7 +15463,7 @@
 
     // @ts-ignore
     if (element.value === '' && !forceRequired) {
-      logger$l.info({
+      logger$n.info({
         // @ts-ignore
         fn: validateNumericFieldValue,
         message: "element control value is empty, but it is not required, so skip numeric validation",
@@ -15383,7 +15475,7 @@
     var value = parseFloat(
     // @ts-ignore
     element.value.replace(/,/g, '').replace('$', '').replace('%', ''));
-    logger$l.info({
+    logger$n.info({
       // @ts-ignore
       fn: validateNumericFieldValue,
       message: "After cleaning value: ".concat(value)
@@ -15423,7 +15515,7 @@
         break;
       default:
         finalMessage = 'Invalid operator';
-        logger$l.error({
+        logger$n.error({
           // @ts-ignore
           fn: validateNumericFieldValue,
           message: "Invalid operator"
@@ -15433,7 +15525,7 @@
     if ((errorMessage === null || errorMessage === void 0 ? void 0 : errorMessage.length) > 0 && ((_finalMessage3 = finalMessage) === null || _finalMessage3 === void 0 ? void 0 : _finalMessage3.length) > 0) {
       finalMessage = errorMessage;
     }
-    logger$l.info({
+    logger$n.info({
       // @ts-ignore
       fn: validateNumericFieldValue,
       message: "returning error message: ".concat(((_finalMessage4 = finalMessage) === null || _finalMessage4 === void 0 ? void 0 : _finalMessage4.length) > 0 ? finalMessage : 'VALIDATION PASSED'),
@@ -15485,7 +15577,7 @@
         break;
       default:
         finalMessage = 'Invalid operator';
-        logger$l.error({
+        logger$n.error({
           // @ts-ignore
           fn: validateNumericFieldValue,
           message: "Invalid operator"
@@ -15541,7 +15633,7 @@
   function validateEmailAddressField(fieldName) {
     var fieldElement = document.querySelector("#".concat(fieldName));
     if (!fieldElement) {
-      logger$l.error({
+      logger$n.error({
         // @ts-ignore
         fn: validateEmailAddressField,
         message: "Could not find fieldElement for fieldName: ".concat(fieldName)
@@ -15571,7 +15663,7 @@
   function displayActiveFieldErrors() {
     // @ts-ignore
     var fields = POWERPOD.state.fields;
-    logger$l.info({
+    logger$n.info({
       // @ts-ignore
       fn: displayActiveFieldErrors,
       message: "checking field state for active errors on fields...",
@@ -15584,7 +15676,7 @@
       return f.error && !f.hidden && (f.visible != undefined || f.visible != null) && f.visible;
     });
     if (!fieldsWithErrors || fieldsWithErrors.length === 0) {
-      logger$l.info({
+      logger$n.info({
         // @ts-ignore
         fn: displayActiveFieldErrors,
         message: "No active errors on any fields to display"
@@ -15597,7 +15689,7 @@
       var errorWithLabelText = "<span>\"".concat(field.label, "\":</span> <span style=\"color: red;\">").concat(field.error, "</span>");
       validationErrorHtml = validationErrorHtml.concat("<div>".concat(errorWithLabelText, "</div>"));
     });
-    logger$l.info({
+    logger$n.info({
       // @ts-ignore
       fn: displayActiveFieldErrors,
       message: "found fields with errors...",
@@ -15613,7 +15705,7 @@
   // @ts-ignore
   function displayValidationErrors(validationErrorHtml) {
     var validationErrorsDiv = $('#error_messages_div');
-    logger$l.info({
+    logger$n.info({
       // @ts-ignore
       fn: displayValidationErrors,
       message: 'displaying validation errors',
@@ -15647,7 +15739,7 @@
       validationErrorsDiv.style = 'display:block;';
       // @ts-ignore
       if (window.debug_pp) {
-        logger$l.warn({
+        logger$n.warn({
           // @ts-ignore
           fn: displayValidationErrors,
           message: "Debugging mode enabled, not disabling next button"
@@ -15796,7 +15888,7 @@
     var sigFilled = isSignatureFilled();
     var _getFieldConfig = getFieldConfig(name),
       signatureSaved = _getFieldConfig.signatureSaved;
-    logger$l.info({
+    logger$n.info({
       fn: validateSignatureField,
       message: "validateSignatureField for name: ".concat(name, ", sigFilled: ").concat(sigFilled, ", signatureSaved: ").concat(signatureSaved)
     });
@@ -15807,7 +15899,7 @@
     }
   }
 
-  var logger$k = Logger('common/html');
+  var logger$m = Logger('common/html');
   POWERPOD.html = {
     setFieldNameLabel: setFieldNameLabel,
     redirectToFormId: redirectToFormId,
@@ -15874,7 +15966,7 @@
     // Append the new parameter to the URL
     currentUrl.search = '';
     currentUrl.searchParams.set('id', id);
-    logger$k.info({
+    logger$m.info({
       fn: redirectToFormId,
       message: "Redirecting to form with id: ".concat(id)
     });
@@ -15890,7 +15982,7 @@
     if (controlId && (_POWERPOD$state = POWERPOD.state) !== null && _POWERPOD$state !== void 0 && (_POWERPOD$state = _POWERPOD$state.fields) !== null && _POWERPOD$state !== void 0 && (_POWERPOD$state = _POWERPOD$state[controlId]) !== null && _POWERPOD$state !== void 0 && _POWERPOD$state.elementType && ((_POWERPOD$state2 = POWERPOD.state) === null || _POWERPOD$state2 === void 0 || (_POWERPOD$state2 = _POWERPOD$state2.fields) === null || _POWERPOD$state2 === void 0 || (_POWERPOD$state2 = _POWERPOD$state2[controlId]) === null || _POWERPOD$state2 === void 0 ? void 0 : _POWERPOD$state2.elementType) !== 'Unknown') {
       return POWERPOD.state.fields[controlId].elementType;
     }
-    logger$k.info({
+    logger$m.info({
       fn: getControlType,
       message: "Control/element type not found in state, start determining type...",
       data: {
@@ -15904,7 +15996,7 @@
     if (!control) {
       // exit early for notescontrol file upload
       if (tr.querySelector('#notescontrol')) {
-        logger$k.info({
+        logger$m.info({
           fn: getControlType,
           message: 'Found notes control control type',
           data: {
@@ -15913,7 +16005,7 @@
         });
         return HtmlElementType.NotesControl;
       } else {
-        logger$k.warn({
+        logger$m.warn({
           fn: getControlType,
           message: 'Could not find form control element, might be an empty row',
           data: {
@@ -15931,7 +16023,7 @@
     if (!skipState && control !== null && control !== void 0 && control.id && (_POWERPOD$state3 = POWERPOD.state) !== null && _POWERPOD$state3 !== void 0 && (_POWERPOD$state3 = _POWERPOD$state3.fields[controlId]) !== null && _POWERPOD$state3 !== void 0 && _POWERPOD$state3.elementType && ((_POWERPOD$state4 = POWERPOD.state) === null || _POWERPOD$state4 === void 0 || (_POWERPOD$state4 = _POWERPOD$state4.fields[controlId]) === null || _POWERPOD$state4 === void 0 ? void 0 : _POWERPOD$state4.elementType) !== 'Unknown') {
       var _POWERPOD$state5;
       controlType = (_POWERPOD$state5 = POWERPOD.state) === null || _POWERPOD$state5 === void 0 || (_POWERPOD$state5 = _POWERPOD$state5.fields[controlId]) === null || _POWERPOD$state5 === void 0 ? void 0 : _POWERPOD$state5.elementType;
-      logger$k.info({
+      logger$m.info({
         fn: getControlType,
         message: "Successfully found control type from STATE for controlId: ".concat(controlId, ", found elementType: ").concat(controlType),
         data: {
@@ -15962,7 +16054,7 @@
       controlType = HtmlElementType.MultiOptionSet;
     }
     if (!controlType) {
-      logger$k.error({
+      logger$m.error({
         fn: getControlType,
         message: 'Could not determine control type',
         data: {
@@ -15974,7 +16066,7 @@
       });
       return HtmlElementType.Unknown;
     }
-    logger$k.info({
+    logger$m.info({
       fn: getControlType,
       message: "Successfully found control type for controlId: ".concat(controlId, ", found elementType: ").concat(controlType),
       data: {
@@ -16006,7 +16098,7 @@
     if (controlType === HtmlElementType.MultiSelectPicklist || controlType === HtmlElementType.DatePicker) {
       var labelElement = tr.querySelector('label.field-label');
       if (!labelElement) {
-        logger$k.error({
+        logger$m.error({
           fn: getControlId,
           message: "Failed to get label element for control, controlType: ".concat(controlType),
           data: {
@@ -16023,7 +16115,7 @@
       id = questionDiv === null || questionDiv === void 0 || (_questionDiv$querySel = questionDiv.querySelector('label')) === null || _questionDiv$querySel === void 0 ? void 0 : _questionDiv$querySel.getAttribute('for');
     }
     if (!id) {
-      logger$k.warn({
+      logger$m.warn({
         fn: getControlId,
         message: "Failed to get id for control, might be an empty row controlType: ".concat(controlType),
         data: {
@@ -16058,7 +16150,7 @@
       tr: tr,
       controlId: controlId
     });
-    logger$k.info({
+    logger$m.info({
       fn: getControlValue,
       message: "Attempting to get control value for controlId: ".concat(controlId, " type: ").concat(elementType, ", raw: ").concat(raw),
       data: {
@@ -16101,7 +16193,7 @@
       var _value2 = controlDiv === null || controlDiv === void 0 || (_controlDiv$querySele4 = controlDiv.querySelector('div > .datetimepicker > input')) === null || _controlDiv$querySele4 === void 0 ? void 0 : _controlDiv$querySele4.value;
       if (_value2 !== null && _value2 !== void 0 && _value2.length) {
         var _convertDateToISO;
-        logger$k.info({
+        logger$m.info({
           fn: getControlValue,
           message: "Attempting to convert date raw value to ISO format, value: ".concat(_value2)
         });
@@ -16118,7 +16210,7 @@
     } else if (elementType === HtmlElementType.DropdownSelect) {
       var selectElement = controlDiv === null || controlDiv === void 0 ? void 0 : controlDiv.querySelector('select');
       if (!selectElement) {
-        logger$k.error({
+        logger$m.error({
           fn: getControlValue,
           message: "Could not found selectElement for controlId: ".concat(controlId),
           data: {
@@ -16138,7 +16230,7 @@
     } else if (elementType === HtmlElementType.Checkbox) {
       var _controlDiv$querySele6;
       var _checked = controlDiv === null || controlDiv === void 0 || (_controlDiv$querySele6 = controlDiv.querySelector('input')) === null || _controlDiv$querySele6 === void 0 ? void 0 : _controlDiv$querySele6.checked;
-      logger$k.info({
+      logger$m.info({
         fn: getControlValue,
         message: "Found control value for type: ".concat(elementType, ", raw: ").concat(raw, ", checked: ").concat(_checked),
         data: {
@@ -16159,7 +16251,7 @@
       rawValue = (_document = document) === null || _document === void 0 || (_document = _document.getElementById(controlId)) === null || _document === void 0 ? void 0 : _document.value;
       verboseValue = controlDiv === null || controlDiv === void 0 || (_controlDiv$querySele7 = controlDiv.querySelector('input')) === null || _controlDiv$querySele7 === void 0 ? void 0 : _controlDiv$querySele7.value;
     }
-    logger$k.info({
+    logger$m.info({
       fn: getControlValue,
       message: "For controlId: ".concat(controlId, ", raw: ").concat(raw, ", forTemplateGeneration: ").concat(forTemplateGeneration, " found rawValue: ").concat(rawValue, " verboseValue: ").concat(verboseValue),
       data: {
@@ -16188,13 +16280,13 @@
     var _originalSelectElemen;
     var originalSelectElementForMSOS = getOriginalMsosElement(controlId);
     if (!originalSelectElementForMSOS) {
-      logger$k.warn({
+      logger$m.warn({
         fn: newGetOriginalMultiOptionSetElementValue,
         message: "Could not find original msos element for controlId: ".concat(controlId, ", attempt to fallback to getMultiOptionSetElementValue")
       });
       var _valueStr = getMultiOptionSetElementValue(controlId, raw);
       if (!_valueStr) {
-        logger$k.error({
+        logger$m.error({
           fn: newGetOriginalMultiOptionSetElementValue,
           message: "Fallback to getMultiOptionSetElementValue also failed..."
         });
@@ -16205,7 +16297,7 @@
     var selectionContainer = // @ts-ignore
     originalSelectElementForMSOS === null || originalSelectElementForMSOS === void 0 || (_originalSelectElemen = originalSelectElementForMSOS.multiSelectOptionSet()) === null || _originalSelectElemen === void 0 ? void 0 : _originalSelectElemen.$selection;
     if (!selectionContainer) {
-      logger$k.error({
+      logger$m.error({
         fn: newGetOriginalMultiOptionSetElementValue,
         message: "Could not find msos selectionContainer for controlId: ".concat(controlId)
       });
@@ -16214,7 +16306,7 @@
     var selectedItems = selectionContainer === null || selectionContainer === void 0 ? void 0 : selectionContainer.find('li[aria-selected="true"]');
     var inputElements = selectedItems === null || selectedItems === void 0 ? void 0 : selectedItems.find('input');
     if (!selectedItems && !selectedItems.length && !inputElements && !inputElements.length) {
-      logger$k.warn({
+      logger$m.warn({
         fn: newGetOriginalMultiOptionSetElementValue,
         message: "Could not find any selectedItems or inputElements for controlId: ".concat(controlId)
       });
@@ -16234,7 +16326,7 @@
       }
     }
     var valueStr = valueStrArray.join(', ');
-    logger$k.info({
+    logger$m.info({
       fn: newGetOriginalMultiOptionSetElementValue,
       message: "For controlId: ".concat(controlId, " found valueStr: ").concat(valueStr)
     });
@@ -16244,14 +16336,14 @@
     var _inputElement$value;
     var inputElement = document.getElementById(controlId);
     if (!inputElement) {
-      logger$k.error({
+      logger$m.error({
         fn: getMultiOptionSetElementValue,
         message: "Could not find input element for MultiOptionSet element controlId: ".concat(controlId)
       });
       return;
     }
     if (inputElement.value === undefined || ((_inputElement$value = inputElement.value) === null || _inputElement$value === void 0 ? void 0 : _inputElement$value.length) <= 0) {
-      logger$k.warn({
+      logger$m.warn({
         fn: getMultiOptionSetElementValue,
         message: "MultiOptionSet value empty for controlId: ".concat(controlId)
       });
@@ -16273,7 +16365,7 @@
       });
     }
     var valueStr = valueStrArray.join(', ');
-    logger$k.info({
+    logger$m.info({
       fn: getMultiOptionSetElementValue,
       message: "For controlId: ".concat(controlId, " found valueStr: ").concat(valueStr),
       data: {
@@ -16285,7 +16377,7 @@
   }
   function listenForIframeReadyStateChanges(iframe, fn) {
     if (fn && (iframe.contentDocument.readyState === 'interactive' || iframe.contentDocument.readyState === 'complete')) {
-      logger$k.info({
+      logger$m.info({
         fn: listenForIframeReadyStateChanges,
         message: 'iframe is now interactive or complete readyState'
       });
@@ -16293,14 +16385,14 @@
     }
     iframe.contentDocument.addEventListener('readystatechange', function () {
       var _iframe$contentDocume;
-      logger$k.info({
+      logger$m.info({
         fn: listenForIframeReadyStateChanges,
         message: "iframe onReadyState changed: ".concat((_iframe$contentDocume = iframe.contentDocument) === null || _iframe$contentDocume === void 0 ? void 0 : _iframe$contentDocume.readyState)
       });
     });
   }
   function onDocumentReadyState(fn) {
-    logger$k.info({
+    logger$m.info({
       fn: onDocumentReadyState,
       message: "checking document readyState: ".concat(doc.readyState)
     });
@@ -16309,7 +16401,7 @@
     } else {
       doc.addEventListener('readystatechange', function () {
         if (doc.readyState === 'complete') {
-          logger$k.info({
+          logger$m.info({
             fn: onDocumentReadyState,
             message: 'document ready!'
           });
@@ -16338,7 +16430,7 @@
         fieldLabelElement = document.getElementById(fieldName);
       }
       if (!fieldLabelElement) {
-        logger$k.error({
+        logger$m.error({
           fn: getFieldRow,
           message: "could not find fieldLabelElement for fieldName: ".concat(fieldName)
         });
@@ -16347,7 +16439,7 @@
     }
     var fieldRow = fieldLabelElement.closest('tr');
     if (!fieldRow) {
-      logger$k.error({
+      logger$m.error({
         fn: getFieldRow,
         message: "could not find fieldRow for fieldName: ".concat(fieldName)
       });
@@ -16360,13 +16452,13 @@
     var fieldName = _ref3.fieldName,
       _ref3$doNotBlank = _ref3.doNotBlank,
       doNotBlank = _ref3$doNotBlank === void 0 ? false : _ref3$doNotBlank;
-    logger$k.info({
+    logger$m.info({
       fn: hideFieldRow,
       message: "hideFieldRow called for fieldName: ".concat(fieldName, ", doNotBlank: ").concat(doNotBlank)
     });
     var fieldRow = getFieldRow(fieldName);
     if (!fieldRow) {
-      logger$k.error({
+      logger$m.error({
         fn: hideFieldRow,
         message: "could not find fieldRow for fieldName: ".concat(fieldName)
       });
@@ -16407,7 +16499,7 @@
       // touched: false,
     });
     displayActiveFieldErrors();
-    logger$k.info({
+    logger$m.info({
       fn: hideFieldRow,
       message: "successfully ran hideFieldRow for fieldName: ".concat(fieldName, ", doNotBlank: ").concat(doNotBlank),
       data: {
@@ -16417,13 +16509,13 @@
   }
   function showFieldRow(fieldName) {
     var _$2, _powerpod2, _nearestFieldSet$styl;
-    logger$k.info({
+    logger$m.info({
       fn: showFieldRow,
       message: "showFieldRow called for fieldName: ".concat(fieldName)
     });
     var fieldRow = getFieldRow(fieldName);
     if (!fieldRow) {
-      logger$k.error({
+      logger$m.error({
         fn: showFieldRow,
         message: "could not find fieldRow for fieldName: ".concat(fieldName)
       });
@@ -16458,7 +16550,7 @@
     // Ensure the nearest fieldset is visible
     var nearestFieldSet = fieldRow.closest('fieldset');
     if (!nearestFieldSet) {
-      logger$k.error({
+      logger$m.error({
         fn: showFieldRow,
         message: "could not find nearestFieldSet to fieldName: ".concat(fieldName)
       });
@@ -16473,7 +16565,7 @@
       revalidate: true
     });
     validateStepField(fieldName);
-    logger$k.info({
+    logger$m.info({
       fn: showFieldRow,
       message: "successfully ran showFieldRow for fieldName: ".concat(fieldName),
       data: {
@@ -16486,7 +16578,7 @@
     var topOrBottom = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 'top';
     var tabDiv = document.querySelector("div[data-name='".concat(tabDataName, "']"));
     if (!tabDiv) {
-      logger$k.error({
+      logger$m.error({
         fn: addHtmlToTabDiv,
         message: "Unable to add to tab div of tabDataName: ".concat(tabDataName, ", could not find tab div")
       });
@@ -16529,7 +16621,7 @@
     var topOrBottom = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 'top';
     var subsectionFieldset = document.querySelector("fieldset[aria-label='".concat(subsectionAriaLabel, "']"));
     if (!subsectionFieldset || !subsectionFieldset.parentNode) {
-      logger$k.warn({
+      logger$m.warn({
         fn: addHtmlToSubsection,
         message: "Unable to add to subsection of fieldset aria-label: ".concat(subsectionAriaLabel, ", could not find section. Could be configuring non-active section.")
       });
@@ -16606,7 +16698,7 @@
     var type = arguments.length > 3 ? arguments[3] : undefined;
     var sectionTable = document.querySelector("div[data-name='".concat(tableDataName, "'] > .tab-column > div"));
     if (!sectionTable) {
-      logger$k.warn({
+      logger$m.warn({
         fn: addHtmlToSection,
         message: "Unable to add to section of tableDataName: ".concat(tableDataName, ", could not find section. Could be configuring non-active section.")
       });
@@ -16648,7 +16740,7 @@
   }
   function addCustomField(customFieldName, customFieldLabel, existingFieldName, sectionDataName) {
     var beforeOrAfter = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : 'before';
-    logger$k.info({
+    logger$m.info({
       fn: addCustomField,
       message: "addCustomField or addCustomField was specified, adding...",
       data: {
@@ -16664,18 +16756,18 @@
       if (!tr) return;
       if (beforeOrAfter === 'before') {
         $(htmlContentToAdd).insertBefore(tr);
-        logger$k.info({
+        logger$m.info({
           fn: addCustomField,
           message: "Added customFieldName: ".concat(customFieldName, " before existingFieldName: ").concat(existingFieldName)
         });
       } else if (beforeOrAfter === 'after') {
         $(htmlContentToAdd).insertAfter(tr);
-        logger$k.info({
+        logger$m.info({
           fn: addCustomField,
           message: "Added customFieldName: ".concat(customFieldName, " after existingFieldName: ").concat(existingFieldName)
         });
       }
-      logger$k.info({
+      logger$m.info({
         fn: addCustomField,
         message: "Successfully added custom field html for customFieldName: ".concat(customFieldName, ", customFieldLabel: ").concat(customFieldLabel, ", existingFieldName: ").concat(existingFieldName, ", beforeOrAfter: ").concat(beforeOrAfter),
         data: {
@@ -16685,7 +16777,7 @@
       });
     } else if (sectionDataName) {
       addHtmlToSection(sectionDataName, "\n        <table role=\"presentation\" class=\"section\">\n          <tbody>\n            ".concat(htmlContentToAdd, "\n          </tbody>\n        </table>\n      "), beforeOrAfter === 'before' ? 'top' : 'bottom', 'customField');
-      logger$k.info({
+      logger$m.info({
         fn: addCustomField,
         message: "adding customField to section: ".concat(sectionDataName, ", customFieldName: ").concat(customFieldName)
       });
@@ -16693,7 +16785,7 @@
   }
   function addHtmlToField(fieldName, htmlContentToAdd) {
     var topOrBottom = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 'top';
-    logger$k.info({
+    logger$m.info({
       fn: addHtmlToField,
       message: "additionalTextAboveField or additionalTextBelowField was specified, adding... fieldName: ".concat(fieldName, ", htmlContentToAdd: ").concat(htmlContentToAdd, ", topOrBottom: ").concat(topOrBottom)
     });
@@ -16716,7 +16808,7 @@
         return existingContent === newContent;
       });
       if (isAlreadyAdded) {
-        logger$k.info({
+        logger$m.info({
           fn: addHtmlToField,
           message: "HTML content is already added for fieldName: ".concat(fieldName)
         });
@@ -16731,7 +16823,7 @@
     }
     var newTrElement = $("tr[data-uuid=\"".concat(uuid, "\"]"));
     if (!newTrElement || !(newTrElement !== null && newTrElement !== void 0 && newTrElement.length)) {
-      logger$k.error({
+      logger$m.error({
         fn: addHtmlToField,
         message: 'Failed to create new row'
       });
@@ -16758,7 +16850,7 @@
   function observeChanges(element, customFunc) {
     var disableInitialCall = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
     var id = (element === null || element === void 0 ? void 0 : element.id) || '';
-    logger$k.info({
+    logger$m.info({
       fn: observeChanges,
       message: 'observing changes...',
       data: {
@@ -16768,7 +16860,7 @@
       }
     });
     if (!element) {
-      logger$k.error({
+      logger$m.error({
         fn: observeChanges,
         message: 'failed to observe changes, null element',
         data: {
@@ -16782,7 +16874,7 @@
 
     // watch for changes
     var observer = new MutationObserver(function (mutations, observer) {
-      logger$k.info({
+      logger$m.info({
         fn: observeChanges,
         message: 'Change observed... testing',
         data: {
@@ -16803,7 +16895,7 @@
         characterData: true,
         subtree: true
       });
-      logger$k.info({
+      logger$m.info({
         fn: observeChanges,
         message: 'Successfully assigned observer to element',
         data: {
@@ -16821,7 +16913,7 @@
       }
       return observer;
     }
-    logger$k.error({
+    logger$m.error({
       fn: observeChanges,
       message: "Unable to assign observer for some reason",
       data: {
@@ -16834,7 +16926,7 @@
     return false;
   }
   function observeIframeChanges(funcToExecute, fieldNameToPass, fieldNameToObserve) {
-    logger$k.info({
+    logger$m.info({
       fn: observeIframeChanges,
       message: 'observing iframe changes...',
       data: {
@@ -16921,7 +17013,7 @@
       elementType = _ref4$elementType === void 0 ? null : _ref4$elementType,
       _ref4$skipValidation = _ref4.skipValidation,
       skipValidation = _ref4$skipValidation === void 0 ? false : _ref4$skipValidation;
-    logger$k.info({
+    logger$m.info({
       fn: setFieldValue,
       message: "Setting field value for name: ".concat(name, ", value: ").concat(value, ", elementType: ").concat(elementType, ", skipValidation: ").concat(skipValidation)
     });
@@ -16940,7 +17032,7 @@
       skipValidation: skipValidation,
       origin: setFieldValue.name
     };
-    logger$k.info({
+    logger$m.info({
       fn: setFieldValue,
       message: "Dispatching change event for field name: ".concat(name, ", value: ").concat(value, ", elementType: ").concat(elementType, ", skipValidation: ").concat(skipValidation),
       data: {
@@ -16957,14 +17049,14 @@
       destinationFieldName = _field$relocateField.destinationFieldName,
       relativePosition = _field$relocateField.relativePosition;
     if (!originFieldName || !destinationFieldName || !relativePosition) {
-      logger$k.error({
+      logger$m.error({
         fn: relocateField,
         message: "Missing a required parameter to relocate field",
         data: field
       });
       return;
     }
-    logger$k.info({
+    logger$m.info({
       fn: relocateField,
       message: "Starting moving originFieldName: ".concat(originFieldName, " ").concat(relativePosition, " destinationFieldName: ").concat(destinationFieldName)
     });
@@ -16974,7 +17066,7 @@
     var moveToElement = document.getElementById(destinationFieldName);
     var moveToRow = moveToElement === null || moveToElement === void 0 ? void 0 : moveToElement.closest('tr');
     if (!moveToRow) {
-      logger$k.error({
+      logger$m.error({
         fn: relocateField,
         message: "Unable to find nearest row to destinationFieldName: ".concat(destinationFieldName),
         data: {
@@ -16993,14 +17085,14 @@
 
     // cleanup original row
     rowToMove.remove();
-    logger$k.info({
+    logger$m.info({
       fn: relocateField,
       message: "Successfully moved originFieldName: ".concat(originFieldName, " to ").concat(relativePosition, " destinationFieldName: ").concat(destinationFieldName)
     });
   }
   function combineElementsIntoOneRowNew(name) {
     var _tableElement$find;
-    logger$k.info({
+    logger$m.info({
       fn: combineElementsIntoOneRowNew,
       message: "Combining elements into one row for name: ".concat(name)
     });
@@ -17009,7 +17101,7 @@
     var inputTd = inputElement.closest('td');
     var labelTd = labelElement.closest('td');
     if (!inputTd.is(labelTd)) {
-      logger$k.warn({
+      logger$m.warn({
         fn: combineElementsIntoOneRowNew,
         message: "Skipping... elements must've already been combined, since label and input are in different cells",
         data: {
@@ -17041,7 +17133,7 @@
   }
   function disableSingleLine(name) {
     var elementType = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '';
-    logger$k.info({
+    logger$m.info({
       fn: disableSingleLine,
       message: "Disable single line for name: ".concat(name, ", elementType: ").concat(elementType)
     });
@@ -17052,7 +17144,7 @@
       inputElement = $("#".concat(name));
     }
     if (!inputElement) {
-      logger$k.error({
+      logger$m.error({
         fn: disableSingleLine,
         message: "Failed to disable single line, could not find input element for name: ".concat(name, ", elementType: ").concat(HtmlElementType)
       });
@@ -17060,7 +17152,7 @@
     }
     var inputTd = inputElement.closest('td');
     if (!inputTd) {
-      logger$k.error({
+      logger$m.error({
         fn: disableSingleLine,
         message: "Failed to disable single line, could not find input td element for name: ".concat(name, ", elementType: ").concat(HtmlElementType)
       });
@@ -17117,12 +17209,12 @@
   function hideFieldsAndSections() {
     var hidden = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : true;
     if (!hidden) {
-      logger$k.info({
+      logger$m.info({
         fn: hideFieldsAndSections,
         message: 'Unhiding fields and sections'
       });
     } else {
-      logger$k.info({
+      logger$m.info({
         fn: hideFieldsAndSections,
         message: 'Hiding fields and sections'
       });
@@ -17137,7 +17229,7 @@
     var _doc$getElementById;
     var label = (_doc$getElementById = doc.getElementById("".concat(fieldName, "_label"))) === null || _doc$getElementById === void 0 ? void 0 : _doc$getElementById.textContent;
     if (!label) {
-      logger$k.error({
+      logger$m.error({
         fn: getFieldNameLabel,
         message: "Could not find label text for fieldName: ".concat(fieldName)
       });
@@ -17148,7 +17240,7 @@
     var _label$replace, _$3;
     var labelElement = $("#".concat(fieldName, "_label"));
     if (!labelElement) {
-      logger$k.error({
+      logger$m.error({
         fn: setFieldNameLabel,
         message: "Could not find field label for fieldName: ".concat(fieldName, " label element")
       });
@@ -17156,7 +17248,7 @@
     }
     var newLabel = (_label$replace = label.replace(/\n/g, '<br/>')) !== null && _label$replace !== void 0 ? _label$replace : label;
     (_$3 = $("#".concat(fieldName, "_label"))) === null || _$3 === void 0 || _$3.html(newLabel);
-    logger$k.info({
+    logger$m.info({
       fn: setFieldNameLabel,
       message: "Successfully set field label for fieldName: ".concat(fieldName, " to ").concat(label)
     });
@@ -17169,13 +17261,13 @@
   function copyFromFieldAToFieldB(fromFieldNameA, toFieldNameB) {
     var fromFieldNameAElement = document.getElementById(fromFieldNameA);
     if (!fromFieldNameAElement) {
-      logger$k.error({
+      logger$m.error({
         fn: copyFromFieldAToFieldB,
         message: "could not find element forfromFieldNameA: ".concat(fromFieldNameA)
       });
       return;
     }
-    logger$k.info({
+    logger$m.info({
       fn: copyFromFieldAToFieldB,
       message: "Start copying value ".concat((fromFieldNameAElement === null || fromFieldNameAElement === void 0 ? void 0 : fromFieldNameAElement.value) || '', " from ").concat(fromFieldNameA, " to ").concat(toFieldNameB)
     });
@@ -17185,7 +17277,7 @@
       name: toFieldNameB,
       value: (fromFieldNameAElement === null || fromFieldNameAElement === void 0 ? void 0 : fromFieldNameAElement.value) || ''
     });
-    logger$k.info({
+    logger$m.info({
       fn: copyFromFieldAToFieldB,
       message: "Successfully copied value ".concat((fromFieldNameAElement === null || fromFieldNameAElement === void 0 ? void 0 : fromFieldNameAElement.value) || '', " from ").concat(fromFieldNameA, " to ").concat(toFieldNameB)
     });
@@ -17206,7 +17298,7 @@
     var _$4;
     var infoDiv = (_$4 = $("#".concat(name, "_label"))) === null || _$4 === void 0 || (_$4 = _$4.closest('td')) === null || _$4 === void 0 ? void 0 : _$4.find('div.info');
     if (!infoDiv) {
-      logger$k.error({
+      logger$m.error({
         fn: getFieldInfoDiv,
         message: "Could not find info div for field name: ".concat(name)
       });
@@ -17218,7 +17310,7 @@
     var _$5;
     var originalSelectElementForMSOS = (_$5 = $("#".concat(name, "_0"))) !== null && _$5 !== void 0 && _$5.length ? $("#".concat(name, "_0")) : $("#".concat(name, "_i"));
     if (!originalSelectElementForMSOS || !originalSelectElementForMSOS.length) {
-      logger$k.error({
+      logger$m.error({
         fn: getOriginalMsosElement,
         message: "Could not get original select control element for fieldName: ".concat(name, " for Msos, see initializeMsosLibrary, MultiSelectOptionSet libraries, https://pbauerochse.github.io/searchable-option-list/")
       });
@@ -17234,7 +17326,7 @@
 
     // @ts-ignore
     if (!(originalSelectElementForMSOS !== null && originalSelectElementForMSOS !== void 0 && originalSelectElementForMSOS.multiSelectOptionSet())) {
-      logger$k.error({
+      logger$m.error({
         fn: setMultiSelectValues,
         message: "Could not get multiSelectOptionSet() object form original select control element for Msos, see initializeMsosLibrary, MultiSelectOptionSet libraries, https://pbauerochse.github.io/searchable-option-list/"
       });
@@ -17260,7 +17352,7 @@
       control === null || control === void 0 || control.insertAdjacentElement('afterend', div);
       errorMessageElement = document.querySelector("#".concat(fieldName, "_error_message"));
       if (!errorMessageElement) {
-        logger$k.error({
+        logger$m.error({
           fn: getFieldErrorDiv,
           message: "Failed to find field error div, fieldName: ".concat(fieldName)
         });
@@ -17270,7 +17362,7 @@
     return errorMessageElement;
   }
   function setFieldValueToEmptyState(fieldName) {
-    logger$k.info({
+    logger$m.info({
       fn: setFieldValueToEmptyState,
       message: "setting fieldName: ".concat(fieldName, " value to empty")
     });
@@ -17300,13 +17392,13 @@
       }
     });
     if (!matchingElement) {
-      logger$k.error({
+      logger$m.error({
         fn: renameSectionLabel,
         message: "Failed to find fieldset for name: ".concat(name, ", type: ").concat(type, ", newLabel: ").concat(newLabel)
       });
       return;
     }
-    logger$k.info({
+    logger$m.info({
       fn: renameSectionLabel,
       message: "Succesfully renamed section name: ".concat(name, ", to newLabel: ").concat(newLabel)
     });
@@ -17326,7 +17418,7 @@
         }
       });
     } else {
-      logger$k.warn({
+      logger$m.warn({
         fn: removeDropdownOptions,
         message: "No dropdown found with name or id: ".concat(name),
         data: {
@@ -17339,14 +17431,14 @@
   function moveTableRow(rowIdToMove, referenceRowId) {
     var _document$getElementB, _document$getElementB2;
     var position = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 'after';
-    logger$k.info({
+    logger$m.info({
       fn: moveTableRow,
       message: "moveTableRow called with rowIdToMove: ".concat(rowIdToMove, ", referenceRowId: ").concat(referenceRowId, ", position: ").concat(position)
     });
     var rowToMove = (_document$getElementB = document.getElementById(rowIdToMove)) === null || _document$getElementB === void 0 ? void 0 : _document$getElementB.closest('tr');
     var referenceRow = (_document$getElementB2 = document.getElementById(referenceRowId)) === null || _document$getElementB2 === void 0 ? void 0 : _document$getElementB2.closest('tr');
     if (!rowToMove || !referenceRow) {
-      logger$k.error({
+      logger$m.error({
         fn: moveTableRow,
         message: 'One or both of the specified rows were not found.'
       });
@@ -17385,7 +17477,7 @@
   function isSignatureFilled() {
     var canvas = document.querySelector('.drawCanvas');
     if (!canvas) {
-      logger$k.error({
+      logger$m.error({
         fn: isSignatureFilled,
         message: "Could not find signature canvas"
       });
@@ -17394,7 +17486,7 @@
     // @ts-ignore
     var ctx = canvas.getContext('2d');
     if (!ctx || !canvas.width || !canvas.height) {
-      logger$k.error({
+      logger$m.error({
         fn: isSignatureFilled,
         message: "Could not get context, canvas width or height",
         data: {
@@ -17419,7 +17511,7 @@
     return false; // Canvas is empty
   }
 
-  var logger$j = Logger('common/utils');
+  var logger$l = Logger('common/utils');
   POWERPOD.utils = {
     enableDebugging: enableDebugging,
     disableDebugging: disableDebugging,
@@ -17450,7 +17542,7 @@
       JSON.parse(jsonString);
       return true; // JSON is valid
     } catch (e) {
-      logger$j.error({
+      logger$l.error({
         fn: isValidJSON,
         message: "Invalid JSON for jsonString: ".concat(jsonString)
       });
@@ -17486,7 +17578,7 @@
 
   // Merges two arrays of objects joining on a given prop, e.g. "name"
   function mergeFieldArrays(a, b, prop) {
-    logger$j.info({
+    logger$l.info({
       fn: mergeFieldArrays,
       message: "mergeFieldArrays with the following data:",
       data: {
@@ -17511,7 +17603,7 @@
     }
     var result = prop ? Object.values(mergedObj) : mergedObj;
     // Check if the result should be an array or object
-    logger$j.info({
+    logger$l.info({
       fn: mergeFieldArrays,
       message: "mergeFieldArrays done with result:",
       data: {
@@ -17611,7 +17703,7 @@
               _context.next = 5;
               break;
             }
-            logger$j.error({
+            logger$l.error({
               fn: saveBrowserInfo,
               message: 'Failed to get browser info'
             });
@@ -17661,7 +17753,7 @@
           case 21:
             _context.sent;
           case 22:
-            logger$j.info({
+            logger$l.info({
               fn: saveBrowserInfo,
               message: "successfully patched form data with browser information payload: ".concat(JSON.stringify(payload)),
               data: {
@@ -17675,7 +17767,7 @@
           case 25:
             _context.prev = 25;
             _context.t0 = _context["catch"](8);
-            logger$j.error({
+            logger$l.error({
               fn: saveBrowserInfo,
               message: "failed to patch form data with browser info for formType: ".concat(formType, ", payload: ").concat(JSON.stringify(payload)),
               data: {
@@ -17739,7 +17831,7 @@
     return originals;
   }
 
-  var logger$i = Logger('common/loading');
+  var logger$k = Logger('common/loading');
 
   /**
    * Hides the loading animation by removing the div and the styling element.
@@ -17749,12 +17841,12 @@
    * @function
    */
   function hideLoadingAnimation() {
-    logger$i.info({
+    logger$k.info({
       fn: hideLoadingAnimation,
       message: 'attempting to hide loading animation...'
     });
     if (POWERPOD.doNotUnhideLoader) {
-      logger$i.info({
+      logger$k.info({
         fn: hideLoadingAnimation,
         message: 'abort unhiding due to POWERPOD.doNotUnhideLoader flag set to true'
       });
@@ -17764,13 +17856,13 @@
     var loader = doc.getElementById('loader');
     if (loader) {
       var _loader$parentNode;
-      logger$i.info({
+      logger$k.info({
         fn: hideLoadingAnimation,
         message: 'loader found & finished loading, removing element'
       });
       (_loader$parentNode = loader.parentNode) === null || _loader$parentNode === void 0 || _loader$parentNode.removeChild(loader);
     } else {
-      logger$i.warn({
+      logger$k.warn({
         fn: hideLoadingAnimation,
         message: 'loader not found!'
       });
@@ -17778,21 +17870,21 @@
     var loaderStyle = doc.getElementById('loader-style');
     if (loaderStyle) {
       var _loaderStyle$parentNo;
-      logger$i.info({
+      logger$k.info({
         fn: hideLoadingAnimation,
         message: 'loaderStyle found & finished loading, removing element'
       });
       (_loaderStyle$parentNo = loaderStyle.parentNode) === null || _loaderStyle$parentNo === void 0 || _loaderStyle$parentNo.removeChild(loaderStyle);
       window.scrollTo(0, 0);
     } else {
-      logger$i.warn({
+      logger$k.warn({
         fn: hideLoadingAnimation,
         message: 'loaderStyle not found!'
       });
     }
   }
 
-  var logger$h = Logger('common/fieldConditionalLogicLegacy');
+  var logger$j = Logger('common/fieldConditionalLogicLegacy');
   function shouldRequireDependentField(_ref) {
     var _POWERPOD$state;
     var shouldBeRequired = _ref.shouldBeRequired,
@@ -17805,7 +17897,7 @@
     var requiredFieldRow = requiredFieldLabelElement === null || requiredFieldLabelElement === void 0 ? void 0 : requiredFieldLabelElement.closest('tr');
     var requiredFieldInputElement = document.querySelector("#".concat(requiredFieldTag));
     if (!requiredFieldLabelElement || !requiredFieldRow || !requiredFieldInputElement) {
-      logger$h.error({
+      logger$j.error({
         fn: shouldRequireDependentField,
         message: 'Failed to find required elements',
         data: {
@@ -17821,7 +17913,7 @@
     var loadingAllFieldConfig = POWERPOD.configuringFields;
     var loadingFieldConfig = (_POWERPOD$state = POWERPOD.state) === null || _POWERPOD$state === void 0 || (_POWERPOD$state = _POWERPOD$state.fields) === null || _POWERPOD$state === void 0 || (_POWERPOD$state = _POWERPOD$state[requiredFieldTag]) === null || _POWERPOD$state === void 0 ? void 0 : _POWERPOD$state.loading;
     if (shouldBeRequired) {
-      logger$h.info({
+      logger$j.info({
         fn: shouldRequireDependentField,
         message: "Setting dynamic field to visible requiredFieldTag: ".concat(requiredFieldTag, ", loadingAllFieldConfig: ").concat(loadingAllFieldConfig, ", loadingFieldConfig: ").concat(loadingFieldConfig)
       });
@@ -17851,7 +17943,7 @@
           var _fieldConfig$visibleI2 = fieldConfig.visibleIf.valueIfVisible,
             type = _fieldConfig$visibleI2.type,
             value = _fieldConfig$visibleI2.value;
-          logger$h.info({
+          logger$j.info({
             fn: shouldRequireDependentField,
             message: "visibleIf.valueIfVisible has been configured for fieldName: ".concat(requiredFieldTag, ", start setup with values:"),
             data: {
@@ -17859,7 +17951,7 @@
             }
           });
           if (type === 'raw' && (value !== undefined || value !== null)) {
-            logger$h.info({
+            logger$j.info({
               fn: shouldRequireDependentField,
               message: "visibleIf.valueIfVisible has been configured, setting value: ".concat(value, " for fieldName: ").concat(requiredFieldTag)
             });
@@ -17867,7 +17959,7 @@
           } else if (type === 'function') {
             var valueGeneratorFunction = POWERPOD.valueGeneration[value];
             if (!valueGeneratorFunction || typeof valueGeneratorFunction !== 'function') {
-              logger$h.error({
+              logger$j.error({
                 fn: shouldRequireDependentField,
                 message: "for fieldName: ".concat(requiredFieldTag, " could not find valueGeneration function for value: ").concat(value)
               });
@@ -17875,13 +17967,13 @@
             }
             var newValue = valueGeneratorFunction();
             if (newValue == undefined) {
-              logger$h.info({
+              logger$j.info({
                 fn: shouldRequireDependentField,
                 message: "visibleIf.valueIfVisible has been configured, valueGenerator: ".concat(value, " returned undefined, skipping setting value for fieldName: ").concat(requiredFieldTag)
               });
               return;
             }
-            logger$h.info({
+            logger$j.info({
               fn: shouldRequireDependentField,
               message: "visibleIf.valueIfVisible has been configured, valueGenerator: ".concat(value, " returned and setting value: ").concat(newValue, " for fieldName: ").concat(requiredFieldTag)
             });
@@ -17898,7 +17990,7 @@
       }
     } else {
       var _fieldConfig$visibleI3;
-      logger$h.info({
+      logger$j.info({
         fn: shouldRequireDependentField,
         message: "Setting dynamic field to hidden requiredFieldTag: ".concat(requiredFieldTag, ", fieldConfig: ").concat(JSON.stringify(fieldConfig)),
         data: {
@@ -17934,7 +18026,7 @@
           _type = _fieldConfig$visibleI4.type,
           fieldNames = _fieldConfig$visibleI4.fieldNames;
           _fieldConfig$visibleI4.value;
-        logger$h.info({
+        logger$j.info({
           fn: shouldRequireDependentField,
           message: "visibleIf.valueIfHidden has been configured for fieldName: ".concat(requiredFieldTag, ", start setup with values:"),
           data: {
@@ -17949,7 +18041,7 @@
             fieldValues.push(inputValue);
           });
           var _newValue = fieldValues.join(' ');
-          logger$h.info({
+          logger$j.info({
             fn: shouldRequireDependentField,
             message: "visibleIf.valueIfHidden has been configured, setting value: ".concat(_newValue, " for fieldName: ").concat(requiredFieldTag)
           });
@@ -17975,7 +18067,7 @@
       customFunc = _ref2.customFunc;
     var dependentOnElement = document.querySelector("#".concat(dependentOnElementTag));
     if (!dependentOnElement) {
-      logger$h.error({
+      logger$j.error({
         fn: initOnChange_DependentRequiredField,
         message: "Could not find field for dependentOnElementTag: ".concat(dependentOnElementTag)
       });
@@ -18025,7 +18117,7 @@
       customFunc = _ref3.customFunc;
     var dependentOnElement = document.querySelector("#".concat(dependentOnElementTag));
     if (!dependentOnElement) {
-      logger$h.error({
+      logger$j.error({
         fn: setupDependentRequiredField,
         message: "requiredFieldTag: ".concat(requiredFieldTag, ", could not find field for dependentOnElementTag: ").concat(dependentOnElementTag)
       });
@@ -18038,12 +18130,12 @@
       tr: tr,
       raw: true
     });
-    logger$h.info({
+    logger$j.info({
       fn: setupDependentRequiredField,
       message: "requiredFieldTag: ".concat(requiredFieldTag, ", setting up dependent field dependentOnElementTag: ").concat(dependentOnElementTag, " with value: ").concat(input !== null && input !== void 0 ? input : '')
     });
     if (overrideTruthyClause != undefined) {
-      logger$h.info({
+      logger$j.info({
         fn: setupDependentRequiredField,
         message: "requiredFieldTag: ".concat(requiredFieldTag, ", overriding truthy clause overrideTruthyClause: ").concat(overrideTruthyClause),
         data: {
@@ -18072,7 +18164,7 @@
       }
     } else {
       if (input === dependentOnValue || input === "".concat(dependentOnValue) || dependentOnValueArray.includes(input) || input !== null && input !== void 0 && input.includes(dependentOnValue) || Number(input) && dependentOnValueArray.includes(Number(input))) {
-        logger$h.info({
+        logger$j.info({
           fn: setupDependentRequiredField,
           message: "requiredFieldTag: ".concat(requiredFieldTag, ", value matches visibleIf condition, dependentOnElementTag: ").concat(dependentOnElementTag),
           data: {
@@ -18092,7 +18184,7 @@
           customFunc: customFunc
         });
       } else {
-        logger$h.info({
+        logger$j.info({
           fn: setupDependentRequiredField,
           message: "requiredFieldTag: ".concat(requiredFieldTag, ", value DOES NOT match visibleIf condition"),
           data: {
@@ -18115,7 +18207,7 @@
     }
   }
 
-  const logger$g = Logger('common/commodities');
+  const logger$i = Logger('common/commodities');
   POWERPOD.commodities = {
       getCommodities,
       processCommoditiesData,
@@ -18123,12 +18215,12 @@
   async function getCommodities() {
       const { data } = await getCommoditiesData();
       if (data) {
-          logger$g.info({
+          logger$i.info({
               fn: getCommodities,
               message: 'successfully extracted commodity options',
           });
           const res = processCommoditiesData(data);
-          logger$g.info({
+          logger$i.info({
               fn: getCommodities,
               message: 'successfully extracted commodities:',
               data: res,
@@ -18136,7 +18228,7 @@
           return Promise.resolve(res);
       }
       let errorMsg = 'failed to extract commodities from data';
-      logger$g.warn({
+      logger$i.warn({
           fn: getCommodities,
           message: errorMsg,
           data,
@@ -18170,7 +18262,7 @@
       return res;
   }
 
-  var logger$f = Logger('application/steps/applicantInfo');
+  var logger$h = Logger('application/steps/applicantInfo');
   function customizeApplicantInfoStep$1() {
     setupApplicantInfoStepFields();
     initOnChange_PreviouslyReceivedKttpFunding();
@@ -18218,13 +18310,13 @@
     var selectOptionControl = $('#quartech_hasthisorganizationreceivedkttpfundingin');
     var selectedValue = selectOptionControl.val();
     hideShow_for_PreviouslyReceivedKttpFunding(selectedValue);
-    logger$f.info({
+    logger$h.info({
       fn: initOnChange_PreviouslyReceivedKttpFunding,
       message: 'initOnChange_PreviouslyReceivedKttpFunding called.'
     });
     selectOptionControl.on('change', function () {
       var selectedValue = $(this).val();
-      logger$f.info({
+      logger$h.info({
         fn: initOnChange_PreviouslyReceivedKttpFunding,
         message: "Selected Value: ".concat(selectedValue)
       });
@@ -18243,13 +18335,13 @@
     var organizationReceivedFundingFromBC_SelectCtr = $('#quartech_hasthisorganizationreceivedfundingfrmother');
     var selectedValue = organizationReceivedFundingFromBC_SelectCtr.val();
     hideShow_for_OrganizationReceivedFundingFromBC(selectedValue);
-    logger$f.info({
+    logger$h.info({
       fn: initOnChange_OrganizationReceivedFundingFromBC,
       message: 'initOnChange_OrganizationReceivedFundingFromBC called.'
     });
     organizationReceivedFundingFromBC_SelectCtr.on('change', function () {
       var selectedValue = $(this).val();
-      logger$f.info({
+      logger$h.info({
         fn: initOnChange_OrganizationReceivedFundingFromBC,
         message: "Selected Value: ".concat(selectedValue)
       });
@@ -18268,13 +18360,13 @@
     var collaboratingWithOtherOrgsControl = $('#quartech_areyoucollaboratingwithanyotherorg');
     var selectedValue = collaboratingWithOtherOrgsControl.val();
     hideShow_for_CollaboratingWithOtherOrgsControl(selectedValue);
-    logger$f.info({
+    logger$h.info({
       fn: initOnChange_IsCollaboratingWithOtherOrganizationQuestion,
       message: 'initOnChange_IsCollaboratingWithOtherOrganizationQuestion called.'
     });
     collaboratingWithOtherOrgsControl.on('change', function () {
       var selectedValue = $(this).val();
-      logger$f.info({
+      logger$h.info({
         fn: initOnChange_IsCollaboratingWithOtherOrganizationQuestion,
         message: "Selected Value: ".concat(selectedValue)
       });
@@ -18297,13 +18389,13 @@
     var selectOptionControl = $('#quartech_doestheactivitytakeplaceovermultipleday');
     var selectedValue = selectOptionControl.val();
     hideShow_for_ActivityOverMultipleDays(selectedValue);
-    logger$f.info({
+    logger$h.info({
       fn: initOnChange_ActivityOverMultipleDays,
       message: 'initOnChange_ActivityOverMultipleDays called.'
     });
     selectOptionControl.on('change', function () {
       var selectedValue = $(this).val();
-      logger$f.info({
+      logger$h.info({
         fn: initOnChange_ActivityOverMultipleDays,
         message: "Selected Value: ".concat(selectedValue)
       });
@@ -18324,13 +18416,13 @@
     var selectOptionControl = $('#quartech_theprocessoflearningandprocessingknowledge');
     var selectedValue = selectOptionControl.val();
     hideShow_for_AdaptedEventForAdultLearning(selectedValue);
-    logger$f.info({
+    logger$h.info({
       fn: initOnChange_AdaptedEventForAdultLearning,
       message: 'initOnChange_AdaptedEventForAdultLearning called.'
     });
     selectOptionControl.on('change', function () {
       var selectedValue = $(this).val();
-      logger$f.info({
+      logger$h.info({
         fn: initOnChange_AdaptedEventForAdultLearning,
         message: "Selected Value: ".concat(selectedValue)
       });
@@ -18382,7 +18474,7 @@
       });
       getTopicCredentials(topic || null);
     }).fail(function (e) {
-      logger$f.error({
+      logger$h.error({
         fn: getTopic,
         message: 'Unable to get topic',
         data: e
@@ -18403,7 +18495,7 @@
       });
       updateBusinessNumberField(topic, latestValidCredentials);
     }).fail(function (e) {
-      logger$f.error({
+      logger$h.error({
         fn: getTopicCredentials,
         message: 'Unable to get topic credentials',
         data: e
@@ -18524,7 +18616,7 @@
     if (businessOverviewFieldSetElement) businessOverviewFieldSetElement.css('display', 'none');
   }
   function initCommoditiesMultiSelect() {
-    logger$f.info({
+    logger$h.info({
       fn: initCommoditiesMultiSelect,
       message: 'start initializing commodities multiselect'
     });
@@ -18541,7 +18633,7 @@
     var commodityFieldId = 'quartech_organizationsectororcommodity';
     if (!$("#".concat(commodityFieldId))) return;
     var commoditiesGroupedByCategoryKey = processCommoditiesData(commoditiesJson);
-    logger$f.info({
+    logger$h.info({
       fn: addCommodityMultiSelect,
       message: "got processed commodities data:",
       data: commoditiesGroupedByCategoryKey
@@ -18565,7 +18657,7 @@
     useScript('chosen', setupChosen$1);
   }
   function setupChosen$1() {
-    logger$f.info({
+    logger$h.info({
       fn: setupChosen$1,
       message: 'setting up chosen...'
     });
@@ -18611,7 +18703,7 @@
         value: stringToPassToFieldInput
       });
     });
-    logger$f.info({
+    logger$h.info({
       fn: setupChosen$1,
       message: 'successfully setup chosen...'
     });
@@ -18636,7 +18728,7 @@
       return res;
   }
 
-  var logger$e = Logger('application/steps/project');
+  var logger$g = Logger('application/steps/project');
   function customizeProjectStep(programData) {
     setProjectStepRequiredFields();
     customizeActivityTypesDropDownList(programData);
@@ -18709,7 +18801,7 @@
     ];
     var container = document.querySelector('#subgrid_ProjectStep_New_TF_Inventory');
     if (!container) {
-      logger$e.error({
+      logger$g.error({
         fn: setNewTFInventoryColWidths,
         message: "TF Inventory subgrid not found."
       });
@@ -18717,7 +18809,7 @@
     }
     var headerRow = container.querySelector('tr');
     if (!headerRow) {
-      logger$e.error({
+      logger$g.error({
         fn: setNewTFInventoryColWidths,
         message: "No header row found in subgrid."
       });
@@ -18753,7 +18845,7 @@
     ];
     var container = document.querySelector('#subgrid_ProjectStep_Import_TF_Inventory');
     if (!container) {
-      logger$e.error({
+      logger$g.error({
         fn: setNewTFInventoryColWidths,
         message: "TF Inventory subgrid not found."
       });
@@ -18761,7 +18853,7 @@
     }
     var headerRow = container.querySelector('tr');
     if (!headerRow) {
-      logger$e.error({
+      logger$g.error({
         fn: setNewTFInventoryColWidths,
         message: "No header row found in subgrid."
       });
@@ -18798,13 +18890,13 @@
     var q2Control = $('#quartech_willthisactivitybeopentotheentirepublic');
     var selectedValue = q2Control.val();
     hideShow_WhyActiviyNotOpenToPublic(selectedValue);
-    logger$e.info({
+    logger$g.info({
       fn: initOnChange_ActiviyOpenToPublic,
       message: 'initOnChange_ActiviyOpenToPublic called.'
     });
     q2Control.on('change', function () {
       var selectedValue = $(this).val();
-      logger$e.info({
+      logger$g.info({
         fn: initOnChange_ActiviyOpenToPublic,
         message: "Selected Value: ".concat(selectedValue)
       });
@@ -19008,7 +19100,7 @@
     useScript('chosen', setupChosen);
   }
   function setupChosen() {
-    logger$e.info({
+    logger$g.info({
       fn: setupChosen,
       message: 'setting up chosen...'
     });
@@ -19059,7 +19151,7 @@
       tooltipText: 'Project locations in addition to what you have provided in the question above',
       tooltipTargetElementId: 'additionalLocationControl_chosen'
     });
-    logger$e.info({
+    logger$g.info({
       fn: setupChosen,
       message: 'successfully setup chosen...'
     });
@@ -19151,14 +19243,14 @@
     }
   };
 
-  var logger$d = Logger('common/saveButton');
+  var logger$f = Logger('common/saveButton');
   POWERPOD.saveButton = {
     addSaveButton: addSaveButton
   };
   function addSaveButton() {
     var currentStep = getCurrentStep();
     if (currentStep === FormStep.DeclarationAndConsent) {
-      logger$d.info({
+      logger$f.info({
         fn: addSaveButton,
         message: "Skip adding save button on currentStep: ".concat(currentStep)
       });
@@ -19173,7 +19265,7 @@
     actionsDiv === null || actionsDiv === void 0 || actionsDiv.append(divElement);
     var saveButton = document.getElementById('quartechSaveBtn');
     if (!saveButton) {
-      logger$d.error({
+      logger$f.error({
         fn: addSaveButton,
         message: 'Could not get saveButton after adding it to the DOM'
       });
@@ -19207,13 +19299,13 @@
               _context2.next = 5;
               break;
             }
-            logger$d.error({
+            logger$f.error({
               fn: saveFormData,
               message: 'Could not get saveButton after adding it to the DOM'
             });
             return _context2.abrupt("return");
           case 5:
-            logger$d.info({
+            logger$f.info({
               fn: saveFormData,
               message: 'Start saving form data...',
               data: {
@@ -19224,7 +19316,7 @@
             saveButton.value = 'Saving...';
             formJsonRes = generateFormJson();
             if (!formJsonRes) {
-              logger$d.error({
+              logger$f.error({
                 fn: saveButton,
                 message: "Failed to generateFormJson"
               });
@@ -19233,7 +19325,7 @@
               _context2.next = 13;
               break;
             }
-            logger$d.warn({
+            logger$f.warn({
               fn: saveFormData,
               message: 'No field data to save'
             });
@@ -19244,12 +19336,12 @@
             payload = {};
             fields = Object.keys(fieldsStore);
             fields.forEach(function (field) {
-              logger$d.info({
+              logger$f.info({
                 fn: saveFormData,
                 message: "processing stored data for field: ".concat(field)
               });
               var fieldData = fieldsStore[field];
-              logger$d.info({
+              logger$f.info({
                 fn: saveFormData,
                 message: "found stored data for field: ".concat(field, ", fieldData: ").concat(JSON.stringify(fieldData))
               });
@@ -19261,14 +19353,14 @@
                 dataFormat = fieldData.dataFormat,
                 forceSave = fieldData.forceSave;
               if (elementType === HtmlElementType.MultiSelectPicklist && (!value || !value.length)) {
-                logger$d.warn({
+                logger$f.warn({
                   fn: saveFormData,
                   message: "skipping saving EMPTY data for elementType: ".concat(HtmlElementType.MultiSelectPicklist, " field name: ").concat(field)
                 });
                 return;
               }
               if (!forceSave && (error && error.length || !touched)) {
-                logger$d.warn({
+                logger$f.warn({
                   fn: saveFormData,
                   message: "skipping saving data for field name: ".concat(field)
                 });
@@ -19293,7 +19385,7 @@
                 payload = _objectSpread2(_objectSpread2(_objectSpread2(_objectSpread2({}, value !== undefined && formattedValue === undefined && _defineProperty({}, field, value)), value !== undefined && formattedValue !== undefined && _defineProperty({}, field, formattedValue)), payload), ((_Object$keys2 = Object.keys(customPayload)) === null || _Object$keys2 === void 0 ? void 0 : _Object$keys2.length) && customPayload);
               }
               if (customPayload && Object.keys(customPayload).length > 0) {
-                logger$d.info({
+                logger$f.info({
                   fn: saveFormData,
                   message: "Adding custom payload to form save data payload: ".concat(JSON.stringify(customPayload)),
                   data: {
@@ -19307,7 +19399,7 @@
               _context2.next = 21;
               break;
             }
-            logger$d.warn({
+            logger$f.warn({
               fn: saveFormData,
               message: 'no payload data to save'
             });
@@ -19347,7 +19439,7 @@
           case 36:
             _context2.sent;
           case 37:
-            logger$d.info({
+            logger$f.info({
               fn: saveFormData,
               message: 'successfully patched form data with payload',
               data: {
@@ -19361,7 +19453,7 @@
           case 40:
             _context2.prev = 40;
             _context2.t0 = _context2["catch"](26);
-            logger$d.error({
+            logger$f.error({
               fn: saveFormData,
               message: "failed to patch form data for formType: ".concat(formType),
               data: {
@@ -19385,9 +19477,9 @@
     return _saveFormData.apply(this, arguments);
   }
 
-  var logger$c = Logger('application/steps/demographicInfo');
+  var logger$e = Logger('application/steps/demographicInfo');
   function customizeDemographicInfoStep(programData) {
-    logger$c.info({
+    logger$e.info({
       fn: customizeDemographicInfoStep,
       message: "Start customizing demographic info step, quartech_disabledchefsdemographicinfo: ".concat(programData === null || programData === void 0 ? void 0 : programData.quartech_disabledchefsdemographicinfo)
     });
@@ -19439,7 +19531,7 @@
       return _regeneratorRuntime().wrap(function _callee$(_context) {
         while (1) switch (_context.prev = _context.next) {
           case 0:
-            logger$c.info({
+            logger$e.info({
               fn: addDemographicInfoChefsIframe,
               message: "Start adding chefs iframe... v1.1"
             });
@@ -19460,7 +19552,7 @@
             // Logic has since changed, if there's an ID present, we don't need to do anything.
             // chefsUrl = `https://submit.digital.gov.bc.ca/app/form/success?s=${chefsSubmissionGuid}`;
 
-            logger$c.info({
+            logger$e.info({
               fn: addDemographicInfoChefsIframe,
               message: "Demographic info survey has already been completed, chefsSubmissionGuid: ".concat(chefsSubmissionGuid, ", chefsSubmissionId: ").concat(chefsSubmissionId)
             });
@@ -19495,7 +19587,7 @@
               chefsDemographicDataFormId = quartech_ChefsDemographicDataFormId;
               chefsDemographicDataIndividualsFormId = quartech_ChefsDemographicDataIndividualsFormId;
             }
-            logger$c.info({
+            logger$e.info({
               fn: addDemographicInfoChefsIframe,
               message: "Retrieved params for iframe, chefsDemographicDataFormId: ".concat(chefsDemographicDataFormId, ", chefsDemographicDataIndividualsFormId: ").concat(chefsDemographicDataIndividualsFormId)
             });
@@ -19507,7 +19599,7 @@
           case 25:
             applicationDataRes = _context.sent;
             if (!(applicationDataRes !== null && applicationDataRes !== void 0 && (_applicationDataRes$d = applicationDataRes.data) !== null && _applicationDataRes$d !== void 0 && (_applicationDataRes$d = _applicationDataRes$d.value) !== null && _applicationDataRes$d !== void 0 && _applicationDataRes$d[0])) {
-              logger$c.error({
+              logger$e.error({
                 fn: addDemographicInfoChefsIframe,
                 message: "Could not get application data result to determine whether individual or business"
               });
@@ -19515,7 +19607,7 @@
             _applicationDataRes$d2 = applicationDataRes === null || applicationDataRes === void 0 || (_applicationDataRes$d3 = applicationDataRes.data) === null || _applicationDataRes$d3 === void 0 || (_applicationDataRes$d3 = _applicationDataRes$d3.value) === null || _applicationDataRes$d3 === void 0 ? void 0 : _applicationDataRes$d3[0], quartech_nocragstnumber = _applicationDataRes$d2.quartech_nocragstnumber; // If no CRA number then it's an individual
             if (quartech_nocragstnumber) {
               if (!chefsDemographicDataIndividualsFormId) {
-                logger$c.error({
+                logger$e.error({
                   fn: addDemographicInfoChefsIframe,
                   message: "Bad config: Env Vars should contain the quartech_ChefsDemographicDataFormId element"
                 });
@@ -19524,7 +19616,7 @@
             } else {
               // Otherwise it's a business
               if (!chefsDemographicDataFormId) {
-                logger$c.error({
+                logger$e.error({
                   fn: addDemographicInfoChefsIframe,
                   message: "Bad config: Env Vars should contain the quartech_ChefsDemographicDataFormId element"
                 });
@@ -19539,13 +19631,13 @@
               if (!containSubmissionId) return;
               var submissionPayload = JSON.parse(event.data);
               var chefsSubmissionGuidResult = submissionPayload.submissionId;
-              logger$c.info({
+              logger$e.info({
                 fn: addDemographicInfoChefsIframe,
                 message: 'received chefsSubmissionGuidResult: ' + chefsSubmissionGuidResult
               });
               var chefsSubmissionId = chefsSubmissionGuidResult.substring(0, 8).toUpperCase();
               if (!chefsSubmissionId || !chefsSubmissionGuidResult) {
-                logger$c.error({
+                logger$e.error({
                   fn: addDemographicInfoChefsIframe,
                   message: "Failed to get chefsSubmissionId"
                 });
@@ -19580,10 +19672,10 @@
     return _addDemographicInfoChefsIframe.apply(this, arguments);
   }
 
-  var logger$b = Logger('steps/documents');
+  var logger$d = Logger('steps/documents');
   function customizeDocumentsStep$1() {
     var programAbbreviation = getProgramAbbreviation();
-    logger$b.info({
+    logger$d.info({
       fn: customizeDocumentsStep$1,
       message: "Start customizing documents step"
     });
@@ -19605,7 +19697,7 @@
       return _regeneratorRuntime().wrap(function _callee$(_context) {
         while (1) switch (_context.prev = _context.next) {
           case 0:
-            logger$b.info({
+            logger$d.info({
               fn: customizeDocumentsStepForTFCCRF,
               message: "Start customizing documents step for TFCCRF"
             });
@@ -19617,13 +19709,13 @@
           case 4:
             applicationDataRes = _context.sent;
             if (!(applicationDataRes !== null && applicationDataRes !== void 0 && (_applicationDataRes$d = applicationDataRes.data) !== null && _applicationDataRes$d !== void 0 && (_applicationDataRes$d = _applicationDataRes$d.value) !== null && _applicationDataRes$d !== void 0 && _applicationDataRes$d[0])) {
-              logger$b.error({
+              logger$d.error({
                 fn: customizeDocumentsStepForTFCCRF,
                 message: "Could not get application data result to determine whether individual or business"
               });
             }
             _applicationDataRes$d2 = applicationDataRes === null || applicationDataRes === void 0 || (_applicationDataRes$d3 = applicationDataRes.data) === null || _applicationDataRes$d3 === void 0 || (_applicationDataRes$d3 = _applicationDataRes$d3.value) === null || _applicationDataRes$d3 === void 0 ? void 0 : _applicationDataRes$d3[0], quartech_ownorleaseland = _applicationDataRes$d2.quartech_ownorleaseland, quartech_originalsource = _applicationDataRes$d2.quartech_originalsource, quartech_reportnewtreefruitinventory = _applicationDataRes$d2.quartech_reportnewtreefruitinventory;
-            logger$b.info({
+            logger$d.info({
               fn: customizeDocumentsStepForTFCCRF,
               message: "Found application value quartech_originalsource: ".concat(quartech_originalsource)
             });
@@ -19636,7 +19728,7 @@
                 fieldName: 'quartech_taxdocument'
               });
             }
-            logger$b.info({
+            logger$d.info({
               fn: customizeDocumentsStep$1,
               message: "Found application value quartech_ownorleaseland: ".concat(quartech_ownorleaseland)
             });
@@ -19662,13 +19754,13 @@
                 fieldName: 'quartech_leaseagreement'
               });
             }
-            logger$b.info({
+            logger$d.info({
               fn: customizeDocumentsStepForTFCCRF,
               message: "Found application value quartech_reportnewtreefruitinventory: ".concat(quartech_reportnewtreefruitinventory)
             });
             // Mandatory if quartech_originalsource != Import OR quartech_reportnewtreefruitinventory = YES
             if ([255550000, 255550002].includes(quartech_originalsource) || quartech_reportnewtreefruitinventory === 255550000) {
-              logger$b.info({
+              logger$d.info({
                 fn: customizeDocumentsStepForTFCCRF,
                 message: "Found application value quartech_reportnewtreefruitinventory: ".concat(quartech_reportnewtreefruitinventory, ", setting quartech_uploadasitemap to REQUIRED")
               });
@@ -19682,7 +19774,7 @@
               validateStepFields();
             } else {
               // hideFieldRow({ fieldName: 'quartech_uploadasitemap' });
-              logger$b.info({
+              logger$d.info({
                 fn: customizeDocumentsStepForTFCCRF,
                 message: "Found application value quartech_reportnewtreefruitinventory: ".concat(quartech_reportnewtreefruitinventory, ", setting quartech_uploadasitemap to NOT required")
               });
@@ -19704,16 +19796,16 @@
     return _customizeDocumentsStepForTFCCRF.apply(this, arguments);
   }
 
-  var logger$a = Logger('application/steps/success');
+  var logger$c = Logger('application/steps/success');
   function customizeSuccessStep(programData) {
-    logger$a.info({
+    logger$c.info({
       fn: customizeSuccessStep,
       message: "Start customizing success step..."
     });
     configureFields();
   }
 
-  var logger$9 = Logger('application/application');
+  var logger$b = Logger('application/application');
   function initApplication() {
     preloadRequestVerificationToken();
     hideFieldsAndSections();
@@ -19787,7 +19879,7 @@
             formId = fetchedFormId;
             redirect = fetchedRedirect || false;
           case 11:
-            logger$9.info({
+            logger$b.info({
               fn: updatePageForSelectedProgram$1,
               message: "Determining redirect for programId: ".concat(programId, ", found formId: ").concat(formId, ", found redirect: ").concat(redirect)
             });
@@ -19795,7 +19887,7 @@
               _context.next = 16;
               break;
             }
-            logger$9.info({
+            logger$b.info({
               fn: updatePageForSelectedProgram$1,
               message: "Stop updating page,redirect to new formId: ".concat(formId),
               data: {
@@ -19810,7 +19902,7 @@
               _context.next = 20;
               break;
             }
-            logger$9.info({
+            logger$b.info({
               fn: updatePageForSelectedProgram$1,
               message: 'Could not find programid, retry when DOM readyState is comlete',
               data: {
@@ -19829,7 +19921,7 @@
               break;
             }
             hideLoadingAnimation();
-            logger$9.error({
+            logger$b.error({
               fn: updatePageForSelectedProgram$1,
               message: 'Missing programid, or unknown current step',
               data: {
@@ -19839,14 +19931,14 @@
             });
             return _context.abrupt("return");
           case 26:
-            logger$9.info({
+            logger$b.info({
               fn: updatePageForSelectedProgram$1,
               message: "Retrieving Program data for the selected programid querystring: ".concat(programId)
             });
             getApplicationFormData({
               programId: programId,
               beforeSend: function beforeSend() {
-                logger$9.info({
+                logger$b.info({
                   fn: updatePageForSelectedProgram$1,
                   message: 'clear any cached data from previous page loads'
                 });
@@ -19856,13 +19948,13 @@
               },
               onSuccess: function onSuccess(programData, textStatus, xhr) {
                 if (programData) {
-                  logger$9.info({
+                  logger$b.info({
                     fn: updatePageForSelectedProgram$1,
                     message: 'Retrieved Program data:',
                     data: programData
                   });
                   localStorage.setItem('programData', JSON.stringify(programData));
-                  logger$9.info({
+                  logger$b.info({
                     fn: updatePageForSelectedProgram$1,
                     message: 'Update application page with the program data.',
                     data: {
@@ -19905,7 +19997,7 @@
     }
   }
   function updateFormStepForSelectedProgram(programData) {
-    logger$9.info({
+    logger$b.info({
       fn: updateFormStepForSelectedProgram,
       message: 'Begin updating form step for program'
     });
@@ -20224,10 +20316,10 @@
           padding: 0px;
           position: absolute;
           ${!this.errorMessage && !this.errorMessage.length
-            ? i$3 `
+            ? i$4 `
               display: none;
             `
-            : i$3 `
+            : i$4 `
               display: block;
             `}
         }
@@ -20245,10 +20337,10 @@
           text-align: center;
           font-style: normal;
           ${!this.readOnly
-            ? i$3 `
+            ? i$4 `
               font-size: 15px;
             `
-            : i$3 ``}
+            : i$4 ``}
         }
 
         .input-icon > input {
@@ -20273,10 +20365,10 @@
           border-radius: 0.25rem;
           color: #000;
           ${!this.readOnly
-            ? i$3 `
+            ? i$4 `
               font-size: 15px;
             `
-            : i$3 `
+            : i$4 `
               pointer-events: none;
             `}
         }
@@ -20294,22 +20386,22 @@
       e$5('#inputElement')
   ], CurrencyInput.prototype, "inputElement", void 0);
   __decorate([
-      n$1({ type: String })
+      n$2({ type: String })
   ], CurrencyInput.prototype, "inputValue", void 0);
   __decorate([
-      n$1({ type: Boolean })
+      n$2({ type: Boolean })
   ], CurrencyInput.prototype, "allowNegatives", void 0);
   __decorate([
-      n$1({ type: Number })
+      n$2({ type: Number })
   ], CurrencyInput.prototype, "maxValue", void 0);
   __decorate([
-      n$1({ type: Boolean })
+      n$2({ type: Boolean })
   ], CurrencyInput.prototype, "readOnly", void 0);
   __decorate([
-      n$1({ type: String })
+      n$2({ type: String })
   ], CurrencyInput.prototype, "errorMessage", void 0);
   __decorate([
-      n$1({ type: String })
+      n$2({ type: String })
   ], CurrencyInput.prototype, "tooltip", void 0);
   CurrencyInput = __decorate([
       t$1('currency-input')
@@ -20360,10 +20452,10 @@
           padding: 0px;
           position: absolute;
           ${!this.errorMessage && !this.errorMessage.length
-            ? i$3 `
+            ? i$4 `
               display: none;
             `
-            : i$3 `
+            : i$4 `
               display: block;
             `}
         }
@@ -20420,7 +20512,7 @@
     `;
       }
   };
-  DropdownSearch.styles = i$3 `
+  DropdownSearch.styles = i$4 `
     .dropdown-search {
       position: relative;
       margin-top: 18px;
@@ -20481,28 +20573,28 @@
       e$5('#selectElement')
   ], DropdownSearch.prototype, "selectElement", void 0);
   __decorate([
-      n$1({ type: String, reflect: true })
+      n$2({ type: String, reflect: true })
   ], DropdownSearch.prototype, "id", void 0);
   __decorate([
-      n$1({ type: Array, reflect: true })
+      n$2({ type: Array, reflect: true })
   ], DropdownSearch.prototype, "options", void 0);
   __decorate([
-      n$1({ type: String })
+      n$2({ type: String })
   ], DropdownSearch.prototype, "selectedValue", void 0);
   __decorate([
-      n$1({ type: String })
+      n$2({ type: String })
   ], DropdownSearch.prototype, "additionalTextBelowField", void 0);
   __decorate([
-      n$1({ type: String })
+      n$2({ type: String })
   ], DropdownSearch.prototype, "fieldLabel", void 0);
   __decorate([
-      n$1({ type: String })
+      n$2({ type: String })
   ], DropdownSearch.prototype, "placeholder", void 0);
   __decorate([
-      n$1({ type: String })
+      n$2({ type: String })
   ], DropdownSearch.prototype, "errorMessage", void 0);
   __decorate([
-      n$1({ type: Boolean })
+      n$2({ type: Boolean })
   ], DropdownSearch.prototype, "disabled", void 0);
   DropdownSearch = __decorate([
       t$1('dropdown-search')
@@ -20575,10 +20667,10 @@
           border-radius: 0.25rem;
           color: #000;
           ${!this.readOnly
-            ? i$3 `
+            ? i$4 `
               font-size: 15px;
             `
-            : i$3 `
+            : i$4 `
               pointer-events: none;
             `}
         }
@@ -20589,10 +20681,10 @@
           padding: 0px;
           position: absolute;
           ${!this.errorMessage && !this.errorMessage.length
-            ? i$3 `
+            ? i$4 `
               display: none;
             `
-            : i$3 `
+            : i$4 `
               display: block;
             `}
         }
@@ -20623,31 +20715,31 @@
       e$5('#inputElement')
   ], TextField.prototype, "inputElement", void 0);
   __decorate([
-      n$1({ type: Boolean })
+      n$2({ type: Boolean })
   ], TextField.prototype, "required", void 0);
   __decorate([
-      n$1({ type: String })
+      n$2({ type: String })
   ], TextField.prototype, "inputValue", void 0);
   __decorate([
-      n$1({ type: String })
+      n$2({ type: String })
   ], TextField.prototype, "errorMessage", void 0);
   __decorate([
-      n$1()
+      n$2()
   ], TextField.prototype, "customStyle", void 0);
   __decorate([
-      n$1({ type: Boolean })
+      n$2({ type: Boolean })
   ], TextField.prototype, "readOnly", void 0);
   __decorate([
-      n$1({ type: String })
+      n$2({ type: String })
   ], TextField.prototype, "fieldLabel", void 0);
   __decorate([
-      n$1({ type: Number })
+      n$2({ type: Number })
   ], TextField.prototype, "maxLength", void 0);
   __decorate([
-      n$1({ type: Function })
+      n$2({ type: Function })
   ], TextField.prototype, "validation", void 0);
   __decorate([
-      n$1({ type: String })
+      n$2({ type: String })
   ], TextField.prototype, "tooltip", void 0);
   TextField = __decorate([
       t$1('text-field')
@@ -20803,10 +20895,10 @@
           border-collapse: collapse;
           margin: 25px 0;
           ${!this.readOnly
-            ? i$3 `
+            ? i$4 `
                   font-size: 0.9em;
                 `
-            : i$3 ``}
+            : i$4 ``}
           font-family: sans-serif;
           min-width: 400px;
           box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
@@ -20819,10 +20911,10 @@
         .styled-table th {
           padding: 12px 15px;
           ${!this.readOnly
-            ? i$3 `
+            ? i$4 `
                   font-size: 15px;
                 `
-            : i$3 ``}
+            : i$4 ``}
         }
         .styled-table td {
           padding: 12px 15px 24px;
@@ -20856,10 +20948,10 @@
         .add-another-btn {
           line-height: 1.5;
           ${!this.readOnly
-            ? i$3 `
+            ? i$4 `
                   font-size: 13px;
                 `
-            : i$3 ``}
+            : i$4 ``}
         }
         .add-another-btn span {
           padding-bottom: 2px;
@@ -20983,19 +21075,19 @@
       }
   };
   __decorate([
-      n$1({ type: String, reflect: true })
+      n$2({ type: String, reflect: true })
   ], ExpenseReportTable.prototype, "id", void 0);
   __decorate([
-      n$1({ type: Object })
+      n$2({ type: Object })
   ], ExpenseReportTable.prototype, "columns", void 0);
   __decorate([
-      n$1({ type: Array })
+      n$2({ type: Array })
   ], ExpenseReportTable.prototype, "rows", void 0);
   __decorate([
-      n$1({ type: Array })
+      n$2({ type: Array })
   ], ExpenseReportTable.prototype, "expenseTypes", void 0);
   __decorate([
-      n$1({ type: Boolean })
+      n$2({ type: Boolean })
   ], ExpenseReportTable.prototype, "readOnly", void 0);
   ExpenseReportTable = __decorate([
       t$1('expense-report-table')
@@ -21171,10 +21263,10 @@
           padding: 0px;
           position: absolute;
           ${!this.errorMessage && !((_a = this.errorMessage) === null || _a === void 0 ? void 0 : _a.length)
-            ? i$3 `
+            ? i$4 `
                   display: none;
                 `
-            : i$3 `
+            : i$4 `
                   display: block;
                 `}
         }
@@ -21183,10 +21275,10 @@
           border-collapse: collapse;
           margin: 25px 0;
           ${!this.readOnly
-            ? i$3 `
+            ? i$4 `
                   font-size: 0.9em;
                 `
-            : i$3 ``}
+            : i$4 ``}
           font-family: sans-serif;
           min-width: 400px;
           box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
@@ -21199,10 +21291,10 @@
         .styled-table th {
           padding: 12px 15px;
           ${!this.readOnly
-            ? i$3 `
+            ? i$4 `
                   font-size: 15px;
                 `
-            : i$3 ``}
+            : i$4 ``}
         }
         .styled-table td {
           padding: 5px 15px 20px;
@@ -21236,10 +21328,10 @@
         .add-another-btn {
           line-height: 1.5;
           ${!this.readOnly
-            ? i$3 `
+            ? i$4 `
                   font-size: 13px;
                 `
-            : i$3 ``}
+            : i$4 ``}
         }
         .add-another-btn span {
           padding-bottom: 2px;
@@ -21390,25 +21482,25 @@
       }
   };
   __decorate([
-      n$1({ type: String, reflect: true })
+      n$2({ type: String, reflect: true })
   ], ExpenseReportTableKTTP.prototype, "id", void 0);
   __decorate([
-      n$1({ type: Object })
+      n$2({ type: Object })
   ], ExpenseReportTableKTTP.prototype, "columns", void 0);
   __decorate([
-      n$1({ type: Array })
+      n$2({ type: Array })
   ], ExpenseReportTableKTTP.prototype, "rows", void 0);
   __decorate([
-      n$1({ type: Array })
+      n$2({ type: Array })
   ], ExpenseReportTableKTTP.prototype, "expenseTypes", void 0);
   __decorate([
-      n$1({ type: Boolean })
+      n$2({ type: Boolean })
   ], ExpenseReportTableKTTP.prototype, "readOnly", void 0);
   __decorate([
-      n$1({ type: Object, reflect: true })
+      n$2({ type: Object, reflect: true })
   ], ExpenseReportTableKTTP.prototype, "cellErrors", void 0);
   __decorate([
-      n$1({ type: String })
+      n$2({ type: String })
   ], ExpenseReportTableKTTP.prototype, "errorMessage", void 0);
   ExpenseReportTableKTTP = __decorate([
       t$1('expense-report-table-kttp')
@@ -24048,16 +24140,16 @@
       e$5('#inputElement')
   ], DateField.prototype, "inputElement", void 0);
   __decorate([
-      n$1({ type: Boolean })
+      n$2({ type: Boolean })
   ], DateField.prototype, "required", void 0);
   __decorate([
-      n$1({ type: String })
+      n$2({ type: String })
   ], DateField.prototype, "inputValue", void 0);
   __decorate([
-      n$1()
+      n$2()
   ], DateField.prototype, "customStyle", void 0);
   __decorate([
-      n$1({ type: String })
+      n$2({ type: String })
   ], DateField.prototype, "fieldLabel", void 0);
   DateField = __decorate([
       t$1('date-field')
@@ -24184,10 +24276,10 @@
           border-collapse: collapse;
           margin: 25px 0;
           ${!this.readOnly
-            ? i$3 `
+            ? i$4 `
                   font-size: 0.9em;
                 `
-            : i$3 ``}
+            : i$4 ``}
           font-family: sans-serif;
           min-width: 400px;
           box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
@@ -24200,10 +24292,10 @@
         .styled-table th {
           padding: 12px 15px;
           ${!this.readOnly
-            ? i$3 `
+            ? i$4 `
                   font-size: 15px;
                 `
-            : i$3 ``}
+            : i$4 ``}
         }
         .styled-table td {
           padding: 12px 15px 24px;
@@ -24237,10 +24329,10 @@
         .add-another-btn {
           line-height: 1.5;
           ${!this.readOnly
-            ? i$3 `
+            ? i$4 `
                   font-size: 13px;
                 `
-            : i$3 ``}
+            : i$4 ``}
         }
         .add-another-btn span {
           padding-bottom: 2px;
@@ -24367,23 +24459,23 @@
     `;
       }
   };
-  ExpenseInvoicesTable.styles = i$3 `
+  ExpenseInvoicesTable.styles = i$4 `
     ${r$5(shoelace)}
   `;
   __decorate([
-      n$1({ type: String, reflect: true })
+      n$2({ type: String, reflect: true })
   ], ExpenseInvoicesTable.prototype, "id", void 0);
   __decorate([
-      n$1({ type: Object })
+      n$2({ type: Object })
   ], ExpenseInvoicesTable.prototype, "columns", void 0);
   __decorate([
-      n$1({ type: Array })
+      n$2({ type: Array })
   ], ExpenseInvoicesTable.prototype, "rows", void 0);
   __decorate([
-      n$1({ type: Array })
+      n$2({ type: Array })
   ], ExpenseInvoicesTable.prototype, "expenseTypes", void 0);
   __decorate([
-      n$1({ type: Boolean })
+      n$2({ type: Boolean })
   ], ExpenseInvoicesTable.prototype, "readOnly", void 0);
   ExpenseInvoicesTable = __decorate([
       t$1('expense-invoices-table')
@@ -27019,7 +27111,7 @@
   }
   customElements.define("fa-icon", FaIcon);
 
-  var logger$8 = Logger('claim/steps/claimInfoStep');
+  var logger$a = Logger('claim/steps/claimInfoStep');
   function customizeClaimInfoStep() {
     configureFields();
     var programAbbreviation = getProgramAbbreviation();
@@ -27040,7 +27132,7 @@
       // @ts-ignore
       iframe.contentWindow.document;
       var numberOfStudentsApprovedFieldElement = innerDoc === null || innerDoc === void 0 ? void 0 : innerDoc.getElementById('quartech_numberofstudentsapproved');
-      logger$8.info({
+      logger$a.info({
         fn: addVVTSApprovedFundingAmount,
         message: "Change detected...",
         data: {
@@ -27281,7 +27373,7 @@
       },
       customEvent: 'onChangeClaimInfoGridVLBData',
       customEventHandler: function customEventHandler(event, customElement) {
-        logger$8.info({
+        logger$a.info({
           fn: addClaimInfoGrid,
           message: 'onChangeClaimInfoGridVLBData event listener triggered',
           data: {
@@ -27317,7 +27409,7 @@
       //   });
       // },
       initValuesFn: function initValuesFn(mappedValueKey, existingValue, customElement) {
-        logger$8.info({
+        logger$a.info({
           fn: addExpenseReportGrid,
           message: "Running initValuesFn for Expense Report Grid...",
           data: {
@@ -27336,7 +27428,7 @@
         }
       }
     });
-    logger$8.info({
+    logger$a.info({
       fn: addClaimInfoGrid,
       message: 'Successfully added VLB claim info grid'
     });
@@ -27370,7 +27462,7 @@
       },
       customEvent: 'onChangeExpenseReportData',
       customEventHandler: function customEventHandler(event, customElement) {
-        logger$8.info({
+        logger$a.info({
           fn: customizeClaimInfoStep,
           message: 'onChangeExpenseReportData event listener triggered',
           data: {
@@ -27403,7 +27495,7 @@
         verifyTotalSumEqualsRequestedAmount();
       },
       initValuesFn: function initValuesFn(mappedValueKey, existingValue, customElement) {
-        logger$8.info({
+        logger$a.info({
           fn: addExpenseReportGrid,
           message: "Running initValuesFn for Expense Report Grid...",
           data: {
@@ -27422,7 +27514,7 @@
         }
       }
     });
-    logger$8.info({
+    logger$a.info({
       fn: addExpenseReportGrid,
       message: 'Successfully added expense report grid'
     });
@@ -27460,7 +27552,7 @@
       },
       customEvent: 'onChangeExpenseReportData',
       customEventHandler: function customEventHandler(event, customElement) {
-        logger$8.info({
+        logger$a.info({
           fn: customizeClaimInfoStep,
           message: 'onChangeExpenseReportData event listener triggered',
           data: {
@@ -27499,7 +27591,7 @@
         calculateTotalRequestedAmountForKTTP();
       },
       initValuesFn: function initValuesFn(mappedValueKey, existingValue, customElement) {
-        logger$8.info({
+        logger$a.info({
           fn: addExpenseReportGridForKTTP,
           message: "Running initValuesFn for Expense Report Grid...",
           data: {
@@ -27518,7 +27610,7 @@
         }
       }
     });
-    logger$8.info({
+    logger$a.info({
       fn: addExpenseReportGridForKTTP,
       message: 'Successfully added expense report grid'
     });
@@ -27562,7 +27654,7 @@
       },
       customEvent: 'onChangeExpenseInvoicesData',
       customEventHandler: function customEventHandler(event, customElement) {
-        logger$8.info({
+        logger$a.info({
           fn: customizeClaimInfoStep,
           message: 'onChangeExpenseInvoicesData event listener triggered',
           data: {
@@ -27600,7 +27692,7 @@
         verifyTotalSumEqualsRequestedAmount();
       },
       initValuesFn: function initValuesFn(mappedValueKey, existingValue, customElement) {
-        logger$8.info({
+        logger$a.info({
           fn: addExpenseReportGrid,
           message: "Running initValuesFn for Expense Report Grid...",
           data: {
@@ -27619,7 +27711,7 @@
         }
       }
     });
-    logger$8.info({
+    logger$a.info({
       fn: addExpenseReportGrid,
       message: 'Successfully added expense invoices grid'
     });
@@ -27655,7 +27747,7 @@
     $('#quartech_declarationandconsent_label').text('I / We agree to the above statement.');
   }
 
-  var logger$7 = Logger('claim/steps/documents');
+  var logger$9 = Logger('claim/steps/documents');
   function customizeDocumentsStep() {
     return _customizeDocumentsStep.apply(this, arguments);
   }
@@ -27707,7 +27799,7 @@
       return _regeneratorRuntime().wrap(function _callee2$(_context2) {
         while (1) switch (_context2.prev = _context2.next) {
           case 0:
-            logger$7.info({
+            logger$9.info({
               fn: customizeDocumentsStepForKTTP,
               message: "Start customizing documents step for KTTP"
             });
@@ -27724,13 +27816,13 @@
           case 8:
             claimDataRes = _context2.sent;
             if (!(claimDataRes !== null && claimDataRes !== void 0 && claimDataRes.data)) {
-              logger$7.error({
+              logger$9.error({
                 fn: customizeDocumentsStepForKTTP,
                 message: "Could not get claim data result to determine whether admission fee was required in project results step"
               });
             }
             _claimDataRes$data = claimDataRes === null || claimDataRes === void 0 ? void 0 : claimDataRes.data, quartech_admissionfeerequired = _claimDataRes$data.quartech_admissionfeerequired;
-            logger$7.info({
+            logger$9.info({
               fn: customizeDocumentsStepForKTTP,
               message: "Found claim value quartech_admissionfeerequired: ".concat(quartech_admissionfeerequired)
             });
@@ -27776,7 +27868,7 @@
             // Logic has since changed, if there's an ID present, we don't need to do anything.
             // chefsUrl = `https://submit.digital.gov.bc.ca/app/form/success?s=${chefsSubmissionGuid}`;
 
-            logger$7.info({
+            logger$9.info({
               fn: addChefsVVTSIframe,
               message: "VVTS Chefs already been completed, chefsSubmissionGuid: ".concat(chefsSubmissionGuid, ", chefsSubmissionId: ").concat(chefsSubmissionId)
             });
@@ -27788,7 +27880,7 @@
             _yield$getEnvVars = _context3.sent;
             chefsVVTSFormId = _yield$getEnvVars.quartech_ChefsVVTSFormId;
             if (!chefsVVTSFormId) {
-              logger$7.error({
+              logger$9.error({
                 fn: addSatisfactionSurveyChefsIframe,
                 message: 'Bad config: Applicant Portal Config should contain the quartech_ChefsVVTSFormId element',
                 data: {
@@ -27865,7 +27957,7 @@
             // Logic has since changed, if there's an ID present, we don't need to do anything.
             // chefsUrl = `https://submit.digital.gov.bc.ca/app/form/success?s=${chefsSubmissionGuid}`;
 
-            logger$7.info({
+            logger$9.info({
               fn: addSatisfactionSurveyChefsIframeForABPP,
               message: "Satisfaction survey has already been completed, chefsSubmissionGuid: ".concat(chefsSubmissionGuid, ", chefsSubmissionId: ").concat(chefsSubmissionId)
             });
@@ -27878,7 +27970,7 @@
               chefsABPPSatisfactionSurveyFormId = 'bc502ff8-4c19-4836-9e32-5445dece02c8';
             }
             if (!chefsABPPSatisfactionSurveyFormId) {
-              logger$7.error({
+              logger$9.error({
                 fn: addSatisfactionSurveyChefsIframeForABPP,
                 message: 'Bad config: Could not get the chefsABPPSatisfactionSurveyFormId element',
                 data: {
@@ -27955,7 +28047,7 @@
             // Logic has since changed, if there's an ID present, we don't need to do anything.
             // chefsUrl = `https://submit.digital.gov.bc.ca/app/form/success?s=${chefsSubmissionGuid}`;
 
-            logger$7.info({
+            logger$9.info({
               fn: addSatisfactionSurveyChefsIframe,
               message: "Satisfaction survey has already been completed, chefsSubmissionGuid: ".concat(chefsSubmissionGuid, ", chefsSubmissionId: ").concat(chefsSubmissionId)
             });
@@ -27967,7 +28059,7 @@
             _yield$getEnvVars2 = _context5.sent;
             chefsNefbaSatisfactionSurveyFormId = _yield$getEnvVars2.quartech_ChefsNefbaSatisfactionSurveyFormId;
             if (!chefsNefbaSatisfactionSurveyFormId) {
-              logger$7.error({
+              logger$9.error({
                 fn: addSatisfactionSurveyChefsIframe,
                 message: 'Bad config: Applicant Portal Config should contain the quartech_ChefsNefbaSatisfactionSurveyFormId element',
                 data: {
@@ -28051,7 +28143,7 @@
     }
   }
 
-  var logger$6 = Logger('claim/claim');
+  var logger$8 = Logger('claim/claim');
   function initClaim() {
     preloadRequestVerificationToken();
     hideFieldsAndSections();
@@ -28076,7 +28168,7 @@
               _context.next = 8;
               break;
             }
-            logger$6.info({
+            logger$8.info({
               fn: updatePageForSelectedProgram,
               message: 'Could not find programid, retry when DOM readyState is comlete',
               data: {
@@ -28095,7 +28187,7 @@
               break;
             }
             hideLoadingAnimation();
-            logger$6.error({
+            logger$8.error({
               fn: updatePageForSelectedProgram,
               message: 'Missing programid, or unknown current step',
               data: {
@@ -28105,14 +28197,14 @@
             });
             return _context.abrupt("return");
           case 14:
-            logger$6.info({
+            logger$8.info({
               fn: updatePageForSelectedProgram,
               message: "Retrieving Program data for the selected programid querystring: ".concat(programId)
             });
             getClaimFormData({
               programId: programId,
               beforeSend: function beforeSend() {
-                logger$6.info({
+                logger$8.info({
                   fn: updatePageForSelectedProgram,
                   message: 'clear any cached data from previous page loads'
                 });
@@ -28122,13 +28214,13 @@
               },
               onSuccess: function onSuccess(programData, textStatus, xhr) {
                 if (programData) {
-                  logger$6.info({
+                  logger$8.info({
                     fn: updatePageForSelectedProgram,
                     message: 'Retrieved Program data:',
                     data: programData
                   });
                   localStorage.setItem('programData', JSON.stringify(programData));
-                  logger$6.info({
+                  logger$8.info({
                     fn: updatePageForSelectedProgram,
                     message: 'Update application page with the program data.'
                   });
@@ -28182,7 +28274,7 @@
   }
 
   // src/components/tag/tag.styles.ts
-  var tag_styles_default = i$3`
+  var tag_styles_default = i$4`
   :host {
     display: inline-block;
   }
@@ -28352,20 +28444,20 @@
   SlTag.styles = [component_styles_default, tag_styles_default];
   SlTag.dependencies = { "sl-icon-button": SlIconButton };
   __decorateClass([
-    n$1({ reflect: true })
+    n$2({ reflect: true })
   ], SlTag.prototype, "variant", 2);
   __decorateClass([
-    n$1({ reflect: true })
+    n$2({ reflect: true })
   ], SlTag.prototype, "size", 2);
   __decorateClass([
-    n$1({ type: Boolean, reflect: true })
+    n$2({ type: Boolean, reflect: true })
   ], SlTag.prototype, "pill", 2);
   __decorateClass([
-    n$1({ type: Boolean })
+    n$2({ type: Boolean })
   ], SlTag.prototype, "removable", 2);
 
   // src/components/select/select.styles.ts
-  var select_styles_default = i$3`
+  var select_styles_default = i$4`
   :host {
     display: block;
   }
@@ -28731,8 +28823,8 @@
       const options = ctor.getPropertyOptions(propertyName);
       const attributeName = typeof options.attribute === "string" ? options.attribute : propertyName;
       if (name === attributeName) {
-        const converter = options.converter || u$1;
-        const fromAttribute = typeof converter === "function" ? converter : (_a = converter == null ? void 0 : converter.fromAttribute) != null ? _a : u$1.fromAttribute;
+        const converter = options.converter || u$2;
+        const fromAttribute = typeof converter === "function" ? converter : (_a = converter == null ? void 0 : converter.fromAttribute) != null ? _a : u$2.fromAttribute;
         const newValue = fromAttribute(value, options.type);
         if (this[propertyName] !== newValue) {
           this[key] = newValue;
@@ -28743,7 +28835,7 @@
   };
 
   // src/styles/form-control.styles.ts
-  var form_control_styles_default = i$3`
+  var form_control_styles_default = i$4`
   .form-control .form-control__label {
     display: none;
   }
@@ -28805,7 +28897,7 @@
    * @license
    * Copyright 2017 Google LLC
    * SPDX-License-Identifier: BSD-3-Clause
-   */class e extends i{constructor(i){if(super(i),this.it=T,i.type!==t.CHILD)throw Error(this.constructor.directiveName+"() can only be used in child bindings")}render(r){if(r===T||null==r)return this._t=void 0,this.it=r;if(r===w)return r;if("string"!=typeof r)throw Error(this.constructor.directiveName+"() called with a non-string value");if(r===this.it)return this._t;this.it=r;const s=[r];return s.raw=s,this._t={_$litType$:this.constructor.resultType,strings:s,values:[]}}}e.directiveName="unsafeHTML",e.resultType=1;const o=e$4(e);
+   */class e extends i$1{constructor(i){if(super(i),this.it=T,i.type!==t.CHILD)throw Error(this.constructor.directiveName+"() can only be used in child bindings")}render(r){if(r===T||null==r)return this._t=void 0,this.it=r;if(r===w)return r;if("string"!=typeof r)throw Error(this.constructor.directiveName+"() called with a non-string value");if(r===this.it)return this._t;this.it=r;const s=[r];return s.raw=s,this._t={_$litType$:this.constructor.resultType,strings:s,values:[]}}}e.directiveName="unsafeHTML",e.resultType=1;const o$1=e$4(e);
 
   var SlSelect = class extends ShoelaceElement {
     constructor() {
@@ -29158,7 +29250,7 @@
         if (index < this.maxOptionsVisible || this.maxOptionsVisible <= 0) {
           const tag = this.getTag(option, index);
           return x`<div @sl-remove=${(e) => this.handleTagRemove(e, option)}>
-          ${typeof tag === "string" ? o(tag) : tag}
+          ${typeof tag === "string" ? o$1(tag) : tag}
         </div>`;
         } else if (index === this.maxOptionsVisible) {
           return x`<sl-tag size=${this.size}>+${this.selectedOptions.length - index}</sl-tag>`;
@@ -29437,10 +29529,10 @@
     r()
   ], SlSelect.prototype, "selectedOptions", 2);
   __decorateClass([
-    n$1()
+    n$2()
   ], SlSelect.prototype, "name", 2);
   __decorateClass([
-    n$1({
+    n$2({
       converter: {
         fromAttribute: (value) => value.split(" "),
         toAttribute: (value) => value.join(" ")
@@ -29451,52 +29543,52 @@
     defaultValue()
   ], SlSelect.prototype, "defaultValue", 2);
   __decorateClass([
-    n$1({ reflect: true })
+    n$2({ reflect: true })
   ], SlSelect.prototype, "size", 2);
   __decorateClass([
-    n$1()
+    n$2()
   ], SlSelect.prototype, "placeholder", 2);
   __decorateClass([
-    n$1({ type: Boolean, reflect: true })
+    n$2({ type: Boolean, reflect: true })
   ], SlSelect.prototype, "multiple", 2);
   __decorateClass([
-    n$1({ attribute: "max-options-visible", type: Number })
+    n$2({ attribute: "max-options-visible", type: Number })
   ], SlSelect.prototype, "maxOptionsVisible", 2);
   __decorateClass([
-    n$1({ type: Boolean, reflect: true })
+    n$2({ type: Boolean, reflect: true })
   ], SlSelect.prototype, "disabled", 2);
   __decorateClass([
-    n$1({ type: Boolean })
+    n$2({ type: Boolean })
   ], SlSelect.prototype, "clearable", 2);
   __decorateClass([
-    n$1({ type: Boolean, reflect: true })
+    n$2({ type: Boolean, reflect: true })
   ], SlSelect.prototype, "open", 2);
   __decorateClass([
-    n$1({ type: Boolean })
+    n$2({ type: Boolean })
   ], SlSelect.prototype, "hoist", 2);
   __decorateClass([
-    n$1({ type: Boolean, reflect: true })
+    n$2({ type: Boolean, reflect: true })
   ], SlSelect.prototype, "filled", 2);
   __decorateClass([
-    n$1({ type: Boolean, reflect: true })
+    n$2({ type: Boolean, reflect: true })
   ], SlSelect.prototype, "pill", 2);
   __decorateClass([
-    n$1()
+    n$2()
   ], SlSelect.prototype, "label", 2);
   __decorateClass([
-    n$1({ reflect: true })
+    n$2({ reflect: true })
   ], SlSelect.prototype, "placement", 2);
   __decorateClass([
-    n$1({ attribute: "help-text" })
+    n$2({ attribute: "help-text" })
   ], SlSelect.prototype, "helpText", 2);
   __decorateClass([
-    n$1({ reflect: true })
+    n$2({ reflect: true })
   ], SlSelect.prototype, "form", 2);
   __decorateClass([
-    n$1({ type: Boolean, reflect: true })
+    n$2({ type: Boolean, reflect: true })
   ], SlSelect.prototype, "required", 2);
   __decorateClass([
-    n$1()
+    n$2()
   ], SlSelect.prototype, "getTag", 2);
   __decorateClass([
     watch("disabled", { waitUntilFirstUpdate: true })
@@ -29525,7 +29617,7 @@
   SlSelect.define("sl-select");
 
   // src/components/option/option.styles.ts
-  var option_styles_default = i$3`
+  var option_styles_default = i$4`
   :host {
     display: block;
     user-select: none;
@@ -29712,10 +29804,10 @@
     r()
   ], SlOption.prototype, "hasHover", 2);
   __decorateClass([
-    n$1({ reflect: true })
+    n$2({ reflect: true })
   ], SlOption.prototype, "value", 2);
   __decorateClass([
-    n$1({ type: Boolean, reflect: true })
+    n$2({ type: Boolean, reflect: true })
   ], SlOption.prototype, "disabled", 2);
   __decorateClass([
     watch("disabled")
@@ -29806,10 +29898,10 @@
           color: #e23636;
           padding: 0px;
           ${!this.errorMessage && !this.errorMessage.length
-            ? i$3 `
+            ? i$4 `
               display: none;
             `
-            : i$3 `
+            : i$4 `
               display: block;
             `}
         }
@@ -29891,7 +29983,7 @@
     `;
       }
   };
-  DropdownMultiselect.styles = i$3 `
+  DropdownMultiselect.styles = i$4 `
     sl-select::part(tag__base) {
       font-size: 15px;
     }
@@ -29904,37 +29996,37 @@
       e$5('#selectElement')
   ], DropdownMultiselect.prototype, "selectElement", void 0);
   __decorate([
-      n$1({ type: String, reflect: true })
+      n$2({ type: String, reflect: true })
   ], DropdownMultiselect.prototype, "id", void 0);
   __decorate([
-      n$1({ type: Boolean })
+      n$2({ type: Boolean })
   ], DropdownMultiselect.prototype, "required", void 0);
   __decorate([
-      n$1({ type: Array })
+      n$2({ type: Array })
   ], DropdownMultiselect.prototype, "options", void 0);
   __decorate([
-      n$1({ type: String })
+      n$2({ type: String })
   ], DropdownMultiselect.prototype, "selectedValues", void 0);
   __decorate([
-      n$1({ type: String })
+      n$2({ type: String })
   ], DropdownMultiselect.prototype, "additionalTextBelowField", void 0);
   __decorate([
-      n$1({ type: String })
+      n$2({ type: String })
   ], DropdownMultiselect.prototype, "fieldLabel", void 0);
   __decorate([
-      n$1({ type: Array })
+      n$2({ type: Array })
   ], DropdownMultiselect.prototype, "slimmedOptions", void 0);
   __decorate([
-      n$1({ type: Object })
+      n$2({ type: Object })
   ], DropdownMultiselect.prototype, "lookupMap", void 0);
   __decorate([
-      n$1({ type: String })
+      n$2({ type: String })
   ], DropdownMultiselect.prototype, "selectedOptions", void 0);
   __decorate([
-      n$1({ type: String })
+      n$2({ type: String })
   ], DropdownMultiselect.prototype, "errorMessage", void 0);
   __decorate([
-      n$1({ type: Boolean })
+      n$2({ type: Boolean })
   ], DropdownMultiselect.prototype, "readOnly", void 0);
   DropdownMultiselect = __decorate([
       t$1('dropdown-multiselect')
@@ -30067,10 +30159,10 @@
           padding: 0px;
           position: absolute;
           ${!this.errorMessage && !((_a = this.errorMessage) === null || _a === void 0 ? void 0 : _a.length)
-            ? i$3 `
+            ? i$4 `
               display: none;
             `
-            : i$3 `
+            : i$4 `
               display: block;
             `}
         }
@@ -30123,7 +30215,7 @@
     `;
       }
   };
-  DateMultiSelect.styles = i$3 `
+  DateMultiSelect.styles = i$4 `
     sl-select::part(tag__base) {
       font-size: 15px;
     }
@@ -30145,43 +30237,43 @@
       e$5('#selectElement')
   ], DateMultiSelect.prototype, "selectElement", void 0);
   __decorate([
-      n$1({ type: String, reflect: true })
+      n$2({ type: String, reflect: true })
   ], DateMultiSelect.prototype, "id", void 0);
   __decorate([
-      n$1({ type: Boolean })
+      n$2({ type: Boolean })
   ], DateMultiSelect.prototype, "required", void 0);
   __decorate([
-      n$1({ type: String })
+      n$2({ type: String })
   ], DateMultiSelect.prototype, "errorMessage", void 0);
   __decorate([
-      n$1({ type: String, reflect: true })
+      n$2({ type: String, reflect: true })
   ], DateMultiSelect.prototype, "inputValue", void 0);
   __decorate([
-      n$1({ type: Array, reflect: true })
+      n$2({ type: Array, reflect: true })
   ], DateMultiSelect.prototype, "selectedOptions", void 0);
   __decorate([
-      n$1({ type: Array, reflect: true })
+      n$2({ type: Array, reflect: true })
   ], DateMultiSelect.prototype, "options", void 0);
   __decorate([
-      n$1({ type: String })
+      n$2({ type: String })
   ], DateMultiSelect.prototype, "additionalTextBelowField", void 0);
   __decorate([
-      n$1({ type: String })
+      n$2({ type: String })
   ], DateMultiSelect.prototype, "fieldLabel", void 0);
   __decorate([
-      n$1({ type: Object })
+      n$2({ type: Object })
   ], DateMultiSelect.prototype, "lookupMap", void 0);
   __decorate([
-      n$1({ type: Boolean })
+      n$2({ type: Boolean })
   ], DateMultiSelect.prototype, "readOnly", void 0);
   __decorate([
-      n$1({ type: Function })
+      n$2({ type: Function })
   ], DateMultiSelect.prototype, "validation", void 0);
   DateMultiSelect = __decorate([
       t$1('date-multiselect')
   ], DateMultiSelect);
 
-  const logger$5 = Logger('common/typesOfFood');
+  const logger$7 = Logger('common/typesOfFood');
   POWERPOD.typesOfFood = {
       getTypesOfFood,
       processTypesOfFoodData,
@@ -30189,12 +30281,12 @@
   async function getTypesOfFood() {
       const { data } = await getTypesOfFoodData();
       if (data) {
-          logger$5.info({
+          logger$7.info({
               fn: getTypesOfFood,
               message: 'successfully extracted types of food options',
           });
           const res = processTypesOfFoodData(data);
-          logger$5.info({
+          logger$7.info({
               fn: getTypesOfFood,
               message: 'successfully extracted types of food:',
               data: res,
@@ -30202,7 +30294,7 @@
           return Promise.resolve(res);
       }
       let errorMsg = 'failed to extract types of food from data';
-      logger$5.warn({
+      logger$7.warn({
           fn: getTypesOfFood,
           message: errorMsg,
           data,
@@ -30222,7 +30314,7 @@
   }
 
   var ClaimInfoGridVLB_1;
-  const logger$4 = Logger('components/ClaimInfoGridVLB');
+  const logger$6 = Logger('components/ClaimInfoGridVLB');
   let ClaimInfoGridVLB = ClaimInfoGridVLB_1 = class ClaimInfoGridVLB extends s$1 {
       constructor() {
           super(...arguments);
@@ -30351,7 +30443,7 @@
           .options=${this.typesOfFood}
           .selectedOptions=${cellValue}
           @onChangeDropdownMultiselectValues=${(e) => {
-                logger$4.info({
+                logger$6.info({
                     fn: 'ClaimInfoGridVLB',
                     message: `onChangeDropdownMultiselectValues called`,
                     data: {
@@ -30513,10 +30605,10 @@
           padding: 0px;
           position: absolute;
           ${!this.errorMessage && !((_a = this.errorMessage) === null || _a === void 0 ? void 0 : _a.length)
-            ? i$3 `
+            ? i$4 `
                   display: none;
                 `
-            : i$3 `
+            : i$4 `
                   display: block;
                 `}
         }
@@ -30525,10 +30617,10 @@
           border-collapse: collapse;
           margin: 25px 0;
           ${!this.readOnly
-            ? i$3 `
+            ? i$4 `
                   font-size: 0.9em;
                 `
-            : i$3 ``}
+            : i$4 ``}
           font-family: sans-serif;
           min-width: 400px;
           box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
@@ -30541,10 +30633,10 @@
         .styled-table th {
           padding: 12px 15px;
           ${!this.readOnly
-            ? i$3 `
+            ? i$4 `
                   font-size: 15px;
                 `
-            : i$3 ``}
+            : i$4 ``}
         }
         .styled-table td {
           padding: 12px 15px 24px;
@@ -30589,10 +30681,10 @@
         .add-another-btn {
           line-height: 1.5;
           ${!this.readOnly
-            ? i$3 `
+            ? i$4 `
                   font-size: 13px;
                 `
-            : i$3 ``}
+            : i$4 ``}
         }
         .add-another-btn span {
           padding-bottom: 2px;
@@ -30666,28 +30758,28 @@
       dates: '',
   };
   __decorate([
-      n$1({ type: String, reflect: true })
+      n$2({ type: String, reflect: true })
   ], ClaimInfoGridVLB.prototype, "id", void 0);
   __decorate([
-      n$1({ type: Object })
+      n$2({ type: Object })
   ], ClaimInfoGridVLB.prototype, "columns", void 0);
   __decorate([
-      n$1({ type: Object })
+      n$2({ type: Object })
   ], ClaimInfoGridVLB.prototype, "header", void 0);
   __decorate([
-      n$1({ type: Array })
+      n$2({ type: Array })
   ], ClaimInfoGridVLB.prototype, "rows", void 0);
   __decorate([
-      n$1({ type: Array })
+      n$2({ type: Array })
   ], ClaimInfoGridVLB.prototype, "typesOfFood", void 0);
   __decorate([
-      n$1({ type: Boolean })
+      n$2({ type: Boolean })
   ], ClaimInfoGridVLB.prototype, "readOnly", void 0);
   __decorate([
-      n$1({ type: Object, reflect: true })
+      n$2({ type: Object, reflect: true })
   ], ClaimInfoGridVLB.prototype, "cellErrors", void 0);
   __decorate([
-      n$1({ type: String })
+      n$2({ type: String })
   ], ClaimInfoGridVLB.prototype, "errorMessage", void 0);
   ClaimInfoGridVLB = ClaimInfoGridVLB_1 = __decorate([
       t$1('claim-info-grid-vlb')
@@ -30787,28 +30879,4319 @@
       }
   };
   __decorate([
-      n$1({ type: String })
+      n$2({ type: String })
   ], CommoditiesMultiSelect.prototype, "id", void 0);
   __decorate([
-      n$1({ type: Object })
+      n$2({ type: Object })
   ], CommoditiesMultiSelect.prototype, "commodities", void 0);
   __decorate([
-      n$1({ type: String, reflect: true })
+      n$2({ type: String, reflect: true })
   ], CommoditiesMultiSelect.prototype, "selectedValues", void 0);
   __decorate([
-      n$1({ type: Boolean })
+      n$2({ type: Boolean })
   ], CommoditiesMultiSelect.prototype, "loaded", void 0);
   CommoditiesMultiSelect = __decorate([
       t$1('commodities-multiselect')
   ], CommoditiesMultiSelect);
 
-  var logger$3 = Logger('workbook/workbook');
-  function initWorkbook() {
-    preloadRequestVerificationToken();
-    logger$3.info({
-      fn: initWorkbook,
-      message: "workbook initialized!"
+  var logger$5 = Logger('common/workbook');
+  POWERPOD.workbookUtils = {
+    getWorkbookId: getWorkbookId,
+    loadWorkbookData: loadWorkbookData,
+    isWorkbookInitialized: isWorkbookInitialized,
+    getWorkbookData: getWorkbookData,
+    getCurrentWorkbookId: getCurrentWorkbookId,
+    getNestedChapterStructure: getNestedChapterStructure
+  };
+
+  /**
+   * Gets the workbook ID from URL parameters or DOM elements
+   * @returns {string|null} The workbook ID or null if not found
+   */
+  function getWorkbookId() {
+    if (window.location.hostname === 'localhost') {
+      return 'test-workbook-id'; // Default for local development
+    }
+
+    // Try to get workbook ID from URL parameters
+    var params = new URLSearchParams(window.location.search);
+    var workbookId = params.get('id');
+    if (workbookId) {
+      logger$5.info({
+        fn: getWorkbookId,
+        message: "Successfully retrieved workbook id from url params: ".concat(workbookId)
+      });
+      return workbookId;
+    }
+
+    // Try to get from DOM element (similar to other forms)
+    var workbookElement = document.querySelector('#quartech_workbook');
+    if (workbookElement && 'value' in workbookElement && typeof workbookElement.value === 'string') {
+      workbookId = workbookElement.value;
+      logger$5.info({
+        fn: getWorkbookId,
+        message: "Successfully retrieved workbook id from DOM element: ".concat(workbookId)
+      });
+      return workbookId;
+    }
+    logger$5.warn({
+      fn: getWorkbookId,
+      message: 'Could not find workbook id in URL params or DOM elements'
     });
+    return null;
+  }
+
+  /**
+   * Loads workbook data from the API and stores it in POWERPOD.workbook
+   * @param {string} workbookId - The workbook ID to load
+   * @returns {Promise<Object|null>} The workbook data or null if failed
+   */
+  function loadWorkbookData(_x) {
+    return _loadWorkbookData.apply(this, arguments);
+  }
+
+  /**
+   * Checks if the workbook has been initialized
+   * @returns {boolean} True if workbook is initialized
+   */
+  function _loadWorkbookData() {
+    _loadWorkbookData = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee(workbookId) {
+      var response, workbookData;
+      return _regeneratorRuntime().wrap(function _callee$(_context) {
+        while (1) switch (_context.prev = _context.next) {
+          case 0:
+            if (workbookId) {
+              _context.next = 3;
+              break;
+            }
+            logger$5.warn({
+              fn: loadWorkbookData,
+              message: 'No workbook ID provided'
+            });
+            return _context.abrupt("return", null);
+          case 3:
+            _context.prev = 3;
+            logger$5.info({
+              fn: loadWorkbookData,
+              message: "Fetching workbook data for ID: ".concat(workbookId)
+            });
+            _context.next = 7;
+            return getWorkbookDataById({
+              id: workbookId
+            });
+          case 7:
+            response = _context.sent;
+            workbookData = response.data;
+            logger$5.info({
+              fn: loadWorkbookData,
+              message: 'Successfully fetched workbook data',
+              data: workbookData
+            });
+
+            // Store workbook data globally for use by components
+            // @ts-ignore
+            POWERPOD.workbook = {
+              id: workbookId,
+              data: workbookData,
+              initialized: true
+            };
+            return _context.abrupt("return", workbookData);
+          case 14:
+            _context.prev = 14;
+            _context.t0 = _context["catch"](3);
+            logger$5.error({
+              fn: loadWorkbookData,
+              message: 'Failed to fetch workbook data',
+              data: {
+                workbookId: workbookId,
+                error: _context.t0
+              }
+            });
+            return _context.abrupt("return", null);
+          case 18:
+          case "end":
+            return _context.stop();
+        }
+      }, _callee, null, [[3, 14]]);
+    }));
+    return _loadWorkbookData.apply(this, arguments);
+  }
+  function isWorkbookInitialized() {
+    var _POWERPOD$workbook;
+    // @ts-ignore
+    return ((_POWERPOD$workbook = POWERPOD.workbook) === null || _POWERPOD$workbook === void 0 ? void 0 : _POWERPOD$workbook.initialized) === true;
+  }
+
+  /**
+   * Gets the current workbook data
+   * @returns {Object|null} The workbook data or null if not loaded
+   */
+  function getWorkbookData() {
+    var _POWERPOD$workbook2;
+    // @ts-ignore
+    return ((_POWERPOD$workbook2 = POWERPOD.workbook) === null || _POWERPOD$workbook2 === void 0 ? void 0 : _POWERPOD$workbook2.data) || null;
+  }
+
+  /**
+   * Gets the current workbook ID
+   * @returns {string|null} The workbook ID or null if not loaded
+   */
+  function getCurrentWorkbookId() {
+    var _POWERPOD$workbook3;
+    // @ts-ignore
+    return ((_POWERPOD$workbook3 = POWERPOD.workbook) === null || _POWERPOD$workbook3 === void 0 ? void 0 : _POWERPOD$workbook3.id) || null;
+  }
+
+  /**
+   * Gets the nested chapter structure with subchapters and questions
+   * @returns {Array|null} The nested chapter structure or null if not loaded
+   */
+  function getNestedChapterStructure() {
+    var _POWERPOD$workbook4;
+    // @ts-ignore
+    return ((_POWERPOD$workbook4 = POWERPOD.workbook) === null || _POWERPOD$workbook4 === void 0 ? void 0 : _POWERPOD$workbook4.nestedStructure) || null;
+  }
+
+  var logger$4 = Logger('common/chaptersAndQuestions');
+  POWERPOD.chaptersAndQuestionsUtils = {
+    loadChaptersAndQuestions: loadChaptersAndQuestions,
+    getStoredChaptersData: getStoredChaptersData,
+    getStoredQuestionsData: getStoredQuestionsData,
+    isChaptersAndQuestionsLoaded: isChaptersAndQuestionsLoaded,
+    buildNestedChapterStructure: buildNestedChapterStructure,
+    getChaptersWithNestedQuestionsAndSubchapters: getChaptersWithNestedQuestionsAndSubchapters
+  };
+
+  /**
+   * Loads chapters and workbook questions data from the API and stores them in POWERPOD.workbook
+   * @returns {Promise<Object|null>} Object with chaptersData and questionsData, or null if failed
+   */
+  function loadChaptersAndQuestions() {
+    return _loadChaptersAndQuestions.apply(this, arguments);
+  }
+
+  /**
+   * Gets the stored chapters data
+   * @returns {Array|null} The chapters data or null if not loaded
+   */
+  function _loadChaptersAndQuestions() {
+    _loadChaptersAndQuestions = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee() {
+      var _chaptersData$value, _questionsData$value, _yield$Promise$all, _yield$Promise$all2, chaptersResponse, questionsResponse, chaptersData, questionsData;
+      return _regeneratorRuntime().wrap(function _callee$(_context) {
+        while (1) switch (_context.prev = _context.next) {
+          case 0:
+            _context.prev = 0;
+            logger$4.info({
+              fn: loadChaptersAndQuestions,
+              message: 'Loading chapters and workbook questions data...'
+            });
+
+            // Load chapters and workbook questions in parallel
+            _context.next = 4;
+            return Promise.all([getChaptersData(), getWorkbookQuestionsData()]);
+          case 4:
+            _yield$Promise$all = _context.sent;
+            _yield$Promise$all2 = _slicedToArray(_yield$Promise$all, 2);
+            chaptersResponse = _yield$Promise$all2[0];
+            questionsResponse = _yield$Promise$all2[1];
+            chaptersData = chaptersResponse.data;
+            questionsData = questionsResponse.data;
+            logger$4.info({
+              fn: loadChaptersAndQuestions,
+              message: 'Successfully loaded chapters and workbook questions data',
+              data: {
+                chaptersCount: (chaptersData === null || chaptersData === void 0 || (_chaptersData$value = chaptersData.value) === null || _chaptersData$value === void 0 ? void 0 : _chaptersData$value.length) || 0,
+                questionsCount: (questionsData === null || questionsData === void 0 || (_questionsData$value = questionsData.value) === null || _questionsData$value === void 0 ? void 0 : _questionsData$value.length) || 0
+              }
+            });
+
+            // Store data in POWERPOD object
+            // @ts-ignore
+            POWERPOD.workbook = POWERPOD.workbook || {};
+            // @ts-ignore
+            POWERPOD.workbook.chapters = chaptersData;
+            // @ts-ignore
+            POWERPOD.workbook.questions = questionsData;
+            // @ts-ignore
+            POWERPOD.workbook.chaptersAndQuestionsLoaded = true;
+            return _context.abrupt("return", {
+              chaptersData: chaptersData,
+              questionsData: questionsData
+            });
+          case 18:
+            _context.prev = 18;
+            _context.t0 = _context["catch"](0);
+            logger$4.error({
+              fn: loadChaptersAndQuestions,
+              message: 'Failed to load chapters and workbook questions data',
+              data: {
+                error: _context.t0
+              }
+            });
+            return _context.abrupt("return", null);
+          case 22:
+          case "end":
+            return _context.stop();
+        }
+      }, _callee, null, [[0, 18]]);
+    }));
+    return _loadChaptersAndQuestions.apply(this, arguments);
+  }
+  function getStoredChaptersData() {
+    var _POWERPOD$workbook;
+    // @ts-ignore
+    return ((_POWERPOD$workbook = POWERPOD.workbook) === null || _POWERPOD$workbook === void 0 ? void 0 : _POWERPOD$workbook.chapters) || null;
+  }
+
+  /**
+   * Gets the stored workbook questions data
+   * @returns {Array|null} The questions data or null if not loaded
+   */
+  function getStoredQuestionsData() {
+    var _POWERPOD$workbook2;
+    // @ts-ignore
+    return ((_POWERPOD$workbook2 = POWERPOD.workbook) === null || _POWERPOD$workbook2 === void 0 ? void 0 : _POWERPOD$workbook2.questions) || null;
+  }
+
+  /**
+   * Checks if both chapters and questions data have been loaded
+   * @returns {boolean} True if both datasets are loaded
+   */
+  function isChaptersAndQuestionsLoaded() {
+    var _POWERPOD$workbook3;
+    // @ts-ignore
+    return ((_POWERPOD$workbook3 = POWERPOD.workbook) === null || _POWERPOD$workbook3 === void 0 ? void 0 : _POWERPOD$workbook3.chaptersAndQuestionsLoaded) === true;
+  }
+
+  /**
+   * Builds a nested chapter structure with subchapters and questions
+   * @returns {Array} Array of main chapters with nested subchapters and questions
+   */
+  function buildNestedChapterStructure() {
+    var chapters = getStoredChaptersData();
+    var questions = getStoredQuestionsData();
+    if (!(chapters !== null && chapters !== void 0 && chapters.value) || !(questions !== null && questions !== void 0 && questions.value)) return [];
+
+    // Separate main chapters and subchapters
+    var mainChapters = chapters.value.filter(function (chapter) {
+      return !chapter._quartech_parentchapter_value;
+    });
+    var subchapters = chapters.value.filter(function (chapter) {
+      return chapter._quartech_parentchapter_value;
+    });
+
+    // Build nested structure
+    return mainChapters.map(function (mainChapter) {
+      // Find subchapters for this main chapter
+      var chapterSubchapters = subchapters.filter(function (subchapter) {
+        return subchapter._quartech_parentchapter_value === mainChapter.quartech_chapterid;
+      }).map(function (subchapter) {
+        return _objectSpread2(_objectSpread2({}, subchapter), {}, {
+          questions: questions.value.filter(function (question) {
+            return question._quartech_chapter_value === subchapter.quartech_chapterid;
+          }).sort(function (a, b) {
+            return (a.quartech_order || 0) - (b.quartech_order || 0);
+          })
+        });
+      }).sort(function (a, b) {
+        return (a.quartech_order || 0) - (b.quartech_order || 0);
+      });
+
+      // Find questions directly associated with the main chapter
+      var mainChapterQuestions = questions.value.filter(function (question) {
+        return question._quartech_chapter_value === mainChapter.quartech_chapterid;
+      }).sort(function (a, b) {
+        return (a.quartech_order || 0) - (b.quartech_order || 0);
+      });
+      return _objectSpread2(_objectSpread2({}, mainChapter), {}, {
+        questions: mainChapterQuestions,
+        subchapters: chapterSubchapters
+      });
+    }).sort(function (a, b) {
+      return (a.quartech_order || 0) - (b.quartech_order || 0);
+    });
+  }
+
+  /**
+   * Gets chapters with nested subchapters and questions in a clean structure
+   * @returns {Array} Array of chapters with nested structure
+   */
+  function getChaptersWithNestedQuestionsAndSubchapters() {
+    var nestedStructure = buildNestedChapterStructure();
+    return nestedStructure.map(function (chapter) {
+      return {
+        id: chapter.quartech_chapterid,
+        name: chapter.quartech_name,
+        label: chapter.quartech_label,
+        order: chapter.quartech_order,
+        description: chapter.quartech_description,
+        tooltip: chapter.quartech_tooltip,
+        imageUrl: chapter.quartech_imageurl,
+        questions: chapter.questions.map(function (question) {
+          return {
+            id: question.quartech_workbookquestionid,
+            name: question.quartech_name,
+            label: question.quartech_label,
+            order: question.quartech_order,
+            questionType: question.quartech_questiontype,
+            textAboveQuestion: question.quartech_textabovequestion,
+            textBelowQuestion: question.quartech_textbelowquestion,
+            tooltip: question.quartech_tooltip,
+            responseOptionColor: question.quartech_responseoptioncolor
+          };
+        }),
+        subchapters: chapter.subchapters.map(function (subchapter) {
+          return {
+            id: subchapter.quartech_chapterid,
+            name: subchapter.quartech_name,
+            label: subchapter.quartech_label,
+            order: subchapter.quartech_order,
+            description: subchapter.quartech_description,
+            tooltip: subchapter.quartech_tooltip,
+            imageUrl: subchapter.quartech_imageurl,
+            parentChapterId: subchapter._quartech_parentchapter_value,
+            questions: subchapter.questions.map(function (question) {
+              return {
+                id: question.quartech_workbookquestionid,
+                name: question.quartech_name,
+                label: question.quartech_label,
+                order: question.quartech_order,
+                questionType: question.quartech_questiontype,
+                textAboveQuestion: question.quartech_textabovequestion,
+                textBelowQuestion: question.quartech_textbelowquestion,
+                tooltip: question.quartech_tooltip,
+                responseOptionColor: question.quartech_responseoptioncolor
+              };
+            })
+          };
+        })
+      };
+    });
+  }
+
+  // src/components/details/details.styles.ts
+  var details_styles_default = i$4`
+  :host {
+    display: block;
+  }
+
+  .details {
+    border: solid 1px var(--sl-color-neutral-200);
+    border-radius: var(--sl-border-radius-medium);
+    background-color: var(--sl-color-neutral-0);
+    overflow-anchor: none;
+  }
+
+  .details--disabled {
+    opacity: 0.5;
+  }
+
+  .details__header {
+    display: flex;
+    align-items: center;
+    border-radius: inherit;
+    padding: var(--sl-spacing-medium);
+    user-select: none;
+    -webkit-user-select: none;
+    cursor: pointer;
+  }
+
+  .details__header::-webkit-details-marker {
+    display: none;
+  }
+
+  .details__header:focus {
+    outline: none;
+  }
+
+  .details__header:focus-visible {
+    outline: var(--sl-focus-ring);
+    outline-offset: calc(1px + var(--sl-focus-ring-offset));
+  }
+
+  .details--disabled .details__header {
+    cursor: not-allowed;
+  }
+
+  .details--disabled .details__header:focus-visible {
+    outline: none;
+    box-shadow: none;
+  }
+
+  .details__summary {
+    flex: 1 1 auto;
+    display: flex;
+    align-items: center;
+  }
+
+  .details__summary-icon {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    transition: var(--sl-transition-medium) rotate ease;
+  }
+
+  .details--open .details__summary-icon {
+    rotate: 90deg;
+  }
+
+  .details--open.details--rtl .details__summary-icon {
+    rotate: -90deg;
+  }
+
+  .details--open slot[name='expand-icon'],
+  .details:not(.details--open) slot[name='collapse-icon'] {
+    display: none;
+  }
+
+  .details__body {
+    overflow: hidden;
+  }
+
+  .details__content {
+    display: block;
+    padding: var(--sl-spacing-medium);
+  }
+`;
+
+  var SlDetails = class extends ShoelaceElement {
+    constructor() {
+      super(...arguments);
+      this.localize = new LocalizeController(this);
+      this.open = false;
+      this.disabled = false;
+    }
+    firstUpdated() {
+      this.body.style.height = this.open ? "auto" : "0";
+      if (this.open) {
+        this.details.open = true;
+      }
+      this.detailsObserver = new MutationObserver((changes) => {
+        for (const change of changes) {
+          if (change.type === "attributes" && change.attributeName === "open") {
+            if (this.details.open) {
+              this.show();
+            } else {
+              this.hide();
+            }
+          }
+        }
+      });
+      this.detailsObserver.observe(this.details, { attributes: true });
+    }
+    disconnectedCallback() {
+      super.disconnectedCallback();
+      this.detailsObserver.disconnect();
+    }
+    handleSummaryClick(event) {
+      event.preventDefault();
+      if (!this.disabled) {
+        if (this.open) {
+          this.hide();
+        } else {
+          this.show();
+        }
+        this.header.focus();
+      }
+    }
+    handleSummaryKeyDown(event) {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        if (this.open) {
+          this.hide();
+        } else {
+          this.show();
+        }
+      }
+      if (event.key === "ArrowUp" || event.key === "ArrowLeft") {
+        event.preventDefault();
+        this.hide();
+      }
+      if (event.key === "ArrowDown" || event.key === "ArrowRight") {
+        event.preventDefault();
+        this.show();
+      }
+    }
+    async handleOpenChange() {
+      if (this.open) {
+        this.details.open = true;
+        const slShow = this.emit("sl-show", { cancelable: true });
+        if (slShow.defaultPrevented) {
+          this.open = false;
+          this.details.open = false;
+          return;
+        }
+        await stopAnimations(this.body);
+        const { keyframes, options } = getAnimation(this, "details.show", { dir: this.localize.dir() });
+        await animateTo(this.body, shimKeyframesHeightAuto(keyframes, this.body.scrollHeight), options);
+        this.body.style.height = "auto";
+        this.emit("sl-after-show");
+      } else {
+        const slHide = this.emit("sl-hide", { cancelable: true });
+        if (slHide.defaultPrevented) {
+          this.details.open = true;
+          this.open = true;
+          return;
+        }
+        await stopAnimations(this.body);
+        const { keyframes, options } = getAnimation(this, "details.hide", { dir: this.localize.dir() });
+        await animateTo(this.body, shimKeyframesHeightAuto(keyframes, this.body.scrollHeight), options);
+        this.body.style.height = "auto";
+        this.details.open = false;
+        this.emit("sl-after-hide");
+      }
+    }
+    /** Shows the details. */
+    async show() {
+      if (this.open || this.disabled) {
+        return void 0;
+      }
+      this.open = true;
+      return waitForEvent(this, "sl-after-show");
+    }
+    /** Hides the details */
+    async hide() {
+      if (!this.open || this.disabled) {
+        return void 0;
+      }
+      this.open = false;
+      return waitForEvent(this, "sl-after-hide");
+    }
+    render() {
+      const isRtl = this.localize.dir() === "rtl";
+      return x`
+      <details
+        part="base"
+        class=${e$3({
+      details: true,
+      "details--open": this.open,
+      "details--disabled": this.disabled,
+      "details--rtl": isRtl
+    })}
+      >
+        <summary
+          part="header"
+          id="header"
+          class="details__header"
+          role="button"
+          aria-expanded=${this.open ? "true" : "false"}
+          aria-controls="content"
+          aria-disabled=${this.disabled ? "true" : "false"}
+          tabindex=${this.disabled ? "-1" : "0"}
+          @click=${this.handleSummaryClick}
+          @keydown=${this.handleSummaryKeyDown}
+        >
+          <slot name="summary" part="summary" class="details__summary">${this.summary}</slot>
+
+          <span part="summary-icon" class="details__summary-icon">
+            <slot name="expand-icon">
+              <sl-icon library="system" name=${isRtl ? "chevron-left" : "chevron-right"}></sl-icon>
+            </slot>
+            <slot name="collapse-icon">
+              <sl-icon library="system" name=${isRtl ? "chevron-left" : "chevron-right"}></sl-icon>
+            </slot>
+          </span>
+        </summary>
+
+        <div class="details__body" role="region" aria-labelledby="header">
+          <slot part="content" id="content" class="details__content"></slot>
+        </div>
+      </details>
+    `;
+    }
+  };
+  SlDetails.styles = [component_styles_default, details_styles_default];
+  SlDetails.dependencies = {
+    "sl-icon": SlIcon
+  };
+  __decorateClass([
+    e$5(".details")
+  ], SlDetails.prototype, "details", 2);
+  __decorateClass([
+    e$5(".details__header")
+  ], SlDetails.prototype, "header", 2);
+  __decorateClass([
+    e$5(".details__body")
+  ], SlDetails.prototype, "body", 2);
+  __decorateClass([
+    e$5(".details__expand-icon-slot")
+  ], SlDetails.prototype, "expandIconSlot", 2);
+  __decorateClass([
+    n$2({ type: Boolean, reflect: true })
+  ], SlDetails.prototype, "open", 2);
+  __decorateClass([
+    n$2()
+  ], SlDetails.prototype, "summary", 2);
+  __decorateClass([
+    n$2({ type: Boolean, reflect: true })
+  ], SlDetails.prototype, "disabled", 2);
+  __decorateClass([
+    watch("open", { waitUntilFirstUpdate: true })
+  ], SlDetails.prototype, "handleOpenChange", 1);
+  setDefaultAnimation("details.show", {
+    keyframes: [
+      { height: "0", opacity: "0" },
+      { height: "auto", opacity: "1" }
+    ],
+    options: { duration: 250, easing: "linear" }
+  });
+  setDefaultAnimation("details.hide", {
+    keyframes: [
+      { height: "auto", opacity: "1" },
+      { height: "0", opacity: "0" }
+    ],
+    options: { duration: 250, easing: "linear" }
+  });
+
+  SlDetails.define("sl-details");
+
+  // src/components/progress-bar/progress-bar.styles.ts
+  var progress_bar_styles_default = i$4`
+  :host {
+    --height: 1rem;
+    --track-color: var(--sl-color-neutral-200);
+    --indicator-color: var(--sl-color-primary-600);
+    --label-color: var(--sl-color-neutral-0);
+
+    display: block;
+  }
+
+  .progress-bar {
+    position: relative;
+    background-color: var(--track-color);
+    height: var(--height);
+    border-radius: var(--sl-border-radius-pill);
+    box-shadow: inset var(--sl-shadow-small);
+    overflow: hidden;
+  }
+
+  .progress-bar__indicator {
+    height: 100%;
+    font-family: var(--sl-font-sans);
+    font-size: 12px;
+    font-weight: var(--sl-font-weight-normal);
+    background-color: var(--indicator-color);
+    color: var(--label-color);
+    text-align: center;
+    line-height: var(--height);
+    white-space: nowrap;
+    overflow: hidden;
+    transition:
+      400ms width,
+      400ms background-color;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  /* Indeterminate */
+  .progress-bar--indeterminate .progress-bar__indicator {
+    position: absolute;
+    animation: indeterminate 2.5s infinite cubic-bezier(0.37, 0, 0.63, 1);
+  }
+
+  .progress-bar--indeterminate.progress-bar--rtl .progress-bar__indicator {
+    animation-name: indeterminate-rtl;
+  }
+
+  @media (forced-colors: active) {
+    .progress-bar {
+      outline: solid 1px SelectedItem;
+      background-color: var(--sl-color-neutral-0);
+    }
+
+    .progress-bar__indicator {
+      outline: solid 1px SelectedItem;
+      background-color: SelectedItem;
+    }
+  }
+
+  @keyframes indeterminate {
+    0% {
+      left: -50%;
+      width: 50%;
+    }
+    75%,
+    100% {
+      left: 100%;
+      width: 50%;
+    }
+  }
+
+  @keyframes indeterminate-rtl {
+    0% {
+      right: -50%;
+      width: 50%;
+    }
+    75%,
+    100% {
+      right: 100%;
+      width: 50%;
+    }
+  }
+`;
+
+  /**
+   * @license
+   * Copyright 2018 Google LLC
+   * SPDX-License-Identifier: BSD-3-Clause
+   */const n="important",i=" !"+n,o=e$4(class extends i$1{constructor(t$1){if(super(t$1),t$1.type!==t.ATTRIBUTE||"style"!==t$1.name||t$1.strings?.length>2)throw Error("The `styleMap` directive must be used in the `style` attribute and must be the only part in the attribute.")}render(t){return Object.keys(t).reduce(((e,r)=>{const s=t[r];return null==s?e:e+`${r=r.includes("-")?r:r.replace(/(?:^(webkit|moz|ms|o)|)(?=[A-Z])/g,"-$&").toLowerCase()}:${s};`}),"")}update(e,[r]){const{style:s}=e.element;if(void 0===this.ft)return this.ft=new Set(Object.keys(r)),this.render(r);for(const t of this.ft)null==r[t]&&(this.ft.delete(t),t.includes("-")?s.removeProperty(t):s[t]=null);for(const t in r){const e=r[t];if(null!=e){this.ft.add(t);const r="string"==typeof e&&e.endsWith(i);t.includes("-")||r?s.setProperty(t,r?e.slice(0,-11):e,r?n:""):s[t]=e;}}return w}});
+
+  var SlProgressBar = class extends ShoelaceElement {
+    constructor() {
+      super(...arguments);
+      this.localize = new LocalizeController(this);
+      this.value = 0;
+      this.indeterminate = false;
+      this.label = "";
+    }
+    render() {
+      return x`
+      <div
+        part="base"
+        class=${e$3({
+      "progress-bar": true,
+      "progress-bar--indeterminate": this.indeterminate,
+      "progress-bar--rtl": this.localize.dir() === "rtl"
+    })}
+        role="progressbar"
+        title=${o$2(this.title)}
+        aria-label=${this.label.length > 0 ? this.label : this.localize.term("progress")}
+        aria-valuemin="0"
+        aria-valuemax="100"
+        aria-valuenow=${this.indeterminate ? 0 : this.value}
+      >
+        <div part="indicator" class="progress-bar__indicator" style=${o({ width: `${this.value}%` })}>
+          ${!this.indeterminate ? x` <slot part="label" class="progress-bar__label"></slot> ` : ""}
+        </div>
+      </div>
+    `;
+    }
+  };
+  SlProgressBar.styles = [component_styles_default, progress_bar_styles_default];
+  __decorateClass([
+    n$2({ type: Number, reflect: true })
+  ], SlProgressBar.prototype, "value", 2);
+  __decorateClass([
+    n$2({ type: Boolean, reflect: true })
+  ], SlProgressBar.prototype, "indeterminate", 2);
+  __decorateClass([
+    n$2()
+  ], SlProgressBar.prototype, "label", 2);
+
+  SlProgressBar.define("sl-progress-bar");
+
+  // src/components/tab-group/tab-group.styles.ts
+  var tab_group_styles_default = i$4`
+  :host {
+    --indicator-color: var(--sl-color-primary-600);
+    --track-color: var(--sl-color-neutral-200);
+    --track-width: 2px;
+
+    display: block;
+  }
+
+  .tab-group {
+    display: flex;
+    border-radius: 0;
+  }
+
+  .tab-group__tabs {
+    display: flex;
+    position: relative;
+  }
+
+  .tab-group__indicator {
+    position: absolute;
+    transition:
+      var(--sl-transition-fast) translate ease,
+      var(--sl-transition-fast) width ease;
+  }
+
+  .tab-group--has-scroll-controls .tab-group__nav-container {
+    position: relative;
+    padding: 0 var(--sl-spacing-x-large);
+  }
+
+  .tab-group__body {
+    display: block;
+    overflow: auto;
+  }
+
+  .tab-group__scroll-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: var(--sl-spacing-x-large);
+  }
+
+  .tab-group__scroll-button--start {
+    left: 0;
+  }
+
+  .tab-group__scroll-button--end {
+    right: 0;
+  }
+
+  .tab-group--rtl .tab-group__scroll-button--start {
+    left: auto;
+    right: 0;
+  }
+
+  .tab-group--rtl .tab-group__scroll-button--end {
+    left: 0;
+    right: auto;
+  }
+
+  /*
+   * Top
+   */
+
+  .tab-group--top {
+    flex-direction: column;
+  }
+
+  .tab-group--top .tab-group__nav-container {
+    order: 1;
+  }
+
+  .tab-group--top .tab-group__nav {
+    display: flex;
+    overflow-x: auto;
+
+    /* Hide scrollbar in Firefox */
+    scrollbar-width: none;
+  }
+
+  /* Hide scrollbar in Chrome/Safari */
+  .tab-group--top .tab-group__nav::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+  }
+
+  .tab-group--top .tab-group__tabs {
+    flex: 1 1 auto;
+    position: relative;
+    flex-direction: row;
+    border-bottom: solid var(--track-width) var(--track-color);
+  }
+
+  .tab-group--top .tab-group__indicator {
+    bottom: calc(-1 * var(--track-width));
+    border-bottom: solid var(--track-width) var(--indicator-color);
+  }
+
+  .tab-group--top .tab-group__body {
+    order: 2;
+  }
+
+  .tab-group--top ::slotted(sl-tab-panel) {
+    --padding: var(--sl-spacing-medium) 0;
+  }
+
+  /*
+   * Bottom
+   */
+
+  .tab-group--bottom {
+    flex-direction: column;
+  }
+
+  .tab-group--bottom .tab-group__nav-container {
+    order: 2;
+  }
+
+  .tab-group--bottom .tab-group__nav {
+    display: flex;
+    overflow-x: auto;
+
+    /* Hide scrollbar in Firefox */
+    scrollbar-width: none;
+  }
+
+  /* Hide scrollbar in Chrome/Safari */
+  .tab-group--bottom .tab-group__nav::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+  }
+
+  .tab-group--bottom .tab-group__tabs {
+    flex: 1 1 auto;
+    position: relative;
+    flex-direction: row;
+    border-top: solid var(--track-width) var(--track-color);
+  }
+
+  .tab-group--bottom .tab-group__indicator {
+    top: calc(-1 * var(--track-width));
+    border-top: solid var(--track-width) var(--indicator-color);
+  }
+
+  .tab-group--bottom .tab-group__body {
+    order: 1;
+  }
+
+  .tab-group--bottom ::slotted(sl-tab-panel) {
+    --padding: var(--sl-spacing-medium) 0;
+  }
+
+  /*
+   * Start
+   */
+
+  .tab-group--start {
+    flex-direction: row;
+  }
+
+  .tab-group--start .tab-group__nav-container {
+    order: 1;
+  }
+
+  .tab-group--start .tab-group__tabs {
+    flex: 0 0 auto;
+    flex-direction: column;
+    border-inline-end: solid var(--track-width) var(--track-color);
+  }
+
+  .tab-group--start .tab-group__indicator {
+    right: calc(-1 * var(--track-width));
+    border-right: solid var(--track-width) var(--indicator-color);
+  }
+
+  .tab-group--start.tab-group--rtl .tab-group__indicator {
+    right: auto;
+    left: calc(-1 * var(--track-width));
+  }
+
+  .tab-group--start .tab-group__body {
+    flex: 1 1 auto;
+    order: 2;
+  }
+
+  .tab-group--start ::slotted(sl-tab-panel) {
+    --padding: 0 var(--sl-spacing-medium);
+  }
+
+  /*
+   * End
+   */
+
+  .tab-group--end {
+    flex-direction: row;
+  }
+
+  .tab-group--end .tab-group__nav-container {
+    order: 2;
+  }
+
+  .tab-group--end .tab-group__tabs {
+    flex: 0 0 auto;
+    flex-direction: column;
+    border-left: solid var(--track-width) var(--track-color);
+  }
+
+  .tab-group--end .tab-group__indicator {
+    left: calc(-1 * var(--track-width));
+    border-inline-start: solid var(--track-width) var(--indicator-color);
+  }
+
+  .tab-group--end.tab-group--rtl .tab-group__indicator {
+    right: calc(-1 * var(--track-width));
+    left: auto;
+  }
+
+  .tab-group--end .tab-group__body {
+    flex: 1 1 auto;
+    order: 1;
+  }
+
+  .tab-group--end ::slotted(sl-tab-panel) {
+    --padding: 0 var(--sl-spacing-medium);
+  }
+`;
+
+  var SlTabGroup = class extends ShoelaceElement {
+    constructor() {
+      super(...arguments);
+      this.localize = new LocalizeController(this);
+      this.tabs = [];
+      this.panels = [];
+      this.hasScrollControls = false;
+      this.placement = "top";
+      this.activation = "auto";
+      this.noScrollControls = false;
+    }
+    connectedCallback() {
+      const whenAllDefined = Promise.all([
+        customElements.whenDefined("sl-tab"),
+        customElements.whenDefined("sl-tab-panel")
+      ]);
+      super.connectedCallback();
+      this.resizeObserver = new ResizeObserver(() => {
+        this.repositionIndicator();
+        this.updateScrollControls();
+      });
+      this.mutationObserver = new MutationObserver((mutations) => {
+        if (mutations.some((m) => !["aria-labelledby", "aria-controls"].includes(m.attributeName))) {
+          setTimeout(() => this.setAriaLabels());
+        }
+        if (mutations.some((m) => m.attributeName === "disabled")) {
+          this.syncTabsAndPanels();
+        }
+      });
+      this.updateComplete.then(() => {
+        this.syncTabsAndPanels();
+        this.mutationObserver.observe(this, { attributes: true, childList: true, subtree: true });
+        this.resizeObserver.observe(this.nav);
+        whenAllDefined.then(() => {
+          const intersectionObserver = new IntersectionObserver((entries, observer) => {
+            var _a;
+            if (entries[0].intersectionRatio > 0) {
+              this.setAriaLabels();
+              this.setActiveTab((_a = this.getActiveTab()) != null ? _a : this.tabs[0], { emitEvents: false });
+              observer.unobserve(entries[0].target);
+            }
+          });
+          intersectionObserver.observe(this.tabGroup);
+        });
+      });
+    }
+    disconnectedCallback() {
+      super.disconnectedCallback();
+      this.mutationObserver.disconnect();
+      this.resizeObserver.unobserve(this.nav);
+    }
+    getAllTabs(options = { includeDisabled: true }) {
+      const slot = this.shadowRoot.querySelector('slot[name="nav"]');
+      return [...slot.assignedElements()].filter((el) => {
+        return options.includeDisabled ? el.tagName.toLowerCase() === "sl-tab" : el.tagName.toLowerCase() === "sl-tab" && !el.disabled;
+      });
+    }
+    getAllPanels() {
+      return [...this.body.assignedElements()].filter((el) => el.tagName.toLowerCase() === "sl-tab-panel");
+    }
+    getActiveTab() {
+      return this.tabs.find((el) => el.active);
+    }
+    handleClick(event) {
+      const target = event.target;
+      const tab = target.closest("sl-tab");
+      const tabGroup = tab == null ? void 0 : tab.closest("sl-tab-group");
+      if (tabGroup !== this) {
+        return;
+      }
+      if (tab !== null) {
+        this.setActiveTab(tab, { scrollBehavior: "smooth" });
+      }
+    }
+    handleKeyDown(event) {
+      const target = event.target;
+      const tab = target.closest("sl-tab");
+      const tabGroup = tab == null ? void 0 : tab.closest("sl-tab-group");
+      if (tabGroup !== this) {
+        return;
+      }
+      if (["Enter", " "].includes(event.key)) {
+        if (tab !== null) {
+          this.setActiveTab(tab, { scrollBehavior: "smooth" });
+          event.preventDefault();
+        }
+      }
+      if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Home", "End"].includes(event.key)) {
+        const activeEl = this.tabs.find((t) => t.matches(":focus"));
+        const isRtl = this.localize.dir() === "rtl";
+        if ((activeEl == null ? void 0 : activeEl.tagName.toLowerCase()) === "sl-tab") {
+          let index = this.tabs.indexOf(activeEl);
+          if (event.key === "Home") {
+            index = 0;
+          } else if (event.key === "End") {
+            index = this.tabs.length - 1;
+          } else if (["top", "bottom"].includes(this.placement) && event.key === (isRtl ? "ArrowRight" : "ArrowLeft") || ["start", "end"].includes(this.placement) && event.key === "ArrowUp") {
+            index--;
+          } else if (["top", "bottom"].includes(this.placement) && event.key === (isRtl ? "ArrowLeft" : "ArrowRight") || ["start", "end"].includes(this.placement) && event.key === "ArrowDown") {
+            index++;
+          }
+          if (index < 0) {
+            index = this.tabs.length - 1;
+          }
+          if (index > this.tabs.length - 1) {
+            index = 0;
+          }
+          this.tabs[index].focus({ preventScroll: true });
+          if (this.activation === "auto") {
+            this.setActiveTab(this.tabs[index], { scrollBehavior: "smooth" });
+          }
+          if (["top", "bottom"].includes(this.placement)) {
+            scrollIntoView(this.tabs[index], this.nav, "horizontal");
+          }
+          event.preventDefault();
+        }
+      }
+    }
+    handleScrollToStart() {
+      this.nav.scroll({
+        left: this.localize.dir() === "rtl" ? this.nav.scrollLeft + this.nav.clientWidth : this.nav.scrollLeft - this.nav.clientWidth,
+        behavior: "smooth"
+      });
+    }
+    handleScrollToEnd() {
+      this.nav.scroll({
+        left: this.localize.dir() === "rtl" ? this.nav.scrollLeft - this.nav.clientWidth : this.nav.scrollLeft + this.nav.clientWidth,
+        behavior: "smooth"
+      });
+    }
+    setActiveTab(tab, options) {
+      options = __spreadValues({
+        emitEvents: true,
+        scrollBehavior: "auto"
+      }, options);
+      if (tab !== this.activeTab && !tab.disabled) {
+        const previousTab = this.activeTab;
+        this.activeTab = tab;
+        this.tabs.forEach((el) => el.active = el === this.activeTab);
+        this.panels.forEach((el) => {
+          var _a;
+          return el.active = el.name === ((_a = this.activeTab) == null ? void 0 : _a.panel);
+        });
+        this.syncIndicator();
+        if (["top", "bottom"].includes(this.placement)) {
+          scrollIntoView(this.activeTab, this.nav, "horizontal", options.scrollBehavior);
+        }
+        if (options.emitEvents) {
+          if (previousTab) {
+            this.emit("sl-tab-hide", { detail: { name: previousTab.panel } });
+          }
+          this.emit("sl-tab-show", { detail: { name: this.activeTab.panel } });
+        }
+      }
+    }
+    setAriaLabels() {
+      this.tabs.forEach((tab) => {
+        const panel = this.panels.find((el) => el.name === tab.panel);
+        if (panel) {
+          tab.setAttribute("aria-controls", panel.getAttribute("id"));
+          panel.setAttribute("aria-labelledby", tab.getAttribute("id"));
+        }
+      });
+    }
+    repositionIndicator() {
+      const currentTab = this.getActiveTab();
+      if (!currentTab) {
+        return;
+      }
+      const width = currentTab.clientWidth;
+      const height = currentTab.clientHeight;
+      const isRtl = this.localize.dir() === "rtl";
+      const allTabs = this.getAllTabs();
+      const precedingTabs = allTabs.slice(0, allTabs.indexOf(currentTab));
+      const offset = precedingTabs.reduce(
+        (previous, current) => ({
+          left: previous.left + current.clientWidth,
+          top: previous.top + current.clientHeight
+        }),
+        { left: 0, top: 0 }
+      );
+      switch (this.placement) {
+        case "top":
+        case "bottom":
+          this.indicator.style.width = `${width}px`;
+          this.indicator.style.height = "auto";
+          this.indicator.style.translate = isRtl ? `${-1 * offset.left}px` : `${offset.left}px`;
+          break;
+        case "start":
+        case "end":
+          this.indicator.style.width = "auto";
+          this.indicator.style.height = `${height}px`;
+          this.indicator.style.translate = `0 ${offset.top}px`;
+          break;
+      }
+    }
+    // This stores tabs and panels so we can refer to a cache instead of calling querySelectorAll() multiple times.
+    syncTabsAndPanels() {
+      this.tabs = this.getAllTabs({ includeDisabled: false });
+      this.panels = this.getAllPanels();
+      this.syncIndicator();
+      this.updateComplete.then(() => this.updateScrollControls());
+    }
+    updateScrollControls() {
+      if (this.noScrollControls) {
+        this.hasScrollControls = false;
+      } else {
+        this.hasScrollControls = ["top", "bottom"].includes(this.placement) && this.nav.scrollWidth > this.nav.clientWidth + 1;
+      }
+    }
+    syncIndicator() {
+      const tab = this.getActiveTab();
+      if (tab) {
+        this.indicator.style.display = "block";
+        this.repositionIndicator();
+      } else {
+        this.indicator.style.display = "none";
+      }
+    }
+    /** Shows the specified tab panel. */
+    show(panel) {
+      const tab = this.tabs.find((el) => el.panel === panel);
+      if (tab) {
+        this.setActiveTab(tab, { scrollBehavior: "smooth" });
+      }
+    }
+    render() {
+      const isRtl = this.localize.dir() === "rtl";
+      return x`
+      <div
+        part="base"
+        class=${e$3({
+      "tab-group": true,
+      "tab-group--top": this.placement === "top",
+      "tab-group--bottom": this.placement === "bottom",
+      "tab-group--start": this.placement === "start",
+      "tab-group--end": this.placement === "end",
+      "tab-group--rtl": this.localize.dir() === "rtl",
+      "tab-group--has-scroll-controls": this.hasScrollControls
+    })}
+        @click=${this.handleClick}
+        @keydown=${this.handleKeyDown}
+      >
+        <div class="tab-group__nav-container" part="nav">
+          ${this.hasScrollControls ? x`
+                <sl-icon-button
+                  part="scroll-button scroll-button--start"
+                  exportparts="base:scroll-button__base"
+                  class="tab-group__scroll-button tab-group__scroll-button--start"
+                  name=${isRtl ? "chevron-right" : "chevron-left"}
+                  library="system"
+                  label=${this.localize.term("scrollToStart")}
+                  @click=${this.handleScrollToStart}
+                ></sl-icon-button>
+              ` : ""}
+
+          <div class="tab-group__nav">
+            <div part="tabs" class="tab-group__tabs" role="tablist">
+              <div part="active-tab-indicator" class="tab-group__indicator"></div>
+              <slot name="nav" @slotchange=${this.syncTabsAndPanels}></slot>
+            </div>
+          </div>
+
+          ${this.hasScrollControls ? x`
+                <sl-icon-button
+                  part="scroll-button scroll-button--end"
+                  exportparts="base:scroll-button__base"
+                  class="tab-group__scroll-button tab-group__scroll-button--end"
+                  name=${isRtl ? "chevron-left" : "chevron-right"}
+                  library="system"
+                  label=${this.localize.term("scrollToEnd")}
+                  @click=${this.handleScrollToEnd}
+                ></sl-icon-button>
+              ` : ""}
+        </div>
+
+        <slot part="body" class="tab-group__body" @slotchange=${this.syncTabsAndPanels}></slot>
+      </div>
+    `;
+    }
+  };
+  SlTabGroup.styles = [component_styles_default, tab_group_styles_default];
+  SlTabGroup.dependencies = { "sl-icon-button": SlIconButton };
+  __decorateClass([
+    e$5(".tab-group")
+  ], SlTabGroup.prototype, "tabGroup", 2);
+  __decorateClass([
+    e$5(".tab-group__body")
+  ], SlTabGroup.prototype, "body", 2);
+  __decorateClass([
+    e$5(".tab-group__nav")
+  ], SlTabGroup.prototype, "nav", 2);
+  __decorateClass([
+    e$5(".tab-group__indicator")
+  ], SlTabGroup.prototype, "indicator", 2);
+  __decorateClass([
+    r()
+  ], SlTabGroup.prototype, "hasScrollControls", 2);
+  __decorateClass([
+    n$2()
+  ], SlTabGroup.prototype, "placement", 2);
+  __decorateClass([
+    n$2()
+  ], SlTabGroup.prototype, "activation", 2);
+  __decorateClass([
+    n$2({ attribute: "no-scroll-controls", type: Boolean })
+  ], SlTabGroup.prototype, "noScrollControls", 2);
+  __decorateClass([
+    watch("noScrollControls", { waitUntilFirstUpdate: true })
+  ], SlTabGroup.prototype, "updateScrollControls", 1);
+  __decorateClass([
+    watch("placement", { waitUntilFirstUpdate: true })
+  ], SlTabGroup.prototype, "syncIndicator", 1);
+
+  SlTabGroup.define("sl-tab-group");
+
+  // src/components/tab/tab.styles.ts
+  var tab_styles_default = i$4`
+  :host {
+    display: inline-block;
+  }
+
+  .tab {
+    display: inline-flex;
+    align-items: center;
+    font-family: var(--sl-font-sans);
+    font-size: var(--sl-font-size-small);
+    font-weight: var(--sl-font-weight-semibold);
+    border-radius: var(--sl-border-radius-medium);
+    color: var(--sl-color-neutral-600);
+    padding: var(--sl-spacing-medium) var(--sl-spacing-large);
+    white-space: nowrap;
+    user-select: none;
+    -webkit-user-select: none;
+    cursor: pointer;
+    transition:
+      var(--transition-speed) box-shadow,
+      var(--transition-speed) color;
+  }
+
+  .tab:hover:not(.tab--disabled) {
+    color: var(--sl-color-primary-600);
+  }
+
+  .tab:focus {
+    outline: none;
+  }
+
+  .tab:focus-visible:not(.tab--disabled) {
+    color: var(--sl-color-primary-600);
+  }
+
+  .tab:focus-visible {
+    outline: var(--sl-focus-ring);
+    outline-offset: calc(-1 * var(--sl-focus-ring-width) - var(--sl-focus-ring-offset));
+  }
+
+  .tab.tab--active:not(.tab--disabled) {
+    color: var(--sl-color-primary-600);
+  }
+
+  .tab.tab--closable {
+    padding-inline-end: var(--sl-spacing-small);
+  }
+
+  .tab.tab--disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .tab__close-button {
+    font-size: var(--sl-font-size-small);
+    margin-inline-start: var(--sl-spacing-small);
+  }
+
+  .tab__close-button::part(base) {
+    padding: var(--sl-spacing-3x-small);
+  }
+
+  @media (forced-colors: active) {
+    .tab.tab--active:not(.tab--disabled) {
+      outline: solid 1px transparent;
+      outline-offset: -3px;
+    }
+  }
+`;
+
+  var id$1 = 0;
+  var SlTab = class extends ShoelaceElement {
+    constructor() {
+      super(...arguments);
+      this.localize = new LocalizeController(this);
+      this.attrId = ++id$1;
+      this.componentId = `sl-tab-${this.attrId}`;
+      this.panel = "";
+      this.active = false;
+      this.closable = false;
+      this.disabled = false;
+    }
+    connectedCallback() {
+      super.connectedCallback();
+      this.setAttribute("role", "tab");
+    }
+    handleCloseClick(event) {
+      event.stopPropagation();
+      this.emit("sl-close");
+    }
+    handleActiveChange() {
+      this.setAttribute("aria-selected", this.active ? "true" : "false");
+    }
+    handleDisabledChange() {
+      this.setAttribute("aria-disabled", this.disabled ? "true" : "false");
+    }
+    /** Sets focus to the tab. */
+    focus(options) {
+      this.tab.focus(options);
+    }
+    /** Removes focus from the tab. */
+    blur() {
+      this.tab.blur();
+    }
+    render() {
+      this.id = this.id.length > 0 ? this.id : this.componentId;
+      return x`
+      <div
+        part="base"
+        class=${e$3({
+      tab: true,
+      "tab--active": this.active,
+      "tab--closable": this.closable,
+      "tab--disabled": this.disabled
+    })}
+        tabindex=${this.disabled ? "-1" : "0"}
+      >
+        <slot></slot>
+        ${this.closable ? x`
+              <sl-icon-button
+                part="close-button"
+                exportparts="base:close-button__base"
+                name="x-lg"
+                library="system"
+                label=${this.localize.term("close")}
+                class="tab__close-button"
+                @click=${this.handleCloseClick}
+                tabindex="-1"
+              ></sl-icon-button>
+            ` : ""}
+      </div>
+    `;
+    }
+  };
+  SlTab.styles = [component_styles_default, tab_styles_default];
+  SlTab.dependencies = { "sl-icon-button": SlIconButton };
+  __decorateClass([
+    e$5(".tab")
+  ], SlTab.prototype, "tab", 2);
+  __decorateClass([
+    n$2({ reflect: true })
+  ], SlTab.prototype, "panel", 2);
+  __decorateClass([
+    n$2({ type: Boolean, reflect: true })
+  ], SlTab.prototype, "active", 2);
+  __decorateClass([
+    n$2({ type: Boolean })
+  ], SlTab.prototype, "closable", 2);
+  __decorateClass([
+    n$2({ type: Boolean, reflect: true })
+  ], SlTab.prototype, "disabled", 2);
+  __decorateClass([
+    watch("active")
+  ], SlTab.prototype, "handleActiveChange", 1);
+  __decorateClass([
+    watch("disabled")
+  ], SlTab.prototype, "handleDisabledChange", 1);
+
+  SlTab.define("sl-tab");
+
+  // src/components/tab-panel/tab-panel.styles.ts
+  var tab_panel_styles_default = i$4`
+  :host {
+    --padding: 0;
+
+    display: none;
+  }
+
+  :host([active]) {
+    display: block;
+  }
+
+  .tab-panel {
+    display: block;
+    padding: var(--padding);
+  }
+`;
+
+  var id = 0;
+  var SlTabPanel = class extends ShoelaceElement {
+    constructor() {
+      super(...arguments);
+      this.attrId = ++id;
+      this.componentId = `sl-tab-panel-${this.attrId}`;
+      this.name = "";
+      this.active = false;
+    }
+    connectedCallback() {
+      super.connectedCallback();
+      this.id = this.id.length > 0 ? this.id : this.componentId;
+      this.setAttribute("role", "tabpanel");
+    }
+    handleActiveChange() {
+      this.setAttribute("aria-hidden", this.active ? "false" : "true");
+    }
+    render() {
+      return x`
+      <slot
+        part="base"
+        class=${e$3({
+      "tab-panel": true,
+      "tab-panel--active": this.active
+    })}
+      ></slot>
+    `;
+    }
+  };
+  SlTabPanel.styles = [component_styles_default, tab_panel_styles_default];
+  __decorateClass([
+    n$2({ reflect: true })
+  ], SlTabPanel.prototype, "name", 2);
+  __decorateClass([
+    n$2({ type: Boolean, reflect: true })
+  ], SlTabPanel.prototype, "active", 2);
+  __decorateClass([
+    watch("active")
+  ], SlTabPanel.prototype, "handleActiveChange", 1);
+
+  SlTabPanel.define("sl-tab-panel");
+
+  // src/components/radio-group/radio-group.styles.ts
+  var radio_group_styles_default = i$4`
+  :host {
+    display: block;
+  }
+
+  .form-control {
+    position: relative;
+    border: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .form-control__label {
+    padding: 0;
+  }
+
+  .radio-group--required .radio-group__label::after {
+    content: var(--sl-input-required-content);
+    margin-inline-start: var(--sl-input-required-content-offset);
+  }
+
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+`;
+
+  // src/components/button-group/button-group.styles.ts
+  var button_group_styles_default = i$4`
+  :host {
+    display: inline-block;
+  }
+
+  .button-group {
+    display: flex;
+    flex-wrap: nowrap;
+  }
+`;
+
+  var SlButtonGroup = class extends ShoelaceElement {
+    constructor() {
+      super(...arguments);
+      this.disableRole = false;
+      this.label = "";
+    }
+    handleFocus(event) {
+      const button = findButton(event.target);
+      button == null ? void 0 : button.toggleAttribute("data-sl-button-group__button--focus", true);
+    }
+    handleBlur(event) {
+      const button = findButton(event.target);
+      button == null ? void 0 : button.toggleAttribute("data-sl-button-group__button--focus", false);
+    }
+    handleMouseOver(event) {
+      const button = findButton(event.target);
+      button == null ? void 0 : button.toggleAttribute("data-sl-button-group__button--hover", true);
+    }
+    handleMouseOut(event) {
+      const button = findButton(event.target);
+      button == null ? void 0 : button.toggleAttribute("data-sl-button-group__button--hover", false);
+    }
+    handleSlotChange() {
+      const slottedElements = [...this.defaultSlot.assignedElements({ flatten: true })];
+      slottedElements.forEach((el) => {
+        const index = slottedElements.indexOf(el);
+        const button = findButton(el);
+        if (button) {
+          button.toggleAttribute("data-sl-button-group__button", true);
+          button.toggleAttribute("data-sl-button-group__button--first", index === 0);
+          button.toggleAttribute("data-sl-button-group__button--inner", index > 0 && index < slottedElements.length - 1);
+          button.toggleAttribute("data-sl-button-group__button--last", index === slottedElements.length - 1);
+          button.toggleAttribute(
+            "data-sl-button-group__button--radio",
+            button.tagName.toLowerCase() === "sl-radio-button"
+          );
+        }
+      });
+    }
+    render() {
+      return x`
+      <div
+        part="base"
+        class="button-group"
+        role="${this.disableRole ? "presentation" : "group"}"
+        aria-label=${this.label}
+        @focusout=${this.handleBlur}
+        @focusin=${this.handleFocus}
+        @mouseover=${this.handleMouseOver}
+        @mouseout=${this.handleMouseOut}
+      >
+        <slot @slotchange=${this.handleSlotChange}></slot>
+      </div>
+    `;
+    }
+  };
+  SlButtonGroup.styles = [component_styles_default, button_group_styles_default];
+  __decorateClass([
+    e$5("slot")
+  ], SlButtonGroup.prototype, "defaultSlot", 2);
+  __decorateClass([
+    r()
+  ], SlButtonGroup.prototype, "disableRole", 2);
+  __decorateClass([
+    n$2()
+  ], SlButtonGroup.prototype, "label", 2);
+  function findButton(el) {
+    var _a;
+    const selector = "sl-button, sl-radio-button";
+    return (_a = el.closest(selector)) != null ? _a : el.querySelector(selector);
+  }
+
+  var SlRadioGroup = class extends ShoelaceElement {
+    constructor() {
+      super(...arguments);
+      this.formControlController = new FormControlController(this);
+      this.hasSlotController = new HasSlotController(this, "help-text", "label");
+      this.customValidityMessage = "";
+      this.hasButtonGroup = false;
+      this.errorMessage = "";
+      this.defaultValue = "";
+      this.label = "";
+      this.helpText = "";
+      this.name = "option";
+      this.value = "";
+      this.size = "medium";
+      this.form = "";
+      this.required = false;
+    }
+    /** Gets the validity state object */
+    get validity() {
+      const isRequiredAndEmpty = this.required && !this.value;
+      const hasCustomValidityMessage = this.customValidityMessage !== "";
+      if (hasCustomValidityMessage) {
+        return customErrorValidityState;
+      } else if (isRequiredAndEmpty) {
+        return valueMissingValidityState;
+      }
+      return validValidityState;
+    }
+    /** Gets the validation message */
+    get validationMessage() {
+      const isRequiredAndEmpty = this.required && !this.value;
+      const hasCustomValidityMessage = this.customValidityMessage !== "";
+      if (hasCustomValidityMessage) {
+        return this.customValidityMessage;
+      } else if (isRequiredAndEmpty) {
+        return this.validationInput.validationMessage;
+      }
+      return "";
+    }
+    connectedCallback() {
+      super.connectedCallback();
+      this.defaultValue = this.value;
+    }
+    firstUpdated() {
+      this.formControlController.updateValidity();
+    }
+    getAllRadios() {
+      return [...this.querySelectorAll("sl-radio, sl-radio-button")];
+    }
+    handleRadioClick(event) {
+      const target = event.target.closest("sl-radio, sl-radio-button");
+      const radios = this.getAllRadios();
+      const oldValue = this.value;
+      if (target.disabled) {
+        return;
+      }
+      this.value = target.value;
+      radios.forEach((radio) => radio.checked = radio === target);
+      if (this.value !== oldValue) {
+        this.emit("sl-change");
+        this.emit("sl-input");
+      }
+    }
+    handleKeyDown(event) {
+      var _a;
+      if (!["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", " "].includes(event.key)) {
+        return;
+      }
+      const radios = this.getAllRadios().filter((radio) => !radio.disabled);
+      const checkedRadio = (_a = radios.find((radio) => radio.checked)) != null ? _a : radios[0];
+      const incr = event.key === " " ? 0 : ["ArrowUp", "ArrowLeft"].includes(event.key) ? -1 : 1;
+      const oldValue = this.value;
+      let index = radios.indexOf(checkedRadio) + incr;
+      if (index < 0) {
+        index = radios.length - 1;
+      }
+      if (index > radios.length - 1) {
+        index = 0;
+      }
+      this.getAllRadios().forEach((radio) => {
+        radio.checked = false;
+        if (!this.hasButtonGroup) {
+          radio.tabIndex = -1;
+        }
+      });
+      this.value = radios[index].value;
+      radios[index].checked = true;
+      if (!this.hasButtonGroup) {
+        radios[index].tabIndex = 0;
+        radios[index].focus();
+      } else {
+        radios[index].shadowRoot.querySelector("button").focus();
+      }
+      if (this.value !== oldValue) {
+        this.emit("sl-change");
+        this.emit("sl-input");
+      }
+      event.preventDefault();
+    }
+    handleLabelClick() {
+      const radios = this.getAllRadios();
+      const checked = radios.find((radio) => radio.checked);
+      const radioToFocus = checked || radios[0];
+      if (radioToFocus) {
+        radioToFocus.focus();
+      }
+    }
+    handleInvalid(event) {
+      this.formControlController.setValidity(false);
+      this.formControlController.emitInvalidEvent(event);
+    }
+    async syncRadioElements() {
+      var _a, _b;
+      const radios = this.getAllRadios();
+      await Promise.all(
+        // Sync the checked state and size
+        radios.map(async (radio) => {
+          await radio.updateComplete;
+          radio.checked = radio.value === this.value;
+          radio.size = this.size;
+        })
+      );
+      this.hasButtonGroup = radios.some((radio) => radio.tagName.toLowerCase() === "sl-radio-button");
+      if (radios.length > 0 && !radios.some((radio) => radio.checked)) {
+        if (this.hasButtonGroup) {
+          const buttonRadio = (_a = radios[0].shadowRoot) == null ? void 0 : _a.querySelector("button");
+          if (buttonRadio) {
+            buttonRadio.tabIndex = 0;
+          }
+        } else {
+          radios[0].tabIndex = 0;
+        }
+      }
+      if (this.hasButtonGroup) {
+        const buttonGroup = (_b = this.shadowRoot) == null ? void 0 : _b.querySelector("sl-button-group");
+        if (buttonGroup) {
+          buttonGroup.disableRole = true;
+        }
+      }
+    }
+    syncRadios() {
+      if (customElements.get("sl-radio") && customElements.get("sl-radio-button")) {
+        this.syncRadioElements();
+        return;
+      }
+      if (customElements.get("sl-radio")) {
+        this.syncRadioElements();
+      } else {
+        customElements.whenDefined("sl-radio").then(() => this.syncRadios());
+      }
+      if (customElements.get("sl-radio-button")) {
+        this.syncRadioElements();
+      } else {
+        customElements.whenDefined("sl-radio-button").then(() => this.syncRadios());
+      }
+    }
+    updateCheckedRadio() {
+      const radios = this.getAllRadios();
+      radios.forEach((radio) => radio.checked = radio.value === this.value);
+      this.formControlController.setValidity(this.validity.valid);
+    }
+    handleSizeChange() {
+      this.syncRadios();
+    }
+    handleValueChange() {
+      if (this.hasUpdated) {
+        this.updateCheckedRadio();
+      }
+    }
+    /** Checks for validity but does not show a validation message. Returns `true` when valid and `false` when invalid. */
+    checkValidity() {
+      const isRequiredAndEmpty = this.required && !this.value;
+      const hasCustomValidityMessage = this.customValidityMessage !== "";
+      if (isRequiredAndEmpty || hasCustomValidityMessage) {
+        this.formControlController.emitInvalidEvent();
+        return false;
+      }
+      return true;
+    }
+    /** Gets the associated form, if one exists. */
+    getForm() {
+      return this.formControlController.getForm();
+    }
+    /** Checks for validity and shows the browser's validation message if the control is invalid. */
+    reportValidity() {
+      const isValid = this.validity.valid;
+      this.errorMessage = this.customValidityMessage || isValid ? "" : this.validationInput.validationMessage;
+      this.formControlController.setValidity(isValid);
+      this.validationInput.hidden = true;
+      clearTimeout(this.validationTimeout);
+      if (!isValid) {
+        this.validationInput.hidden = false;
+        this.validationInput.reportValidity();
+        this.validationTimeout = setTimeout(() => this.validationInput.hidden = true, 1e4);
+      }
+      return isValid;
+    }
+    /** Sets a custom validation message. Pass an empty string to restore validity. */
+    setCustomValidity(message = "") {
+      this.customValidityMessage = message;
+      this.errorMessage = message;
+      this.validationInput.setCustomValidity(message);
+      this.formControlController.updateValidity();
+    }
+    render() {
+      const hasLabelSlot = this.hasSlotController.test("label");
+      const hasHelpTextSlot = this.hasSlotController.test("help-text");
+      const hasLabel = this.label ? true : !!hasLabelSlot;
+      const hasHelpText = this.helpText ? true : !!hasHelpTextSlot;
+      const defaultSlot = x`
+      <slot @slotchange=${this.syncRadios} @click=${this.handleRadioClick} @keydown=${this.handleKeyDown}></slot>
+    `;
+      return x`
+      <fieldset
+        part="form-control"
+        class=${e$3({
+      "form-control": true,
+      "form-control--small": this.size === "small",
+      "form-control--medium": this.size === "medium",
+      "form-control--large": this.size === "large",
+      "form-control--radio-group": true,
+      "form-control--has-label": hasLabel,
+      "form-control--has-help-text": hasHelpText
+    })}
+        role="radiogroup"
+        aria-labelledby="label"
+        aria-describedby="help-text"
+        aria-errormessage="error-message"
+      >
+        <label
+          part="form-control-label"
+          id="label"
+          class="form-control__label"
+          aria-hidden=${hasLabel ? "false" : "true"}
+          @click=${this.handleLabelClick}
+        >
+          <slot name="label">${this.label}</slot>
+        </label>
+
+        <div part="form-control-input" class="form-control-input">
+          <div class="visually-hidden">
+            <div id="error-message" aria-live="assertive">${this.errorMessage}</div>
+            <label class="radio-group__validation">
+              <input
+                type="text"
+                class="radio-group__validation-input"
+                ?required=${this.required}
+                tabindex="-1"
+                hidden
+                @invalid=${this.handleInvalid}
+              />
+            </label>
+          </div>
+
+          ${this.hasButtonGroup ? x`
+                <sl-button-group part="button-group" exportparts="base:button-group__base" role="presentation">
+                  ${defaultSlot}
+                </sl-button-group>
+              ` : defaultSlot}
+        </div>
+
+        <div
+          part="form-control-help-text"
+          id="help-text"
+          class="form-control__help-text"
+          aria-hidden=${hasHelpText ? "false" : "true"}
+        >
+          <slot name="help-text">${this.helpText}</slot>
+        </div>
+      </fieldset>
+    `;
+    }
+  };
+  SlRadioGroup.styles = [component_styles_default, form_control_styles_default, radio_group_styles_default];
+  SlRadioGroup.dependencies = { "sl-button-group": SlButtonGroup };
+  __decorateClass([
+    e$5("slot:not([name])")
+  ], SlRadioGroup.prototype, "defaultSlot", 2);
+  __decorateClass([
+    e$5(".radio-group__validation-input")
+  ], SlRadioGroup.prototype, "validationInput", 2);
+  __decorateClass([
+    r()
+  ], SlRadioGroup.prototype, "hasButtonGroup", 2);
+  __decorateClass([
+    r()
+  ], SlRadioGroup.prototype, "errorMessage", 2);
+  __decorateClass([
+    r()
+  ], SlRadioGroup.prototype, "defaultValue", 2);
+  __decorateClass([
+    n$2()
+  ], SlRadioGroup.prototype, "label", 2);
+  __decorateClass([
+    n$2({ attribute: "help-text" })
+  ], SlRadioGroup.prototype, "helpText", 2);
+  __decorateClass([
+    n$2()
+  ], SlRadioGroup.prototype, "name", 2);
+  __decorateClass([
+    n$2({ reflect: true })
+  ], SlRadioGroup.prototype, "value", 2);
+  __decorateClass([
+    n$2({ reflect: true })
+  ], SlRadioGroup.prototype, "size", 2);
+  __decorateClass([
+    n$2({ reflect: true })
+  ], SlRadioGroup.prototype, "form", 2);
+  __decorateClass([
+    n$2({ type: Boolean, reflect: true })
+  ], SlRadioGroup.prototype, "required", 2);
+  __decorateClass([
+    watch("size", { waitUntilFirstUpdate: true })
+  ], SlRadioGroup.prototype, "handleSizeChange", 1);
+  __decorateClass([
+    watch("value")
+  ], SlRadioGroup.prototype, "handleValueChange", 1);
+
+  SlRadioGroup.define("sl-radio-group");
+
+  // src/components/radio/radio.styles.ts
+  var radio_styles_default = i$4`
+  :host {
+    display: block;
+  }
+
+  :host(:focus-visible) {
+    outline: 0px;
+  }
+
+  .radio {
+    display: inline-flex;
+    align-items: top;
+    font-family: var(--sl-input-font-family);
+    font-size: var(--sl-input-font-size-medium);
+    font-weight: var(--sl-input-font-weight);
+    color: var(--sl-input-label-color);
+    vertical-align: middle;
+    cursor: pointer;
+  }
+
+  .radio--small {
+    --toggle-size: var(--sl-toggle-size-small);
+    font-size: var(--sl-input-font-size-small);
+  }
+
+  .radio--medium {
+    --toggle-size: var(--sl-toggle-size-medium);
+    font-size: var(--sl-input-font-size-medium);
+  }
+
+  .radio--large {
+    --toggle-size: var(--sl-toggle-size-large);
+    font-size: var(--sl-input-font-size-large);
+  }
+
+  .radio__checked-icon {
+    display: inline-flex;
+    width: var(--toggle-size);
+    height: var(--toggle-size);
+  }
+
+  .radio__control {
+    flex: 0 0 auto;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--toggle-size);
+    height: var(--toggle-size);
+    border: solid var(--sl-input-border-width) var(--sl-input-border-color);
+    border-radius: 50%;
+    background-color: var(--sl-input-background-color);
+    color: transparent;
+    transition:
+      var(--sl-transition-fast) border-color,
+      var(--sl-transition-fast) background-color,
+      var(--sl-transition-fast) color,
+      var(--sl-transition-fast) box-shadow;
+  }
+
+  .radio__input {
+    position: absolute;
+    opacity: 0;
+    padding: 0;
+    margin: 0;
+    pointer-events: none;
+  }
+
+  /* Hover */
+  .radio:not(.radio--checked):not(.radio--disabled) .radio__control:hover {
+    border-color: var(--sl-input-border-color-hover);
+    background-color: var(--sl-input-background-color-hover);
+  }
+
+  /* Checked */
+  .radio--checked .radio__control {
+    color: var(--sl-color-neutral-0);
+    border-color: var(--sl-color-primary-600);
+    background-color: var(--sl-color-primary-600);
+  }
+
+  /* Checked + hover */
+  .radio.radio--checked:not(.radio--disabled) .radio__control:hover {
+    border-color: var(--sl-color-primary-500);
+    background-color: var(--sl-color-primary-500);
+  }
+
+  /* Checked + focus */
+  :host(:focus-visible) .radio__control {
+    outline: var(--sl-focus-ring);
+    outline-offset: var(--sl-focus-ring-offset);
+  }
+
+  /* Disabled */
+  .radio--disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  /* When the control isn't checked, hide the circle for Windows High Contrast mode a11y */
+  .radio:not(.radio--checked) svg circle {
+    opacity: 0;
+  }
+
+  .radio__label {
+    display: inline-block;
+    color: var(--sl-input-label-color);
+    line-height: var(--toggle-size);
+    margin-inline-start: 0.5em;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+`;
+
+  var SlRadio = class extends ShoelaceElement {
+    constructor() {
+      super();
+      this.checked = false;
+      this.hasFocus = false;
+      this.size = "medium";
+      this.disabled = false;
+      this.handleBlur = () => {
+        this.hasFocus = false;
+        this.emit("sl-blur");
+      };
+      this.handleClick = () => {
+        if (!this.disabled) {
+          this.checked = true;
+        }
+      };
+      this.handleFocus = () => {
+        this.hasFocus = true;
+        this.emit("sl-focus");
+      };
+      this.addEventListener("blur", this.handleBlur);
+      this.addEventListener("click", this.handleClick);
+      this.addEventListener("focus", this.handleFocus);
+    }
+    connectedCallback() {
+      super.connectedCallback();
+      this.setInitialAttributes();
+    }
+    setInitialAttributes() {
+      this.setAttribute("role", "radio");
+      this.setAttribute("tabindex", "-1");
+      this.setAttribute("aria-disabled", this.disabled ? "true" : "false");
+    }
+    handleCheckedChange() {
+      this.setAttribute("aria-checked", this.checked ? "true" : "false");
+      this.setAttribute("tabindex", this.checked ? "0" : "-1");
+    }
+    handleDisabledChange() {
+      this.setAttribute("aria-disabled", this.disabled ? "true" : "false");
+    }
+    render() {
+      return x`
+      <span
+        part="base"
+        class=${e$3({
+      radio: true,
+      "radio--checked": this.checked,
+      "radio--disabled": this.disabled,
+      "radio--focused": this.hasFocus,
+      "radio--small": this.size === "small",
+      "radio--medium": this.size === "medium",
+      "radio--large": this.size === "large"
+    })}
+      >
+        <span part="${`control${this.checked ? " control--checked" : ""}`}" class="radio__control">
+          ${this.checked ? x` <sl-icon part="checked-icon" class="radio__checked-icon" library="system" name="radio"></sl-icon> ` : ""}
+        </span>
+
+        <slot part="label" class="radio__label"></slot>
+      </span>
+    `;
+    }
+  };
+  SlRadio.styles = [component_styles_default, radio_styles_default];
+  SlRadio.dependencies = { "sl-icon": SlIcon };
+  __decorateClass([
+    r()
+  ], SlRadio.prototype, "checked", 2);
+  __decorateClass([
+    r()
+  ], SlRadio.prototype, "hasFocus", 2);
+  __decorateClass([
+    n$2()
+  ], SlRadio.prototype, "value", 2);
+  __decorateClass([
+    n$2({ reflect: true })
+  ], SlRadio.prototype, "size", 2);
+  __decorateClass([
+    n$2({ type: Boolean, reflect: true })
+  ], SlRadio.prototype, "disabled", 2);
+  __decorateClass([
+    watch("checked")
+  ], SlRadio.prototype, "handleCheckedChange", 1);
+  __decorateClass([
+    watch("disabled", { waitUntilFirstUpdate: true })
+  ], SlRadio.prototype, "handleDisabledChange", 1);
+
+  SlRadio.define("sl-radio");
+
+  // src/components/textarea/textarea.styles.ts
+  var textarea_styles_default = i$4`
+  :host {
+    display: block;
+  }
+
+  .textarea {
+    display: flex;
+    align-items: center;
+    position: relative;
+    width: 100%;
+    font-family: var(--sl-input-font-family);
+    font-weight: var(--sl-input-font-weight);
+    line-height: var(--sl-line-height-normal);
+    letter-spacing: var(--sl-input-letter-spacing);
+    vertical-align: middle;
+    transition:
+      var(--sl-transition-fast) color,
+      var(--sl-transition-fast) border,
+      var(--sl-transition-fast) box-shadow,
+      var(--sl-transition-fast) background-color;
+    cursor: text;
+  }
+
+  /* Standard textareas */
+  .textarea--standard {
+    background-color: var(--sl-input-background-color);
+    border: solid var(--sl-input-border-width) var(--sl-input-border-color);
+  }
+
+  .textarea--standard:hover:not(.textarea--disabled) {
+    background-color: var(--sl-input-background-color-hover);
+    border-color: var(--sl-input-border-color-hover);
+  }
+  .textarea--standard:hover:not(.textarea--disabled) .textarea__control {
+    color: var(--sl-input-color-hover);
+  }
+
+  .textarea--standard.textarea--focused:not(.textarea--disabled) {
+    background-color: var(--sl-input-background-color-focus);
+    border-color: var(--sl-input-border-color-focus);
+    color: var(--sl-input-color-focus);
+    box-shadow: 0 0 0 var(--sl-focus-ring-width) var(--sl-input-focus-ring-color);
+  }
+
+  .textarea--standard.textarea--focused:not(.textarea--disabled) .textarea__control {
+    color: var(--sl-input-color-focus);
+  }
+
+  .textarea--standard.textarea--disabled {
+    background-color: var(--sl-input-background-color-disabled);
+    border-color: var(--sl-input-border-color-disabled);
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .textarea--standard.textarea--disabled .textarea__control {
+    color: var(--sl-input-color-disabled);
+  }
+
+  .textarea--standard.textarea--disabled .textarea__control::placeholder {
+    color: var(--sl-input-placeholder-color-disabled);
+  }
+
+  /* Filled textareas */
+  .textarea--filled {
+    border: none;
+    background-color: var(--sl-input-filled-background-color);
+    color: var(--sl-input-color);
+  }
+
+  .textarea--filled:hover:not(.textarea--disabled) {
+    background-color: var(--sl-input-filled-background-color-hover);
+  }
+
+  .textarea--filled.textarea--focused:not(.textarea--disabled) {
+    background-color: var(--sl-input-filled-background-color-focus);
+    outline: var(--sl-focus-ring);
+    outline-offset: var(--sl-focus-ring-offset);
+  }
+
+  .textarea--filled.textarea--disabled {
+    background-color: var(--sl-input-filled-background-color-disabled);
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .textarea__control {
+    flex: 1 1 auto;
+    font-family: inherit;
+    font-size: inherit;
+    font-weight: inherit;
+    line-height: 1.4;
+    color: var(--sl-input-color);
+    border: none;
+    background: none;
+    box-shadow: none;
+    cursor: inherit;
+    -webkit-appearance: none;
+  }
+
+  .textarea__control::-webkit-search-decoration,
+  .textarea__control::-webkit-search-cancel-button,
+  .textarea__control::-webkit-search-results-button,
+  .textarea__control::-webkit-search-results-decoration {
+    -webkit-appearance: none;
+  }
+
+  .textarea__control::placeholder {
+    color: var(--sl-input-placeholder-color);
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  .textarea__control:focus {
+    outline: none;
+  }
+
+  /*
+   * Size modifiers
+   */
+
+  .textarea--small {
+    border-radius: var(--sl-input-border-radius-small);
+    font-size: var(--sl-input-font-size-small);
+  }
+
+  .textarea--small .textarea__control {
+    padding: 0.5em var(--sl-input-spacing-small);
+  }
+
+  .textarea--medium {
+    border-radius: var(--sl-input-border-radius-medium);
+    font-size: var(--sl-input-font-size-medium);
+  }
+
+  .textarea--medium .textarea__control {
+    padding: 0.5em var(--sl-input-spacing-medium);
+  }
+
+  .textarea--large {
+    border-radius: var(--sl-input-border-radius-large);
+    font-size: var(--sl-input-font-size-large);
+  }
+
+  .textarea--large .textarea__control {
+    padding: 0.5em var(--sl-input-spacing-large);
+  }
+
+  /*
+   * Resize types
+   */
+
+  .textarea--resize-none .textarea__control {
+    resize: none;
+  }
+
+  .textarea--resize-vertical .textarea__control {
+    resize: vertical;
+  }
+
+  .textarea--resize-auto .textarea__control {
+    height: auto;
+    resize: none;
+    overflow-y: hidden;
+  }
+`;
+
+  /**
+   * @license
+   * Copyright 2020 Google LLC
+   * SPDX-License-Identifier: BSD-3-Clause
+   */const l=e$4(class extends i$1{constructor(r){if(super(r),r.type!==t.PROPERTY&&r.type!==t.ATTRIBUTE&&r.type!==t.BOOLEAN_ATTRIBUTE)throw Error("The `live` directive is not allowed on child or event bindings");if(!f(r))throw Error("`live` bindings can only contain a single expression")}render(r){return r}update(i,[t$1]){if(t$1===w||t$1===T)return t$1;const o=i.element,l=i.name;if(i.type===t.PROPERTY){if(t$1===o[l])return w}else if(i.type===t.BOOLEAN_ATTRIBUTE){if(!!t$1===o.hasAttribute(l))return w}else if(i.type===t.ATTRIBUTE&&o.getAttribute(l)===t$1+"")return w;return m(i),t$1}});
+
+  var SlTextarea = class extends ShoelaceElement {
+    constructor() {
+      super(...arguments);
+      this.formControlController = new FormControlController(this, {
+        assumeInteractionOn: ["sl-blur", "sl-input"]
+      });
+      this.hasSlotController = new HasSlotController(this, "help-text", "label");
+      this.hasFocus = false;
+      this.title = "";
+      this.name = "";
+      this.value = "";
+      this.size = "medium";
+      this.filled = false;
+      this.label = "";
+      this.helpText = "";
+      this.placeholder = "";
+      this.rows = 4;
+      this.resize = "vertical";
+      this.disabled = false;
+      this.readonly = false;
+      this.form = "";
+      this.required = false;
+      this.spellcheck = true;
+      this.defaultValue = "";
+    }
+    /** Gets the validity state object */
+    get validity() {
+      return this.input.validity;
+    }
+    /** Gets the validation message */
+    get validationMessage() {
+      return this.input.validationMessage;
+    }
+    connectedCallback() {
+      super.connectedCallback();
+      this.resizeObserver = new ResizeObserver(() => this.setTextareaHeight());
+      this.updateComplete.then(() => {
+        this.setTextareaHeight();
+        this.resizeObserver.observe(this.input);
+      });
+    }
+    firstUpdated() {
+      this.formControlController.updateValidity();
+    }
+    disconnectedCallback() {
+      super.disconnectedCallback();
+      this.resizeObserver.unobserve(this.input);
+    }
+    handleBlur() {
+      this.hasFocus = false;
+      this.emit("sl-blur");
+    }
+    handleChange() {
+      this.value = this.input.value;
+      this.setTextareaHeight();
+      this.emit("sl-change");
+    }
+    handleFocus() {
+      this.hasFocus = true;
+      this.emit("sl-focus");
+    }
+    handleInput() {
+      this.value = this.input.value;
+      this.emit("sl-input");
+    }
+    handleInvalid(event) {
+      this.formControlController.setValidity(false);
+      this.formControlController.emitInvalidEvent(event);
+    }
+    setTextareaHeight() {
+      if (this.resize === "auto") {
+        this.input.style.height = "auto";
+        this.input.style.height = `${this.input.scrollHeight}px`;
+      } else {
+        this.input.style.height = void 0;
+      }
+    }
+    handleDisabledChange() {
+      this.formControlController.setValidity(this.disabled);
+    }
+    handleRowsChange() {
+      this.setTextareaHeight();
+    }
+    async handleValueChange() {
+      await this.updateComplete;
+      this.formControlController.updateValidity();
+      this.setTextareaHeight();
+    }
+    /** Sets focus on the textarea. */
+    focus(options) {
+      this.input.focus(options);
+    }
+    /** Removes focus from the textarea. */
+    blur() {
+      this.input.blur();
+    }
+    /** Selects all the text in the textarea. */
+    select() {
+      this.input.select();
+    }
+    /** Gets or sets the textarea's scroll position. */
+    scrollPosition(position) {
+      if (position) {
+        if (typeof position.top === "number")
+          this.input.scrollTop = position.top;
+        if (typeof position.left === "number")
+          this.input.scrollLeft = position.left;
+        return void 0;
+      }
+      return {
+        top: this.input.scrollTop,
+        left: this.input.scrollTop
+      };
+    }
+    /** Sets the start and end positions of the text selection (0-based). */
+    setSelectionRange(selectionStart, selectionEnd, selectionDirection = "none") {
+      this.input.setSelectionRange(selectionStart, selectionEnd, selectionDirection);
+    }
+    /** Replaces a range of text with a new string. */
+    setRangeText(replacement, start, end, selectMode = "preserve") {
+      const selectionStart = start != null ? start : this.input.selectionStart;
+      const selectionEnd = end != null ? end : this.input.selectionEnd;
+      this.input.setRangeText(replacement, selectionStart, selectionEnd, selectMode);
+      if (this.value !== this.input.value) {
+        this.value = this.input.value;
+        this.setTextareaHeight();
+      }
+    }
+    /** Checks for validity but does not show a validation message. Returns `true` when valid and `false` when invalid. */
+    checkValidity() {
+      return this.input.checkValidity();
+    }
+    /** Gets the associated form, if one exists. */
+    getForm() {
+      return this.formControlController.getForm();
+    }
+    /** Checks for validity and shows the browser's validation message if the control is invalid. */
+    reportValidity() {
+      return this.input.reportValidity();
+    }
+    /** Sets a custom validation message. Pass an empty string to restore validity. */
+    setCustomValidity(message) {
+      this.input.setCustomValidity(message);
+      this.formControlController.updateValidity();
+    }
+    render() {
+      const hasLabelSlot = this.hasSlotController.test("label");
+      const hasHelpTextSlot = this.hasSlotController.test("help-text");
+      const hasLabel = this.label ? true : !!hasLabelSlot;
+      const hasHelpText = this.helpText ? true : !!hasHelpTextSlot;
+      return x`
+      <div
+        part="form-control"
+        class=${e$3({
+      "form-control": true,
+      "form-control--small": this.size === "small",
+      "form-control--medium": this.size === "medium",
+      "form-control--large": this.size === "large",
+      "form-control--has-label": hasLabel,
+      "form-control--has-help-text": hasHelpText
+    })}
+      >
+        <label
+          part="form-control-label"
+          class="form-control__label"
+          for="input"
+          aria-hidden=${hasLabel ? "false" : "true"}
+        >
+          <slot name="label">${this.label}</slot>
+        </label>
+
+        <div part="form-control-input" class="form-control-input">
+          <div
+            part="base"
+            class=${e$3({
+      textarea: true,
+      "textarea--small": this.size === "small",
+      "textarea--medium": this.size === "medium",
+      "textarea--large": this.size === "large",
+      "textarea--standard": !this.filled,
+      "textarea--filled": this.filled,
+      "textarea--disabled": this.disabled,
+      "textarea--focused": this.hasFocus,
+      "textarea--empty": !this.value,
+      "textarea--resize-none": this.resize === "none",
+      "textarea--resize-vertical": this.resize === "vertical",
+      "textarea--resize-auto": this.resize === "auto"
+    })}
+          >
+            <textarea
+              part="textarea"
+              id="input"
+              class="textarea__control"
+              title=${this.title}
+              name=${o$2(this.name)}
+              .value=${l(this.value)}
+              ?disabled=${this.disabled}
+              ?readonly=${this.readonly}
+              ?required=${this.required}
+              placeholder=${o$2(this.placeholder)}
+              rows=${o$2(this.rows)}
+              minlength=${o$2(this.minlength)}
+              maxlength=${o$2(this.maxlength)}
+              autocapitalize=${o$2(this.autocapitalize)}
+              autocorrect=${o$2(this.autocorrect)}
+              ?autofocus=${this.autofocus}
+              spellcheck=${o$2(this.spellcheck)}
+              enterkeyhint=${o$2(this.enterkeyhint)}
+              inputmode=${o$2(this.inputmode)}
+              aria-describedby="help-text"
+              @change=${this.handleChange}
+              @input=${this.handleInput}
+              @invalid=${this.handleInvalid}
+              @focus=${this.handleFocus}
+              @blur=${this.handleBlur}
+            ></textarea>
+          </div>
+        </div>
+
+        <div
+          part="form-control-help-text"
+          id="help-text"
+          class="form-control__help-text"
+          aria-hidden=${hasHelpText ? "false" : "true"}
+        >
+          <slot name="help-text">${this.helpText}</slot>
+        </div>
+      </div>
+    `;
+    }
+  };
+  SlTextarea.styles = [component_styles_default, form_control_styles_default, textarea_styles_default];
+  __decorateClass([
+    e$5(".textarea__control")
+  ], SlTextarea.prototype, "input", 2);
+  __decorateClass([
+    r()
+  ], SlTextarea.prototype, "hasFocus", 2);
+  __decorateClass([
+    n$2()
+  ], SlTextarea.prototype, "title", 2);
+  __decorateClass([
+    n$2()
+  ], SlTextarea.prototype, "name", 2);
+  __decorateClass([
+    n$2()
+  ], SlTextarea.prototype, "value", 2);
+  __decorateClass([
+    n$2({ reflect: true })
+  ], SlTextarea.prototype, "size", 2);
+  __decorateClass([
+    n$2({ type: Boolean, reflect: true })
+  ], SlTextarea.prototype, "filled", 2);
+  __decorateClass([
+    n$2()
+  ], SlTextarea.prototype, "label", 2);
+  __decorateClass([
+    n$2({ attribute: "help-text" })
+  ], SlTextarea.prototype, "helpText", 2);
+  __decorateClass([
+    n$2()
+  ], SlTextarea.prototype, "placeholder", 2);
+  __decorateClass([
+    n$2({ type: Number })
+  ], SlTextarea.prototype, "rows", 2);
+  __decorateClass([
+    n$2()
+  ], SlTextarea.prototype, "resize", 2);
+  __decorateClass([
+    n$2({ type: Boolean, reflect: true })
+  ], SlTextarea.prototype, "disabled", 2);
+  __decorateClass([
+    n$2({ type: Boolean, reflect: true })
+  ], SlTextarea.prototype, "readonly", 2);
+  __decorateClass([
+    n$2({ reflect: true })
+  ], SlTextarea.prototype, "form", 2);
+  __decorateClass([
+    n$2({ type: Boolean, reflect: true })
+  ], SlTextarea.prototype, "required", 2);
+  __decorateClass([
+    n$2({ type: Number })
+  ], SlTextarea.prototype, "minlength", 2);
+  __decorateClass([
+    n$2({ type: Number })
+  ], SlTextarea.prototype, "maxlength", 2);
+  __decorateClass([
+    n$2()
+  ], SlTextarea.prototype, "autocapitalize", 2);
+  __decorateClass([
+    n$2()
+  ], SlTextarea.prototype, "autocorrect", 2);
+  __decorateClass([
+    n$2()
+  ], SlTextarea.prototype, "autocomplete", 2);
+  __decorateClass([
+    n$2({ type: Boolean })
+  ], SlTextarea.prototype, "autofocus", 2);
+  __decorateClass([
+    n$2()
+  ], SlTextarea.prototype, "enterkeyhint", 2);
+  __decorateClass([
+    n$2({
+      type: Boolean,
+      converter: {
+        // Allow "true|false" attribute values but keep the property boolean
+        fromAttribute: (value) => !value || value === "false" ? false : true,
+        toAttribute: (value) => value ? "true" : "false"
+      }
+    })
+  ], SlTextarea.prototype, "spellcheck", 2);
+  __decorateClass([
+    n$2()
+  ], SlTextarea.prototype, "inputmode", 2);
+  __decorateClass([
+    defaultValue()
+  ], SlTextarea.prototype, "defaultValue", 2);
+  __decorateClass([
+    watch("disabled", { waitUntilFirstUpdate: true })
+  ], SlTextarea.prototype, "handleDisabledChange", 1);
+  __decorateClass([
+    watch("rows", { waitUntilFirstUpdate: true })
+  ], SlTextarea.prototype, "handleRowsChange", 1);
+  __decorateClass([
+    watch("value", { waitUntilFirstUpdate: true })
+  ], SlTextarea.prototype, "handleValueChange", 1);
+
+  SlTextarea.define("sl-textarea");
+
+  // src/components/input/input.styles.ts
+  var input_styles_default = i$4`
+  :host {
+    display: block;
+  }
+
+  .input {
+    flex: 1 1 auto;
+    display: inline-flex;
+    align-items: stretch;
+    justify-content: start;
+    position: relative;
+    width: 100%;
+    font-family: var(--sl-input-font-family);
+    font-weight: var(--sl-input-font-weight);
+    letter-spacing: var(--sl-input-letter-spacing);
+    vertical-align: middle;
+    overflow: hidden;
+    cursor: text;
+    transition:
+      var(--sl-transition-fast) color,
+      var(--sl-transition-fast) border,
+      var(--sl-transition-fast) box-shadow,
+      var(--sl-transition-fast) background-color;
+  }
+
+  /* Standard inputs */
+  .input--standard {
+    background-color: var(--sl-input-background-color);
+    border: solid var(--sl-input-border-width) var(--sl-input-border-color);
+  }
+
+  .input--standard:hover:not(.input--disabled) {
+    background-color: var(--sl-input-background-color-hover);
+    border-color: var(--sl-input-border-color-hover);
+  }
+
+  .input--standard.input--focused:not(.input--disabled) {
+    background-color: var(--sl-input-background-color-focus);
+    border-color: var(--sl-input-border-color-focus);
+    box-shadow: 0 0 0 var(--sl-focus-ring-width) var(--sl-input-focus-ring-color);
+  }
+
+  .input--standard.input--focused:not(.input--disabled) .input__control {
+    color: var(--sl-input-color-focus);
+  }
+
+  .input--standard.input--disabled {
+    background-color: var(--sl-input-background-color-disabled);
+    border-color: var(--sl-input-border-color-disabled);
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .input--standard.input--disabled .input__control {
+    color: var(--sl-input-color-disabled);
+  }
+
+  .input--standard.input--disabled .input__control::placeholder {
+    color: var(--sl-input-placeholder-color-disabled);
+  }
+
+  /* Filled inputs */
+  .input--filled {
+    border: none;
+    background-color: var(--sl-input-filled-background-color);
+    color: var(--sl-input-color);
+  }
+
+  .input--filled:hover:not(.input--disabled) {
+    background-color: var(--sl-input-filled-background-color-hover);
+  }
+
+  .input--filled.input--focused:not(.input--disabled) {
+    background-color: var(--sl-input-filled-background-color-focus);
+    outline: var(--sl-focus-ring);
+    outline-offset: var(--sl-focus-ring-offset);
+  }
+
+  .input--filled.input--disabled {
+    background-color: var(--sl-input-filled-background-color-disabled);
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .input__control {
+    flex: 1 1 auto;
+    font-family: inherit;
+    font-size: inherit;
+    font-weight: inherit;
+    min-width: 0;
+    height: 100%;
+    color: var(--sl-input-color);
+    border: none;
+    background: inherit;
+    box-shadow: none;
+    padding: 0;
+    margin: 0;
+    cursor: inherit;
+    -webkit-appearance: none;
+  }
+
+  .input__control::-webkit-search-decoration,
+  .input__control::-webkit-search-cancel-button,
+  .input__control::-webkit-search-results-button,
+  .input__control::-webkit-search-results-decoration {
+    -webkit-appearance: none;
+  }
+
+  .input__control:-webkit-autofill,
+  .input__control:-webkit-autofill:hover,
+  .input__control:-webkit-autofill:focus,
+  .input__control:-webkit-autofill:active {
+    box-shadow: 0 0 0 var(--sl-input-height-large) var(--sl-input-background-color-hover) inset !important;
+    -webkit-text-fill-color: var(--sl-color-primary-500);
+    caret-color: var(--sl-input-color);
+  }
+
+  .input--filled .input__control:-webkit-autofill,
+  .input--filled .input__control:-webkit-autofill:hover,
+  .input--filled .input__control:-webkit-autofill:focus,
+  .input--filled .input__control:-webkit-autofill:active {
+    box-shadow: 0 0 0 var(--sl-input-height-large) var(--sl-input-filled-background-color) inset !important;
+  }
+
+  .input__control::placeholder {
+    color: var(--sl-input-placeholder-color);
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  .input:hover:not(.input--disabled) .input__control {
+    color: var(--sl-input-color-hover);
+  }
+
+  .input__control:focus {
+    outline: none;
+  }
+
+  .input__prefix,
+  .input__suffix {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    cursor: default;
+  }
+
+  .input__prefix ::slotted(sl-icon),
+  .input__suffix ::slotted(sl-icon) {
+    color: var(--sl-input-icon-color);
+  }
+
+  /*
+   * Size modifiers
+   */
+
+  .input--small {
+    border-radius: var(--sl-input-border-radius-small);
+    font-size: var(--sl-input-font-size-small);
+    height: var(--sl-input-height-small);
+  }
+
+  .input--small .input__control {
+    height: calc(var(--sl-input-height-small) - var(--sl-input-border-width) * 2);
+    padding: 0 var(--sl-input-spacing-small);
+  }
+
+  .input--small .input__clear,
+  .input--small .input__password-toggle {
+    width: calc(1em + var(--sl-input-spacing-small) * 2);
+  }
+
+  .input--small .input__prefix ::slotted(*) {
+    margin-inline-start: var(--sl-input-spacing-small);
+  }
+
+  .input--small .input__suffix ::slotted(*) {
+    margin-inline-end: var(--sl-input-spacing-small);
+  }
+
+  .input--medium {
+    border-radius: var(--sl-input-border-radius-medium);
+    font-size: var(--sl-input-font-size-medium);
+    height: var(--sl-input-height-medium);
+  }
+
+  .input--medium .input__control {
+    height: calc(var(--sl-input-height-medium) - var(--sl-input-border-width) * 2);
+    padding: 0 var(--sl-input-spacing-medium);
+  }
+
+  .input--medium .input__clear,
+  .input--medium .input__password-toggle {
+    width: calc(1em + var(--sl-input-spacing-medium) * 2);
+  }
+
+  .input--medium .input__prefix ::slotted(*) {
+    margin-inline-start: var(--sl-input-spacing-medium);
+  }
+
+  .input--medium .input__suffix ::slotted(*) {
+    margin-inline-end: var(--sl-input-spacing-medium);
+  }
+
+  .input--large {
+    border-radius: var(--sl-input-border-radius-large);
+    font-size: var(--sl-input-font-size-large);
+    height: var(--sl-input-height-large);
+  }
+
+  .input--large .input__control {
+    height: calc(var(--sl-input-height-large) - var(--sl-input-border-width) * 2);
+    padding: 0 var(--sl-input-spacing-large);
+  }
+
+  .input--large .input__clear,
+  .input--large .input__password-toggle {
+    width: calc(1em + var(--sl-input-spacing-large) * 2);
+  }
+
+  .input--large .input__prefix ::slotted(*) {
+    margin-inline-start: var(--sl-input-spacing-large);
+  }
+
+  .input--large .input__suffix ::slotted(*) {
+    margin-inline-end: var(--sl-input-spacing-large);
+  }
+
+  /*
+   * Pill modifier
+   */
+
+  .input--pill.input--small {
+    border-radius: var(--sl-input-height-small);
+  }
+
+  .input--pill.input--medium {
+    border-radius: var(--sl-input-height-medium);
+  }
+
+  .input--pill.input--large {
+    border-radius: var(--sl-input-height-large);
+  }
+
+  /*
+   * Clearable + Password Toggle
+   */
+
+  .input__clear,
+  .input__password-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: inherit;
+    color: var(--sl-input-icon-color);
+    border: none;
+    background: none;
+    padding: 0;
+    transition: var(--sl-transition-fast) color;
+    cursor: pointer;
+  }
+
+  .input__clear:hover,
+  .input__password-toggle:hover {
+    color: var(--sl-input-icon-color-hover);
+  }
+
+  .input__clear:focus,
+  .input__password-toggle:focus {
+    outline: none;
+  }
+
+  /* Don't show the browser's password toggle in Edge */
+  ::-ms-reveal {
+    display: none;
+  }
+
+  /* Hide the built-in number spinner */
+  .input--no-spin-buttons input[type='number']::-webkit-outer-spin-button,
+  .input--no-spin-buttons input[type='number']::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    display: none;
+  }
+
+  .input--no-spin-buttons input[type='number'] {
+    -moz-appearance: textfield;
+  }
+`;
+
+  var SlInput = class extends ShoelaceElement {
+    constructor() {
+      super(...arguments);
+      this.formControlController = new FormControlController(this, {
+        assumeInteractionOn: ["sl-blur", "sl-input"]
+      });
+      this.hasSlotController = new HasSlotController(this, "help-text", "label");
+      this.localize = new LocalizeController(this);
+      this.hasFocus = false;
+      this.title = "";
+      // make reactive to pass through
+      this.__numberInput = Object.assign(document.createElement("input"), { type: "number" });
+      this.__dateInput = Object.assign(document.createElement("input"), { type: "date" });
+      this.type = "text";
+      this.name = "";
+      this.value = "";
+      this.defaultValue = "";
+      this.size = "medium";
+      this.filled = false;
+      this.pill = false;
+      this.label = "";
+      this.helpText = "";
+      this.clearable = false;
+      this.disabled = false;
+      this.placeholder = "";
+      this.readonly = false;
+      this.passwordToggle = false;
+      this.passwordVisible = false;
+      this.noSpinButtons = false;
+      this.form = "";
+      this.required = false;
+      this.spellcheck = true;
+    }
+    //
+    // NOTE: We use an in-memory input for these getters/setters instead of the one in the template because the properties
+    // can be set before the component is rendered.
+    //
+    /**
+     * Gets or sets the current value as a `Date` object. Returns `null` if the value can't be converted. This will use the native `<input type="{{type}}">` implementation and may result in an error.
+     */
+    get valueAsDate() {
+      var _a;
+      this.__dateInput.type = this.type;
+      this.__dateInput.value = this.value;
+      return ((_a = this.input) == null ? void 0 : _a.valueAsDate) || this.__dateInput.valueAsDate;
+    }
+    set valueAsDate(newValue) {
+      this.__dateInput.type = this.type;
+      this.__dateInput.valueAsDate = newValue;
+      this.value = this.__dateInput.value;
+    }
+    /** Gets or sets the current value as a number. Returns `NaN` if the value can't be converted. */
+    get valueAsNumber() {
+      var _a;
+      this.__numberInput.value = this.value;
+      return ((_a = this.input) == null ? void 0 : _a.valueAsNumber) || this.__numberInput.valueAsNumber;
+    }
+    set valueAsNumber(newValue) {
+      this.__numberInput.valueAsNumber = newValue;
+      this.value = this.__numberInput.value;
+    }
+    /** Gets the validity state object */
+    get validity() {
+      return this.input.validity;
+    }
+    /** Gets the validation message */
+    get validationMessage() {
+      return this.input.validationMessage;
+    }
+    firstUpdated() {
+      this.formControlController.updateValidity();
+    }
+    handleBlur() {
+      this.hasFocus = false;
+      this.emit("sl-blur");
+    }
+    handleChange() {
+      this.value = this.input.value;
+      this.emit("sl-change");
+    }
+    handleClearClick(event) {
+      event.preventDefault();
+      if (this.value !== "") {
+        this.value = "";
+        this.emit("sl-clear");
+        this.emit("sl-input");
+        this.emit("sl-change");
+      }
+      this.input.focus();
+    }
+    handleFocus() {
+      this.hasFocus = true;
+      this.emit("sl-focus");
+    }
+    handleInput() {
+      this.value = this.input.value;
+      this.formControlController.updateValidity();
+      this.emit("sl-input");
+    }
+    handleInvalid(event) {
+      this.formControlController.setValidity(false);
+      this.formControlController.emitInvalidEvent(event);
+    }
+    handleKeyDown(event) {
+      const hasModifier = event.metaKey || event.ctrlKey || event.shiftKey || event.altKey;
+      if (event.key === "Enter" && !hasModifier) {
+        setTimeout(() => {
+          if (!event.defaultPrevented && !event.isComposing) {
+            this.formControlController.submit();
+          }
+        });
+      }
+    }
+    handlePasswordToggle() {
+      this.passwordVisible = !this.passwordVisible;
+    }
+    handleDisabledChange() {
+      this.formControlController.setValidity(this.disabled);
+    }
+    handleStepChange() {
+      this.input.step = String(this.step);
+      this.formControlController.updateValidity();
+    }
+    async handleValueChange() {
+      await this.updateComplete;
+      this.formControlController.updateValidity();
+    }
+    /** Sets focus on the input. */
+    focus(options) {
+      this.input.focus(options);
+    }
+    /** Removes focus from the input. */
+    blur() {
+      this.input.blur();
+    }
+    /** Selects all the text in the input. */
+    select() {
+      this.input.select();
+    }
+    /** Sets the start and end positions of the text selection (0-based). */
+    setSelectionRange(selectionStart, selectionEnd, selectionDirection = "none") {
+      this.input.setSelectionRange(selectionStart, selectionEnd, selectionDirection);
+    }
+    /** Replaces a range of text with a new string. */
+    setRangeText(replacement, start, end, selectMode = "preserve") {
+      const selectionStart = start != null ? start : this.input.selectionStart;
+      const selectionEnd = end != null ? end : this.input.selectionEnd;
+      this.input.setRangeText(replacement, selectionStart, selectionEnd, selectMode);
+      if (this.value !== this.input.value) {
+        this.value = this.input.value;
+      }
+    }
+    /** Displays the browser picker for an input element (only works if the browser supports it for the input type). */
+    showPicker() {
+      if ("showPicker" in HTMLInputElement.prototype) {
+        this.input.showPicker();
+      }
+    }
+    /** Increments the value of a numeric input type by the value of the step attribute. */
+    stepUp() {
+      this.input.stepUp();
+      if (this.value !== this.input.value) {
+        this.value = this.input.value;
+      }
+    }
+    /** Decrements the value of a numeric input type by the value of the step attribute. */
+    stepDown() {
+      this.input.stepDown();
+      if (this.value !== this.input.value) {
+        this.value = this.input.value;
+      }
+    }
+    /** Checks for validity but does not show a validation message. Returns `true` when valid and `false` when invalid. */
+    checkValidity() {
+      return this.input.checkValidity();
+    }
+    /** Gets the associated form, if one exists. */
+    getForm() {
+      return this.formControlController.getForm();
+    }
+    /** Checks for validity and shows the browser's validation message if the control is invalid. */
+    reportValidity() {
+      return this.input.reportValidity();
+    }
+    /** Sets a custom validation message. Pass an empty string to restore validity. */
+    setCustomValidity(message) {
+      this.input.setCustomValidity(message);
+      this.formControlController.updateValidity();
+    }
+    render() {
+      const hasLabelSlot = this.hasSlotController.test("label");
+      const hasHelpTextSlot = this.hasSlotController.test("help-text");
+      const hasLabel = this.label ? true : !!hasLabelSlot;
+      const hasHelpText = this.helpText ? true : !!hasHelpTextSlot;
+      const hasClearIcon = this.clearable && !this.disabled && !this.readonly;
+      const isClearIconVisible = hasClearIcon && (typeof this.value === "number" || this.value.length > 0);
+      return x`
+      <div
+        part="form-control"
+        class=${e$3({
+      "form-control": true,
+      "form-control--small": this.size === "small",
+      "form-control--medium": this.size === "medium",
+      "form-control--large": this.size === "large",
+      "form-control--has-label": hasLabel,
+      "form-control--has-help-text": hasHelpText
+    })}
+      >
+        <label
+          part="form-control-label"
+          class="form-control__label"
+          for="input"
+          aria-hidden=${hasLabel ? "false" : "true"}
+        >
+          <slot name="label">${this.label}</slot>
+        </label>
+
+        <div part="form-control-input" class="form-control-input">
+          <div
+            part="base"
+            class=${e$3({
+      input: true,
+      // Sizes
+      "input--small": this.size === "small",
+      "input--medium": this.size === "medium",
+      "input--large": this.size === "large",
+      // States
+      "input--pill": this.pill,
+      "input--standard": !this.filled,
+      "input--filled": this.filled,
+      "input--disabled": this.disabled,
+      "input--focused": this.hasFocus,
+      "input--empty": !this.value,
+      "input--no-spin-buttons": this.noSpinButtons
+    })}
+          >
+            <span part="prefix" class="input__prefix">
+              <slot name="prefix"></slot>
+            </span>
+
+            <input
+              part="input"
+              id="input"
+              class="input__control"
+              type=${this.type === "password" && this.passwordVisible ? "text" : this.type}
+              title=${this.title}
+              name=${o$2(this.name)}
+              ?disabled=${this.disabled}
+              ?readonly=${this.readonly}
+              ?required=${this.required}
+              placeholder=${o$2(this.placeholder)}
+              minlength=${o$2(this.minlength)}
+              maxlength=${o$2(this.maxlength)}
+              min=${o$2(this.min)}
+              max=${o$2(this.max)}
+              step=${o$2(this.step)}
+              .value=${l(this.value)}
+              autocapitalize=${o$2(this.autocapitalize)}
+              autocomplete=${o$2(this.autocomplete)}
+              autocorrect=${o$2(this.autocorrect)}
+              ?autofocus=${this.autofocus}
+              spellcheck=${this.spellcheck}
+              pattern=${o$2(this.pattern)}
+              enterkeyhint=${o$2(this.enterkeyhint)}
+              inputmode=${o$2(this.inputmode)}
+              aria-describedby="help-text"
+              @change=${this.handleChange}
+              @input=${this.handleInput}
+              @invalid=${this.handleInvalid}
+              @keydown=${this.handleKeyDown}
+              @focus=${this.handleFocus}
+              @blur=${this.handleBlur}
+            />
+
+            ${isClearIconVisible ? x`
+                  <button
+                    part="clear-button"
+                    class="input__clear"
+                    type="button"
+                    aria-label=${this.localize.term("clearEntry")}
+                    @click=${this.handleClearClick}
+                    tabindex="-1"
+                  >
+                    <slot name="clear-icon">
+                      <sl-icon name="x-circle-fill" library="system"></sl-icon>
+                    </slot>
+                  </button>
+                ` : ""}
+            ${this.passwordToggle && !this.disabled ? x`
+                  <button
+                    part="password-toggle-button"
+                    class="input__password-toggle"
+                    type="button"
+                    aria-label=${this.localize.term(this.passwordVisible ? "hidePassword" : "showPassword")}
+                    @click=${this.handlePasswordToggle}
+                    tabindex="-1"
+                  >
+                    ${this.passwordVisible ? x`
+                          <slot name="show-password-icon">
+                            <sl-icon name="eye-slash" library="system"></sl-icon>
+                          </slot>
+                        ` : x`
+                          <slot name="hide-password-icon">
+                            <sl-icon name="eye" library="system"></sl-icon>
+                          </slot>
+                        `}
+                  </button>
+                ` : ""}
+
+            <span part="suffix" class="input__suffix">
+              <slot name="suffix"></slot>
+            </span>
+          </div>
+        </div>
+
+        <div
+          part="form-control-help-text"
+          id="help-text"
+          class="form-control__help-text"
+          aria-hidden=${hasHelpText ? "false" : "true"}
+        >
+          <slot name="help-text">${this.helpText}</slot>
+        </div>
+      </div>
+    `;
+    }
+  };
+  SlInput.styles = [component_styles_default, form_control_styles_default, input_styles_default];
+  SlInput.dependencies = { "sl-icon": SlIcon };
+  __decorateClass([
+    e$5(".input__control")
+  ], SlInput.prototype, "input", 2);
+  __decorateClass([
+    r()
+  ], SlInput.prototype, "hasFocus", 2);
+  __decorateClass([
+    n$2()
+  ], SlInput.prototype, "title", 2);
+  __decorateClass([
+    n$2({ reflect: true })
+  ], SlInput.prototype, "type", 2);
+  __decorateClass([
+    n$2()
+  ], SlInput.prototype, "name", 2);
+  __decorateClass([
+    n$2()
+  ], SlInput.prototype, "value", 2);
+  __decorateClass([
+    defaultValue()
+  ], SlInput.prototype, "defaultValue", 2);
+  __decorateClass([
+    n$2({ reflect: true })
+  ], SlInput.prototype, "size", 2);
+  __decorateClass([
+    n$2({ type: Boolean, reflect: true })
+  ], SlInput.prototype, "filled", 2);
+  __decorateClass([
+    n$2({ type: Boolean, reflect: true })
+  ], SlInput.prototype, "pill", 2);
+  __decorateClass([
+    n$2()
+  ], SlInput.prototype, "label", 2);
+  __decorateClass([
+    n$2({ attribute: "help-text" })
+  ], SlInput.prototype, "helpText", 2);
+  __decorateClass([
+    n$2({ type: Boolean })
+  ], SlInput.prototype, "clearable", 2);
+  __decorateClass([
+    n$2({ type: Boolean, reflect: true })
+  ], SlInput.prototype, "disabled", 2);
+  __decorateClass([
+    n$2()
+  ], SlInput.prototype, "placeholder", 2);
+  __decorateClass([
+    n$2({ type: Boolean, reflect: true })
+  ], SlInput.prototype, "readonly", 2);
+  __decorateClass([
+    n$2({ attribute: "password-toggle", type: Boolean })
+  ], SlInput.prototype, "passwordToggle", 2);
+  __decorateClass([
+    n$2({ attribute: "password-visible", type: Boolean })
+  ], SlInput.prototype, "passwordVisible", 2);
+  __decorateClass([
+    n$2({ attribute: "no-spin-buttons", type: Boolean })
+  ], SlInput.prototype, "noSpinButtons", 2);
+  __decorateClass([
+    n$2({ reflect: true })
+  ], SlInput.prototype, "form", 2);
+  __decorateClass([
+    n$2({ type: Boolean, reflect: true })
+  ], SlInput.prototype, "required", 2);
+  __decorateClass([
+    n$2()
+  ], SlInput.prototype, "pattern", 2);
+  __decorateClass([
+    n$2({ type: Number })
+  ], SlInput.prototype, "minlength", 2);
+  __decorateClass([
+    n$2({ type: Number })
+  ], SlInput.prototype, "maxlength", 2);
+  __decorateClass([
+    n$2()
+  ], SlInput.prototype, "min", 2);
+  __decorateClass([
+    n$2()
+  ], SlInput.prototype, "max", 2);
+  __decorateClass([
+    n$2()
+  ], SlInput.prototype, "step", 2);
+  __decorateClass([
+    n$2()
+  ], SlInput.prototype, "autocapitalize", 2);
+  __decorateClass([
+    n$2()
+  ], SlInput.prototype, "autocorrect", 2);
+  __decorateClass([
+    n$2()
+  ], SlInput.prototype, "autocomplete", 2);
+  __decorateClass([
+    n$2({ type: Boolean })
+  ], SlInput.prototype, "autofocus", 2);
+  __decorateClass([
+    n$2()
+  ], SlInput.prototype, "enterkeyhint", 2);
+  __decorateClass([
+    n$2({
+      type: Boolean,
+      converter: {
+        // Allow "true|false" attribute values but keep the property boolean
+        fromAttribute: (value) => !value || value === "false" ? false : true,
+        toAttribute: (value) => value ? "true" : "false"
+      }
+    })
+  ], SlInput.prototype, "spellcheck", 2);
+  __decorateClass([
+    n$2()
+  ], SlInput.prototype, "inputmode", 2);
+  __decorateClass([
+    watch("disabled", { waitUntilFirstUpdate: true })
+  ], SlInput.prototype, "handleDisabledChange", 1);
+  __decorateClass([
+    watch("step", { waitUntilFirstUpdate: true })
+  ], SlInput.prototype, "handleStepChange", 1);
+  __decorateClass([
+    watch("value", { waitUntilFirstUpdate: true })
+  ], SlInput.prototype, "handleValueChange", 1);
+
+  SlInput.define("sl-input");
+
+  let EFPEntryForm = class EFPEntryForm extends s$1 {
+      constructor() {
+          super(...arguments);
+          this.currentSectionIndex = 0;
+          this.currentStepIndex = 0;
+          this.nestedChapterStructure = [];
+          this.activeContent = {
+              title: 'Introduction to the Environmental Farm Plan (EFP)',
+              content: 'The purpose of the EFP is to assess the features and management of your farm to identify environmental risks and develop an action plan.',
+          };
+      }
+      get sections() {
+          var _a;
+          console.log('EFPEntryForm: sections getter called, nestedChapterStructure length:', ((_a = this.nestedChapterStructure) === null || _a === void 0 ? void 0 : _a.length) || 0);
+          return [
+              {
+                  tab: 'Section A',
+                  title: 'Farm Business Profile',
+                  items: [
+                      {
+                          label: 'Farm Business Name',
+                          content: `
+          <h3>Farm Business Name</h3>
+          <p>Please enter the legal name under which your farm operates. This should match your tax documents and business registration.</p>
+          <p>If your farm uses a different operating name or DBA ("doing business as"), include that as well.</p>
+        `,
+                          complete: true,
+                      },
+                      {
+                          label: 'Ownership Details',
+                          content: `
+          <h3>Ownership Details</h3>
+          <p>Provide details about the ownership structure of your farm.</p>
+          <ul>
+            <li>Is the farm owned by an individual, partnership, or corporation?</li>
+            <li>List all owners and their roles.</li>
+            <li>Indicate who is responsible for daily operations and environmental decision-making.</li>
+          </ul>
+        `,
+                          complete: false,
+                      },
+                      {
+                          title: 'Nested Section: Certifications',
+                          items: [
+                              {
+                                  label: 'Organic Certification',
+                                  content: `
+              <h3>Organic Certification</h3>
+              <p>This section documents your organic certification status.</p>
+              <p>Certified by: <strong>Pacific Organic Growers (POG)</strong></p>
+              <p>Include your certificate number and expiration date, and upload supporting documentation if available.</p>
+            `,
+                                  complete: true,
+                              },
+                              {
+                                  label: 'Other Accreditation',
+                                  content: `
+              <h3>Other Environmental or Farm Certifications</h3>
+              <p>If your farm has additional certifications such as:</p>
+              <ul>
+                <li>Environmental Farm Stewardship</li>
+                <li>Salmon Safe</li>
+                <li>Bee-Friendly Farming</li>
+              </ul>
+              <p>Provide issuing organization, validity period, and documentation.</p>
+            `,
+                                  complete: false,
+                              },
+                          ],
+                      },
+                  ],
+              },
+              {
+                  tab: 'Section B',
+                  title: 'Environmental Farm Plan Questionnaire',
+                  items: this.generateSectionBItems(),
+              },
+              {
+                  tab: 'Section C',
+                  title: 'Field Review',
+                  items: [
+                      {
+                          label: 'Soil Type',
+                          content: `
+          <h3>Soil Type and Characteristics</h3>
+          <p>Identify the dominant soil types across your fields.</p>
+          <ul>
+            <li>Include texture (e.g., loam, clay, sandy loam)</li>
+            <li>Note any known drainage or compaction issues</li>
+            <li>Attach soil maps or reports if available</li>
+          </ul>
+        `,
+                          complete: false,
+                      },
+                      {
+                          label: 'Erosion Risk',
+                          content: `
+          <h3>Erosion Risk Assessment</h3>
+          <p>Evaluate your fields for signs and risk of soil erosion.</p>
+          <p>Factors to consider:</p>
+          <ul>
+            <li>Slope and topography</li>
+            <li>Crop residue or cover crop practices</li>
+            <li>History of water or wind erosion</li>
+          </ul>
+          <p>List any mitigation strategies currently in use, such as grassed waterways or windbreaks.</p>
+        `,
+                          complete: false,
+                      },
+                  ],
+              },
+          ];
+      }
+      renderQuestion(question) {
+          const questionTypeMap = {
+              100000000: 'Yes/No/NA',
+              100000001: 'Point Rating',
+              // Add more question types as needed
+          };
+          const questionTypeName = questionTypeMap[question.questionType] || 'Unknown';
+          return x `
+      <div class="question-container">
+        ${question.textAboveQuestion ? x `
+          <div class="question-text">
+            ${o$1(question.textAboveQuestion)}
+          </div>
+        ` : ''}
+
+        <div class="question-label">
+          ${o$1(question.label)}
+        </div>
+
+        ${question.textBelowQuestion ? x `
+          <div class="question-text">
+            ${o$1(question.textBelowQuestion)}
+          </div>
+        ` : ''}
+
+        <div class="question-response">
+          ${this.renderQuestionInput(question, questionTypeName)}
+        </div>
+      </div>
+    `;
+      }
+      renderQuestionInput(question, questionType) {
+          switch (questionType) {
+              case 'Yes/No/NA':
+                  return x `
+          <sl-radio-group
+            label="Select your answer"
+            name="question-${question.id}"
+            size="small"
+          >
+            <sl-radio value="yes">Yes</sl-radio>
+            <sl-radio value="no">No</sl-radio>
+            <sl-radio value="na">N/A</sl-radio>
+          </sl-radio-group>
+        `;
+              case 'Point Rating':
+                  return x `
+          <sl-radio-group
+            label="Rate this practice"
+            name="question-${question.id}"
+            size="small"
+          >
+            <sl-radio value="1">1 - Poor</sl-radio>
+            <sl-radio value="2">2 - Fair</sl-radio>
+            <sl-radio value="3">3 - Good</sl-radio>
+            <sl-radio value="4">4 - Excellent</sl-radio>
+          </sl-radio-group>
+        `;
+              default:
+                  return x `
+          <sl-textarea
+            label="Your response"
+            name="question-${question.id}"
+            rows="3"
+            placeholder="Enter your response..."
+          ></sl-textarea>
+        `;
+          }
+      }
+      renderSubchapter(subchapter) {
+          return x `
+      <div class="subchapter-header">
+        <h4>${subchapter.name}</h4>
+        ${subchapter.description ? x `
+          <div>${o$1(subchapter.description)}</div>
+        ` : ''}
+      </div>
+      ${subchapter.questions.map((question) => this.renderQuestion(question))}
+    `;
+      }
+      renderChapter(chapter) {
+          return x `
+      <div class="chapter-header">
+        <h3>${chapter.name}</h3>
+        ${chapter.description ? x `
+          <div>${o$1(chapter.description)}</div>
+        ` : ''}
+      </div>
+
+      ${chapter.questions.map((question) => this.renderQuestion(question))}
+
+      ${chapter.subchapters.map((subchapter) => this.renderSubchapter(subchapter))}
+    `;
+      }
+      generateSectionBItems() {
+          console.log('EFPEntryForm: generateSectionBItems called, nestedChapterStructure:', this.nestedChapterStructure);
+          if (!this.nestedChapterStructure || this.nestedChapterStructure.length === 0) {
+              console.log('EFPEntryForm: No nested chapter structure available, showing loading message');
+              return [
+                  {
+                      label: 'Loading Chapters...',
+                      content: `
+            <h3>Loading Environmental Farm Plan Chapters</h3>
+            <p>Please wait while we load the questionnaire chapters and questions...</p>
+          `,
+                      complete: false,
+                  }
+              ];
+          }
+          console.log('EFPEntryForm: Generating section B items from', this.nestedChapterStructure.length, 'chapters');
+          const items = [];
+          this.nestedChapterStructure.forEach((chapter) => {
+              // Add the main chapter
+              const chapterItem = {
+                  label: chapter.name || chapter.label,
+                  title: chapter.name || chapter.label, // Add title for renderItems method
+                  content: this.renderChapterContent(chapter),
+                  complete: false,
+                  chapterData: chapter
+              };
+              // If chapter has subchapters, create nested structure
+              if (chapter.subchapters && chapter.subchapters.length > 0) {
+                  chapterItem.items = chapter.subchapters.map((subchapter) => ({
+                      label: subchapter.name || subchapter.label,
+                      content: this.renderSubchapterContent(subchapter),
+                      complete: false,
+                      subchapterData: subchapter,
+                      parentChapter: chapter
+                  }));
+              }
+              items.push(chapterItem);
+          });
+          return items;
+      }
+      renderSubchapterContent(subchapter) {
+          var _a;
+          return `
+      <div class="subchapter-content">
+        <h3>${subchapter.name || subchapter.label}</h3>
+        ${subchapter.description || ''}
+        <p><strong>Questions:</strong> ${((_a = subchapter.questions) === null || _a === void 0 ? void 0 : _a.length) || 0}</p>
+      </div>
+    `;
+      }
+      renderChapterContent(chapter) {
+          // Return a string representation for the content property
+          // The actual rendering will be handled by the render method
+          return `
+      <div class="chapter-content">
+        <h3>${chapter.name}</h3>
+        ${chapter.description || ''}
+        <p><strong>Questions:</strong> ${chapter.questions.length}</p>
+        <p><strong>Subchapters:</strong> ${chapter.subchapters.length}</p>
+      </div>
+    `;
+      }
+      renderMainContent() {
+          // Check if we're in Section B and have a chapter to render
+          if (this.currentSectionIndex === 1) { // Section B is index 1
+              const currentStep = this.flatSteps[this.currentStepIndex];
+              // Check if it's a subchapter
+              if (currentStep && 'subchapterData' in currentStep) {
+                  return this.renderSubchapter(currentStep.subchapterData);
+              }
+              // Check if it's a main chapter
+              else if (currentStep && 'chapterData' in currentStep) {
+                  return this.renderChapter(currentStep.chapterData);
+              }
+          }
+          // Default content rendering
+          return x `<div>${o$1(this.activeContent.content)}</div>`;
+      }
+      // Public method to update the nested chapter structure
+      updateNestedChapterStructure(nestedStructure) {
+          console.log('EFPEntryForm: updateNestedChapterStructure called with:', nestedStructure);
+          console.log('EFPEntryForm: Current nestedChapterStructure length before update:', this.nestedChapterStructure.length);
+          this.nestedChapterStructure = nestedStructure;
+          console.log('EFPEntryForm: nestedChapterStructure updated, new length:', this.nestedChapterStructure.length);
+          console.log('EFPEntryForm: Triggering re-render...');
+          // The @property decorator will automatically trigger a re-render
+          // But we can force it to be sure
+          this.requestUpdate();
+      }
+      get completionPercent() {
+          const allItems = [];
+          const collect = (items) => {
+              for (const item of items) {
+                  if ('items' in item) {
+                      collect(item.items);
+                  }
+                  else {
+                      allItems.push(item);
+                  }
+              }
+          };
+          for (const section of this.sections) {
+              collect(section.items);
+          }
+          const completed = allItems.filter((item) => item.complete).length;
+          return allItems.length === 0
+              ? 0
+              : Math.round((completed / allItems.length) * 100);
+      }
+      goToNext() {
+          if (this.currentStepIndex < this.flatSteps.length - 1) {
+              this.currentStepIndex++;
+              this.currentSectionIndex =
+                  this.flatSteps[this.currentStepIndex].sectionIndex;
+          }
+      }
+      goToPrevious() {
+          if (this.currentStepIndex > 0) {
+              this.currentStepIndex--;
+              this.currentSectionIndex =
+                  this.flatSteps[this.currentStepIndex].sectionIndex;
+          }
+      }
+      get flatSteps() {
+          const result = [];
+          const collect = (items, sectionIndex) => {
+              var _a, _b;
+              for (const item of items) {
+                  if ('items' in item) {
+                      // This is a parent item with nested items (like a chapter with subchapters)
+                      result.push({
+                          label: item.label, // Use item.label which contains the chapter name
+                          content: item.content || '',
+                          sectionIndex,
+                          chapterData: item.chapterData, // Preserve chapter data
+                      });
+                      collect(item.items, sectionIndex);
+                  }
+                  else {
+                      const stepItem = {
+                          label: item.label,
+                          content: (_a = item.content) !== null && _a !== void 0 ? _a : '',
+                          complete: (_b = item.complete) !== null && _b !== void 0 ? _b : false,
+                          sectionIndex,
+                      };
+                      // Add chapter data if it exists (for main chapters)
+                      if (item.chapterData) {
+                          stepItem.chapterData = item.chapterData;
+                      }
+                      // Add subchapter data if it exists (for subchapters)
+                      if (item.subchapterData) {
+                          stepItem.subchapterData = item.subchapterData;
+                      }
+                      result.push(stepItem);
+                  }
+              }
+          };
+          this.sections.forEach((section, index) => {
+              result.push({
+                  label: section.tab,
+                  content: section.title,
+                  sectionIndex: index,
+              });
+              collect(section.items, index);
+          });
+          return result;
+      }
+      isSectionComplete(section) {
+          const leafItems = [];
+          const collect = (items) => {
+              for (const item of items) {
+                  if ('items' in item) {
+                      collect(item.items);
+                  }
+                  else {
+                      leafItems.push(item);
+                  }
+              }
+          };
+          collect(section.items);
+          return leafItems.every((item) => item.complete);
+      }
+      renderItems(items) {
+          return items.map((item) => {
+              if ('items' in item && Array.isArray(item.items)) {
+                  return x `
+          <sl-details summary=${item.title} open>
+            <div
+              style=${`padding-left: 8px; cursor: pointer; font-weight: ${this.activeContent.title === item.label ? 'bold' : '500'};`}
+              @click=${() => {
+                    const index = this.flatSteps.findIndex((i) => i.label === item.label);
+                    if (index !== -1) {
+                        this.currentStepIndex = index;
+                        this.currentSectionIndex = this.flatSteps[index].sectionIndex;
+                    }
+                }}
+            >
+              <sl-icon name="folder" style="margin-right: 6px;"></sl-icon>
+              ${item.title}
+            </div>
+            ${this.renderItems(item.items)}
+          </sl-details>
+        `;
+              }
+              else {
+                  return x `
+          <div
+            style="padding-left: 16px; display: flex; align-items: center; gap: 0.5rem; cursor: pointer;"
+            style=${this.activeContent.title === item.label
+                    ? 'font-weight: bold;'
+                    : ''}
+            @click=${() => {
+                    const index = this.flatSteps.findIndex((i) => i.label === item.label);
+                    if (index !== -1) {
+                        this.currentStepIndex = index;
+                        this.currentSectionIndex = this.flatSteps[index].sectionIndex;
+                    }
+                }}
+          >
+            <sl-icon
+              name=${item.complete ? 'check-circle' : 'pencil'}
+              style="color: ${item.complete ? 'green' : 'orange'}"
+            ></sl-icon>
+            ${item.label}
+          </div>
+        `;
+              }
+          });
+      }
+      updated(changedProps) {
+          var _a, _b;
+          if (changedProps.has('currentStepIndex')) {
+              const step = this.flatSteps[this.currentStepIndex];
+              if (step &&
+                  (this.activeContent.title !== step.label ||
+                      this.activeContent.content !== step.content)) {
+                  this.activeContent = {
+                      title: step.label,
+                      content: step.content,
+                  };
+              }
+          }
+          if (changedProps.has('currentSectionIndex') && this.tabGroupEl) {
+              const activeTab = `section-${this.currentSectionIndex}`;
+              (_b = (_a = this.tabGroupEl).show) === null || _b === void 0 ? void 0 : _b.call(_a, activeTab); // <- force the tab to show
+          }
+      }
+      willUpdate(changedProps) {
+          if (changedProps.has('currentStepIndex')) {
+              const step = this.flatSteps[this.currentStepIndex];
+              if (step &&
+                  (this.activeContent.title !== step.label ||
+                      this.activeContent.content !== step.content)) {
+                  this.activeContent = {
+                      title: step.label,
+                      content: step.content,
+                  };
+              }
+          }
+      }
+      render() {
+          return x `
+      <div class="container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+          <div class="card">
+            <div><strong>EFP Workbook:</strong> Test</div>
+            <div><strong>Status:</strong> In Progress</div>
+          </div>
+
+          <sl-tab-group
+            .activeTab=${`section-${this.currentSectionIndex}`}
+            @sl-tab-show=${(e) => {
+            const tabIndex = parseInt(e.detail.name.replace('section-', ''));
+            this.currentSectionIndex = tabIndex;
+        }}
+          >
+            ${this.sections.map((section, index) => {
+            const isActive = index === this.currentSectionIndex;
+            const isComplete = this.isSectionComplete(section);
+            const icon = isComplete ? 'check-circle' : 'pencil';
+            const color = isActive ? 'orange' : isComplete ? 'green' : 'gray';
+            return x `
+                <sl-tab slot="nav" panel="section-${index}">
+                  <sl-icon
+                    name=${icon}
+                    style="color: ${color}; margin-right: 0.5rem;"
+                  ></sl-icon>
+                  <span style=${isActive ? 'font-weight: bold;' : ''}
+                    >${section.tab}</span
+                  >
+                </sl-tab>
+              `;
+        })}
+            ${this.sections.map((section, index) => x `
+                <sl-tab-panel name="section-${index}">
+                  <div class="card">
+                    <strong>${section.title}</strong>
+                  </div>
+                  ${this.renderItems(section.items)}
+                </sl-tab-panel>
+              `)}
+          </sl-tab-group>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+          <div class="card">
+            <strong>${this.completionPercent}% Complete</strong>
+            <sl-progress
+              .value=${this.completionPercent}
+              max="100"
+            ></sl-progress>
+          </div>
+
+          <div class="card">
+            <h2>${this.activeContent.title}</h2>
+            ${this.renderMainContent()}
+          </div>
+
+          <div
+            class="card"
+            style="display: flex; gap: 1rem; align-items: center;"
+          >
+            <sl-button
+              variant="default"
+              size="large"
+              ?disabled=${this.currentStepIndex === 0}
+              @click=${this.goToPrevious}
+            >
+              <sl-icon name="chevron-left"></sl-icon>
+              Previous
+            </sl-button>
+
+            <sl-button
+              variant="text"
+              @click=${() => (this.currentSectionIndex = this.sections.length - 1)}
+            >
+              Skip to Next Required Step
+            </sl-button>
+
+            <sl-button
+              variant="primary"
+              size="large"
+              ?disabled=${this.currentStepIndex >= this.flatSteps.length - 1}
+              @click=${this.goToNext}
+            >
+              Continue
+            </sl-button>
+          </div>
+        </main>
+      </div>
+    `;
+      }
+  };
+  EFPEntryForm.styles = i$4 `
+    .container {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      height: 100vh;
+    }
+
+    .sidebar {
+      flex: 0 0 25%;
+      padding: 1rem;
+      border-right: 1px solid var(--sl-color-neutral-200);
+    }
+
+    .main-content {
+      flex: 1;
+      padding: 1rem;
+      overflow-y: auto;
+    }
+
+    @media (max-width: 992px) {
+      .sidebar {
+        order: 2;
+        flex: 0 0 100%;
+      }
+
+      .main-content {
+        order: 1;
+        flex: 0 0 100%;
+      }
+    }
+
+    .card {
+      border: 1px solid var(--sl-color-neutral-200);
+      border-radius: var(--sl-border-radius-medium);
+      padding: 1rem;
+      margin-bottom: 1rem;
+      background-color: var(--sl-color-neutral-0);
+    }
+
+    .nav {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    sl-tab::part(base) {
+      display: flex;
+      align-items: center;
+    }
+
+    .question-container {
+      margin-bottom: 1.5rem;
+      padding: 1rem;
+      border: 1px solid var(--sl-color-neutral-200);
+      border-radius: var(--sl-border-radius-medium);
+      background-color: var(--sl-color-neutral-50);
+    }
+
+    .question-label {
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      line-height: 1.4;
+    }
+
+    .question-text {
+      margin-bottom: 1rem;
+      color: var(--sl-color-neutral-700);
+      font-size: 0.9rem;
+    }
+
+    .chapter-header {
+      background-color: var(--sl-color-primary-50);
+      padding: 1rem;
+      margin-bottom: 1rem;
+      border-radius: var(--sl-border-radius-medium);
+      border-left: 4px solid var(--sl-color-primary-600);
+    }
+
+    .subchapter-header {
+      background-color: var(--sl-color-neutral-100);
+      padding: 0.75rem;
+      margin: 1rem 0;
+      border-radius: var(--sl-border-radius-small);
+      border-left: 3px solid var(--sl-color-neutral-400);
+    }
+
+    .question-response {
+      margin-top: 1rem;
+    }
+  `;
+  __decorate([
+      n$2({ type: Number })
+  ], EFPEntryForm.prototype, "currentSectionIndex", void 0);
+  __decorate([
+      n$2({ type: Number })
+  ], EFPEntryForm.prototype, "currentStepIndex", void 0);
+  __decorate([
+      n$2({ type: Array, attribute: false })
+  ], EFPEntryForm.prototype, "nestedChapterStructure", void 0);
+  __decorate([
+      n$2({ type: Object })
+  ], EFPEntryForm.prototype, "activeContent", void 0);
+  __decorate([
+      e$5('sl-tab-group')
+  ], EFPEntryForm.prototype, "tabGroupEl", void 0);
+  EFPEntryForm = __decorate([
+      t$1('efp-entry-form')
+  ], EFPEntryForm);
+
+  var logger$3 = Logger('workbook/workbook');
+  function updateEFPEntryFormWithNestedStructure(nestedStructure) {
+    try {
+      // Find the EFP Entry Form component in the DOM
+      var efpEntryForm = document.querySelector('efp-entry-form');
+      if (!efpEntryForm) {
+        logger$3.warn({
+          // @ts-ignore
+          fn: updateEFPEntryFormWithNestedStructure,
+          message: 'EFP Entry Form component not found in DOM'
+        });
+        return;
+      }
+
+      // @ts-ignore
+      if (typeof efpEntryForm.updateNestedChapterStructure === 'function') {
+        // @ts-ignore
+        efpEntryForm.updateNestedChapterStructure(nestedStructure);
+        logger$3.info({
+          // @ts-ignore
+          fn: updateEFPEntryFormWithNestedStructure,
+          message: 'Successfully updated EFP Entry Form with nested chapter structure',
+          data: {
+            chaptersCount: nestedStructure.length
+          }
+        });
+      } else {
+        logger$3.warn({
+          // @ts-ignore
+          fn: updateEFPEntryFormWithNestedStructure,
+          message: 'EFP Entry Form component does not support updateNestedChapterStructure method'
+        });
+
+        // Try alternative approach - set property directly
+        // @ts-ignore
+        if (efpEntryForm.nestedChapterStructure !== undefined) {
+          // @ts-ignore
+          efpEntryForm.nestedChapterStructure = nestedStructure;
+          // @ts-ignore
+          efpEntryForm.requestUpdate();
+          logger$3.info({
+            // @ts-ignore
+            fn: updateEFPEntryFormWithNestedStructure,
+            message: 'Updated EFP Entry Form via direct property assignment'
+          });
+        }
+      }
+    } catch (error) {
+      logger$3.error({
+        // @ts-ignore
+        fn: updateEFPEntryFormWithNestedStructure,
+        message: 'Failed to update EFP Entry Form with nested structure',
+        data: {
+          error: error
+        }
+      });
+    }
+  }
+  function initWorkbook() {
+    return _initWorkbook.apply(this, arguments);
+  }
+
+  // Function to insert the element
+  function _initWorkbook() {
+    _initWorkbook = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee() {
+      var existingToken, workbookId, nestedStructure;
+      return _regeneratorRuntime().wrap(function _callee$(_context) {
+        while (1) switch (_context.prev = _context.next) {
+          case 0:
+            if (!isWorkbookInitialized()) {
+              _context.next = 3;
+              break;
+            }
+            logger$3.info({
+              fn: initWorkbook,
+              message: 'Workbook already initialized, skipping...'
+            });
+            return _context.abrupt("return");
+          case 3:
+            // Check if token already exists to avoid redundant calls
+            existingToken = document.querySelector('input[name=__RequestVerificationToken]');
+            if (existingToken) {
+              _context.next = 7;
+              break;
+            }
+            _context.next = 7;
+            return preloadRequestVerificationToken();
+          case 7:
+            logger$3.info({
+              fn: initWorkbook,
+              message: "workbook initialized!"
+            });
+
+            // Get workbook ID and load data
+            workbookId = getWorkbookId();
+            if (!workbookId) {
+              _context.next = 14;
+              break;
+            }
+            _context.next = 12;
+            return loadWorkbookData(workbookId);
+          case 12:
+            _context.next = 15;
+            break;
+          case 14:
+            // Mark as initialized even if no workbook ID was found
+            // @ts-ignore
+            POWERPOD.workbook = {
+              initialized: true
+            };
+          case 15:
+            // Insert the LitElement first
+            insertLitElement();
+
+            // Load chapters and workbook questions data
+            _context.next = 18;
+            return loadChaptersAndQuestions();
+          case 18:
+            // Build and store the nested chapter structure
+            try {
+              logger$3.info({
+                fn: initWorkbook,
+                message: 'Building nested chapter structure...'
+              });
+              nestedStructure = getChaptersWithNestedQuestionsAndSubchapters();
+              logger$3.info({
+                fn: initWorkbook,
+                message: 'Successfully built nested chapter structure',
+                data: {
+                  chaptersCount: nestedStructure.length,
+                  totalSubchapters: nestedStructure.reduce(function (sum, chapter) {
+                    return sum + chapter.subchapters.length;
+                  }, 0),
+                  totalQuestions: nestedStructure.reduce(function (sum, chapter) {
+                    return sum + chapter.questions.length + chapter.subchapters.reduce(function (subSum, subchapter) {
+                      return subSum + subchapter.questions.length;
+                    }, 0);
+                  }, 0)
+                }
+              });
+
+              // Store nested structure in POWERPOD object
+              // @ts-ignore
+              POWERPOD.workbook = POWERPOD.workbook || {};
+              // @ts-ignore
+              POWERPOD.workbook.nestedStructure = nestedStructure;
+
+              // Update the EFP Entry Form component with the nested structure
+              // Use multiple attempts to ensure the component gets updated
+              updateEFPEntryFormWithNestedStructure(nestedStructure);
+
+              // Retry after a short delay in case the component wasn't ready
+              setTimeout(function () {
+                updateEFPEntryFormWithNestedStructure(nestedStructure);
+              }, 100);
+
+              // Final retry after a longer delay
+              setTimeout(function () {
+                updateEFPEntryFormWithNestedStructure(nestedStructure);
+              }, 500);
+            } catch (error) {
+              logger$3.error({
+                fn: initWorkbook,
+                message: 'Failed to build nested chapter structure',
+                data: {
+                  error: error
+                }
+              });
+            }
+            hideLoadingAnimation();
+          case 20:
+          case "end":
+            return _context.stop();
+        }
+      }, _callee);
+    }));
+    return _initWorkbook.apply(this, arguments);
+  }
+  function insertLitElement() {
+    var container = document.querySelector('.page-copy');
+    if (container) {
+      var element = document.createElement('efp-entry-form');
+      container.appendChild(element);
+    } else {
+      console.warn('No element with class "page-copy" found.');
+    }
   }
 
   var logger$2 = Logger('powerpod');
@@ -30894,6 +35277,7 @@
           message: "initializing ".concat(Form.Workbook)
         });
         initWorkbook();
+        break;
       default:
         logger$2.warn({
           message: 'init with no form type defined in options'
@@ -30912,7 +35296,7 @@
       };
     };
     // @ts-ignore
-    POWERPOD.version = '4.1.9';
+    POWERPOD.version = '4.2.0';
     // @ts-ignore
     window.powerpod = POWERPOD;
   }

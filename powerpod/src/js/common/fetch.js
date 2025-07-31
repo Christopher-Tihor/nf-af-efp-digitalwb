@@ -46,6 +46,8 @@ export const ENDPOINT_URL = {
   get_program_intake_data: `/_api/quartech_programintakes?$select=quartech_intakeenddate,quartech_intakestartdate,quartech_openintakedescription,quartech_closedintakedescription`,
   get_program_home_page_content_data: `/_api/quartech_programhomepagecontents`,
   get_workbook_data_by_id: (id) => `/_api/quartech_workbooks(${id})`,
+  get_chapters_data: `/_api/quartech_chapters`,
+  get_workbookquestions_data: `/_api/quartech_workbookquestions`,
 };
 
 POWERPOD.fetch = {
@@ -77,6 +79,9 @@ POWERPOD.fetch = {
   getClaimData,
   getProgramIntakeData,
   getProgramHomePageContentData,
+  getWorkbookDataById,
+  getChaptersData,
+  getWorkbookQuestionsData,
 };
 
 const CONTENT_TYPE = {
@@ -653,6 +658,41 @@ export async function getProgramIntakeData({ onSuccess = null, ...options }) {
 export async function getProgramHomePageContentData({ ...options } = {}) {
   return fetch({
     url: ENDPOINT_URL.get_program_home_page_content_data,
+    contentType: CONTENT_TYPE.json,
+    datatype: DATATYPE.json,
+    includeODataHeaders: true,
+    async: false,
+    returnData: true,
+    ...options,
+  });
+}
+
+export async function getWorkbookDataById({ id, ...options }) {
+  return fetch({
+    url: ENDPOINT_URL.get_workbook_data_by_id(id),
+    contentType: CONTENT_TYPE.json,
+    datatype: DATATYPE.json,
+    includeODataHeaders: true,
+    returnData: true,
+    ...options,
+  });
+}
+
+export async function getChaptersData({ ...options } = {}) {
+  return fetch({
+    url: ENDPOINT_URL.get_chapters_data,
+    contentType: CONTENT_TYPE.json,
+    datatype: DATATYPE.json,
+    includeODataHeaders: true,
+    async: false,
+    returnData: true,
+    ...options,
+  });
+}
+
+export async function getWorkbookQuestionsData({ ...options } = {}) {
+  return fetch({
+    url: ENDPOINT_URL.get_workbookquestions_data,
     contentType: CONTENT_TYPE.json,
     datatype: DATATYPE.json,
     includeODataHeaders: true,

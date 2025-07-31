@@ -7,6 +7,10 @@ import '@shoelace-style/shoelace/dist/components/progress-bar/progress-bar.js';
 import '@shoelace-style/shoelace/dist/components/tab-group/tab-group.js';
 import '@shoelace-style/shoelace/dist/components/tab/tab.js';
 import '@shoelace-style/shoelace/dist/components/tab-panel/tab-panel.js';
+import '@shoelace-style/shoelace/dist/components/radio-group/radio-group.js';
+import '@shoelace-style/shoelace/dist/components/radio/radio.js';
+import '@shoelace-style/shoelace/dist/components/textarea/textarea.js';
+import '@shoelace-style/shoelace/dist/components/input/input.js';
 
 import { LitElement, css, html, unsafeCSS } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
@@ -15,6 +19,7 @@ import { customElement, property, query } from 'lit/decorators.js';
 class EFPEntryForm extends LitElement {
   @property({ type: Number }) currentSectionIndex = 0;
   @property({ type: Number }) currentStepIndex = 0;
+  @property({ type: Array, attribute: false }) nestedChapterStructure: any[] = [];
   @property({ type: Object }) activeContent: {
     title: string;
     content: string;
@@ -77,9 +82,52 @@ class EFPEntryForm extends LitElement {
       display: flex;
       align-items: center;
     }
+
+    .question-container {
+      margin-bottom: 1.5rem;
+      padding: 1rem;
+      border: 1px solid var(--sl-color-neutral-200);
+      border-radius: var(--sl-border-radius-medium);
+      background-color: var(--sl-color-neutral-50);
+    }
+
+    .question-label {
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      line-height: 1.4;
+    }
+
+    .question-text {
+      margin-bottom: 1rem;
+      color: var(--sl-color-neutral-700);
+      font-size: 0.9rem;
+    }
+
+    .chapter-header {
+      background-color: var(--sl-color-primary-50);
+      padding: 1rem;
+      margin-bottom: 1rem;
+      border-radius: var(--sl-border-radius-medium);
+      border-left: 4px solid var(--sl-color-primary-600);
+    }
+
+    .subchapter-header {
+      background-color: var(--sl-color-neutral-100);
+      padding: 0.75rem;
+      margin: 1rem 0;
+      border-radius: var(--sl-border-radius-small);
+      border-left: 3px solid var(--sl-color-neutral-400);
+    }
+
+    .question-response {
+      margin-top: 1rem;
+    }
   `;
 
-  private sections = [
+  private get sections() {
+    console.log('EFPEntryForm: sections getter called, nestedChapterStructure length:', this.nestedChapterStructure?.length || 0);
+
+    return [
     {
       tab: 'Section A',
       title: 'Farm Business Profile',
@@ -139,31 +187,8 @@ class EFPEntryForm extends LitElement {
     },
     {
       tab: 'Section B',
-      title: 'Yard Site Review',
-      items: [
-        {
-          label: 'Infrastructure',
-          content: `
-          <h3>Farm Infrastructure Overview</h3>
-          <p>List and describe key structures on your farm such as barns, workshops, storage sheds, greenhouses, and fuel storage areas.</p>
-          <p>Include the age, condition, and primary use of each structure. Note any recent renovations or upgrades relevant to environmental management.</p>
-        `,
-          complete: false,
-        },
-        {
-          label: 'Drainage',
-          content: `
-          <h3>Drainage and Runoff</h3>
-          <p>Assess how water drains from your yard site:</p>
-          <ul>
-            <li>Are there any areas with standing water or poor drainage?</li>
-            <li>Is runoff directed away from wells, manure storage, and watercourses?</li>
-            <li>Describe any ditches, berms, or engineered drainage solutions in place.</li>
-          </ul>
-        `,
-          complete: true,
-        },
-      ],
+      title: 'Environmental Farm Plan Questionnaire',
+      items: this.generateSectionBItems(),
     },
     {
       tab: 'Section C',
@@ -200,6 +225,214 @@ class EFPEntryForm extends LitElement {
       ],
     },
   ];
+  }
+
+  private renderQuestion(question: any) {
+    const questionTypeMap: { [key: number]: string } = {
+      100000000: 'Yes/No/NA',
+      100000001: 'Point Rating',
+      // Add more question types as needed
+    };
+
+    const questionTypeName = questionTypeMap[question.questionType] || 'Unknown';
+
+    return html`
+      <div class="question-container">
+        ${question.textAboveQuestion ? html`
+          <div class="question-text">
+            ${unsafeHTML(question.textAboveQuestion)}
+          </div>
+        ` : ''}
+
+        <div class="question-label">
+          ${unsafeHTML(question.label)}
+        </div>
+
+        ${question.textBelowQuestion ? html`
+          <div class="question-text">
+            ${unsafeHTML(question.textBelowQuestion)}
+          </div>
+        ` : ''}
+
+        <div class="question-response">
+          ${this.renderQuestionInput(question, questionTypeName)}
+        </div>
+      </div>
+    `;
+  }
+
+  private renderQuestionInput(question: any, questionType: string) {
+    switch (questionType) {
+      case 'Yes/No/NA':
+        return html`
+          <sl-radio-group
+            label="Select your answer"
+            name="question-${question.id}"
+            size="small"
+          >
+            <sl-radio value="yes">Yes</sl-radio>
+            <sl-radio value="no">No</sl-radio>
+            <sl-radio value="na">N/A</sl-radio>
+          </sl-radio-group>
+        `;
+
+      case 'Point Rating':
+        return html`
+          <sl-radio-group
+            label="Rate this practice"
+            name="question-${question.id}"
+            size="small"
+          >
+            <sl-radio value="1">1 - Poor</sl-radio>
+            <sl-radio value="2">2 - Fair</sl-radio>
+            <sl-radio value="3">3 - Good</sl-radio>
+            <sl-radio value="4">4 - Excellent</sl-radio>
+          </sl-radio-group>
+        `;
+
+      default:
+        return html`
+          <sl-textarea
+            label="Your response"
+            name="question-${question.id}"
+            rows="3"
+            placeholder="Enter your response..."
+          ></sl-textarea>
+        `;
+    }
+  }
+
+  private renderSubchapter(subchapter: any) {
+    return html`
+      <div class="subchapter-header">
+        <h4>${subchapter.name}</h4>
+        ${subchapter.description ? html`
+          <div>${unsafeHTML(subchapter.description)}</div>
+        ` : ''}
+      </div>
+      ${subchapter.questions.map((question: any) => this.renderQuestion(question))}
+    `;
+  }
+
+  private renderChapter(chapter: any) {
+    return html`
+      <div class="chapter-header">
+        <h3>${chapter.name}</h3>
+        ${chapter.description ? html`
+          <div>${unsafeHTML(chapter.description)}</div>
+        ` : ''}
+      </div>
+
+      ${chapter.questions.map((question: any) => this.renderQuestion(question))}
+
+      ${chapter.subchapters.map((subchapter: any) => this.renderSubchapter(subchapter))}
+    `;
+  }
+
+  private generateSectionBItems() {
+    console.log('EFPEntryForm: generateSectionBItems called, nestedChapterStructure:', this.nestedChapterStructure);
+
+    if (!this.nestedChapterStructure || this.nestedChapterStructure.length === 0) {
+      console.log('EFPEntryForm: No nested chapter structure available, showing loading message');
+      return [
+        {
+          label: 'Loading Chapters...',
+          content: `
+            <h3>Loading Environmental Farm Plan Chapters</h3>
+            <p>Please wait while we load the questionnaire chapters and questions...</p>
+          `,
+          complete: false,
+        }
+      ];
+    }
+
+    console.log('EFPEntryForm: Generating section B items from', this.nestedChapterStructure.length, 'chapters');
+
+    const items: any[] = [];
+
+    this.nestedChapterStructure.forEach((chapter: any) => {
+      // Add the main chapter
+      const chapterItem: any = {
+        label: chapter.name || chapter.label,
+        title: chapter.name || chapter.label, // Add title for renderItems method
+        content: this.renderChapterContent(chapter),
+        complete: false,
+        chapterData: chapter
+      };
+
+      // If chapter has subchapters, create nested structure
+      if (chapter.subchapters && chapter.subchapters.length > 0) {
+        chapterItem.items = chapter.subchapters.map((subchapter: any) => ({
+          label: subchapter.name || subchapter.label,
+          content: this.renderSubchapterContent(subchapter),
+          complete: false,
+          subchapterData: subchapter,
+          parentChapter: chapter
+        }));
+      }
+
+      items.push(chapterItem);
+    });
+
+    return items;
+  }
+
+  private renderSubchapterContent(subchapter: any): string {
+    return `
+      <div class="subchapter-content">
+        <h3>${subchapter.name || subchapter.label}</h3>
+        ${subchapter.description || ''}
+        <p><strong>Questions:</strong> ${subchapter.questions?.length || 0}</p>
+      </div>
+    `;
+  }
+
+  private renderChapterContent(chapter: any): string {
+    // Return a string representation for the content property
+    // The actual rendering will be handled by the render method
+    return `
+      <div class="chapter-content">
+        <h3>${chapter.name}</h3>
+        ${chapter.description || ''}
+        <p><strong>Questions:</strong> ${chapter.questions.length}</p>
+        <p><strong>Subchapters:</strong> ${chapter.subchapters.length}</p>
+      </div>
+    `;
+  }
+
+  private renderMainContent() {
+    // Check if we're in Section B and have a chapter to render
+    if (this.currentSectionIndex === 1) { // Section B is index 1
+      const currentStep = this.flatSteps[this.currentStepIndex];
+
+      // Check if it's a subchapter
+      if (currentStep && 'subchapterData' in currentStep) {
+        return this.renderSubchapter(currentStep.subchapterData);
+      }
+      // Check if it's a main chapter
+      else if (currentStep && 'chapterData' in currentStep) {
+        return this.renderChapter(currentStep.chapterData);
+      }
+    }
+
+    // Default content rendering
+    return html`<div>${unsafeHTML(this.activeContent.content)}</div>`;
+  }
+
+  // Public method to update the nested chapter structure
+  public updateNestedChapterStructure(nestedStructure: any[]) {
+    console.log('EFPEntryForm: updateNestedChapterStructure called with:', nestedStructure);
+    console.log('EFPEntryForm: Current nestedChapterStructure length before update:', this.nestedChapterStructure.length);
+
+    this.nestedChapterStructure = nestedStructure;
+
+    console.log('EFPEntryForm: nestedChapterStructure updated, new length:', this.nestedChapterStructure.length);
+    console.log('EFPEntryForm: Triggering re-render...');
+
+    // The @property decorator will automatically trigger a re-render
+    // But we can force it to be sure
+    this.requestUpdate();
+  }
 
   private get completionPercent(): number {
     const allItems: any[] = [];
@@ -245,25 +478,41 @@ class EFPEntryForm extends LitElement {
     content: string;
     complete?: boolean;
     sectionIndex: number;
+    chapterData?: any;
+    subchapterData?: any;
   }> {
     const result: any[] = [];
 
     const collect = (items: any[], sectionIndex: number) => {
       for (const item of items) {
         if ('items' in item) {
+          // This is a parent item with nested items (like a chapter with subchapters)
           result.push({
-            label: item.title,
-            content: '', // or item.description if needed
+            label: item.label, // Use item.label which contains the chapter name
+            content: item.content || '',
             sectionIndex,
+            chapterData: item.chapterData, // Preserve chapter data
           });
           collect(item.items, sectionIndex);
         } else {
-          result.push({
+          const stepItem: any = {
             label: item.label,
             content: item.content ?? '',
             complete: item.complete ?? false,
             sectionIndex,
-          });
+          };
+
+          // Add chapter data if it exists (for main chapters)
+          if (item.chapterData) {
+            stepItem.chapterData = item.chapterData;
+          }
+
+          // Add subchapter data if it exists (for subchapters)
+          if (item.subchapterData) {
+            stepItem.subchapterData = item.subchapterData;
+          }
+
+          result.push(stepItem);
         }
       }
     };
@@ -447,7 +696,7 @@ class EFPEntryForm extends LitElement {
 
           <div class="card">
             <h2>${this.activeContent.title}</h2>
-            <div>${unsafeHTML(this.activeContent.content)}</div>
+            ${this.renderMainContent()}
           </div>
 
           <div
