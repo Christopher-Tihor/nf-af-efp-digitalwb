@@ -34528,9 +34528,10 @@
     `;
       }
       renderChapter(chapter) {
+          const formattedTitle = this.formatChapterTitle(chapter.name);
           return x `
       <div class="chapter-header">
-        <h3>${chapter.name}</h3>
+        <h3>${formattedTitle}</h3>
         ${chapter.description ? x `
           <div>${o$1(chapter.description)}</div>
         ` : ''}
@@ -34540,6 +34541,20 @@
 
       ${chapter.subchapters.map((subchapter) => this.renderSubchapter(subchapter))}
     `;
+      }
+      formatChapterTitle(chapterName) {
+          // Transform "CHAPTER 2 BUILDINGS AND ROADS" to "Chapter 2: Buildings and Roads"
+          if (!chapterName)
+              return '';
+          // Convert to title case and handle the chapter format
+          const titleCase = chapterName.toLowerCase().replace(/\b\w/g, l => l.toUpperCase());
+          // If it starts with "Chapter" and has a number, add a colon after the number
+          const chapterMatch = titleCase.match(/^Chapter (\d+) (.+)$/);
+          if (chapterMatch) {
+              const [, chapterNum, chapterTitle] = chapterMatch;
+              return `Chapter ${chapterNum}: ${chapterTitle}`;
+          }
+          return titleCase;
       }
       generateSectionBItems() {
           console.log('EFPEntryForm: generateSectionBItems called, nestedChapterStructure:', this.nestedChapterStructure);
@@ -34559,10 +34574,12 @@
           console.log('EFPEntryForm: Generating section B items from', this.nestedChapterStructure.length, 'chapters');
           const items = [];
           this.nestedChapterStructure.forEach((chapter) => {
-              // Add the main chapter
+              // Add the main chapter with formatted title
+              const originalTitle = chapter.name || chapter.label;
+              const formattedTitle = this.formatChapterTitle(originalTitle);
               const chapterItem = {
-                  label: chapter.name || chapter.label,
-                  title: chapter.name || chapter.label, // Add title for renderItems method
+                  label: formattedTitle,
+                  title: formattedTitle, // Add title for renderItems method
                   content: this.renderChapterContent(chapter),
                   complete: false,
                   chapterData: chapter
@@ -34595,9 +34612,10 @@
           var _a, _b;
           // Return a string representation for the content property
           // The actual rendering will be handled by the render method
+          const formattedTitle = this.formatChapterTitle(chapter.name);
           return `
       <div class="chapter-content">
-        <h3 style="font-family: var(--chapter-font); font-weight: 700; font-size: 1.75rem; color: var(--sl-color-primary-900); margin-bottom: 1rem; letter-spacing: -0.025em;">${chapter.name}</h3>
+        <h3 style="font-family: var(--chapter-font); font-weight: 700; font-size: 1.75rem; color: var(--sl-color-primary-900); margin-bottom: 1rem; letter-spacing: -0.025em;">${formattedTitle}</h3>
         <div style="font-family: var(--body-font); line-height: 1.6; color: var(--sl-color-neutral-700); margin-bottom: 1.5rem; font-size: 1.05rem;">${chapter.description || ''}</div>
         <div style="display: flex; gap: 2rem; margin-bottom: 1rem;">
           <p style="font-family: var(--body-font); font-weight: 500; color: var(--sl-color-neutral-600); margin: 0;"><strong>Questions:</strong> ${((_a = chapter.questions) === null || _a === void 0 ? void 0 : _a.length) || 0}</p>
@@ -34731,22 +34749,6 @@
               if ('items' in item && Array.isArray(item.items)) {
                   return x `
           <sl-details summary=${item.title} open>
-            <div
-              class="nav-chapter-title"
-              style=${`padding-left: 8px; cursor: pointer; font-weight: ${this.activeContent.title === item.label ? 'bold' : '600'}; color: ${this.activeContent.title === item.label
-                    ? 'var(--sl-color-primary-700)'
-                    : 'var(--sl-color-neutral-800)'};`}
-              @click=${() => {
-                    const index = this.flatSteps.findIndex((i) => i.label === item.label);
-                    if (index !== -1) {
-                        this.currentStepIndex = index;
-                        this.currentSectionIndex = this.flatSteps[index].sectionIndex;
-                    }
-                }}
-            >
-              <sl-icon name="folder" style="margin-right: 8px; color: var(--sl-color-primary-600);"></sl-icon>
-              ${item.title}
-            </div>
             ${this.renderItems(item.items)}
           </sl-details>
         `;
