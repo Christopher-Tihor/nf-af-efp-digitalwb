@@ -33,23 +33,52 @@ class EFPEntryForm extends LitElement {
   };
 
   static styles = css`
+    @import url('https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@400;500;600;700&display=swap');
+    @import url('https://cdn.jsdelivr.net/npm/@bcgov/bc-sans@2.0.0/css/BCSans.css');
+
+    :host {
+      font-family: 'BCSans', 'BC Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --chapter-font: 'Roboto Slab', Georgia, serif;
+      --body-font: 'BCSans', 'BC Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    /* Global font override for all content */
+    :host *,
+    :host *::before,
+    :host *::after {
+      font-family: var(--body-font) !important;
+    }
+
+    /* Specific overrides for headings */
+    :host h1,
+    :host h2,
+    :host h3,
+    :host h4,
+    :host h5,
+    :host h6 {
+      font-family: var(--chapter-font) !important;
+    }
+
     .container {
       display: flex;
       flex-direction: row;
       flex-wrap: wrap;
       height: 100vh;
+      font-family: var(--body-font);
     }
 
     .sidebar {
       flex: 0 0 25%;
       padding: 1rem;
       border-right: 1px solid var(--sl-color-neutral-200);
+      font-family: var(--body-font);
     }
 
     .main-content {
       flex: 1;
       padding: 1rem;
       overflow-y: auto;
+      font-family: var(--body-font);
     }
 
     @media (max-width: 992px) {
@@ -70,6 +99,7 @@ class EFPEntryForm extends LitElement {
       padding: 1rem;
       margin-bottom: 1rem;
       background-color: var(--sl-color-neutral-0);
+      font-family: var(--body-font);
     }
 
     .nav {
@@ -81,46 +111,163 @@ class EFPEntryForm extends LitElement {
     sl-tab::part(base) {
       display: flex;
       align-items: center;
+      font-family: var(--body-font);
+      font-weight: 500;
     }
 
     .question-container {
       margin-bottom: 1.5rem;
-      padding: 1rem;
+      padding: 1.25rem;
       border: 1px solid var(--sl-color-neutral-200);
       border-radius: var(--sl-border-radius-medium);
       background-color: var(--sl-color-neutral-50);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      font-family: var(--body-font);
     }
 
     .question-label {
+      font-family: var(--chapter-font);
       font-weight: 600;
-      margin-bottom: 0.5rem;
+      font-size: 1.1rem;
+      margin-bottom: 0.75rem;
       line-height: 1.4;
+      color: var(--sl-color-neutral-900);
     }
 
     .question-text {
       margin-bottom: 1rem;
       color: var(--sl-color-neutral-700);
-      font-size: 0.9rem;
+      font-size: 0.95rem;
+      line-height: 1.6;
+      font-family: var(--body-font);
     }
 
     .chapter-header {
-      background-color: var(--sl-color-primary-50);
-      padding: 1rem;
-      margin-bottom: 1rem;
+      background: linear-gradient(135deg, var(--sl-color-primary-50) 0%, var(--sl-color-primary-100) 100%);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
       border-radius: var(--sl-border-radius-medium);
       border-left: 4px solid var(--sl-color-primary-600);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    .chapter-header h3 {
+      font-family: var(--chapter-font);
+      font-weight: 700;
+      font-size: 1.75rem;
+      color: var(--sl-color-primary-900);
+      margin: 0 0 0.5rem 0;
+      letter-spacing: -0.025em;
     }
 
     .subchapter-header {
-      background-color: var(--sl-color-neutral-100);
-      padding: 0.75rem;
-      margin: 1rem 0;
+      background: linear-gradient(135deg, var(--sl-color-neutral-100) 0%, var(--sl-color-neutral-150) 100%);
+      padding: 1rem;
+      margin: 1.5rem 0;
       border-radius: var(--sl-border-radius-small);
-      border-left: 3px solid var(--sl-color-neutral-400);
+      border-left: 3px solid var(--sl-color-neutral-500);
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+    }
+
+    .subchapter-header h4 {
+      font-family: var(--chapter-font);
+      font-weight: 600;
+      font-size: 1.35rem;
+      color: var(--sl-color-neutral-800);
+      margin: 0 0 0.5rem 0;
+      letter-spacing: -0.015em;
     }
 
     .question-response {
       margin-top: 1rem;
+      font-family: var(--body-font);
+    }
+
+    /* Navigation styling */
+    .nav-chapter-title {
+      font-family: var(--chapter-font);
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: var(--sl-color-neutral-800);
+    }
+
+    .nav-subchapter-title {
+      font-family: var(--body-font);
+      font-weight: 500;
+      font-size: 0.9rem;
+      color: var(--sl-color-neutral-700);
+    }
+
+    /* Content area typography */
+    .chapter-content h3,
+    .subchapter-content h3 {
+      font-family: var(--chapter-font) !important;
+      font-weight: 600;
+      color: var(--sl-color-neutral-800);
+      margin-bottom: 0.75rem;
+    }
+
+    .chapter-content p,
+    .subchapter-content p {
+      font-family: var(--body-font) !important;
+      line-height: 1.6;
+      color: var(--sl-color-neutral-700);
+    }
+
+    /* Question content styling - override any inherited fonts */
+    .main-content,
+    .main-content *,
+    .main-content p,
+    .main-content div,
+    .main-content span,
+    .main-content label,
+    .main-content input,
+    .main-content textarea,
+    .main-content select {
+      font-family: var(--body-font) !important;
+    }
+
+    /* Ensure question text uses BC Sans */
+    .main-content h1,
+    .main-content h2,
+    .main-content h3,
+    .main-content h4,
+    .main-content h5,
+    .main-content h6 {
+      font-family: var(--chapter-font) !important;
+    }
+
+    /* Radio buttons and form elements */
+    .main-content input[type="radio"],
+    .main-content input[type="checkbox"],
+    .main-content input[type="text"],
+    .main-content textarea,
+    .main-content select {
+      font-family: var(--body-font) !important;
+    }
+
+    /* Question labels and text */
+    .main-content .question-label,
+    .main-content .question-text {
+      font-family: var(--body-font) !important;
+    }
+
+    /* Override any external stylesheets for question content */
+    .main-content [data-question-content],
+    .main-content [data-question-content] *,
+    .main-content .question-container,
+    .main-content .question-container * {
+      font-family: var(--body-font) !important;
+    }
+
+    /* Specific overrides for common question elements */
+    .main-content strong,
+    .main-content b,
+    .main-content em,
+    .main-content i,
+    .main-content span,
+    .main-content div {
+      font-family: inherit !important;
     }
   `;
 
@@ -380,9 +527,9 @@ class EFPEntryForm extends LitElement {
   private renderSubchapterContent(subchapter: any): string {
     return `
       <div class="subchapter-content">
-        <h3>${subchapter.name || subchapter.label}</h3>
-        ${subchapter.description || ''}
-        <p><strong>Questions:</strong> ${subchapter.questions?.length || 0}</p>
+        <h3 style="font-family: var(--chapter-font); font-weight: 600; font-size: 1.5rem; color: var(--sl-color-neutral-800); margin-bottom: 1rem;">${subchapter.name || subchapter.label}</h3>
+        <div style="font-family: var(--body-font); line-height: 1.6; color: var(--sl-color-neutral-700); margin-bottom: 1rem;">${subchapter.description || ''}</div>
+        <p style="font-family: var(--body-font); font-weight: 500; color: var(--sl-color-neutral-600);"><strong>Questions:</strong> ${subchapter.questions?.length || 0}</p>
       </div>
     `;
   }
@@ -392,10 +539,12 @@ class EFPEntryForm extends LitElement {
     // The actual rendering will be handled by the render method
     return `
       <div class="chapter-content">
-        <h3>${chapter.name}</h3>
-        ${chapter.description || ''}
-        <p><strong>Questions:</strong> ${chapter.questions.length}</p>
-        <p><strong>Subchapters:</strong> ${chapter.subchapters.length}</p>
+        <h3 style="font-family: var(--chapter-font); font-weight: 700; font-size: 1.75rem; color: var(--sl-color-primary-900); margin-bottom: 1rem; letter-spacing: -0.025em;">${chapter.name}</h3>
+        <div style="font-family: var(--body-font); line-height: 1.6; color: var(--sl-color-neutral-700); margin-bottom: 1.5rem; font-size: 1.05rem;">${chapter.description || ''}</div>
+        <div style="display: flex; gap: 2rem; margin-bottom: 1rem;">
+          <p style="font-family: var(--body-font); font-weight: 500; color: var(--sl-color-neutral-600); margin: 0;"><strong>Questions:</strong> ${chapter.questions?.length || 0}</p>
+          <p style="font-family: var(--body-font); font-weight: 500; color: var(--sl-color-neutral-600); margin: 0;"><strong>Subchapters:</strong> ${chapter.subchapters?.length || 0}</p>
+        </div>
       </div>
     `;
   }
@@ -552,8 +701,13 @@ class EFPEntryForm extends LitElement {
         return html`
           <sl-details summary=${item.title} open>
             <div
+              class="nav-chapter-title"
               style=${`padding-left: 8px; cursor: pointer; font-weight: ${
-                this.activeContent.title === item.label ? 'bold' : '500'
+                this.activeContent.title === item.label ? 'bold' : '600'
+              }; color: ${
+                this.activeContent.title === item.label
+                  ? 'var(--sl-color-primary-700)'
+                  : 'var(--sl-color-neutral-800)'
               };`}
               @click=${() => {
                 const index = this.flatSteps.findIndex(
@@ -565,7 +719,7 @@ class EFPEntryForm extends LitElement {
                 }
               }}
             >
-              <sl-icon name="folder" style="margin-right: 6px;"></sl-icon>
+              <sl-icon name="folder" style="margin-right: 8px; color: var(--sl-color-primary-600);"></sl-icon>
               ${item.title}
             </div>
             ${this.renderItems(item.items)}
@@ -574,10 +728,11 @@ class EFPEntryForm extends LitElement {
       } else {
         return html`
           <div
-            style="padding-left: 16px; display: flex; align-items: center; gap: 0.5rem; cursor: pointer;"
+            class="nav-subchapter-title"
+            style="padding-left: 24px; display: flex; align-items: center; gap: 0.5rem; cursor: pointer; padding: 0.5rem 0 0.5rem 24px; border-radius: 4px; transition: background-color 0.2s ease;"
             style=${this.activeContent.title === item.label
-              ? 'font-weight: bold;'
-              : ''}
+              ? 'font-weight: 600; background-color: var(--sl-color-primary-50); color: var(--sl-color-primary-800);'
+              : 'font-weight: 500;'}
             @click=${() => {
               const index = this.flatSteps.findIndex(
                 (i) => i.label === item.label
@@ -590,7 +745,7 @@ class EFPEntryForm extends LitElement {
           >
             <sl-icon
               name=${item.complete ? 'check-circle' : 'pencil'}
-              style="color: ${item.complete ? 'green' : 'orange'}"
+              style="color: ${item.complete ? 'var(--sl-color-success-600)' : 'var(--sl-color-warning-600)'}"
             ></sl-icon>
             ${item.label}
           </div>
