@@ -15,6 +15,7 @@ import '@shoelace-style/shoelace/dist/components/input/input.js';
 import { LitElement, css, html, unsafeCSS } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import './NavigationButtons';
+import './RatingQuestion';
 
 @customElement('efp-entry-form')
 class EFPEntryForm extends LitElement {
@@ -475,30 +476,13 @@ class EFPEntryForm extends LitElement {
   private renderQuestionInput(question: any, questionType: string) {
     switch (questionType) {
       case 'Yes/No/NA':
-        return html`
-          <sl-radio-group
-            label="Select your answer"
-            name="question-${question.id}"
-            size="small"
-          >
-            <sl-radio value="yes">Yes</sl-radio>
-            <sl-radio value="no">No</sl-radio>
-            <sl-radio value="na">N/A</sl-radio>
-          </sl-radio-group>
-        `;
-
       case 'Point Rating':
         return html`
-          <sl-radio-group
-            label="Rate this practice"
-            name="question-${question.id}"
-            size="small"
-          >
-            <sl-radio value="1">1 - Poor</sl-radio>
-            <sl-radio value="2">2 - Fair</sl-radio>
-            <sl-radio value="3">3 - Good</sl-radio>
-            <sl-radio value="4">4 - Excellent</sl-radio>
-          </sl-radio-group>
+          <rating-question
+            .questionId=${question.id}
+            .questionType=${questionType}
+            @rating-changed=${this.handleRatingChanged}
+          ></rating-question>
         `;
 
       default:
@@ -882,6 +866,20 @@ class EFPEntryForm extends LitElement {
 
   private handleNavigationContinue() {
     this.goToNext();
+  }
+
+  private handleRatingChanged(event: CustomEvent) {
+    const { questionId, value } = event.detail;
+    console.log(`Question ${questionId} answered with: ${value}`);
+
+    // Here you can store the answer in your data model
+    // For example: this.answers[questionId] = value;
+    // Or dispatch an event to a parent component
+    this.dispatchEvent(new CustomEvent('question-answered', {
+      detail: { questionId, value },
+      bubbles: true,
+      composed: true
+    }));
   }
 
   private updateNavigationState(currentLabel: string) {
