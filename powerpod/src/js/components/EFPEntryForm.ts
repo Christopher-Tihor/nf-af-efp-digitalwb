@@ -517,6 +517,95 @@ class EFPRenderUtils {
   }
 }
 
+// Utility class for event handling helpers
+class EFPEventUtils {
+  static handleItemClick(
+    item: EFPSectionItem,
+    flatSteps: EFPStep[],
+    onStepChange: (stepIndex: number, sectionIndex: number) => void,
+    onNavigationUpdate: (label: string) => void
+  ): void {
+    const index = flatSteps.findIndex((i) => i.label === item.label);
+    console.log(`Navigation click: Looking for "${item.label}", found at index: ${index}`);
+
+    if (index !== -1) {
+      const sectionIndex = flatSteps[index].sectionIndex;
+      console.log(`Set currentStepIndex to ${index}, currentSectionIndex to ${sectionIndex}`);
+
+      onStepChange(index, sectionIndex);
+      onNavigationUpdate(item.label);
+    } else {
+      console.warn(`Step "${item.label}" not found in flatSteps. Available steps:`, flatSteps.map(s => s.label));
+    }
+  }
+
+  static handleSectionChange(
+    newSectionIndex: number,
+    isNavigating: boolean,
+    flatSteps: EFPStep[],
+    onStepChange: (stepIndex: number, sectionIndex: number) => void,
+    onNavigationUpdate: (label: string) => void
+  ): void {
+    console.log('Section changed to:', newSectionIndex, 'isNavigating:', isNavigating);
+
+    // If we're in the middle of programmatic navigation, don't interfere
+    if (isNavigating) {
+      console.log('Ignoring section change during navigation');
+      return;
+    }
+
+    // Find the first CONTENT step in the new section (skip section headers)
+    const stepsInSection = flatSteps.filter(step => step.sectionIndex === newSectionIndex);
+
+    // Skip the first step if it's just the section header
+    let firstContentStep = stepsInSection.find(step =>
+      !step.label.startsWith('Section ') &&
+      step.content &&
+      step.content.trim() !== '' &&
+      step.content !== step.label
+    );
+
+    // If no content step found, fall back to the first step after the section header
+    if (!firstContentStep && stepsInSection.length > 1) {
+      firstContentStep = stepsInSection[1];
+    }
+
+    // If still no step found, use the first step in the section
+    if (!firstContentStep && stepsInSection.length > 0) {
+      firstContentStep = stepsInSection[0];
+    }
+
+    if (firstContentStep) {
+      const stepIndex = flatSteps.indexOf(firstContentStep);
+      onStepChange(stepIndex, newSectionIndex);
+      onNavigationUpdate(firstContentStep.label);
+      console.log('Navigated to first content step in section:', firstContentStep.label);
+    } else {
+      console.warn('No steps found for section:', newSectionIndex);
+    }
+  }
+
+  static handleRatingChanged(
+    event: CustomEvent,
+    onAnswerUpdate?: (questionId: string, value: any) => void
+  ): void {
+    const { questionId, value } = event.detail;
+    console.log(`Question ${questionId} answered with: ${value}`);
+
+    // Call the optional callback to update answers
+    onAnswerUpdate?.(questionId, value);
+
+    // Dispatch a custom event for parent components
+    const answerEvent = new CustomEvent('efp-answer-changed', {
+      detail: { questionId, value },
+      bubbles: true,
+      composed: true
+    });
+
+    event.target?.dispatchEvent(answerEvent);
+  }
+}
+
 @customElement('efp-entry-form')
 class EFPEntryForm extends LitElement {
   @property({ type: Number }) currentSectionIndex = 0;
@@ -1190,6 +1279,7 @@ class EFPEntryForm extends LitElement {
 
 
 
+  // Navigation event handlers
   private handleNavigationPrevious() {
     this.goToPrevious();
   }
@@ -1202,76 +1292,55 @@ class EFPEntryForm extends LitElement {
     this.goToNext();
   }
 
+  // Section navigation event handler
   private handleSectionChange(newSectionIndex: number) {
-    console.log('Section changed to:', newSectionIndex, 'isNavigating:', this.isNavigating);
+    EFPEventUtils.handleSectionChange(
+      newSectionIndex,
+      this.isNavigating,
+      this.flatSteps,
+      (stepIndex: number, sectionIndex: number) => {
+        this.currentStepIndex = stepIndex;
+        this.currentSectionIndex = sectionIndex;
 
-    // If we're in the middle of programmatic navigation, don't interfere
-    if (this.isNavigating) {
-      console.log('Ignoring section change during navigation');
-      return;
-    }
+        // Update the active content
+        const step = this.flatSteps[stepIndex];
+        if (step) {
+          this.activeContent = {
+            title: step.label,
+            content: step.content,
+          };
+        }
 
-    // Update the current section index
-    this.currentSectionIndex = newSectionIndex;
-
-    // Find the first CONTENT step in the new section (skip section headers)
-    const stepsInSection = this.flatSteps.filter(step => step.sectionIndex === newSectionIndex);
-
-    // Skip the first step if it's just the section header (like "Section A", "Section B", etc.)
-    let firstContentStep = stepsInSection.find(step =>
-      !step.label.startsWith('Section ') &&
-      step.content &&
-      step.content.trim() !== '' &&
-      step.content !== step.label // Skip steps where content is just the title
+        // Force a re-render
+        this.requestUpdate();
+      },
+      (label: string) => this.updateNavigationState(label)
     );
-
-    // If no content step found, fall back to the first step after the section header
-    if (!firstContentStep && stepsInSection.length > 1) {
-      firstContentStep = stepsInSection[1]; // Skip the section header
-    }
-
-    // If still no step found, use the first step in the section
-    if (!firstContentStep && stepsInSection.length > 0) {
-      firstContentStep = stepsInSection[0];
-    }
-
-    if (firstContentStep) {
-      const stepIndex = this.flatSteps.indexOf(firstContentStep);
-      this.currentStepIndex = stepIndex;
-
-      // Update the active content
-      this.activeContent = {
-        title: firstContentStep.label,
-        content: firstContentStep.content,
-      };
-
-      // Reset to first page when navigating to new section
-      // (pagination reset would go here if implemented)
-
-      // Update navigation state to expand relevant containers
-      this.updateNavigationState(firstContentStep.label);
-
-      console.log('Navigated to first content step in section:', firstContentStep.label);
-    } else {
-      console.warn('No steps found for section:', newSectionIndex);
-    }
-
-    // Force a re-render
-    this.requestUpdate();
   }
 
+  // Question interaction event handler
   private handleRatingChanged(event: CustomEvent) {
-    const { questionId, value } = event.detail;
-    console.log(`Question ${questionId} answered with: ${value}`);
+    EFPEventUtils.handleRatingChanged(
+      event,
+      (questionId: string, value: any) => {
+        // Store the answer in your data model if needed
+        // For example: this.answers[questionId] = value;
+        console.log(`Storing answer for question ${questionId}: ${value}`);
+      }
+    );
+  }
 
-    // Here you can store the answer in your data model
-    // For example: this.answers[questionId] = value;
-    // Or dispatch an event to a parent component
-    this.dispatchEvent(new CustomEvent('question-answered', {
-      detail: { questionId, value },
-      bubbles: true,
-      composed: true
-    }));
+  // Navigation item click event handler
+  private handleItemClick(item: EFPSectionItem) {
+    EFPEventUtils.handleItemClick(
+      item,
+      this.flatSteps,
+      (stepIndex: number, sectionIndex: number) => {
+        this.currentStepIndex = stepIndex;
+        this.currentSectionIndex = sectionIndex;
+      },
+      (label: string) => this.updateNavigationState(label)
+    );
   }
 
   private updateNavigationState(currentLabel: string) {
@@ -1455,21 +1524,6 @@ class EFPEntryForm extends LitElement {
 
   private isSectionComplete(section: EFPSection): boolean {
     return EFPCompletionUtils.isSectionComplete(section);
-  }
-
-  private handleItemClick(item: EFPSectionItem) {
-    const index = this.flatSteps.findIndex((i) => i.label === item.label);
-    console.log(`Navigation click: Looking for "${item.label}", found at index: ${index}`);
-    if (index !== -1) {
-      this.currentStepIndex = index;
-      this.currentSectionIndex = this.flatSteps[index].sectionIndex;
-      console.log(`Set currentStepIndex to ${index}, currentSectionIndex to ${this.flatSteps[index].sectionIndex}`);
-
-      // Update navigation state to expand relevant containers
-      this.updateNavigationState(item.label);
-    } else {
-      console.warn(`Step "${item.label}" not found in flatSteps. Available steps:`, this.flatSteps.map(s => s.label));
-    }
   }
 
   private renderItems(items: EFPSectionItem[]): unknown {
