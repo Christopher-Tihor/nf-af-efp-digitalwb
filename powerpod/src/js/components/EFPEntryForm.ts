@@ -1,5 +1,4 @@
 import { unsafeHTML } from 'lit/directives/unsafe-html.js';
-import shoelace from '../../assets/css/shoelace.css';
 import '@shoelace-style/shoelace/dist/components/details/details.js';
 import '@shoelace-style/shoelace/dist/components/button/button.js';
 import '@shoelace-style/shoelace/dist/components/icon/icon.js';
@@ -7,12 +6,9 @@ import '@shoelace-style/shoelace/dist/components/progress-bar/progress-bar.js';
 import '@shoelace-style/shoelace/dist/components/tab-group/tab-group.js';
 import '@shoelace-style/shoelace/dist/components/tab/tab.js';
 import '@shoelace-style/shoelace/dist/components/tab-panel/tab-panel.js';
-import '@shoelace-style/shoelace/dist/components/radio-group/radio-group.js';
-import '@shoelace-style/shoelace/dist/components/radio/radio.js';
 import '@shoelace-style/shoelace/dist/components/textarea/textarea.js';
-import '@shoelace-style/shoelace/dist/components/input/input.js';
 
-import { LitElement, css, html, unsafeCSS } from 'lit';
+import { LitElement, css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import './NavigationButtons';
 import './RatingQuestion';
@@ -48,6 +44,29 @@ interface EFPSectionItem {
 interface EFPActiveContent {
   title: string;
   content: string;
+}
+
+// Utility class for logging (can be disabled in production)
+class EFPLogger {
+  private static DEBUG = true; // Set to false in production
+
+  static log(...args: any[]): void {
+    if (EFPLogger.DEBUG) {
+      console.log('[EFP]', ...args);
+    }
+  }
+
+  static warn(...args: any[]): void {
+    if (EFPLogger.DEBUG) {
+      console.warn('[EFP]', ...args);
+    }
+  }
+
+  static error(...args: any[]): void {
+    if (EFPLogger.DEBUG) {
+      console.error('[EFP]', ...args);
+    }
+  }
 }
 
 // Utility class for text formatting
@@ -118,7 +137,7 @@ class EFPCompletionUtils {
 class EFPSectionGenerator {
   static generateSectionBItems(nestedChapterStructure: any[]): EFPSectionItem[] {
     if (!nestedChapterStructure || nestedChapterStructure.length === 0) {
-      console.log('EFPSectionGenerator: No nested chapter structure available, showing loading message');
+      EFPLogger.log('SectionGenerator: No nested chapter structure available, showing loading message');
       return [
         {
           label: 'Loading Chapters...',
@@ -303,12 +322,12 @@ class EFPNavigationUtils {
       const isContainer = EFPNavigationUtils.isStepContainer(step, sections);
 
       if (!isContainer) {
-        console.log(`Found last selectable step in section ${sectionIndex}: "${step.label}" at index ${index}`);
+        EFPLogger.log(`Found last selectable step in section ${sectionIndex}: "${step.label}" at index ${index}`);
         return { step, index };
       }
     }
 
-    console.warn(`No selectable steps found in section ${sectionIndex}`);
+    EFPLogger.warn(`No selectable steps found in section ${sectionIndex}`);
     return null;
   }
 
@@ -329,12 +348,12 @@ class EFPNavigationUtils {
 
       // Skip section headers like "Section A", "Section B", etc.
       if (!isContainer && !step.label.startsWith('Section ')) {
-        console.log(`Found first selectable step in section ${sectionIndex}: "${step.label}" at index ${index}`);
+        EFPLogger.log(`Found first selectable step in section ${sectionIndex}: "${step.label}" at index ${index}`);
         return { step, index };
       }
     }
 
-    console.warn(`No selectable steps found in section ${sectionIndex}`);
+    EFPLogger.warn(`No selectable steps found in section ${sectionIndex}`);
     return null;
   }
 
@@ -969,8 +988,6 @@ class EFPEntryForm extends LitElement {
   `;
 
   private get sections(): EFPSection[] {
-    // console.log('EFPEntryForm: sections getter called, nestedChapterStructure length:', this.nestedChapterStructure?.length || 0);
-
     return [
     {
       tab: 'Section A',
@@ -1189,13 +1206,9 @@ class EFPEntryForm extends LitElement {
 
   // Public API methods
   public updateNestedChapterStructure(nestedStructure: any[]) {
-    console.log('EFPEntryForm: updateNestedChapterStructure called with:', nestedStructure);
-    console.log('EFPEntryForm: Current nestedChapterStructure length before update:', this.nestedChapterStructure.length);
+    EFPLogger.log('updateNestedChapterStructure called with', nestedStructure?.length || 0, 'chapters');
 
     this.nestedChapterStructure = nestedStructure;
-
-    console.log('EFPEntryForm: nestedChapterStructure updated, new length:', this.nestedChapterStructure.length);
-    console.log('EFPEntryForm: Triggering re-render...');
 
     // The @property decorator will automatically trigger a re-render
     // But we can force it to be sure
@@ -1209,27 +1222,19 @@ class EFPEntryForm extends LitElement {
 
   // Navigation methods
   private goToNext() {
-    console.log('goToNext called, current step:', this.currentStepIndex, this.flatSteps[this.currentStepIndex]?.label);
-    console.log('Current activeContent:', this.activeContent.title);
+    EFPLogger.log('goToNext called, current step:', this.currentStepIndex, this.flatSteps[this.currentStepIndex]?.label);
 
     // Handle case where currentStepIndex is -1 (step not found in flatSteps)
     if (this.currentStepIndex === -1) {
-      console.warn('currentStepIndex is -1, trying to find current step by activeContent title');
+      EFPLogger.warn('currentStepIndex is -1, trying to find current step by activeContent title');
       const foundIndex = this.flatSteps.findIndex(step => step.label === this.activeContent.title);
       if (foundIndex !== -1) {
-        console.log(`Found current step "${this.activeContent.title}" at index ${foundIndex}`);
+        EFPLogger.log(`Found current step "${this.activeContent.title}" at index ${foundIndex}`);
         this.currentStepIndex = foundIndex;
       } else {
-        console.error(`Could not find current step "${this.activeContent.title}" in flatSteps`);
-        console.log('Available flatSteps:', this.flatSteps.map((s, i) => `${i}: ${s.label}`));
+        EFPLogger.error(`Could not find current step "${this.activeContent.title}" in flatSteps`);
         return; // Don't proceed with navigation if we can't find current position
       }
-    }
-
-    // Debug: Show the next few steps for context
-    console.log('Next 5 steps:');
-    for (let i = this.currentStepIndex + 1; i < Math.min(this.currentStepIndex + 6, this.flatSteps.length); i++) {
-      console.log(`  ${i}: ${this.flatSteps[i].label}`);
     }
 
     if (this.currentStepIndex < this.flatSteps.length - 1) {
@@ -1238,14 +1243,13 @@ class EFPEntryForm extends LitElement {
       // Skip over container items and find the next selectable item
       while (nextIndex < this.flatSteps.length) {
         const nextStep = this.flatSteps[nextIndex];
-        console.log('Checking next step at index', nextIndex, ':', nextStep.label);
 
         // Check if this step is a container (non-selectable)
         const isContainer = EFPNavigationUtils.isStepContainer(nextStep, this.sections);
 
         if (!isContainer) {
           // Found a selectable step
-          console.log('Found selectable step:', nextStep.label, 'at index', nextIndex);
+          EFPLogger.log('Found selectable step:', nextStep.label, 'at index', nextIndex);
 
           const currentStep = this.flatSteps[this.currentStepIndex];
           const currentSectionIndex = currentStep.sectionIndex;
@@ -1310,13 +1314,12 @@ class EFPEntryForm extends LitElement {
           return;
         }
 
-        console.log('Skipping container step:', nextStep.label);
         nextIndex++;
       }
 
       // If we didn't find any selectable steps, just go to the last step
       if (nextIndex >= this.flatSteps.length && this.currentStepIndex < this.flatSteps.length - 1) {
-        console.log('No more selectable steps found, going to last step');
+        EFPLogger.log('No more selectable steps found, going to last step');
         this.currentStepIndex = this.flatSteps.length - 1;
         this.currentSectionIndex = this.flatSteps[this.currentStepIndex].sectionIndex;
       }
@@ -1371,7 +1374,7 @@ class EFPEntryForm extends LitElement {
       (questionId: string, value: any) => {
         // Store the answer in your data model if needed
         // For example: this.answers[questionId] = value;
-        console.log(`Storing answer for question ${questionId}: ${value}`);
+        EFPLogger.log(`Storing answer for question ${questionId}: ${value}`);
       }
     );
   }
@@ -1412,22 +1415,18 @@ class EFPEntryForm extends LitElement {
     });
   }
 
-
-
   private goToPrevious() {
-    console.log('goToPrevious called, current step:', this.currentStepIndex, this.flatSteps[this.currentStepIndex]?.label);
-    console.log('Current activeContent:', this.activeContent.title);
+    EFPLogger.log('goToPrevious called, current step:', this.currentStepIndex, this.flatSteps[this.currentStepIndex]?.label);
 
     // Handle case where currentStepIndex is -1 (step not found in flatSteps)
     if (this.currentStepIndex === -1) {
-      console.warn('currentStepIndex is -1, trying to find current step by activeContent title');
+      EFPLogger.warn('currentStepIndex is -1, trying to find current step by activeContent title');
       const foundIndex = this.flatSteps.findIndex(step => step.label === this.activeContent.title);
       if (foundIndex !== -1) {
-        console.log(`Found current step "${this.activeContent.title}" at index ${foundIndex}`);
+        EFPLogger.log(`Found current step "${this.activeContent.title}" at index ${foundIndex}`);
         this.currentStepIndex = foundIndex;
       } else {
-        console.error(`Could not find current step "${this.activeContent.title}" in flatSteps`);
-        console.log('Available flatSteps:', this.flatSteps.map((s, i) => `${i}: ${s.label}`));
+        EFPLogger.error(`Could not find current step "${this.activeContent.title}" in flatSteps`);
         return; // Don't proceed with navigation if we can't find current position
       }
     }

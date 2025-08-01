@@ -5002,11 +5002,11 @@
     valid: true,
     valueMissing: false
   });
-  var valueMissingValidityState = Object.freeze(__spreadProps(__spreadValues({}, validValidityState), {
+  Object.freeze(__spreadProps(__spreadValues({}, validValidityState), {
     valid: false,
     valueMissing: true
   }));
-  var customErrorValidityState = Object.freeze(__spreadProps(__spreadValues({}, validValidityState), {
+  Object.freeze(__spreadProps(__spreadValues({}, validValidityState), {
     valid: false,
     customError: true
   }));
@@ -32590,649 +32590,6 @@
 
   SlTabPanel.define("sl-tab-panel");
 
-  // src/components/radio-group/radio-group.styles.ts
-  var radio_group_styles_default = i$4`
-  :host {
-    display: block;
-  }
-
-  .form-control {
-    position: relative;
-    border: none;
-    padding: 0;
-    margin: 0;
-  }
-
-  .form-control__label {
-    padding: 0;
-  }
-
-  .radio-group--required .radio-group__label::after {
-    content: var(--sl-input-required-content);
-    margin-inline-start: var(--sl-input-required-content-offset);
-  }
-
-  .visually-hidden {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-    border: 0;
-  }
-`;
-
-  // src/components/button-group/button-group.styles.ts
-  var button_group_styles_default = i$4`
-  :host {
-    display: inline-block;
-  }
-
-  .button-group {
-    display: flex;
-    flex-wrap: nowrap;
-  }
-`;
-
-  var SlButtonGroup = class extends ShoelaceElement {
-    constructor() {
-      super(...arguments);
-      this.disableRole = false;
-      this.label = "";
-    }
-    handleFocus(event) {
-      const button = findButton(event.target);
-      button == null ? void 0 : button.toggleAttribute("data-sl-button-group__button--focus", true);
-    }
-    handleBlur(event) {
-      const button = findButton(event.target);
-      button == null ? void 0 : button.toggleAttribute("data-sl-button-group__button--focus", false);
-    }
-    handleMouseOver(event) {
-      const button = findButton(event.target);
-      button == null ? void 0 : button.toggleAttribute("data-sl-button-group__button--hover", true);
-    }
-    handleMouseOut(event) {
-      const button = findButton(event.target);
-      button == null ? void 0 : button.toggleAttribute("data-sl-button-group__button--hover", false);
-    }
-    handleSlotChange() {
-      const slottedElements = [...this.defaultSlot.assignedElements({ flatten: true })];
-      slottedElements.forEach((el) => {
-        const index = slottedElements.indexOf(el);
-        const button = findButton(el);
-        if (button) {
-          button.toggleAttribute("data-sl-button-group__button", true);
-          button.toggleAttribute("data-sl-button-group__button--first", index === 0);
-          button.toggleAttribute("data-sl-button-group__button--inner", index > 0 && index < slottedElements.length - 1);
-          button.toggleAttribute("data-sl-button-group__button--last", index === slottedElements.length - 1);
-          button.toggleAttribute(
-            "data-sl-button-group__button--radio",
-            button.tagName.toLowerCase() === "sl-radio-button"
-          );
-        }
-      });
-    }
-    render() {
-      return x`
-      <div
-        part="base"
-        class="button-group"
-        role="${this.disableRole ? "presentation" : "group"}"
-        aria-label=${this.label}
-        @focusout=${this.handleBlur}
-        @focusin=${this.handleFocus}
-        @mouseover=${this.handleMouseOver}
-        @mouseout=${this.handleMouseOut}
-      >
-        <slot @slotchange=${this.handleSlotChange}></slot>
-      </div>
-    `;
-    }
-  };
-  SlButtonGroup.styles = [component_styles_default, button_group_styles_default];
-  __decorateClass([
-    e$5("slot")
-  ], SlButtonGroup.prototype, "defaultSlot", 2);
-  __decorateClass([
-    r()
-  ], SlButtonGroup.prototype, "disableRole", 2);
-  __decorateClass([
-    n$2()
-  ], SlButtonGroup.prototype, "label", 2);
-  function findButton(el) {
-    var _a;
-    const selector = "sl-button, sl-radio-button";
-    return (_a = el.closest(selector)) != null ? _a : el.querySelector(selector);
-  }
-
-  var SlRadioGroup = class extends ShoelaceElement {
-    constructor() {
-      super(...arguments);
-      this.formControlController = new FormControlController(this);
-      this.hasSlotController = new HasSlotController(this, "help-text", "label");
-      this.customValidityMessage = "";
-      this.hasButtonGroup = false;
-      this.errorMessage = "";
-      this.defaultValue = "";
-      this.label = "";
-      this.helpText = "";
-      this.name = "option";
-      this.value = "";
-      this.size = "medium";
-      this.form = "";
-      this.required = false;
-    }
-    /** Gets the validity state object */
-    get validity() {
-      const isRequiredAndEmpty = this.required && !this.value;
-      const hasCustomValidityMessage = this.customValidityMessage !== "";
-      if (hasCustomValidityMessage) {
-        return customErrorValidityState;
-      } else if (isRequiredAndEmpty) {
-        return valueMissingValidityState;
-      }
-      return validValidityState;
-    }
-    /** Gets the validation message */
-    get validationMessage() {
-      const isRequiredAndEmpty = this.required && !this.value;
-      const hasCustomValidityMessage = this.customValidityMessage !== "";
-      if (hasCustomValidityMessage) {
-        return this.customValidityMessage;
-      } else if (isRequiredAndEmpty) {
-        return this.validationInput.validationMessage;
-      }
-      return "";
-    }
-    connectedCallback() {
-      super.connectedCallback();
-      this.defaultValue = this.value;
-    }
-    firstUpdated() {
-      this.formControlController.updateValidity();
-    }
-    getAllRadios() {
-      return [...this.querySelectorAll("sl-radio, sl-radio-button")];
-    }
-    handleRadioClick(event) {
-      const target = event.target.closest("sl-radio, sl-radio-button");
-      const radios = this.getAllRadios();
-      const oldValue = this.value;
-      if (target.disabled) {
-        return;
-      }
-      this.value = target.value;
-      radios.forEach((radio) => radio.checked = radio === target);
-      if (this.value !== oldValue) {
-        this.emit("sl-change");
-        this.emit("sl-input");
-      }
-    }
-    handleKeyDown(event) {
-      var _a;
-      if (!["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", " "].includes(event.key)) {
-        return;
-      }
-      const radios = this.getAllRadios().filter((radio) => !radio.disabled);
-      const checkedRadio = (_a = radios.find((radio) => radio.checked)) != null ? _a : radios[0];
-      const incr = event.key === " " ? 0 : ["ArrowUp", "ArrowLeft"].includes(event.key) ? -1 : 1;
-      const oldValue = this.value;
-      let index = radios.indexOf(checkedRadio) + incr;
-      if (index < 0) {
-        index = radios.length - 1;
-      }
-      if (index > radios.length - 1) {
-        index = 0;
-      }
-      this.getAllRadios().forEach((radio) => {
-        radio.checked = false;
-        if (!this.hasButtonGroup) {
-          radio.tabIndex = -1;
-        }
-      });
-      this.value = radios[index].value;
-      radios[index].checked = true;
-      if (!this.hasButtonGroup) {
-        radios[index].tabIndex = 0;
-        radios[index].focus();
-      } else {
-        radios[index].shadowRoot.querySelector("button").focus();
-      }
-      if (this.value !== oldValue) {
-        this.emit("sl-change");
-        this.emit("sl-input");
-      }
-      event.preventDefault();
-    }
-    handleLabelClick() {
-      const radios = this.getAllRadios();
-      const checked = radios.find((radio) => radio.checked);
-      const radioToFocus = checked || radios[0];
-      if (radioToFocus) {
-        radioToFocus.focus();
-      }
-    }
-    handleInvalid(event) {
-      this.formControlController.setValidity(false);
-      this.formControlController.emitInvalidEvent(event);
-    }
-    async syncRadioElements() {
-      var _a, _b;
-      const radios = this.getAllRadios();
-      await Promise.all(
-        // Sync the checked state and size
-        radios.map(async (radio) => {
-          await radio.updateComplete;
-          radio.checked = radio.value === this.value;
-          radio.size = this.size;
-        })
-      );
-      this.hasButtonGroup = radios.some((radio) => radio.tagName.toLowerCase() === "sl-radio-button");
-      if (radios.length > 0 && !radios.some((radio) => radio.checked)) {
-        if (this.hasButtonGroup) {
-          const buttonRadio = (_a = radios[0].shadowRoot) == null ? void 0 : _a.querySelector("button");
-          if (buttonRadio) {
-            buttonRadio.tabIndex = 0;
-          }
-        } else {
-          radios[0].tabIndex = 0;
-        }
-      }
-      if (this.hasButtonGroup) {
-        const buttonGroup = (_b = this.shadowRoot) == null ? void 0 : _b.querySelector("sl-button-group");
-        if (buttonGroup) {
-          buttonGroup.disableRole = true;
-        }
-      }
-    }
-    syncRadios() {
-      if (customElements.get("sl-radio") && customElements.get("sl-radio-button")) {
-        this.syncRadioElements();
-        return;
-      }
-      if (customElements.get("sl-radio")) {
-        this.syncRadioElements();
-      } else {
-        customElements.whenDefined("sl-radio").then(() => this.syncRadios());
-      }
-      if (customElements.get("sl-radio-button")) {
-        this.syncRadioElements();
-      } else {
-        customElements.whenDefined("sl-radio-button").then(() => this.syncRadios());
-      }
-    }
-    updateCheckedRadio() {
-      const radios = this.getAllRadios();
-      radios.forEach((radio) => radio.checked = radio.value === this.value);
-      this.formControlController.setValidity(this.validity.valid);
-    }
-    handleSizeChange() {
-      this.syncRadios();
-    }
-    handleValueChange() {
-      if (this.hasUpdated) {
-        this.updateCheckedRadio();
-      }
-    }
-    /** Checks for validity but does not show a validation message. Returns `true` when valid and `false` when invalid. */
-    checkValidity() {
-      const isRequiredAndEmpty = this.required && !this.value;
-      const hasCustomValidityMessage = this.customValidityMessage !== "";
-      if (isRequiredAndEmpty || hasCustomValidityMessage) {
-        this.formControlController.emitInvalidEvent();
-        return false;
-      }
-      return true;
-    }
-    /** Gets the associated form, if one exists. */
-    getForm() {
-      return this.formControlController.getForm();
-    }
-    /** Checks for validity and shows the browser's validation message if the control is invalid. */
-    reportValidity() {
-      const isValid = this.validity.valid;
-      this.errorMessage = this.customValidityMessage || isValid ? "" : this.validationInput.validationMessage;
-      this.formControlController.setValidity(isValid);
-      this.validationInput.hidden = true;
-      clearTimeout(this.validationTimeout);
-      if (!isValid) {
-        this.validationInput.hidden = false;
-        this.validationInput.reportValidity();
-        this.validationTimeout = setTimeout(() => this.validationInput.hidden = true, 1e4);
-      }
-      return isValid;
-    }
-    /** Sets a custom validation message. Pass an empty string to restore validity. */
-    setCustomValidity(message = "") {
-      this.customValidityMessage = message;
-      this.errorMessage = message;
-      this.validationInput.setCustomValidity(message);
-      this.formControlController.updateValidity();
-    }
-    render() {
-      const hasLabelSlot = this.hasSlotController.test("label");
-      const hasHelpTextSlot = this.hasSlotController.test("help-text");
-      const hasLabel = this.label ? true : !!hasLabelSlot;
-      const hasHelpText = this.helpText ? true : !!hasHelpTextSlot;
-      const defaultSlot = x`
-      <slot @slotchange=${this.syncRadios} @click=${this.handleRadioClick} @keydown=${this.handleKeyDown}></slot>
-    `;
-      return x`
-      <fieldset
-        part="form-control"
-        class=${e$3({
-      "form-control": true,
-      "form-control--small": this.size === "small",
-      "form-control--medium": this.size === "medium",
-      "form-control--large": this.size === "large",
-      "form-control--radio-group": true,
-      "form-control--has-label": hasLabel,
-      "form-control--has-help-text": hasHelpText
-    })}
-        role="radiogroup"
-        aria-labelledby="label"
-        aria-describedby="help-text"
-        aria-errormessage="error-message"
-      >
-        <label
-          part="form-control-label"
-          id="label"
-          class="form-control__label"
-          aria-hidden=${hasLabel ? "false" : "true"}
-          @click=${this.handleLabelClick}
-        >
-          <slot name="label">${this.label}</slot>
-        </label>
-
-        <div part="form-control-input" class="form-control-input">
-          <div class="visually-hidden">
-            <div id="error-message" aria-live="assertive">${this.errorMessage}</div>
-            <label class="radio-group__validation">
-              <input
-                type="text"
-                class="radio-group__validation-input"
-                ?required=${this.required}
-                tabindex="-1"
-                hidden
-                @invalid=${this.handleInvalid}
-              />
-            </label>
-          </div>
-
-          ${this.hasButtonGroup ? x`
-                <sl-button-group part="button-group" exportparts="base:button-group__base" role="presentation">
-                  ${defaultSlot}
-                </sl-button-group>
-              ` : defaultSlot}
-        </div>
-
-        <div
-          part="form-control-help-text"
-          id="help-text"
-          class="form-control__help-text"
-          aria-hidden=${hasHelpText ? "false" : "true"}
-        >
-          <slot name="help-text">${this.helpText}</slot>
-        </div>
-      </fieldset>
-    `;
-    }
-  };
-  SlRadioGroup.styles = [component_styles_default, form_control_styles_default, radio_group_styles_default];
-  SlRadioGroup.dependencies = { "sl-button-group": SlButtonGroup };
-  __decorateClass([
-    e$5("slot:not([name])")
-  ], SlRadioGroup.prototype, "defaultSlot", 2);
-  __decorateClass([
-    e$5(".radio-group__validation-input")
-  ], SlRadioGroup.prototype, "validationInput", 2);
-  __decorateClass([
-    r()
-  ], SlRadioGroup.prototype, "hasButtonGroup", 2);
-  __decorateClass([
-    r()
-  ], SlRadioGroup.prototype, "errorMessage", 2);
-  __decorateClass([
-    r()
-  ], SlRadioGroup.prototype, "defaultValue", 2);
-  __decorateClass([
-    n$2()
-  ], SlRadioGroup.prototype, "label", 2);
-  __decorateClass([
-    n$2({ attribute: "help-text" })
-  ], SlRadioGroup.prototype, "helpText", 2);
-  __decorateClass([
-    n$2()
-  ], SlRadioGroup.prototype, "name", 2);
-  __decorateClass([
-    n$2({ reflect: true })
-  ], SlRadioGroup.prototype, "value", 2);
-  __decorateClass([
-    n$2({ reflect: true })
-  ], SlRadioGroup.prototype, "size", 2);
-  __decorateClass([
-    n$2({ reflect: true })
-  ], SlRadioGroup.prototype, "form", 2);
-  __decorateClass([
-    n$2({ type: Boolean, reflect: true })
-  ], SlRadioGroup.prototype, "required", 2);
-  __decorateClass([
-    watch("size", { waitUntilFirstUpdate: true })
-  ], SlRadioGroup.prototype, "handleSizeChange", 1);
-  __decorateClass([
-    watch("value")
-  ], SlRadioGroup.prototype, "handleValueChange", 1);
-
-  SlRadioGroup.define("sl-radio-group");
-
-  // src/components/radio/radio.styles.ts
-  var radio_styles_default = i$4`
-  :host {
-    display: block;
-  }
-
-  :host(:focus-visible) {
-    outline: 0px;
-  }
-
-  .radio {
-    display: inline-flex;
-    align-items: top;
-    font-family: var(--sl-input-font-family);
-    font-size: var(--sl-input-font-size-medium);
-    font-weight: var(--sl-input-font-weight);
-    color: var(--sl-input-label-color);
-    vertical-align: middle;
-    cursor: pointer;
-  }
-
-  .radio--small {
-    --toggle-size: var(--sl-toggle-size-small);
-    font-size: var(--sl-input-font-size-small);
-  }
-
-  .radio--medium {
-    --toggle-size: var(--sl-toggle-size-medium);
-    font-size: var(--sl-input-font-size-medium);
-  }
-
-  .radio--large {
-    --toggle-size: var(--sl-toggle-size-large);
-    font-size: var(--sl-input-font-size-large);
-  }
-
-  .radio__checked-icon {
-    display: inline-flex;
-    width: var(--toggle-size);
-    height: var(--toggle-size);
-  }
-
-  .radio__control {
-    flex: 0 0 auto;
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: var(--toggle-size);
-    height: var(--toggle-size);
-    border: solid var(--sl-input-border-width) var(--sl-input-border-color);
-    border-radius: 50%;
-    background-color: var(--sl-input-background-color);
-    color: transparent;
-    transition:
-      var(--sl-transition-fast) border-color,
-      var(--sl-transition-fast) background-color,
-      var(--sl-transition-fast) color,
-      var(--sl-transition-fast) box-shadow;
-  }
-
-  .radio__input {
-    position: absolute;
-    opacity: 0;
-    padding: 0;
-    margin: 0;
-    pointer-events: none;
-  }
-
-  /* Hover */
-  .radio:not(.radio--checked):not(.radio--disabled) .radio__control:hover {
-    border-color: var(--sl-input-border-color-hover);
-    background-color: var(--sl-input-background-color-hover);
-  }
-
-  /* Checked */
-  .radio--checked .radio__control {
-    color: var(--sl-color-neutral-0);
-    border-color: var(--sl-color-primary-600);
-    background-color: var(--sl-color-primary-600);
-  }
-
-  /* Checked + hover */
-  .radio.radio--checked:not(.radio--disabled) .radio__control:hover {
-    border-color: var(--sl-color-primary-500);
-    background-color: var(--sl-color-primary-500);
-  }
-
-  /* Checked + focus */
-  :host(:focus-visible) .radio__control {
-    outline: var(--sl-focus-ring);
-    outline-offset: var(--sl-focus-ring-offset);
-  }
-
-  /* Disabled */
-  .radio--disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-
-  /* When the control isn't checked, hide the circle for Windows High Contrast mode a11y */
-  .radio:not(.radio--checked) svg circle {
-    opacity: 0;
-  }
-
-  .radio__label {
-    display: inline-block;
-    color: var(--sl-input-label-color);
-    line-height: var(--toggle-size);
-    margin-inline-start: 0.5em;
-    user-select: none;
-    -webkit-user-select: none;
-  }
-`;
-
-  var SlRadio = class extends ShoelaceElement {
-    constructor() {
-      super();
-      this.checked = false;
-      this.hasFocus = false;
-      this.size = "medium";
-      this.disabled = false;
-      this.handleBlur = () => {
-        this.hasFocus = false;
-        this.emit("sl-blur");
-      };
-      this.handleClick = () => {
-        if (!this.disabled) {
-          this.checked = true;
-        }
-      };
-      this.handleFocus = () => {
-        this.hasFocus = true;
-        this.emit("sl-focus");
-      };
-      this.addEventListener("blur", this.handleBlur);
-      this.addEventListener("click", this.handleClick);
-      this.addEventListener("focus", this.handleFocus);
-    }
-    connectedCallback() {
-      super.connectedCallback();
-      this.setInitialAttributes();
-    }
-    setInitialAttributes() {
-      this.setAttribute("role", "radio");
-      this.setAttribute("tabindex", "-1");
-      this.setAttribute("aria-disabled", this.disabled ? "true" : "false");
-    }
-    handleCheckedChange() {
-      this.setAttribute("aria-checked", this.checked ? "true" : "false");
-      this.setAttribute("tabindex", this.checked ? "0" : "-1");
-    }
-    handleDisabledChange() {
-      this.setAttribute("aria-disabled", this.disabled ? "true" : "false");
-    }
-    render() {
-      return x`
-      <span
-        part="base"
-        class=${e$3({
-      radio: true,
-      "radio--checked": this.checked,
-      "radio--disabled": this.disabled,
-      "radio--focused": this.hasFocus,
-      "radio--small": this.size === "small",
-      "radio--medium": this.size === "medium",
-      "radio--large": this.size === "large"
-    })}
-      >
-        <span part="${`control${this.checked ? " control--checked" : ""}`}" class="radio__control">
-          ${this.checked ? x` <sl-icon part="checked-icon" class="radio__checked-icon" library="system" name="radio"></sl-icon> ` : ""}
-        </span>
-
-        <slot part="label" class="radio__label"></slot>
-      </span>
-    `;
-    }
-  };
-  SlRadio.styles = [component_styles_default, radio_styles_default];
-  SlRadio.dependencies = { "sl-icon": SlIcon };
-  __decorateClass([
-    r()
-  ], SlRadio.prototype, "checked", 2);
-  __decorateClass([
-    r()
-  ], SlRadio.prototype, "hasFocus", 2);
-  __decorateClass([
-    n$2()
-  ], SlRadio.prototype, "value", 2);
-  __decorateClass([
-    n$2({ reflect: true })
-  ], SlRadio.prototype, "size", 2);
-  __decorateClass([
-    n$2({ type: Boolean, reflect: true })
-  ], SlRadio.prototype, "disabled", 2);
-  __decorateClass([
-    watch("checked")
-  ], SlRadio.prototype, "handleCheckedChange", 1);
-  __decorateClass([
-    watch("disabled", { waitUntilFirstUpdate: true })
-  ], SlRadio.prototype, "handleDisabledChange", 1);
-
-  SlRadio.define("sl-radio");
-
   // src/components/textarea/textarea.styles.ts
   var textarea_styles_default = i$4`
   :host {
@@ -33736,745 +33093,6 @@
 
   SlTextarea.define("sl-textarea");
 
-  // src/components/input/input.styles.ts
-  var input_styles_default = i$4`
-  :host {
-    display: block;
-  }
-
-  .input {
-    flex: 1 1 auto;
-    display: inline-flex;
-    align-items: stretch;
-    justify-content: start;
-    position: relative;
-    width: 100%;
-    font-family: var(--sl-input-font-family);
-    font-weight: var(--sl-input-font-weight);
-    letter-spacing: var(--sl-input-letter-spacing);
-    vertical-align: middle;
-    overflow: hidden;
-    cursor: text;
-    transition:
-      var(--sl-transition-fast) color,
-      var(--sl-transition-fast) border,
-      var(--sl-transition-fast) box-shadow,
-      var(--sl-transition-fast) background-color;
-  }
-
-  /* Standard inputs */
-  .input--standard {
-    background-color: var(--sl-input-background-color);
-    border: solid var(--sl-input-border-width) var(--sl-input-border-color);
-  }
-
-  .input--standard:hover:not(.input--disabled) {
-    background-color: var(--sl-input-background-color-hover);
-    border-color: var(--sl-input-border-color-hover);
-  }
-
-  .input--standard.input--focused:not(.input--disabled) {
-    background-color: var(--sl-input-background-color-focus);
-    border-color: var(--sl-input-border-color-focus);
-    box-shadow: 0 0 0 var(--sl-focus-ring-width) var(--sl-input-focus-ring-color);
-  }
-
-  .input--standard.input--focused:not(.input--disabled) .input__control {
-    color: var(--sl-input-color-focus);
-  }
-
-  .input--standard.input--disabled {
-    background-color: var(--sl-input-background-color-disabled);
-    border-color: var(--sl-input-border-color-disabled);
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-
-  .input--standard.input--disabled .input__control {
-    color: var(--sl-input-color-disabled);
-  }
-
-  .input--standard.input--disabled .input__control::placeholder {
-    color: var(--sl-input-placeholder-color-disabled);
-  }
-
-  /* Filled inputs */
-  .input--filled {
-    border: none;
-    background-color: var(--sl-input-filled-background-color);
-    color: var(--sl-input-color);
-  }
-
-  .input--filled:hover:not(.input--disabled) {
-    background-color: var(--sl-input-filled-background-color-hover);
-  }
-
-  .input--filled.input--focused:not(.input--disabled) {
-    background-color: var(--sl-input-filled-background-color-focus);
-    outline: var(--sl-focus-ring);
-    outline-offset: var(--sl-focus-ring-offset);
-  }
-
-  .input--filled.input--disabled {
-    background-color: var(--sl-input-filled-background-color-disabled);
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-
-  .input__control {
-    flex: 1 1 auto;
-    font-family: inherit;
-    font-size: inherit;
-    font-weight: inherit;
-    min-width: 0;
-    height: 100%;
-    color: var(--sl-input-color);
-    border: none;
-    background: inherit;
-    box-shadow: none;
-    padding: 0;
-    margin: 0;
-    cursor: inherit;
-    -webkit-appearance: none;
-  }
-
-  .input__control::-webkit-search-decoration,
-  .input__control::-webkit-search-cancel-button,
-  .input__control::-webkit-search-results-button,
-  .input__control::-webkit-search-results-decoration {
-    -webkit-appearance: none;
-  }
-
-  .input__control:-webkit-autofill,
-  .input__control:-webkit-autofill:hover,
-  .input__control:-webkit-autofill:focus,
-  .input__control:-webkit-autofill:active {
-    box-shadow: 0 0 0 var(--sl-input-height-large) var(--sl-input-background-color-hover) inset !important;
-    -webkit-text-fill-color: var(--sl-color-primary-500);
-    caret-color: var(--sl-input-color);
-  }
-
-  .input--filled .input__control:-webkit-autofill,
-  .input--filled .input__control:-webkit-autofill:hover,
-  .input--filled .input__control:-webkit-autofill:focus,
-  .input--filled .input__control:-webkit-autofill:active {
-    box-shadow: 0 0 0 var(--sl-input-height-large) var(--sl-input-filled-background-color) inset !important;
-  }
-
-  .input__control::placeholder {
-    color: var(--sl-input-placeholder-color);
-    user-select: none;
-    -webkit-user-select: none;
-  }
-
-  .input:hover:not(.input--disabled) .input__control {
-    color: var(--sl-input-color-hover);
-  }
-
-  .input__control:focus {
-    outline: none;
-  }
-
-  .input__prefix,
-  .input__suffix {
-    display: inline-flex;
-    flex: 0 0 auto;
-    align-items: center;
-    cursor: default;
-  }
-
-  .input__prefix ::slotted(sl-icon),
-  .input__suffix ::slotted(sl-icon) {
-    color: var(--sl-input-icon-color);
-  }
-
-  /*
-   * Size modifiers
-   */
-
-  .input--small {
-    border-radius: var(--sl-input-border-radius-small);
-    font-size: var(--sl-input-font-size-small);
-    height: var(--sl-input-height-small);
-  }
-
-  .input--small .input__control {
-    height: calc(var(--sl-input-height-small) - var(--sl-input-border-width) * 2);
-    padding: 0 var(--sl-input-spacing-small);
-  }
-
-  .input--small .input__clear,
-  .input--small .input__password-toggle {
-    width: calc(1em + var(--sl-input-spacing-small) * 2);
-  }
-
-  .input--small .input__prefix ::slotted(*) {
-    margin-inline-start: var(--sl-input-spacing-small);
-  }
-
-  .input--small .input__suffix ::slotted(*) {
-    margin-inline-end: var(--sl-input-spacing-small);
-  }
-
-  .input--medium {
-    border-radius: var(--sl-input-border-radius-medium);
-    font-size: var(--sl-input-font-size-medium);
-    height: var(--sl-input-height-medium);
-  }
-
-  .input--medium .input__control {
-    height: calc(var(--sl-input-height-medium) - var(--sl-input-border-width) * 2);
-    padding: 0 var(--sl-input-spacing-medium);
-  }
-
-  .input--medium .input__clear,
-  .input--medium .input__password-toggle {
-    width: calc(1em + var(--sl-input-spacing-medium) * 2);
-  }
-
-  .input--medium .input__prefix ::slotted(*) {
-    margin-inline-start: var(--sl-input-spacing-medium);
-  }
-
-  .input--medium .input__suffix ::slotted(*) {
-    margin-inline-end: var(--sl-input-spacing-medium);
-  }
-
-  .input--large {
-    border-radius: var(--sl-input-border-radius-large);
-    font-size: var(--sl-input-font-size-large);
-    height: var(--sl-input-height-large);
-  }
-
-  .input--large .input__control {
-    height: calc(var(--sl-input-height-large) - var(--sl-input-border-width) * 2);
-    padding: 0 var(--sl-input-spacing-large);
-  }
-
-  .input--large .input__clear,
-  .input--large .input__password-toggle {
-    width: calc(1em + var(--sl-input-spacing-large) * 2);
-  }
-
-  .input--large .input__prefix ::slotted(*) {
-    margin-inline-start: var(--sl-input-spacing-large);
-  }
-
-  .input--large .input__suffix ::slotted(*) {
-    margin-inline-end: var(--sl-input-spacing-large);
-  }
-
-  /*
-   * Pill modifier
-   */
-
-  .input--pill.input--small {
-    border-radius: var(--sl-input-height-small);
-  }
-
-  .input--pill.input--medium {
-    border-radius: var(--sl-input-height-medium);
-  }
-
-  .input--pill.input--large {
-    border-radius: var(--sl-input-height-large);
-  }
-
-  /*
-   * Clearable + Password Toggle
-   */
-
-  .input__clear,
-  .input__password-toggle {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-size: inherit;
-    color: var(--sl-input-icon-color);
-    border: none;
-    background: none;
-    padding: 0;
-    transition: var(--sl-transition-fast) color;
-    cursor: pointer;
-  }
-
-  .input__clear:hover,
-  .input__password-toggle:hover {
-    color: var(--sl-input-icon-color-hover);
-  }
-
-  .input__clear:focus,
-  .input__password-toggle:focus {
-    outline: none;
-  }
-
-  /* Don't show the browser's password toggle in Edge */
-  ::-ms-reveal {
-    display: none;
-  }
-
-  /* Hide the built-in number spinner */
-  .input--no-spin-buttons input[type='number']::-webkit-outer-spin-button,
-  .input--no-spin-buttons input[type='number']::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    display: none;
-  }
-
-  .input--no-spin-buttons input[type='number'] {
-    -moz-appearance: textfield;
-  }
-`;
-
-  var SlInput = class extends ShoelaceElement {
-    constructor() {
-      super(...arguments);
-      this.formControlController = new FormControlController(this, {
-        assumeInteractionOn: ["sl-blur", "sl-input"]
-      });
-      this.hasSlotController = new HasSlotController(this, "help-text", "label");
-      this.localize = new LocalizeController(this);
-      this.hasFocus = false;
-      this.title = "";
-      // make reactive to pass through
-      this.__numberInput = Object.assign(document.createElement("input"), { type: "number" });
-      this.__dateInput = Object.assign(document.createElement("input"), { type: "date" });
-      this.type = "text";
-      this.name = "";
-      this.value = "";
-      this.defaultValue = "";
-      this.size = "medium";
-      this.filled = false;
-      this.pill = false;
-      this.label = "";
-      this.helpText = "";
-      this.clearable = false;
-      this.disabled = false;
-      this.placeholder = "";
-      this.readonly = false;
-      this.passwordToggle = false;
-      this.passwordVisible = false;
-      this.noSpinButtons = false;
-      this.form = "";
-      this.required = false;
-      this.spellcheck = true;
-    }
-    //
-    // NOTE: We use an in-memory input for these getters/setters instead of the one in the template because the properties
-    // can be set before the component is rendered.
-    //
-    /**
-     * Gets or sets the current value as a `Date` object. Returns `null` if the value can't be converted. This will use the native `<input type="{{type}}">` implementation and may result in an error.
-     */
-    get valueAsDate() {
-      var _a;
-      this.__dateInput.type = this.type;
-      this.__dateInput.value = this.value;
-      return ((_a = this.input) == null ? void 0 : _a.valueAsDate) || this.__dateInput.valueAsDate;
-    }
-    set valueAsDate(newValue) {
-      this.__dateInput.type = this.type;
-      this.__dateInput.valueAsDate = newValue;
-      this.value = this.__dateInput.value;
-    }
-    /** Gets or sets the current value as a number. Returns `NaN` if the value can't be converted. */
-    get valueAsNumber() {
-      var _a;
-      this.__numberInput.value = this.value;
-      return ((_a = this.input) == null ? void 0 : _a.valueAsNumber) || this.__numberInput.valueAsNumber;
-    }
-    set valueAsNumber(newValue) {
-      this.__numberInput.valueAsNumber = newValue;
-      this.value = this.__numberInput.value;
-    }
-    /** Gets the validity state object */
-    get validity() {
-      return this.input.validity;
-    }
-    /** Gets the validation message */
-    get validationMessage() {
-      return this.input.validationMessage;
-    }
-    firstUpdated() {
-      this.formControlController.updateValidity();
-    }
-    handleBlur() {
-      this.hasFocus = false;
-      this.emit("sl-blur");
-    }
-    handleChange() {
-      this.value = this.input.value;
-      this.emit("sl-change");
-    }
-    handleClearClick(event) {
-      event.preventDefault();
-      if (this.value !== "") {
-        this.value = "";
-        this.emit("sl-clear");
-        this.emit("sl-input");
-        this.emit("sl-change");
-      }
-      this.input.focus();
-    }
-    handleFocus() {
-      this.hasFocus = true;
-      this.emit("sl-focus");
-    }
-    handleInput() {
-      this.value = this.input.value;
-      this.formControlController.updateValidity();
-      this.emit("sl-input");
-    }
-    handleInvalid(event) {
-      this.formControlController.setValidity(false);
-      this.formControlController.emitInvalidEvent(event);
-    }
-    handleKeyDown(event) {
-      const hasModifier = event.metaKey || event.ctrlKey || event.shiftKey || event.altKey;
-      if (event.key === "Enter" && !hasModifier) {
-        setTimeout(() => {
-          if (!event.defaultPrevented && !event.isComposing) {
-            this.formControlController.submit();
-          }
-        });
-      }
-    }
-    handlePasswordToggle() {
-      this.passwordVisible = !this.passwordVisible;
-    }
-    handleDisabledChange() {
-      this.formControlController.setValidity(this.disabled);
-    }
-    handleStepChange() {
-      this.input.step = String(this.step);
-      this.formControlController.updateValidity();
-    }
-    async handleValueChange() {
-      await this.updateComplete;
-      this.formControlController.updateValidity();
-    }
-    /** Sets focus on the input. */
-    focus(options) {
-      this.input.focus(options);
-    }
-    /** Removes focus from the input. */
-    blur() {
-      this.input.blur();
-    }
-    /** Selects all the text in the input. */
-    select() {
-      this.input.select();
-    }
-    /** Sets the start and end positions of the text selection (0-based). */
-    setSelectionRange(selectionStart, selectionEnd, selectionDirection = "none") {
-      this.input.setSelectionRange(selectionStart, selectionEnd, selectionDirection);
-    }
-    /** Replaces a range of text with a new string. */
-    setRangeText(replacement, start, end, selectMode = "preserve") {
-      const selectionStart = start != null ? start : this.input.selectionStart;
-      const selectionEnd = end != null ? end : this.input.selectionEnd;
-      this.input.setRangeText(replacement, selectionStart, selectionEnd, selectMode);
-      if (this.value !== this.input.value) {
-        this.value = this.input.value;
-      }
-    }
-    /** Displays the browser picker for an input element (only works if the browser supports it for the input type). */
-    showPicker() {
-      if ("showPicker" in HTMLInputElement.prototype) {
-        this.input.showPicker();
-      }
-    }
-    /** Increments the value of a numeric input type by the value of the step attribute. */
-    stepUp() {
-      this.input.stepUp();
-      if (this.value !== this.input.value) {
-        this.value = this.input.value;
-      }
-    }
-    /** Decrements the value of a numeric input type by the value of the step attribute. */
-    stepDown() {
-      this.input.stepDown();
-      if (this.value !== this.input.value) {
-        this.value = this.input.value;
-      }
-    }
-    /** Checks for validity but does not show a validation message. Returns `true` when valid and `false` when invalid. */
-    checkValidity() {
-      return this.input.checkValidity();
-    }
-    /** Gets the associated form, if one exists. */
-    getForm() {
-      return this.formControlController.getForm();
-    }
-    /** Checks for validity and shows the browser's validation message if the control is invalid. */
-    reportValidity() {
-      return this.input.reportValidity();
-    }
-    /** Sets a custom validation message. Pass an empty string to restore validity. */
-    setCustomValidity(message) {
-      this.input.setCustomValidity(message);
-      this.formControlController.updateValidity();
-    }
-    render() {
-      const hasLabelSlot = this.hasSlotController.test("label");
-      const hasHelpTextSlot = this.hasSlotController.test("help-text");
-      const hasLabel = this.label ? true : !!hasLabelSlot;
-      const hasHelpText = this.helpText ? true : !!hasHelpTextSlot;
-      const hasClearIcon = this.clearable && !this.disabled && !this.readonly;
-      const isClearIconVisible = hasClearIcon && (typeof this.value === "number" || this.value.length > 0);
-      return x`
-      <div
-        part="form-control"
-        class=${e$3({
-      "form-control": true,
-      "form-control--small": this.size === "small",
-      "form-control--medium": this.size === "medium",
-      "form-control--large": this.size === "large",
-      "form-control--has-label": hasLabel,
-      "form-control--has-help-text": hasHelpText
-    })}
-      >
-        <label
-          part="form-control-label"
-          class="form-control__label"
-          for="input"
-          aria-hidden=${hasLabel ? "false" : "true"}
-        >
-          <slot name="label">${this.label}</slot>
-        </label>
-
-        <div part="form-control-input" class="form-control-input">
-          <div
-            part="base"
-            class=${e$3({
-      input: true,
-      // Sizes
-      "input--small": this.size === "small",
-      "input--medium": this.size === "medium",
-      "input--large": this.size === "large",
-      // States
-      "input--pill": this.pill,
-      "input--standard": !this.filled,
-      "input--filled": this.filled,
-      "input--disabled": this.disabled,
-      "input--focused": this.hasFocus,
-      "input--empty": !this.value,
-      "input--no-spin-buttons": this.noSpinButtons
-    })}
-          >
-            <span part="prefix" class="input__prefix">
-              <slot name="prefix"></slot>
-            </span>
-
-            <input
-              part="input"
-              id="input"
-              class="input__control"
-              type=${this.type === "password" && this.passwordVisible ? "text" : this.type}
-              title=${this.title}
-              name=${o$2(this.name)}
-              ?disabled=${this.disabled}
-              ?readonly=${this.readonly}
-              ?required=${this.required}
-              placeholder=${o$2(this.placeholder)}
-              minlength=${o$2(this.minlength)}
-              maxlength=${o$2(this.maxlength)}
-              min=${o$2(this.min)}
-              max=${o$2(this.max)}
-              step=${o$2(this.step)}
-              .value=${l(this.value)}
-              autocapitalize=${o$2(this.autocapitalize)}
-              autocomplete=${o$2(this.autocomplete)}
-              autocorrect=${o$2(this.autocorrect)}
-              ?autofocus=${this.autofocus}
-              spellcheck=${this.spellcheck}
-              pattern=${o$2(this.pattern)}
-              enterkeyhint=${o$2(this.enterkeyhint)}
-              inputmode=${o$2(this.inputmode)}
-              aria-describedby="help-text"
-              @change=${this.handleChange}
-              @input=${this.handleInput}
-              @invalid=${this.handleInvalid}
-              @keydown=${this.handleKeyDown}
-              @focus=${this.handleFocus}
-              @blur=${this.handleBlur}
-            />
-
-            ${isClearIconVisible ? x`
-                  <button
-                    part="clear-button"
-                    class="input__clear"
-                    type="button"
-                    aria-label=${this.localize.term("clearEntry")}
-                    @click=${this.handleClearClick}
-                    tabindex="-1"
-                  >
-                    <slot name="clear-icon">
-                      <sl-icon name="x-circle-fill" library="system"></sl-icon>
-                    </slot>
-                  </button>
-                ` : ""}
-            ${this.passwordToggle && !this.disabled ? x`
-                  <button
-                    part="password-toggle-button"
-                    class="input__password-toggle"
-                    type="button"
-                    aria-label=${this.localize.term(this.passwordVisible ? "hidePassword" : "showPassword")}
-                    @click=${this.handlePasswordToggle}
-                    tabindex="-1"
-                  >
-                    ${this.passwordVisible ? x`
-                          <slot name="show-password-icon">
-                            <sl-icon name="eye-slash" library="system"></sl-icon>
-                          </slot>
-                        ` : x`
-                          <slot name="hide-password-icon">
-                            <sl-icon name="eye" library="system"></sl-icon>
-                          </slot>
-                        `}
-                  </button>
-                ` : ""}
-
-            <span part="suffix" class="input__suffix">
-              <slot name="suffix"></slot>
-            </span>
-          </div>
-        </div>
-
-        <div
-          part="form-control-help-text"
-          id="help-text"
-          class="form-control__help-text"
-          aria-hidden=${hasHelpText ? "false" : "true"}
-        >
-          <slot name="help-text">${this.helpText}</slot>
-        </div>
-      </div>
-    `;
-    }
-  };
-  SlInput.styles = [component_styles_default, form_control_styles_default, input_styles_default];
-  SlInput.dependencies = { "sl-icon": SlIcon };
-  __decorateClass([
-    e$5(".input__control")
-  ], SlInput.prototype, "input", 2);
-  __decorateClass([
-    r()
-  ], SlInput.prototype, "hasFocus", 2);
-  __decorateClass([
-    n$2()
-  ], SlInput.prototype, "title", 2);
-  __decorateClass([
-    n$2({ reflect: true })
-  ], SlInput.prototype, "type", 2);
-  __decorateClass([
-    n$2()
-  ], SlInput.prototype, "name", 2);
-  __decorateClass([
-    n$2()
-  ], SlInput.prototype, "value", 2);
-  __decorateClass([
-    defaultValue()
-  ], SlInput.prototype, "defaultValue", 2);
-  __decorateClass([
-    n$2({ reflect: true })
-  ], SlInput.prototype, "size", 2);
-  __decorateClass([
-    n$2({ type: Boolean, reflect: true })
-  ], SlInput.prototype, "filled", 2);
-  __decorateClass([
-    n$2({ type: Boolean, reflect: true })
-  ], SlInput.prototype, "pill", 2);
-  __decorateClass([
-    n$2()
-  ], SlInput.prototype, "label", 2);
-  __decorateClass([
-    n$2({ attribute: "help-text" })
-  ], SlInput.prototype, "helpText", 2);
-  __decorateClass([
-    n$2({ type: Boolean })
-  ], SlInput.prototype, "clearable", 2);
-  __decorateClass([
-    n$2({ type: Boolean, reflect: true })
-  ], SlInput.prototype, "disabled", 2);
-  __decorateClass([
-    n$2()
-  ], SlInput.prototype, "placeholder", 2);
-  __decorateClass([
-    n$2({ type: Boolean, reflect: true })
-  ], SlInput.prototype, "readonly", 2);
-  __decorateClass([
-    n$2({ attribute: "password-toggle", type: Boolean })
-  ], SlInput.prototype, "passwordToggle", 2);
-  __decorateClass([
-    n$2({ attribute: "password-visible", type: Boolean })
-  ], SlInput.prototype, "passwordVisible", 2);
-  __decorateClass([
-    n$2({ attribute: "no-spin-buttons", type: Boolean })
-  ], SlInput.prototype, "noSpinButtons", 2);
-  __decorateClass([
-    n$2({ reflect: true })
-  ], SlInput.prototype, "form", 2);
-  __decorateClass([
-    n$2({ type: Boolean, reflect: true })
-  ], SlInput.prototype, "required", 2);
-  __decorateClass([
-    n$2()
-  ], SlInput.prototype, "pattern", 2);
-  __decorateClass([
-    n$2({ type: Number })
-  ], SlInput.prototype, "minlength", 2);
-  __decorateClass([
-    n$2({ type: Number })
-  ], SlInput.prototype, "maxlength", 2);
-  __decorateClass([
-    n$2()
-  ], SlInput.prototype, "min", 2);
-  __decorateClass([
-    n$2()
-  ], SlInput.prototype, "max", 2);
-  __decorateClass([
-    n$2()
-  ], SlInput.prototype, "step", 2);
-  __decorateClass([
-    n$2()
-  ], SlInput.prototype, "autocapitalize", 2);
-  __decorateClass([
-    n$2()
-  ], SlInput.prototype, "autocorrect", 2);
-  __decorateClass([
-    n$2()
-  ], SlInput.prototype, "autocomplete", 2);
-  __decorateClass([
-    n$2({ type: Boolean })
-  ], SlInput.prototype, "autofocus", 2);
-  __decorateClass([
-    n$2()
-  ], SlInput.prototype, "enterkeyhint", 2);
-  __decorateClass([
-    n$2({
-      type: Boolean,
-      converter: {
-        // Allow "true|false" attribute values but keep the property boolean
-        fromAttribute: (value) => !value || value === "false" ? false : true,
-        toAttribute: (value) => value ? "true" : "false"
-      }
-    })
-  ], SlInput.prototype, "spellcheck", 2);
-  __decorateClass([
-    n$2()
-  ], SlInput.prototype, "inputmode", 2);
-  __decorateClass([
-    watch("disabled", { waitUntilFirstUpdate: true })
-  ], SlInput.prototype, "handleDisabledChange", 1);
-  __decorateClass([
-    watch("step", { waitUntilFirstUpdate: true })
-  ], SlInput.prototype, "handleStepChange", 1);
-  __decorateClass([
-    watch("value", { waitUntilFirstUpdate: true })
-  ], SlInput.prototype, "handleValueChange", 1);
-
-  SlInput.define("sl-input");
-
   let NavigationButtons = class NavigationButtons extends s$1 {
       constructor() {
           super(...arguments);
@@ -34772,6 +33390,25 @@
       t$1('rating-question')
   ], RatingQuestion);
 
+  // Utility class for logging (can be disabled in production)
+  class EFPLogger {
+      static log(...args) {
+          if (EFPLogger.DEBUG) {
+              console.log('[EFP]', ...args);
+          }
+      }
+      static warn(...args) {
+          if (EFPLogger.DEBUG) {
+              console.warn('[EFP]', ...args);
+          }
+      }
+      static error(...args) {
+          if (EFPLogger.DEBUG) {
+              console.error('[EFP]', ...args);
+          }
+      }
+  }
+  EFPLogger.DEBUG = true; // Set to false in production
   // Utility class for text formatting
   class EFPTextUtils {
       static formatChapterTitle(chapterName) {
@@ -34832,7 +33469,7 @@
   class EFPSectionGenerator {
       static generateSectionBItems(nestedChapterStructure) {
           if (!nestedChapterStructure || nestedChapterStructure.length === 0) {
-              console.log('EFPSectionGenerator: No nested chapter structure available, showing loading message');
+              EFPLogger.log('SectionGenerator: No nested chapter structure available, showing loading message');
               return [
                   {
                       label: 'Loading Chapters...',
@@ -34996,11 +33633,11 @@
               const { step, index } = stepsInSection[i];
               const isContainer = EFPNavigationUtils.isStepContainer(step, sections);
               if (!isContainer) {
-                  console.log(`Found last selectable step in section ${sectionIndex}: "${step.label}" at index ${index}`);
+                  EFPLogger.log(`Found last selectable step in section ${sectionIndex}: "${step.label}" at index ${index}`);
                   return { step, index };
               }
           }
-          console.warn(`No selectable steps found in section ${sectionIndex}`);
+          EFPLogger.warn(`No selectable steps found in section ${sectionIndex}`);
           return null;
       }
       static findFirstSelectableStepInSection(sectionIndex, flatSteps, sections) {
@@ -35017,11 +33654,11 @@
               const isContainer = EFPNavigationUtils.isStepContainer(step, sections);
               // Skip section headers like "Section A", "Section B", etc.
               if (!isContainer && !step.label.startsWith('Section ')) {
-                  console.log(`Found first selectable step in section ${sectionIndex}: "${step.label}" at index ${index}`);
+                  EFPLogger.log(`Found first selectable step in section ${sectionIndex}: "${step.label}" at index ${index}`);
                   return { step, index };
               }
           }
-          console.warn(`No selectable steps found in section ${sectionIndex}`);
+          EFPLogger.warn(`No selectable steps found in section ${sectionIndex}`);
           return null;
       }
       static findContainersForItem(itemLabel, sections) {
@@ -35273,7 +33910,6 @@
           };
       }
       get sections() {
-          // console.log('EFPEntryForm: sections getter called, nestedChapterStructure length:', this.nestedChapterStructure?.length || 0);
           return [
               {
                   tab: 'Section A',
@@ -35469,11 +34105,8 @@
       }
       // Public API methods
       updateNestedChapterStructure(nestedStructure) {
-          console.log('EFPEntryForm: updateNestedChapterStructure called with:', nestedStructure);
-          console.log('EFPEntryForm: Current nestedChapterStructure length before update:', this.nestedChapterStructure.length);
+          EFPLogger.log('updateNestedChapterStructure called with', (nestedStructure === null || nestedStructure === void 0 ? void 0 : nestedStructure.length) || 0, 'chapters');
           this.nestedChapterStructure = nestedStructure;
-          console.log('EFPEntryForm: nestedChapterStructure updated, new length:', this.nestedChapterStructure.length);
-          console.log('EFPEntryForm: Triggering re-render...');
           // The @property decorator will automatically trigger a re-render
           // But we can force it to be sure
           this.requestUpdate();
@@ -35485,38 +34118,30 @@
       // Navigation methods
       goToNext() {
           var _a;
-          console.log('goToNext called, current step:', this.currentStepIndex, (_a = this.flatSteps[this.currentStepIndex]) === null || _a === void 0 ? void 0 : _a.label);
-          console.log('Current activeContent:', this.activeContent.title);
+          EFPLogger.log('goToNext called, current step:', this.currentStepIndex, (_a = this.flatSteps[this.currentStepIndex]) === null || _a === void 0 ? void 0 : _a.label);
           // Handle case where currentStepIndex is -1 (step not found in flatSteps)
           if (this.currentStepIndex === -1) {
-              console.warn('currentStepIndex is -1, trying to find current step by activeContent title');
+              EFPLogger.warn('currentStepIndex is -1, trying to find current step by activeContent title');
               const foundIndex = this.flatSteps.findIndex(step => step.label === this.activeContent.title);
               if (foundIndex !== -1) {
-                  console.log(`Found current step "${this.activeContent.title}" at index ${foundIndex}`);
+                  EFPLogger.log(`Found current step "${this.activeContent.title}" at index ${foundIndex}`);
                   this.currentStepIndex = foundIndex;
               }
               else {
-                  console.error(`Could not find current step "${this.activeContent.title}" in flatSteps`);
-                  console.log('Available flatSteps:', this.flatSteps.map((s, i) => `${i}: ${s.label}`));
+                  EFPLogger.error(`Could not find current step "${this.activeContent.title}" in flatSteps`);
                   return; // Don't proceed with navigation if we can't find current position
               }
-          }
-          // Debug: Show the next few steps for context
-          console.log('Next 5 steps:');
-          for (let i = this.currentStepIndex + 1; i < Math.min(this.currentStepIndex + 6, this.flatSteps.length); i++) {
-              console.log(`  ${i}: ${this.flatSteps[i].label}`);
           }
           if (this.currentStepIndex < this.flatSteps.length - 1) {
               let nextIndex = this.currentStepIndex + 1;
               // Skip over container items and find the next selectable item
               while (nextIndex < this.flatSteps.length) {
                   const nextStep = this.flatSteps[nextIndex];
-                  console.log('Checking next step at index', nextIndex, ':', nextStep.label);
                   // Check if this step is a container (non-selectable)
                   const isContainer = EFPNavigationUtils.isStepContainer(nextStep, this.sections);
                   if (!isContainer) {
                       // Found a selectable step
-                      console.log('Found selectable step:', nextStep.label, 'at index', nextIndex);
+                      EFPLogger.log('Found selectable step:', nextStep.label, 'at index', nextIndex);
                       const currentStep = this.flatSteps[this.currentStepIndex];
                       const currentSectionIndex = currentStep.sectionIndex;
                       // Check if this is cross-section navigation (going to next section)
@@ -35565,12 +34190,11 @@
                       this.requestUpdate();
                       return;
                   }
-                  console.log('Skipping container step:', nextStep.label);
                   nextIndex++;
               }
               // If we didn't find any selectable steps, just go to the last step
               if (nextIndex >= this.flatSteps.length && this.currentStepIndex < this.flatSteps.length - 1) {
-                  console.log('No more selectable steps found, going to last step');
+                  EFPLogger.log('No more selectable steps found, going to last step');
                   this.currentStepIndex = this.flatSteps.length - 1;
                   this.currentSectionIndex = this.flatSteps[this.currentStepIndex].sectionIndex;
               }
@@ -35608,7 +34232,7 @@
           EFPEventUtils.handleRatingChanged(event, (questionId, value) => {
               // Store the answer in your data model if needed
               // For example: this.answers[questionId] = value;
-              console.log(`Storing answer for question ${questionId}: ${value}`);
+              EFPLogger.log(`Storing answer for question ${questionId}: ${value}`);
           });
       }
       // Navigation item click event handler
@@ -35641,19 +34265,17 @@
       }
       goToPrevious() {
           var _a;
-          console.log('goToPrevious called, current step:', this.currentStepIndex, (_a = this.flatSteps[this.currentStepIndex]) === null || _a === void 0 ? void 0 : _a.label);
-          console.log('Current activeContent:', this.activeContent.title);
+          EFPLogger.log('goToPrevious called, current step:', this.currentStepIndex, (_a = this.flatSteps[this.currentStepIndex]) === null || _a === void 0 ? void 0 : _a.label);
           // Handle case where currentStepIndex is -1 (step not found in flatSteps)
           if (this.currentStepIndex === -1) {
-              console.warn('currentStepIndex is -1, trying to find current step by activeContent title');
+              EFPLogger.warn('currentStepIndex is -1, trying to find current step by activeContent title');
               const foundIndex = this.flatSteps.findIndex(step => step.label === this.activeContent.title);
               if (foundIndex !== -1) {
-                  console.log(`Found current step "${this.activeContent.title}" at index ${foundIndex}`);
+                  EFPLogger.log(`Found current step "${this.activeContent.title}" at index ${foundIndex}`);
                   this.currentStepIndex = foundIndex;
               }
               else {
-                  console.error(`Could not find current step "${this.activeContent.title}" in flatSteps`);
-                  console.log('Available flatSteps:', this.flatSteps.map((s, i) => `${i}: ${s.label}`));
+                  EFPLogger.error(`Could not find current step "${this.activeContent.title}" in flatSteps`);
                   return; // Don't proceed with navigation if we can't find current position
               }
           }
