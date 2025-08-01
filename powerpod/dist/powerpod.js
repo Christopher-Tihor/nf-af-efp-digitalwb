@@ -33426,6 +33426,11 @@
           }
           return titleCase;
       }
+      static truncateText(text, maxLength) {
+          if (text.length <= maxLength)
+              return text;
+          return text.substring(0, maxLength - 3) + '...';
+      }
   }
   // Utility class for completion calculations
   class EFPCompletionUtils {
@@ -34394,6 +34399,93 @@
       isSectionComplete(section) {
           return EFPCompletionUtils.isSectionComplete(section);
       }
+      renderBreadcrumbs() {
+          const currentStep = this.flatSteps[this.currentStepIndex];
+          if (!currentStep)
+              return x ``;
+          const currentSection = this.sections[this.currentSectionIndex];
+          const breadcrumbs = [];
+          // Add home/root breadcrumb
+          breadcrumbs.push({
+              label: 'Environmental Farm Plan',
+              isActive: false,
+              onClick: () => {
+                  // Navigate to first step
+                  this.currentStepIndex = 0;
+                  this.currentSectionIndex = 0;
+                  this.requestUpdate();
+              }
+          });
+          // Add section breadcrumb
+          if (currentSection) {
+              breadcrumbs.push({
+                  label: currentSection.tab,
+                  isActive: false,
+                  onClick: () => {
+                      // Navigate to first step in section
+                      const firstStepInSection = this.flatSteps.find(step => step.sectionIndex === this.currentSectionIndex);
+                      if (firstStepInSection) {
+                          const stepIndex = this.flatSteps.indexOf(firstStepInSection);
+                          this.currentStepIndex = stepIndex;
+                          this.requestUpdate();
+                      }
+                  }
+              });
+          }
+          // For nested items, add parent container breadcrumb if applicable
+          if (currentStep.label.includes(':') || currentStep.label.startsWith('Chapter ')) {
+              // Check if this is a sub-item of a chapter
+              const parentContainers = EFPNavigationUtils.findContainersForItem(currentStep.label, this.sections);
+              if (parentContainers.length > 0) {
+                  // Add the immediate parent container
+                  const parentLabel = parentContainers[parentContainers.length - 1];
+                  if (parentLabel && parentLabel !== currentStep.label) {
+                      breadcrumbs.push({
+                          label: parentLabel,
+                          isActive: false,
+                          onClick: () => {
+                              // Find and navigate to parent container
+                              const parentStepIndex = this.flatSteps.findIndex(step => step.label === parentLabel);
+                              if (parentStepIndex !== -1) {
+                                  this.currentStepIndex = parentStepIndex;
+                                  this.requestUpdate();
+                              }
+                          }
+                      });
+                  }
+              }
+          }
+          // Add current step breadcrumb (always last)
+          breadcrumbs.push({
+              label: EFPTextUtils.truncateText(currentStep.label, 50), // Truncate long titles
+              isActive: true,
+              onClick: null
+          });
+          return x `
+      <nav class="breadcrumbs" aria-label="Breadcrumb navigation" role="navigation">
+        <ol class="breadcrumb-list">
+          ${breadcrumbs.map((crumb, index) => x `
+            <li class="breadcrumb-item ${crumb.isActive ? 'active' : ''}">
+              ${crumb.isActive ?
+            x `<span
+                  class="breadcrumb-current"
+                  title="${currentStep.label}"
+                  aria-current="page"
+                >${crumb.label}</span>` :
+            x `<button
+                  class="breadcrumb-link"
+                  @click=${crumb.onClick}
+                  type="button"
+                  title="Navigate to ${crumb.label}"
+                  aria-label="Navigate to ${crumb.label}"
+                >${crumb.label}</button>`}
+              ${index < breadcrumbs.length - 1 ? x `<sl-icon name="chevron-right" class="breadcrumb-separator" aria-hidden="true"></sl-icon>` : ''}
+            </li>
+          `)}
+        </ol>
+      </nav>
+    `;
+      }
       renderItems(items) {
           return EFPRenderUtils.renderItems(items, x, this.activeContent.title, (item) => this.handleItemClick(item), (items) => this.renderItems(items));
       }
@@ -34481,6 +34573,7 @@
           ></navigation-buttons>
 
           <div class="card">
+            ${this.renderBreadcrumbs()}
             <h2>${this.activeContent.title}</h2>
             ${this.renderMainContent()}
           </div>
@@ -34800,6 +34893,89 @@
     .main-content span,
     .main-content div {
       font-family: inherit !important;
+    }
+
+    /* Breadcrumbs styling */
+    .breadcrumbs {
+      margin-bottom: 1rem;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid var(--sl-color-neutral-200);
+      background: linear-gradient(135deg, var(--sl-color-neutral-25) 0%, var(--sl-color-neutral-50) 100%);
+      border-radius: var(--sl-border-radius-small) var(--sl-border-radius-small) 0 0;
+      margin: -1rem -1rem 1rem -1rem;
+      padding: 0.75rem 1rem;
+    }
+
+    .breadcrumb-list {
+      display: flex;
+      align-items: center;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      font-size: 0.875rem;
+      color: var(--sl-color-neutral-600);
+    }
+
+    .breadcrumb-item {
+      display: flex;
+      align-items: center;
+    }
+
+    .breadcrumb-link {
+      background: none;
+      border: none;
+      color: var(--sl-color-primary-600);
+      text-decoration: none;
+      cursor: pointer;
+      padding: 0.25rem 0.5rem;
+      border-radius: var(--sl-border-radius-small);
+      font-family: var(--body-font);
+      font-size: inherit;
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+    .breadcrumb-link:hover {
+      background-color: var(--sl-color-primary-50);
+      color: var(--sl-color-primary-700);
+    }
+
+    .breadcrumb-link:focus {
+      outline: 2px solid var(--sl-color-primary-600);
+      outline-offset: 2px;
+    }
+
+    .breadcrumb-current {
+      color: var(--sl-color-neutral-800);
+      font-weight: 500;
+      padding: 0.25rem 0.5rem;
+      font-family: var(--body-font);
+    }
+
+    .breadcrumb-item.active .breadcrumb-current {
+      color: var(--sl-color-neutral-900);
+      font-weight: 600;
+    }
+
+    .breadcrumb-separator {
+      margin: 0 0.5rem;
+      color: var(--sl-color-neutral-400);
+      font-size: 0.75rem;
+    }
+
+    /* Responsive breadcrumbs */
+    @media (max-width: 768px) {
+      .breadcrumb-list {
+        font-size: 0.8rem;
+      }
+
+      .breadcrumb-link,
+      .breadcrumb-current {
+        padding: 0.2rem 0.4rem;
+      }
+
+      .breadcrumb-separator {
+        margin: 0 0.3rem;
+      }
     }
   `;
   __decorate([
