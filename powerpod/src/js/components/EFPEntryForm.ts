@@ -17,16 +17,67 @@ import { customElement, property, query } from 'lit/decorators.js';
 import './NavigationButtons';
 import './RatingQuestion';
 
+// Type definitions for better type safety
+interface EFPStep {
+  label: string;
+  content: string;
+  complete?: boolean;
+  sectionIndex: number;
+  chapterData?: any;
+  subchapterData?: any;
+  isContainer?: boolean;
+}
+
+interface EFPSection {
+  tab: string;
+  title: string;
+  items: EFPSectionItem[];
+}
+
+interface EFPSectionItem {
+  label: string;
+  content?: string;
+  complete?: boolean;
+  items?: EFPSectionItem[];
+  title?: string;
+  isContainer?: boolean;
+  chapterData?: any;
+  subchapterData?: any;
+}
+
+interface EFPActiveContent {
+  title: string;
+  content: string;
+}
+
+// Utility class for text formatting
+class EFPTextUtils {
+  static formatChapterTitle(chapterName: string): string {
+    // Transform "CHAPTER 2 BUILDINGS AND ROADS" to "Chapter 2: Buildings and Roads"
+    // Transform "PLANT BIODIVERSITY" to "Plant Biodiversity"
+    if (!chapterName) return '';
+
+    // Convert to title case and handle the chapter format
+    const titleCase = chapterName.toLowerCase().replace(/\b\w/g, l => l.toUpperCase());
+
+    // If it starts with "Chapter" and has a number, add a colon after the number
+    const chapterMatch = titleCase.match(/^Chapter (\d+(?:\.\d+)?) (.+)$/);
+    if (chapterMatch) {
+      const [, chapterNum, chapterTitle] = chapterMatch;
+      return `Chapter ${chapterNum}: ${chapterTitle}`;
+    }
+
+    return titleCase;
+  }
+}
+
 @customElement('efp-entry-form')
 class EFPEntryForm extends LitElement {
   @property({ type: Number }) currentSectionIndex = 0;
   @property({ type: Number }) currentStepIndex = 0;
   @property({ type: Array, attribute: false }) nestedChapterStructure: any[] = [];
   private isNavigating = false; // Flag to prevent tab change interference
-  @property({ type: Object }) activeContent: {
-    title: string;
-    content: string;
-  } = {
+  @property({ type: Object }) activeContent: EFPActiveContent = {
     title: 'Introduction to the Environmental Farm Plan (EFP)',
     content:
       'The purpose of the EFP is to assess the features and management of your farm to identify environmental risks and develop an action plan.',
@@ -339,7 +390,7 @@ class EFPEntryForm extends LitElement {
     }
   `;
 
-  private get sections() {
+  private get sections(): EFPSection[] {
     // console.log('EFPEntryForm: sections getter called, nestedChapterStructure length:', this.nestedChapterStructure?.length || 0);
 
     return [
@@ -540,21 +591,7 @@ class EFPEntryForm extends LitElement {
   }
 
   private formatChapterTitle(chapterName: string): string {
-    // Transform "CHAPTER 2 BUILDINGS AND ROADS" to "Chapter 2: Buildings and Roads"
-    // Transform "PLANT BIODIVERSITY" to "Plant Biodiversity"
-    if (!chapterName) return '';
-
-    // Convert to title case and handle the chapter format
-    const titleCase = chapterName.toLowerCase().replace(/\b\w/g, l => l.toUpperCase());
-
-    // If it starts with "Chapter" and has a number, add a colon after the number
-    const chapterMatch = titleCase.match(/^Chapter (\d+(?:\.\d+)?) (.+)$/);
-    if (chapterMatch) {
-      const [, chapterNum, chapterTitle] = chapterMatch;
-      return `Chapter ${chapterNum}: ${chapterTitle}`;
-    }
-
-    return titleCase;
+    return EFPTextUtils.formatChapterTitle(chapterName);
   }
 
   private generateSectionBItems() {
@@ -1230,15 +1267,8 @@ class EFPEntryForm extends LitElement {
     }
   }
 
-  private get flatSteps(): Array<{
-    label: string;
-    content: string;
-    complete?: boolean;
-    sectionIndex: number;
-    chapterData?: any;
-    subchapterData?: any;
-  }> {
-    const result: any[] = [];
+  private get flatSteps(): EFPStep[] {
+    const result: EFPStep[] = [];
 
     const collect = (items: any[], sectionIndex: number) => {
       for (const item of items) {

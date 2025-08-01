@@ -34772,6 +34772,24 @@
       t$1('rating-question')
   ], RatingQuestion);
 
+  // Utility class for text formatting
+  class EFPTextUtils {
+      static formatChapterTitle(chapterName) {
+          // Transform "CHAPTER 2 BUILDINGS AND ROADS" to "Chapter 2: Buildings and Roads"
+          // Transform "PLANT BIODIVERSITY" to "Plant Biodiversity"
+          if (!chapterName)
+              return '';
+          // Convert to title case and handle the chapter format
+          const titleCase = chapterName.toLowerCase().replace(/\b\w/g, l => l.toUpperCase());
+          // If it starts with "Chapter" and has a number, add a colon after the number
+          const chapterMatch = titleCase.match(/^Chapter (\d+(?:\.\d+)?) (.+)$/);
+          if (chapterMatch) {
+              const [, chapterNum, chapterTitle] = chapterMatch;
+              return `Chapter ${chapterNum}: ${chapterTitle}`;
+          }
+          return titleCase;
+      }
+  }
   let EFPEntryForm = class EFPEntryForm extends s$1 {
       constructor() {
           super(...arguments);
@@ -34975,19 +34993,7 @@
     `;
       }
       formatChapterTitle(chapterName) {
-          // Transform "CHAPTER 2 BUILDINGS AND ROADS" to "Chapter 2: Buildings and Roads"
-          // Transform "PLANT BIODIVERSITY" to "Plant Biodiversity"
-          if (!chapterName)
-              return '';
-          // Convert to title case and handle the chapter format
-          const titleCase = chapterName.toLowerCase().replace(/\b\w/g, l => l.toUpperCase());
-          // If it starts with "Chapter" and has a number, add a colon after the number
-          const chapterMatch = titleCase.match(/^Chapter (\d+(?:\.\d+)?) (.+)$/);
-          if (chapterMatch) {
-              const [, chapterNum, chapterTitle] = chapterMatch;
-              return `Chapter ${chapterNum}: ${chapterTitle}`;
-          }
-          return titleCase;
+          return EFPTextUtils.formatChapterTitle(chapterName);
       }
       generateSectionBItems() {
           // console.log('EFPEntryForm: generateSectionBItems called, nestedChapterStructure:', this.nestedChapterStructure);
