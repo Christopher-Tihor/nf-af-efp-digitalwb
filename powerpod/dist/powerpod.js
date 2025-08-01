@@ -34790,6 +34790,44 @@
           return titleCase;
       }
   }
+  // Utility class for completion calculations
+  class EFPCompletionUtils {
+      static calculateOverallCompletion(sections) {
+          const allItems = [];
+          const collect = (items) => {
+              for (const item of items) {
+                  if ('items' in item && Array.isArray(item.items)) {
+                      collect(item.items);
+                  }
+                  else {
+                      allItems.push(item);
+                  }
+              }
+          };
+          for (const section of sections) {
+              collect(section.items);
+          }
+          const completed = allItems.filter((item) => item.complete).length;
+          return allItems.length === 0
+              ? 0
+              : Math.round((completed / allItems.length) * 100);
+      }
+      static isSectionComplete(section) {
+          const leafItems = [];
+          const collect = (items) => {
+              for (const item of items) {
+                  if ('items' in item && Array.isArray(item.items)) {
+                      collect(item.items);
+                  }
+                  else {
+                      leafItems.push(item);
+                  }
+              }
+          };
+          collect(section.items);
+          return leafItems.every((item) => item.complete);
+      }
+  }
   let EFPEntryForm = class EFPEntryForm extends s$1 {
       constructor() {
           super(...arguments);
@@ -35144,24 +35182,7 @@
           this.requestUpdate();
       }
       get completionPercent() {
-          const allItems = [];
-          const collect = (items) => {
-              for (const item of items) {
-                  if ('items' in item) {
-                      collect(item.items);
-                  }
-                  else {
-                      allItems.push(item);
-                  }
-              }
-          };
-          for (const section of this.sections) {
-              collect(section.items);
-          }
-          const completed = allItems.filter((item) => item.complete).length;
-          return allItems.length === 0
-              ? 0
-              : Math.round((completed / allItems.length) * 100);
+          return EFPCompletionUtils.calculateOverallCompletion(this.sections);
       }
       goToNext() {
           var _a;
@@ -35600,19 +35621,7 @@
           return result;
       }
       isSectionComplete(section) {
-          const leafItems = [];
-          const collect = (items) => {
-              for (const item of items) {
-                  if ('items' in item) {
-                      collect(item.items);
-                  }
-                  else {
-                      leafItems.push(item);
-                  }
-              }
-          };
-          collect(section.items);
-          return leafItems.every((item) => item.complete);
+          return EFPCompletionUtils.isSectionComplete(section);
       }
       renderItems(items) {
           return items.map((item) => {

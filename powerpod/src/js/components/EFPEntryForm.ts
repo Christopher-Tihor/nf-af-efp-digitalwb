@@ -71,6 +71,49 @@ class EFPTextUtils {
   }
 }
 
+// Utility class for completion calculations
+class EFPCompletionUtils {
+  static calculateOverallCompletion(sections: EFPSection[]): number {
+    const allItems: EFPSectionItem[] = [];
+
+    const collect = (items: EFPSectionItem[]) => {
+      for (const item of items) {
+        if ('items' in item && Array.isArray(item.items)) {
+          collect(item.items);
+        } else {
+          allItems.push(item);
+        }
+      }
+    };
+
+    for (const section of sections) {
+      collect(section.items);
+    }
+
+    const completed = allItems.filter((item) => item.complete).length;
+    return allItems.length === 0
+      ? 0
+      : Math.round((completed / allItems.length) * 100);
+  }
+
+  static isSectionComplete(section: EFPSection): boolean {
+    const leafItems: EFPSectionItem[] = [];
+
+    const collect = (items: EFPSectionItem[]) => {
+      for (const item of items) {
+        if ('items' in item && Array.isArray(item.items)) {
+          collect(item.items);
+        } else {
+          leafItems.push(item);
+        }
+      }
+    };
+
+    collect(section.items);
+    return leafItems.every((item) => item.complete);
+  }
+}
+
 @customElement('efp-entry-form')
 class EFPEntryForm extends LitElement {
   @property({ type: Number }) currentSectionIndex = 0;
@@ -767,26 +810,7 @@ class EFPEntryForm extends LitElement {
   }
 
   private get completionPercent(): number {
-    const allItems: any[] = [];
-
-    const collect = (items: any[]) => {
-      for (const item of items) {
-        if ('items' in item) {
-          collect(item.items);
-        } else {
-          allItems.push(item);
-        }
-      }
-    };
-
-    for (const section of this.sections) {
-      collect(section.items);
-    }
-
-    const completed = allItems.filter((item) => item.complete).length;
-    return allItems.length === 0
-      ? 0
-      : Math.round((completed / allItems.length) * 100);
+    return EFPCompletionUtils.calculateOverallCompletion(this.sections);
   }
 
   private goToNext() {
@@ -1316,21 +1340,8 @@ class EFPEntryForm extends LitElement {
     return result;
   }
 
-  private isSectionComplete(section: { items: any[] }): boolean {
-    const leafItems: any[] = [];
-
-    const collect = (items: any[]) => {
-      for (const item of items) {
-        if ('items' in item) {
-          collect(item.items);
-        } else {
-          leafItems.push(item);
-        }
-      }
-    };
-
-    collect(section.items);
-    return leafItems.every((item) => item.complete);
+  private isSectionComplete(section: EFPSection): boolean {
+    return EFPCompletionUtils.isSectionComplete(section);
   }
 
   private renderItems(items: any[]): unknown {
