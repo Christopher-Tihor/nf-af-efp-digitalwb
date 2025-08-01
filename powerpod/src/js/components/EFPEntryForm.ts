@@ -606,6 +606,49 @@ class EFPEventUtils {
   }
 }
 
+// Utility class for lifecycle management
+class EFPLifecycleUtils {
+  static handleStepIndexChange(
+    currentStepIndex: number,
+    flatSteps: EFPStep[],
+    activeContent: EFPActiveContent,
+    onContentUpdate: (newContent: EFPActiveContent) => void,
+    onNavigationUpdate?: (label: string) => void
+  ): boolean {
+    const step = flatSteps[currentStepIndex];
+
+    if (step && (activeContent.title !== step.label || activeContent.content !== step.content)) {
+      const newContent: EFPActiveContent = {
+        title: step.label,
+        content: step.content,
+      };
+
+      onContentUpdate(newContent);
+      onNavigationUpdate?.(step.label);
+
+      return true; // Content was updated
+    }
+
+    return false; // No update needed
+  }
+
+  static handleSectionIndexChange(
+    currentSectionIndex: number,
+    tabGroupEl: any,
+    onTabUpdate?: () => void
+  ): void {
+    if (tabGroupEl) {
+      const activeTab = `section-${currentSectionIndex}`;
+      tabGroupEl.show?.(activeTab);
+      onTabUpdate?.();
+    }
+  }
+
+  static shouldRequestUpdate(changedProps: Map<string, unknown>, watchedProps: string[]): boolean {
+    return watchedProps.some(prop => changedProps.has(prop));
+  }
+}
+
 @customElement('efp-entry-form')
 class EFPEntryForm extends LitElement {
   @property({ type: Number }) currentSectionIndex = 0;
@@ -1029,6 +1072,7 @@ class EFPEntryForm extends LitElement {
   ];
   }
 
+  // Rendering methods
   private renderQuestion(question: any) {
     const questionTypeMap: { [key: number]: string } = {
       100000000: 'Yes/No/NA',
@@ -1143,7 +1187,7 @@ class EFPEntryForm extends LitElement {
     );
   }
 
-  // Public method to update the nested chapter structure
+  // Public API methods
   public updateNestedChapterStructure(nestedStructure: any[]) {
     console.log('EFPEntryForm: updateNestedChapterStructure called with:', nestedStructure);
     console.log('EFPEntryForm: Current nestedChapterStructure length before update:', this.nestedChapterStructure.length);
@@ -1158,10 +1202,12 @@ class EFPEntryForm extends LitElement {
     this.requestUpdate();
   }
 
+  // Computed properties
   private get completionPercent(): number {
     return EFPCompletionUtils.calculateOverallCompletion(this.sections);
   }
 
+  // Navigation methods
   private goToNext() {
     console.log('goToNext called, current step:', this.currentStepIndex, this.flatSteps[this.currentStepIndex]?.label);
     console.log('Current activeContent:', this.activeContent.title);
@@ -1343,6 +1389,7 @@ class EFPEntryForm extends LitElement {
     );
   }
 
+  // Utility methods
   private updateNavigationState(currentLabel: string) {
     // Find all sl-details elements in the navigation
     const allDetails = this.shadowRoot?.querySelectorAll('sl-details');
@@ -1538,41 +1585,36 @@ class EFPEntryForm extends LitElement {
 
   updated(changedProps: Map<string, unknown>) {
     if (changedProps.has('currentStepIndex')) {
-      const step = this.flatSteps[this.currentStepIndex];
-      if (
-        step &&
-        (this.activeContent.title !== step.label ||
-          this.activeContent.content !== step.content)
-      ) {
-        this.activeContent = {
-          title: step.label,
-          content: step.content,
-        };
-
-        // Update navigation state when step changes
-        this.updateNavigationState(step.label);
-      }
+      EFPLifecycleUtils.handleStepIndexChange(
+        this.currentStepIndex,
+        this.flatSteps,
+        this.activeContent,
+        (newContent: EFPActiveContent) => {
+          this.activeContent = newContent;
+        },
+        (label: string) => this.updateNavigationState(label)
+      );
     }
 
-    if (changedProps.has('currentSectionIndex') && this.tabGroupEl) {
-      const activeTab = `section-${this.currentSectionIndex}`;
-      this.tabGroupEl.show?.(activeTab); // <- force the tab to show
+    if (changedProps.has('currentSectionIndex')) {
+      EFPLifecycleUtils.handleSectionIndexChange(
+        this.currentSectionIndex,
+        this.tabGroupEl
+      );
     }
   }
 
+  // Lifecycle methods
   willUpdate(changedProps: Map<string, unknown>) {
     if (changedProps.has('currentStepIndex')) {
-      const step = this.flatSteps[this.currentStepIndex];
-      if (
-        step &&
-        (this.activeContent.title !== step.label ||
-          this.activeContent.content !== step.content)
-      ) {
-        this.activeContent = {
-          title: step.label,
-          content: step.content,
-        };
-      }
+      EFPLifecycleUtils.handleStepIndexChange(
+        this.currentStepIndex,
+        this.flatSteps,
+        this.activeContent,
+        (newContent: EFPActiveContent) => {
+          this.activeContent = newContent;
+        }
+      );
     }
   }
 
