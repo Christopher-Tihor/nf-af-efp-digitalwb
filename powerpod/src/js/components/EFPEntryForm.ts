@@ -233,6 +233,216 @@ class EFPSectionGenerator {
   }
 }
 
+// Utility class for navigation helpers
+class EFPNavigationUtils {
+  static isStepContainer(step: EFPStep, sections: EFPSection[]): boolean {
+    // Check if this step corresponds to a container item
+    // Container items are those that have 'items' property in the original structure
+    // and are marked as containers, or have empty/placeholder content
+
+    // If the step has no actual content or is marked as container
+    if (!step.content || step.content === '') {
+      return true;
+    }
+
+    // Check if this step corresponds to a main chapter container
+    for (const section of sections) {
+      for (const item of section.items) {
+        if ('items' in item && Array.isArray(item.items)) {
+          for (const subItem of item.items) {
+            if (subItem.label === step.label && subItem.isContainer) {
+              return true;
+            }
+          }
+        }
+      }
+    }
+
+    // Check if the step label matches a chapter container pattern (e.g., "Chapter 6", "Chapter 7")
+    if (/^Chapter \d+$/.test(step.label)) {
+      return true;
+    }
+
+    // Check if the step label matches a subchapter container pattern (e.g., "Chapter 6: Nutrient Application")
+    if (/^Chapter \d+: /.test(step.label)) {
+      // Check if there's a next step that would be a child of this container
+      // This is a heuristic to determine if this is a container
+      const flatSteps = EFPNavigationUtils.getFlatStepsFromSections(sections);
+      const currentIndex = flatSteps.findIndex(s => s.label === step.label);
+      if (currentIndex >= 0 && currentIndex < flatSteps.length - 1) {
+        const nextStep = flatSteps[currentIndex + 1];
+        if (nextStep && nextStep.label.length > step.label.length &&
+            !nextStep.label.startsWith('Chapter ') &&
+            nextStep.content && nextStep.content.trim() !== '') {
+          return true;
+        }
+      }
+    }
+
+    // Check if the content contains the container message
+    if (step.content && step.content.includes('Please select a specific chapter section')) {
+      return true;
+    }
+
+    return false;
+  }
+
+  static findLastSelectableStepInSection(sectionIndex: number, flatSteps: EFPStep[], sections: EFPSection[]): { step: EFPStep, index: number } | null {
+    // Find all steps in the given section
+    const stepsInSection: { step: EFPStep, index: number }[] = [];
+
+    flatSteps.forEach((step, index) => {
+      if (step.sectionIndex === sectionIndex) {
+        stepsInSection.push({ step, index });
+      }
+    });
+
+    // Go through the steps in reverse order to find the last selectable one
+    for (let i = stepsInSection.length - 1; i >= 0; i--) {
+      const { step, index } = stepsInSection[i];
+      const isContainer = EFPNavigationUtils.isStepContainer(step, sections);
+
+      if (!isContainer) {
+        console.log(`Found last selectable step in section ${sectionIndex}: "${step.label}" at index ${index}`);
+        return { step, index };
+      }
+    }
+
+    console.warn(`No selectable steps found in section ${sectionIndex}`);
+    return null;
+  }
+
+  static findFirstSelectableStepInSection(sectionIndex: number, flatSteps: EFPStep[], sections: EFPSection[]): { step: EFPStep, index: number } | null {
+    // Find all steps in the given section
+    const stepsInSection: { step: EFPStep, index: number }[] = [];
+
+    flatSteps.forEach((step, index) => {
+      if (step.sectionIndex === sectionIndex) {
+        stepsInSection.push({ step, index });
+      }
+    });
+
+    // Go through the steps in order to find the first selectable one (skip section headers)
+    for (let i = 0; i < stepsInSection.length; i++) {
+      const { step, index } = stepsInSection[i];
+      const isContainer = EFPNavigationUtils.isStepContainer(step, sections);
+
+      // Skip section headers like "Section A", "Section B", etc.
+      if (!isContainer && !step.label.startsWith('Section ')) {
+        console.log(`Found first selectable step in section ${sectionIndex}: "${step.label}" at index ${index}`);
+        return { step, index };
+      }
+    }
+
+    console.warn(`No selectable steps found in section ${sectionIndex}`);
+    return null;
+  }
+
+  static findContainersForItem(itemLabel: string, sections: EFPSection[]): string[] {
+    const containers: string[] = [];
+
+    // Recursive function to search through the navigation structure
+    const searchItems = (items: EFPSectionItem[], parentContainers: string[] = []) => {
+      for (const item of items) {
+        const currentPath = [...parentContainers];
+
+        if ('items' in item && Array.isArray(item.items)) {
+          // This is a container, add it to the current path
+          if (item.title) {
+            currentPath.push(item.title);
+          }
+
+          // Check if the target item exists in this container's children
+          const foundInChildren = EFPNavigationUtils.itemExistsInChildren(item.items, itemLabel);
+          if (foundInChildren) {
+            containers.push(...currentPath);
+          }
+
+          // Recursively search children
+          searchItems(item.items, currentPath);
+        }
+      }
+    };
+
+    // Search through all sections
+    sections.forEach(section => {
+      if (section.items) {
+        searchItems(section.items);
+      }
+    });
+
+    return containers;
+  }
+
+  static itemExistsInChildren(items: EFPSectionItem[], targetLabel: string): boolean {
+    for (const item of items) {
+      if (item.label === targetLabel) {
+        return true;
+      }
+      if ('items' in item && Array.isArray(item.items)) {
+        if (EFPNavigationUtils.itemExistsInChildren(item.items, targetLabel)) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  // Helper method to get flat steps from sections (used internally)
+  private static getFlatStepsFromSections(sections: EFPSection[]): EFPStep[] {
+    const result: EFPStep[] = [];
+
+    const collect = (items: EFPSectionItem[], sectionIndex: number) => {
+      for (const item of items) {
+        if ('items' in item && Array.isArray(item.items)) {
+          result.push({
+            label: item.title || item.label,
+            content: '', // Container items have no content
+            sectionIndex,
+            isContainer: true,
+          });
+          collect(item.items, sectionIndex);
+        } else {
+          const stepItem: EFPStep = {
+            label: item.label,
+            content: item.content ?? '',
+            complete: item.complete ?? false,
+            sectionIndex,
+          };
+
+          // Add chapter data if it exists (for chapters)
+          if (item.chapterData) {
+            stepItem.chapterData = item.chapterData;
+          }
+
+          // Add subchapter data if it exists (for subchapters)
+          if (item.subchapterData) {
+            stepItem.subchapterData = item.subchapterData;
+          }
+
+          // Mark as container if specified
+          if (item.isContainer) {
+            stepItem.isContainer = item.isContainer;
+          }
+
+          result.push(stepItem);
+        }
+      }
+    };
+
+    sections.forEach((section, index) => {
+      result.push({
+        label: section.tab,
+        content: section.title,
+        sectionIndex: index,
+      });
+      collect(section.items, index);
+    });
+
+    return result;
+  }
+}
+
 @customElement('efp-entry-form')
 class EFPEntryForm extends LitElement {
   @property({ type: Number }) currentSectionIndex = 0;
@@ -837,7 +1047,7 @@ class EFPEntryForm extends LitElement {
         console.log('Checking next step at index', nextIndex, ':', nextStep.label);
 
         // Check if this step is a container (non-selectable)
-        const isContainer = this.isStepContainer(nextStep);
+        const isContainer = EFPNavigationUtils.isStepContainer(nextStep, this.sections);
 
         if (!isContainer) {
           // Found a selectable step
@@ -851,7 +1061,7 @@ class EFPEntryForm extends LitElement {
             console.log(`Cross-section navigation detected: going from section ${currentSectionIndex} to section ${nextStep.sectionIndex}`);
 
             // Find the FIRST selectable step in the next section
-            const firstStepInNextSection = this.findFirstSelectableStepInSection(nextStep.sectionIndex);
+            const firstStepInNextSection = EFPNavigationUtils.findFirstSelectableStepInSection(nextStep.sectionIndex, this.flatSteps, this.sections);
             if (firstStepInNextSection) {
               console.log(`Navigating to first step in section ${nextStep.sectionIndex}: "${firstStepInNextSection.step.label}"`);
 
@@ -919,59 +1129,7 @@ class EFPEntryForm extends LitElement {
     }
   }
 
-  private isStepContainer(step: any): boolean {
-    // Check if this step corresponds to a container item
-    // Container items are those that have 'items' property in the original structure
-    // and are marked as containers, or have empty/placeholder content
 
-    // If the step has no actual content or is marked as container
-    if (!step.content || step.content === '') {
-      return true;
-    }
-
-    // Check if this step corresponds to a main chapter container
-    // by looking for the container message in the rendered content
-    if (this.currentSectionIndex === 1) { // Section B
-      // Find the corresponding item in the navigation structure
-      for (const section of this.sections) {
-        if (section.items) {
-          for (const item of section.items) {
-            if (item.label === step.label && item.isContainer) {
-              return true;
-            }
-          }
-        }
-      }
-    }
-
-    // Check if the step label matches a chapter container pattern (e.g., "Chapter 6", "Chapter 7")
-    if (/^Chapter \d+$/.test(step.label)) {
-      return true;
-    }
-
-    // Check if the step label matches a subchapter container pattern (e.g., "Chapter 6: Nutrient Application")
-    // These are typically parent containers for more specific items
-    if (/^Chapter \d+: /.test(step.label)) {
-      // Check if there's a more specific item right after this one
-      const currentIndex = this.flatSteps.findIndex(s => s.label === step.label);
-      if (currentIndex >= 0 && currentIndex < this.flatSteps.length - 1) {
-        const nextStep = this.flatSteps[currentIndex + 1];
-        // If the next step is more specific (longer, more descriptive), this is likely a container
-        if (nextStep && nextStep.label.length > step.label.length &&
-            !nextStep.label.startsWith('Chapter ') &&
-            nextStep.content && nextStep.content.trim() !== '') {
-          return true;
-        }
-      }
-    }
-
-    // Check if the content contains the container message
-    if (step.content && step.content.includes('Please select a specific chapter section')) {
-      return true;
-    }
-
-    return false;
-  }
 
   private handleNavigationPrevious() {
     this.goToPrevious();
@@ -1068,7 +1226,7 @@ class EFPEntryForm extends LitElement {
     });
 
     // Find which containers should be open based on the current item
-    const containersToOpen = this.findContainersForItem(currentLabel);
+    const containersToOpen = EFPNavigationUtils.findContainersForItem(currentLabel, this.sections);
 
     // Open the relevant containers
     allDetails.forEach(detail => {
@@ -1079,102 +1237,7 @@ class EFPEntryForm extends LitElement {
     });
   }
 
-  private findContainersForItem(itemLabel: string): string[] {
-    const containers: string[] = [];
 
-    // Recursive function to search through the navigation structure
-    const searchItems = (items: any[], parentContainers: string[] = []) => {
-      for (const item of items) {
-        if ('items' in item && Array.isArray(item.items)) {
-          // This is a container item
-          const currentPath = [...parentContainers, item.title || item.label];
-
-          // Check if the target item is in this container's children
-          const foundInChildren = this.itemExistsInChildren(item.items, itemLabel);
-          if (foundInChildren) {
-            containers.push(...currentPath);
-          }
-
-          // Recursively search children
-          searchItems(item.items, currentPath);
-        }
-      }
-    };
-
-    // Search through all sections
-    this.sections.forEach(section => {
-      if (section.items) {
-        searchItems(section.items);
-      }
-    });
-
-    return containers;
-  }
-
-  private itemExistsInChildren(items: any[], targetLabel: string): boolean {
-    for (const item of items) {
-      if (item.label === targetLabel) {
-        return true;
-      }
-      if ('items' in item && Array.isArray(item.items)) {
-        if (this.itemExistsInChildren(item.items, targetLabel)) {
-          return true;
-        }
-      }
-    }
-    return false;
-  }
-
-  private findLastSelectableStepInSection(sectionIndex: number): { step: any, index: number } | null {
-    // Find all steps in the given section
-    const stepsInSection: { step: any, index: number }[] = [];
-
-    this.flatSteps.forEach((step, index) => {
-      if (step.sectionIndex === sectionIndex) {
-        stepsInSection.push({ step, index });
-      }
-    });
-
-    // Go through the steps in reverse order to find the last selectable one
-    for (let i = stepsInSection.length - 1; i >= 0; i--) {
-      const { step, index } = stepsInSection[i];
-      const isContainer = this.isStepContainer(step);
-
-      if (!isContainer) {
-        console.log(`Found last selectable step in section ${sectionIndex}: "${step.label}" at index ${index}`);
-        return { step, index };
-      }
-    }
-
-    console.warn(`No selectable steps found in section ${sectionIndex}`);
-    return null;
-  }
-
-  private findFirstSelectableStepInSection(sectionIndex: number): { step: any, index: number } | null {
-    // Find all steps in the given section
-    const stepsInSection: { step: any, index: number }[] = [];
-
-    this.flatSteps.forEach((step, index) => {
-      if (step.sectionIndex === sectionIndex) {
-        stepsInSection.push({ step, index });
-      }
-    });
-
-    // Go through the steps in order to find the first selectable one (skip section headers)
-    for (let i = 0; i < stepsInSection.length; i++) {
-      const { step, index } = stepsInSection[i];
-      const isContainer = this.isStepContainer(step);
-
-      // Skip section headers like "Section A", "Section B", etc.
-      if (!isContainer && !step.label.startsWith('Section ')) {
-        console.log(`Found first selectable step in section ${sectionIndex}: "${step.label}" at index ${index}`);
-        return { step, index };
-      }
-    }
-
-    console.warn(`No selectable steps found in section ${sectionIndex}`);
-    return null;
-  }
 
   private goToPrevious() {
     console.log('goToPrevious called, current step:', this.currentStepIndex, this.flatSteps[this.currentStepIndex]?.label);
@@ -1205,7 +1268,7 @@ class EFPEntryForm extends LitElement {
       // Skip over container items to find the actual previous selectable step
       while (prevIndex >= 0) {
         const prevStep = this.flatSteps[prevIndex];
-        const isContainer = this.isStepContainer(prevStep);
+        const isContainer = EFPNavigationUtils.isStepContainer(prevStep, this.sections);
 
         if (!isContainer) {
           // Found a selectable previous step
@@ -1216,7 +1279,7 @@ class EFPEntryForm extends LitElement {
             console.log(`Cross-section navigation detected: going from section ${currentSectionIndex} to section ${prevStep.sectionIndex}`);
 
             // Find the LAST selectable step in the previous section
-            const lastStepInPrevSection = this.findLastSelectableStepInSection(prevStep.sectionIndex);
+            const lastStepInPrevSection = EFPNavigationUtils.findLastSelectableStepInSection(prevStep.sectionIndex, this.flatSteps, this.sections);
             if (lastStepInPrevSection) {
               console.log(`Navigating to last step in section ${prevStep.sectionIndex}: "${lastStepInPrevSection.step.label}"`);
 
