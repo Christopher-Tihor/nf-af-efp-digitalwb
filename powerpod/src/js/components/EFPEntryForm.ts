@@ -14,6 +14,7 @@ import '@shoelace-style/shoelace/dist/components/input/input.js';
 
 import { LitElement, css, html, unsafeCSS } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
+import './NavigationButtons';
 
 @customElement('efp-entry-form')
 class EFPEntryForm extends LitElement {
@@ -871,6 +872,18 @@ class EFPEntryForm extends LitElement {
     return false;
   }
 
+  private handleNavigationPrevious() {
+    this.goToPrevious();
+  }
+
+  private handleNavigationSkip(event: CustomEvent) {
+    this.currentSectionIndex = event.detail.sectionIndex;
+  }
+
+  private handleNavigationContinue() {
+    this.goToNext();
+  }
+
   private updateNavigationState(currentLabel: string) {
     // Find all sl-details elements in the navigation
     const allDetails = this.shadowRoot?.querySelectorAll('sl-details');
@@ -1182,42 +1195,30 @@ class EFPEntryForm extends LitElement {
             ></sl-progress>
           </div>
 
+          <!-- Navigation buttons above content -->
+          <navigation-buttons
+            .isPreviousDisabled=${this.currentStepIndex === 0}
+            .isContinueDisabled=${this.currentStepIndex >= this.flatSteps.length - 1}
+            .sectionsLength=${this.sections.length}
+            @previous-clicked=${this.handleNavigationPrevious}
+            @skip-clicked=${this.handleNavigationSkip}
+            @continue-clicked=${this.handleNavigationContinue}
+          ></navigation-buttons>
+
           <div class="card">
             <h2>${this.activeContent.title}</h2>
             ${this.renderMainContent()}
           </div>
 
-          <div
-            class="card"
-            style="display: flex; gap: 1rem; align-items: center;"
-          >
-            <sl-button
-              variant="default"
-              size="large"
-              ?disabled=${this.currentStepIndex === 0}
-              @click=${this.goToPrevious}
-            >
-              <sl-icon name="chevron-left"></sl-icon>
-              Previous
-            </sl-button>
-
-            <sl-button
-              variant="text"
-              @click=${() =>
-                (this.currentSectionIndex = this.sections.length - 1)}
-            >
-              Skip to Next Required Step
-            </sl-button>
-
-            <sl-button
-              variant="primary"
-              size="large"
-              ?disabled=${this.currentStepIndex >= this.flatSteps.length - 1}
-              @click=${this.goToNext}
-            >
-              Continue
-            </sl-button>
-          </div>
+          <!-- Navigation buttons below content -->
+          <navigation-buttons
+            .isPreviousDisabled=${this.currentStepIndex === 0}
+            .isContinueDisabled=${this.currentStepIndex >= this.flatSteps.length - 1}
+            .sectionsLength=${this.sections.length}
+            @previous-clicked=${this.handleNavigationPrevious}
+            @skip-clicked=${this.handleNavigationSkip}
+            @continue-clicked=${this.handleNavigationContinue}
+          ></navigation-buttons>
         </main>
       </div>
     `;

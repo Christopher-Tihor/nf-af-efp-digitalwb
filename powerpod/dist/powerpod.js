@@ -34475,6 +34475,100 @@
 
   SlInput.define("sl-input");
 
+  let NavigationButtons = class NavigationButtons extends s$1 {
+      constructor() {
+          super(...arguments);
+          this.isPreviousDisabled = false;
+          this.isContinueDisabled = false;
+          this.sectionsLength = 0;
+      }
+      handlePrevious() {
+          this.dispatchEvent(new CustomEvent('previous-clicked', {
+              bubbles: true,
+              composed: true
+          }));
+      }
+      handleSkip() {
+          this.dispatchEvent(new CustomEvent('skip-clicked', {
+              bubbles: true,
+              composed: true,
+              detail: { sectionIndex: this.sectionsLength - 1 }
+          }));
+      }
+      handleContinue() {
+          this.dispatchEvent(new CustomEvent('continue-clicked', {
+              bubbles: true,
+              composed: true
+          }));
+      }
+      render() {
+          return x `
+      <div class="navigation-card">
+        <sl-button
+          variant="default"
+          size="large"
+          ?disabled=${this.isPreviousDisabled}
+          @click=${this.handlePrevious}
+        >
+          <sl-icon name="chevron-left"></sl-icon>
+          Previous
+        </sl-button>
+
+        <sl-button
+          variant="text"
+          @click=${this.handleSkip}
+        >
+          Skip to Next Required Step
+        </sl-button>
+
+        <sl-button
+          variant="primary"
+          size="large"
+          ?disabled=${this.isContinueDisabled}
+          @click=${this.handleContinue}
+        >
+          Continue
+        </sl-button>
+      </div>
+    `;
+      }
+  };
+  NavigationButtons.styles = i$4 `
+    .navigation-card {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      padding: 1rem;
+      background: var(--sl-color-neutral-0);
+      border: 1px solid var(--sl-color-neutral-200);
+      border-radius: var(--sl-border-radius-medium);
+      box-shadow: var(--sl-shadow-x-small);
+    }
+
+    @media (max-width: 768px) {
+      .navigation-card {
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+      
+      sl-button {
+        width: 100%;
+      }
+    }
+  `;
+  __decorate([
+      n$2({ type: Boolean })
+  ], NavigationButtons.prototype, "isPreviousDisabled", void 0);
+  __decorate([
+      n$2({ type: Boolean })
+  ], NavigationButtons.prototype, "isContinueDisabled", void 0);
+  __decorate([
+      n$2({ type: Number })
+  ], NavigationButtons.prototype, "sectionsLength", void 0);
+  NavigationButtons = __decorate([
+      t$1('navigation-buttons')
+  ], NavigationButtons);
+
   let EFPEntryForm = class EFPEntryForm extends s$1 {
       constructor() {
           super(...arguments);
@@ -34965,6 +35059,15 @@
           }
           return false;
       }
+      handleNavigationPrevious() {
+          this.goToPrevious();
+      }
+      handleNavigationSkip(event) {
+          this.currentSectionIndex = event.detail.sectionIndex;
+      }
+      handleNavigationContinue() {
+          this.goToNext();
+      }
       updateNavigationState(currentLabel) {
           var _a;
           // Find all sl-details elements in the navigation
@@ -35233,41 +35336,30 @@
             ></sl-progress>
           </div>
 
+          <!-- Navigation buttons above content -->
+          <navigation-buttons
+            .isPreviousDisabled=${this.currentStepIndex === 0}
+            .isContinueDisabled=${this.currentStepIndex >= this.flatSteps.length - 1}
+            .sectionsLength=${this.sections.length}
+            @previous-clicked=${this.handleNavigationPrevious}
+            @skip-clicked=${this.handleNavigationSkip}
+            @continue-clicked=${this.handleNavigationContinue}
+          ></navigation-buttons>
+
           <div class="card">
             <h2>${this.activeContent.title}</h2>
             ${this.renderMainContent()}
           </div>
 
-          <div
-            class="card"
-            style="display: flex; gap: 1rem; align-items: center;"
-          >
-            <sl-button
-              variant="default"
-              size="large"
-              ?disabled=${this.currentStepIndex === 0}
-              @click=${this.goToPrevious}
-            >
-              <sl-icon name="chevron-left"></sl-icon>
-              Previous
-            </sl-button>
-
-            <sl-button
-              variant="text"
-              @click=${() => (this.currentSectionIndex = this.sections.length - 1)}
-            >
-              Skip to Next Required Step
-            </sl-button>
-
-            <sl-button
-              variant="primary"
-              size="large"
-              ?disabled=${this.currentStepIndex >= this.flatSteps.length - 1}
-              @click=${this.goToNext}
-            >
-              Continue
-            </sl-button>
-          </div>
+          <!-- Navigation buttons below content -->
+          <navigation-buttons
+            .isPreviousDisabled=${this.currentStepIndex === 0}
+            .isContinueDisabled=${this.currentStepIndex >= this.flatSteps.length - 1}
+            .sectionsLength=${this.sections.length}
+            @previous-clicked=${this.handleNavigationPrevious}
+            @skip-clicked=${this.handleNavigationSkip}
+            @continue-clicked=${this.handleNavigationContinue}
+          ></navigation-buttons>
         </main>
       </div>
     `;
