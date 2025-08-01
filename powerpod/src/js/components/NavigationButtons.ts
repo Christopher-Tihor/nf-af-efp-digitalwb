@@ -11,6 +11,7 @@ export class NavigationButtons extends LitElement {
     .navigation-card {
       display: flex;
       gap: 1rem;
+      margin-bottom: 1rem;
       align-items: center;
       padding: 1rem;
       background: var(--sl-color-neutral-0);

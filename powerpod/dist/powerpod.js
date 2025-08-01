@@ -33155,6 +33155,7 @@
     .navigation-card {
       display: flex;
       gap: 1rem;
+      margin-bottom: 1rem;
       align-items: center;
       padding: 1rem;
       background: var(--sl-color-neutral-0);
@@ -34452,7 +34453,7 @@
       }
       buildStepHierarchy(currentStep) {
           const hierarchy = [];
-          // Check if this is a numbered step (e.g., "7.11 Plant Biodiversity")
+          // Method 1: Check if this is a numbered step (e.g., "7.11 Plant Biodiversity")
           const stepMatch = currentStep.label.match(/^(\d+)\.(\d+)\s+(.+)$/);
           if (stepMatch) {
               const [, chapterNum, subNum] = stepMatch;
@@ -34476,18 +34477,56 @@
               }
               return hierarchy;
           }
-          // Fallback: try to find parent containers using existing logic
-          const parentContainers = EFPNavigationUtils.findContainersForItem(currentStep.label, this.sections);
-          parentContainers.forEach((container, index) => {
-              hierarchy.push({
-                  label: container,
-                  level: index + 1
+          // Method 2: Find parent containers by searching the section structure
+          const currentSection = this.sections[this.currentSectionIndex];
+          if (currentSection) {
+              const parentContainer = this.findParentContainer(currentStep.label, currentSection.items);
+              if (parentContainer) {
+                  hierarchy.push({
+                      label: parentContainer,
+                      level: 1
+                  });
+              }
+          }
+          // Method 3: Fallback - try to find parent containers using existing navigation utility
+          if (hierarchy.length === 0) {
+              const parentContainers = EFPNavigationUtils.findContainersForItem(currentStep.label, this.sections);
+              parentContainers.forEach((container, index) => {
+                  hierarchy.push({
+                      label: container,
+                      level: index + 1
+                  });
               });
-          });
+          }
           return hierarchy;
+      }
+      findParentContainer(targetLabel, items) {
+          for (const item of items) {
+              // Check if this item has nested items
+              if ('items' in item && Array.isArray(item.items)) {
+                  // Check if the target is directly in this container's items
+                  const foundInContainer = item.items.some(subItem => subItem.label === targetLabel);
+                  if (foundInContainer) {
+                      console.log(`Found parent container for "${targetLabel}": "${item.title || item.label}"`);
+                      return item.title || item.label;
+                  }
+                  // Recursively search in nested containers
+                  const foundInNested = this.findParentContainer(targetLabel, item.items);
+                  if (foundInNested) {
+                      return foundInNested;
+                  }
+              }
+          }
+          return null;
       }
       findStepByPattern(pattern) {
           return this.flatSteps.find(step => pattern.test(step.label));
+      }
+      isItemInNestedContainer(targetLabel) {
+          const currentSection = this.sections[this.currentSectionIndex];
+          if (!currentSection)
+              return false;
+          return this.findParentContainer(targetLabel, currentSection.items) !== null;
       }
       renderBreadcrumbs() {
           const currentStep = this.flatSteps[this.currentStepIndex];
@@ -34549,11 +34588,17 @@
               });
           }
           // For nested items, build the complete hierarchy breadcrumb
-          if (currentStep.label.includes(':') || currentStep.label.startsWith('Chapter ') || /^\d+\.\d+/.test(currentStep.label)) {
+          // Check for various nested patterns: numbered chapters, nested sections, or items with colons
+          const isNestedItem = currentStep.label.includes(':') ||
+              currentStep.label.startsWith('Chapter ') ||
+              /^\d+\.\d+/.test(currentStep.label) ||
+              this.isItemInNestedContainer(currentStep.label);
+          if (isNestedItem) {
               // Build the complete hierarchy for this step
               const hierarchy = this.buildStepHierarchy(currentStep);
+              console.log('Breadcrumb hierarchy for', currentStep.label, ':', hierarchy);
               // Add each level of the hierarchy (excluding the current step itself)
-              hierarchy.forEach(hierarchyItem => {
+              hierarchy.forEach((hierarchyItem) => {
                   if (hierarchyItem.label !== currentStep.label) {
                       breadcrumbs.push({
                           label: hierarchyItem.label,
