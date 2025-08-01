@@ -178,6 +178,47 @@ class EFPEntryForm extends LitElement {
       letter-spacing: -0.015em;
     }
 
+    .sub-subchapter-header {
+      background: linear-gradient(135deg, var(--sl-color-neutral-50) 0%, var(--sl-color-neutral-100) 100%);
+      padding: 0.75rem;
+      margin: 1rem 0 1rem 1rem;
+      border-radius: var(--sl-border-radius-small);
+      border-left: 2px solid var(--sl-color-neutral-400);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    }
+
+    .sub-subchapter-header h5 {
+      font-family: var(--chapter-font);
+      font-weight: 500;
+      font-size: 1.15rem;
+      color: var(--sl-color-neutral-700);
+      margin: 0 0 0.5rem 0;
+    }
+
+    .container-message {
+      background: linear-gradient(135deg, var(--sl-color-neutral-50) 0%, var(--sl-color-neutral-100) 100%);
+      padding: 2rem;
+      margin: 2rem 0;
+      border-radius: var(--sl-border-radius-medium);
+      border: 1px solid var(--sl-color-neutral-200);
+      text-align: center;
+    }
+
+    .container-message h3 {
+      font-family: var(--chapter-font);
+      font-weight: 600;
+      font-size: 1.25rem;
+      color: var(--sl-color-neutral-700);
+      margin: 0 0 1rem 0;
+    }
+
+    .container-message p {
+      font-family: var(--body-font);
+      color: var(--sl-color-neutral-600);
+      margin: 0;
+      line-height: 1.5;
+    }
+
     .question-response {
       margin-top: 1rem;
       font-family: var(--body-font);
@@ -458,6 +499,21 @@ class EFPEntryForm extends LitElement {
         ` : ''}
       </div>
       ${subchapter.questions.map((question: any) => this.renderQuestion(question))}
+
+      ${subchapter.subchapters ? subchapter.subchapters.map((subSubchapter: any) => this.renderSubSubchapter(subSubchapter)) : ''}
+    `;
+  }
+
+  private renderSubSubchapter(subSubchapter: any) {
+    return html`
+      <div class="sub-subchapter-header">
+        <h5>${subSubchapter.name}</h5>
+        ${subSubchapter.description ? html`
+          <div>${unsafeHTML(subSubchapter.description)}</div>
+        ` : ''}
+      </div>
+
+      ${subSubchapter.questions.map((question: any) => this.renderQuestion(question))}
     `;
   }
 
@@ -479,13 +535,14 @@ class EFPEntryForm extends LitElement {
 
   private formatChapterTitle(chapterName: string): string {
     // Transform "CHAPTER 2 BUILDINGS AND ROADS" to "Chapter 2: Buildings and Roads"
+    // Transform "PLANT BIODIVERSITY" to "Plant Biodiversity"
     if (!chapterName) return '';
 
     // Convert to title case and handle the chapter format
     const titleCase = chapterName.toLowerCase().replace(/\b\w/g, l => l.toUpperCase());
 
     // If it starts with "Chapter" and has a number, add a colon after the number
-    const chapterMatch = titleCase.match(/^Chapter (\d+) (.+)$/);
+    const chapterMatch = titleCase.match(/^Chapter (\d+(?:\.\d+)?) (.+)$/);
     if (chapterMatch) {
       const [, chapterNum, chapterTitle] = chapterMatch;
       return `Chapter ${chapterNum}: ${chapterTitle}`;
@@ -513,44 +570,96 @@ class EFPEntryForm extends LitElement {
 
     console.log('EFPEntryForm: Generating section B items from', this.nestedChapterStructure.length, 'chapters');
 
+
+
     const items: any[] = [];
 
     this.nestedChapterStructure.forEach((chapter: any) => {
-      // Add the main chapter with formatted title
-      const originalTitle = chapter.name || chapter.label;
-      const formattedTitle = this.formatChapterTitle(originalTitle);
+      // Extract chapter number from the main chapter
+      const chapterNumber = Math.floor(chapter.order || 0);
 
+      // Create the main chapter container (collapsible parent)
       const chapterItem: any = {
-        label: formattedTitle,
-        title: formattedTitle, // Add title for renderItems method
-        content: this.renderChapterContent(chapter),
+        label: `Chapter ${chapterNumber}`,
+        title: `Chapter ${chapterNumber}`,
+        content: '', // No content for the parent container
         complete: false,
-        chapterData: chapter
+        isContainer: true, // Mark as container only
+        items: []
       };
 
-      // If chapter has subchapters, create nested structure
+      // Add all subchapters as direct clickable items under the main chapter
       if (chapter.subchapters && chapter.subchapters.length > 0) {
-        chapterItem.items = chapter.subchapters.map((subchapter: any) => ({
-          label: subchapter.name || subchapter.label,
-          content: this.renderSubchapterContent(subchapter),
+        chapter.subchapters.forEach((subchapter: any) => {
+          // Add the subchapter as a clickable item
+          const formattedSubchapterTitle = this.formatChapterTitle(subchapter.name || subchapter.label);
+          const subchapterItem: any = {
+            label: formattedSubchapterTitle,
+            content: this.renderSubchapterContent(subchapter),
+            complete: false,
+            subchapterData: subchapter,
+            parentChapter: chapter
+          };
+
+          // If subchapter has sub-subchapters, add them as nested items
+          if (subchapter.subchapters && subchapter.subchapters.length > 0) {
+            subchapterItem.items = subchapter.subchapters.map((subSubchapter: any) => {
+              // Format sub-subchapter title (remove "CHAPTER X.Y" prefix, keep just the descriptive part)
+              let subSubLabel = subSubchapter.name || subSubchapter.label;
+              // Remove chapter prefix if it exists (e.g., "CHAPTER 7.11 Plant Biodiversity" -> "Plant Biodiversity")
+              subSubLabel = subSubLabel.replace(/^CHAPTER\s+\d+\.\d+\s+/i, '');
+              const formattedSubSubTitle = this.formatChapterTitle(subSubLabel);
+
+              return {
+                label: formattedSubSubTitle,
+                content: this.renderSubchapterContent(subSubchapter),
+                complete: false,
+                subchapterData: subSubchapter,
+                parentChapter: subchapter,
+                grandParentChapter: chapter
+              };
+            });
+
+            // Add title property for sl-details rendering
+            subchapterItem.title = subchapterItem.label;
+          }
+
+          // Always add the subchapter to the main chapter items
+          chapterItem.items.push(subchapterItem);
+        });
+      } else {
+        // If no subchapters, add the main chapter itself as a clickable item
+        const formattedTitle = this.formatChapterTitle(chapter.name || chapter.label);
+        chapterItem.items.push({
+          label: formattedTitle,
+          content: this.renderChapterContent(chapter),
           complete: false,
-          subchapterData: subchapter,
-          parentChapter: chapter
-        }));
+          chapterData: chapter
+        });
       }
 
       items.push(chapterItem);
     });
 
+
+
     return items;
   }
 
   private renderSubchapterContent(subchapter: any): string {
+    const subSubchaptersCount = subchapter.subchapters?.length || 0;
+    const subSubchaptersInfo = subSubchaptersCount > 0
+      ? `<p style="font-family: var(--body-font); font-weight: 500; color: var(--sl-color-neutral-600); margin: 0;"><strong>Sub-sections:</strong> ${subSubchaptersCount}</p>`
+      : '';
+
     return `
       <div class="subchapter-content">
         <h3 style="font-family: var(--chapter-font); font-weight: 600; font-size: 1.5rem; color: var(--sl-color-neutral-800); margin-bottom: 1rem;">${subchapter.name || subchapter.label}</h3>
         <div style="font-family: var(--body-font); line-height: 1.6; color: var(--sl-color-neutral-700); margin-bottom: 1rem;">${subchapter.description || ''}</div>
-        <p style="font-family: var(--body-font); font-weight: 500; color: var(--sl-color-neutral-600);"><strong>Questions:</strong> ${subchapter.questions?.length || 0}</p>
+        <div style="display: flex; gap: 2rem; margin-bottom: 1rem;">
+          <p style="font-family: var(--body-font); font-weight: 500; color: var(--sl-color-neutral-600); margin: 0;"><strong>Questions:</strong> ${subchapter.questions?.length || 0}</p>
+          ${subSubchaptersInfo}
+        </div>
       </div>
     `;
   }
@@ -576,8 +685,17 @@ class EFPEntryForm extends LitElement {
     if (this.currentSectionIndex === 1) { // Section B is index 1
       const currentStep = this.flatSteps[this.currentStepIndex];
 
+      // Check if it's a container item (should not be selectable)
+      if (currentStep && 'isContainer' in currentStep && currentStep.isContainer) {
+        return html`
+          <div class="container-message">
+            <h3>Please select a specific chapter section from the navigation</h3>
+            <p>This is a chapter container. Click on one of the specific sections in the navigation to view its content.</p>
+          </div>
+        `;
+      }
       // Check if it's a subchapter
-      if (currentStep && 'subchapterData' in currentStep) {
+      else if (currentStep && 'subchapterData' in currentStep) {
         return this.renderSubchapter(currentStep.subchapterData);
       }
       // Check if it's a main chapter

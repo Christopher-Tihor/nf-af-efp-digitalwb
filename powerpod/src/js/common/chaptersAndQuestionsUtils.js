@@ -136,7 +136,55 @@ export function getChaptersWithQuestions() {
 }
 
 /**
- * Builds a nested chapter structure with subchapters and questions
+ * Determines the hierarchy level based on order number
+ * @param {number} order - Order like 4, 4.1, 4.11, 4.12, 4.2, 5.1
+ * @returns {Object} Hierarchy info with level, mainChapter, subChapter, subSubChapter
+ */
+function parseOrderHierarchy(order) {
+  if (typeof order !== 'number') return null;
+
+  const orderStr = order.toString();
+  const parts = orderStr.split('.');
+
+  if (parts.length === 1) {
+    // Level 1: 4, 5
+    return {
+      level: 1,
+      mainChapter: parseInt(parts[0]),
+      subChapter: null,
+      subSubChapter: null
+    };
+  } else if (parts.length === 2) {
+    const mainChapter = parseInt(parts[0]);
+    const decimalPart = parts[1];
+
+    if (decimalPart.length === 1) {
+      // Level 2: 4.1, 4.2, 5.1 (single digit after decimal)
+      return {
+        level: 2,
+        mainChapter: mainChapter,
+        subChapter: parseInt(decimalPart),
+        subSubChapter: null
+      };
+    } else if (decimalPart.length === 2) {
+      // Level 3: 4.11, 4.12, 7.11, 7.12 (double digit after decimal)
+      // Parse as 4.1.1, 4.1.2, 7.1.1, 7.1.2
+      const subChapter = parseInt(decimalPart.charAt(0));
+      const subSubChapter = parseInt(decimalPart.charAt(1));
+      return {
+        level: 3,
+        mainChapter: mainChapter,
+        subChapter: subChapter,
+        subSubChapter: subSubChapter
+      };
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Builds a nested chapter structure with 3 levels of hierarchy based on order numbers
  * @returns {Array} Array of main chapters with nested subchapters and questions
  */
 export function buildNestedChapterStructure() {
@@ -145,45 +193,113 @@ export function buildNestedChapterStructure() {
 
   if (!chapters?.value || !questions?.value) return [];
 
-  // Separate main chapters and subchapters
-  const mainChapters = chapters.value.filter(chapter =>
-    !chapter._quartech_parentchapter_value
-  );
+  // Group chapters by their hierarchy
+  const chapterHierarchy = {};
 
-  const subchapters = chapters.value.filter(chapter =>
-    chapter._quartech_parentchapter_value
-  );
+  chapters.value.forEach(chapter => {
+    const hierarchy = parseOrderHierarchy(chapter.quartech_order);
+    if (!hierarchy) return;
 
-  // Build nested structure
-  return mainChapters.map(mainChapter => {
-    // Find subchapters for this main chapter
-    const chapterSubchapters = subchapters
-      .filter(subchapter =>
-        subchapter._quartech_parentchapter_value === mainChapter.quartech_chapterid
-      )
-      .map(subchapter => ({
-        ...subchapter,
-        questions: questions.value
-          .filter(question =>
-            question._quartech_chapter_value === subchapter.quartech_chapterid
-          )
-          .sort((a, b) => (a.quartech_order || 0) - (b.quartech_order || 0))
-      }))
-      .sort((a, b) => (a.quartech_order || 0) - (b.quartech_order || 0));
+    const { level, mainChapter, subChapter, subSubChapter } = hierarchy;
 
-    // Find questions directly associated with the main chapter
+
+
+    // Initialize main chapter group if needed
+    if (!chapterHierarchy[mainChapter]) {
+      chapterHierarchy[mainChapter] = {
+        main: null,
+        subs: {},
+        level1Items: []
+      };
+    }
+
+    if (level === 1) {
+      // This is a main chapter (e.g., order 4)
+      chapterHierarchy[mainChapter].main = chapter;
+    } else if (level === 2) {
+      // This is a sub chapter (e.g., order 4.1, 4.2)
+      if (!chapterHierarchy[mainChapter].subs[subChapter]) {
+        chapterHierarchy[mainChapter].subs[subChapter] = {
+          main: null,
+          subSubs: []
+        };
+      }
+      chapterHierarchy[mainChapter].subs[subChapter].main = chapter;
+    } else if (level === 3) {
+      // This is a sub-sub chapter (e.g., order 4.11, 4.12)
+      if (!chapterHierarchy[mainChapter].subs[subChapter]) {
+        chapterHierarchy[mainChapter].subs[subChapter] = {
+          main: null,
+          subSubs: []
+        };
+      }
+      chapterHierarchy[mainChapter].subs[subChapter].subSubs.push(chapter);
+    }
+  });
+
+
+
+  // Build the final nested structure
+  const result = [];
+
+  Object.keys(chapterHierarchy).sort((a, b) => parseInt(a) - parseInt(b)).forEach(mainChapterNum => {
+    const chapterGroup = chapterHierarchy[mainChapterNum];
+
+    // Create main chapter (or use existing one)
+    let mainChapterData = chapterGroup.main;
+    if (!mainChapterData) {
+      // Create a synthetic main chapter if none exists
+      mainChapterData = {
+        quartech_chapterid: `chapter-${mainChapterNum}-main`,
+        quartech_name: `CHAPTER ${mainChapterNum}`,
+        quartech_label: `CHAPTER ${mainChapterNum}`,
+        quartech_order: parseInt(mainChapterNum),
+        quartech_description: null,
+        quartech_tooltip: null,
+        quartech_imageurl: null
+      };
+    }
+
+    // Get questions for main chapter
     const mainChapterQuestions = questions.value
-      .filter(question =>
-        question._quartech_chapter_value === mainChapter.quartech_chapterid
-      )
+      .filter(question => question._quartech_chapter_value === mainChapterData.quartech_chapterid)
       .sort((a, b) => (a.quartech_order || 0) - (b.quartech_order || 0));
 
-    return {
-      ...mainChapter,
+    // Build subchapters
+    const subchapters = [];
+    Object.keys(chapterGroup.subs).sort((a, b) => parseInt(a) - parseInt(b)).forEach(subChapterNum => {
+      const subGroup = chapterGroup.subs[subChapterNum];
+
+      if (subGroup.main) {
+        // Get questions for this subchapter
+        const subChapterQuestions = questions.value
+          .filter(question => question._quartech_chapter_value === subGroup.main.quartech_chapterid)
+          .sort((a, b) => (a.quartech_order || 0) - (b.quartech_order || 0));
+
+        // Build sub-subchapters
+        const subSubchapters = subGroup.subSubs.map(subSubChapter => ({
+          ...subSubChapter,
+          questions: questions.value
+            .filter(question => question._quartech_chapter_value === subSubChapter.quartech_chapterid)
+            .sort((a, b) => (a.quartech_order || 0) - (b.quartech_order || 0))
+        })).sort((a, b) => (a.quartech_order || 0) - (b.quartech_order || 0));
+
+        subchapters.push({
+          ...subGroup.main,
+          questions: subChapterQuestions,
+          subchapters: subSubchapters
+        });
+      }
+    });
+
+    result.push({
+      ...mainChapterData,
       questions: mainChapterQuestions,
-      subchapters: chapterSubchapters
-    };
-  }).sort((a, b) => (a.quartech_order || 0) - (b.quartech_order || 0));
+      subchapters: subchapters
+    });
+  });
+
+  return result;
 }
 
 /**
@@ -201,7 +317,7 @@ export function getChaptersWithNestedQuestionsAndSubchapters() {
     description: chapter.quartech_description,
     tooltip: chapter.quartech_tooltip,
     imageUrl: chapter.quartech_imageurl,
-    questions: chapter.questions.map(question => ({
+    questions: (chapter.questions || []).map(question => ({
       id: question.quartech_workbookquestionid,
       name: question.quartech_name,
       label: question.quartech_label,
@@ -212,7 +328,7 @@ export function getChaptersWithNestedQuestionsAndSubchapters() {
       tooltip: question.quartech_tooltip,
       responseOptionColor: question.quartech_responseoptioncolor
     })),
-    subchapters: chapter.subchapters.map(subchapter => ({
+    subchapters: (chapter.subchapters || []).map(subchapter => ({
       id: subchapter.quartech_chapterid,
       name: subchapter.quartech_name,
       label: subchapter.quartech_label,
@@ -221,7 +337,7 @@ export function getChaptersWithNestedQuestionsAndSubchapters() {
       tooltip: subchapter.quartech_tooltip,
       imageUrl: subchapter.quartech_imageurl,
       parentChapterId: subchapter._quartech_parentchapter_value,
-      questions: subchapter.questions.map(question => ({
+      questions: (subchapter.questions || []).map(question => ({
         id: question.quartech_workbookquestionid,
         name: question.quartech_name,
         label: question.quartech_label,
@@ -231,6 +347,28 @@ export function getChaptersWithNestedQuestionsAndSubchapters() {
         textBelowQuestion: question.quartech_textbelowquestion,
         tooltip: question.quartech_tooltip,
         responseOptionColor: question.quartech_responseoptioncolor
+      })),
+      // Handle 3rd level subchapters (sub-subchapters)
+      subchapters: (subchapter.subchapters || []).map(subSubchapter => ({
+        id: subSubchapter.quartech_chapterid,
+        name: subSubchapter.quartech_name,
+        label: subSubchapter.quartech_label,
+        order: subSubchapter.quartech_order,
+        description: subSubchapter.quartech_description,
+        tooltip: subSubchapter.quartech_tooltip,
+        imageUrl: subSubchapter.quartech_imageurl,
+        parentChapterId: subSubchapter._quartech_parentchapter_value,
+        questions: (subSubchapter.questions || []).map(question => ({
+          id: question.quartech_workbookquestionid,
+          name: question.quartech_name,
+          label: question.quartech_label,
+          order: question.quartech_order,
+          questionType: question.quartech_questiontype,
+          textAboveQuestion: question.quartech_textabovequestion,
+          textBelowQuestion: question.quartech_textbelowquestion,
+          tooltip: question.quartech_tooltip,
+          responseOptionColor: question.quartech_responseoptioncolor
+        }))
       }))
     }))
   }));

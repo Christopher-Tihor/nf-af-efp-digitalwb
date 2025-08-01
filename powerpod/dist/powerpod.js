@@ -31164,7 +31164,51 @@
   }
 
   /**
-   * Builds a nested chapter structure with subchapters and questions
+   * Determines the hierarchy level based on order number
+   * @param {number} order - Order like 4, 4.1, 4.11, 4.12, 4.2, 5.1
+   * @returns {Object} Hierarchy info with level, mainChapter, subChapter, subSubChapter
+   */
+  function parseOrderHierarchy(order) {
+    if (typeof order !== 'number') return null;
+    var orderStr = order.toString();
+    var parts = orderStr.split('.');
+    if (parts.length === 1) {
+      // Level 1: 4, 5
+      return {
+        level: 1,
+        mainChapter: parseInt(parts[0]),
+        subChapter: null,
+        subSubChapter: null
+      };
+    } else if (parts.length === 2) {
+      var mainChapter = parseInt(parts[0]);
+      var decimalPart = parts[1];
+      if (decimalPart.length === 1) {
+        // Level 2: 4.1, 4.2, 5.1 (single digit after decimal)
+        return {
+          level: 2,
+          mainChapter: mainChapter,
+          subChapter: parseInt(decimalPart),
+          subSubChapter: null
+        };
+      } else if (decimalPart.length === 2) {
+        // Level 3: 4.11, 4.12, 7.11, 7.12 (double digit after decimal)
+        // Parse as 4.1.1, 4.1.2, 7.1.1, 7.1.2
+        var subChapter = parseInt(decimalPart.charAt(0));
+        var subSubChapter = parseInt(decimalPart.charAt(1));
+        return {
+          level: 3,
+          mainChapter: mainChapter,
+          subChapter: subChapter,
+          subSubChapter: subSubChapter
+        };
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Builds a nested chapter structure with 3 levels of hierarchy based on order numbers
    * @returns {Array} Array of main chapters with nested subchapters and questions
    */
   function buildNestedChapterStructure() {
@@ -31172,44 +31216,115 @@
     var questions = getStoredQuestionsData();
     if (!(chapters !== null && chapters !== void 0 && chapters.value) || !(questions !== null && questions !== void 0 && questions.value)) return [];
 
-    // Separate main chapters and subchapters
-    var mainChapters = chapters.value.filter(function (chapter) {
-      return !chapter._quartech_parentchapter_value;
-    });
-    var subchapters = chapters.value.filter(function (chapter) {
-      return chapter._quartech_parentchapter_value;
+    // Group chapters by their hierarchy
+    var chapterHierarchy = {};
+    chapters.value.forEach(function (chapter) {
+      var hierarchy = parseOrderHierarchy(chapter.quartech_order);
+      if (!hierarchy) return;
+      var level = hierarchy.level,
+        mainChapter = hierarchy.mainChapter,
+        subChapter = hierarchy.subChapter;
+        hierarchy.subSubChapter;
+
+      // Initialize main chapter group if needed
+      if (!chapterHierarchy[mainChapter]) {
+        chapterHierarchy[mainChapter] = {
+          main: null,
+          subs: {},
+          level1Items: []
+        };
+      }
+      if (level === 1) {
+        // This is a main chapter (e.g., order 4)
+        chapterHierarchy[mainChapter].main = chapter;
+      } else if (level === 2) {
+        // This is a sub chapter (e.g., order 4.1, 4.2)
+        if (!chapterHierarchy[mainChapter].subs[subChapter]) {
+          chapterHierarchy[mainChapter].subs[subChapter] = {
+            main: null,
+            subSubs: []
+          };
+        }
+        chapterHierarchy[mainChapter].subs[subChapter].main = chapter;
+      } else if (level === 3) {
+        // This is a sub-sub chapter (e.g., order 4.11, 4.12)
+        if (!chapterHierarchy[mainChapter].subs[subChapter]) {
+          chapterHierarchy[mainChapter].subs[subChapter] = {
+            main: null,
+            subSubs: []
+          };
+        }
+        chapterHierarchy[mainChapter].subs[subChapter].subSubs.push(chapter);
+      }
     });
 
-    // Build nested structure
-    return mainChapters.map(function (mainChapter) {
-      // Find subchapters for this main chapter
-      var chapterSubchapters = subchapters.filter(function (subchapter) {
-        return subchapter._quartech_parentchapter_value === mainChapter.quartech_chapterid;
-      }).map(function (subchapter) {
-        return _objectSpread2(_objectSpread2({}, subchapter), {}, {
-          questions: questions.value.filter(function (question) {
-            return question._quartech_chapter_value === subchapter.quartech_chapterid;
+    // Build the final nested structure
+    var result = [];
+    Object.keys(chapterHierarchy).sort(function (a, b) {
+      return parseInt(a) - parseInt(b);
+    }).forEach(function (mainChapterNum) {
+      var chapterGroup = chapterHierarchy[mainChapterNum];
+
+      // Create main chapter (or use existing one)
+      var mainChapterData = chapterGroup.main;
+      if (!mainChapterData) {
+        // Create a synthetic main chapter if none exists
+        mainChapterData = {
+          quartech_chapterid: "chapter-".concat(mainChapterNum, "-main"),
+          quartech_name: "CHAPTER ".concat(mainChapterNum),
+          quartech_label: "CHAPTER ".concat(mainChapterNum),
+          quartech_order: parseInt(mainChapterNum),
+          quartech_description: null,
+          quartech_tooltip: null,
+          quartech_imageurl: null
+        };
+      }
+
+      // Get questions for main chapter
+      var mainChapterQuestions = questions.value.filter(function (question) {
+        return question._quartech_chapter_value === mainChapterData.quartech_chapterid;
+      }).sort(function (a, b) {
+        return (a.quartech_order || 0) - (b.quartech_order || 0);
+      });
+
+      // Build subchapters
+      var subchapters = [];
+      Object.keys(chapterGroup.subs).sort(function (a, b) {
+        return parseInt(a) - parseInt(b);
+      }).forEach(function (subChapterNum) {
+        var subGroup = chapterGroup.subs[subChapterNum];
+        if (subGroup.main) {
+          // Get questions for this subchapter
+          var subChapterQuestions = questions.value.filter(function (question) {
+            return question._quartech_chapter_value === subGroup.main.quartech_chapterid;
           }).sort(function (a, b) {
             return (a.quartech_order || 0) - (b.quartech_order || 0);
-          })
-        });
-      }).sort(function (a, b) {
-        return (a.quartech_order || 0) - (b.quartech_order || 0);
-      });
+          });
 
-      // Find questions directly associated with the main chapter
-      var mainChapterQuestions = questions.value.filter(function (question) {
-        return question._quartech_chapter_value === mainChapter.quartech_chapterid;
-      }).sort(function (a, b) {
-        return (a.quartech_order || 0) - (b.quartech_order || 0);
+          // Build sub-subchapters
+          var subSubchapters = subGroup.subSubs.map(function (subSubChapter) {
+            return _objectSpread2(_objectSpread2({}, subSubChapter), {}, {
+              questions: questions.value.filter(function (question) {
+                return question._quartech_chapter_value === subSubChapter.quartech_chapterid;
+              }).sort(function (a, b) {
+                return (a.quartech_order || 0) - (b.quartech_order || 0);
+              })
+            });
+          }).sort(function (a, b) {
+            return (a.quartech_order || 0) - (b.quartech_order || 0);
+          });
+          subchapters.push(_objectSpread2(_objectSpread2({}, subGroup.main), {}, {
+            questions: subChapterQuestions,
+            subchapters: subSubchapters
+          }));
+        }
       });
-      return _objectSpread2(_objectSpread2({}, mainChapter), {}, {
+      result.push(_objectSpread2(_objectSpread2({}, mainChapterData), {}, {
         questions: mainChapterQuestions,
-        subchapters: chapterSubchapters
-      });
-    }).sort(function (a, b) {
-      return (a.quartech_order || 0) - (b.quartech_order || 0);
+        subchapters: subchapters
+      }));
     });
+    return result;
   }
 
   /**
@@ -31227,7 +31342,7 @@
         description: chapter.quartech_description,
         tooltip: chapter.quartech_tooltip,
         imageUrl: chapter.quartech_imageurl,
-        questions: chapter.questions.map(function (question) {
+        questions: (chapter.questions || []).map(function (question) {
           return {
             id: question.quartech_workbookquestionid,
             name: question.quartech_name,
@@ -31240,7 +31355,7 @@
             responseOptionColor: question.quartech_responseoptioncolor
           };
         }),
-        subchapters: chapter.subchapters.map(function (subchapter) {
+        subchapters: (chapter.subchapters || []).map(function (subchapter) {
           return {
             id: subchapter.quartech_chapterid,
             name: subchapter.quartech_name,
@@ -31250,7 +31365,7 @@
             tooltip: subchapter.quartech_tooltip,
             imageUrl: subchapter.quartech_imageurl,
             parentChapterId: subchapter._quartech_parentchapter_value,
-            questions: subchapter.questions.map(function (question) {
+            questions: (subchapter.questions || []).map(function (question) {
               return {
                 id: question.quartech_workbookquestionid,
                 name: question.quartech_name,
@@ -31261,6 +31376,32 @@
                 textBelowQuestion: question.quartech_textbelowquestion,
                 tooltip: question.quartech_tooltip,
                 responseOptionColor: question.quartech_responseoptioncolor
+              };
+            }),
+            // Handle 3rd level subchapters (sub-subchapters)
+            subchapters: (subchapter.subchapters || []).map(function (subSubchapter) {
+              return {
+                id: subSubchapter.quartech_chapterid,
+                name: subSubchapter.quartech_name,
+                label: subSubchapter.quartech_label,
+                order: subSubchapter.quartech_order,
+                description: subSubchapter.quartech_description,
+                tooltip: subSubchapter.quartech_tooltip,
+                imageUrl: subSubchapter.quartech_imageurl,
+                parentChapterId: subSubchapter._quartech_parentchapter_value,
+                questions: (subSubchapter.questions || []).map(function (question) {
+                  return {
+                    id: question.quartech_workbookquestionid,
+                    name: question.quartech_name,
+                    label: question.quartech_label,
+                    order: question.quartech_order,
+                    questionType: question.quartech_questiontype,
+                    textAboveQuestion: question.quartech_textabovequestion,
+                    textBelowQuestion: question.quartech_textbelowquestion,
+                    tooltip: question.quartech_tooltip,
+                    responseOptionColor: question.quartech_responseoptioncolor
+                  };
+                })
               };
             })
           };
@@ -34525,6 +34666,20 @@
         ` : ''}
       </div>
       ${subchapter.questions.map((question) => this.renderQuestion(question))}
+
+      ${subchapter.subchapters ? subchapter.subchapters.map((subSubchapter) => this.renderSubSubchapter(subSubchapter)) : ''}
+    `;
+      }
+      renderSubSubchapter(subSubchapter) {
+          return x `
+      <div class="sub-subchapter-header">
+        <h5>${subSubchapter.name}</h5>
+        ${subSubchapter.description ? x `
+          <div>${o$1(subSubchapter.description)}</div>
+        ` : ''}
+      </div>
+
+      ${subSubchapter.questions.map((question) => this.renderQuestion(question))}
     `;
       }
       renderChapter(chapter) {
@@ -34544,12 +34699,13 @@
       }
       formatChapterTitle(chapterName) {
           // Transform "CHAPTER 2 BUILDINGS AND ROADS" to "Chapter 2: Buildings and Roads"
+          // Transform "PLANT BIODIVERSITY" to "Plant Biodiversity"
           if (!chapterName)
               return '';
           // Convert to title case and handle the chapter format
           const titleCase = chapterName.toLowerCase().replace(/\b\w/g, l => l.toUpperCase());
           // If it starts with "Chapter" and has a number, add a colon after the number
-          const chapterMatch = titleCase.match(/^Chapter (\d+) (.+)$/);
+          const chapterMatch = titleCase.match(/^Chapter (\d+(?:\.\d+)?) (.+)$/);
           if (chapterMatch) {
               const [, chapterNum, chapterTitle] = chapterMatch;
               return `Chapter ${chapterNum}: ${chapterTitle}`;
@@ -34574,37 +34730,81 @@
           console.log('EFPEntryForm: Generating section B items from', this.nestedChapterStructure.length, 'chapters');
           const items = [];
           this.nestedChapterStructure.forEach((chapter) => {
-              // Add the main chapter with formatted title
-              const originalTitle = chapter.name || chapter.label;
-              const formattedTitle = this.formatChapterTitle(originalTitle);
+              // Extract chapter number from the main chapter
+              const chapterNumber = Math.floor(chapter.order || 0);
+              // Create the main chapter container (collapsible parent)
               const chapterItem = {
-                  label: formattedTitle,
-                  title: formattedTitle, // Add title for renderItems method
-                  content: this.renderChapterContent(chapter),
+                  label: `Chapter ${chapterNumber}`,
+                  title: `Chapter ${chapterNumber}`,
+                  content: '', // No content for the parent container
                   complete: false,
-                  chapterData: chapter
+                  isContainer: true, // Mark as container only
+                  items: []
               };
-              // If chapter has subchapters, create nested structure
+              // Add all subchapters as direct clickable items under the main chapter
               if (chapter.subchapters && chapter.subchapters.length > 0) {
-                  chapterItem.items = chapter.subchapters.map((subchapter) => ({
-                      label: subchapter.name || subchapter.label,
-                      content: this.renderSubchapterContent(subchapter),
+                  chapter.subchapters.forEach((subchapter) => {
+                      // Add the subchapter as a clickable item
+                      const formattedSubchapterTitle = this.formatChapterTitle(subchapter.name || subchapter.label);
+                      const subchapterItem = {
+                          label: formattedSubchapterTitle,
+                          content: this.renderSubchapterContent(subchapter),
+                          complete: false,
+                          subchapterData: subchapter,
+                          parentChapter: chapter
+                      };
+                      // If subchapter has sub-subchapters, add them as nested items
+                      if (subchapter.subchapters && subchapter.subchapters.length > 0) {
+                          subchapterItem.items = subchapter.subchapters.map((subSubchapter) => {
+                              // Format sub-subchapter title (remove "CHAPTER X.Y" prefix, keep just the descriptive part)
+                              let subSubLabel = subSubchapter.name || subSubchapter.label;
+                              // Remove chapter prefix if it exists (e.g., "CHAPTER 7.11 Plant Biodiversity" -> "Plant Biodiversity")
+                              subSubLabel = subSubLabel.replace(/^CHAPTER\s+\d+\.\d+\s+/i, '');
+                              const formattedSubSubTitle = this.formatChapterTitle(subSubLabel);
+                              return {
+                                  label: formattedSubSubTitle,
+                                  content: this.renderSubchapterContent(subSubchapter),
+                                  complete: false,
+                                  subchapterData: subSubchapter,
+                                  parentChapter: subchapter,
+                                  grandParentChapter: chapter
+                              };
+                          });
+                          // Add title property for sl-details rendering
+                          subchapterItem.title = subchapterItem.label;
+                      }
+                      // Always add the subchapter to the main chapter items
+                      chapterItem.items.push(subchapterItem);
+                  });
+              }
+              else {
+                  // If no subchapters, add the main chapter itself as a clickable item
+                  const formattedTitle = this.formatChapterTitle(chapter.name || chapter.label);
+                  chapterItem.items.push({
+                      label: formattedTitle,
+                      content: this.renderChapterContent(chapter),
                       complete: false,
-                      subchapterData: subchapter,
-                      parentChapter: chapter
-                  }));
+                      chapterData: chapter
+                  });
               }
               items.push(chapterItem);
           });
           return items;
       }
       renderSubchapterContent(subchapter) {
-          var _a;
+          var _a, _b;
+          const subSubchaptersCount = ((_a = subchapter.subchapters) === null || _a === void 0 ? void 0 : _a.length) || 0;
+          const subSubchaptersInfo = subSubchaptersCount > 0
+              ? `<p style="font-family: var(--body-font); font-weight: 500; color: var(--sl-color-neutral-600); margin: 0;"><strong>Sub-sections:</strong> ${subSubchaptersCount}</p>`
+              : '';
           return `
       <div class="subchapter-content">
         <h3 style="font-family: var(--chapter-font); font-weight: 600; font-size: 1.5rem; color: var(--sl-color-neutral-800); margin-bottom: 1rem;">${subchapter.name || subchapter.label}</h3>
         <div style="font-family: var(--body-font); line-height: 1.6; color: var(--sl-color-neutral-700); margin-bottom: 1rem;">${subchapter.description || ''}</div>
-        <p style="font-family: var(--body-font); font-weight: 500; color: var(--sl-color-neutral-600);"><strong>Questions:</strong> ${((_a = subchapter.questions) === null || _a === void 0 ? void 0 : _a.length) || 0}</p>
+        <div style="display: flex; gap: 2rem; margin-bottom: 1rem;">
+          <p style="font-family: var(--body-font); font-weight: 500; color: var(--sl-color-neutral-600); margin: 0;"><strong>Questions:</strong> ${((_b = subchapter.questions) === null || _b === void 0 ? void 0 : _b.length) || 0}</p>
+          ${subSubchaptersInfo}
+        </div>
       </div>
     `;
       }
@@ -34628,8 +34828,17 @@
           // Check if we're in Section B and have a chapter to render
           if (this.currentSectionIndex === 1) { // Section B is index 1
               const currentStep = this.flatSteps[this.currentStepIndex];
+              // Check if it's a container item (should not be selectable)
+              if (currentStep && 'isContainer' in currentStep && currentStep.isContainer) {
+                  return x `
+          <div class="container-message">
+            <h3>Please select a specific chapter section from the navigation</h3>
+            <p>This is a chapter container. Click on one of the specific sections in the navigation to view its content.</p>
+          </div>
+        `;
+              }
               // Check if it's a subchapter
-              if (currentStep && 'subchapterData' in currentStep) {
+              else if (currentStep && 'subchapterData' in currentStep) {
                   return this.renderSubchapter(currentStep.subchapterData);
               }
               // Check if it's a main chapter
@@ -35049,6 +35258,47 @@
       color: var(--sl-color-neutral-800);
       margin: 0 0 0.5rem 0;
       letter-spacing: -0.015em;
+    }
+
+    .sub-subchapter-header {
+      background: linear-gradient(135deg, var(--sl-color-neutral-50) 0%, var(--sl-color-neutral-100) 100%);
+      padding: 0.75rem;
+      margin: 1rem 0 1rem 1rem;
+      border-radius: var(--sl-border-radius-small);
+      border-left: 2px solid var(--sl-color-neutral-400);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    }
+
+    .sub-subchapter-header h5 {
+      font-family: var(--chapter-font);
+      font-weight: 500;
+      font-size: 1.15rem;
+      color: var(--sl-color-neutral-700);
+      margin: 0 0 0.5rem 0;
+    }
+
+    .container-message {
+      background: linear-gradient(135deg, var(--sl-color-neutral-50) 0%, var(--sl-color-neutral-100) 100%);
+      padding: 2rem;
+      margin: 2rem 0;
+      border-radius: var(--sl-border-radius-medium);
+      border: 1px solid var(--sl-color-neutral-200);
+      text-align: center;
+    }
+
+    .container-message h3 {
+      font-family: var(--chapter-font);
+      font-weight: 600;
+      font-size: 1.25rem;
+      color: var(--sl-color-neutral-700);
+      margin: 0 0 1rem 0;
+    }
+
+    .container-message p {
+      font-family: var(--body-font);
+      color: var(--sl-color-neutral-600);
+      margin: 0;
+      line-height: 1.5;
     }
 
     .question-response {
