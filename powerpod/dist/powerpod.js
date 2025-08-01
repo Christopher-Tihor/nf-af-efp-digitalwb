@@ -34487,8 +34487,7 @@
           };
       }
       get sections() {
-          var _a;
-          console.log('EFPEntryForm: sections getter called, nestedChapterStructure length:', ((_a = this.nestedChapterStructure) === null || _a === void 0 ? void 0 : _a.length) || 0);
+          // console.log('EFPEntryForm: sections getter called, nestedChapterStructure length:', this.nestedChapterStructure?.length || 0);
           return [
               {
                   tab: 'Section A',
@@ -34683,14 +34682,14 @@
       renderChapter(chapter) {
           return x `
       <div class="chapter-header">
-        ${chapter.description ? x `
+        ${(chapter === null || chapter === void 0 ? void 0 : chapter.description) ? x `
           <div>${o$1(chapter.description)}</div>
         ` : ''}
       </div>
 
-      ${chapter.questions.map((question) => this.renderQuestion(question))}
+      ${(chapter === null || chapter === void 0 ? void 0 : chapter.questions) ? chapter.questions.map((question) => this.renderQuestion(question)) : ''}
 
-      ${chapter.subchapters.map((subchapter) => this.renderSubchapter(subchapter))}
+      ${(chapter === null || chapter === void 0 ? void 0 : chapter.subchapters) ? chapter.subchapters.map((subchapter) => this.renderSubchapter(subchapter)) : ''}
     `;
       }
       formatChapterTitle(chapterName) {
@@ -34709,7 +34708,7 @@
           return titleCase;
       }
       generateSectionBItems() {
-          console.log('EFPEntryForm: generateSectionBItems called, nestedChapterStructure:', this.nestedChapterStructure);
+          // console.log('EFPEntryForm: generateSectionBItems called, nestedChapterStructure:', this.nestedChapterStructure);
           if (!this.nestedChapterStructure || this.nestedChapterStructure.length === 0) {
               console.log('EFPEntryForm: No nested chapter structure available, showing loading message');
               return [
@@ -34723,7 +34722,7 @@
                   }
               ];
           }
-          console.log('EFPEntryForm: Generating section B items from', this.nestedChapterStructure.length, 'chapters');
+          // console.log('EFPEntryForm: Generating section B items from', this.nestedChapterStructure.length, 'chapters');
           const items = [];
           this.nestedChapterStructure.forEach((chapter) => {
               // Extract chapter number from the main chapter
@@ -34877,17 +34876,114 @@
               : Math.round((completed / allItems.length) * 100);
       }
       goToNext() {
-          if (this.currentStepIndex < this.flatSteps.length - 1) {
-              this.currentStepIndex++;
-              this.currentSectionIndex =
-                  this.flatSteps[this.currentStepIndex].sectionIndex;
+          var _a;
+          console.log('goToNext called, current step:', this.currentStepIndex, (_a = this.flatSteps[this.currentStepIndex]) === null || _a === void 0 ? void 0 : _a.label);
+          // Debug: Show the next few steps for context
+          console.log('Next 5 steps:');
+          for (let i = this.currentStepIndex + 1; i < Math.min(this.currentStepIndex + 6, this.flatSteps.length); i++) {
+              console.log(`  ${i}: ${this.flatSteps[i].label}`);
           }
+          if (this.currentStepIndex < this.flatSteps.length - 1) {
+              let nextIndex = this.currentStepIndex + 1;
+              // Skip over container items and find the next selectable item
+              while (nextIndex < this.flatSteps.length) {
+                  const nextStep = this.flatSteps[nextIndex];
+                  console.log('Checking next step at index', nextIndex, ':', nextStep.label);
+                  // Check if this step is a container (non-selectable)
+                  const isContainer = this.isStepContainer(nextStep);
+                  if (!isContainer) {
+                      // Found a selectable step
+                      console.log('Found selectable step:', nextStep.label, 'at index', nextIndex);
+                      this.currentStepIndex = nextIndex;
+                      this.currentSectionIndex = nextStep.sectionIndex;
+                      // Immediately update the active content
+                      this.activeContent = {
+                          title: nextStep.label,
+                          content: nextStep.content,
+                      };
+                      // Force a re-render
+                      this.requestUpdate();
+                      return;
+                  }
+                  console.log('Skipping container step:', nextStep.label);
+                  nextIndex++;
+              }
+              // If we didn't find any selectable steps, just go to the last step
+              if (nextIndex >= this.flatSteps.length && this.currentStepIndex < this.flatSteps.length - 1) {
+                  console.log('No more selectable steps found, going to last step');
+                  this.currentStepIndex = this.flatSteps.length - 1;
+                  this.currentSectionIndex = this.flatSteps[this.currentStepIndex].sectionIndex;
+              }
+          }
+      }
+      isStepContainer(step) {
+          // Check if this step corresponds to a container item
+          // Container items are those that have 'items' property in the original structure
+          // and are marked as containers, or have empty/placeholder content
+          // If the step has no actual content or is marked as container
+          if (!step.content || step.content === '') {
+              return true;
+          }
+          // Check if this step corresponds to a main chapter container
+          // by looking for the container message in the rendered content
+          if (this.currentSectionIndex === 1) { // Section B
+              // Find the corresponding item in the navigation structure
+              for (const section of this.sections) {
+                  if (section.items) {
+                      for (const item of section.items) {
+                          if (item.label === step.label && item.isContainer) {
+                              return true;
+                          }
+                      }
+                  }
+              }
+          }
+          // Check if the step label matches a chapter container pattern (e.g., "Chapter 6", "Chapter 7")
+          if (/^Chapter \d+$/.test(step.label)) {
+              return true;
+          }
+          // Check if the step label matches a subchapter container pattern (e.g., "Chapter 6: Nutrient Application")
+          // These are typically parent containers for more specific items
+          if (/^Chapter \d+: /.test(step.label)) {
+              // Check if there's a more specific item right after this one
+              const currentIndex = this.flatSteps.findIndex(s => s.label === step.label);
+              if (currentIndex >= 0 && currentIndex < this.flatSteps.length - 1) {
+                  const nextStep = this.flatSteps[currentIndex + 1];
+                  // If the next step is more specific (longer, more descriptive), this is likely a container
+                  if (nextStep && nextStep.label.length > step.label.length &&
+                      !nextStep.label.startsWith('Chapter ') &&
+                      nextStep.content && nextStep.content.trim() !== '') {
+                      return true;
+                  }
+              }
+          }
+          // Check if the content contains the container message
+          if (step.content && step.content.includes('Please select a specific chapter section')) {
+              return true;
+          }
+          return false;
       }
       goToPrevious() {
           if (this.currentStepIndex > 0) {
-              this.currentStepIndex--;
-              this.currentSectionIndex =
-                  this.flatSteps[this.currentStepIndex].sectionIndex;
+              let prevIndex = this.currentStepIndex - 1;
+              // Skip over container items and find the previous selectable item
+              while (prevIndex >= 0) {
+                  const prevStep = this.flatSteps[prevIndex];
+                  // Check if this step is a container (non-selectable)
+                  const isContainer = this.isStepContainer(prevStep);
+                  if (!isContainer) {
+                      // Found a selectable step
+                      this.currentStepIndex = prevIndex;
+                      this.currentSectionIndex = prevStep.sectionIndex;
+                      return;
+                  }
+                  prevIndex--;
+              }
+              // If we didn't find any selectable steps, just go to the first step
+              if (prevIndex < 0 && this.currentStepIndex > 0) {
+                  this.currentStepIndex = 0;
+                  this.currentSectionIndex = this.flatSteps[0].sectionIndex;
+              }
           }
       }
       get flatSteps() {
