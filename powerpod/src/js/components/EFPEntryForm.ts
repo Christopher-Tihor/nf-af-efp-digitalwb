@@ -839,7 +839,7 @@ class EFPEntryForm extends LitElement {
     return items.map((item) => {
       if ('items' in item && Array.isArray(item.items)) {
         return html`
-          <sl-details summary=${item.title} open>
+          <sl-details summary=${item.title}>
             ${this.renderItems(item.items)}
           </sl-details>
         `;
