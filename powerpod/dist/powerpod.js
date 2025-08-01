@@ -35595,7 +35595,8 @@
       display: flex;
       flex-direction: row;
       flex-wrap: wrap;
-      height: 100vh;
+      min-height: 100vh;
+      height: auto;
       font-family: var(--body-font);
     }
 
@@ -35626,13 +35627,14 @@
       padding: 1rem;
       border-right: 1px solid var(--sl-color-neutral-200);
       font-family: var(--body-font);
+      min-height: 100vh;
     }
 
     .main-content {
       flex: 1;
       padding: 1rem;
-      overflow-y: auto;
       font-family: var(--body-font);
+      min-height: 100vh;
     }
 
     @media (max-width: 992px) {
