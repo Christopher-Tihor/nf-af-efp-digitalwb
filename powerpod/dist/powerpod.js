@@ -35115,6 +35115,62 @@
           return result;
       }
   }
+  // Utility class for rendering helpers
+  class EFPRenderUtils {
+      static renderMainContent(currentSectionIndex, flatSteps, currentStepIndex, activeContent, html, unsafeHTML, renderSubchapter, renderChapter) {
+          // Check if we're in Section B and have a chapter to render
+          if (currentSectionIndex === 1) { // Section B is index 1
+              const currentStep = flatSteps[currentStepIndex];
+              // Check if it's a container item (should not be selectable)
+              if (currentStep && 'isContainer' in currentStep && currentStep.isContainer) {
+                  return html `
+          <div class="container-message">
+            <h3>Please select a specific chapter section from the navigation</h3>
+            <p>This is a chapter container. Click on one of the specific sections in the navigation to view its content.</p>
+          </div>
+        `;
+              }
+              // Check if it's a subchapter
+              else if (currentStep && 'subchapterData' in currentStep) {
+                  return renderSubchapter(currentStep.subchapterData);
+              }
+              // Check if it's a main chapter
+              else if (currentStep && 'chapterData' in currentStep) {
+                  return renderChapter(currentStep.chapterData);
+              }
+          }
+          // Default content rendering
+          return html `<div>${unsafeHTML(activeContent.content)}</div>`;
+      }
+      static renderItems(items, html, activeContentTitle, onItemClick, renderItems) {
+          return items.map((item) => {
+              if ('items' in item && Array.isArray(item.items)) {
+                  return html `
+          <sl-details summary=${item.title}>
+            ${renderItems(item.items)}
+          </sl-details>
+        `;
+              }
+              else {
+                  return html `
+          <div
+            class="nav-subchapter-title"
+            style=${activeContentTitle === item.label
+                    ? 'font-weight: 600; background-color: var(--sl-color-primary-50); color: var(--sl-color-primary-800);'
+                    : 'font-weight: 500;'}
+            @click=${() => onItemClick(item)}
+          >
+            <sl-icon
+              name=${item.complete ? 'check-circle' : 'pencil'}
+              style="color: ${item.complete ? 'var(--sl-color-success-600)' : 'var(--sl-color-warning-600)'}"
+            ></sl-icon>
+            ${item.label}
+          </div>
+        `;
+              }
+          });
+      }
+  }
   let EFPEntryForm = class EFPEntryForm extends s$1 {
       constructor() {
           super(...arguments);
@@ -35319,29 +35375,7 @@
     `;
       }
       renderMainContent() {
-          // Check if we're in Section B and have a chapter to render
-          if (this.currentSectionIndex === 1) { // Section B is index 1
-              const currentStep = this.flatSteps[this.currentStepIndex];
-              // Check if it's a container item (should not be selectable)
-              if (currentStep && 'isContainer' in currentStep && currentStep.isContainer) {
-                  return x `
-          <div class="container-message">
-            <h3>Please select a specific chapter section from the navigation</h3>
-            <p>This is a chapter container. Click on one of the specific sections in the navigation to view its content.</p>
-          </div>
-        `;
-              }
-              // Check if it's a subchapter
-              else if (currentStep && 'subchapterData' in currentStep) {
-                  return this.renderSubchapter(currentStep.subchapterData);
-              }
-              // Check if it's a main chapter
-              else if (currentStep && 'chapterData' in currentStep) {
-                  return this.renderChapter(currentStep.chapterData);
-              }
-          }
-          // Default content rendering
-          return x `<div>${o$1(this.activeContent.content)}</div>`;
+          return EFPRenderUtils.renderMainContent(this.currentSectionIndex, this.flatSteps, this.currentStepIndex, this.activeContent, x, o$1, (subchapterData) => this.renderSubchapter(subchapterData), (chapterData) => this.renderChapter(chapterData));
       }
       // Public method to update the nested chapter structure
       updateNestedChapterStructure(nestedStructure) {
@@ -35669,47 +35703,22 @@
       isSectionComplete(section) {
           return EFPCompletionUtils.isSectionComplete(section);
       }
+      handleItemClick(item) {
+          const index = this.flatSteps.findIndex((i) => i.label === item.label);
+          console.log(`Navigation click: Looking for "${item.label}", found at index: ${index}`);
+          if (index !== -1) {
+              this.currentStepIndex = index;
+              this.currentSectionIndex = this.flatSteps[index].sectionIndex;
+              console.log(`Set currentStepIndex to ${index}, currentSectionIndex to ${this.flatSteps[index].sectionIndex}`);
+              // Update navigation state to expand relevant containers
+              this.updateNavigationState(item.label);
+          }
+          else {
+              console.warn(`Step "${item.label}" not found in flatSteps. Available steps:`, this.flatSteps.map(s => s.label));
+          }
+      }
       renderItems(items) {
-          return items.map((item) => {
-              if ('items' in item && Array.isArray(item.items)) {
-                  return x `
-          <sl-details summary=${item.title}>
-            ${this.renderItems(item.items)}
-          </sl-details>
-        `;
-              }
-              else {
-                  return x `
-          <div
-            class="nav-subchapter-title"
-            style="padding-left: 24px; display: flex; align-items: center; gap: 0.5rem; cursor: pointer; padding: 0.5rem 0 0.5rem 24px; border-radius: 4px; transition: background-color 0.2s ease;"
-            style=${this.activeContent.title === item.label
-                    ? 'font-weight: 600; background-color: var(--sl-color-primary-50); color: var(--sl-color-primary-800);'
-                    : 'font-weight: 500;'}
-            @click=${() => {
-                    const index = this.flatSteps.findIndex((i) => i.label === item.label);
-                    console.log(`Navigation click: Looking for "${item.label}", found at index: ${index}`);
-                    if (index !== -1) {
-                        this.currentStepIndex = index;
-                        this.currentSectionIndex = this.flatSteps[index].sectionIndex;
-                        console.log(`Set currentStepIndex to ${index}, currentSectionIndex to ${this.flatSteps[index].sectionIndex}`);
-                        // Update navigation state to expand relevant containers
-                        this.updateNavigationState(item.label);
-                    }
-                    else {
-                        console.warn(`Step "${item.label}" not found in flatSteps. Available steps:`, this.flatSteps.map(s => s.label));
-                    }
-                }}
-          >
-            <sl-icon
-              name=${item.complete ? 'check-circle' : 'pencil'}
-              style="color: ${item.complete ? 'var(--sl-color-success-600)' : 'var(--sl-color-warning-600)'}"
-            ></sl-icon>
-            ${item.label}
-          </div>
-        `;
-              }
-          });
+          return EFPRenderUtils.renderItems(items, x, this.activeContent.title, (item) => this.handleItemClick(item), (items) => this.renderItems(items));
       }
       updated(changedProps) {
           var _a, _b;
