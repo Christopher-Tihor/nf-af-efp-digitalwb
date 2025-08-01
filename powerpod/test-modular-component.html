@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test EFP Entry Form Modular</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .test-results {
+            background: #f0f8ff;
+            padding: 15px;
+            border-radius: 4px;
+            border-left: 4px solid #007acc;
+            margin-bottom: 20px;
+        }
+        button {
+            background: #007acc;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #005a9e;
+        }
+        .log {
+            background: #f8f8f8;
+            border: 1px solid #ddd;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <h1>EFP Entry Form Modular Component Test</h1>
+    
+    <div class="test-container">
+        <h2>Component Test</h2>
+        <div class="test-results">
+            <p><strong>Status:</strong> <span id="status">Loading...</span></p>
+            <p><strong>Component Found:</strong> <span id="component-found">Checking...</span></p>
+            <p><strong>Method Available:</strong> <span id="method-available">Checking...</span></p>
+        </div>
+        
+        <button onclick="testComponent()">Test Component</button>
+        <button onclick="testMethod()">Test Method</button>
+        <button onclick="clearLog()">Clear Log</button>
+        
+        <h3>Console Log:</h3>
+        <div id="log" class="log"></div>
+    </div>
+
+    <div class="test-container">
+        <h2>EFP Entry Form Component</h2>
+        <div class="page-copy">
+            <!-- Component will be inserted here -->
+        </div>
+    </div>
+
+    <!-- Import the modular component -->
+    <script type="module">
+        // Import the main powerpod bundle which includes the component
+        import './dist/powerpod.js';
+        
+        // Override console.log to capture logs
+        const originalLog = console.log;
+        const originalWarn = console.warn;
+        const originalError = console.error;
+        
+        const logElement = document.getElementById('log');
+        
+        function addToLog(type, ...args) {
+            const timestamp = new Date().toLocaleTimeString();
+            const message = args.map(arg => 
+                typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)
+            ).join(' ');
+            logElement.textContent += `[${timestamp}] ${type.toUpperCase()}: ${message}\n`;
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+        
+        console.log = (...args) => {
+            originalLog(...args);
+            addToLog('log', ...args);
+        };
+        
+        console.warn = (...args) => {
+            originalWarn(...args);
+            addToLog('warn', ...args);
+        };
+        
+        console.error = (...args) => {
+            originalError(...args);
+            addToLog('error', ...args);
+        };
+        
+        // Test functions
+        window.testComponent = function() {
+            console.log('Testing component...');
+            
+            const container = document.querySelector('.page-copy');
+            if (!container) {
+                console.error('Container not found');
+                return;
+            }
+            
+            // Clear existing components
+            container.innerHTML = '';
+            
+            // Create component
+            const element = document.createElement('efp-entry-form-modular');
+            container.appendChild(element);
+            
+            console.log('Component created and added to DOM');
+            
+            // Check if component is found
+            setTimeout(() => {
+                const found = document.querySelector('efp-entry-form-modular');
+                document.getElementById('component-found').textContent = found ? 'Yes' : 'No';
+                
+                if (found) {
+                    const hasMethod = typeof found.updateNestedChapterStructure === 'function';
+                    document.getElementById('method-available').textContent = hasMethod ? 'Yes' : 'No';
+                    document.getElementById('status').textContent = hasMethod ? 'Ready' : 'Method Missing';
+                    
+                    console.log('Component found:', !!found);
+                    console.log('Method available:', hasMethod);
+                    console.log('Component properties:', Object.getOwnPropertyNames(found));
+                } else {
+                    document.getElementById('status').textContent = 'Component Not Found';
+                }
+            }, 500);
+        };
+        
+        window.testMethod = function() {
+            console.log('Testing method...');
+            
+            const component = document.querySelector('efp-entry-form-modular');
+            if (!component) {
+                console.error('Component not found');
+                return;
+            }
+            
+            const testData = [
+                {
+                    name: 'Test Chapter 1',
+                    description: 'This is a test chapter',
+                    questions: [],
+                    subchapters: []
+                }
+            ];
+            
+            try {
+                if (typeof component.updateNestedChapterStructure === 'function') {
+                    component.updateNestedChapterStructure(testData);
+                    console.log('Method called successfully');
+                } else {
+                    console.error('Method not available');
+                }
+            } catch (error) {
+                console.error('Error calling method:', error);
+            }
+        };
+        
+        window.clearLog = function() {
+            document.getElementById('log').textContent = '';
+        };
+        
+        // Auto-test on load
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('Page loaded, starting auto-test...');
+            setTimeout(() => {
+                testComponent();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

@@ -1150,11 +1150,11 @@ class EFPEntryForm extends LitElement {
 
   private renderSubchapter(subchapter: any) {
     return html`
-      <div class="subchapter-header">
-        ${subchapter.description ? html`
+      ${subchapter.description ? html`
+        <div class="subchapter-header">
           <div>${unsafeHTML(subchapter.description)}</div>
-        ` : ''}
-      </div>
+        </div>
+      ` : ''}
       ${subchapter.questions.map((question: any) => this.renderQuestion(question))}
 
       ${subchapter.subchapters ? subchapter.subchapters.map((subSubchapter: any) => this.renderSubSubchapter(subSubchapter)) : ''}
@@ -1163,11 +1163,11 @@ class EFPEntryForm extends LitElement {
 
   private renderSubSubchapter(subSubchapter: any) {
     return html`
-      <div class="sub-subchapter-header">
-        ${subSubchapter.description ? html`
+      ${subSubchapter.description ? html`
+        <div class="sub-subchapter-header">
           <div>${unsafeHTML(subSubchapter.description)}</div>
-        ` : ''}
-      </div>
+        </div>
+      ` : ''}
 
       ${subSubchapter.questions.map((question: any) => this.renderQuestion(question))}
     `;
@@ -1175,11 +1175,11 @@ class EFPEntryForm extends LitElement {
 
   private renderChapter(chapter: any) {
     return html`
-      <div class="chapter-header">
-        ${chapter?.description ? html`
+      ${chapter?.description ? html`
+        <div class="chapter-header">
           <div>${unsafeHTML(chapter.description)}</div>
-        ` : ''}
-      </div>
+        </div>
+      ` : ''}
 
       ${chapter?.questions ? chapter.questions.map((question: any) => this.renderQuestion(question)) : ''}
 

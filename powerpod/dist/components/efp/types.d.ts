@@ -48,8 +48,3 @@ export interface EFPQuestion {
     options?: string[];
     required?: boolean;
 }
-export interface EFPNavigationButtons {
-    isPreviousDisabled: boolean;
-    isContinueDisabled: boolean;
-    sectionsLength: number;
-}

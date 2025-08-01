@@ -34066,11 +34066,11 @@
       }
       renderSubchapter(subchapter) {
           return x `
-      <div class="subchapter-header">
-        ${subchapter.description ? x `
+      ${subchapter.description ? x `
+        <div class="subchapter-header">
           <div>${o$1(subchapter.description)}</div>
-        ` : ''}
-      </div>
+        </div>
+      ` : ''}
       ${subchapter.questions.map((question) => this.renderQuestion(question))}
 
       ${subchapter.subchapters ? subchapter.subchapters.map((subSubchapter) => this.renderSubSubchapter(subSubchapter)) : ''}
@@ -34078,22 +34078,22 @@
       }
       renderSubSubchapter(subSubchapter) {
           return x `
-      <div class="sub-subchapter-header">
-        ${subSubchapter.description ? x `
+      ${subSubchapter.description ? x `
+        <div class="sub-subchapter-header">
           <div>${o$1(subSubchapter.description)}</div>
-        ` : ''}
-      </div>
+        </div>
+      ` : ''}
 
       ${subSubchapter.questions.map((question) => this.renderQuestion(question))}
     `;
       }
       renderChapter(chapter) {
           return x `
-      <div class="chapter-header">
-        ${(chapter === null || chapter === void 0 ? void 0 : chapter.description) ? x `
+      ${(chapter === null || chapter === void 0 ? void 0 : chapter.description) ? x `
+        <div class="chapter-header">
           <div>${o$1(chapter.description)}</div>
-        ` : ''}
-      </div>
+        </div>
+      ` : ''}
 
       ${(chapter === null || chapter === void 0 ? void 0 : chapter.questions) ? chapter.questions.map((question) => this.renderQuestion(question)) : ''}
 
