@@ -34450,6 +34450,45 @@
               // Keep the default initialization (currentStepIndex = 0, currentSectionIndex = 0)
           }
       }
+      buildStepHierarchy(currentStep) {
+          const hierarchy = [];
+          // Check if this is a numbered step (e.g., "7.11 Plant Biodiversity")
+          const stepMatch = currentStep.label.match(/^(\d+)\.(\d+)\s+(.+)$/);
+          if (stepMatch) {
+              const [, chapterNum, subNum] = stepMatch;
+              // Add main chapter (e.g., "Chapter 7")
+              hierarchy.push({
+                  label: `Chapter ${chapterNum}`,
+                  level: 1
+              });
+              // For sub-subchapters (7.11), also add the subchapter level
+              if (subNum.length > 1) {
+                  // This is a sub-subchapter like 7.11, so add the parent subchapter (7.1)
+                  const parentSubNum = `${chapterNum}.${subNum.charAt(0)}`;
+                  // Find the parent subchapter in the navigation structure
+                  const parentSubchapter = this.findStepByPattern(new RegExp(`^${parentSubNum}\\s+`));
+                  if (parentSubchapter) {
+                      hierarchy.push({
+                          label: parentSubchapter.label,
+                          level: 2
+                      });
+                  }
+              }
+              return hierarchy;
+          }
+          // Fallback: try to find parent containers using existing logic
+          const parentContainers = EFPNavigationUtils.findContainersForItem(currentStep.label, this.sections);
+          parentContainers.forEach((container, index) => {
+              hierarchy.push({
+                  label: container,
+                  level: index + 1
+              });
+          });
+          return hierarchy;
+      }
+      findStepByPattern(pattern) {
+          return this.flatSteps.find(step => pattern.test(step.label));
+      }
       renderBreadcrumbs() {
           const currentStep = this.flatSteps[this.currentStepIndex];
           if (!currentStep) {
@@ -34509,43 +34548,48 @@
                   }
               });
           }
-          // For nested items, add parent container breadcrumb if applicable
-          if (currentStep.label.includes(':') || currentStep.label.startsWith('Chapter ')) {
-              // Check if this is a sub-item of a chapter
-              const parentContainers = EFPNavigationUtils.findContainersForItem(currentStep.label, this.sections);
-              if (parentContainers.length > 0) {
-                  // Add the immediate parent container
-                  const parentLabel = parentContainers[parentContainers.length - 1];
-                  if (parentLabel && parentLabel !== currentStep.label) {
+          // For nested items, build the complete hierarchy breadcrumb
+          if (currentStep.label.includes(':') || currentStep.label.startsWith('Chapter ') || /^\d+\.\d+/.test(currentStep.label)) {
+              // Build the complete hierarchy for this step
+              const hierarchy = this.buildStepHierarchy(currentStep);
+              // Add each level of the hierarchy (excluding the current step itself)
+              hierarchy.forEach(hierarchyItem => {
+                  if (hierarchyItem.label !== currentStep.label) {
                       breadcrumbs.push({
-                          label: parentLabel,
+                          label: hierarchyItem.label,
                           isActive: false,
                           onClick: () => {
-                              // Find and navigate to parent container
-                              const parentStepIndex = this.flatSteps.findIndex(step => step.label === parentLabel);
-                              if (parentStepIndex !== -1) {
-                                  const parentStep = this.flatSteps[parentStepIndex];
-                                  this.currentStepIndex = parentStepIndex;
-                                  this.currentSectionIndex = parentStep.sectionIndex;
+                              // Find and navigate to this hierarchy level
+                              const hierarchyStepIndex = this.flatSteps.findIndex(step => step.label === hierarchyItem.label);
+                              if (hierarchyStepIndex !== -1) {
+                                  const hierarchyStep = this.flatSteps[hierarchyStepIndex];
+                                  this.currentStepIndex = hierarchyStepIndex;
+                                  this.currentSectionIndex = hierarchyStep.sectionIndex;
                                   // Update active content
                                   this.activeContent = {
-                                      title: parentStep.label,
-                                      content: parentStep.content,
+                                      title: hierarchyStep.label,
+                                      content: hierarchyStep.content,
                                   };
                                   // Update navigation state
-                                  this.updateNavigationState(parentStep.label);
+                                  this.updateNavigationState(hierarchyStep.label);
                                   this.requestUpdate();
                               }
                           }
                       });
                   }
-              }
+              });
           }
           // Add current step breadcrumb (always last)
           // If current step is a section header, show it as the section name
-          const currentStepLabel = isSectionHeader ?
+          let currentStepLabel = isSectionHeader ?
               ((currentSection === null || currentSection === void 0 ? void 0 : currentSection.tab) || currentStep.label) :
               currentStep.label;
+          // Format numbered steps to use colon (e.g., "7.11 Plant Biodiversity" -> "7.11: Plant Biodiversity")
+          const numberedStepMatch = currentStepLabel.match(/^(\d+\.\d+)\s+(.+)$/);
+          if (numberedStepMatch) {
+              const [, number, title] = numberedStepMatch;
+              currentStepLabel = `${number}: ${title}`;
+          }
           breadcrumbs.push({
               label: EFPTextUtils.truncateText(currentStepLabel, 50), // Truncate long titles
               isActive: true,
