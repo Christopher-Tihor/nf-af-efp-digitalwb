@@ -34901,6 +34901,8 @@
                           title: nextStep.label,
                           content: nextStep.content,
                       };
+                      // Update navigation state to expand relevant containers
+                      this.updateNavigationState(nextStep.label);
                       // Force a re-render
                       this.requestUpdate();
                       return;
@@ -34963,6 +34965,65 @@
           }
           return false;
       }
+      updateNavigationState(currentLabel) {
+          var _a;
+          // Find all sl-details elements in the navigation
+          const allDetails = (_a = this.shadowRoot) === null || _a === void 0 ? void 0 : _a.querySelectorAll('sl-details');
+          if (!allDetails)
+              return;
+          // First, close all details
+          allDetails.forEach(detail => {
+              detail.open = false;
+          });
+          // Find which containers should be open based on the current item
+          const containersToOpen = this.findContainersForItem(currentLabel);
+          // Open the relevant containers
+          allDetails.forEach(detail => {
+              const summary = detail.getAttribute('summary');
+              if (summary && containersToOpen.includes(summary)) {
+                  detail.open = true;
+              }
+          });
+      }
+      findContainersForItem(itemLabel) {
+          const containers = [];
+          // Recursive function to search through the navigation structure
+          const searchItems = (items, parentContainers = []) => {
+              for (const item of items) {
+                  if ('items' in item && Array.isArray(item.items)) {
+                      // This is a container item
+                      const currentPath = [...parentContainers, item.title || item.label];
+                      // Check if the target item is in this container's children
+                      const foundInChildren = this.itemExistsInChildren(item.items, itemLabel);
+                      if (foundInChildren) {
+                          containers.push(...currentPath);
+                      }
+                      // Recursively search children
+                      searchItems(item.items, currentPath);
+                  }
+              }
+          };
+          // Search through all sections
+          this.sections.forEach(section => {
+              if (section.items) {
+                  searchItems(section.items);
+              }
+          });
+          return containers;
+      }
+      itemExistsInChildren(items, targetLabel) {
+          for (const item of items) {
+              if (item.label === targetLabel) {
+                  return true;
+              }
+              if ('items' in item && Array.isArray(item.items)) {
+                  if (this.itemExistsInChildren(item.items, targetLabel)) {
+                      return true;
+                  }
+              }
+          }
+          return false;
+      }
       goToPrevious() {
           if (this.currentStepIndex > 0) {
               let prevIndex = this.currentStepIndex - 1;
@@ -34975,6 +35036,8 @@
                       // Found a selectable step
                       this.currentStepIndex = prevIndex;
                       this.currentSectionIndex = prevStep.sectionIndex;
+                      // Update navigation state to expand relevant containers
+                      this.updateNavigationState(prevStep.label);
                       return;
                   }
                   prevIndex--;
@@ -35067,6 +35130,8 @@
                     if (index !== -1) {
                         this.currentStepIndex = index;
                         this.currentSectionIndex = this.flatSteps[index].sectionIndex;
+                        // Update navigation state to expand relevant containers
+                        this.updateNavigationState(item.label);
                     }
                 }}
           >
@@ -35091,6 +35156,8 @@
                       title: step.label,
                       content: step.content,
                   };
+                  // Update navigation state when step changes
+                  this.updateNavigationState(step.label);
               }
           }
           if (changedProps.has('currentSectionIndex') && this.tabGroupEl) {
