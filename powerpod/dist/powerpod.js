@@ -33502,8 +33502,22 @@
               // Add all subchapters as direct clickable items under the main chapter
               if (chapter.subchapters && chapter.subchapters.length > 0) {
                   chapter.subchapters.forEach((subchapter) => {
-                      // Add the subchapter as a clickable item
-                      const formattedSubchapterTitle = EFPTextUtils.formatChapterTitle(subchapter.name || subchapter.label);
+                      // Add the subchapter as a clickable item with order number
+                      const subchapterOrder = subchapter.order || 0;
+                      const subchapterTitle = subchapter.name || subchapter.label;
+                      // Format subchapter title to include order number (e.g., "7.1 Biodiversity")
+                      let formattedSubchapterTitle;
+                      if (subchapterOrder && subchapterOrder !== Math.floor(subchapterOrder)) {
+                          // This is a decimal order (e.g., 7.1), show as "7.1 Title"
+                          const cleanTitle = subchapterTitle.replace(/^CHAPTER\s+\d+(\.\d+)?\s+/i, '');
+                          formattedSubchapterTitle = `${subchapterOrder} ${EFPTextUtils.formatChapterTitle(cleanTitle)}`;
+                          console.log(`Subchapter: ${subchapterOrder} -> "${formattedSubchapterTitle}"`);
+                      }
+                      else {
+                          // Fallback to original formatting
+                          formattedSubchapterTitle = EFPTextUtils.formatChapterTitle(subchapterTitle);
+                          console.log(`Subchapter (no order): "${formattedSubchapterTitle}"`);
+                      }
                       const subchapterItem = {
                           label: formattedSubchapterTitle,
                           content: EFPSectionGenerator.renderSubchapterContent(subchapter),
@@ -33513,11 +33527,22 @@
                       // If subchapter has sub-subchapters, add them as nested items
                       if (subchapter.subchapters && subchapter.subchapters.length > 0) {
                           subchapterItem.items = subchapter.subchapters.map((subSubchapter) => {
-                              // Format sub-subchapter title (remove "CHAPTER X.Y" prefix, keep just the descriptive part)
-                              let subSubLabel = subSubchapter.name || subSubchapter.label;
-                              // Remove chapter prefix if it exists (e.g., "CHAPTER 7.11 Plant Biodiversity" -> "Plant Biodiversity")
-                              subSubLabel = subSubLabel.replace(/^CHAPTER\s+\d+\.\d+\s+/i, '');
-                              const formattedSubSubTitle = EFPTextUtils.formatChapterTitle(subSubLabel);
+                              // Format sub-subchapter title with order number (e.g., "7.11 Plant Biodiversity")
+                              const subSubOrder = subSubchapter.order || 0;
+                              const subSubTitle = subSubchapter.name || subSubchapter.label;
+                              let formattedSubSubTitle;
+                              if (subSubOrder) {
+                                  // Show order number with title (e.g., "7.11 Plant Biodiversity")
+                                  const cleanTitle = subSubTitle.replace(/^CHAPTER\s+\d+(\.\d+)?\s+/i, '');
+                                  formattedSubSubTitle = `${subSubOrder} ${EFPTextUtils.formatChapterTitle(cleanTitle)}`;
+                                  console.log(`Sub-subchapter: ${subSubOrder} -> "${formattedSubSubTitle}"`);
+                              }
+                              else {
+                                  // Fallback: remove chapter prefix and format
+                                  const subSubLabel = subSubTitle.replace(/^CHAPTER\s+\d+\.\d+\s+/i, '');
+                                  formattedSubSubTitle = EFPTextUtils.formatChapterTitle(subSubLabel);
+                                  console.log(`Sub-subchapter (no order): "${formattedSubSubTitle}"`);
+                              }
                               return {
                                   label: formattedSubSubTitle,
                                   content: EFPSectionGenerator.renderSubchapterContent(subSubchapter),
@@ -34399,35 +34424,87 @@
       isSectionComplete(section) {
           return EFPCompletionUtils.isSectionComplete(section);
       }
+      initializeToFirstSelectableStep() {
+          // Only initialize if we have sections and steps available
+          if (!this.sections || this.sections.length === 0 || !this.flatSteps || this.flatSteps.length === 0) {
+              console.log('Sections or steps not ready yet, skipping initialization');
+              return;
+          }
+          // Find the first selectable step in the first section
+          const firstSelectableStep = EFPNavigationUtils.findFirstSelectableStepInSection(0, // First section
+          this.flatSteps, this.sections);
+          if (firstSelectableStep) {
+              console.log('Initializing to first selectable step:', firstSelectableStep.step.label);
+              this.currentStepIndex = firstSelectableStep.index;
+              this.currentSectionIndex = 0;
+              // Update active content
+              this.activeContent = {
+                  title: firstSelectableStep.step.label,
+                  content: firstSelectableStep.step.content,
+              };
+              // Update navigation state
+              this.updateNavigationState(firstSelectableStep.step.label);
+          }
+          else {
+              console.log('No selectable step found, keeping default initialization');
+              // Keep the default initialization (currentStepIndex = 0, currentSectionIndex = 0)
+          }
+      }
       renderBreadcrumbs() {
           const currentStep = this.flatSteps[this.currentStepIndex];
-          if (!currentStep)
-              return x ``;
+          if (!currentStep) {
+              // Fallback: show basic breadcrumb even if no current step
+              return x `
+        <nav class="breadcrumbs" aria-label="Breadcrumb navigation" role="navigation">
+          <ol class="breadcrumb-list">
+            <li class="breadcrumb-item active">
+            </li>
+          </ol>
+        </nav>
+      `;
+          }
           const currentSection = this.sections[this.currentSectionIndex];
           const breadcrumbs = [];
-          // Add home/root breadcrumb
-          breadcrumbs.push({
-              label: 'Environmental Farm Plan',
-              isActive: false,
-              onClick: () => {
-                  // Navigate to first step
-                  this.currentStepIndex = 0;
-                  this.currentSectionIndex = 0;
-                  this.requestUpdate();
-              }
-          });
-          // Add section breadcrumb
-          if (currentSection) {
+          // Check if current step is a section header (like "Section A", "Section B")
+          const isSectionHeader = currentStep.label === (currentSection === null || currentSection === void 0 ? void 0 : currentSection.tab) ||
+              currentStep.label.startsWith('Section ') ||
+              currentStep.content === (currentSection === null || currentSection === void 0 ? void 0 : currentSection.title);
+          // Add section breadcrumb (only if current step is not the section header itself)
+          if (currentSection && !isSectionHeader) {
               breadcrumbs.push({
                   label: currentSection.tab,
                   isActive: false,
                   onClick: () => {
-                      // Navigate to first step in section
-                      const firstStepInSection = this.flatSteps.find(step => step.sectionIndex === this.currentSectionIndex);
-                      if (firstStepInSection) {
-                          const stepIndex = this.flatSteps.indexOf(firstStepInSection);
-                          this.currentStepIndex = stepIndex;
+                      console.log('Breadcrumb: Navigating to section', this.currentSectionIndex);
+                      // Navigate to first selectable step in section using the navigation utility
+                      const firstSelectableStep = EFPNavigationUtils.findFirstSelectableStepInSection(this.currentSectionIndex, this.flatSteps, this.sections);
+                      if (firstSelectableStep) {
+                          console.log('Breadcrumb: Found first selectable step:', firstSelectableStep.step.label);
+                          this.currentStepIndex = firstSelectableStep.index;
+                          this.currentSectionIndex = this.currentSectionIndex; // Keep same section
+                          // Update active content
+                          this.activeContent = {
+                              title: firstSelectableStep.step.label,
+                              content: firstSelectableStep.step.content,
+                          };
+                          // Update navigation state
+                          this.updateNavigationState(firstSelectableStep.step.label);
                           this.requestUpdate();
+                      }
+                      else {
+                          console.log('Breadcrumb: No selectable step found, using fallback');
+                          // Fallback: navigate to first step in section even if it's a container
+                          const firstStepInSection = this.flatSteps.find(step => step.sectionIndex === this.currentSectionIndex);
+                          if (firstStepInSection) {
+                              const stepIndex = this.flatSteps.indexOf(firstStepInSection);
+                              console.log('Breadcrumb: Fallback to step:', firstStepInSection.label, 'at index:', stepIndex);
+                              this.currentStepIndex = stepIndex;
+                              this.activeContent = {
+                                  title: firstStepInSection.label,
+                                  content: firstStepInSection.content,
+                              };
+                              this.requestUpdate();
+                          }
                       }
                   }
               });
@@ -34447,7 +34524,16 @@
                               // Find and navigate to parent container
                               const parentStepIndex = this.flatSteps.findIndex(step => step.label === parentLabel);
                               if (parentStepIndex !== -1) {
+                                  const parentStep = this.flatSteps[parentStepIndex];
                                   this.currentStepIndex = parentStepIndex;
+                                  this.currentSectionIndex = parentStep.sectionIndex;
+                                  // Update active content
+                                  this.activeContent = {
+                                      title: parentStep.label,
+                                      content: parentStep.content,
+                                  };
+                                  // Update navigation state
+                                  this.updateNavigationState(parentStep.label);
                                   this.requestUpdate();
                               }
                           }
@@ -34456,11 +34542,23 @@
               }
           }
           // Add current step breadcrumb (always last)
+          // If current step is a section header, show it as the section name
+          const currentStepLabel = isSectionHeader ?
+              ((currentSection === null || currentSection === void 0 ? void 0 : currentSection.tab) || currentStep.label) :
+              currentStep.label;
           breadcrumbs.push({
-              label: EFPTextUtils.truncateText(currentStep.label, 50), // Truncate long titles
+              label: EFPTextUtils.truncateText(currentStepLabel, 50), // Truncate long titles
               isActive: true,
               onClick: null
           });
+          // Ensure we always have at least one breadcrumb
+          if (breadcrumbs.length === 0) {
+              breadcrumbs.push({
+                  label: 'Environmental Farm Plan',
+                  isActive: true,
+                  onClick: null
+              });
+          }
           return x `
       <nav class="breadcrumbs" aria-label="Breadcrumb navigation" role="navigation">
         <ol class="breadcrumb-list">
@@ -34469,7 +34567,7 @@
               ${crumb.isActive ?
             x `<span
                   class="breadcrumb-current"
-                  title="${currentStep.label}"
+                  title="${(currentStep === null || currentStep === void 0 ? void 0 : currentStep.label) || crumb.label}"
                   aria-current="page"
                 >${crumb.label}</span>` :
             x `<button
@@ -34500,6 +34598,10 @@
           }
       }
       // Lifecycle methods
+      firstUpdated() {
+          // Initialize to the first selectable step instead of potentially a section header
+          this.initializeToFirstSelectableStep();
+      }
       willUpdate(changedProps) {
           if (changedProps.has('currentStepIndex')) {
               EFPLifecycleUtils.handleStepIndexChange(this.currentStepIndex, this.flatSteps, this.activeContent, (newContent) => {
