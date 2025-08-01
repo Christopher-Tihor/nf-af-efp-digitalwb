@@ -22,6 +22,7 @@ class EFPEntryForm extends LitElement {
   @property({ type: Number }) currentSectionIndex = 0;
   @property({ type: Number }) currentStepIndex = 0;
   @property({ type: Array, attribute: false }) nestedChapterStructure: any[] = [];
+  private isNavigating = false; // Flag to prevent tab change interference
   @property({ type: Object }) activeContent: {
     title: string;
     content: string;
@@ -753,6 +754,21 @@ class EFPEntryForm extends LitElement {
 
   private goToNext() {
     console.log('goToNext called, current step:', this.currentStepIndex, this.flatSteps[this.currentStepIndex]?.label);
+    console.log('Current activeContent:', this.activeContent.title);
+
+    // Handle case where currentStepIndex is -1 (step not found in flatSteps)
+    if (this.currentStepIndex === -1) {
+      console.warn('currentStepIndex is -1, trying to find current step by activeContent title');
+      const foundIndex = this.flatSteps.findIndex(step => step.label === this.activeContent.title);
+      if (foundIndex !== -1) {
+        console.log(`Found current step "${this.activeContent.title}" at index ${foundIndex}`);
+        this.currentStepIndex = foundIndex;
+      } else {
+        console.error(`Could not find current step "${this.activeContent.title}" in flatSteps`);
+        console.log('Available flatSteps:', this.flatSteps.map((s, i) => `${i}: ${s.label}`));
+        return; // Don't proceed with navigation if we can't find current position
+      }
+    }
 
     // Debug: Show the next few steps for context
     console.log('Next 5 steps:');
@@ -774,6 +790,48 @@ class EFPEntryForm extends LitElement {
         if (!isContainer) {
           // Found a selectable step
           console.log('Found selectable step:', nextStep.label, 'at index', nextIndex);
+
+          const currentStep = this.flatSteps[this.currentStepIndex];
+          const currentSectionIndex = currentStep.sectionIndex;
+
+          // Check if this is cross-section navigation (going to next section)
+          if (nextStep.sectionIndex > currentSectionIndex) {
+            console.log(`Cross-section navigation detected: going from section ${currentSectionIndex} to section ${nextStep.sectionIndex}`);
+
+            // Find the FIRST selectable step in the next section
+            const firstStepInNextSection = this.findFirstSelectableStepInSection(nextStep.sectionIndex);
+            if (firstStepInNextSection) {
+              console.log(`Navigating to first step in section ${nextStep.sectionIndex}: "${firstStepInNextSection.step.label}"`);
+
+              // Set navigation flag to prevent tab change interference
+              this.isNavigating = true;
+
+              this.currentStepIndex = firstStepInNextSection.index;
+              this.currentSectionIndex = firstStepInNextSection.step.sectionIndex;
+
+              // Update the active content
+              this.activeContent = {
+                title: firstStepInNextSection.step.label,
+                content: firstStepInNextSection.step.content,
+              };
+
+              // Update navigation state to expand relevant containers
+              this.updateNavigationState(firstStepInNextSection.step.label);
+
+              // Clear navigation flag after a brief delay
+              setTimeout(() => {
+                this.isNavigating = false;
+              }, 100);
+
+              // Force a re-render
+              this.requestUpdate();
+              return;
+            }
+          }
+
+          // Regular same-section navigation
+          this.isNavigating = true;
+
           this.currentStepIndex = nextIndex;
           this.currentSectionIndex = nextStep.sectionIndex;
 
@@ -785,6 +843,11 @@ class EFPEntryForm extends LitElement {
 
           // Update navigation state to expand relevant containers
           this.updateNavigationState(nextStep.label);
+
+          // Clear navigation flag after a brief delay
+          setTimeout(() => {
+            this.isNavigating = false;
+          }, 100);
 
           // Force a re-render
           this.requestUpdate();
@@ -870,6 +933,64 @@ class EFPEntryForm extends LitElement {
     this.goToNext();
   }
 
+  private handleSectionChange(newSectionIndex: number) {
+    console.log('Section changed to:', newSectionIndex, 'isNavigating:', this.isNavigating);
+
+    // If we're in the middle of programmatic navigation, don't interfere
+    if (this.isNavigating) {
+      console.log('Ignoring section change during navigation');
+      return;
+    }
+
+    // Update the current section index
+    this.currentSectionIndex = newSectionIndex;
+
+    // Find the first CONTENT step in the new section (skip section headers)
+    const stepsInSection = this.flatSteps.filter(step => step.sectionIndex === newSectionIndex);
+
+    // Skip the first step if it's just the section header (like "Section A", "Section B", etc.)
+    let firstContentStep = stepsInSection.find(step =>
+      !step.label.startsWith('Section ') &&
+      step.content &&
+      step.content.trim() !== '' &&
+      step.content !== step.label // Skip steps where content is just the title
+    );
+
+    // If no content step found, fall back to the first step after the section header
+    if (!firstContentStep && stepsInSection.length > 1) {
+      firstContentStep = stepsInSection[1]; // Skip the section header
+    }
+
+    // If still no step found, use the first step in the section
+    if (!firstContentStep && stepsInSection.length > 0) {
+      firstContentStep = stepsInSection[0];
+    }
+
+    if (firstContentStep) {
+      const stepIndex = this.flatSteps.indexOf(firstContentStep);
+      this.currentStepIndex = stepIndex;
+
+      // Update the active content
+      this.activeContent = {
+        title: firstContentStep.label,
+        content: firstContentStep.content,
+      };
+
+      // Reset to first page when navigating to new section
+      // (pagination reset would go here if implemented)
+
+      // Update navigation state to expand relevant containers
+      this.updateNavigationState(firstContentStep.label);
+
+      console.log('Navigated to first content step in section:', firstContentStep.label);
+    } else {
+      console.warn('No steps found for section:', newSectionIndex);
+    }
+
+    // Force a re-render
+    this.requestUpdate();
+  }
+
   private handleRatingChanged(event: CustomEvent) {
     const { questionId, value } = event.detail;
     console.log(`Question ${questionId} answered with: ${value}`);
@@ -952,24 +1073,149 @@ class EFPEntryForm extends LitElement {
     return false;
   }
 
+  private findLastSelectableStepInSection(sectionIndex: number): { step: any, index: number } | null {
+    // Find all steps in the given section
+    const stepsInSection: { step: any, index: number }[] = [];
+
+    this.flatSteps.forEach((step, index) => {
+      if (step.sectionIndex === sectionIndex) {
+        stepsInSection.push({ step, index });
+      }
+    });
+
+    // Go through the steps in reverse order to find the last selectable one
+    for (let i = stepsInSection.length - 1; i >= 0; i--) {
+      const { step, index } = stepsInSection[i];
+      const isContainer = this.isStepContainer(step);
+
+      if (!isContainer) {
+        console.log(`Found last selectable step in section ${sectionIndex}: "${step.label}" at index ${index}`);
+        return { step, index };
+      }
+    }
+
+    console.warn(`No selectable steps found in section ${sectionIndex}`);
+    return null;
+  }
+
+  private findFirstSelectableStepInSection(sectionIndex: number): { step: any, index: number } | null {
+    // Find all steps in the given section
+    const stepsInSection: { step: any, index: number }[] = [];
+
+    this.flatSteps.forEach((step, index) => {
+      if (step.sectionIndex === sectionIndex) {
+        stepsInSection.push({ step, index });
+      }
+    });
+
+    // Go through the steps in order to find the first selectable one (skip section headers)
+    for (let i = 0; i < stepsInSection.length; i++) {
+      const { step, index } = stepsInSection[i];
+      const isContainer = this.isStepContainer(step);
+
+      // Skip section headers like "Section A", "Section B", etc.
+      if (!isContainer && !step.label.startsWith('Section ')) {
+        console.log(`Found first selectable step in section ${sectionIndex}: "${step.label}" at index ${index}`);
+        return { step, index };
+      }
+    }
+
+    console.warn(`No selectable steps found in section ${sectionIndex}`);
+    return null;
+  }
+
   private goToPrevious() {
+    console.log('goToPrevious called, current step:', this.currentStepIndex, this.flatSteps[this.currentStepIndex]?.label);
+    console.log('Current activeContent:', this.activeContent.title);
+
+    // Handle case where currentStepIndex is -1 (step not found in flatSteps)
+    if (this.currentStepIndex === -1) {
+      console.warn('currentStepIndex is -1, trying to find current step by activeContent title');
+      const foundIndex = this.flatSteps.findIndex(step => step.label === this.activeContent.title);
+      if (foundIndex !== -1) {
+        console.log(`Found current step "${this.activeContent.title}" at index ${foundIndex}`);
+        this.currentStepIndex = foundIndex;
+      } else {
+        console.error(`Could not find current step "${this.activeContent.title}" in flatSteps`);
+        console.log('Available flatSteps:', this.flatSteps.map((s, i) => `${i}: ${s.label}`));
+        return; // Don't proceed with navigation if we can't find current position
+      }
+    }
+
     if (this.currentStepIndex > 0) {
+      const currentStep = this.flatSteps[this.currentStepIndex];
+      const currentSectionIndex = currentStep.sectionIndex;
+
+      // Check if we need to do cross-section navigation
+      // Look for the immediate previous step to see if it's in a different section
       let prevIndex = this.currentStepIndex - 1;
 
-      // Skip over container items and find the previous selectable item
+      // Skip over container items to find the actual previous selectable step
       while (prevIndex >= 0) {
         const prevStep = this.flatSteps[prevIndex];
-
-        // Check if this step is a container (non-selectable)
         const isContainer = this.isStepContainer(prevStep);
 
         if (!isContainer) {
-          // Found a selectable step
+          // Found a selectable previous step
+          console.log(`Found previous selectable step: "${prevStep.label}" at index ${prevIndex}, section ${prevStep.sectionIndex}`);
+
+          // Check if this step is in a different section (cross-section navigation)
+          if (prevStep.sectionIndex < currentSectionIndex) {
+            console.log(`Cross-section navigation detected: going from section ${currentSectionIndex} to section ${prevStep.sectionIndex}`);
+
+            // Find the LAST selectable step in the previous section
+            const lastStepInPrevSection = this.findLastSelectableStepInSection(prevStep.sectionIndex);
+            if (lastStepInPrevSection) {
+              console.log(`Navigating to last step in section ${prevStep.sectionIndex}: "${lastStepInPrevSection.step.label}"`);
+
+              // Set navigation flag to prevent tab change interference
+              this.isNavigating = true;
+
+              this.currentStepIndex = lastStepInPrevSection.index;
+              this.currentSectionIndex = lastStepInPrevSection.step.sectionIndex;
+
+              // Update the active content
+              this.activeContent = {
+                title: lastStepInPrevSection.step.label,
+                content: lastStepInPrevSection.step.content,
+              };
+
+              // Update navigation state to expand relevant containers
+              this.updateNavigationState(lastStepInPrevSection.step.label);
+
+              // Clear navigation flag after a brief delay
+              setTimeout(() => {
+                this.isNavigating = false;
+              }, 100);
+
+              // Force a re-render
+              this.requestUpdate();
+              return;
+            }
+          }
+
+          // Regular same-section navigation
+          this.isNavigating = true;
+
           this.currentStepIndex = prevIndex;
           this.currentSectionIndex = prevStep.sectionIndex;
 
+          // Update the active content
+          this.activeContent = {
+            title: prevStep.label,
+            content: prevStep.content,
+          };
+
           // Update navigation state to expand relevant containers
           this.updateNavigationState(prevStep.label);
+
+          // Clear navigation flag after a brief delay
+          setTimeout(() => {
+            this.isNavigating = false;
+          }, 100);
+
+          // Force a re-render
+          this.requestUpdate();
           return;
         }
 
@@ -1077,12 +1323,16 @@ class EFPEntryForm extends LitElement {
               const index = this.flatSteps.findIndex(
                 (i) => i.label === item.label
               );
+              console.log(`Navigation click: Looking for "${item.label}", found at index: ${index}`);
               if (index !== -1) {
                 this.currentStepIndex = index;
                 this.currentSectionIndex = this.flatSteps[index].sectionIndex;
+                console.log(`Set currentStepIndex to ${index}, currentSectionIndex to ${this.flatSteps[index].sectionIndex}`);
 
                 // Update navigation state to expand relevant containers
                 this.updateNavigationState(item.label);
+              } else {
+                console.warn(`Step "${item.label}" not found in flatSteps. Available steps:`, this.flatSteps.map(s => s.label));
               }
             }}
           >
@@ -1151,7 +1401,7 @@ class EFPEntryForm extends LitElement {
             .activeTab=${`section-${this.currentSectionIndex}`}
             @sl-tab-show=${(e: CustomEvent) => {
               const tabIndex = parseInt(e.detail.name.replace('section-', ''));
-              this.currentSectionIndex = tabIndex;
+              this.handleSectionChange(tabIndex);
             }}
           >
             ${this.sections.map((section, index) => {
