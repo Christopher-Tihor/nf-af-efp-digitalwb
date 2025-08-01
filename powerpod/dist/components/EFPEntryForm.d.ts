@@ -8,3 +8,4 @@ import '@shoelace-style/shoelace/dist/components/tab-panel/tab-panel.js';
 import '@shoelace-style/shoelace/dist/components/textarea/textarea.js';
 import './NavigationButtons';
 import './RatingQuestion';
+import './EFPBreadcrumbs';

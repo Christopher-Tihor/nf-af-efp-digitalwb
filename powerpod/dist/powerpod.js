@@ -30894,6 +30894,328 @@
       t$1('commodities-multiselect')
   ], CommoditiesMultiSelect);
 
+  // Utility class for text operations
+  class EFPTextUtils$1 {
+      static truncateText(text, maxLength) {
+          if (text.length <= maxLength)
+              return text;
+          return text.substring(0, maxLength - 3) + '...';
+      }
+  }
+  // Utility class for navigation operations
+  class EFPNavigationUtils$1 {
+      static findFirstSelectableStepInSection(sectionIndex, flatSteps, sections) {
+          // Implementation would be provided by the parent component
+          return null;
+      }
+      static findContainersForItem(itemLabel, sections) {
+          // Implementation would be provided by the parent component
+          return [];
+      }
+  }
+  let EFPBreadcrumbs = class EFPBreadcrumbs extends s$1 {
+      constructor() {
+          super(...arguments);
+          this.currentStep = null;
+          this.currentSection = null;
+          this.currentSectionIndex = 0;
+          this.currentStepIndex = 0;
+          this.flatSteps = [];
+          this.sections = [];
+      }
+      buildStepHierarchy(currentStep) {
+          const hierarchy = [];
+          // Method 1: Check if this is a numbered step (e.g., "7.11 Plant Biodiversity")
+          const stepMatch = currentStep.label.match(/^(\d+)\.(\d+)\s+(.+)$/);
+          if (stepMatch) {
+              const [, chapterNum, subNum] = stepMatch;
+              // Add main chapter (e.g., "Chapter 7")
+              hierarchy.push({
+                  label: `Chapter ${chapterNum}`,
+                  level: 1
+              });
+              // For sub-subchapters (7.11), also add the subchapter level
+              if (subNum.length > 1) {
+                  // This is a sub-subchapter like 7.11, so add the parent subchapter (7.1)
+                  const parentSubNum = `${chapterNum}.${subNum.charAt(0)}`;
+                  // Find the parent subchapter in the navigation structure
+                  const parentSubchapter = this.findStepByPattern(new RegExp(`^${parentSubNum}\\s+`));
+                  if (parentSubchapter) {
+                      hierarchy.push({
+                          label: parentSubchapter.label,
+                          level: 2
+                      });
+                  }
+              }
+              return hierarchy;
+          }
+          // Method 2: Find parent containers by searching the section structure
+          const currentSection = this.sections[this.currentSectionIndex];
+          if (currentSection) {
+              const parentContainer = this.findParentContainer(currentStep.label, currentSection.items);
+              if (parentContainer) {
+                  hierarchy.push({
+                      label: parentContainer,
+                      level: 1
+                  });
+              }
+          }
+          // Method 3: Fallback - try to find parent containers using existing navigation utility
+          if (hierarchy.length === 0) {
+              const parentContainers = EFPNavigationUtils$1.findContainersForItem(currentStep.label, this.sections);
+              parentContainers.forEach((container, index) => {
+                  hierarchy.push({
+                      label: container,
+                      level: index + 1
+                  });
+              });
+          }
+          return hierarchy;
+      }
+      findParentContainer(targetLabel, items) {
+          for (const item of items) {
+              // Check if this item has nested items
+              if ('items' in item && Array.isArray(item.items)) {
+                  // Check if the target is directly in this container's items
+                  const foundInContainer = item.items.some(subItem => subItem.label === targetLabel);
+                  if (foundInContainer) {
+                      console.log(`Found parent container for "${targetLabel}": "${item.title || item.label}"`);
+                      return item.title || item.label;
+                  }
+                  // Recursively search in nested containers
+                  const foundInNested = this.findParentContainer(targetLabel, item.items);
+                  if (foundInNested) {
+                      return foundInNested;
+                  }
+              }
+          }
+          return null;
+      }
+      findStepByPattern(pattern) {
+          return this.flatSteps.find(step => pattern.test(step.label));
+      }
+      isItemInNestedContainer(targetLabel) {
+          const currentSection = this.sections[this.currentSectionIndex];
+          if (!currentSection)
+              return false;
+          return this.findParentContainer(targetLabel, currentSection.items) !== null;
+      }
+      generateBreadcrumbs() {
+          const currentStep = this.currentStep;
+          if (!currentStep)
+              return [];
+          const currentSection = this.currentSection;
+          const breadcrumbs = [];
+          // Check if current step is a section header (like "Section A", "Section B")
+          const isSectionHeader = currentStep.label === (currentSection === null || currentSection === void 0 ? void 0 : currentSection.tab) ||
+              currentStep.label.startsWith('Section ') ||
+              currentStep.content === (currentSection === null || currentSection === void 0 ? void 0 : currentSection.title);
+          // Add section breadcrumb (only if current step is not the section header itself)
+          if (currentSection && !isSectionHeader) {
+              breadcrumbs.push({
+                  label: currentSection.tab,
+                  isActive: false,
+                  onClick: () => {
+                      this.dispatchNavigationEvent('section', {
+                          sectionIndex: this.currentSectionIndex
+                      });
+                  }
+              });
+          }
+          // For nested items, build the complete hierarchy breadcrumb
+          const isNestedItem = currentStep.label.includes(':') ||
+              currentStep.label.startsWith('Chapter ') ||
+              /^\d+\.\d+/.test(currentStep.label) ||
+              this.isItemInNestedContainer(currentStep.label);
+          if (isNestedItem) {
+              // Build the complete hierarchy for this step
+              const hierarchy = this.buildStepHierarchy(currentStep);
+              console.log('Breadcrumb hierarchy for', currentStep.label, ':', hierarchy);
+              // Add each level of the hierarchy (excluding the current step itself)
+              hierarchy.forEach((hierarchyItem) => {
+                  if (hierarchyItem.label !== currentStep.label) {
+                      breadcrumbs.push({
+                          label: hierarchyItem.label,
+                          isActive: false,
+                          onClick: () => {
+                              this.dispatchNavigationEvent('hierarchy', {
+                                  targetLabel: hierarchyItem.label
+                              });
+                          }
+                      });
+                  }
+              });
+          }
+          // Add current step breadcrumb (always last)
+          let currentStepLabel = isSectionHeader ?
+              ((currentSection === null || currentSection === void 0 ? void 0 : currentSection.tab) || currentStep.label) :
+              currentStep.label;
+          // Format numbered steps to use colon (e.g., "7.11 Plant Biodiversity" -> "7.11: Plant Biodiversity")
+          const numberedStepMatch = currentStepLabel.match(/^(\d+\.\d+)\s+(.+)$/);
+          if (numberedStepMatch) {
+              const [, number, title] = numberedStepMatch;
+              currentStepLabel = `${number}: ${title}`;
+          }
+          breadcrumbs.push({
+              label: EFPTextUtils$1.truncateText(currentStepLabel, 50),
+              isActive: true,
+              onClick: null
+          });
+          return breadcrumbs;
+      }
+      dispatchNavigationEvent(type, data) {
+          this.dispatchEvent(new CustomEvent('breadcrumb-navigate', {
+              detail: { type, data },
+              bubbles: true,
+              composed: true
+          }));
+      }
+      render() {
+          if (!this.currentStep) {
+              // Fallback: show basic breadcrumb even if no current step
+              return x `
+        <nav class="breadcrumbs" aria-label="Breadcrumb navigation" role="navigation">
+          <ol class="breadcrumb-list">
+          </ol>
+        </nav>
+      `;
+          }
+          const breadcrumbs = this.generateBreadcrumbs();
+          return x `
+      <nav class="breadcrumbs" aria-label="Breadcrumb navigation" role="navigation">
+        <ol class="breadcrumb-list">
+          ${breadcrumbs.map((crumb, index) => {
+            var _a;
+            return x `
+            <li class="breadcrumb-item ${crumb.isActive ? 'active' : ''}">
+              ${crumb.isActive ?
+                x `<span 
+                  class="breadcrumb-current" 
+                  title="${((_a = this.currentStep) === null || _a === void 0 ? void 0 : _a.label) || crumb.label}"
+                  aria-current="page"
+                >${crumb.label}</span>` :
+                x `<button 
+                  class="breadcrumb-link" 
+                  @click=${crumb.onClick}
+                  type="button"
+                  title="Navigate to ${crumb.label}"
+                  aria-label="Navigate to ${crumb.label}"
+                >${crumb.label}</button>`}
+              ${index < breadcrumbs.length - 1 ? x `<sl-icon name="chevron-right" class="breadcrumb-separator" aria-hidden="true"></sl-icon>` : ''}
+            </li>
+          `;
+        })}
+        </ol>
+      </nav>
+    `;
+      }
+  };
+  EFPBreadcrumbs.styles = i$4 `
+    /* Breadcrumbs styling */
+    .breadcrumbs {
+      margin-bottom: 1rem;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid var(--sl-color-neutral-200);
+      background: linear-gradient(135deg, var(--sl-color-neutral-25) 0%, var(--sl-color-neutral-50) 100%);
+      border-radius: var(--sl-border-radius-small) var(--sl-border-radius-small) 0 0;
+      margin: -1rem -1rem 1rem -1rem;
+      padding: 0.75rem 1rem;
+    }
+
+    .breadcrumb-list {
+      display: flex;
+      align-items: center;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      font-size: 0.875rem;
+      color: var(--sl-color-neutral-600);
+    }
+
+    .breadcrumb-item {
+      display: flex;
+      align-items: center;
+    }
+
+    .breadcrumb-link {
+      background: none;
+      border: none;
+      color: var(--sl-color-primary-600);
+      text-decoration: none;
+      cursor: pointer;
+      padding: 0.25rem 0.5rem;
+      border-radius: var(--sl-border-radius-small);
+      font-family: var(--body-font);
+      font-size: inherit;
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+    .breadcrumb-link:hover {
+      background-color: var(--sl-color-primary-50);
+      color: var(--sl-color-primary-700);
+    }
+
+    .breadcrumb-link:focus {
+      outline: 2px solid var(--sl-color-primary-600);
+      outline-offset: 2px;
+    }
+
+    .breadcrumb-current {
+      color: var(--sl-color-neutral-800);
+      font-weight: 500;
+      padding: 0.25rem 0.5rem;
+      font-family: var(--body-font);
+    }
+
+    .breadcrumb-item.active .breadcrumb-current {
+      color: var(--sl-color-neutral-900);
+      font-weight: 600;
+    }
+
+    .breadcrumb-separator {
+      margin: 0 0.5rem;
+      color: var(--sl-color-neutral-400);
+      font-size: 0.75rem;
+    }
+
+    /* Responsive breadcrumbs */
+    @media (max-width: 768px) {
+      .breadcrumb-list {
+        font-size: 0.8rem;
+      }
+      
+      .breadcrumb-link,
+      .breadcrumb-current {
+        padding: 0.2rem 0.4rem;
+      }
+      
+      .breadcrumb-separator {
+        margin: 0 0.3rem;
+      }
+    }
+  `;
+  __decorate([
+      n$2({ type: Object })
+  ], EFPBreadcrumbs.prototype, "currentStep", void 0);
+  __decorate([
+      n$2({ type: Object })
+  ], EFPBreadcrumbs.prototype, "currentSection", void 0);
+  __decorate([
+      n$2({ type: Number })
+  ], EFPBreadcrumbs.prototype, "currentSectionIndex", void 0);
+  __decorate([
+      n$2({ type: Number })
+  ], EFPBreadcrumbs.prototype, "currentStepIndex", void 0);
+  __decorate([
+      n$2({ type: Array })
+  ], EFPBreadcrumbs.prototype, "flatSteps", void 0);
+  __decorate([
+      n$2({ type: Array })
+  ], EFPBreadcrumbs.prototype, "sections", void 0);
+  EFPBreadcrumbs = __decorate([
+      t$1('efp-breadcrumbs')
+  ], EFPBreadcrumbs);
+
   var logger$5 = Logger('common/workbook');
   POWERPOD.workbookUtils = {
     getWorkbookId: getWorkbookId,
@@ -34451,227 +34773,93 @@
               // Keep the default initialization (currentStepIndex = 0, currentSectionIndex = 0)
           }
       }
-      buildStepHierarchy(currentStep) {
-          const hierarchy = [];
-          // Method 1: Check if this is a numbered step (e.g., "7.11 Plant Biodiversity")
-          const stepMatch = currentStep.label.match(/^(\d+)\.(\d+)\s+(.+)$/);
-          if (stepMatch) {
-              const [, chapterNum, subNum] = stepMatch;
-              // Add main chapter (e.g., "Chapter 7")
-              hierarchy.push({
-                  label: `Chapter ${chapterNum}`,
-                  level: 1
-              });
-              // For sub-subchapters (7.11), also add the subchapter level
-              if (subNum.length > 1) {
-                  // This is a sub-subchapter like 7.11, so add the parent subchapter (7.1)
-                  const parentSubNum = `${chapterNum}.${subNum.charAt(0)}`;
-                  // Find the parent subchapter in the navigation structure
-                  const parentSubchapter = this.findStepByPattern(new RegExp(`^${parentSubNum}\\s+`));
-                  if (parentSubchapter) {
-                      hierarchy.push({
-                          label: parentSubchapter.label,
-                          level: 2
-                      });
-                  }
+      handleBreadcrumbNavigation(event) {
+          const { type, data } = event.detail;
+          switch (type) {
+              case 'home':
+                  this.navigateToHome();
+                  break;
+              case 'section':
+                  this.navigateToSection(data.sectionIndex);
+                  break;
+              case 'hierarchy':
+                  this.navigateToHierarchyItem(data.targetLabel);
+                  break;
+          }
+      }
+      navigateToHome() {
+          // Navigate to first selectable step in first section
+          const firstSelectableStep = EFPNavigationUtils.findFirstSelectableStepInSection(0, // First section
+          this.flatSteps, this.sections);
+          if (firstSelectableStep) {
+              this.currentStepIndex = firstSelectableStep.index;
+              this.currentSectionIndex = 0;
+              // Update active content
+              this.activeContent = {
+                  title: firstSelectableStep.step.label,
+                  content: firstSelectableStep.step.content,
+              };
+              // Update navigation state
+              this.updateNavigationState(firstSelectableStep.step.label);
+              this.requestUpdate();
+          }
+          else {
+              // Fallback to first step
+              this.currentStepIndex = 0;
+              this.currentSectionIndex = 0;
+              this.requestUpdate();
+          }
+      }
+      navigateToSection(sectionIndex) {
+          console.log('Breadcrumb: Navigating to section', sectionIndex);
+          // Navigate to first selectable step in section using the navigation utility
+          const firstSelectableStep = EFPNavigationUtils.findFirstSelectableStepInSection(sectionIndex, this.flatSteps, this.sections);
+          if (firstSelectableStep) {
+              console.log('Breadcrumb: Found first selectable step:', firstSelectableStep.step.label);
+              this.currentStepIndex = firstSelectableStep.index;
+              this.currentSectionIndex = sectionIndex;
+              // Update active content
+              this.activeContent = {
+                  title: firstSelectableStep.step.label,
+                  content: firstSelectableStep.step.content,
+              };
+              // Update navigation state
+              this.updateNavigationState(firstSelectableStep.step.label);
+              this.requestUpdate();
+          }
+          else {
+              console.log('Breadcrumb: No selectable step found, using fallback');
+              // Fallback: navigate to first step in section even if it's a container
+              const firstStepInSection = this.flatSteps.find(step => step.sectionIndex === sectionIndex);
+              if (firstStepInSection) {
+                  const stepIndex = this.flatSteps.indexOf(firstStepInSection);
+                  console.log('Breadcrumb: Fallback to step:', firstStepInSection.label, 'at index:', stepIndex);
+                  this.currentStepIndex = stepIndex;
+                  this.currentSectionIndex = sectionIndex;
+                  this.activeContent = {
+                      title: firstStepInSection.label,
+                      content: firstStepInSection.content,
+                  };
+                  this.requestUpdate();
               }
-              return hierarchy;
           }
-          // Method 2: Find parent containers by searching the section structure
-          const currentSection = this.sections[this.currentSectionIndex];
-          if (currentSection) {
-              const parentContainer = this.findParentContainer(currentStep.label, currentSection.items);
-              if (parentContainer) {
-                  hierarchy.push({
-                      label: parentContainer,
-                      level: 1
-                  });
-              }
-          }
-          // Method 3: Fallback - try to find parent containers using existing navigation utility
-          if (hierarchy.length === 0) {
-              const parentContainers = EFPNavigationUtils.findContainersForItem(currentStep.label, this.sections);
-              parentContainers.forEach((container, index) => {
-                  hierarchy.push({
-                      label: container,
-                      level: index + 1
-                  });
-              });
-          }
-          return hierarchy;
       }
-      findParentContainer(targetLabel, items) {
-          for (const item of items) {
-              // Check if this item has nested items
-              if ('items' in item && Array.isArray(item.items)) {
-                  // Check if the target is directly in this container's items
-                  const foundInContainer = item.items.some(subItem => subItem.label === targetLabel);
-                  if (foundInContainer) {
-                      console.log(`Found parent container for "${targetLabel}": "${item.title || item.label}"`);
-                      return item.title || item.label;
-                  }
-                  // Recursively search in nested containers
-                  const foundInNested = this.findParentContainer(targetLabel, item.items);
-                  if (foundInNested) {
-                      return foundInNested;
-                  }
-              }
+      navigateToHierarchyItem(targetLabel) {
+          // Find and navigate to this hierarchy level
+          const hierarchyStepIndex = this.flatSteps.findIndex(step => step.label === targetLabel);
+          if (hierarchyStepIndex !== -1) {
+              const hierarchyStep = this.flatSteps[hierarchyStepIndex];
+              this.currentStepIndex = hierarchyStepIndex;
+              this.currentSectionIndex = hierarchyStep.sectionIndex;
+              // Update active content
+              this.activeContent = {
+                  title: hierarchyStep.label,
+                  content: hierarchyStep.content,
+              };
+              // Update navigation state
+              this.updateNavigationState(hierarchyStep.label);
+              this.requestUpdate();
           }
-          return null;
-      }
-      findStepByPattern(pattern) {
-          return this.flatSteps.find(step => pattern.test(step.label));
-      }
-      isItemInNestedContainer(targetLabel) {
-          const currentSection = this.sections[this.currentSectionIndex];
-          if (!currentSection)
-              return false;
-          return this.findParentContainer(targetLabel, currentSection.items) !== null;
-      }
-      renderBreadcrumbs() {
-          const currentStep = this.flatSteps[this.currentStepIndex];
-          if (!currentStep) {
-              // Fallback: show basic breadcrumb even if no current step
-              return x `
-        <nav class="breadcrumbs" aria-label="Breadcrumb navigation" role="navigation">
-          <ol class="breadcrumb-list">
-            <li class="breadcrumb-item active">
-            </li>
-          </ol>
-        </nav>
-      `;
-          }
-          const currentSection = this.sections[this.currentSectionIndex];
-          const breadcrumbs = [];
-          // Check if current step is a section header (like "Section A", "Section B")
-          const isSectionHeader = currentStep.label === (currentSection === null || currentSection === void 0 ? void 0 : currentSection.tab) ||
-              currentStep.label.startsWith('Section ') ||
-              currentStep.content === (currentSection === null || currentSection === void 0 ? void 0 : currentSection.title);
-          // Add section breadcrumb (only if current step is not the section header itself)
-          if (currentSection && !isSectionHeader) {
-              breadcrumbs.push({
-                  label: currentSection.tab,
-                  isActive: false,
-                  onClick: () => {
-                      console.log('Breadcrumb: Navigating to section', this.currentSectionIndex);
-                      // Navigate to first selectable step in section using the navigation utility
-                      const firstSelectableStep = EFPNavigationUtils.findFirstSelectableStepInSection(this.currentSectionIndex, this.flatSteps, this.sections);
-                      if (firstSelectableStep) {
-                          console.log('Breadcrumb: Found first selectable step:', firstSelectableStep.step.label);
-                          this.currentStepIndex = firstSelectableStep.index;
-                          this.currentSectionIndex = this.currentSectionIndex; // Keep same section
-                          // Update active content
-                          this.activeContent = {
-                              title: firstSelectableStep.step.label,
-                              content: firstSelectableStep.step.content,
-                          };
-                          // Update navigation state
-                          this.updateNavigationState(firstSelectableStep.step.label);
-                          this.requestUpdate();
-                      }
-                      else {
-                          console.log('Breadcrumb: No selectable step found, using fallback');
-                          // Fallback: navigate to first step in section even if it's a container
-                          const firstStepInSection = this.flatSteps.find(step => step.sectionIndex === this.currentSectionIndex);
-                          if (firstStepInSection) {
-                              const stepIndex = this.flatSteps.indexOf(firstStepInSection);
-                              console.log('Breadcrumb: Fallback to step:', firstStepInSection.label, 'at index:', stepIndex);
-                              this.currentStepIndex = stepIndex;
-                              this.activeContent = {
-                                  title: firstStepInSection.label,
-                                  content: firstStepInSection.content,
-                              };
-                              this.requestUpdate();
-                          }
-                      }
-                  }
-              });
-          }
-          // For nested items, build the complete hierarchy breadcrumb
-          // Check for various nested patterns: numbered chapters, nested sections, or items with colons
-          const isNestedItem = currentStep.label.includes(':') ||
-              currentStep.label.startsWith('Chapter ') ||
-              /^\d+\.\d+/.test(currentStep.label) ||
-              this.isItemInNestedContainer(currentStep.label);
-          if (isNestedItem) {
-              // Build the complete hierarchy for this step
-              const hierarchy = this.buildStepHierarchy(currentStep);
-              console.log('Breadcrumb hierarchy for', currentStep.label, ':', hierarchy);
-              // Add each level of the hierarchy (excluding the current step itself)
-              hierarchy.forEach((hierarchyItem) => {
-                  if (hierarchyItem.label !== currentStep.label) {
-                      breadcrumbs.push({
-                          label: hierarchyItem.label,
-                          isActive: false,
-                          onClick: () => {
-                              // Find and navigate to this hierarchy level
-                              const hierarchyStepIndex = this.flatSteps.findIndex(step => step.label === hierarchyItem.label);
-                              if (hierarchyStepIndex !== -1) {
-                                  const hierarchyStep = this.flatSteps[hierarchyStepIndex];
-                                  this.currentStepIndex = hierarchyStepIndex;
-                                  this.currentSectionIndex = hierarchyStep.sectionIndex;
-                                  // Update active content
-                                  this.activeContent = {
-                                      title: hierarchyStep.label,
-                                      content: hierarchyStep.content,
-                                  };
-                                  // Update navigation state
-                                  this.updateNavigationState(hierarchyStep.label);
-                                  this.requestUpdate();
-                              }
-                          }
-                      });
-                  }
-              });
-          }
-          // Add current step breadcrumb (always last)
-          // If current step is a section header, show it as the section name
-          let currentStepLabel = isSectionHeader ?
-              ((currentSection === null || currentSection === void 0 ? void 0 : currentSection.tab) || currentStep.label) :
-              currentStep.label;
-          // Format numbered steps to use colon (e.g., "7.11 Plant Biodiversity" -> "7.11: Plant Biodiversity")
-          const numberedStepMatch = currentStepLabel.match(/^(\d+\.\d+)\s+(.+)$/);
-          if (numberedStepMatch) {
-              const [, number, title] = numberedStepMatch;
-              currentStepLabel = `${number}: ${title}`;
-          }
-          breadcrumbs.push({
-              label: EFPTextUtils.truncateText(currentStepLabel, 50), // Truncate long titles
-              isActive: true,
-              onClick: null
-          });
-          // Ensure we always have at least one breadcrumb
-          if (breadcrumbs.length === 0) {
-              breadcrumbs.push({
-                  label: 'Environmental Farm Plan',
-                  isActive: true,
-                  onClick: null
-              });
-          }
-          return x `
-      <nav class="breadcrumbs" aria-label="Breadcrumb navigation" role="navigation">
-        <ol class="breadcrumb-list">
-          ${breadcrumbs.map((crumb, index) => x `
-            <li class="breadcrumb-item ${crumb.isActive ? 'active' : ''}">
-              ${crumb.isActive ?
-            x `<span
-                  class="breadcrumb-current"
-                  title="${(currentStep === null || currentStep === void 0 ? void 0 : currentStep.label) || crumb.label}"
-                  aria-current="page"
-                >${crumb.label}</span>` :
-            x `<button
-                  class="breadcrumb-link"
-                  @click=${crumb.onClick}
-                  type="button"
-                  title="Navigate to ${crumb.label}"
-                  aria-label="Navigate to ${crumb.label}"
-                >${crumb.label}</button>`}
-              ${index < breadcrumbs.length - 1 ? x `<sl-icon name="chevron-right" class="breadcrumb-separator" aria-hidden="true"></sl-icon>` : ''}
-            </li>
-          `)}
-        </ol>
-      </nav>
-    `;
       }
       renderItems(items) {
           return EFPRenderUtils.renderItems(items, x, this.activeContent.title, (item) => this.handleItemClick(item), (items) => this.renderItems(items));
@@ -34764,7 +34952,15 @@
           ></navigation-buttons>
 
           <div class="card">
-            ${this.renderBreadcrumbs()}
+            <efp-breadcrumbs
+              .currentStep=${this.flatSteps[this.currentStepIndex]}
+              .currentSection=${this.sections[this.currentSectionIndex]}
+              .currentSectionIndex=${this.currentSectionIndex}
+              .currentStepIndex=${this.currentStepIndex}
+              .flatSteps=${this.flatSteps}
+              .sections=${this.sections}
+              @breadcrumb-navigate=${this.handleBreadcrumbNavigation}
+            ></efp-breadcrumbs>
             <h2>${this.activeContent.title}</h2>
             ${this.renderMainContent()}
           </div>
@@ -35086,88 +35282,7 @@
       font-family: inherit !important;
     }
 
-    /* Breadcrumbs styling */
-    .breadcrumbs {
-      margin-bottom: 1rem;
-      padding: 0.75rem 0;
-      border-bottom: 1px solid var(--sl-color-neutral-200);
-      background: linear-gradient(135deg, var(--sl-color-neutral-25) 0%, var(--sl-color-neutral-50) 100%);
-      border-radius: var(--sl-border-radius-small) var(--sl-border-radius-small) 0 0;
-      margin: -1rem -1rem 1rem -1rem;
-      padding: 0.75rem 1rem;
-    }
 
-    .breadcrumb-list {
-      display: flex;
-      align-items: center;
-      list-style: none;
-      margin: 0;
-      padding: 0;
-      font-size: 0.875rem;
-      color: var(--sl-color-neutral-600);
-    }
-
-    .breadcrumb-item {
-      display: flex;
-      align-items: center;
-    }
-
-    .breadcrumb-link {
-      background: none;
-      border: none;
-      color: var(--sl-color-primary-600);
-      text-decoration: none;
-      cursor: pointer;
-      padding: 0.25rem 0.5rem;
-      border-radius: var(--sl-border-radius-small);
-      font-family: var(--body-font);
-      font-size: inherit;
-      transition: background-color 0.2s ease, color 0.2s ease;
-    }
-
-    .breadcrumb-link:hover {
-      background-color: var(--sl-color-primary-50);
-      color: var(--sl-color-primary-700);
-    }
-
-    .breadcrumb-link:focus {
-      outline: 2px solid var(--sl-color-primary-600);
-      outline-offset: 2px;
-    }
-
-    .breadcrumb-current {
-      color: var(--sl-color-neutral-800);
-      font-weight: 500;
-      padding: 0.25rem 0.5rem;
-      font-family: var(--body-font);
-    }
-
-    .breadcrumb-item.active .breadcrumb-current {
-      color: var(--sl-color-neutral-900);
-      font-weight: 600;
-    }
-
-    .breadcrumb-separator {
-      margin: 0 0.5rem;
-      color: var(--sl-color-neutral-400);
-      font-size: 0.75rem;
-    }
-
-    /* Responsive breadcrumbs */
-    @media (max-width: 768px) {
-      .breadcrumb-list {
-        font-size: 0.8rem;
-      }
-
-      .breadcrumb-link,
-      .breadcrumb-current {
-        padding: 0.2rem 0.4rem;
-      }
-
-      .breadcrumb-separator {
-        margin: 0 0.3rem;
-      }
-    }
   `;
   __decorate([
       n$2({ type: Number })
