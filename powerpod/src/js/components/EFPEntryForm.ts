@@ -67,6 +67,28 @@ class EFPEntryForm extends LitElement {
       font-family: var(--body-font);
     }
 
+    /* Custom spacing for navigation collapsible containers */
+    sl-details {
+      margin-bottom: 0.75rem !important;
+    }
+
+    sl-details::part(base) {
+      padding: 0.25rem !important;
+    }
+
+    sl-details::part(header) {
+      padding: 0.5rem 0.75rem !important;
+    }
+
+    sl-details::part(content) {
+      padding: 0.25rem 0.75rem 0.5rem 0.75rem !important;
+    }
+
+    /* Spacing for standalone navigation items after collapsible containers */
+    .nav-subchapter-title {
+      margin-top: 0.5rem !important;
+    }
+
     .sidebar {
       flex: 0 0 25%;
       padding: 1rem;
@@ -493,7 +515,6 @@ class EFPEntryForm extends LitElement {
   private renderSubchapter(subchapter: any) {
     return html`
       <div class="subchapter-header">
-        <h4>${subchapter.name}</h4>
         ${subchapter.description ? html`
           <div>${unsafeHTML(subchapter.description)}</div>
         ` : ''}
@@ -507,7 +528,6 @@ class EFPEntryForm extends LitElement {
   private renderSubSubchapter(subSubchapter: any) {
     return html`
       <div class="sub-subchapter-header">
-        <h5>${subSubchapter.name}</h5>
         ${subSubchapter.description ? html`
           <div>${unsafeHTML(subSubchapter.description)}</div>
         ` : ''}
@@ -518,10 +538,8 @@ class EFPEntryForm extends LitElement {
   }
 
   private renderChapter(chapter: any) {
-    const formattedTitle = this.formatChapterTitle(chapter.name);
     return html`
       <div class="chapter-header">
-        <h3>${formattedTitle}</h3>
         ${chapter.description ? html`
           <div>${unsafeHTML(chapter.description)}</div>
         ` : ''}

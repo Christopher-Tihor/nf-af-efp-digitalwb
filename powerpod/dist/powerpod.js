@@ -34660,7 +34660,6 @@
       renderSubchapter(subchapter) {
           return x `
       <div class="subchapter-header">
-        <h4>${subchapter.name}</h4>
         ${subchapter.description ? x `
           <div>${o$1(subchapter.description)}</div>
         ` : ''}
@@ -34673,7 +34672,6 @@
       renderSubSubchapter(subSubchapter) {
           return x `
       <div class="sub-subchapter-header">
-        <h5>${subSubchapter.name}</h5>
         ${subSubchapter.description ? x `
           <div>${o$1(subSubchapter.description)}</div>
         ` : ''}
@@ -34683,10 +34681,8 @@
     `;
       }
       renderChapter(chapter) {
-          const formattedTitle = this.formatChapterTitle(chapter.name);
           return x `
       <div class="chapter-header">
-        <h3>${formattedTitle}</h3>
         ${chapter.description ? x `
           <div>${o$1(chapter.description)}</div>
         ` : ''}
@@ -35147,6 +35143,28 @@
       flex-wrap: wrap;
       height: 100vh;
       font-family: var(--body-font);
+    }
+
+    /* Custom spacing for navigation collapsible containers */
+    sl-details {
+      margin-bottom: 0.75rem !important;
+    }
+
+    sl-details::part(base) {
+      padding: 0.25rem !important;
+    }
+
+    sl-details::part(header) {
+      padding: 0.5rem 0.75rem !important;
+    }
+
+    sl-details::part(content) {
+      padding: 0.25rem 0.75rem 0.5rem 0.75rem !important;
+    }
+
+    /* Spacing for standalone navigation items after collapsible containers */
+    .nav-subchapter-title {
+      margin-top: 0.5rem !important;
     }
 
     .sidebar {
