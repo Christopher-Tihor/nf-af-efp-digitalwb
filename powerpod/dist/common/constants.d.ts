@@ -109,4 +109,6 @@ export namespace POWERPOD {
     let fieldConfiguration: {};
     let commodities: {};
     let expenseTypes: {};
+    let examples: {};
+    let workbookResponseHelper: null;
 }

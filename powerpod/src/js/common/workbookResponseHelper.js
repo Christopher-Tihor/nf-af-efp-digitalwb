@@ -1,0 +1,398 @@
+import { POWERPOD } from './constants.js';
+import { Logger } from './logger.js';
+import { getCurrentWorkbookId } from './workbookUtils.js';
+
+const logger = Logger('common/workbookResponseHelper');
+
+/**
+ * WorkbookResponseHelper - Common utility for managing workbook responses
+ * Provides high-level methods for CRUD operations on workbook responses
+ */
+export class WorkbookResponseHelper {
+  /**
+   * Fetch all responses for a specific workbook
+   * @param {string} workbookId - The workbook ID
+   * @param {Object} options - Additional fetch options
+   * @returns {Promise<Object>} Response data with metadata
+   */
+  static async getResponsesForWorkbook(workbookId, options = {}) {
+    try {
+      logger.info({
+        fn: 'getResponsesForWorkbook',
+        message: `Fetching responses for workbook: ${workbookId}`,
+        data: { workbookId, options },
+      });
+
+      const result = await POWERPOD.fetch.getWorkbookResponsesByWorkbook({
+        workbookId,
+        ...options,
+      });
+
+      const responses = result?.data?.value || [];
+
+      logger.info({
+        fn: 'getResponsesForWorkbook',
+        message: `Found ${responses.length} responses for workbook ${workbookId}`,
+        data: { workbookId, responseCount: responses.length },
+      });
+
+      return {
+        responses,
+        totalCount: result?.data?.['@odata.count'] || responses.length,
+        metadata: {
+          context: result?.data?.['@odata.context'],
+          nextLink: result?.data?.['@odata.nextLink'],
+        },
+        workbookId,
+      };
+    } catch (error) {
+      logger.error({
+        fn: 'getResponsesForWorkbook',
+        message: `Failed to fetch responses for workbook ${workbookId}`,
+        data: { workbookId, error: error.message },
+      });
+      throw new Error(`Failed to fetch workbook responses: ${error.message}`);
+    }
+  }
+
+  /**
+   * Fetch responses for a specific workbook and question
+   * @param {string} workbookId - The workbook ID
+   * @param {string} questionId - The question ID
+   * @param {Object} options - Additional fetch options
+   * @returns {Promise<Object>} Response data with metadata
+   */
+  static async getResponsesForWorkbookAndQuestion(
+    workbookId,
+    questionId,
+    options = {}
+  ) {
+    try {
+      logger.info({
+        fn: 'getResponsesForWorkbookAndQuestion',
+        message: `Fetching responses for workbook: ${workbookId}, question: ${questionId}`,
+        data: { workbookId, questionId, options },
+      });
+
+      const result =
+        await POWERPOD.fetch.getWorkbookResponsesByWorkbookAndQuestion({
+          workbookId,
+          questionId,
+          ...options,
+        });
+
+      const responses = result?.data?.value || [];
+
+      logger.info({
+        fn: 'getResponsesForWorkbookAndQuestion',
+        message: `Found ${responses.length} responses for workbook ${workbookId}, question ${questionId}`,
+        data: { workbookId, questionId, responseCount: responses.length },
+      });
+
+      return {
+        responses,
+        totalCount: result?.data?.['@odata.count'] || responses.length,
+        metadata: {
+          context: result?.data?.['@odata.context'],
+          nextLink: result?.data?.['@odata.nextLink'],
+        },
+        workbookId,
+        questionId,
+      };
+    } catch (error) {
+      logger.error({
+        fn: 'getResponsesForWorkbookAndQuestion',
+        message: `Failed to fetch responses for workbook ${workbookId}, question ${questionId}`,
+        data: { workbookId, questionId, error: error.message },
+      });
+      throw new Error(`Failed to fetch workbook responses: ${error.message}`);
+    }
+  }
+
+  /**
+   * Create a new workbook response
+   * @param {string} workbookId - The workbook ID
+   * @param {string} questionId - The question ID
+   * @param {string} response - The response text
+   * @param {Object} options - Additional fetch options
+   * @returns {Promise<Object>} Created response data
+   */
+  static async createResponse(
+    questionId,
+    response,
+    options = {}
+  ) {
+    const workbookId = getCurrentWorkbookId();
+    if (!workbookId) {
+      throw new Error('No workbook ID available');
+    }
+    try {
+      logger.info({
+        fn: 'createResponse',
+        message: `Creating response for workbook: ${workbookId}, question: ${questionId}`,
+        data: {
+          workbookId,
+          questionId,
+          response: response?.substring(0, 100) + '...',
+        },
+      });
+
+      const result = await POWERPOD.fetch.postWorkbookResponseData({
+        workbookId,
+        questionId,
+        response,
+        ...options,
+      });
+
+      logger.info({
+        fn: 'createResponse',
+        message: `Successfully created response`,
+        data: {
+          workbookId,
+          questionId,
+          responseId: result?.data?.quartech_workbookresponseid,
+        },
+      });
+
+      return {
+        response: result?.data,
+        success: true,
+        workbookId,
+        questionId,
+      };
+    } catch (error) {
+      logger.error({
+        fn: 'createResponse',
+        message: `Failed to create response for workbook ${workbookId}, question ${questionId}`,
+        data: { workbookId, questionId, error: error.message },
+      });
+      throw new Error(`Failed to create workbook response: ${error.message}`);
+    }
+  }
+
+  /**
+   * Update an existing workbook response
+   * @param {string} responseId - The response ID to update
+   * @param {string} response - The new response text (optional)
+   * @param {Object} options - Additional fetch options
+   * @returns {Promise<Object>} Update result
+   */
+  static async updateResponse(
+    responseId,
+    response = null,
+    options = {}
+  ) {
+    try {
+      logger.info({
+        fn: 'updateResponse',
+        message: `Updating response: ${responseId}`,
+        data: { responseId, hasResponse: !!response },
+      });
+
+      const result = await POWERPOD.fetch.patchWorkbookResponseData({
+        id: responseId,
+        response,
+        ...options,
+      });
+
+      logger.info({
+        fn: 'updateResponse',
+        message: `Successfully updated response ${responseId}`,
+        data: { responseId },
+      });
+
+      return {
+        success: true,
+        responseId,
+        updated: result?.data,
+      };
+    } catch (error) {
+      logger.error({
+        fn: 'updateResponse',
+        message: `Failed to update response ${responseId}`,
+        data: { responseId, error: error.message },
+      });
+      throw new Error(`Failed to update workbook response: ${error.message}`);
+    }
+  }
+
+  /**
+   * Delete a workbook response
+   * @param {string} responseId - The response ID to delete
+   * @param {Object} options - Additional fetch options
+   * @returns {Promise<Object>} Delete result
+   */
+  static async deleteResponse(responseId, options = {}) {
+    try {
+      logger.info({
+        fn: 'deleteResponse',
+        message: `Deleting response: ${responseId}`,
+        data: { responseId },
+      });
+
+      await POWERPOD.fetch.deleteWorkbookResponseData({
+        id: responseId,
+        ...options,
+      });
+
+      logger.info({
+        fn: 'deleteResponse',
+        message: `Successfully deleted response ${responseId}`,
+        data: { responseId },
+      });
+
+      return {
+        success: true,
+        responseId,
+        deleted: true,
+      };
+    } catch (error) {
+      logger.error({
+        fn: 'deleteResponse',
+        message: `Failed to delete response ${responseId}`,
+        data: { responseId, error: error.message },
+      });
+      throw new Error(`Failed to delete workbook response: ${error.message}`);
+    }
+  }
+
+  /**
+   * Get the most recent response for a specific workbook and question
+   * @param {string} workbookId - The workbook ID
+   * @param {string} questionId - The question ID
+   * @param {Object} options - Additional fetch options
+   * @returns {Promise<Object|null>} Most recent response or null if none found
+   */
+  static async getLatestResponse(workbookId, questionId, options = {}) {
+    try {
+      const result = await this.getResponsesForWorkbookAndQuestion(
+        workbookId,
+        questionId,
+        options
+      );
+
+      if (result.responses && result.responses.length > 0) {
+        // Responses are ordered by createdon desc, so first one is most recent
+        const latestResponse = result.responses[0];
+
+        logger.info({
+          fn: 'getLatestResponse',
+          message: `Found latest response for workbook ${workbookId}, question ${questionId}`,
+          data: {
+            workbookId,
+            questionId,
+            responseId: latestResponse.quartech_workbookresponseid,
+            createdOn: latestResponse.createdon,
+          },
+        });
+
+        return latestResponse;
+      }
+
+      logger.info({
+        fn: 'getLatestResponse',
+        message: `No responses found for workbook ${workbookId}, question ${questionId}`,
+        data: { workbookId, questionId },
+      });
+
+      return null;
+    } catch (error) {
+      logger.error({
+        fn: 'getLatestResponse',
+        message: `Failed to get latest response for workbook ${workbookId}, question ${questionId}`,
+        data: { workbookId, questionId, error: error.message },
+      });
+      throw error;
+    }
+  }
+
+  /**
+   * Check if a response exists for a specific workbook and question
+   * @param {string} workbookId - The workbook ID
+   * @param {string} questionId - The question ID
+   * @param {Object} options - Additional fetch options
+   * @returns {Promise<boolean>} True if response exists, false otherwise
+   */
+  static async hasResponse(workbookId, questionId, options = {}) {
+    try {
+      const latestResponse = await this.getLatestResponse(
+        workbookId,
+        questionId,
+        options
+      );
+      return latestResponse !== null;
+    } catch (error) {
+      logger.error({
+        fn: 'hasResponse',
+        message: `Failed to check if response exists for workbook ${workbookId}, question ${questionId}`,
+        data: { workbookId, questionId, error: error.message },
+      });
+      return false;
+    }
+  }
+
+  /**
+   * Get response statistics for a workbook
+   * @param {string} workbookId - The workbook ID
+   * @param {Object} options - Additional fetch options
+   * @returns {Promise<Object>} Response statistics
+   */
+  static async getResponseStats(workbookId, options = {}) {
+    try {
+      const result = await this.getResponsesForWorkbook(workbookId, options);
+      const responses = result.responses || [];
+
+      // Group responses by question
+      const responsesByQuestion = new Map();
+      responses.forEach((response) => {
+        const questionId = response._quartech_question_value;
+        if (!responsesByQuestion.has(questionId)) {
+          responsesByQuestion.set(questionId, []);
+        }
+        responsesByQuestion.get(questionId).push(response);
+      });
+
+      const stats = {
+        totalResponses: responses.length,
+        uniqueQuestions: responsesByQuestion.size,
+        questionsWithMultipleResponses: 0,
+        averageResponsesPerQuestion: 0,
+        responsesByQuestion: Object.fromEntries(responsesByQuestion),
+        workbookId,
+      };
+
+      // Calculate additional stats
+      responsesByQuestion.forEach((questionResponses) => {
+        if (questionResponses.length > 1) {
+          stats.questionsWithMultipleResponses++;
+        }
+      });
+
+      if (stats.uniqueQuestions > 0) {
+        stats.averageResponsesPerQuestion = (
+          stats.totalResponses / stats.uniqueQuestions
+        ).toFixed(2);
+      }
+
+      logger.info({
+        fn: 'getResponseStats',
+        message: `Generated response statistics for workbook ${workbookId}`,
+        data: { workbookId, stats },
+      });
+
+      return stats;
+    } catch (error) {
+      logger.error({
+        fn: 'getResponseStats',
+        message: `Failed to get response statistics for workbook ${workbookId}`,
+        data: { workbookId, error: error.message },
+      });
+      throw new Error(`Failed to get response statistics: ${error.message}`);
+    }
+  }
+}
+
+// Export for use in other modules
+export default WorkbookResponseHelper;
+
+POWERPOD.workbookResponseHelper = WorkbookResponseHelper

@@ -158,4 +158,6 @@ export const POWERPOD = {
   fieldConfiguration: {},
   commodities: {},
   expenseTypes: {},
+  examples: {},
+  workbookResponseHelper: null,
 };

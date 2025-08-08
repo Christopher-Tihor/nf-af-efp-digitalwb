@@ -48,6 +48,14 @@ export const ENDPOINT_URL = {
   get_workbook_data_by_id: (id) => `/_api/quartech_workbooks(${id})`,
   get_chapters_data: `/_api/quartech_chapters`,
   get_workbookquestions_data: `/_api/quartech_workbookquestions`,
+  get_workbookresponses_data: `/_api/quartech_workbookresponses`,
+  get_workbookresponses_by_workbook: (workbookId) =>
+    `/_api/quartech_workbooks(${workbookId})?$expand=quartech_workbookresponse_Workbook_quartech_workbook($select=quartech_workbookresponseid,quartech_response,createdon,modifiedon,_quartech_question_value;$expand=quartech_Question($select=quartech_questiontext,quartech_questiontype);$orderby=createdon desc)`,
+  get_workbookresponses_by_workbook_and_question: (workbookId, questionId) =>
+    `/_api/quartech_workbooks(${workbookId})?$expand=quartech_workbookresponse_Workbook_quartech_workbook($filter=_quartech_question_value eq ${questionId};$select=quartech_workbookresponseid,quartech_response,createdon,modifiedon,_quartech_question_value;$expand=quartech_Question($select=quartech_questiontext,quartech_questiontype);$orderby=createdon desc)`,
+  post_workbookresponse_data: `/_api/quartech_workbookresponses`,
+  patch_workbookresponse_data: (id) => `/_api/quartech_workbookresponses(${id})`,
+  delete_workbookresponse_data: (id) => `/_api/quartech_workbookresponses(${id})`,
 };
 
 POWERPOD.fetch = {
@@ -82,6 +90,12 @@ POWERPOD.fetch = {
   getWorkbookDataById,
   getChaptersData,
   getWorkbookQuestionsData,
+  getWorkbookResponsesData,
+  getWorkbookResponsesByWorkbook,
+  getWorkbookResponsesByWorkbookAndQuestion,
+  postWorkbookResponseData,
+  patchWorkbookResponseData,
+  deleteWorkbookResponseData,
 };
 
 const CONTENT_TYPE = {
@@ -697,6 +711,204 @@ export async function getWorkbookQuestionsData({ ...options } = {}) {
     datatype: DATATYPE.json,
     includeODataHeaders: true,
     async: false,
+    returnData: true,
+    ...options,
+  });
+}
+
+// Workbook Response API Functions
+export async function getWorkbookResponsesData({ ...options } = {}) {
+  return fetch({
+    url: ENDPOINT_URL.get_workbookresponses_data,
+    contentType: CONTENT_TYPE.json,
+    datatype: DATATYPE.json,
+    includeODataHeaders: true,
+    returnData: true,
+    ...options,
+  });
+}
+
+export async function getWorkbookResponsesByWorkbook({ workbookId, ...options }) {
+  if (!workbookId) {
+    logger.error({
+      fn: getWorkbookResponsesByWorkbook,
+      message: 'Missing required workbookId parameter',
+      data: { workbookId },
+    });
+    throw new Error('workbookId is required');
+  }
+
+  const result = await fetch({
+    url: ENDPOINT_URL.get_workbookresponses_by_workbook(workbookId),
+    contentType: CONTENT_TYPE.json,
+    datatype: DATATYPE.json,
+    includeODataHeaders: true,
+    returnData: true,
+    skipCache: true, // Always get fresh response data
+    ...options,
+  });
+
+  // Transform the response structure to match the expected format
+  // The API returns workbook data with expanded responses, but we want just the responses
+  if (result && result.data && result.data.quartech_workbookresponse_Workbook_quartech_workbook) {
+    const responses = result.data.quartech_workbookresponse_Workbook_quartech_workbook;
+    return {
+      ...result,
+      data: {
+        value: responses,
+        '@odata.count': responses.length,
+        '@odata.context': result.data['@odata.context']
+      }
+    };
+  }
+
+  return result;
+}
+
+export async function getWorkbookResponsesByWorkbookAndQuestion({
+  workbookId,
+  questionId,
+  ...options
+}) {
+  if (!workbookId || !questionId) {
+    logger.error({
+      fn: getWorkbookResponsesByWorkbookAndQuestion,
+      message: 'Missing required parameters',
+      data: { workbookId, questionId },
+    });
+    throw new Error('workbookId and questionId are required');
+  }
+
+  const result = await fetch({
+    url: ENDPOINT_URL.get_workbookresponses_by_workbook_and_question(workbookId, questionId),
+    contentType: CONTENT_TYPE.json,
+    datatype: DATATYPE.json,
+    includeODataHeaders: true,
+    returnData: true,
+    skipCache: true, // Always get fresh response data
+    ...options,
+  });
+
+  // Transform the response structure to match the expected format
+  // The API returns workbook data with expanded responses filtered by question
+  if (result && result.data && result.data.quartech_workbookresponse_Workbook_quartech_workbook) {
+    const responses = result.data.quartech_workbookresponse_Workbook_quartech_workbook;
+    return {
+      ...result,
+      data: {
+        value: responses,
+        '@odata.count': responses.length,
+        '@odata.context': result.data['@odata.context']
+      }
+    };
+  }
+
+  return result;
+}
+
+export async function postWorkbookResponseData({
+  workbookId,
+  questionId,
+  response,
+  ...options
+}) {
+  if (!workbookId || !questionId || response === undefined) {
+    logger.error({
+      fn: postWorkbookResponseData,
+      message: 'Missing required parameters',
+      data: { workbookId, questionId, response },
+    });
+    throw new Error('workbookId, questionId, and response are required');
+  }
+
+  logger.info({
+    fn: postWorkbookResponseData,
+    message: 'Creating workbook response',
+    data: { workbookId, questionId, response },
+  });
+
+  return fetch({
+    method: 'POST',
+    url: ENDPOINT_URL.post_workbookresponse_data,
+    datatype: DATATYPE.json,
+    includeODataHeaders: true,
+    addRequestVerificationToken: true,
+    processData: false,
+    returnData: true,
+    data: JSON.stringify({
+      quartech_response: response,
+      'quartech_Workbook@odata.bind': `/quartech_workbooks(${workbookId})`,
+      'quartech_Question@odata.bind': `/quartech_workbookquestions(${questionId})`,
+    }),
+    ...options,
+  });
+}
+
+export async function patchWorkbookResponseData({
+  id,
+  response = null,
+  ...options
+}) {
+  if (!id) {
+    logger.error({
+      fn: patchWorkbookResponseData,
+      message: 'Missing required id parameter',
+      data: { id },
+    });
+    throw new Error('id is required');
+  }
+
+  const updateData = {};
+  if (response !== null) updateData.quartech_response = response;
+
+  if (Object.keys(updateData).length === 0) {
+    logger.warn({
+      fn: patchWorkbookResponseData,
+      message: 'No data to update',
+      data: { id, response },
+    });
+    return Promise.resolve({ data: null });
+  }
+
+  logger.info({
+    fn: patchWorkbookResponseData,
+    message: 'Updating workbook response',
+    data: { id, updateData },
+  });
+
+  return fetch({
+    method: 'PATCH',
+    url: ENDPOINT_URL.patch_workbookresponse_data(id),
+    datatype: DATATYPE.json,
+    includeODataHeaders: true,
+    addRequestVerificationToken: true,
+    processData: false,
+    returnData: true,
+    data: JSON.stringify(updateData),
+    ...options,
+  });
+}
+
+export async function deleteWorkbookResponseData({ id, ...options }) {
+  if (!id) {
+    logger.error({
+      fn: deleteWorkbookResponseData,
+      message: 'Missing required id parameter',
+      data: { id },
+    });
+    throw new Error('id is required');
+  }
+
+  logger.info({
+    fn: deleteWorkbookResponseData,
+    message: 'Deleting workbook response',
+    data: { id },
+  });
+
+  return fetch({
+    method: 'DELETE',
+    url: ENDPOINT_URL.delete_workbookresponse_data(id),
+    addRequestVerificationToken: true,
     returnData: true,
     ...options,
   });

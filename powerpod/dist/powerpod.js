@@ -689,7 +689,9 @@
     fieldConditionalLogic: {},
     fieldConfiguration: {},
     commodities: {},
-    expenseTypes: {}
+    expenseTypes: {},
+    examples: {},
+    workbookResponseHelper: null
   };
 
   POWERPOD.logger = {
@@ -799,10 +801,10 @@
     }
   };
 
-  var logger$M = Logger('store/mutations');
+  var logger$N = Logger('store/mutations');
   var mutations = {
     setFieldData: function setFieldData(state, payload) {
-      logger$M.info({
+      logger$N.info({
         fn: this.setFieldData,
         message: 'Updated field config in state',
         data: {
@@ -814,7 +816,7 @@
       return state;
     },
     addFieldData: function addFieldData(state, payload) {
-      logger$M.info({
+      logger$N.info({
         fn: this.addFieldData,
         message: 'Add field data to state',
         data: {
@@ -832,7 +834,7 @@
     },
     setValidationError: function setValidationError(state, payload) {
       if (state.validationError === payload) {
-        logger$M.warn({
+        logger$N.warn({
           fn: this.setValidationError,
           message: 'Previous validationError state matches payload, no need to update',
           data: {
@@ -848,7 +850,7 @@
     },
     addValidationError: function addValidationError(state, payload) {
       if (state.validationError.includes(payload)) {
-        logger$M.warn({
+        logger$N.warn({
           fn: this.addValidationError,
           message: 'Added validationError message already included in currently displayed message',
           data: {
@@ -865,7 +867,7 @@
     },
     removeValidationError: function removeValidationError(state, payload) {
       if (!state.validationError.includes(payload)) {
-        logger$M.error({
+        logger$N.error({
           fn: this.addValidationError,
           message: 'Requested validationError paylaod does not exist in current state',
           data: {
@@ -881,7 +883,7 @@
       return state;
     },
     addToFieldOrder: function addToFieldOrder(state, payload) {
-      logger$M.info({
+      logger$N.info({
         fn: this.addToFieldOrder,
         message: 'Add field to fieldOrder array',
         data: {
@@ -1202,7 +1204,7 @@
     return validationErrorHtml;
   }
 
-  const logger$L = Logger('common/dynamics');
+  const logger$M = Logger('common/dynamics');
   POWERPOD.dynamics = {
       getCurrentUser,
       getRequestVerificationToken,
@@ -1210,21 +1212,21 @@
   };
   function getCurrentUser() {
       var _a, _b, _c;
-      logger$L.info({
+      logger$M.info({
           fn: getCurrentUser,
           message: 'Start getting current user',
       });
       // @ts-ignore
       const { User } = (_b = (_a = win === null || win === void 0 ? void 0 : win.Microsoft) === null || _a === void 0 ? void 0 : _a.Dynamic365) === null || _b === void 0 ? void 0 : _b.Portal;
       if (!User) {
-          logger$L.error({
+          logger$M.error({
               fn: getCurrentUser,
               message: 'Could not get current user',
               // @ts-ignore
               data: { dynamic365: (_c = win === null || win === void 0 ? void 0 : win.Microsoft) === null || _c === void 0 ? void 0 : _c.Dynamic365 },
           });
       }
-      logger$L.info({
+      logger$M.info({
           fn: getCurrentUser,
           message: 'Successfully retrieved current user data',
           data: { currentUser: User },
@@ -1234,20 +1236,20 @@
   async function preloadRequestVerificationToken() {
       let requestVerificationToken = $('input[name=__RequestVerificationToken]').val();
       if (requestVerificationToken) {
-          logger$L.info({
+          logger$M.info({
               fn: preloadRequestVerificationToken,
               message: `No need to preload token, exists already, __RequestVerificationToken: ${requestVerificationToken}`,
           });
           saveBrowserInfo(BrowserInformationAction.Load);
           return;
       }
-      logger$L.info({
+      logger$M.info({
           fn: preloadRequestVerificationToken,
           message: 'Could not find input[name=__RequestVerificationToken], attempt finding antiforgerytoken div',
       });
       const tokenUrlDiv = document.getElementById('antiforgerytoken');
       if (!tokenUrlDiv) {
-          logger$L.error({
+          logger$M.error({
               fn: preloadRequestVerificationToken,
               message: 'Could not find antiforgerytoken, failed to find verificationtoken',
           });
@@ -1255,7 +1257,7 @@
       }
       const tokenUrl = tokenUrlDiv.getAttribute('data-url');
       if (!tokenUrl) {
-          logger$L.error({
+          logger$M.error({
               fn: preloadRequestVerificationToken,
               message: 'Could not find antiforgerytoken URL, failed to find verificationtoken',
           });
@@ -1271,7 +1273,7 @@
       const inputElement = tempDiv.querySelector('input');
       const token = inputElement === null || inputElement === void 0 ? void 0 : inputElement.getAttribute('value');
       if (!token) {
-          logger$L.error({
+          logger$M.error({
               fn: preloadRequestVerificationToken,
               message: 'Failed to load verification token from antiforgery url',
           });
@@ -1281,7 +1283,7 @@
       // set DOM HTML content for easy/immediate fetching later
       tokenUrlDiv.innerHTML = `<input name="__RequestVerificationToken" type="hidden" value="${requestVerificationToken}">`;
       saveBrowserInfo(BrowserInformationAction.Load);
-      logger$L.info({
+      logger$M.info({
           fn: preloadRequestVerificationToken,
           message: `Successfully created token input element with __RequestVerificationToken: ${requestVerificationToken}`,
       });
@@ -1289,12 +1291,12 @@
   function getRequestVerificationToken() {
       let requestVerificationToken = $('input[name=__RequestVerificationToken]').val();
       if (!requestVerificationToken) {
-          logger$L.error({
+          logger$M.error({
               fn: getRequestVerificationToken,
               message: 'Could not find input[name=__RequestVerificationToken]',
           });
       }
-      logger$L.info({
+      logger$M.info({
           fn: getRequestVerificationToken,
           message: `Successfully found __RequestVerificationToken: ${requestVerificationToken}`,
       });
@@ -1323,8 +1325,13 @@
     _excluded20 = ["id", "fieldData"],
     _excluded21 = ["onSuccess"],
     _excluded22 = ["onSuccess"],
-    _excluded23 = ["id"];
-  var logger$K = Logger('common/fetch');
+    _excluded23 = ["id"],
+    _excluded24 = ["workbookId"],
+    _excluded25 = ["workbookId", "questionId"],
+    _excluded26 = ["workbookId", "questionId", "response"],
+    _excluded27 = ["id", "response"],
+    _excluded28 = ["id"];
+  var logger$L = Logger('common/fetch');
   var ENDPOINT_URL = {
     get_env_vars_data: "/_api/environmentvariabledefinitions?$filter=contains(schemaname,'quartech_')&$select=schemaname,environmentvariabledefinitionid&$expand=environmentvariabledefinition_environmentvariablevalue($select=value)",
     get_application_form_data: function get_application_form_data(programId) {
@@ -1384,7 +1391,21 @@
       return "/_api/quartech_workbooks(".concat(id, ")");
     },
     get_chapters_data: "/_api/quartech_chapters",
-    get_workbookquestions_data: "/_api/quartech_workbookquestions"
+    get_workbookquestions_data: "/_api/quartech_workbookquestions",
+    get_workbookresponses_data: "/_api/quartech_workbookresponses",
+    get_workbookresponses_by_workbook: function get_workbookresponses_by_workbook(workbookId) {
+      return "/_api/quartech_workbooks(".concat(workbookId, ")?$expand=quartech_workbookresponse_Workbook_quartech_workbook($select=quartech_workbookresponseid,quartech_response,createdon,modifiedon,_quartech_question_value;$expand=quartech_Question($select=quartech_questiontext,quartech_questiontype);$orderby=createdon desc)");
+    },
+    get_workbookresponses_by_workbook_and_question: function get_workbookresponses_by_workbook_and_question(workbookId, questionId) {
+      return "/_api/quartech_workbooks(".concat(workbookId, ")?$expand=quartech_workbookresponse_Workbook_quartech_workbook($filter=_quartech_question_value eq ").concat(questionId, ";$select=quartech_workbookresponseid,quartech_response,createdon,modifiedon,_quartech_question_value;$expand=quartech_Question($select=quartech_questiontext,quartech_questiontype);$orderby=createdon desc)");
+    },
+    post_workbookresponse_data: "/_api/quartech_workbookresponses",
+    patch_workbookresponse_data: function patch_workbookresponse_data(id) {
+      return "/_api/quartech_workbookresponses(".concat(id, ")");
+    },
+    delete_workbookresponse_data: function delete_workbookresponse_data(id) {
+      return "/_api/quartech_workbookresponses(".concat(id, ")");
+    }
   };
   POWERPOD.fetch = {
     fetch: fetch$1,
@@ -1417,7 +1438,13 @@
     getProgramHomePageContentData: getProgramHomePageContentData,
     getWorkbookDataById: getWorkbookDataById,
     getChaptersData: getChaptersData,
-    getWorkbookQuestionsData: getWorkbookQuestionsData
+    getWorkbookQuestionsData: getWorkbookQuestionsData,
+    getWorkbookResponsesData: getWorkbookResponsesData,
+    getWorkbookResponsesByWorkbook: getWorkbookResponsesByWorkbook,
+    getWorkbookResponsesByWorkbookAndQuestion: getWorkbookResponsesByWorkbookAndQuestion,
+    postWorkbookResponseData: postWorkbookResponseData,
+    patchWorkbookResponseData: patchWorkbookResponseData,
+    deleteWorkbookResponseData: deleteWorkbookResponseData
   };
   var CONTENT_TYPE = {
     json: 'application/json; charset=utf-8'
@@ -1434,13 +1461,13 @@
   var _setReqVerificationHeaderToken = function setReqVerificationHeaderToken(XMLHttpRequest) {
     var requestVerificationToken = getRequestVerificationToken();
     if (!requestVerificationToken) {
-      logger$K.warn({
+      logger$L.warn({
         fn: _setReqVerificationHeaderToken,
         message: 'Failed to set request verification token header'
       });
     }
     XMLHttpRequest.setRequestHeader('__RequestVerificationToken', requestVerificationToken);
-    logger$K.info({
+    logger$L.info({
       fn: _setReqVerificationHeaderToken,
       message: "Successfully set header __RequestVerificationToken=".concat(requestVerificationToken)
     });
@@ -1469,7 +1496,7 @@
             if (window.location.hostname === 'localhost') {
               url = 'https://af-pods-dev.powerappsportals.com' + endpointUrl;
             }
-            logger$K.info({
+            logger$L.info({
               fn: fetch$1,
               message: 'Starting fetch request...',
               data: _objectSpread2(_objectSpread2({}, params), {}, {
@@ -1483,7 +1510,7 @@
               break;
             }
             _POWERPOD$fetch$CACHE = POWERPOD.fetch.CACHED_RESULTS[reqHash], _data = _POWERPOD$fetch$CACHE.data, textStatus = _POWERPOD$fetch$CACHE.textStatus, jqXHR = _POWERPOD$fetch$CACHE.jqXHR;
-            logger$K.info({
+            logger$L.info({
               fn: fetch$1,
               message: "returning cached data for url: ".concat(url),
               data: {
@@ -1520,7 +1547,7 @@
                 if (_beforeSend && typeof _beforeSend === 'function') _beforeSend();
               },
               success: function success(data, textStatus, jqXHR) {
-                logger$K.info({
+                logger$L.info({
                   fn: fetch$1,
                   message: 'success handler called',
                   data: {
@@ -1535,7 +1562,7 @@
                   jqXHR: jqXHR
                 };
                 if (returnData) {
-                  logger$K.info({
+                  logger$L.info({
                     fn: fetch$1,
                     message: "skipping onSuccess handler call: ".concat(url),
                     data: {
@@ -1550,7 +1577,7 @@
                 }
               },
               error: function error(jqXHR, textStatus, errorThrown) {
-                logger$K.error({
+                logger$L.error({
                   fn: fetch$1,
                   message: "Error handler called for url: ".concat(url),
                   data: {
@@ -1565,7 +1592,7 @@
               }
             }).then(function (data, textStatus, jqXHR) {
               if (returnData) {
-                logger$K.info({
+                logger$L.info({
                   fn: fetch$1,
                   message: "returning data for url: ".concat(url),
                   data: {
@@ -1659,7 +1686,7 @@
               _context4.next = 4;
               break;
             }
-            logger$K.error({
+            logger$L.error({
               fn: getClaimFormData,
               message: 'Missing required params',
               data: {
@@ -1867,7 +1894,7 @@
         while (1) switch (_context12.prev = _context12.next) {
           case 0:
             formId = _ref11.formId, subject = _ref11.subject, filename = _ref11.filename, documentbody = _ref11.documentbody, mimetype = _ref11.mimetype, formType = _ref11.formType, options = _objectWithoutProperties(_ref11, _excluded9);
-            logger$K.info({
+            logger$L.info({
               fn: postDocumentData,
               message: "postDocumentData called with payload:",
               data: _objectSpread2({
@@ -1895,7 +1922,7 @@
             };
             return _context12.abrupt("break", 12);
           case 12:
-            logger$K.info({
+            logger$L.info({
               fn: postDocumentData,
               message: "postDocumentData called with objecttypecode: ".concat(objecttypecode, ", objecttypecode_databind: ").concat(JSON.stringify(objecttypecode_databind)),
               data: _objectSpread2({
@@ -2399,6 +2426,8 @@
   function getWorkbookQuestionsData() {
     return _getWorkbookQuestionsData.apply(this, arguments);
   }
+
+  // Workbook Response API Functions
   function _getWorkbookQuestionsData() {
     _getWorkbookQuestionsData = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee30() {
       var _ref29,
@@ -2424,8 +2453,315 @@
     }));
     return _getWorkbookQuestionsData.apply(this, arguments);
   }
+  function getWorkbookResponsesData() {
+    return _getWorkbookResponsesData.apply(this, arguments);
+  }
+  function _getWorkbookResponsesData() {
+    _getWorkbookResponsesData = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee31() {
+      var _ref30,
+        options,
+        _args31 = arguments;
+      return _regeneratorRuntime().wrap(function _callee31$(_context31) {
+        while (1) switch (_context31.prev = _context31.next) {
+          case 0:
+            _ref30 = _args31.length > 0 && _args31[0] !== undefined ? _args31[0] : {}, options = _extends({}, (_objectDestructuringEmpty(_ref30), _ref30));
+            return _context31.abrupt("return", fetch$1(_objectSpread2({
+              url: ENDPOINT_URL.get_workbookresponses_data,
+              contentType: CONTENT_TYPE.json,
+              datatype: DATATYPE.json,
+              includeODataHeaders: true,
+              returnData: true
+            }, options)));
+          case 2:
+          case "end":
+            return _context31.stop();
+        }
+      }, _callee31);
+    }));
+    return _getWorkbookResponsesData.apply(this, arguments);
+  }
+  function getWorkbookResponsesByWorkbook(_x25) {
+    return _getWorkbookResponsesByWorkbook.apply(this, arguments);
+  }
+  function _getWorkbookResponsesByWorkbook() {
+    _getWorkbookResponsesByWorkbook = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee32(_ref31) {
+      var workbookId, options, result, responses;
+      return _regeneratorRuntime().wrap(function _callee32$(_context32) {
+        while (1) switch (_context32.prev = _context32.next) {
+          case 0:
+            workbookId = _ref31.workbookId, options = _objectWithoutProperties(_ref31, _excluded24);
+            if (workbookId) {
+              _context32.next = 4;
+              break;
+            }
+            logger$L.error({
+              fn: getWorkbookResponsesByWorkbook,
+              message: 'Missing required workbookId parameter',
+              data: {
+                workbookId: workbookId
+              }
+            });
+            throw new Error('workbookId is required');
+          case 4:
+            _context32.next = 6;
+            return fetch$1(_objectSpread2({
+              url: ENDPOINT_URL.get_workbookresponses_by_workbook(workbookId),
+              contentType: CONTENT_TYPE.json,
+              datatype: DATATYPE.json,
+              includeODataHeaders: true,
+              returnData: true,
+              skipCache: true
+            }, options));
+          case 6:
+            result = _context32.sent;
+            if (!(result && result.data && result.data.quartech_workbookresponse_Workbook_quartech_workbook)) {
+              _context32.next = 10;
+              break;
+            }
+            responses = result.data.quartech_workbookresponse_Workbook_quartech_workbook;
+            return _context32.abrupt("return", _objectSpread2(_objectSpread2({}, result), {}, {
+              data: {
+                value: responses,
+                '@odata.count': responses.length,
+                '@odata.context': result.data['@odata.context']
+              }
+            }));
+          case 10:
+            return _context32.abrupt("return", result);
+          case 11:
+          case "end":
+            return _context32.stop();
+        }
+      }, _callee32);
+    }));
+    return _getWorkbookResponsesByWorkbook.apply(this, arguments);
+  }
+  function getWorkbookResponsesByWorkbookAndQuestion(_x26) {
+    return _getWorkbookResponsesByWorkbookAndQuestion.apply(this, arguments);
+  }
+  function _getWorkbookResponsesByWorkbookAndQuestion() {
+    _getWorkbookResponsesByWorkbookAndQuestion = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee33(_ref32) {
+      var workbookId, questionId, options, result, responses;
+      return _regeneratorRuntime().wrap(function _callee33$(_context33) {
+        while (1) switch (_context33.prev = _context33.next) {
+          case 0:
+            workbookId = _ref32.workbookId, questionId = _ref32.questionId, options = _objectWithoutProperties(_ref32, _excluded25);
+            if (!(!workbookId || !questionId)) {
+              _context33.next = 4;
+              break;
+            }
+            logger$L.error({
+              fn: getWorkbookResponsesByWorkbookAndQuestion,
+              message: 'Missing required parameters',
+              data: {
+                workbookId: workbookId,
+                questionId: questionId
+              }
+            });
+            throw new Error('workbookId and questionId are required');
+          case 4:
+            _context33.next = 6;
+            return fetch$1(_objectSpread2({
+              url: ENDPOINT_URL.get_workbookresponses_by_workbook_and_question(workbookId, questionId),
+              contentType: CONTENT_TYPE.json,
+              datatype: DATATYPE.json,
+              includeODataHeaders: true,
+              returnData: true,
+              skipCache: true
+            }, options));
+          case 6:
+            result = _context33.sent;
+            if (!(result && result.data && result.data.quartech_workbookresponse_Workbook_quartech_workbook)) {
+              _context33.next = 10;
+              break;
+            }
+            responses = result.data.quartech_workbookresponse_Workbook_quartech_workbook;
+            return _context33.abrupt("return", _objectSpread2(_objectSpread2({}, result), {}, {
+              data: {
+                value: responses,
+                '@odata.count': responses.length,
+                '@odata.context': result.data['@odata.context']
+              }
+            }));
+          case 10:
+            return _context33.abrupt("return", result);
+          case 11:
+          case "end":
+            return _context33.stop();
+        }
+      }, _callee33);
+    }));
+    return _getWorkbookResponsesByWorkbookAndQuestion.apply(this, arguments);
+  }
+  function postWorkbookResponseData(_x27) {
+    return _postWorkbookResponseData.apply(this, arguments);
+  }
+  function _postWorkbookResponseData() {
+    _postWorkbookResponseData = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee34(_ref33) {
+      var workbookId, questionId, response, options;
+      return _regeneratorRuntime().wrap(function _callee34$(_context34) {
+        while (1) switch (_context34.prev = _context34.next) {
+          case 0:
+            workbookId = _ref33.workbookId, questionId = _ref33.questionId, response = _ref33.response, options = _objectWithoutProperties(_ref33, _excluded26);
+            if (!(!workbookId || !questionId || response === undefined)) {
+              _context34.next = 4;
+              break;
+            }
+            logger$L.error({
+              fn: postWorkbookResponseData,
+              message: 'Missing required parameters',
+              data: {
+                workbookId: workbookId,
+                questionId: questionId,
+                response: response
+              }
+            });
+            throw new Error('workbookId, questionId, and response are required');
+          case 4:
+            logger$L.info({
+              fn: postWorkbookResponseData,
+              message: 'Creating workbook response',
+              data: {
+                workbookId: workbookId,
+                questionId: questionId,
+                response: response
+              }
+            });
+            return _context34.abrupt("return", fetch$1(_objectSpread2({
+              method: 'POST',
+              url: ENDPOINT_URL.post_workbookresponse_data,
+              datatype: DATATYPE.json,
+              includeODataHeaders: true,
+              addRequestVerificationToken: true,
+              processData: false,
+              returnData: true,
+              data: JSON.stringify({
+                quartech_response: response,
+                'quartech_Workbook@odata.bind': "/quartech_workbooks(".concat(workbookId, ")"),
+                'quartech_Question@odata.bind': "/quartech_workbookquestions(".concat(questionId, ")")
+              })
+            }, options)));
+          case 6:
+          case "end":
+            return _context34.stop();
+        }
+      }, _callee34);
+    }));
+    return _postWorkbookResponseData.apply(this, arguments);
+  }
+  function patchWorkbookResponseData(_x28) {
+    return _patchWorkbookResponseData.apply(this, arguments);
+  }
+  function _patchWorkbookResponseData() {
+    _patchWorkbookResponseData = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee35(_ref34) {
+      var id, _ref34$response, response, options, updateData;
+      return _regeneratorRuntime().wrap(function _callee35$(_context35) {
+        while (1) switch (_context35.prev = _context35.next) {
+          case 0:
+            id = _ref34.id, _ref34$response = _ref34.response, response = _ref34$response === void 0 ? null : _ref34$response, options = _objectWithoutProperties(_ref34, _excluded27);
+            if (id) {
+              _context35.next = 4;
+              break;
+            }
+            logger$L.error({
+              fn: patchWorkbookResponseData,
+              message: 'Missing required id parameter',
+              data: {
+                id: id
+              }
+            });
+            throw new Error('id is required');
+          case 4:
+            updateData = {};
+            if (response !== null) updateData.quartech_response = response;
+            if (!(Object.keys(updateData).length === 0)) {
+              _context35.next = 9;
+              break;
+            }
+            logger$L.warn({
+              fn: patchWorkbookResponseData,
+              message: 'No data to update',
+              data: {
+                id: id,
+                response: response
+              }
+            });
+            return _context35.abrupt("return", Promise.resolve({
+              data: null
+            }));
+          case 9:
+            logger$L.info({
+              fn: patchWorkbookResponseData,
+              message: 'Updating workbook response',
+              data: {
+                id: id,
+                updateData: updateData
+              }
+            });
+            return _context35.abrupt("return", fetch$1(_objectSpread2({
+              method: 'PATCH',
+              url: ENDPOINT_URL.patch_workbookresponse_data(id),
+              datatype: DATATYPE.json,
+              includeODataHeaders: true,
+              addRequestVerificationToken: true,
+              processData: false,
+              returnData: true,
+              data: JSON.stringify(updateData)
+            }, options)));
+          case 11:
+          case "end":
+            return _context35.stop();
+        }
+      }, _callee35);
+    }));
+    return _patchWorkbookResponseData.apply(this, arguments);
+  }
+  function deleteWorkbookResponseData(_x29) {
+    return _deleteWorkbookResponseData.apply(this, arguments);
+  }
+  function _deleteWorkbookResponseData() {
+    _deleteWorkbookResponseData = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee36(_ref35) {
+      var id, options;
+      return _regeneratorRuntime().wrap(function _callee36$(_context36) {
+        while (1) switch (_context36.prev = _context36.next) {
+          case 0:
+            id = _ref35.id, options = _objectWithoutProperties(_ref35, _excluded28);
+            if (id) {
+              _context36.next = 4;
+              break;
+            }
+            logger$L.error({
+              fn: deleteWorkbookResponseData,
+              message: 'Missing required id parameter',
+              data: {
+                id: id
+              }
+            });
+            throw new Error('id is required');
+          case 4:
+            logger$L.info({
+              fn: deleteWorkbookResponseData,
+              message: 'Deleting workbook response',
+              data: {
+                id: id
+              }
+            });
+            return _context36.abrupt("return", fetch$1(_objectSpread2({
+              method: 'DELETE',
+              url: ENDPOINT_URL.delete_workbookresponse_data(id),
+              addRequestVerificationToken: true,
+              returnData: true
+            }, options)));
+          case 6:
+          case "end":
+            return _context36.stop();
+        }
+      }, _callee36);
+    }));
+    return _deleteWorkbookResponseData.apply(this, arguments);
+  }
 
-  const logger$J = Logger('common/env');
+  const logger$K = Logger('common/env');
   POWERPOD.env = {
       getEnvVars,
       getEnv,
@@ -2434,14 +2770,14 @@
       const { host } = window.location;
       const env = Object.keys(Hosts).find((key) => Hosts[key].includes(host));
       if (!env) {
-          logger$J.error({
+          logger$K.error({
               fn: getEnv,
               message: 'Unable to determine current env',
               data: { host, Hosts },
           });
           return;
       }
-      logger$J.info({
+      logger$K.info({
           fn: getEnv,
           message: `successfully determined current env: ${env}`,
       });
@@ -2451,7 +2787,7 @@
       const { data } = await getEnvVarsData();
       if (data) {
           const res = processEnvVarsData(data);
-          logger$J.info({
+          logger$K.info({
               fn: getEnvVars,
               message: 'successfully extracted env vars:',
               data: res,
@@ -2459,7 +2795,7 @@
           return Promise.resolve(res);
       }
       let errorMsg = 'failed to extract env vars from data';
-      logger$J.warn({
+      logger$K.warn({
           fn: getEnvVars,
           message: errorMsg,
           data,
@@ -2520,7 +2856,7 @@
   // Claim TFCR:
   // import localConfigJson from '../../../../assets/claim/json/quartech_applicantportalclaimformjson_tfcr.json';
 
-  var logger$I = Logger('common/config');
+  var logger$J = Logger('common/config');
   POWERPOD.config = {
     getGlobalConfigData: getGlobalConfigData,
     getClaimConfigData: getClaimConfigData,
@@ -2529,7 +2865,7 @@
   function getGlobalConfigData() {
     var _JSON$parse;
     var path = window.location.pathname;
-    logger$I.info({
+    logger$J.info({
       fn: getGlobalConfigData,
       message: 'checking path to determine if we should use localhost or hosted data',
       data: {
@@ -2553,7 +2889,7 @@
     var programData = localStorage.getItem('programData');
     var configDataJSON = (_JSON$parse = JSON.parse(programData)) === null || _JSON$parse === void 0 || (_JSON$parse = _JSON$parse.quartech_ApplicantPortalConfig) === null || _JSON$parse === void 0 ? void 0 : _JSON$parse.quartech_configdata;
     if (!configDataJSON) {
-      logger$I.error({
+      logger$J.error({
         fn: getGlobalConfigData,
         message: 'Could not find config data json, check global JSON config data',
         data: {
@@ -2564,7 +2900,7 @@
       return;
     }
     var podsConfigData = JSON.parse(configDataJSON);
-    logger$I.info({
+    logger$J.info({
       fn: getApplicationConfigData,
       message: 'successfully fetched global config data from storage',
       data: podsConfigData
@@ -2574,7 +2910,7 @@
   function getClaimConfigData() {
     var _JSON$parse2;
     var path = window.location.pathname;
-    logger$I.info({
+    logger$J.info({
       fn: getClaimConfigData,
       message: 'checking path to determine if we should use localhost or hosted data',
       data: {
@@ -2595,7 +2931,7 @@
     var programData = localStorage.getItem('programData');
     var configDataJSON = (_JSON$parse2 = JSON.parse(programData)) === null || _JSON$parse2 === void 0 ? void 0 : _JSON$parse2.quartech_applicantportalclaimformjson;
     if (!configDataJSON) {
-      logger$I.error({
+      logger$J.error({
         fn: getClaimConfigData,
         message: 'Failed to get Claim config data, check quartech_applicantportalclaimformjson for the program in MS Dynamics.',
         data: {
@@ -2606,7 +2942,7 @@
       return;
     }
     var podsConfigData = JSON.parse(configDataJSON);
-    logger$I.info({
+    logger$J.info({
       fn: getApplicationConfigData,
       message: 'successfully fetched claim config data from storage',
       data: podsConfigData
@@ -2616,7 +2952,7 @@
   function getApplicationConfigData(programId) {
     var _JSON$parse3;
     var path = window.location.pathname;
-    logger$I.info({
+    logger$J.info({
       fn: getApplicationConfigData,
       message: 'checking path to determine if we should use localhost or hosted data',
       data: {
@@ -2636,7 +2972,7 @@
     // UNCOMMENT THIS IF YOU WANT TO FORCE TO USE LOCAL JSON CONFIG
 
     var programData = localStorage.getItem('programData');
-    logger$I.info({
+    logger$J.info({
       fn: getApplicationConfigData,
       message: "got applicationConfigData from storage, programData",
       data: {
@@ -2644,7 +2980,7 @@
       }
     });
     var configDataJSON = (_JSON$parse3 = JSON.parse(programData)) === null || _JSON$parse3 === void 0 ? void 0 : _JSON$parse3.quartech_applicantportalapplicationformconfigjson;
-    logger$I.info({
+    logger$J.info({
       fn: getApplicationConfigData,
       message: "got applicationConfigData from storage, configDataJSON",
       data: {
@@ -2653,7 +2989,7 @@
       }
     });
     var podsConfigData = JSON.parse(configDataJSON);
-    logger$I.info({
+    logger$J.info({
       fn: getApplicationConfigData,
       message: "got applicationConfigData from storage, podsConfigData",
       data: {
@@ -2662,7 +2998,7 @@
         podsConfigData: podsConfigData
       }
     });
-    logger$I.info({
+    logger$J.info({
       fn: getApplicationConfigData,
       message: 'successfully fetched application config data from storage',
       data: podsConfigData
@@ -2670,7 +3006,7 @@
     return podsConfigData;
   }
 
-  var logger$H = Logger('application/steps/deliverablesBudget');
+  var logger$I = Logger('application/steps/deliverablesBudget');
   function customizeDeliverablesBudgetStep() {
     var _deliverablesBudgetTa;
     configureFields();
@@ -2769,7 +3105,7 @@
   function getCurrencyFieldValue(valueElementId) {
     var valueElement = $("#".concat(valueElementId));
     if (!valueElement) {
-      logger$H.error({
+      logger$I.error({
         fn: getCurrencyFieldValue,
         message: "Unable to find element for valueElementId: ".concat(valueElementId)
       });
@@ -2848,7 +3184,7 @@
   }
   function calculateEstimatedActivityBudget() {
     var _document$getElementB;
-    logger$H.info({
+    logger$I.info({
       fn: calculateEstimatedActivityBudget,
       message: "Calculating estimated activity budget..."
     });
@@ -2890,18 +3226,18 @@
     var estimatedNumberOfAttendeesId = 'quartech_estimatednumberofattendees';
     var estimatedNumberOfAttendees = ((_document$getElementB = document.getElementById(estimatedNumberOfAttendeesId)) === null || _document$getElementB === void 0 ? void 0 : _document$getElementB.value) || 1;
     var estimatedNumberOfAttendeesVal = parseFloat(estimatedNumberOfAttendees) || 1;
-    logger$H.info({
+    logger$I.info({
       fn: calculateEstimatedActivityBudget,
       message: "estimatedNumberOfAttendees: ".concat(estimatedNumberOfAttendees, ", estimatedNumberOfAttendeesVal: ").concat(estimatedNumberOfAttendeesVal)
     });
     var estimatedCostPerAttendeeId = 'quartech_estimatedcostperattendee';
     var estimatedCostPerAttendee = totalActivityCost / estimatedNumberOfAttendeesVal;
-    logger$H.info({
+    logger$I.info({
       fn: calculateEstimatedActivityBudget,
       message: "estimatedCostPerAttendee: ".concat(estimatedCostPerAttendee)
     });
     var estimatedCostPerAttendeeWithCurrencyFormat = CURRENCY_FORMAT.format(estimatedCostPerAttendee);
-    logger$H.info({
+    logger$I.info({
       fn: calculateEstimatedActivityBudget,
       message: "estimatedCostPerAttendeeWithCurrencyFormat: ".concat(estimatedCostPerAttendeeWithCurrencyFormat)
     });
@@ -2929,7 +3265,7 @@
     // validateStepFields();
   }
 
-  var logger$G = Logger('common/currency');
+  var logger$H = Logger('common/currency');
   function formatCurrencyOnBlur(inputValue, allowNegatives) {
     // Remove any non-numeric characters except for decimals and negative signs
     var cleanedValue = inputValue.replace(/[^0-9.-]/g, '');
@@ -2968,7 +3304,7 @@
       initialValue = _ref$initialValue === void 0 ? undefined : _ref$initialValue,
       _ref$allowNegatives = _ref.allowNegatives,
       allowNegatives = _ref$allowNegatives === void 0 ? false : _ref$allowNegatives;
-    logger$G.info({
+    logger$H.info({
       fn: customizeCurrencyInput,
       message: "customizeCurrencyInput called with the following params",
       data: {
@@ -2998,12 +3334,12 @@
       var inputValue = inputCtr.val();
       var pressedKeyCode = event.which; // pressed key on the keyboard.
 
-      logger$G.info({
+      logger$H.info({
         fn: customizeCurrencyInput,
         message: "KEYDOWN ACTION: Detected pressedKeyCode: ".concat(pressedKeyCode)
       });
       if (pressedKeyCode <= 40 && pressedKeyCode >= 37) {
-        logger$G.info({
+        logger$H.info({
           fn: customizeCurrencyInput,
           message: 'KEYDOWN ACTION: Arrow keys pressed, allowing default event behaviour'
         });
@@ -3050,7 +3386,7 @@
         }
         var isDecimalPlace = false;
         // @ts-ignore
-        logger$G.info({
+        logger$H.info({
           fn: customizeCurrencyInput,
           message: 'DELETE ACTION: Attempting to detect if decimal place',
           data: {
@@ -3065,7 +3401,7 @@
         // @ts-ignore
         if (isDecimalPlace && currentInputCursor !== inputValue.length) {
           var _document$getElementB5;
-          logger$G.info({
+          logger$H.info({
             fn: customizeCurrencyInput,
             message: 'DELETE ACTION: Decimal place input detected',
             data: {
@@ -3082,7 +3418,7 @@
           // @ts-ignore
           ) === null || _document$getElementB5 === void 0 || _document$getElementB5.setSelectionRange(currentInputCursor + 1, currentInputCursor + 1);
           event.preventDefault();
-          logger$G.info({
+          logger$H.info({
             fn: customizeCurrencyInput,
             message: 'DELETE ACTION: Decimal place value updated',
             data: {
@@ -3216,7 +3552,7 @@
         currentInputCursor >= inputValue.length - 2 // || adding number after decimal place
         /*             inputValue.length <= totalMaxDigits */) {
           var _document$getElementB10;
-          logger$G.info({
+          logger$H.info({
             fn: customizeCurrencyInput,
             message: 'KEYDOWN ACTION: Decimal input detected',
             data: {
@@ -3236,7 +3572,7 @@
           // }
           event.preventDefault();
           event.stopImmediatePropagation();
-          logger$G.info({
+          logger$H.info({
             fn: customizeCurrencyInput,
             message: 'KEYDOWN ACTION: Decimal input detected... set new value',
             data: {
@@ -3273,7 +3609,7 @@
     if (isNaN(cleanDecimalValue)) cleanDecimalValue = 0.0;
     var newAmountWithCurrencyFormat = CURRENCY_FORMAT.format(cleanDecimalValue);
     if (newAmountWithCurrencyFormat) {
-      logger$G.info({
+      logger$H.info({
         fn: handleNewValueEntered,
         message: "newAmountWithCurrencyFormat: ".concat(newAmountWithCurrencyFormat)
       });
@@ -3314,7 +3650,7 @@
     inputCtr.data('val', inputCtr.val());
   }
 
-  var logger$F = Logger('common/scripts');
+  var logger$G = Logger('common/scripts');
   POWERPOD.useScript = useScript;
   var Scripts = {
     jquerymask: 'jquerymask',
@@ -3388,12 +3724,12 @@
     if (isScriptAdded(id)) {
       // If script already loaded successfully, trigger the callback function
       if (isScriptFullyLoaded(id)) {
-        logger$F.warn({
+        logger$G.warn({
           fn: useScript,
           message: "Script already loaded. Skipping: ".concat(id)
         });
         if (onload) {
-          logger$F.warn({
+          logger$G.warn({
             fn: useScript,
             message: "Script already loaded. Calling onload for: ".concat(id)
           });
@@ -3403,14 +3739,14 @@
       }
       if (onload) {
         var _script$callstack, _script$callstack2;
-        logger$F.warn({
+        logger$G.warn({
           fn: useScript,
           message: "Script still loading, adding to call stack: ".concat(id),
           data: script
         });
         script.callstack = _objectSpread2(_objectSpread2({}, script.callstack ? script.callstack : {}), {}, _defineProperty({}, id, [].concat(_toConsumableArray((_script$callstack = script.callstack) !== null && _script$callstack !== void 0 && _script$callstack[id] ? (_script$callstack2 = script.callstack) === null || _script$callstack2 === void 0 ? void 0 : _script$callstack2[id] : []), [onload])));
       } else {
-        logger$F.warn({
+        logger$G.warn({
           fn: useScript,
           message: "Script still loading: ".concat(id)
         });
@@ -3428,7 +3764,7 @@
     }
     scriptEl.onload = function () {
       var _script$callstack3;
-      logger$F.info({
+      logger$G.info({
         fn: useScript,
         message: "script onload successfully called ".concat(id),
         data: script
@@ -3443,7 +3779,7 @@
       }
     };
     scriptEl.onerror = function () {
-      logger$F.error({
+      logger$G.error({
         fn: useScript,
         message: "Failed to load: ".concat(id)
       });
@@ -3453,7 +3789,7 @@
     };
   }
 
-  var logger$E = Logger('common/masking');
+  var logger$F = Logger('common/masking');
 
   // supported masking types
   var FieldMaskType = {
@@ -3471,12 +3807,12 @@
     PhoneNumber: '(000) 000-0000'
   };
   function maskInput(fieldName, type) {
-    logger$E.info({
+    logger$F.info({
       fn: maskInput,
       message: "applying mask input to fieldName: ".concat(fieldName, " of type: ").concat(type)
     });
     if (!Object.keys(FieldMaskType).includes(type)) {
-      logger$E.error({
+      logger$F.error({
         fn: maskInput,
         message: "unsupported mask, cannot mask input for fieldName: ".concat(fieldName, " and type: ").concat(type)
       });
@@ -3513,20 +3849,20 @@
           });
           break;
         default:
-          logger$E.error({
+          logger$F.error({
             fn: maskInput,
             message: "did NOT apply masking to fieldName: ".concat(fieldName, " of type: ").concat(type)
           });
           return;
       }
-      logger$E.info({
+      logger$F.info({
         fn: maskInput,
         message: "successfully applied mask input to fieldName: ".concat(fieldName, " of type: ").concat(type)
       });
     });
   }
 
-  var logger$D = Logger('common/tooltip');
+  var logger$E = Logger('common/tooltip');
   function setupTooltip(field) {
     var name = field.name,
       tooltipText = field.tooltipText,
@@ -3540,7 +3876,7 @@
         tooltipTargetElement = tooltipTargetElement.parent();
       }
       if (!tooltipTargetElement) {
-        logger$D.error({
+        logger$E.error({
           fn: setupTooltip,
           message: 'Could not find tooltipTargetElement',
           data: {
@@ -3548,7 +3884,7 @@
           }
         });
       }
-      logger$D.info({
+      logger$E.info({
         fn: setupTooltip,
         message: "Start configuring tooltip for fieldName: ".concat(name),
         data: {
@@ -3587,14 +3923,14 @@
     }
   }
 
-  var logger$C = Logger('common/fieldConditionalLogic');
+  var logger$D = Logger('common/fieldConditionalLogic');
   POWERPOD.fieldConditionalLogic = {
     setFieldVisibility: setFieldVisibility
   };
   function assignDependentFields(fieldConfig) {
     var name = fieldConfig.name,
       visibleIf = fieldConfig.visibleIf;
-    logger$C.info({
+    logger$D.info({
       fn: assignDependentFields,
       message: "starting to set dependent fields for name: ".concat(name),
       data: {
@@ -3602,7 +3938,7 @@
       }
     });
     if (!visibleIf) {
-      logger$C.warn({
+      logger$D.warn({
         fn: assignDependentFields,
         message: "could not find visibleIf configuration for field with name: ".concat(name),
         data: {
@@ -3615,7 +3951,7 @@
     fieldNames.forEach(function (controlFieldName) {
       var controlFieldConfig = getFieldConfig(controlFieldName);
       if (!controlFieldConfig) {
-        logger$C.warn({
+        logger$D.warn({
           fn: assignDependentFields,
           message: "control field config not found for: ".concat(controlFieldName),
           data: {
@@ -3655,7 +3991,7 @@
       fieldConfig = params.fieldConfig,
       controlFieldName = params.controlFieldName;
     if (controlFieldConfig.dependentFields && Array.isArray(controlFieldConfig.dependentFields) && (_controlFieldConfig$d = controlFieldConfig.dependentFields) !== null && _controlFieldConfig$d !== void 0 && _controlFieldConfig$d.includes(name)) {
-      logger$C.info({
+      logger$D.info({
         fn: checkControlDependentFields,
         message: "dependent field name: ".concat(name, " already assigned to controlFieldName: ").concat(controlFieldName),
         data: {
@@ -3675,7 +4011,7 @@
   function setFieldVisibility(name) {
     var visibleIf = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
     var condition = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : undefined;
-    logger$C.info({
+    logger$D.info({
       fn: setFieldVisibility,
       message: "starting to set field visibility for name: ".concat(name)
     });
@@ -3690,7 +4026,7 @@
     }
     var matchesCondition = false;
     if (!visibleIf) {
-      logger$C.warn({
+      logger$D.warn({
         fn: setFieldVisibility,
         message: "no visibleIf config found for field: ".concat(name),
         data: {
@@ -3938,7 +4274,7 @@
       comparison: comparison,
       value: value
     };
-    logger$C.info({
+    logger$D.info({
       fn: checkVisibleIfComparison,
       message: "for name: ".concat(name, ", doing a comparison: ").concat(comparison, ", controlValue: ").concat(controlValue),
       data: {
@@ -3946,7 +4282,7 @@
       }
     });
     if (controlValue === '') {
-      logger$C.info({
+      logger$D.info({
         fn: checkVisibleIfComparison,
         message: "for name: ".concat(name, ", cannot compare an empty value, DOES NOT match visibleIf condition"),
         data: {
@@ -3961,7 +4297,7 @@
       operator: comparison,
       forceRequired: true
     });
-    logger$C.info({
+    logger$D.info({
       fn: checkVisibleIfComparison,
       message: "for name: ".concat(name, ", comparison: ").concat(comparison, " returned numericValidationResult: ").concat(getNumericValidationError, ", controlValue: ").concat(controlValue),
       data: {
@@ -3986,7 +4322,7 @@
       selectedValueIn: selectedValueIn
     };
     if (controlValue === selectedValue || controlValue === "".concat(selectedValue) || selectedValueIn !== null && selectedValueIn !== void 0 && selectedValueIn.includes(controlValue) || controlValue !== null && controlValue !== void 0 && controlValue.includes && controlValue !== null && controlValue !== void 0 && controlValue.includes(selectedValue) || Number(controlValue) && selectedValueIn !== null && selectedValueIn !== void 0 && selectedValueIn.includes(Number(controlValue))) {
-      logger$C.info({
+      logger$D.info({
         fn: checkVisibleIfCondition,
         message: "for name: ".concat(name, ", FOUND matching condition"),
         data: {
@@ -4000,7 +4336,7 @@
       var _POWERPOD$state;
       var loadingAllFieldConfig = POWERPOD.configuringFields;
       var loadingFieldConfig = (_POWERPOD$state = POWERPOD.state) === null || _POWERPOD$state === void 0 || (_POWERPOD$state = _POWERPOD$state.fields) === null || _POWERPOD$state === void 0 || (_POWERPOD$state = _POWERPOD$state[name]) === null || _POWERPOD$state === void 0 ? void 0 : _POWERPOD$state.loading;
-      logger$C.info({
+      logger$D.info({
         fn: checkVisibleIfCondition,
         message: "for name: ".concat(name, ", found did NOT find matching condition"),
         data: {
@@ -4050,7 +4386,7 @@
         return evaluateVisibilityConditions(subCond, name);
       });
     }
-    logger$C.warn({
+    logger$D.warn({
       fn: evaluateVisibilityConditions,
       message: 'Invalid visibleIf structure',
       data: {
@@ -4061,7 +4397,7 @@
     return false;
   }
 
-  const logger$B = Logger('common/components');
+  const logger$C = Logger('common/components');
   POWERPOD.components = {
       renderCustomComponent,
   };
@@ -4077,13 +4413,13 @@
       const { fieldId, customElementTag, attributes = {}, customEvent, customEventHandler = () => { }, mappedValueKey, // internal element property that should map to the dynamics field, e.g. in this case "rows" maps to quartech_eligibleexpenses
       initValuesFn, // additional function to load initial values
       customSetupFn, } = params;
-      logger$B.info({
+      logger$C.info({
           fn: renderCustomComponent,
           message: `Start adding custom component: ${customElementTag}`,
           data: { params },
       });
       if (!$(`#${fieldId}`)) {
-          logger$B.error({
+          logger$C.error({
               fn: renderCustomComponent,
               message: `Failed to add custom element, could not find fieldId: ${fieldId}`,
           });
@@ -4105,14 +4441,14 @@
       // hide dynamics field
       $(`#${fieldId}`).css({ display: 'none' });
       customElement.addEventListener(customEvent, (event) => {
-          logger$B.info({
+          logger$C.info({
               fn: renderCustomComponent,
               message: `Detected event from custom element: ${customElementTag}`,
               data: { event, customElement, params },
           });
           customEventHandler(event, customElement);
       });
-      logger$B.info({
+      logger$C.info({
           fn: renderCustomComponent,
           message: `Successfully added custom component: ${customElementTag}`,
           data: { params },
@@ -4124,13 +4460,13 @@
           tr,
           raw: true,
       });
-      logger$B.info({
+      logger$C.info({
           fn: renderCustomComponent,
           message: `For fieldId: ${fieldId}, found existingValue: ${existingValue}`,
           data: { params, existingValue, tr },
       });
       if (existingValue !== null && existingValue !== '[]') {
-          logger$B.info({
+          logger$C.info({
               fn: renderCustomComponent,
               message: `Setting existing value for mappedValueKey: ${mappedValueKey} to existingValue: ${existingValue}`,
               data: { params },
@@ -4144,7 +4480,7 @@
           customSetupFn();
       }
       const id = customElement.getAttribute('id');
-      logger$B.info({
+      logger$C.info({
           fn: renderCustomComponent,
           message: `Looking for id for fieldId: ${fieldId}`,
           data: { customElement, id },
@@ -9131,7 +9467,7 @@
     return formattedDate;
   }
 
-  var logger$A = Logger('common/contacts');
+  var logger$B = Logger('common/contacts');
   POWERPOD.contacts = {
     getContactName: getContactName
   };
@@ -9156,7 +9492,7 @@
               _context.next = 7;
               break;
             }
-            logger$A.error({
+            logger$B.error({
               fn: getContactName,
               message: 'Failed to get contact'
             });
@@ -9167,13 +9503,13 @@
               _context.next = 11;
               break;
             }
-            logger$A.error({
+            logger$B.error({
               fn: getContactName,
               message: 'Failed to get contact name'
             });
             return _context.abrupt("return");
           case 11:
-            logger$A.info({
+            logger$B.info({
               fn: getContactName,
               message: "Successfully retrieved fullname: ".concat(fullname)
             });
@@ -9207,7 +9543,7 @@
     });
   }
 
-  const logger$z = Logger('common/documents');
+  const logger$A = Logger('common/documents');
   POWERPOD.docUtils = {
       getFilenamesFromDocData,
       getFilenamesFromFieldData,
@@ -9238,7 +9574,7 @@
   function getFilenamesFromDocData(data, fieldName = 'ALL FIELDS') {
       const { value } = data;
       const filenames = value.map((item) => item.filename);
-      logger$z.info({
+      logger$A.info({
           fn: getFilenamesFromDocData,
           message: `Returning filenames string from documents data for fieldName: ${fieldName}`,
           data: { data, filenames },
@@ -9262,7 +9598,7 @@
       if (fileName && !fileNames.includes(fileName)) {
           fileNames.push(fileName);
       }
-      logger$z.info({
+      logger$A.info({
           fn: getFilenamesFromFieldData,
           message: `Returning filename list from upload field content for fieldName: ${fieldName}`,
           data: { fileNames },
@@ -9340,7 +9676,7 @@
               const startIndex = fileString.lastIndexOf('(', endIndex); // Find the preceding opening parenthesis
               if (startIndex !== -1 && endIndex !== -1 && endIndex > startIndex) {
                   const filename = fileString.substring(0, startIndex).trim(); // Extract filename
-                  logger$z.info({
+                  logger$A.info({
                       fn: readFileInputStr,
                       message: `Found filename: ${filename}`,
                   });
@@ -9351,7 +9687,7 @@
               }
           }
       });
-      logger$z.info({
+      logger$A.info({
           fn: readFileInputStr,
           message: `Found ${(_a = matchingDocs === null || matchingDocs === void 0 ? void 0 : matchingDocs.length) !== null && _a !== void 0 ? _a : 0} matching docs`,
           data: { fileInputStr, docs, matchingDocs },
@@ -9359,7 +9695,7 @@
       return matchingDocs;
   }
   function generateFileInputStr(docs) {
-      logger$z.info({
+      logger$A.info({
           fn: generateFileInputStr,
           message: 'Start generating file input str',
           data: { docs },
@@ -9368,7 +9704,7 @@
       docs.forEach((doc) => {
           const { filename, fileId, filesize, status } = doc;
           if (status !== 'uploaded') {
-              logger$z.warn({
+              logger$A.warn({
                   fn: generateFileInputStr,
                   message: `File not uploaded yet, filename: ${filename}`,
                   data: { doc },
@@ -9382,7 +9718,7 @@
           }
           inputStr += fileStr + '\n';
       });
-      logger$z.info({
+      logger$A.info({
           fn: generateFileInputStr,
           message: 'Successfully generated file input str',
           data: { docs, inputStr },
@@ -9394,7 +9730,7 @@
       const filename = convertExtensionToLowerCase(name);
       const { contactId } = getCurrentUser();
       if (!contactId) {
-          logger$z.error({
+          logger$A.error({
               fn: generateDocumentSubject,
               message: 'Could not find contactId for user',
           });
@@ -9405,7 +9741,7 @@
           fullname = await getContactName(contactId);
       }
       if (!fullname) {
-          logger$z.error({
+          logger$A.error({
               fn: generateDocumentSubject,
               message: 'Could not find fullname for user',
           });
@@ -9431,7 +9767,7 @@
   }
   async function postDocument(file, fieldName) {
       var _a;
-      logger$z.info({
+      logger$A.info({
           fn: postDocument,
           message: `Start uploading file for fieldName: ${fieldName}`,
           data: { file, fieldName },
@@ -9442,7 +9778,7 @@
       const { subject, fileId } = await generateDocumentSubject(file, fieldName);
       const formId = getFormId();
       if (!(documentbody === null || documentbody === void 0 ? void 0 : documentbody.length) || !(subject === null || subject === void 0 ? void 0 : subject.length) || !(formId === null || formId === void 0 ? void 0 : formId.length)) {
-          logger$z.error({
+          logger$A.error({
               fn: postDocument,
               message: `Failed to postDocument for fieldName: ${fieldName}`,
               data: { file, fieldName, documentbody, subject, formId },
@@ -9458,35 +9794,35 @@
           mimetype: type,
           formType,
       };
-      logger$z.info({
+      logger$A.info({
           fn: postDocument,
           message: `Posting document for fieldName: ${fieldName}`,
           data: { payload, file, fieldName, formType },
       });
       const response = await postDocumentData(payload);
       if (!response || ((_a = response.jqXHR) === null || _a === void 0 ? void 0 : _a.status) !== 204) {
-          logger$z.error({
+          logger$A.error({
               fn: postDocument,
               message: 'Failed to post document',
               data: { payload, response, file, fieldName },
           });
           return;
       }
-      logger$z.info({
+      logger$A.info({
           fn: postDocument,
           message: 'Successfully posted document',
           data: { payload, response, file, fieldName },
       });
   }
   function processDocumentsData(data) {
-      logger$z.info({
+      logger$A.info({
           fn: processDocumentsData,
           message: 'Start processing retrieved documents data',
           data: { data },
       });
       const { value: documentsDataArray } = data;
       const documents = documentsDataArray.map((docData) => mapDataToUploadedDoc(docData));
-      logger$z.info({
+      logger$A.info({
           fn: processDocumentsData,
           message: 'Successfully parsed documents data',
           data: { documents },
@@ -9495,7 +9831,7 @@
   }
   async function deleteDocuments(formId, documents = []) {
       if (!documents || !documents.length) {
-          logger$z.warn({
+          logger$A.warn({
               fn: deleteDocuments,
               message: 'No documents found to delete',
               data: { formId },
@@ -9503,7 +9839,7 @@
           return;
       }
       const startTime = Date.now();
-      logger$z.info({
+      logger$A.info({
           fn: deleteDocuments,
           message: `Start deleting all documents for formId: ${formId}`,
           data: { formId, documents },
@@ -9512,7 +9848,7 @@
           var _a;
           const { annotationid: annotationId } = doc;
           const startTime = Date.now();
-          logger$z.info({
+          logger$A.info({
               fn: deleteDocuments,
               message: `Start deleting document for for annotationId: ${annotationId}`,
               data: { formId, doc },
@@ -9522,7 +9858,7 @@
               returnData: true,
           });
           if (!response || ((_a = response.jqXHR) === null || _a === void 0 ? void 0 : _a.status) !== 204) {
-              logger$z.error({
+              logger$A.error({
                   fn: deleteDocuments,
                   message: `Failed to delete document for annotationId: ${annotationId}`,
                   data: { response, doc, formId, annotationId },
@@ -9530,14 +9866,14 @@
               return;
           }
           const elapsedTime = Date.now() - startTime;
-          logger$z.info({
+          logger$A.info({
               fn: deleteDocuments,
               message: `Successfully deleted document for annotationId: ${annotationId}, took ${elapsedTime} ms`,
               data: { response, doc, formId, annotationId },
           });
       });
       const elapsedTime = Date.now() - startTime;
-      logger$z.info({
+      logger$A.info({
           fn: deleteDocuments,
           message: `Successfully deleted all documents for formId: ${formId}, took ${elapsedTime} ms`,
           data: { formId, documents },
@@ -9545,7 +9881,7 @@
   }
   function validateFileUpload(file) {
       var _a;
-      logger$z.info({
+      logger$A.info({
           fn: validateFileUpload,
           message: 'Validating file upload file',
           data: { file },
@@ -9580,7 +9916,7 @@
       var _a;
       const allowedDocumentsTooltipText = (_a = getGlobalConfigData()) === null || _a === void 0 ? void 0 : _a.AllowedDocumentsTooltipText;
       if (!allowedDocumentsTooltipText) {
-          logger$z.error({
+          logger$A.error({
               fn: addDocumentsStepText,
               message: 'Failed to fetch AllowedDocumentsTooltipText',
           });
@@ -9640,7 +9976,7 @@
       return inputString.trim();
   }
 
-  const logger$y = Logger('components/fileUpload');
+  const logger$z = Logger('components/fileUpload');
   let FileUpload = class FileUpload extends s$1 {
       constructor() {
           super(...arguments);
@@ -9662,7 +9998,7 @@
           this.getDocuments(true);
       }
       setupTooltip(element, tooltipText) {
-          logger$y.info({
+          logger$z.info({
               fn: 'FileUpload.setupTooltip',
               message: `Start configuring tooltip for element`,
               data: { element, tooltipText },
@@ -9699,7 +10035,7 @@
           });
       }
       firstUpdated(props) {
-          logger$y.info({
+          logger$z.info({
               fn: 'FileUpload.firstUpdated',
               message: `this.tooltiptext: ${this.tooltiptext}`,
               data: {
@@ -9712,7 +10048,7 @@
               this.tooltiptext !== 'undefined' &&
               this.fileUploadElement) {
               const $fileUploadElement = $(this.fileUploadElement);
-              logger$y.info({
+              logger$z.info({
                   fn: 'FileUpload.firstUpdated',
                   message: `$fileUploadElement:`,
                   data: {
@@ -9745,7 +10081,7 @@
           }
       }
       async getDocuments(emitEvent = false) {
-          logger$y.info({
+          logger$z.info({
               fn: 'getDocuments',
               message: 'Calling getDocuments task',
               data: { fileInputStr: this.fileInputStr },
@@ -9760,7 +10096,7 @@
               this.emitEvent();
       }
       async getDocument(fileId) {
-          logger$y.info({
+          logger$z.info({
               fn: 'getDocument',
               message: 'Calling getDocument task',
               data: { fileId },
@@ -9773,7 +10109,7 @@
               const allDocs = processDocumentsData(data);
               const doc = allDocs.find((doc) => doc.subject.includes(fileId));
               if (!doc) {
-                  logger$y.error({
+                  logger$z.error({
                       fn: 'getDocument',
                       message: `Could not find doc to delete by fileId: ${fileId}`,
                   });
@@ -9782,7 +10118,7 @@
               return doc;
           }
           catch (e) {
-              logger$y.error({
+              logger$z.error({
                   fn: 'getDocument',
                   message: 'getDocument task failed',
                   data: { e, fileId },
@@ -9811,7 +10147,7 @@
           this.handleFiles(files);
       }
       handleFileSelect(e) {
-          logger$y.info({
+          logger$z.info({
               fn: 'handleFileSelect',
               message: 'Start handling file select',
               data: { e },
@@ -9830,7 +10166,7 @@
       }
       async uploadFile(file, fieldName) {
           var _a;
-          logger$y.info({
+          logger$z.info({
               fn: 'uploadFile',
               message: `Start uploading file for fieldName: ${fieldName}`,
               data: { file, fieldName },
@@ -9850,7 +10186,7 @@
               formType: this.formType,
           }) - 1;
           this.emitEvent();
-          logger$y.info({
+          logger$z.info({
               fn: 'uploadFile',
               message: `Added pending file to docs array for fieldName: ${fieldName}`,
               data: { file, fieldName, docs: this.docs, docIndex },
@@ -9860,7 +10196,7 @@
               const { subject, fileId } = await generateDocumentSubject(file, this.fieldName);
               const formId = getFormId();
               if (!(documentbody === null || documentbody === void 0 ? void 0 : documentbody.length) || !(subject === null || subject === void 0 ? void 0 : subject.length) || !(formId === null || formId === void 0 ? void 0 : formId.length)) {
-                  logger$y.error({
+                  logger$z.error({
                       fn: 'uploadFile',
                       message: `Failed to postDocument for fieldName: ${fieldName}`,
                       data: {
@@ -9881,7 +10217,7 @@
                   documentbody,
                   mimetype: type,
               };
-              logger$y.info({
+              logger$z.info({
                   fn: this.uploadFile,
                   message: `Posting document for fieldName: ${fieldName}`,
                   data: { payload, file, fieldName, formType },
@@ -9900,7 +10236,7 @@
                   timeout: 120 * 1000, // for file uploads allow 120 seconds
               });
               if (!response || ((_a = response.jqXHR) === null || _a === void 0 ? void 0 : _a.status) !== 204) {
-                  logger$y.error({
+                  logger$z.error({
                       fn: this.uploadFile,
                       message: 'Failed to post document',
                       data: { payload, response, file, fieldName },
@@ -9910,7 +10246,7 @@
                   return;
               }
               this.docs[docIndex].status = 'uploaded';
-              logger$y.info({
+              logger$z.info({
                   fn: 'uploadFile',
                   message: 'Successfully posted document',
                   data: {
@@ -9924,7 +10260,7 @@
               this.emitEvent();
           }
           catch (e) {
-              logger$y.error({
+              logger$z.error({
                   fn: 'uploadFile',
                   message: 'File upload encountered an error',
                   data: { e },
@@ -9935,7 +10271,7 @@
       }
       async deleteDocument(doc, docIndex) {
           var _a;
-          logger$y.info({
+          logger$z.info({
               fn: 'deleteDocument',
               message: `Start deleting document...`,
               data: { doc, docIndex },
@@ -9952,14 +10288,14 @@
               }
               if (!annotationId) {
                   let errorMsg = 'Could not find annotationid, likely file does not exist in dynamics';
-                  logger$y.error({
+                  logger$z.error({
                       fn: 'deleteDocument',
                       message: errorMsg,
                       data: { doc, docIndex, fileId },
                   });
                   throw new Error(errorMsg);
               }
-              logger$y.info({
+              logger$z.info({
                   fn: 'deleteDocument',
                   message: `Start deleting document for for annotationId: ${annotationId}`,
                   data: { doc },
@@ -9970,21 +10306,21 @@
               });
               // purposely do not "return" on fail, remove file from list of user's file, even if hard delete fails
               if (!response || ((_a = response.jqXHR) === null || _a === void 0 ? void 0 : _a.status) !== 204) {
-                  logger$y.error({
+                  logger$z.error({
                       fn: 'deleteDocument',
                       message: `Failed to delete document for annotationId: ${annotationId}`,
                       data: { response, doc, annotationId },
                   });
               }
               const elapsedTime = Date.now() - startTime;
-              logger$y.info({
+              logger$z.info({
                   fn: 'deleteDocument',
                   message: `Done deleting document for annotationId: ${annotationId}, took ${elapsedTime} ms`,
                   data: { response, doc, annotationId },
               });
           }
           catch (e) {
-              logger$y.error({
+              logger$z.error({
                   fn: 'deleteDocument',
                   message: 'File delete encountered an error, remove document anyway',
                   data: { e },
@@ -10576,11 +10912,11 @@
     updateSMEDesignationExplanationFieldLabelForKTTP2: updateSMEDesignationExplanationFieldLabelForKTTP2,
     calculateTotalRequestedAmountForKTTP: calculateTotalRequestedAmountForKTTP
   };
-  var logger$x = Logger('common/onChangeHandlers');
+  var logger$y = Logger('common/onChangeHandlers');
   function setOnChangeHandler(fieldName, elemType, onChangeHandlerName) {
     var onChangeHandler = POWERPOD.onChangeHandlers[onChangeHandlerName];
     if (!onChangeHandler || typeof onChangeHandler !== 'function') {
-      logger$x.error({
+      logger$y.error({
         fn: setOnChangeHandler,
         message: "Could not set onChangeHandler for fieldName: ".concat(fieldName, " with onChangeHandlerName: ").concat(onChangeHandlerName)
       });
@@ -10590,7 +10926,7 @@
       case HtmlElementType.FileInput:
         var textareaField = $("#".concat(fieldName));
         var attachFileField = $("input[id=".concat(fieldName, "_AttachFile]"));
-        logger$x.info({
+        logger$y.info({
           fn: setOnChangeHandler,
           message: "observe changes on file input element, setOnChangeHandler: ".concat(fieldName),
           data: {
@@ -10608,12 +10944,12 @@
         });
         break;
       case HtmlElementType.DatePicker:
-        logger$x.info({
+        logger$y.info({
           fn: setOnChangeHandler,
           message: "Configuring onChangeHandler for datepicker element, setOnChangeHandler: ".concat(fieldName)
         });
         var datePickerElement = $("input[id=".concat(fieldName, "_datepicker_description]")).parent()[0];
-        logger$x.info({
+        logger$y.info({
           fn: setOnChangeHandler,
           message: "observe changes on datepicker element, setOnChangeHandler: ".concat(fieldName),
           data: {
@@ -10627,20 +10963,20 @@
         break;
       case HtmlElementType.SingleOptionSet:
       case HtmlElementType.MultiOptionSet:
-        logger$x.info({
+        logger$y.info({
           fn: setOnChangeHandler,
           message: "Configuring onChangeHandler for Single/MultiOptionSet, setOnChangeHandler: ".concat(fieldName)
         });
         $("input[id*='".concat(fieldName, "']")).on('change', function () {
           onChangeHandler();
-          logger$x.info({
+          logger$y.info({
             fn: setOnChangeHandler,
             message: 'Q3 updated... validateRequiredFields...'
           });
         });
         break;
       case HtmlElementType.DropdownSelect:
-        logger$x.info({
+        logger$y.info({
           fn: setOnChangeHandler,
           message: "Configuring onChangeHandler for DropdownSelect, setOnChangeHandler: ".concat(fieldName)
         });
@@ -10650,7 +10986,7 @@
         break;
       default:
         // HtmlElementTypeEnum.Input
-        logger$x.info({
+        logger$y.info({
           fn: setOnChangeHandler,
           message: "Configuring onChangeHandler for default input, setOnChangeHandler: ".concat(fieldName)
         });
@@ -10659,7 +10995,7 @@
         });
         break;
     }
-    logger$x.info({
+    logger$y.info({
       fn: setOnChangeHandler,
       message: "Successfully set onChangeHandler for fieldName: ".concat(fieldName, ", elemType: ").concat(elemType, ", onChangeHandlerName: ").concat(onChangeHandlerName)
     });
@@ -10672,7 +11008,7 @@
     var _document$getElementB, _document$getElementB2;
     var totalSumOfReportedExpenses = ((_document$getElementB = document.getElementById('quartech_totalsumofreportedexpenses')) === null || _document$getElementB === void 0 ? void 0 : _document$getElementB.value) || 0;
     var costShareContribution = ((_document$getElementB2 = document.getElementById('quartech_costsharecontributioncashorinkind')) === null || _document$getElementB2 === void 0 ? void 0 : _document$getElementB2.value) || 0;
-    logger$x.info({
+    logger$y.info({
       fn: calculateTotalRequestedAmountForKTTP,
       message: "calculateTotalRequestedAmount returned the following data",
       data: {
@@ -10684,7 +11020,7 @@
     var totalExpenses = parseFloat(sanitizedTotalSumOfExpenses) || 0;
     var sanitizedCostShareContribution = typeof costShareContribution === 'string' ? costShareContribution.replace(',', '') : String(costShareContribution).replace(',', '');
     var contribution = parseFloat(sanitizedCostShareContribution) || 0;
-    logger$x.info({
+    logger$y.info({
       fn: calculateTotalRequestedAmountForKTTP,
       message: "calculateTotalRequestedAmount returned ".concat(totalExpenses, " for totalExpenses and ").concat(contribution, " for contribution")
     });
@@ -10697,14 +11033,14 @@
       name: 'quartech_totalfees',
       value: formattedResult
     });
-    logger$x.info({
+    logger$y.info({
       fn: calculateTotalRequestedAmountForKTTP,
       message: "Successfuly set field tag: quartech_totalfees to value: ".concat(result)
     });
   }
   function calculateTFCRBudgets() {
     var _document$getElementB3, _document$getElementB4, _document$getElementB5, _document$getElementB6, _document$getElementB7;
-    logger$x.info({
+    logger$y.info({
       fn: calculateTFCRBudgets,
       message: "calculateTFCRBudgets called, start calculating..."
     });
@@ -10715,7 +11051,7 @@
     var equipment = ((_document$getElementB5 = document.getElementById('quartech_facilityequipmenttechnologyrental')) === null || _document$getElementB5 === void 0 ? void 0 : _document$getElementB5.value) || 0;
     var materials = ((_document$getElementB6 = document.getElementById('quartech_materials')) === null || _document$getElementB6 === void 0 ? void 0 : _document$getElementB6.value) || 0;
     var other = ((_document$getElementB7 = document.getElementById('quartech_othercost')) === null || _document$getElementB7 === void 0 ? void 0 : _document$getElementB7.value) || 0;
-    logger$x.info({
+    logger$y.info({
       fn: calculateTFCRBudgets,
       message: "calculateTFCRBudgets returned the following values",
       data: {
@@ -10733,7 +11069,7 @@
     var equipmentCost = parseFloat(equipment.replaceAll(',', '')) || 0;
     var materialsCost = parseFloat(materials.replaceAll(',', '')) || 0;
     var otherCost = parseFloat(other.replaceAll(',', '')) || 0;
-    logger$x.info({
+    logger$y.info({
       fn: calculateTFCRBudgets,
       message: "calculateAndPopulateRequestedClaimAmountForVLB returned the following for expenses",
       data: {
@@ -10754,7 +11090,7 @@
       name: 'quartech_estimatedbudgettotalactivitycost',
       value: formattedTotalProposedBudgetCost
     });
-    logger$x.info({
+    logger$y.info({
       fn: calculateTFCRBudgets,
       message: "Successfuly set field tag: quartech_estimatedbudgettotalactivitycost to value: ".concat(formattedTotalProposedBudgetCost)
     });
@@ -10772,7 +11108,7 @@
       name: 'quartech_totalfundingrequiredfromtheprogram',
       value: formattedfinalTotalFundingRequired
     });
-    logger$x.info({
+    logger$y.info({
       fn: calculateTFCRBudgets,
       message: "Successfuly set field tag: quartech_totalfundingrequiredfromtheprogram to value: ".concat(formattedfinalTotalFundingRequired)
     });
@@ -10784,7 +11120,7 @@
   }
   function checkAndSetTFCCRFEligbilityNotice() {
     var _document$getElementB8, _document$getElementB9, _document$getElementB10, _document$getElementB11, _document$getElementB12, _document$getElementB13, _document$getElementB14;
-    logger$x.info({
+    logger$y.info({
       fn: checkAndSetTFCCRFEligbilityNotice,
       message: "checkAndSetTFCCRFEligbilityNotice called, start calculating..."
     });
@@ -10795,7 +11131,7 @@
     var taxReturnNotRequired = (_document$getElementB12 = document.getElementById('quartech_taxreturnnotrequired')) === null || _document$getElementB12 === void 0 ? void 0 : _document$getElementB12.value;
     var ownerOrLesseeOfTheLand = (_document$getElementB13 = document.getElementById('quartech_areyouanownerorlesseeoftheland')) === null || _document$getElementB13 === void 0 ? void 0 : _document$getElementB13.value;
     var notResearchStationOrGovernmentFundedAgency = (_document$getElementB14 = document.getElementById('quartech_notresearchstationorgovernmentfundedagency')) === null || _document$getElementB14 === void 0 ? void 0 : _document$getElementB14.value;
-    logger$x.info({
+    logger$y.info({
       fn: checkAndSetTFCCRFEligbilityNotice,
       message: "founds the following values...",
       data: {
@@ -10816,7 +11152,7 @@
     var areAllValuesYes = existingTreeFruit === YES_VALUE && treeFruitDensityEligibility === YES_VALUE && taxableEntity === YES_VALUE && (fileFarmIncomeTaxUnderTaxActInBC === YES_VALUE || fileFarmIncomeTaxUnderTaxActInBC === NO_VALUE && taxReturnNotRequired === YES_VALUE) && ownerOrLesseeOfTheLand === YES_VALUE && notResearchStationOrGovernmentFundedAgency === YES_VALUE;
     var noticeElement = document.getElementById('doesNotMeetTFCCRFEligibilityRequirements');
     if (!noticeElement) {
-      logger$x.warn({
+      logger$y.warn({
         fn: checkAndSetTFCCRFEligbilityNotice,
         message: "Could not fetch noticeElement by id doesNotMeetTFCCRFEligibilityRequirements"
       });
@@ -10863,7 +11199,7 @@
   }
   function checkAndSetTFCREligbilityNotice() {
     var _document$getElementB15, _document$getElementB16, _document$getElementB17, _document$getElementB18, _document$getElementB19;
-    logger$x.info({
+    logger$y.info({
       fn: checkAndSetTFCREligbilityNotice,
       message: "checkAndSetTFCREligbilityNotice called, start calculating..."
     });
@@ -10872,7 +11208,7 @@
     var taxableEntity = (_document$getElementB17 = document.getElementById('quartech_areyouataxableentity')) === null || _document$getElementB17 === void 0 ? void 0 : _document$getElementB17.value;
     var fileFarmIncomeTaxUnderTaxActInBC = (_document$getElementB18 = document.getElementById('quartech_doyoufilefarmincometaxundertaxactinbc')) === null || _document$getElementB18 === void 0 ? void 0 : _document$getElementB18.value;
     var commitToMaintainingTheProperty = (_document$getElementB19 = document.getElementById('quartech_doyoucommittomaintainingtheproperty')) === null || _document$getElementB19 === void 0 ? void 0 : _document$getElementB19.value;
-    logger$x.info({
+    logger$y.info({
       fn: checkAndSetTFCREligbilityNotice,
       message: "founds the following values...",
       data: {
@@ -10889,7 +11225,7 @@
     var areAllValuesYes = existingTreeFruit === YES_VALUE && ownerOrLesseeOfTheLand === YES_VALUE && taxableEntity === YES_VALUE && fileFarmIncomeTaxUnderTaxActInBC === YES_VALUE && commitToMaintainingTheProperty === YES_VALUE;
     var noticeElement = document.getElementById('doesNotMeetTFCREligibilityRequirements');
     if (!noticeElement) {
-      logger$x.error({
+      logger$y.error({
         fn: checkAndSetTFCREligbilityNotice,
         message: "Could not fetch noticeElement by id doesNotMeetTFCREligibilityRequirements"
       });
@@ -10932,7 +11268,7 @@
   }
   function calculateAndPopulateRequestedClaimAmountForVLB() {
     var _document$getElementB20, _document$getElementB21, _document$getElementB22, _document$getElementB23;
-    logger$x.info({
+    logger$y.info({
       fn: calculateAndPopulateRequestedClaimAmountForVLB,
       message: "calculateAndPopulateRequestedClaimAmountForVLB called, start calculating..."
     });
@@ -10941,7 +11277,7 @@
     var totalDaysAsAnRVT = ((_document$getElementB21 = document.getElementById('quartech_numberoffulldaysworkedasanrvt')) === null || _document$getElementB21 === void 0 ? void 0 : _document$getElementB21.value) || 0;
     var totalDaysAsTelemedicineSupport = ((_document$getElementB22 = document.getElementById('quartech_numberofdaysprovidingtelemedicinesupport')) === null || _document$getElementB22 === void 0 ? void 0 : _document$getElementB22.value) || 0;
     var totalExpensesForCVBCAndBCVTA = ((_document$getElementB23 = document.getElementById('quartech_totalsumofreportedexpenses')) === null || _document$getElementB23 === void 0 ? void 0 : _document$getElementB23.value) || 0;
-    logger$x.info({
+    logger$y.info({
       fn: calculateAndPopulateRequestedClaimAmountForVLB,
       message: "calculateAndPopulateRequestedClaimAmountForVLB returned ".concat(totalExpensesForCVBCAndBCVTA, " for totalExpensesForCVBCAndBCVTA")
     });
@@ -10952,7 +11288,7 @@
     var telemedicineDays = parseFloat(totalDaysAsTelemedicineSupport) || 0;
     var sanitizedtotalExpensesForCVBCAndBCVTA = typeof totalExpensesForCVBCAndBCVTA === 'string' ? totalExpensesForCVBCAndBCVTA.replace(',', '') : String(totalExpensesForCVBCAndBCVTA).replace(',', '');
     var expenses = parseFloat(sanitizedtotalExpensesForCVBCAndBCVTA) || 0;
-    logger$x.info({
+    logger$y.info({
       fn: calculateAndPopulateRequestedClaimAmountForVLB,
       message: "calculateAndPopulateRequestedClaimAmountForVLB returned ".concat(expenses, " for expenses")
     });
@@ -10966,21 +11302,21 @@
       name: 'quartech_totalfees',
       value: formattedResult
     });
-    logger$x.info({
+    logger$y.info({
       fn: calculateAndPopulateRequestedClaimAmountForVLB,
       message: "Successfuly set field tag: quartech_totalfees to value: ".concat(result)
     });
   }
   function calculateAndPopulateRequestedClaimAmountForTFCR() {
     var _document$getElementB24, _document$getElementB25;
-    logger$x.info({
+    logger$y.info({
       fn: calculateAndPopulateRequestedClaimAmountForTFCR,
       message: "calculateAndPopulateRequestedClaimAmountForTFCR called, start calculating..."
     });
     // Get input values from the elements
     var approvedAmountForTFCR = ((_document$getElementB24 = document.getElementById('quartech_authorizedclaimedamount')) === null || _document$getElementB24 === void 0 ? void 0 : _document$getElementB24.value) || 0;
     var sumOfTotalExpensesForTFCR = ((_document$getElementB25 = document.getElementById('quartech_totalsumofreportedexpenses')) === null || _document$getElementB25 === void 0 ? void 0 : _document$getElementB25.value) || 0;
-    logger$x.info({
+    logger$y.info({
       fn: calculateAndPopulateRequestedClaimAmountForTFCR,
       message: "calculateAndPopulateRequestedClaimAmountForTFCR returned ".concat(sumOfTotalExpensesForTFCR, " for totalExpensesForCVBCAndBCVTA")
     });
@@ -10988,7 +11324,7 @@
     // Convert input values to numbers (fallback to 0 if invalid)
     var sumOfTotalExpenses = parseFloat(sumOfTotalExpensesForTFCR.replace(',', '')) || 0;
     var approvedAmount = parseFloat(approvedAmountForTFCR.replace(',', '')) || 0;
-    logger$x.info({
+    logger$y.info({
       fn: calculateAndPopulateRequestedClaimAmountForTFCR,
       message: "calculateAndPopulateRequestedClaimAmountForTFCR returned ".concat(sumOfTotalExpenses, " for expenses, and approvedAmount: ").concat(approvedAmount)
     });
@@ -11002,7 +11338,7 @@
       name: 'quartech_totalfees',
       value: formattedResult
     });
-    logger$x.info({
+    logger$y.info({
       fn: calculateAndPopulateRequestedClaimAmountForTFCR,
       message: "Successfuly set field tag: quartech_totalfees to value: ".concat(result)
     });
@@ -11010,14 +11346,14 @@
   function setBusinessOrPersonalAddressLabels() {
     var noCraNumberCheckbox = document.getElementById('quartech_nocragstnumber');
     if (!noCraNumberCheckbox) {
-      logger$x.error({
+      logger$y.error({
         fn: setBusinessOrPersonalAddressLabels,
         message: "Could not find element by id 'quartech_nocragstnumber'"
       });
       return;
     }
     var noCraNumberCheckboxChecked = noCraNumberCheckbox.checked;
-    logger$x.info({
+    logger$y.info({
       fn: setBusinessOrPersonalAddressLabels,
       message: "Successfully found quartech_nocragstnumber with checked: ".concat(noCraNumberCheckboxChecked)
     });
@@ -11042,7 +11378,7 @@
         setFieldNameLabel(fName, businessAddressFieldLabels[index]);
       });
     }
-    logger$x.info({
+    logger$y.info({
       fn: setBusinessOrPersonalAddressLabels,
       message: "Successfully set labels for address fields based on quartech_nocragstnumber"
     });
@@ -11053,14 +11389,14 @@
   function setBusinessOrPersonalStateForVLB() {
     var noCraNumberCheckbox = document.getElementById('quartech_nocragstnumber');
     if (!noCraNumberCheckbox) {
-      logger$x.error({
+      logger$y.error({
         fn: setBusinessOrPersonalStateForVLB,
         message: "Could not find element by id 'quartech_nocragstnumber'"
       });
       return;
     }
     var noCraNumberCheckboxChecked = noCraNumberCheckbox.checked;
-    logger$x.info({
+    logger$y.info({
       fn: setBusinessOrPersonalStateForVLB,
       message: "Successfully found quartech_nocragstnumber with checked: ".concat(noCraNumberCheckboxChecked)
     });
@@ -11101,7 +11437,7 @@
         setFieldNameLabel(fName, businessAddressFieldLabels[index]);
       });
       var isScriptLoaded = isScriptFullyLoaded('jquerymask');
-      logger$x.info({
+      logger$y.info({
         fn: setBusinessOrPersonalStateForVLB,
         message: "Decide whether to empty fields: quartech_businessphonenumber, quartech_businessemailaddress, quartech_city, isScriptLoaded: ".concat(isScriptLoaded)
       });
@@ -11120,7 +11456,7 @@
         });
         copyFromFieldAToFieldB('quartech_businesscity', 'quartech_city');
       } else {
-        logger$x.info({
+        logger$y.info({
           fn: setBusinessOrPersonalStateForVLB,
           message: "Skip emptying fields since scripts are still loading... quartech_businessphonenumber, quartech_businessemailaddress, quartech_city, isScriptLoaded: ".concat(isScriptLoaded)
         });
@@ -11128,7 +11464,7 @@
       showFieldRow('quartech_businessphonenumber');
       showFieldRow('quartech_businessemailaddress');
     }
-    logger$x.info({
+    logger$y.info({
       fn: setBusinessOrPersonalStateForVLB,
       message: "Successfully set labels for address fields based on quartech_nocragstnumber"
     });
@@ -11140,7 +11476,7 @@
   function populatePhoneNumberEmailAndCityOnChangeVLB() {
     var noCraNumberCheckbox = document.getElementById('quartech_nocragstnumber');
     if (!noCraNumberCheckbox) {
-      logger$x.error({
+      logger$y.error({
         fn: populatePhoneNumberEmailAndCityOnChangeVLB,
         message: "Could not find element by id 'quartech_nocragstnumber'"
       });
@@ -11149,7 +11485,7 @@
     var isIndividual = noCraNumberCheckbox.checked;
     if (!isIndividual) {
       copyFromFieldAToFieldB('quartech_businesscity', 'quartech_city');
-      logger$x.info({
+      logger$y.info({
         fn: populatePhoneNumberEmailAndCityOnChangeVLB,
         message: "\"I do not have a Canada Revenue Agency (CRA) Business Number\" is not checked, isIndividual: ".concat(isIndividual)
       });
@@ -11163,7 +11499,7 @@
 
     // Note: in this case Business City field label is actually just "City" since it's for a person NOT a business
     copyFromFieldAToFieldB('quartech_businesscity', 'quartech_city');
-    logger$x.info({
+    logger$y.info({
       fn: populatePhoneNumberEmailAndCityOnChangeVLB,
       message: "Successfully ran onChangeHandler populateBusinessPhoneNumberOnChange, isIndividual: ".concat(isIndividual, ",")
     });
@@ -11182,7 +11518,7 @@
         }
       }
     });
-    logger$x.info({
+    logger$y.info({
       fn: populateTotalPercent,
       message: "Setting total percent to total: ".concat(total)
     });
@@ -11192,7 +11528,7 @@
       value: "".concat(total)
     });
     var fieldConfig = getFieldConfig('quartech_totalpercentageofpracticeserved');
-    logger$x.info({
+    logger$y.info({
       fn: populateTotalPercent,
       message: "Got fieldConfig for quartech_totalpercentageofpracticeserved:",
       data: {
@@ -11211,7 +11547,7 @@
     var legalBusinessOrgNameTag = 'quartech_legalbusinessororganizationname';
     var legalBusinessOrgNameTagElement = document.querySelector("#".concat(legalBusinessOrgNameTag));
     if (!legalBusinessOrgNameTagElement) {
-      logger$x.error({
+      logger$y.error({
         fn: populateBusinessNameOnChangeFirstOrLastNameVLB,
         message: "Could not find Legal Business or Organization Name field tag: ".concat(legalBusinessOrgNameTag)
       });
@@ -11219,7 +11555,7 @@
     }
     var tr = legalBusinessOrgNameTagElement.closest('tr');
     if (!isHiddenRow(tr)) {
-      logger$x.info({
+      logger$y.info({
         fn: populateBusinessNameOnChangeFirstOrLastNameVLB,
         message: "Only populate when hidden. Legal Business or Organization Name field tag: ".concat(legalBusinessOrgNameTag),
         data: {
@@ -11244,14 +11580,14 @@
       name: legalBusinessOrgNameTag,
       value: newValue
     });
-    logger$x.info({
+    logger$y.info({
       fn: populateBusinessNameOnChangeFirstOrLastNameVLB,
       message: "Successfuly set field tag: quartech_legalbusinessororganizationname to value: ".concat(newValue)
     });
   }
   function displayOrHideAdministrationCostsNoticeForKTTP() {
     var _document$getElementB30, _document$getElementB31;
-    logger$x.info({
+    logger$y.info({
       fn: displayOrHideAdministrationCostsNoticeForKTTP,
       message: "displayOrHideAdministrationCostsNoticeForKTTP called, start calculating..."
     });
@@ -11259,7 +11595,7 @@
     // Get input values from the elements
     var administration = ((_document$getElementB30 = document.getElementById('quartech_administrationcosts')) === null || _document$getElementB30 === void 0 ? void 0 : _document$getElementB30.value) || 0;
     var totalFundingRequested = ((_document$getElementB31 = document.getElementById('quartech_totalfundingrequiredfromtheprogram')) === null || _document$getElementB31 === void 0 ? void 0 : _document$getElementB31.value) || 0;
-    logger$x.info({
+    logger$y.info({
       fn: displayOrHideAdministrationCostsNoticeForKTTP,
       message: "displayOrHideAdministrationCostsNoticeForKTTP returned the following values",
       data: {
@@ -11268,7 +11604,7 @@
       }
     });
     if (!administration || !administration.replaceAll || !totalFundingRequested || !totalFundingRequested.replaceAll) {
-      logger$x.warn({
+      logger$y.warn({
         fn: displayOrHideAdministrationCostsNoticeForKTTP,
         message: "Could not retrieve administration or totalFundingRequested field values",
         data: {
@@ -11282,7 +11618,7 @@
     // Convert input values to numbers (fallback to 0 if invalid)
     var administrationCost = parseFloat(administration === null || administration === void 0 ? void 0 : administration.replaceAll(',', '')) || 0;
     var totalFundingRequestedCost = parseFloat(totalFundingRequested === null || totalFundingRequested === void 0 ? void 0 : totalFundingRequested.replaceAll(',', '')) || 0;
-    logger$x.info({
+    logger$y.info({
       fn: displayOrHideAdministrationCostsNoticeForKTTP,
       message: "displayOrHideAdministrationCostsNoticeForKTTP returned the following for expenses",
       data: {
@@ -11296,13 +11632,13 @@
     if (administrationCost > totalFundingRequestedCost * 0.1) {
       isAdministrationCostGreaterThan10PercentOfFundingRequired = true;
     }
-    logger$x.info({
+    logger$y.info({
       fn: displayOrHideAdministrationCostsNoticeForKTTP,
       message: "displayOrHideAdministrationCostsNoticeForKTTP isAdministrationCostGreaterThan10PercentOfFundingRequired: ".concat(isAdministrationCostGreaterThan10PercentOfFundingRequired)
     });
     var noticeElement = document.getElementById('doesNotMeetAdministrativeCostRequirementsNotice');
     if (!noticeElement) {
-      logger$x.error({
+      logger$y.error({
         fn: displayOrHideAdministrationCostsNoticeForKTTP,
         message: "Could not fetch noticeElement by id doesNotMeetAdministrativeCostRequirementsNotice"
       });
@@ -11319,7 +11655,7 @@
     }
   }
   function updateSMEDesignationExplanationFieldLabelForKTTP1() {
-    logger$x.info({
+    logger$y.info({
       fn: updateSMEDesignationExplanationFieldLabelForKTTP1,
       message: "updateSMEDesignationExplanationFieldLabelForKTTP1 called, start determing label to show..."
     });
@@ -11337,7 +11673,7 @@
     }
   }
   function updateSMEDesignationExplanationFieldLabelForKTTP2() {
-    logger$x.info({
+    logger$y.info({
       fn: updateSMEDesignationExplanationFieldLabelForKTTP2,
       message: "updateSMEDesignationExplanationFieldLabelForKTTP2 called, start determing label to show..."
     });
@@ -11361,10 +11697,10 @@
     customFieldEventHandler: customFieldEventHandler,
     handleIsBusinessContactInfoDropdownChangeHandler: handleIsBusinessContactInfoDropdownChangeHandler
   };
-  var logger$w = Logger('common/customEventHandlers');
+  var logger$x = Logger('common/customEventHandlers');
   function genericEventHandler(name) {
     return function (event, customElement) {
-      logger$w.info({
+      logger$x.info({
         fn: genericEventHandler,
         message: "Detected generic event handler for name: ".concat(name),
         data: {
@@ -11374,7 +11710,7 @@
         }
       });
       var value = event.detail.value;
-      logger$w.info({
+      logger$x.info({
         fn: hasCraNumberCheckboxEventHandler,
         message: "Setting attribute for name: ".concat(name, ", inputvalue: ").concat(value),
         data: {
@@ -11392,7 +11728,7 @@
   }
   function customFieldEventHandler(name) {
     return function (event, customElement) {
-      logger$w.info({
+      logger$x.info({
         fn: customFieldEventHandler,
         message: "Detected generic event handler for name: ".concat(name),
         data: {
@@ -11402,7 +11738,7 @@
         }
       });
       var value = event.detail.value;
-      logger$w.info({
+      logger$x.info({
         fn: customFieldEventHandler,
         message: "Setting attribute for name: ".concat(name, ", inputvalue: ").concat(value),
         data: {
@@ -11419,7 +11755,7 @@
   }
   function hasCraNumberCheckboxEventHandler(name) {
     return function (event, customElement) {
-      logger$w.info({
+      logger$x.info({
         fn: hasCraNumberCheckboxEventHandler,
         message: "Detected custom event handler for name: ".concat(name),
         data: {
@@ -11429,7 +11765,7 @@
         }
       });
       var checked = event.detail.value;
-      logger$w.info({
+      logger$x.info({
         fn: hasCraNumberCheckboxEventHandler,
         message: "Setting attribute for name: ".concat(name, ", checked: ").concat(checked),
         data: {
@@ -11455,7 +11791,7 @@
         return _regeneratorRuntime().wrap(function _callee$(_context) {
           while (1) switch (_context.prev = _context.next) {
             case 0:
-              logger$w.info({
+              logger$x.info({
                 fn: handleIsBusinessContactInfoDropdownChangeHandler,
                 message: "Detected generic event handler for name: ".concat(name),
                 data: {
@@ -11465,7 +11801,7 @@
                 }
               });
               value = event.detail.value;
-              logger$w.info({
+              logger$x.info({
                 fn: handleIsBusinessContactInfoDropdownChangeHandler,
                 message: "Setting attribute for name: ".concat(name, ", inputvalue: ").concat(value),
                 data: {
@@ -11490,13 +11826,13 @@
             case 8:
               applicationDataRes = _context.sent;
               if (!(applicationDataRes !== null && applicationDataRes !== void 0 && (_applicationDataRes$d = applicationDataRes.data) !== null && _applicationDataRes$d !== void 0 && (_applicationDataRes$d = _applicationDataRes$d.value) !== null && _applicationDataRes$d !== void 0 && _applicationDataRes$d[0])) {
-                logger$w.error({
+                logger$x.error({
                   fn: handleIsBusinessContactInfoDropdownChangeHandler,
                   message: "Could not get application data result to determine whether individual or business"
                 });
               }
               _applicationDataRes$d2 = applicationDataRes === null || applicationDataRes === void 0 || (_applicationDataRes$d3 = applicationDataRes.data) === null || _applicationDataRes$d3 === void 0 || (_applicationDataRes$d3 = _applicationDataRes$d3.value) === null || _applicationDataRes$d3 === void 0 ? void 0 : _applicationDataRes$d3[0], quartech_businesssuitenumberoptional = _applicationDataRes$d2.quartech_businesssuitenumberoptional, quartech_businessstreetnumber = _applicationDataRes$d2.quartech_businessstreetnumber, quartech_businessstreet = _applicationDataRes$d2.quartech_businessstreet, quartech_businesscity = _applicationDataRes$d2.quartech_businesscity, quartech_businessprovinceterritory = _applicationDataRes$d2.quartech_businessprovinceterritory, quartech_businesspostalcode = _applicationDataRes$d2.quartech_businesspostalcode, quartech_email = _applicationDataRes$d2.quartech_email;
-              logger$w.info({
+              logger$x.info({
                 fn: handleIsBusinessContactInfoDropdownChangeHandler,
                 message: "received the following data",
                 data: {
@@ -11559,10 +11895,10 @@
   POWERPOD.initValuesFns = {
     initCraNumberCheckbox: initCraNumberCheckbox
   };
-  var logger$v = Logger('common/initValuesFn');
+  var logger$w = Logger('common/initValuesFn');
   function initCraNumberCheckbox(mappedValueKey, existingValue, customElement) {
     customElement.setAttribute("".concat(mappedValueKey), !existingValue);
-    logger$v.info({
+    logger$w.info({
       fn: initCraNumberCheckbox,
       message: "Successfully set custom Checkbox value for mappedValueKey: ".concat(mappedValueKey, ", existingValue: ").concat(existingValue, ", final value: ").concat(!existingValue),
       data: {
@@ -11573,7 +11909,7 @@
     });
   }
 
-  var logger$u = Logger('common/fieldConfiguration');
+  var logger$v = Logger('common/fieldConfiguration');
   POWERPOD.fieldConfiguration = {
     updateFieldValue: updateFieldValue
   };
@@ -11618,7 +11954,7 @@
       reorderField = _field$reorderField === void 0 ? {} : _field$reorderField,
       hideNumberInputArrows = field.hideNumberInputArrows;
     var elementType = field.elementType;
-    logger$u.info({
+    logger$v.info({
       fn: configureField,
       message: "setting field definition for field name: ".concat(name),
       data: {
@@ -11626,7 +11962,7 @@
       }
     });
     if (!$("#".concat(name))) {
-      logger$u.error({
+      logger$v.error({
         fn: configureField,
         message: "could not find existing element for field name: ".concat(name)
       });
@@ -11658,7 +11994,7 @@
         doNotBlank: doNotBlank,
         hideOrShowAdditionalTextWithFieldVisibility: hideOrShowAdditionalTextWithFieldVisibility
       });
-      logger$u.info({
+      logger$v.info({
         fn: configureField,
         message: "aborting field config for fieldName: ".concat(name, ", since it is hidden")
       });
@@ -11683,7 +12019,7 @@
     }
     if (label) {
       var _$;
-      logger$u.info({
+      logger$v.info({
         fn: configureField,
         message: "Found field label configuration for name: ".concat(name, ", label: ").concat(label, ", existingLabel: ").concat((_$ = $("#".concat(name, "_label"))) === null || _$ === void 0 ? void 0 : _$.html())
       });
@@ -11693,7 +12029,7 @@
         name: name,
         label: updatedLabel
       });
-      logger$u.info({
+      logger$v.info({
         fn: configureField,
         message: "Successfully set field label for name: ".concat(name, ", label: ").concat(updatedLabel, ", selector: ", "#".concat(name, "_label")),
         data: {
@@ -11713,7 +12049,7 @@
       setOnChangeHandler(name, elementType, onChangeHandler);
     }
     if (hasUpperCase(name)) {
-      logger$u.warn({
+      logger$v.warn({
         fn: configureField,
         message: "Warning! Field name: ".concat(name, " contains an uppercase letter, please confirm if it was intentional or not.")
       });
@@ -11791,7 +12127,7 @@
     } else if (format === 'numbersOnly') {
       var input = document.getElementById(name);
       if (!input) {
-        logger$u.error({
+        logger$v.error({
           fn: configureField,
           message: "could not find input element for numbersOnly config"
         });
@@ -11829,7 +12165,7 @@
       boldLabelText(name);
     }
     if (customComponent && customComponent.customElementTag) {
-      logger$u.info({
+      logger$v.info({
         fn: configureField,
         message: "Start configuring custom component for field name: ".concat(name),
         data: {
@@ -11858,7 +12194,7 @@
         initValuesFn: customInitValuesFn,
         attributes: customComponent.attributes
       };
-      logger$u.info({
+      logger$v.info({
         fn: configureField,
         message: "Rendering custom component",
         data: {
@@ -11871,7 +12207,7 @@
       var _$3;
       var defaultFileTypes = '.csv,.doc,.docx,.odt,.pdf,.xls,.xlsx,.ods,.gif,.jpeg,.jpg,.png,.svg,.tif';
       (_$3 = $("#".concat(name, "_AttachFile"))) === null || _$3 === void 0 || _$3.attr('accept', fileTypes !== null && fileTypes !== void 0 ? fileTypes : defaultFileTypes);
-      logger$u.info({
+      logger$v.info({
         fn: configureField,
         message: "Start configuring custom component for FileInput"
       });
@@ -11884,7 +12220,7 @@
         },
         customEvent: 'onChangeFileUpload',
         customEventHandler: function customEventHandler(event, customElement) {
-          logger$u.info({
+          logger$v.info({
             fn: configureField,
             message: 'onChangeFileUpload event listener triggered',
             data: {
@@ -11928,7 +12264,7 @@
       name: name,
       loading: false
     });
-    logger$u.info({
+    logger$v.info({
       fn: configureField,
       message: "DONE configuring field: ".concat(name, ", setting POWERPOD.state.field['").concat(name, "'].loading = false")
     });
@@ -11937,7 +12273,7 @@
   }
   function configureFields() {
     var stepName = getCurrentStep();
-    logger$u.info({
+    logger$v.info({
       fn: configureFields,
       message: "configuring fields for step: ".concat(stepName, "...")
     });
@@ -11951,7 +12287,7 @@
     // Exit early if Success step
     if (stepName === FormStep.Success) return;
     if (!fields) return;
-    logger$u.info({
+    logger$v.info({
       fn: configureFields,
       message: 'configuring fields...',
       data: {
@@ -11968,7 +12304,7 @@
 
     generateFormJson(true);
     POWERPOD.configuringFields = false;
-    logger$u.info({
+    logger$v.info({
       fn: configureFields,
       message: "DONE configuring fields, setting POWERPOD.configuringFields = false"
     });
@@ -11976,18 +12312,18 @@
   function setupCanadaPostAddressComplete(fields) {
     var env = getEnv();
     if (window.debug_canadapost) {
-      logger$u.warn({
+      logger$v.warn({
         fn: setupCanadaPostAddressComplete,
         message: "Forcibly enabling Canada Post Address Complete using debug_canadapost flag, env: ".concat(env)
       });
     } else if (env !== Environment.PROD) {
-      logger$u.warn({
+      logger$v.warn({
         fn: setupCanadaPostAddressComplete,
         message: "Skipping Canada Post since env detected is not prod, but is env: ".concat(env)
       });
       return;
     }
-    logger$u.info({
+    logger$v.info({
       fn: setupCanadaPostAddressComplete,
       message: "Start setting up Canada Post Address Complete..."
     });
@@ -11999,7 +12335,7 @@
     var allCpFieldsPresent = cpFieldNames === null || cpFieldNames === void 0 ? void 0 : cpFieldNames.every(function (val) {
       return fieldKeys.includes(val);
     });
-    logger$u.info({
+    logger$v.info({
       fn: setupCanadaPostAddressComplete,
       message: "Checked if all Canada Post addresscomplete fields exist in fields data: allCpFieldsPresent: ".concat(allCpFieldsPresent),
       data: {
@@ -12009,14 +12345,14 @@
       }
     });
     if (allCpFieldsPresent) {
-      logger$u.info({
+      logger$v.info({
         fn: setupCanadaPostAddressComplete,
         message: "Start setting up Canada Post Address Complete... found all fields! Continue configuration..."
       });
       useScript('canadapost', function () {
         // @ts-ignore
         var pca = window.pca;
-        logger$u.info({
+        logger$v.info({
           fn: setupCanadaPostAddressComplete,
           message: 'Starting to setup Canada Post Address Complete',
           data: {
@@ -12053,14 +12389,14 @@
         scriptEl.setAttribute('type', 'text/javascript');
         scriptEl.innerHTML = "\n          var fields = ".concat(JSON.stringify(fieldConfig), ",\n          options = ").concat(JSON.stringify(options), ",\n          control = new pca.Address(fields, options);\n        ");
         doc.head.appendChild(scriptEl);
-        logger$u.info({
+        logger$v.info({
           fn: setupCanadaPostAddressComplete,
           message: 'Successfully configured Canada Post Address Complete'
         });
       });
       return;
     }
-    logger$u.info({
+    logger$v.info({
       fn: setupCanadaPostAddressComplete,
       message: 'Canadapost addresscomplete fields not found, no need to load script'
     });
@@ -12080,7 +12416,7 @@
       skipValidation: skipValidation,
       origin: origin
     };
-    logger$u.info({
+    logger$v.info({
       fn: updateFieldValue,
       message: "updateFieldValue called for name: ".concat(name, ", origin: ").concat(origin, ", is still configuringFields: ").concat(POWERPOD.configuringFields, ", loading: ").concat(POWERPOD.loading),
       data: params
@@ -12121,7 +12457,7 @@
       //     break;
       // }
       if (value === null || value === undefined) {
-        logger$u.warn({
+        logger$v.warn({
           fn: updateFieldValue,
           message: "nothing to save for name: ".concat(name, ", value: ").concat(value, ", format: ").concat(format),
           data: {
@@ -12149,7 +12485,7 @@
       }
     }
     if (!(fieldConfig !== null && fieldConfig !== void 0 && (_fieldConfig$customCo = fieldConfig.customComponent) !== null && _fieldConfig$customCo !== void 0 && _fieldConfig$customCo.customEventHandler) && fieldConfig.value === value) {
-      logger$u.info({
+      logger$v.info({
         fn: updateFieldValue,
         message: "No need to update state or validate new value as it is the same for name: ".concat(name),
         data: {
@@ -12165,7 +12501,7 @@
     if (elementType && elementType === HtmlElementType.DatePicker) {
       var datePickerElement = document.getElementById(name);
       if (!datePickerElement) {
-        logger$u.warn({
+        logger$v.warn({
           fn: updateFieldValue,
           message: "Could not find DatePicker element for name: ".concat(name)
         });
@@ -12176,7 +12512,7 @@
           controlId: name
         }); // returns in display value like M/D/YYY
         var formattedDate = (_formatDateToISOStrin = formatDateToISOString(dateValue)) !== null && _formatDateToISOStrin !== void 0 ? _formatDateToISOStrin : '';
-        logger$u.info({
+        logger$v.info({
           fn: updateFieldValue,
           message: "updateFieldValue called on DatePicker element of name: ".concat(name, ", with value: ").concat(formattedDate)
         });
@@ -12184,7 +12520,7 @@
         datePickerElement.value = formattedDate;
       }
     }
-    logger$u.info({
+    logger$v.info({
       fn: updateFieldValue,
       message: "Saving field data for name: ".concat(name, " and value: ").concat(value, ", format: ").concat(format),
       data: {
@@ -12211,14 +12547,14 @@
     });
   }
   function setDirtyField(name) {
-    logger$u.info({
+    logger$v.info({
       fn: setDirtyField,
       message: "set dirty field for name: ".concat(name)
     });
     var fieldConfig = getFieldConfig(name);
     // If field has never been touched before, always validate
     if (fieldConfig.touched === false) {
-      logger$u.info({
+      logger$v.info({
         fn: setDirtyField,
         message: "Setting dirty field name: ".concat(name, " to dirty status, touched: true")
       });
@@ -12234,19 +12570,19 @@
     var name = _ref2.name,
       _ref2$origin = _ref2.origin,
       origin = _ref2$origin === void 0 ? '' : _ref2$origin;
-    logger$u.info({
+    logger$v.info({
       fn: validateNeededFields,
       message: "called for name: ".concat(name, " from origin: ").concat(origin)
     });
     if (POWERPOD.configuringFields) {
-      logger$u.warn({
+      logger$v.warn({
         fn: validateNeededFields,
         message: "Still configuring fields, DO NOT validate yet"
       });
       return;
     }
     if (!((_POWERPOD$state$field = POWERPOD.state.fieldOrder) !== null && _POWERPOD$state$field !== void 0 && _POWERPOD$state$field.length)) {
-      logger$u.error({
+      logger$v.error({
         fn: validateNeededFields,
         message: "No fields found in powerpod.state.fieldOrder, unable to validate"
       });
@@ -12263,7 +12599,7 @@
     var fieldsToRevalidate = Object.keys(fieldsToSetDirty).map(function (key) {
       return fieldsToSetDirty[key].name;
     });
-    logger$u.info({
+    logger$v.info({
       fn: validateNeededFields,
       message: "for name: ".concat(name, ", validating the following fields: ").concat(JSON.stringify(fieldsToRevalidate)),
       data: {
@@ -12285,7 +12621,7 @@
     // set appropriate observer/on change listener depending on field type
     var fieldConfig = getFieldConfig(name);
     var elementType = fieldConfig.elementType;
-    logger$u.info({
+    logger$v.info({
       fn: setFieldObserver,
       message: "Watching for value changes on name: ".concat(name, ", elementType: ").concat(elementType, ", format: ").concat(format)
     });
@@ -12293,7 +12629,7 @@
       case HtmlElementType.SignatureControl:
         var canvas = document.querySelector('.drawCanvas');
         if (!canvas) {
-          logger$u.error({
+          logger$v.error({
             fn: setFieldObserver,
             message: "Could not find signature canvas"
           });
@@ -12346,7 +12682,7 @@
         var inputElementParent = inputElement.parent()[0];
         var datePickerElement = $("input[id=".concat(name, "_datepicker_description]"));
         var datePickerParentElement = datePickerElement.parent()[0];
-        logger$u.info({
+        logger$v.info({
           fn: setFieldObserver,
           message: 'datePickerElement:',
           data: {
@@ -12421,7 +12757,7 @@
       case HtmlElementType.SingleOptionSet:
       case HtmlElementType.MultiOptionSet:
         var inputElements = $("input[id*='".concat(name, "']")).parent();
-        logger$u.info({
+        logger$v.info({
           fn: setFieldObserver,
           message: "setting name: ".concat(name, " elementType: ").concat(HtmlElementType.MultiOptionSet, " observer"),
           data: {
@@ -12476,7 +12812,7 @@
   function setRequiredField(fieldName) {
     var elemType = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : HtmlElementType.Input;
     var validationErrorMessage = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 'Required field';
-    logger$u.info({
+    logger$v.info({
       fn: setRequiredField,
       message: "Start configuring required fieldName: ".concat(fieldName, ", elemType: ").concat(elemType),
       data: {
@@ -12493,7 +12829,7 @@
       case HtmlElementType.FileInput:
         var textareaField = $("#".concat(fieldName));
         var attachFileField = $("input[id=".concat(fieldName, "_AttachFile]"));
-        logger$u.info({
+        logger$v.info({
           fn: setRequiredField,
           message: 'observe changes on file input element',
           data: {
@@ -12504,7 +12840,7 @@
         });
         break;
       case HtmlElementType.DatePicker:
-        logger$u.info({
+        logger$v.info({
           fn: setRequiredField,
           message: "Configuring required datepicker element for fieldName: ".concat(fieldName)
         });
@@ -12524,20 +12860,20 @@
   }
 
   // @ts-nocheck
-  var logger$t = Logger('common/tabs');
+  var logger$u = Logger('common/tabs');
   POWERPOD.tabs = {
     setTabName: setTabName,
     getTabElement: getTabElement
   };
   function hideTabs(hiddenTabs) {
     if (!hiddenTabs || !hiddenTabs.length) {
-      logger$t.warn({
+      logger$u.warn({
         fn: hideTabs,
         message: 'Hide tabs called with empty data'
       });
     }
     if (hiddenTabs && !Array.isArray(hiddenTabs)) {
-      logger$t.error({
+      logger$u.error({
         fn: hideTabs,
         message: "check syntax for hiddenSteps in JSON",
         data: {
@@ -12546,7 +12882,7 @@
       });
       return;
     }
-    logger$t.info({
+    logger$u.info({
       fn: hideTabs,
       message: 'Attempting to hide tabs...',
       data: {
@@ -12562,7 +12898,7 @@
       });
       if (tabElement && tabElement.style) {
         tabElement.style.display = 'none';
-        logger$t.info({
+        logger$u.info({
           fn: hideTabs,
           message: "Successfully hid tab for given name: ".concat(name, ", displayName: ").concat(displayName)
         });
@@ -12575,7 +12911,7 @@
     var displayName = _ref2.displayName,
       name = _ref2.name;
     if (!displayName && !name) {
-      logger$t.error({
+      logger$u.error({
         fn: getTabElement,
         message: 'Need at least one param displayName or name to find tab element'
       });
@@ -12586,7 +12922,7 @@
         return tabNames.includes(name);
       });
       if (!formStepIndex) {
-        logger$t.error({
+        logger$u.error({
           fn: getTabElement,
           message: "Could not find form step index for name: ".concat(name)
         });
@@ -12596,7 +12932,7 @@
       displayName = TabDisplayNames[formStep];
     }
     if (!displayName) {
-      logger$t.error({
+      logger$u.error({
         fn: getTabElement,
         message: "Unable to find display name for tab name: ".concat(name)
       });
@@ -12624,7 +12960,7 @@
       });
     }
     if (!tabElement || !tabElement.length) {
-      logger$t.warn({
+      logger$u.warn({
         fn: getTabElement,
         message: 'Could not find tab element',
         data: {
@@ -12635,7 +12971,7 @@
       return;
     }
     if (tabElement.length !== 1) {
-      logger$t.error({
+      logger$u.error({
         fn: setTabName,
         message: 'Matched multiple elements for one given tab',
         data: {
@@ -12649,14 +12985,14 @@
   }
   function setTabName(name, displayName) {
     if (!name || !displayName) {
-      logger$t.warn({
+      logger$u.warn({
         fn: setTabName,
         message: 'Missing required params of name or displayName'
       });
       return;
     }
     if (!Object.values(FormStep).includes(name)) {
-      logger$t.warn({
+      logger$u.warn({
         fn: setTabName,
         message: "Invalid section name passed, name: ".concat(name, ", displayName: ").concat(displayName)
       });
@@ -12664,7 +13000,7 @@
     }
     var initialTabDisplayName = TabDisplayNames[name];
     if (!initialTabDisplayName) {
-      logger$t.warn({
+      logger$u.warn({
         fn: setTabName,
         message: 'Could not find original tab display name'
       });
@@ -12676,7 +13012,7 @@
     if (tabElement) {
       tabElement.firstChild.nodeValue = displayName; // Replace 'New Text' with your desired text
       tabElement.setAttribute('originalDisplayName', initialTabDisplayName);
-      logger$t.info({
+      logger$u.info({
         fn: setTabName,
         message: "Successfully updated tab name from ".concat(name, " to ").concat(displayName)
       });
@@ -12684,7 +13020,7 @@
   }
   function setHeadings(sectionName, headings) {
     if (!sectionName || !headings || !(headings !== null && headings !== void 0 && headings.length)) {
-      logger$t.error({
+      logger$u.error({
         fn: setHeadings,
         message: 'Missing required sectionName or headings',
         data: {
@@ -12698,7 +13034,7 @@
       var name = heading.name,
         displayName = heading.displayName;
       if (!name || !displayName) {
-        logger$t.error({
+        logger$u.error({
           fn: setHeadings,
           message: 'Failed to set heading, missing params',
           data: {
@@ -12716,7 +13052,7 @@
       return $(this).text().includes(name);
     });
     if (!headerElements || !headerElements.length) {
-      logger$t.warn({
+      logger$u.warn({
         fn: setTabName,
         message: 'Could not find header element to rename',
         data: {
@@ -12727,7 +13063,7 @@
       return;
     }
     if (headerElements.length > 1) {
-      logger$t.error({
+      logger$u.error({
         fn: setHeadingName,
         message: 'Matched more than one heading, could not update header',
         data: {
@@ -12739,16 +13075,16 @@
       return;
     }
     headerElements[0].innerHTML = displayName;
-    logger$t.info({
+    logger$u.info({
       fn: setTabName,
       message: "Successfully updated header from ".concat(name, " to ").concat(displayName)
     });
   }
 
   // @ts-nocheck
-  var logger$s = Logger('common/sections');
+  var logger$t = Logger('common/sections');
   function configureSections(sections, globalSections) {
-    logger$s.info({
+    logger$t.info({
       fn: configureSections,
       message: "configureSections called with:",
       data: {
@@ -12757,7 +13093,7 @@
       }
     });
     if (!sections || !sections.length) {
-      logger$s.warn({
+      logger$t.warn({
         fn: configureSections,
         message: 'Configure sections called with empty data'
       });
@@ -12780,7 +13116,7 @@
       //     data: { section },
       //   });
       // }
-      logger$s.info({
+      logger$t.info({
         fn: configureSubsections,
         message: "Start configuring section for section.name: ".concat(section.name, "..."),
         data: {
@@ -12797,7 +13133,7 @@
         _section$hideHeaderDe = section.hideHeaderDescription,
         hideHeaderDescription = _section$hideHeaderDe === void 0 ? false : _section$hideHeaderDe;
       if (!sectionName) {
-        logger$s.error({
+        logger$t.error({
           fn: configureSections,
           message: 'Could not find section name'
         });
@@ -12821,7 +13157,7 @@
       if (hideHeaderDescription) {
         hidePageDescription(hideHeaderDescription, sectionName);
       }
-      logger$s.info({
+      logger$t.info({
         fn: configureSections,
         message: "Successfully configured section for sectionName: ".concat(sectionName),
         data: {
@@ -12835,7 +13171,7 @@
     var currentStep = getCurrentStep();
     var pageDescriptionElement = document.querySelector('p#page-description');
     if (sectionName && currentStep !== sectionName) {
-      logger$s.warn({
+      logger$t.warn({
         fn: hidePageDescription,
         message: "Skip setting pageDescriptionElement for nonactive step sectionName: ".concat(sectionName)
       });
@@ -12847,12 +13183,12 @@
       } else {
         pageDescriptionElement.style.display = '';
       }
-      logger$s.info({
+      logger$t.info({
         fn: hidePageDescription,
         message: "Successfully set pageDescriptionElement to hideHeaderDescription: ".concat(hideHeaderDescription, " for sectionName: ").concat(sectionName)
       });
     } else {
-      logger$s.error({
+      logger$t.error({
         fn: hidePageDescription,
         message: "Failed to find pageDescriptionElement for configuring visibility"
       });
@@ -12860,7 +13196,7 @@
   }
   function configureSubsections(sectionName, subsections) {
     if (!subsections || !subsections.length) {
-      logger$s.error({
+      logger$t.error({
         fn: configureSubsections,
         message: 'Configure subsections called with empty data'
       });
@@ -12868,13 +13204,13 @@
     }
     var currentStep = getCurrentStep();
     if (currentStep !== sectionName) {
-      logger$s.warn({
+      logger$t.warn({
         fn: configureSubsections,
         message: "Skip configuring subsections for nonactive step sectionName: ".concat(sectionName)
       });
       return;
     }
-    logger$s.info({
+    logger$t.info({
       fn: configureSubsections,
       message: "Start configuring subsections currentStep: ".concat(currentStep, " for sectionName: ").concat(sectionName, "... ").concat(JSON.stringify(subsections)),
       data: {
@@ -12891,7 +13227,7 @@
         additionalTextAboveSubsection = subsection.additionalTextAboveSubsection,
         additionalTextBelowSubsection = subsection.additionalTextBelowSubsection;
       if (!name) {
-        logger$s.error({
+        logger$t.error({
           fn: configureSections,
           message: 'Could not find section name'
         });
@@ -12899,7 +13235,7 @@
       }
       var sectionElement = $("fieldset[aria-label=\"".concat(name, "\"]"));
       if (!sectionElement) {
-        logger$s.warn({
+        logger$t.warn({
           fn: configureSubsections,
           message: "Could not find sectionElement for name: ".concat(name)
         });
@@ -12917,7 +13253,7 @@
       if (newLabel) {
         var fieldset = document.querySelector("fieldset[aria-label=\"".concat(name, "\"]"));
         if (!fieldset) {
-          logger$s.error({
+          logger$t.error({
             fn: configureSubsections,
             message: "Failed to find fieldset for name: ".concat(name, ", newLabel: ").concat(newLabel)
           });
@@ -12926,7 +13262,7 @@
         fieldset.setAttribute('aria-label', newLabel);
         var h3Tag = fieldset.querySelector('h3');
         if (!h3Tag) {
-          logger$s.error({
+          logger$t.error({
             fn: configureSubsections,
             message: "Failed to find h3Tag for name: ".concat(name, ", newLabel: ").concat(newLabel)
           });
@@ -12940,7 +13276,7 @@
       if (additionalTextBelowSubsection && subsectionAriaLabel) {
         addTextBelowSubsection(subsectionAriaLabel, additionalTextBelowSubsection);
       }
-      logger$s.info({
+      logger$t.info({
         fn: configureSubsections,
         message: "Successfully configured sectionName: ".concat(sectionName, " subsection for subsection: ").concat(name),
         data: {
@@ -13107,7 +13443,7 @@
     $('#quartech_declarationandconsent_label').text('I / We agree to the above statement.');
   }
 
-  var logger$r = Logger('common/form');
+  var logger$s = Logger('common/form');
   POWERPOD.form = {
     generateFormJson: generateFormJson,
     getFormId: getFormId,
@@ -13117,7 +13453,7 @@
     var params = new URLSearchParams(doc.location.search);
     var formId = params.get('id');
     if (!formId) {
-      logger$r.info({
+      logger$s.info({
         fn: getFormIdFromURLParams,
         message: 'Form id not found in URL params'
       });
@@ -13133,7 +13469,7 @@
     if ((_POWERPOD$form = POWERPOD.form) !== null && _POWERPOD$form !== void 0 && _POWERPOD$form.id) {
       var _POWERPOD$form2;
       var _formId = (_POWERPOD$form2 = POWERPOD.form) === null || _POWERPOD$form2 === void 0 ? void 0 : _POWERPOD$form2.id;
-      logger$r.info({
+      logger$s.info({
         fn: getFormId,
         message: "Cached form submission id found, returning ".concat(_formId)
       });
@@ -13143,21 +13479,21 @@
     var formId = params.get('id');
     var formElement;
     if (formId) {
-      logger$r.info({
+      logger$s.info({
         fn: getFormId,
         message: "Successfully retrieved form submission id from url params: ".concat(formId)
       });
       POWERPOD.form.id = formId;
       return formId;
     }
-    logger$r.info({
+    logger$s.info({
       fn: getFormId,
       message: 'Could not find current form submission id from url params, try DOM element containing the value...'
     });
     // Get the element by ID
     formElement = document.getElementById('EntityFormView_EntityID');
     if (!formElement) {
-      logger$r.error({
+      logger$s.error({
         fn: getFormId,
         message: 'Unable to find "EntityFormView_EntityID" element, unable to retrieve app/claim submission id!'
       });
@@ -13167,7 +13503,7 @@
     // Get the value of the 'value' attribute
     formId = formElement.value;
     if (formId) {
-      logger$r.info({
+      logger$s.info({
         fn: getFormId,
         message: "Successfully retrieved form submission id from \"EntityFormView_EntityID\" element: ".concat(formId)
       });
@@ -13215,7 +13551,7 @@
     //   formId = match ? match[1] : null;
     // }
 
-    logger$r.error({
+    logger$s.error({
       fn: getFormId,
       message: 'Unable to retrieve form submission id from either url or form element',
       data: {
@@ -13228,7 +13564,7 @@
   function addFormDataOnClickHandler() {
     var nextButton = document.getElementById('NextButton');
     if (!(nextButton !== null && nextButton !== void 0 && nextButton.onclick)) {
-      logger$r.error({
+      logger$s.error({
         fn: addFormDataOnClickHandler,
         message: "Error getting existing next btn on click handler",
         data: {
@@ -13244,7 +13580,7 @@
       saveBrowserInfo(BrowserInformationAction.Next);
       formDataOnClickHandler(event, nextFn);
     });
-    logger$r.info({
+    logger$s.info({
       fn: addFormDataOnClickHandler,
       message: 'Successfully configured next button onclick handler for form data'
     });
@@ -13256,13 +13592,13 @@
     if (generateFormJson()) {
       nextFn();
     } else {
-      logger$r.error({
+      logger$s.error({
         fn: formDataOnClickHandler,
         message: 'Failed to generate form json data!'
       });
     }
     var elapsedTime = Date.now() - startTime;
-    logger$r.info({
+    logger$s.info({
       fn: formDataOnClickHandler,
       message: "Generating form data json took ".concat(elapsedTime, " ms")
     });
@@ -13272,7 +13608,7 @@
     var containerElement = document.querySelector('#EntityFormView');
     var wordTemplateDataElement = containerElement.querySelectorAll('textarea[id*="quartech_wordtemplatedata"]');
     if (!setFieldOrder && (!wordTemplateDataElement || !wordTemplateDataElement.length)) {
-      logger$r.info({
+      logger$s.info({
         fn: generateFormJson,
         message: 'No need to generate form json if no word template field exists'
       });
@@ -13281,7 +13617,7 @@
     var fieldsetArr = containerElement === null || containerElement === void 0 ? void 0 : containerElement.querySelectorAll('fieldset');
     var tabDivElement = containerElement === null || containerElement === void 0 ? void 0 : containerElement.querySelector('.tab');
     if (!containerElement || !fieldsetArr || !(fieldsetArr !== null && fieldsetArr !== void 0 && fieldsetArr.length) || !tabDivElement) {
-      logger$r.error({
+      logger$s.error({
         fn: generateFormJson,
         message: 'Unable to generate form JSON, could not find required elements'
       });
@@ -13290,7 +13626,7 @@
     var tabDataName = tabDivElement.getAttribute('data-name'); // e.g. "applicantInfoTab"
 
     if (!tabDataName) {
-      logger$r.error({
+      logger$s.error({
         fn: generateFormJson,
         message: 'Failed to get tab data-name',
         data: {
@@ -13299,7 +13635,7 @@
       });
       return false;
     }
-    logger$r.info({
+    logger$s.info({
       fn: generateFormJson,
       message: "Processing fieldSet array for tabDataName: ".concat(tabDataName)
     });
@@ -13320,14 +13656,14 @@
       var sectionId = tableElement === null || tableElement === void 0 ? void 0 : tableElement.getAttribute('data-name'); // e.g. "applicationInfoSection"
 
       if (sectionId && sectionId.toLowerCase().includes('codingsection')) {
-        logger$r.info({
+        logger$s.info({
           fn: generateFormJson,
           message: 'Skipping coding section...'
         });
         return;
       }
       if (((_fieldset$style = fieldset.style) === null || _fieldset$style === void 0 ? void 0 : _fieldset$style.display) === 'none') {
-        logger$r.info({
+        logger$s.info({
           fn: generateFormJson,
           message: 'Skipping hidden section...',
           data: {
@@ -13339,7 +13675,7 @@
       var trArray = tableElement === null || tableElement === void 0 ? void 0 : tableElement.querySelectorAll('tbody > tr');
       var currentStep = getCurrentStep();
       if ((!sectionId || !displayName || !trArray || !trArray.length) && currentStep !== FormStep.DeclarationAndConsent) {
-        logger$r.error({
+        logger$s.error({
           fn: generateFormJson,
           message: 'Unable to generate form JSON, could not find required section elements',
           data: {
@@ -13347,7 +13683,7 @@
           }
         });
       }
-      logger$r.info({
+      logger$s.info({
         fn: generateFormJson,
         message: "Processing tr array for sectionId: ".concat(sectionId, ", displayName: ").concat(displayName)
       });
@@ -13368,7 +13704,7 @@
           tr: tr
         });
         if (controlType === HtmlElementType.NotesControl) {
-          logger$r.info({
+          logger$s.info({
             fn: generateFormJson,
             message: 'Skipping notes control element',
             data: {
@@ -13399,7 +13735,7 @@
 
         // exit early if the intention is just to set the field order
         if (controlId && setFieldOrder) {
-          logger$r.info({
+          logger$s.info({
             fn: generateFormJson,
             message: "addToFieldOrder controlId: ".concat(controlId)
           });
@@ -13407,7 +13743,7 @@
           return;
         }
         if (skipWordTemplateGeneration) {
-          logger$r.info({
+          logger$s.info({
             fn: generateFormJson,
             message: "Skipping row since skipWordTemplateGeneration is set for controlId: ".concat(controlId),
             data: {
@@ -13418,7 +13754,7 @@
         }
         if (isHiddenRow(tr)) {
           if (!forceGenerateWordTemplateData) {
-            logger$r.info({
+            logger$s.info({
               fn: generateFormJson,
               message: "Skipping hidden row, controlId: ".concat(controlId),
               data: {
@@ -13427,7 +13763,7 @@
             });
             return;
           }
-          logger$r.info({
+          logger$s.info({
             fn: generateFormJson,
             message: "Hidden row, but forceGenerateWordTemplateData set to true for controlId: ".concat(controlId),
             data: {
@@ -13436,7 +13772,7 @@
           });
         }
         if (isEmptyRow(tr)) {
-          logger$r.info({
+          logger$s.info({
             fn: generateFormJson,
             message: "Skipping empty row, controlId: ".concat(controlId),
             data: {
@@ -13446,7 +13782,7 @@
           return;
         }
         if (controlId !== null && controlId !== void 0 && controlId.includes('subgrid_')) {
-          logger$r.info({
+          logger$s.info({
             fn: generateFormJson,
             message: "Skipping subgrid, controlId: ".concat(controlId),
             data: {
@@ -13456,7 +13792,7 @@
           return;
         }
         var questionText = getInfoValue(tr);
-        logger$r.info({
+        logger$s.info({
           fn: generateFormJson,
           message: "For controlId: ".concat(controlId, ", with controlType: ").concat(controlType, "; found questionText: ").concat(questionText, ", try finding answerText next..."),
           data: {
@@ -13468,7 +13804,7 @@
           controlId: controlId,
           forTemplateGeneration: true
         });
-        logger$r.info({
+        logger$s.info({
           fn: generateFormJson,
           message: "Converting controlId: ".concat(controlId, " form row to JSON..."),
           data: {
@@ -13478,7 +13814,7 @@
           }
         });
         if (!answerText || answerText === 'undefined') {
-          logger$r.warn({
+          logger$s.warn({
             fn: generateFormJson,
             message: "answerText for controlId: ".concat(controlId, " was missing or undefined, answerText: ").concat(answerText, ", setting it to an empty string")
           });
@@ -13489,7 +13825,7 @@
           questionText = (_POWERPOD$state4 = POWERPOD.state) === null || _POWERPOD$state4 === void 0 || (_POWERPOD$state4 = _POWERPOD$state4.fields) === null || _POWERPOD$state4 === void 0 || (_POWERPOD$state4 = _POWERPOD$state4[controlId]) === null || _POWERPOD$state4 === void 0 ? void 0 : _POWERPOD$state4.label;
         }
         if (!questionText || questionText === ' ') {
-          logger$r.warn({
+          logger$s.warn({
             fn: generateFormJson,
             message: "Could not find question text for controlId: ".concat(controlId, ", controlType: ").concat(controlType),
             data: {
@@ -13499,7 +13835,7 @@
           return; // skip this forEach loop
         }
         if (questionText.toLowerCase().includes('eligible expenses')) {
-          logger$r.info({
+          logger$s.info({
             fn: generateFormJson,
             message: 'Skipping Eligible Expenses question/answer',
             data: {
@@ -13516,7 +13852,7 @@
           var answerObj = JSON.parse(answerText);
           sectionToAppend = answerObj;
           appendSection = true;
-          logger$r.info({
+          logger$s.info({
             fn: generateFormJson,
             message: "For quartech_practiceswherelocumservicesweredelivered skipping adding to original object, instead append at the end",
             data: {
@@ -13529,7 +13865,7 @@
           var _answerObj = JSON.parse(answerText);
           sectionToAppend = _answerObj;
           appendSection = true;
-          logger$r.info({
+          logger$s.info({
             fn: generateFormJson,
             message: "For quartech_expensereceipts skipping adding to original object, instead append at the end",
             data: {
@@ -13543,7 +13879,7 @@
       });
     });
     if (appendSection && sectionToAppend) {
-      logger$r.info({
+      logger$s.info({
         fn: generateFormJson,
         message: "attempting to appendSection...",
         data: {
@@ -13553,7 +13889,7 @@
         }
       });
       formJsonObj = _objectSpread2(_objectSpread2({}, formJsonObj), sectionToAppend);
-      logger$r.info({
+      logger$s.info({
         fn: generateFormJson,
         message: "successfully appended Section to formJsonObj...",
         data: {
@@ -13564,7 +13900,7 @@
       });
     }
     if (setFieldOrder) {
-      logger$r.info({
+      logger$s.info({
         fn: generateFormJson,
         message: "Successfully generated field order state array, exiting...",
         data: {
@@ -13573,7 +13909,7 @@
       });
       return;
     }
-    logger$r.info({
+    logger$s.info({
       fn: generateFormJson,
       message: 'Setting word template field data: \n' + "".concat(JSON.stringify(formJsonObj)),
       data: {
@@ -13659,7 +13995,7 @@
             formId = getFormId();
             formType = getFormType();
             currentStep = getCurrentStep();
-            logger$r.info({
+            logger$s.info({
               fn: augmentFormDataForBUG6998,
               message: "start to getApplicationData: ".concat(formType),
               data: {
@@ -13678,7 +14014,7 @@
           case 9:
             _yield$getProgramId = _context.sent;
             programId = _yield$getProgramId.programId;
-            logger$r.info({
+            logger$s.info({
               fn: augmentFormDataForBUG6998,
               message: "start to getApplicationData: ".concat(formType),
               data: {
@@ -13696,7 +14032,7 @@
               _context.next = 29;
               break;
             }
-            logger$r.info({
+            logger$s.info({
               fn: augmentFormDataForBUG6998,
               message: "start to getApplicationData: ".concat(formType),
               data: {
@@ -13715,13 +14051,13 @@
           case 17:
             applicationDataRes = _context.sent;
             if (!(applicationDataRes !== null && applicationDataRes !== void 0 && (_applicationDataRes$d = applicationDataRes.data) !== null && _applicationDataRes$d !== void 0 && (_applicationDataRes$d = _applicationDataRes$d.value) !== null && _applicationDataRes$d !== void 0 && _applicationDataRes$d[0])) {
-              logger$r.error({
+              logger$s.error({
                 fn: augmentFormDataForBUG6998,
                 message: "Could not get application data result"
               });
             }
             _applicationDataRes$d2 = applicationDataRes === null || applicationDataRes === void 0 || (_applicationDataRes$d3 = applicationDataRes.data) === null || _applicationDataRes$d3 === void 0 || (_applicationDataRes$d3 = _applicationDataRes$d3.value) === null || _applicationDataRes$d3 === void 0 ? void 0 : _applicationDataRes$d3[0], quartech_originalsource = _applicationDataRes$d2.quartech_originalsource;
-            logger$r.info({
+            logger$s.info({
               fn: augmentFormDataForBUG6998,
               message: "successfully fetched application data and found quartech_originalsource: ".concat(quartech_originalsource),
               data: {
@@ -13732,7 +14068,7 @@
             });
             if (quartech_originalsource === 255550001) ; else {
               payload.quartech_originalsource = 255550002;
-              logger$r.info({
+              logger$s.info({
                 fn: augmentFormDataForBUG6998,
                 message: "successfully updated payload with payload.quartech_originalsource: ".concat(payload.quartech_originalsource),
                 data: {
@@ -13748,7 +14084,7 @@
           case 24:
             _context.prev = 24;
             _context.t0 = _context["catch"](14);
-            logger$r.error({
+            logger$s.error({
               fn: augmentFormDataForBUG6998,
               message: "failed to getApplicationData: ".concat(formType),
               data: {
@@ -13766,7 +14102,7 @@
           case 29:
             payload.quartech_originalsource = 255550002;
           case 30:
-            logger$r.info({
+            logger$s.info({
               fn: augmentFormDataForBUG6998,
               message: "payload.quartech_originalsource: ".concat(payload.quartech_originalsource),
               data: {
@@ -13808,7 +14144,7 @@
           case 42:
             _context.sent;
           case 43:
-            logger$r.info({
+            logger$s.info({
               fn: augmentFormDataForBUG6998,
               message: 'successfully patched form data with payload',
               data: {
@@ -13822,7 +14158,7 @@
           case 46:
             _context.prev = 46;
             _context.t1 = _context["catch"](32);
-            logger$r.error({
+            logger$s.error({
               fn: augmentFormDataForBUG6998,
               message: "failed to patch form data for formType: ".concat(formType),
               data: {
@@ -13843,7 +14179,7 @@
     return _augmentFormDataForBUG.apply(this, arguments);
   }
 
-  var logger$q = Logger('common/application');
+  var logger$r = Logger('common/application');
   POWERPOD.applicationUtils = {
     getFormType: getFormType,
     getExistingDraftApplicationId: getExistingDraftApplicationId,
@@ -13854,7 +14190,7 @@
     if (ClaimPaths.some(function (claimPath) {
       return path.includes(claimPath);
     })) {
-      logger$q.info({
+      logger$r.info({
         fn: getFormType,
         message: "auto-detected ".concat(Form.Claim, " form")
       });
@@ -13862,13 +14198,13 @@
     } else if (ApplicationPaths.some(function (appPath) {
       return path.includes(appPath);
     })) {
-      logger$q.info({
+      logger$r.info({
         fn: getFormType,
         message: "auto-detected ".concat(Form.Application, " form")
       });
       return Form.Application;
     } else {
-      logger$q.warn({
+      logger$r.warn({
         fn: getFormType,
         message: "Unable to autodetect form type, path: ".concat(path)
       });
@@ -13919,7 +14255,7 @@
               _context.next = 4;
               break;
             }
-            logger$q.info({
+            logger$r.info({
               fn: getExistingDraftApplicationId,
               message: 'No need to load drafts if specific form id passed by params'
             });
@@ -13930,13 +14266,13 @@
               _context.next = 8;
               break;
             }
-            logger$q.info({
+            logger$r.info({
               fn: getExistingDraftApplicationId,
               message: 'No programId found in URL params, no need to load existing drafts'
             });
             return _context.abrupt("return");
           case 8:
-            logger$q.info({
+            logger$r.info({
               fn: getExistingDraftApplicationId,
               message: "Querying for any existing draft applications for programId: ".concat(programId)
             });
@@ -13959,7 +14295,7 @@
               _context.next = 30;
               break;
             }
-            logger$q.info({
+            logger$r.info({
               fn: getExistingDraftApplicationId,
               message: "No existing draft application found for programid: ".concat(programId, ", create a new application record"),
               data: {
@@ -13970,7 +14306,7 @@
             _getCurrentUser = getCurrentUser(), contactId = _getCurrentUser.contactId;
             quartech_nocragstnumber = null;
             if (programId === ProgramIds.VLB) {
-              logger$q.info({
+              logger$r.info({
                 fn: getExistingDraftApplicationId,
                 message: "Detected VLB program id, starting app with quartech_nocragstnumber = true;"
               });
@@ -13991,7 +14327,7 @@
               _context.next = 28;
               break;
             }
-            logger$q.error({
+            logger$r.error({
               fn: getExistingDraftApplicationId,
               message: 'Failed to create new application',
               data: {
@@ -14001,7 +14337,7 @@
             });
             return _context.abrupt("return");
           case 28:
-            logger$q.info({
+            logger$r.info({
               fn: getExistingDraftApplicationId,
               message: "Successfully created new draft application found for programid: ".concat(programId, ", with id: ").concat(uuid),
               data: {
@@ -14016,7 +14352,7 @@
               break;
             }
             if (((_res$data5 = res.data) === null || _res$data5 === void 0 || (_res$data5 = _res$data5.value) === null || _res$data5 === void 0 ? void 0 : _res$data5.length) > 1) {
-              logger$q.warn({
+              logger$r.warn({
                 fn: getExistingDraftApplicationId,
                 message: "More than one draft application exists for programid: ".concat(programId),
                 data: {
@@ -14027,7 +14363,7 @@
             existingDraftApplications = res.data.value;
             existingDraft = existingDraftApplications[0];
             id = existingDraft.msgov_businessgrantapplicationid;
-            logger$q.info({
+            logger$r.info({
               fn: getExistingDraftApplicationId,
               message: "Found existing draft application for programid: ".concat(programId, " with id: ").concat(id)
             });
@@ -14039,7 +14375,7 @@
           case 40:
             _context.prev = 40;
             _context.t0 = _context["catch"](11);
-            logger$q.error({
+            logger$r.error({
               fn: getExistingDraftApplicationId,
               message: "Error getting draft applications for programid: ".concat(programId),
               data: {
@@ -14048,7 +14384,7 @@
             });
             return _context.abrupt("return");
           case 44:
-            logger$q.error({
+            logger$r.error({
               fn: getExistingDraftApplicationId,
               message: "Some issue occured trying to get existing draft applications for programid: ".concat(programId)
             });
@@ -14062,7 +14398,7 @@
     return _getExistingDraftApplicationId.apply(this, arguments);
   }
 
-  const logger$p = Logger('common/program');
+  const logger$q = Logger('common/program');
   POWERPOD.program = {
       programId: null,
       getProgramId,
@@ -14073,13 +14409,13 @@
       const params = new URLSearchParams(doc.location.search);
       const programIdParam = params.get('programid');
       if (!programIdParam) {
-          logger$p.info({
+          logger$q.info({
               fn: getProgramIdFromUrlParams,
               message: 'No programId found in URL params',
           });
           return;
       }
-      logger$p.info({
+      logger$q.info({
           fn: getProgramIdFromUrlParams,
           message: `Success! Found program id in URL path ${programIdParam}`,
           data: {
@@ -14098,14 +14434,14 @@
       if ((_a = POWERPOD.program) === null || _a === void 0 ? void 0 : _a.programId) {
           const programId = (_b = POWERPOD.program) === null || _b === void 0 ? void 0 : _b.programId;
           const formId = (_d = (_c = POWERPOD.form) === null || _c === void 0 ? void 0 : _c.id) !== null && _d !== void 0 ? _d : null;
-          logger$p.info({
+          logger$q.info({
               fn: getProgramId,
               message: `Cached programId found, returning ${programId}`,
           });
           return { programId, formId };
       }
       // Try and get it from URL path
-      logger$p.info({
+      logger$q.info({
           fn: getProgramId,
           message: 'attempting to get program id from URL path',
           data: {
@@ -14115,7 +14451,7 @@
       const params = new URLSearchParams(doc.location.search);
       const programIdParam = params.get('programid');
       if (programIdParam) {
-          logger$p.info({
+          logger$q.info({
               fn: getProgramId,
               message: `Success! Found program id in URL path ${programIdParam}`,
               data: {
@@ -14127,7 +14463,7 @@
       const hiddenProgramElement = $('#quartech_program');
       const programIdHiddenValue = hiddenProgramElement === null || hiddenProgramElement === void 0 ? void 0 : hiddenProgramElement.val();
       if (programIdHiddenValue) {
-          logger$p.info({
+          logger$q.info({
               fn: getProgramId,
               message: `Success! Found program id in hidden #quartech_program element ${programIdHiddenValue}`,
               data: {
@@ -14138,7 +14474,7 @@
           });
       }
       else {
-          logger$p.warn({
+          logger$q.warn({
               fn: getProgramId,
               message: `Could not find program id in hidden #quartech_program element ${programIdHiddenValue}`,
               data: {
@@ -14152,7 +14488,7 @@
           programIdParam &&
           programIdHiddenValue != programIdParam) ||
           (programIdHiddenValue == undefined && programIdParam)) {
-          logger$p.warn({
+          logger$q.warn({
               fn: getProgramId,
               message: `Program id in URL path differs from program id found in element, checking for existing draft applications with programid: ${programIdParam}`,
               data: {
@@ -14163,7 +14499,7 @@
           });
           const existingDraftApplicationId = await getExistingDraftApplicationId();
           if (existingDraftApplicationId && existingDraftApplicationId.length > 0) {
-              logger$p.info({
+              logger$q.info({
                   fn: getProgramId,
                   message: `Appending existing app id to URL, existingDraftApplicationId: ${existingDraftApplicationId}, for programid: ${programIdParam}`,
               });
@@ -14217,7 +14553,7 @@
       // const existingDraftApplicationId =
       let programId = programIdHiddenValue || programIdParam;
       if (!programId) {
-          logger$p.warn({
+          logger$q.warn({
               fn: getProgramId,
               message: `Could not find program id in either coding section or url params. ` +
                   `As a last resort, pull programId from config data`,
@@ -14226,13 +14562,13 @@
           programId = config.programId;
       }
       if (!programId) {
-          logger$p.error({
+          logger$q.error({
               fn: getProgramId,
               message: 'Could not find program id in either coding section or url params. ' +
                   'Check that HTML content and/or config programId is present in Portal Management.',
           });
       }
-      logger$p.info({
+      logger$q.info({
           fn: getProgramId,
           message: `No mismatch or drafts to look up, succesfully found programid: ${programId}`,
       });
@@ -14245,7 +14581,7 @@
       const programData = localStorage.getItem('programData');
       const programAbbreviation = (_a = JSON.parse(programData)) === null || _a === void 0 ? void 0 : _a.quartech_programabbreviation;
       if (!programAbbreviation) {
-          logger$p.error({
+          logger$q.error({
               fn: getProgramAbbreviation,
               message: 'Failed to get program abbreviation',
           });
@@ -14257,7 +14593,7 @@
       var _a, _b, _c;
       let activeStep = FormStep.Unknown;
       if ((_b = (_a = window === null || window === void 0 ? void 0 : window.location) === null || _a === void 0 ? void 0 : _a.search) === null || _b === void 0 ? void 0 : _b.includes('&msg=success')) {
-          logger$p.info({
+          logger$q.info({
               fn: getCurrentStep,
               message: `Determined that current step is Success page step`,
               data: {
@@ -14269,14 +14605,14 @@
       }
       const activeTabName = htmlDecode($('div > ol > li.list-group-item.active').html());
       if (!activeTabName || activeTabName.length === 0) {
-          logger$p.error({
+          logger$q.error({
               fn: getCurrentStep,
               message: 'Failed to get activeTabName',
               data: { activeTabName },
           });
           return activeStep;
       }
-      logger$p.info({
+      logger$q.info({
           fn: getCurrentStep,
           message: `Trying to find formStep for activeTabName: ${activeTabName}`,
           data: {
@@ -14289,7 +14625,7 @@
               return (tabDisplayName === activeTabName ||
                   tabDisplayName.includes(activeTabName));
           })) !== null && _c !== void 0 ? _c : activeStep;
-      logger$p.info({
+      logger$q.info({
           fn: getCurrentStep,
           message: `Validating current step ${activeStep}`,
           data: {
@@ -14301,14 +14637,14 @@
       if (activeStep &&
           activeStep !== FormStep.Unknown &&
           Object.values(FormStep).includes(activeStep)) {
-          logger$p.info({
+          logger$q.info({
               fn: getCurrentStep,
               message: `Successfully found current step ${activeStep}`,
           });
           return activeStep;
       }
       if (!activeStep || activeStep === FormStep.Unknown) {
-          logger$p.error({
+          logger$q.error({
               fn: getCurrentStep,
               message: 'Unable to determine current step',
               data: { activeStep, activeTabName, TabDisplayNames, FormStep },
@@ -14327,7 +14663,7 @@
     getFieldsBySectionClaim: getFieldsBySectionClaim,
     getFieldConfig: getFieldConfig
   };
-  var logger$o = Logger('common/fields');
+  var logger$p = Logger('common/fields');
 
   // To be used with new global & application level configs
   function getFieldsBySectionApplication(stepName) {
@@ -14348,7 +14684,7 @@
 
     if (!forceRefresh) {
       if (POWERPOD.loadingFieldsIntoState === false) {
-        logger$o.info({
+        logger$p.info({
           fn: getFieldsBySectionApplication,
           message: "returning cached state for fields",
           data: {
@@ -14358,24 +14694,24 @@
         return POWERPOD.state.fields;
       }
     }
-    logger$o.info({
+    logger$p.info({
       fn: getFieldsBySectionApplication,
       message: "start building initial fields state loading: ".concat(POWERPOD.loadingFieldsIntoState)
     });
     var globalConfigData = getGlobalFieldsConfig();
-    logger$o.info({
+    logger$p.info({
       fn: getFieldsBySectionApplication,
       message: 'globalConfigData:',
       data: globalConfigData
     });
     var applicationConfigData = getApplicationConfigData();
-    logger$o.info({
+    logger$p.info({
       fn: getFieldsBySectionApplication,
       message: 'applicationConfigData:',
       data: applicationConfigData
     });
     var globalSections = globalConfigData === null || globalConfigData === void 0 ? void 0 : globalConfigData.sections;
-    logger$o.info({
+    logger$p.info({
       fn: getFieldsBySectionApplication,
       message: "globalSections data:",
       data: {
@@ -14383,7 +14719,7 @@
       }
     });
     var applicationSections = applicationConfigData === null || applicationConfigData === void 0 ? void 0 : applicationConfigData.sections;
-    logger$o.info({
+    logger$p.info({
       fn: getFieldsBySectionApplication,
       message: "applicationSections data:",
       data: {
@@ -14405,7 +14741,7 @@
     var applicationSection = applicationSections === null || applicationSections === void 0 ? void 0 : applicationSections.find(function (s) {
       return s.name === stepName;
     });
-    logger$o.info({
+    logger$p.info({
       fn: getFieldsBySectionApplication,
       message: "found applicationSection data for stepName: ".concat(stepName),
       data: {
@@ -14416,7 +14752,7 @@
     var globalSection = globalSections.find(function (s) {
       return s.name === stepName;
     });
-    logger$o.info({
+    logger$p.info({
       fn: getFieldsBySectionApplication,
       message: "found globalSection data for stepName: ".concat(stepName),
       data: {
@@ -14426,7 +14762,7 @@
     });
     var fields = [];
     if (!applicationSection && !globalSection) {
-      logger$o.warn({
+      logger$p.warn({
         fn: getFieldsBySectionApplication,
         message: "no configuration section found by sectionName: ".concat(stepName),
         data: {
@@ -14439,7 +14775,7 @@
       return;
     }
     if (!applicationSection || !((_applicationSection$f = applicationSection.fields) !== null && _applicationSection$f !== void 0 && _applicationSection$f.length)) {
-      logger$o.warn({
+      logger$p.warn({
         fn: getFieldsBySectionApplication,
         message: "no applicationSection section found by sectionName: ".concat(stepName),
         data: {
@@ -14454,7 +14790,7 @@
       (_fields = fields).push.apply(_fields, _toConsumableArray(applicationSection.fields));
     }
     if (!globalSection || !((_globalSection$fields = globalSection.fields) !== null && _globalSection$fields !== void 0 && _globalSection$fields.length)) {
-      logger$o.warn({
+      logger$p.warn({
         fn: getFieldsBySectionApplication,
         message: "no globalSection section found by sectionName: ".concat(stepName),
         data: {
@@ -14473,7 +14809,7 @@
       localStorage.removeItem("fieldsData-".concat(programName, "-").concat(stepName), JSON.stringify(fields));
     }
     localStorage.setItem("fieldsData-".concat(programName, "-").concat(stepName), JSON.stringify(fields));
-    logger$o.info({
+    logger$p.info({
       fn: getFieldsBySectionApplication,
       message: "Start configuring fields for ".concat(programName, "-").concat(stepName, " with data:"),
       data: {
@@ -14482,14 +14818,14 @@
     });
     fields.forEach(function (s) {
       if (s.type && s.type === 'customField' && s.reorderField.position && (s.reorderField.fieldName || s.reorderField.sectionDataName)) {
-        logger$o.info({
+        logger$p.info({
           fn: getFieldsBySectionApplication,
           message: "Adding custom field, s.name: ".concat(s.name, ", s.label: ").concat(s.label, ", s.reorderField.fieldName: ").concat(s.reorderField.fieldName, ", s.reorderField.position: ").concat(s.reorderField.position)
         });
         addCustomField(s.name, s.label, s.reorderField.fieldName, s.reorderField.sectionDataName, s.reorderField.position);
       }
       if (document.getElementById(s.name) === null) {
-        logger$o.warn({
+        logger$p.warn({
           fn: getFieldsBySectionApplication,
           message: "Skipping non-exist field configured in JSON s.name: ".concat(s.name)
         });
@@ -14503,13 +14839,13 @@
       }
       // If elementType is not given, fill it out for future reference
       if (!s.elementType) {
-        logger$o.info({
+        logger$p.info({
           fn: getFieldsBySectionApplication,
           message: "Field elementType not set, try to determine it using getControlType func for s.name: ".concat(s.name)
         });
         var fieldRow = getFieldRow(s.name);
         if (!fieldRow) {
-          logger$o.error({
+          logger$p.error({
             fn: getFieldsBySectionApplication,
             message: "could not find fieldRow for fieldName: ".concat(s.name)
           });
@@ -14527,7 +14863,7 @@
         revalidate: true
       }));
       if (s.relocateField) {
-        logger$o.info({
+        logger$p.info({
           fn: getFieldsBySectionApplication,
           message: "relocating field name: ".concat(s.name)
         });
@@ -14549,7 +14885,7 @@
       // }
     });
     POWERPOD.loadingFieldsIntoState = false;
-    logger$o.info({
+    logger$p.info({
       fn: getFieldsBySectionApplication,
       message: 'done loading intial field state, fieldsData:',
       data: {
@@ -14576,7 +14912,7 @@
 
     if (!forceRefresh) {
       if (POWERPOD.loadingFieldsIntoState === false) {
-        logger$o.info({
+        logger$p.info({
           fn: getFieldsBySectionApplication,
           message: "returning cached state for fields",
           data: {
@@ -14586,7 +14922,7 @@
         return POWERPOD.state.fields;
       }
     }
-    logger$o.info({
+    logger$p.info({
       fn: getFieldsBySectionApplication,
       message: "call getClaimConfigData() to get fields data",
       data: {
@@ -14594,7 +14930,7 @@
       }
     });
     var claimConfigData = getClaimConfigData();
-    logger$o.info({
+    logger$p.info({
       fn: getFieldsBySectionClaim,
       message: 'claimConfigData:',
       data: claimConfigData
@@ -14612,7 +14948,7 @@
       return s.name === stepName;
     });
     if (!claimSection || !(claimSection !== null && claimSection !== void 0 && (_claimSection$fields = claimSection.fields) !== null && _claimSection$fields !== void 0 && _claimSection$fields.length)) {
-      logger$o.warn({
+      logger$p.warn({
         fn: getFieldsBySectionClaim,
         message: "no configuration section found by sectionName: ".concat(stepName),
         data: {
@@ -14626,13 +14962,13 @@
     var fields = claimSection.fields;
     fields.forEach(function (s) {
       if (document.getElementById(s.name) === null) {
-        logger$o.warn({
+        logger$p.warn({
           fn: getFieldsBySectionClaim,
           message: "Skipping non-exist field configured in JSON s.name: ".concat(s.name)
         });
         return;
       }
-      logger$o.info({
+      logger$p.info({
         fn: getFieldsBySectionClaim,
         message: "Getting field with fieldName: ".concat(s.name, "..."),
         data: {
@@ -14650,13 +14986,13 @@
       }
       // If elementType is not given, fill it out for future reference
       if (!s.elementType) {
-        logger$o.info({
+        logger$p.info({
           fn: getFieldsBySectionClaim,
           message: "Field elementType not set, try to determine it using getControlType func for s.name: ".concat(s.name)
         });
         var fieldRow = getFieldRow(s.name);
         if (!fieldRow) {
-          logger$o.error({
+          logger$p.error({
             fn: getFieldsBySectionClaim,
             message: "could not find fieldRow for fieldName: ".concat(s.name)
           });
@@ -14673,7 +15009,7 @@
         revalidate: true
       }));
       if (s.relocateField) {
-        logger$o.info({
+        logger$p.info({
           fn: getFieldsBySectionClaim,
           message: "relocating field name: ".concat(s.name)
         });
@@ -14686,7 +15022,7 @@
       //   });
       //   return;
       // }
-      logger$o.info({
+      logger$p.info({
         fn: getFieldsBySectionClaim,
         message: "showing field name: ".concat(s.name, ", for programName: ").concat(programName, ", stepName: ").concat(stepName)
       });
@@ -14699,7 +15035,7 @@
     //   JSON.stringify(fields)
     // );
 
-    logger$o.info({
+    logger$p.info({
       fn: getFieldsBySectionClaim,
       message: 'done loading intial field state, fieldsData:',
       data: {
@@ -14710,7 +15046,7 @@
   }
   function getGlobalFieldsConfig() {
     var _getGlobalConfigData;
-    logger$o.info({
+    logger$p.info({
       fn: getGlobalConfigData,
       data: getGlobalConfigData()
     });
@@ -14742,13 +15078,13 @@
     // }
 
     if (!fieldConfig) {
-      logger$o.error({
+      logger$p.error({
         fn: getFieldConfig,
         message: "Could not find fieldConfig for fieldName: ".concat(fieldName)
       });
       return;
     }
-    logger$o.info({
+    logger$p.info({
       fn: getFieldConfig,
       message: "Retrieved field config for name: ".concat(fieldName),
       data: {
@@ -14759,7 +15095,7 @@
   }
 
   // @ts-ignore
-  var logger$n = Logger('common/validation');
+  var logger$o = Logger('common/validation');
   POWERPOD.fieldValidation = {
     validateRequiredFields: validateRequiredFields,
     validateStepFields: validateStepFields,
@@ -14778,7 +15114,7 @@
   function validateStepField(fieldName) {
     var _fieldErrorHtml;
     var fieldConfig = getFieldConfig(fieldName);
-    logger$n.info({
+    logger$o.info({
       // @ts-ignore
       fn: validateStepField,
       message: "validateStepField called for fieldName: ".concat(fieldName),
@@ -14788,7 +15124,7 @@
       }
     });
     if (!fieldConfig) {
-      logger$n.error({
+      logger$o.error({
         // @ts-ignore
         fn: validateStepField,
         message: "failed to find fieldName: ".concat(fieldName, " in state")
@@ -14797,7 +15133,7 @@
     }
     if (fieldConfig.hidden) {
       var _fieldConfig$error;
-      logger$n.warn({
+      logger$o.warn({
         // @ts-ignore
         fn: validateStepField,
         message: "skip validating HIDDEN fieldName: ".concat(fieldName),
@@ -14816,7 +15152,7 @@
       }
       return;
     }
-    logger$n.info({
+    logger$o.info({
       // @ts-ignore
       fn: validateStepField,
       message: "start validating fieldName: ".concat(fieldName),
@@ -14833,7 +15169,7 @@
       errorMessage = fieldConfig.errorMessage;
     var needsValidation = required || validation || format;
     if (!needsValidation) {
-      logger$n.warn({
+      logger$o.warn({
         // @ts-ignore
         fn: validateStepField,
         message: "no validation options configured, skip validating fieldName: ".concat(fieldName),
@@ -14912,7 +15248,7 @@
         postfix = validation.postfix,
         overrideDisplayValue = validation.overrideDisplayValue;
       var _errorMsg4 = validateFieldLength(name, _value2, _comparison3, forceRequired, postfix, overrideDisplayValue);
-      logger$n.info({
+      logger$o.info({
         // @ts-ignore
         fn: validateStepField,
         message: 'Generate length validation error html...'
@@ -14920,7 +15256,7 @@
       // Display instant feedback on field input
       if (_errorMsg4 && _errorMsg4.length > 0) {
         errorMsgs.push(_errorMsg4);
-        logger$n.info({
+        logger$o.info({
           // @ts-ignore
           fn: validateStepField,
           message: 'Done generating length validation error html...'
@@ -14929,7 +15265,7 @@
     }
     if ((validation === null || validation === void 0 ? void 0 : validation.type) === 'signature') {
       var _errorMsg5 = validateSignatureField(name);
-      logger$n.info({
+      logger$o.info({
         // @ts-ignore
         fn: validateStepField,
         message: 'Generate signature validation error html...'
@@ -14937,7 +15273,7 @@
       // Display instant feedback on field input
       if (_errorMsg5 && _errorMsg5.length > 0) {
         errorMsgs.push(_errorMsg5);
-        logger$n.info({
+        logger$o.info({
           // @ts-ignore
           fn: validateStepField,
           message: 'Done generating signature validation error html...'
@@ -14946,7 +15282,7 @@
     }
     if (format === 'email') {
       var _errorMsg6 = validateEmailAddressField(name);
-      logger$n.info({
+      logger$o.info({
         // @ts-ignore
         fn: validateStepField,
         message: 'Generate email validation error html...'
@@ -14954,7 +15290,7 @@
       // Display instant feedback on field input
       if (_errorMsg6 && _errorMsg6.length > 0) {
         errorMsgs.push(_errorMsg6);
-        logger$n.info({
+        logger$o.info({
           // @ts-ignore
           fn: validateStepField,
           message: 'Done generating email validation error html...'
@@ -14963,7 +15299,7 @@
     }
     var errorMessageElement = getFieldErrorDiv(fieldName);
     if (!errorMessageElement) {
-      logger$n.error({
+      logger$o.error({
         // @ts-ignore
         fn: validateStepField,
         message: "Failed to find field error div, fieldName: ".concat(fieldName)
@@ -14974,7 +15310,7 @@
 
     // NO ERROR FOUND:
     if (!((_fieldErrorHtml = fieldErrorHtml) !== null && _fieldErrorHtml !== void 0 && _fieldErrorHtml.length)) {
-      logger$n.info({
+      logger$o.info({
         // @ts-ignore
         fn: validateStepField,
         message: "Did NOT find error message for field: ".concat(name)
@@ -15000,7 +15336,7 @@
     } else {
       var _errorMsgs$join;
       // IF THERE ARE ERRORS:
-      logger$n.info({
+      logger$o.info({
         // @ts-ignore
         fn: validateStepField,
         message: "Found error message for field: ".concat(name, ", fieldErrorHtml: ").concat(fieldErrorHtml)
@@ -15008,7 +15344,7 @@
 
       // only show error message ON FIELD if field has been touched
       if (fieldConfig.touched) {
-        logger$n.info({
+        logger$o.info({
           // @ts-ignore
           fn: validateStepField,
           message: "Field has been touched name: ".concat(name, ", show error message on field: ").concat(name, ", fieldErrorHtml: ").concat(fieldErrorHtml)
@@ -15026,7 +15362,7 @@
         }
       } else {
         // if FIELD NOT TOUCHED
-        logger$n.warn({
+        logger$o.warn({
           // @ts-ignore
           fn: validateStepField,
           message: "Field NOT touched yet name: ".concat(name, ", skip showing error message on field: ").concat(name, ", fieldErrorHtml: ").concat(fieldErrorHtml)
@@ -15069,7 +15405,7 @@
       fields = getFieldsBySectionClaim(stepName);
     }
     if (!fields) return '';
-    logger$n.info({
+    logger$o.info({
       // @ts-ignore
       fn: validateStepFields,
       message: 'loop through fields to get validation errors',
@@ -15087,7 +15423,7 @@
     //   validateStepField(fields[i].name);
     // }
 
-    logger$n.info({
+    logger$o.info({
       // @ts-ignore
       fn: validateStepFields,
       message: 'Go through dynamic fields to generate validation error html'
@@ -15121,7 +15457,7 @@
       }
       validationErrorHtml = validationErrorHtml.concat(errorMsg);
       fieldErrorHtml = fieldErrorHtml.concat(errorMsg);
-      logger$n.info({
+      logger$o.info({
         // @ts-ignore
         fn: validateStepFields,
         message: "Found error for field: ".concat(fieldId, ", errorMsg: ").concat(fieldErrorHtml)
@@ -15146,7 +15482,7 @@
       }
     }
     if (returnString) {
-      logger$n.info({
+      logger$o.info({
         // @ts-ignore
         fn: validateStepFields,
         message: 'returning string',
@@ -15215,7 +15551,7 @@
       elemType = _ref$elemType === void 0 ? HtmlElementType.Input : _ref$elemType,
       _ref$errorMessage = _ref.errorMessage,
       errorMessage = _ref$errorMessage === void 0 ? 'Please enter a value, this field is required.' : _ref$errorMessage;
-    logger$n.info({
+    logger$o.info({
       // @ts-ignore
       fn: validateRequiredField,
       message: "Start validating required fieldName: ".concat(fieldName, " of elemType: ").concat(elemType)
@@ -15246,7 +15582,7 @@
         raw: true
       });
     }
-    logger$n.info({
+    logger$o.info({
       // @ts-ignore
       fn: validateRequiredField,
       message: "Required field fieldName: ".concat(fieldName, ", elemType: ").concat(elemType, " isEmptyField: ").concat(!value || !value.length, ", value: ").concat(value)
@@ -15258,7 +15594,7 @@
       isEmpty = isValueEmpty(value, elemType);
     }
     if (isEmpty) {
-      logger$n.info({
+      logger$o.info({
         // @ts-ignore
         fn: validateRequiredField,
         message: "Required field fieldName: ".concat(fieldName, " is empty! Set validation error message")
@@ -15328,7 +15664,7 @@
     var element = document.querySelector("#".concat(fieldName));
     var comparisonElement = document.querySelector("#".concat(comparisonFieldName));
     if (!element || !comparisonElement) {
-      logger$n.error({
+      logger$o.error({
         // @ts-ignore
         fn: validateDateFieldValue,
         message: "Failed to find element for date field validation",
@@ -15359,7 +15695,7 @@
       console.error('Invalid date format');
       return false;
     }
-    logger$n.info({
+    logger$o.info({
       // @ts-ignore
       fn: validateDateFieldValue,
       message: "After cleaning values:",
@@ -15411,7 +15747,7 @@
         break;
       default:
         finalMessage = 'Invalid operator';
-        logger$n.error({
+        logger$o.error({
           // @ts-ignore
           fn: validateDateFieldValue,
           message: "Invalid operator"
@@ -15421,7 +15757,7 @@
     if ((errorMessage === null || errorMessage === void 0 ? void 0 : errorMessage.length) > 0 && ((_finalMessage = finalMessage) === null || _finalMessage === void 0 ? void 0 : _finalMessage.length) > 0) {
       finalMessage = errorMessage;
     }
-    logger$n.info({
+    logger$o.info({
       // @ts-ignore
       fn: validateDateFieldValue,
       message: "Returning error message: ".concat(((_finalMessage2 = finalMessage) === null || _finalMessage2 === void 0 ? void 0 : _finalMessage2.length) > 0 ? finalMessage : 'VALIDATION PASSED'),
@@ -15451,7 +15787,7 @@
     };
     var element = document.querySelector("#".concat(fieldName));
     if (!element) {
-      logger$n.error({
+      logger$o.error({
         // @ts-ignore
         fn: validateNumericFieldValue,
         message: "failed to find element for numeric field validation",
@@ -15463,7 +15799,7 @@
 
     // @ts-ignore
     if (element.value === '' && !forceRequired) {
-      logger$n.info({
+      logger$o.info({
         // @ts-ignore
         fn: validateNumericFieldValue,
         message: "element control value is empty, but it is not required, so skip numeric validation",
@@ -15475,7 +15811,7 @@
     var value = parseFloat(
     // @ts-ignore
     element.value.replace(/,/g, '').replace('$', '').replace('%', ''));
-    logger$n.info({
+    logger$o.info({
       // @ts-ignore
       fn: validateNumericFieldValue,
       message: "After cleaning value: ".concat(value)
@@ -15515,7 +15851,7 @@
         break;
       default:
         finalMessage = 'Invalid operator';
-        logger$n.error({
+        logger$o.error({
           // @ts-ignore
           fn: validateNumericFieldValue,
           message: "Invalid operator"
@@ -15525,7 +15861,7 @@
     if ((errorMessage === null || errorMessage === void 0 ? void 0 : errorMessage.length) > 0 && ((_finalMessage3 = finalMessage) === null || _finalMessage3 === void 0 ? void 0 : _finalMessage3.length) > 0) {
       finalMessage = errorMessage;
     }
-    logger$n.info({
+    logger$o.info({
       // @ts-ignore
       fn: validateNumericFieldValue,
       message: "returning error message: ".concat(((_finalMessage4 = finalMessage) === null || _finalMessage4 === void 0 ? void 0 : _finalMessage4.length) > 0 ? finalMessage : 'VALIDATION PASSED'),
@@ -15577,7 +15913,7 @@
         break;
       default:
         finalMessage = 'Invalid operator';
-        logger$n.error({
+        logger$o.error({
           // @ts-ignore
           fn: validateNumericFieldValue,
           message: "Invalid operator"
@@ -15633,7 +15969,7 @@
   function validateEmailAddressField(fieldName) {
     var fieldElement = document.querySelector("#".concat(fieldName));
     if (!fieldElement) {
-      logger$n.error({
+      logger$o.error({
         // @ts-ignore
         fn: validateEmailAddressField,
         message: "Could not find fieldElement for fieldName: ".concat(fieldName)
@@ -15663,7 +15999,7 @@
   function displayActiveFieldErrors() {
     // @ts-ignore
     var fields = POWERPOD.state.fields;
-    logger$n.info({
+    logger$o.info({
       // @ts-ignore
       fn: displayActiveFieldErrors,
       message: "checking field state for active errors on fields...",
@@ -15676,7 +16012,7 @@
       return f.error && !f.hidden && (f.visible != undefined || f.visible != null) && f.visible;
     });
     if (!fieldsWithErrors || fieldsWithErrors.length === 0) {
-      logger$n.info({
+      logger$o.info({
         // @ts-ignore
         fn: displayActiveFieldErrors,
         message: "No active errors on any fields to display"
@@ -15689,7 +16025,7 @@
       var errorWithLabelText = "<span>\"".concat(field.label, "\":</span> <span style=\"color: red;\">").concat(field.error, "</span>");
       validationErrorHtml = validationErrorHtml.concat("<div>".concat(errorWithLabelText, "</div>"));
     });
-    logger$n.info({
+    logger$o.info({
       // @ts-ignore
       fn: displayActiveFieldErrors,
       message: "found fields with errors...",
@@ -15705,7 +16041,7 @@
   // @ts-ignore
   function displayValidationErrors(validationErrorHtml) {
     var validationErrorsDiv = $('#error_messages_div');
-    logger$n.info({
+    logger$o.info({
       // @ts-ignore
       fn: displayValidationErrors,
       message: 'displaying validation errors',
@@ -15739,7 +16075,7 @@
       validationErrorsDiv.style = 'display:block;';
       // @ts-ignore
       if (window.debug_pp) {
-        logger$n.warn({
+        logger$o.warn({
           // @ts-ignore
           fn: displayValidationErrors,
           message: "Debugging mode enabled, not disabling next button"
@@ -15888,7 +16224,7 @@
     var sigFilled = isSignatureFilled();
     var _getFieldConfig = getFieldConfig(name),
       signatureSaved = _getFieldConfig.signatureSaved;
-    logger$n.info({
+    logger$o.info({
       fn: validateSignatureField,
       message: "validateSignatureField for name: ".concat(name, ", sigFilled: ").concat(sigFilled, ", signatureSaved: ").concat(signatureSaved)
     });
@@ -15899,7 +16235,7 @@
     }
   }
 
-  var logger$m = Logger('common/html');
+  var logger$n = Logger('common/html');
   POWERPOD.html = {
     setFieldNameLabel: setFieldNameLabel,
     redirectToFormId: redirectToFormId,
@@ -15966,7 +16302,7 @@
     // Append the new parameter to the URL
     currentUrl.search = '';
     currentUrl.searchParams.set('id', id);
-    logger$m.info({
+    logger$n.info({
       fn: redirectToFormId,
       message: "Redirecting to form with id: ".concat(id)
     });
@@ -15982,7 +16318,7 @@
     if (controlId && (_POWERPOD$state = POWERPOD.state) !== null && _POWERPOD$state !== void 0 && (_POWERPOD$state = _POWERPOD$state.fields) !== null && _POWERPOD$state !== void 0 && (_POWERPOD$state = _POWERPOD$state[controlId]) !== null && _POWERPOD$state !== void 0 && _POWERPOD$state.elementType && ((_POWERPOD$state2 = POWERPOD.state) === null || _POWERPOD$state2 === void 0 || (_POWERPOD$state2 = _POWERPOD$state2.fields) === null || _POWERPOD$state2 === void 0 || (_POWERPOD$state2 = _POWERPOD$state2[controlId]) === null || _POWERPOD$state2 === void 0 ? void 0 : _POWERPOD$state2.elementType) !== 'Unknown') {
       return POWERPOD.state.fields[controlId].elementType;
     }
-    logger$m.info({
+    logger$n.info({
       fn: getControlType,
       message: "Control/element type not found in state, start determining type...",
       data: {
@@ -15996,7 +16332,7 @@
     if (!control) {
       // exit early for notescontrol file upload
       if (tr.querySelector('#notescontrol')) {
-        logger$m.info({
+        logger$n.info({
           fn: getControlType,
           message: 'Found notes control control type',
           data: {
@@ -16005,7 +16341,7 @@
         });
         return HtmlElementType.NotesControl;
       } else {
-        logger$m.warn({
+        logger$n.warn({
           fn: getControlType,
           message: 'Could not find form control element, might be an empty row',
           data: {
@@ -16023,7 +16359,7 @@
     if (!skipState && control !== null && control !== void 0 && control.id && (_POWERPOD$state3 = POWERPOD.state) !== null && _POWERPOD$state3 !== void 0 && (_POWERPOD$state3 = _POWERPOD$state3.fields[controlId]) !== null && _POWERPOD$state3 !== void 0 && _POWERPOD$state3.elementType && ((_POWERPOD$state4 = POWERPOD.state) === null || _POWERPOD$state4 === void 0 || (_POWERPOD$state4 = _POWERPOD$state4.fields[controlId]) === null || _POWERPOD$state4 === void 0 ? void 0 : _POWERPOD$state4.elementType) !== 'Unknown') {
       var _POWERPOD$state5;
       controlType = (_POWERPOD$state5 = POWERPOD.state) === null || _POWERPOD$state5 === void 0 || (_POWERPOD$state5 = _POWERPOD$state5.fields[controlId]) === null || _POWERPOD$state5 === void 0 ? void 0 : _POWERPOD$state5.elementType;
-      logger$m.info({
+      logger$n.info({
         fn: getControlType,
         message: "Successfully found control type from STATE for controlId: ".concat(controlId, ", found elementType: ").concat(controlType),
         data: {
@@ -16054,7 +16390,7 @@
       controlType = HtmlElementType.MultiOptionSet;
     }
     if (!controlType) {
-      logger$m.error({
+      logger$n.error({
         fn: getControlType,
         message: 'Could not determine control type',
         data: {
@@ -16066,7 +16402,7 @@
       });
       return HtmlElementType.Unknown;
     }
-    logger$m.info({
+    logger$n.info({
       fn: getControlType,
       message: "Successfully found control type for controlId: ".concat(controlId, ", found elementType: ").concat(controlType),
       data: {
@@ -16098,7 +16434,7 @@
     if (controlType === HtmlElementType.MultiSelectPicklist || controlType === HtmlElementType.DatePicker) {
       var labelElement = tr.querySelector('label.field-label');
       if (!labelElement) {
-        logger$m.error({
+        logger$n.error({
           fn: getControlId,
           message: "Failed to get label element for control, controlType: ".concat(controlType),
           data: {
@@ -16115,7 +16451,7 @@
       id = questionDiv === null || questionDiv === void 0 || (_questionDiv$querySel = questionDiv.querySelector('label')) === null || _questionDiv$querySel === void 0 ? void 0 : _questionDiv$querySel.getAttribute('for');
     }
     if (!id) {
-      logger$m.warn({
+      logger$n.warn({
         fn: getControlId,
         message: "Failed to get id for control, might be an empty row controlType: ".concat(controlType),
         data: {
@@ -16150,7 +16486,7 @@
       tr: tr,
       controlId: controlId
     });
-    logger$m.info({
+    logger$n.info({
       fn: getControlValue,
       message: "Attempting to get control value for controlId: ".concat(controlId, " type: ").concat(elementType, ", raw: ").concat(raw),
       data: {
@@ -16193,7 +16529,7 @@
       var _value2 = controlDiv === null || controlDiv === void 0 || (_controlDiv$querySele4 = controlDiv.querySelector('div > .datetimepicker > input')) === null || _controlDiv$querySele4 === void 0 ? void 0 : _controlDiv$querySele4.value;
       if (_value2 !== null && _value2 !== void 0 && _value2.length) {
         var _convertDateToISO;
-        logger$m.info({
+        logger$n.info({
           fn: getControlValue,
           message: "Attempting to convert date raw value to ISO format, value: ".concat(_value2)
         });
@@ -16210,7 +16546,7 @@
     } else if (elementType === HtmlElementType.DropdownSelect) {
       var selectElement = controlDiv === null || controlDiv === void 0 ? void 0 : controlDiv.querySelector('select');
       if (!selectElement) {
-        logger$m.error({
+        logger$n.error({
           fn: getControlValue,
           message: "Could not found selectElement for controlId: ".concat(controlId),
           data: {
@@ -16230,7 +16566,7 @@
     } else if (elementType === HtmlElementType.Checkbox) {
       var _controlDiv$querySele6;
       var _checked = controlDiv === null || controlDiv === void 0 || (_controlDiv$querySele6 = controlDiv.querySelector('input')) === null || _controlDiv$querySele6 === void 0 ? void 0 : _controlDiv$querySele6.checked;
-      logger$m.info({
+      logger$n.info({
         fn: getControlValue,
         message: "Found control value for type: ".concat(elementType, ", raw: ").concat(raw, ", checked: ").concat(_checked),
         data: {
@@ -16251,7 +16587,7 @@
       rawValue = (_document = document) === null || _document === void 0 || (_document = _document.getElementById(controlId)) === null || _document === void 0 ? void 0 : _document.value;
       verboseValue = controlDiv === null || controlDiv === void 0 || (_controlDiv$querySele7 = controlDiv.querySelector('input')) === null || _controlDiv$querySele7 === void 0 ? void 0 : _controlDiv$querySele7.value;
     }
-    logger$m.info({
+    logger$n.info({
       fn: getControlValue,
       message: "For controlId: ".concat(controlId, ", raw: ").concat(raw, ", forTemplateGeneration: ").concat(forTemplateGeneration, " found rawValue: ").concat(rawValue, " verboseValue: ").concat(verboseValue),
       data: {
@@ -16280,13 +16616,13 @@
     var _originalSelectElemen;
     var originalSelectElementForMSOS = getOriginalMsosElement(controlId);
     if (!originalSelectElementForMSOS) {
-      logger$m.warn({
+      logger$n.warn({
         fn: newGetOriginalMultiOptionSetElementValue,
         message: "Could not find original msos element for controlId: ".concat(controlId, ", attempt to fallback to getMultiOptionSetElementValue")
       });
       var _valueStr = getMultiOptionSetElementValue(controlId, raw);
       if (!_valueStr) {
-        logger$m.error({
+        logger$n.error({
           fn: newGetOriginalMultiOptionSetElementValue,
           message: "Fallback to getMultiOptionSetElementValue also failed..."
         });
@@ -16297,7 +16633,7 @@
     var selectionContainer = // @ts-ignore
     originalSelectElementForMSOS === null || originalSelectElementForMSOS === void 0 || (_originalSelectElemen = originalSelectElementForMSOS.multiSelectOptionSet()) === null || _originalSelectElemen === void 0 ? void 0 : _originalSelectElemen.$selection;
     if (!selectionContainer) {
-      logger$m.error({
+      logger$n.error({
         fn: newGetOriginalMultiOptionSetElementValue,
         message: "Could not find msos selectionContainer for controlId: ".concat(controlId)
       });
@@ -16306,7 +16642,7 @@
     var selectedItems = selectionContainer === null || selectionContainer === void 0 ? void 0 : selectionContainer.find('li[aria-selected="true"]');
     var inputElements = selectedItems === null || selectedItems === void 0 ? void 0 : selectedItems.find('input');
     if (!selectedItems && !selectedItems.length && !inputElements && !inputElements.length) {
-      logger$m.warn({
+      logger$n.warn({
         fn: newGetOriginalMultiOptionSetElementValue,
         message: "Could not find any selectedItems or inputElements for controlId: ".concat(controlId)
       });
@@ -16326,7 +16662,7 @@
       }
     }
     var valueStr = valueStrArray.join(', ');
-    logger$m.info({
+    logger$n.info({
       fn: newGetOriginalMultiOptionSetElementValue,
       message: "For controlId: ".concat(controlId, " found valueStr: ").concat(valueStr)
     });
@@ -16336,14 +16672,14 @@
     var _inputElement$value;
     var inputElement = document.getElementById(controlId);
     if (!inputElement) {
-      logger$m.error({
+      logger$n.error({
         fn: getMultiOptionSetElementValue,
         message: "Could not find input element for MultiOptionSet element controlId: ".concat(controlId)
       });
       return;
     }
     if (inputElement.value === undefined || ((_inputElement$value = inputElement.value) === null || _inputElement$value === void 0 ? void 0 : _inputElement$value.length) <= 0) {
-      logger$m.warn({
+      logger$n.warn({
         fn: getMultiOptionSetElementValue,
         message: "MultiOptionSet value empty for controlId: ".concat(controlId)
       });
@@ -16365,7 +16701,7 @@
       });
     }
     var valueStr = valueStrArray.join(', ');
-    logger$m.info({
+    logger$n.info({
       fn: getMultiOptionSetElementValue,
       message: "For controlId: ".concat(controlId, " found valueStr: ").concat(valueStr),
       data: {
@@ -16377,7 +16713,7 @@
   }
   function listenForIframeReadyStateChanges(iframe, fn) {
     if (fn && (iframe.contentDocument.readyState === 'interactive' || iframe.contentDocument.readyState === 'complete')) {
-      logger$m.info({
+      logger$n.info({
         fn: listenForIframeReadyStateChanges,
         message: 'iframe is now interactive or complete readyState'
       });
@@ -16385,14 +16721,14 @@
     }
     iframe.contentDocument.addEventListener('readystatechange', function () {
       var _iframe$contentDocume;
-      logger$m.info({
+      logger$n.info({
         fn: listenForIframeReadyStateChanges,
         message: "iframe onReadyState changed: ".concat((_iframe$contentDocume = iframe.contentDocument) === null || _iframe$contentDocume === void 0 ? void 0 : _iframe$contentDocume.readyState)
       });
     });
   }
   function onDocumentReadyState(fn) {
-    logger$m.info({
+    logger$n.info({
       fn: onDocumentReadyState,
       message: "checking document readyState: ".concat(doc.readyState)
     });
@@ -16401,7 +16737,7 @@
     } else {
       doc.addEventListener('readystatechange', function () {
         if (doc.readyState === 'complete') {
-          logger$m.info({
+          logger$n.info({
             fn: onDocumentReadyState,
             message: 'document ready!'
           });
@@ -16430,7 +16766,7 @@
         fieldLabelElement = document.getElementById(fieldName);
       }
       if (!fieldLabelElement) {
-        logger$m.error({
+        logger$n.error({
           fn: getFieldRow,
           message: "could not find fieldLabelElement for fieldName: ".concat(fieldName)
         });
@@ -16439,7 +16775,7 @@
     }
     var fieldRow = fieldLabelElement.closest('tr');
     if (!fieldRow) {
-      logger$m.error({
+      logger$n.error({
         fn: getFieldRow,
         message: "could not find fieldRow for fieldName: ".concat(fieldName)
       });
@@ -16452,13 +16788,13 @@
     var fieldName = _ref3.fieldName,
       _ref3$doNotBlank = _ref3.doNotBlank,
       doNotBlank = _ref3$doNotBlank === void 0 ? false : _ref3$doNotBlank;
-    logger$m.info({
+    logger$n.info({
       fn: hideFieldRow,
       message: "hideFieldRow called for fieldName: ".concat(fieldName, ", doNotBlank: ").concat(doNotBlank)
     });
     var fieldRow = getFieldRow(fieldName);
     if (!fieldRow) {
-      logger$m.error({
+      logger$n.error({
         fn: hideFieldRow,
         message: "could not find fieldRow for fieldName: ".concat(fieldName)
       });
@@ -16499,7 +16835,7 @@
       // touched: false,
     });
     displayActiveFieldErrors();
-    logger$m.info({
+    logger$n.info({
       fn: hideFieldRow,
       message: "successfully ran hideFieldRow for fieldName: ".concat(fieldName, ", doNotBlank: ").concat(doNotBlank),
       data: {
@@ -16509,13 +16845,13 @@
   }
   function showFieldRow(fieldName) {
     var _$2, _powerpod2, _nearestFieldSet$styl;
-    logger$m.info({
+    logger$n.info({
       fn: showFieldRow,
       message: "showFieldRow called for fieldName: ".concat(fieldName)
     });
     var fieldRow = getFieldRow(fieldName);
     if (!fieldRow) {
-      logger$m.error({
+      logger$n.error({
         fn: showFieldRow,
         message: "could not find fieldRow for fieldName: ".concat(fieldName)
       });
@@ -16550,7 +16886,7 @@
     // Ensure the nearest fieldset is visible
     var nearestFieldSet = fieldRow.closest('fieldset');
     if (!nearestFieldSet) {
-      logger$m.error({
+      logger$n.error({
         fn: showFieldRow,
         message: "could not find nearestFieldSet to fieldName: ".concat(fieldName)
       });
@@ -16565,7 +16901,7 @@
       revalidate: true
     });
     validateStepField(fieldName);
-    logger$m.info({
+    logger$n.info({
       fn: showFieldRow,
       message: "successfully ran showFieldRow for fieldName: ".concat(fieldName),
       data: {
@@ -16578,7 +16914,7 @@
     var topOrBottom = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 'top';
     var tabDiv = document.querySelector("div[data-name='".concat(tabDataName, "']"));
     if (!tabDiv) {
-      logger$m.error({
+      logger$n.error({
         fn: addHtmlToTabDiv,
         message: "Unable to add to tab div of tabDataName: ".concat(tabDataName, ", could not find tab div")
       });
@@ -16621,7 +16957,7 @@
     var topOrBottom = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 'top';
     var subsectionFieldset = document.querySelector("fieldset[aria-label='".concat(subsectionAriaLabel, "']"));
     if (!subsectionFieldset || !subsectionFieldset.parentNode) {
-      logger$m.warn({
+      logger$n.warn({
         fn: addHtmlToSubsection,
         message: "Unable to add to subsection of fieldset aria-label: ".concat(subsectionAriaLabel, ", could not find section. Could be configuring non-active section.")
       });
@@ -16698,7 +17034,7 @@
     var type = arguments.length > 3 ? arguments[3] : undefined;
     var sectionTable = document.querySelector("div[data-name='".concat(tableDataName, "'] > .tab-column > div"));
     if (!sectionTable) {
-      logger$m.warn({
+      logger$n.warn({
         fn: addHtmlToSection,
         message: "Unable to add to section of tableDataName: ".concat(tableDataName, ", could not find section. Could be configuring non-active section.")
       });
@@ -16740,7 +17076,7 @@
   }
   function addCustomField(customFieldName, customFieldLabel, existingFieldName, sectionDataName) {
     var beforeOrAfter = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : 'before';
-    logger$m.info({
+    logger$n.info({
       fn: addCustomField,
       message: "addCustomField or addCustomField was specified, adding...",
       data: {
@@ -16756,18 +17092,18 @@
       if (!tr) return;
       if (beforeOrAfter === 'before') {
         $(htmlContentToAdd).insertBefore(tr);
-        logger$m.info({
+        logger$n.info({
           fn: addCustomField,
           message: "Added customFieldName: ".concat(customFieldName, " before existingFieldName: ").concat(existingFieldName)
         });
       } else if (beforeOrAfter === 'after') {
         $(htmlContentToAdd).insertAfter(tr);
-        logger$m.info({
+        logger$n.info({
           fn: addCustomField,
           message: "Added customFieldName: ".concat(customFieldName, " after existingFieldName: ").concat(existingFieldName)
         });
       }
-      logger$m.info({
+      logger$n.info({
         fn: addCustomField,
         message: "Successfully added custom field html for customFieldName: ".concat(customFieldName, ", customFieldLabel: ").concat(customFieldLabel, ", existingFieldName: ").concat(existingFieldName, ", beforeOrAfter: ").concat(beforeOrAfter),
         data: {
@@ -16777,7 +17113,7 @@
       });
     } else if (sectionDataName) {
       addHtmlToSection(sectionDataName, "\n        <table role=\"presentation\" class=\"section\">\n          <tbody>\n            ".concat(htmlContentToAdd, "\n          </tbody>\n        </table>\n      "), beforeOrAfter === 'before' ? 'top' : 'bottom', 'customField');
-      logger$m.info({
+      logger$n.info({
         fn: addCustomField,
         message: "adding customField to section: ".concat(sectionDataName, ", customFieldName: ").concat(customFieldName)
       });
@@ -16785,7 +17121,7 @@
   }
   function addHtmlToField(fieldName, htmlContentToAdd) {
     var topOrBottom = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 'top';
-    logger$m.info({
+    logger$n.info({
       fn: addHtmlToField,
       message: "additionalTextAboveField or additionalTextBelowField was specified, adding... fieldName: ".concat(fieldName, ", htmlContentToAdd: ").concat(htmlContentToAdd, ", topOrBottom: ").concat(topOrBottom)
     });
@@ -16808,7 +17144,7 @@
         return existingContent === newContent;
       });
       if (isAlreadyAdded) {
-        logger$m.info({
+        logger$n.info({
           fn: addHtmlToField,
           message: "HTML content is already added for fieldName: ".concat(fieldName)
         });
@@ -16823,7 +17159,7 @@
     }
     var newTrElement = $("tr[data-uuid=\"".concat(uuid, "\"]"));
     if (!newTrElement || !(newTrElement !== null && newTrElement !== void 0 && newTrElement.length)) {
-      logger$m.error({
+      logger$n.error({
         fn: addHtmlToField,
         message: 'Failed to create new row'
       });
@@ -16850,7 +17186,7 @@
   function observeChanges(element, customFunc) {
     var disableInitialCall = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
     var id = (element === null || element === void 0 ? void 0 : element.id) || '';
-    logger$m.info({
+    logger$n.info({
       fn: observeChanges,
       message: 'observing changes...',
       data: {
@@ -16860,7 +17196,7 @@
       }
     });
     if (!element) {
-      logger$m.error({
+      logger$n.error({
         fn: observeChanges,
         message: 'failed to observe changes, null element',
         data: {
@@ -16874,7 +17210,7 @@
 
     // watch for changes
     var observer = new MutationObserver(function (mutations, observer) {
-      logger$m.info({
+      logger$n.info({
         fn: observeChanges,
         message: 'Change observed... testing',
         data: {
@@ -16895,7 +17231,7 @@
         characterData: true,
         subtree: true
       });
-      logger$m.info({
+      logger$n.info({
         fn: observeChanges,
         message: 'Successfully assigned observer to element',
         data: {
@@ -16913,7 +17249,7 @@
       }
       return observer;
     }
-    logger$m.error({
+    logger$n.error({
       fn: observeChanges,
       message: "Unable to assign observer for some reason",
       data: {
@@ -16926,7 +17262,7 @@
     return false;
   }
   function observeIframeChanges(funcToExecute, fieldNameToPass, fieldNameToObserve) {
-    logger$m.info({
+    logger$n.info({
       fn: observeIframeChanges,
       message: 'observing iframe changes...',
       data: {
@@ -17013,7 +17349,7 @@
       elementType = _ref4$elementType === void 0 ? null : _ref4$elementType,
       _ref4$skipValidation = _ref4.skipValidation,
       skipValidation = _ref4$skipValidation === void 0 ? false : _ref4$skipValidation;
-    logger$m.info({
+    logger$n.info({
       fn: setFieldValue,
       message: "Setting field value for name: ".concat(name, ", value: ").concat(value, ", elementType: ").concat(elementType, ", skipValidation: ").concat(skipValidation)
     });
@@ -17032,7 +17368,7 @@
       skipValidation: skipValidation,
       origin: setFieldValue.name
     };
-    logger$m.info({
+    logger$n.info({
       fn: setFieldValue,
       message: "Dispatching change event for field name: ".concat(name, ", value: ").concat(value, ", elementType: ").concat(elementType, ", skipValidation: ").concat(skipValidation),
       data: {
@@ -17049,14 +17385,14 @@
       destinationFieldName = _field$relocateField.destinationFieldName,
       relativePosition = _field$relocateField.relativePosition;
     if (!originFieldName || !destinationFieldName || !relativePosition) {
-      logger$m.error({
+      logger$n.error({
         fn: relocateField,
         message: "Missing a required parameter to relocate field",
         data: field
       });
       return;
     }
-    logger$m.info({
+    logger$n.info({
       fn: relocateField,
       message: "Starting moving originFieldName: ".concat(originFieldName, " ").concat(relativePosition, " destinationFieldName: ").concat(destinationFieldName)
     });
@@ -17066,7 +17402,7 @@
     var moveToElement = document.getElementById(destinationFieldName);
     var moveToRow = moveToElement === null || moveToElement === void 0 ? void 0 : moveToElement.closest('tr');
     if (!moveToRow) {
-      logger$m.error({
+      logger$n.error({
         fn: relocateField,
         message: "Unable to find nearest row to destinationFieldName: ".concat(destinationFieldName),
         data: {
@@ -17085,14 +17421,14 @@
 
     // cleanup original row
     rowToMove.remove();
-    logger$m.info({
+    logger$n.info({
       fn: relocateField,
       message: "Successfully moved originFieldName: ".concat(originFieldName, " to ").concat(relativePosition, " destinationFieldName: ").concat(destinationFieldName)
     });
   }
   function combineElementsIntoOneRowNew(name) {
     var _tableElement$find;
-    logger$m.info({
+    logger$n.info({
       fn: combineElementsIntoOneRowNew,
       message: "Combining elements into one row for name: ".concat(name)
     });
@@ -17101,7 +17437,7 @@
     var inputTd = inputElement.closest('td');
     var labelTd = labelElement.closest('td');
     if (!inputTd.is(labelTd)) {
-      logger$m.warn({
+      logger$n.warn({
         fn: combineElementsIntoOneRowNew,
         message: "Skipping... elements must've already been combined, since label and input are in different cells",
         data: {
@@ -17133,7 +17469,7 @@
   }
   function disableSingleLine(name) {
     var elementType = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '';
-    logger$m.info({
+    logger$n.info({
       fn: disableSingleLine,
       message: "Disable single line for name: ".concat(name, ", elementType: ").concat(elementType)
     });
@@ -17144,7 +17480,7 @@
       inputElement = $("#".concat(name));
     }
     if (!inputElement) {
-      logger$m.error({
+      logger$n.error({
         fn: disableSingleLine,
         message: "Failed to disable single line, could not find input element for name: ".concat(name, ", elementType: ").concat(HtmlElementType)
       });
@@ -17152,7 +17488,7 @@
     }
     var inputTd = inputElement.closest('td');
     if (!inputTd) {
-      logger$m.error({
+      logger$n.error({
         fn: disableSingleLine,
         message: "Failed to disable single line, could not find input td element for name: ".concat(name, ", elementType: ").concat(HtmlElementType)
       });
@@ -17209,12 +17545,12 @@
   function hideFieldsAndSections() {
     var hidden = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : true;
     if (!hidden) {
-      logger$m.info({
+      logger$n.info({
         fn: hideFieldsAndSections,
         message: 'Unhiding fields and sections'
       });
     } else {
-      logger$m.info({
+      logger$n.info({
         fn: hideFieldsAndSections,
         message: 'Hiding fields and sections'
       });
@@ -17229,7 +17565,7 @@
     var _doc$getElementById;
     var label = (_doc$getElementById = doc.getElementById("".concat(fieldName, "_label"))) === null || _doc$getElementById === void 0 ? void 0 : _doc$getElementById.textContent;
     if (!label) {
-      logger$m.error({
+      logger$n.error({
         fn: getFieldNameLabel,
         message: "Could not find label text for fieldName: ".concat(fieldName)
       });
@@ -17240,7 +17576,7 @@
     var _label$replace, _$3;
     var labelElement = $("#".concat(fieldName, "_label"));
     if (!labelElement) {
-      logger$m.error({
+      logger$n.error({
         fn: setFieldNameLabel,
         message: "Could not find field label for fieldName: ".concat(fieldName, " label element")
       });
@@ -17248,7 +17584,7 @@
     }
     var newLabel = (_label$replace = label.replace(/\n/g, '<br/>')) !== null && _label$replace !== void 0 ? _label$replace : label;
     (_$3 = $("#".concat(fieldName, "_label"))) === null || _$3 === void 0 || _$3.html(newLabel);
-    logger$m.info({
+    logger$n.info({
       fn: setFieldNameLabel,
       message: "Successfully set field label for fieldName: ".concat(fieldName, " to ").concat(label)
     });
@@ -17261,13 +17597,13 @@
   function copyFromFieldAToFieldB(fromFieldNameA, toFieldNameB) {
     var fromFieldNameAElement = document.getElementById(fromFieldNameA);
     if (!fromFieldNameAElement) {
-      logger$m.error({
+      logger$n.error({
         fn: copyFromFieldAToFieldB,
         message: "could not find element forfromFieldNameA: ".concat(fromFieldNameA)
       });
       return;
     }
-    logger$m.info({
+    logger$n.info({
       fn: copyFromFieldAToFieldB,
       message: "Start copying value ".concat((fromFieldNameAElement === null || fromFieldNameAElement === void 0 ? void 0 : fromFieldNameAElement.value) || '', " from ").concat(fromFieldNameA, " to ").concat(toFieldNameB)
     });
@@ -17277,7 +17613,7 @@
       name: toFieldNameB,
       value: (fromFieldNameAElement === null || fromFieldNameAElement === void 0 ? void 0 : fromFieldNameAElement.value) || ''
     });
-    logger$m.info({
+    logger$n.info({
       fn: copyFromFieldAToFieldB,
       message: "Successfully copied value ".concat((fromFieldNameAElement === null || fromFieldNameAElement === void 0 ? void 0 : fromFieldNameAElement.value) || '', " from ").concat(fromFieldNameA, " to ").concat(toFieldNameB)
     });
@@ -17298,7 +17634,7 @@
     var _$4;
     var infoDiv = (_$4 = $("#".concat(name, "_label"))) === null || _$4 === void 0 || (_$4 = _$4.closest('td')) === null || _$4 === void 0 ? void 0 : _$4.find('div.info');
     if (!infoDiv) {
-      logger$m.error({
+      logger$n.error({
         fn: getFieldInfoDiv,
         message: "Could not find info div for field name: ".concat(name)
       });
@@ -17310,7 +17646,7 @@
     var _$5;
     var originalSelectElementForMSOS = (_$5 = $("#".concat(name, "_0"))) !== null && _$5 !== void 0 && _$5.length ? $("#".concat(name, "_0")) : $("#".concat(name, "_i"));
     if (!originalSelectElementForMSOS || !originalSelectElementForMSOS.length) {
-      logger$m.error({
+      logger$n.error({
         fn: getOriginalMsosElement,
         message: "Could not get original select control element for fieldName: ".concat(name, " for Msos, see initializeMsosLibrary, MultiSelectOptionSet libraries, https://pbauerochse.github.io/searchable-option-list/")
       });
@@ -17326,7 +17662,7 @@
 
     // @ts-ignore
     if (!(originalSelectElementForMSOS !== null && originalSelectElementForMSOS !== void 0 && originalSelectElementForMSOS.multiSelectOptionSet())) {
-      logger$m.error({
+      logger$n.error({
         fn: setMultiSelectValues,
         message: "Could not get multiSelectOptionSet() object form original select control element for Msos, see initializeMsosLibrary, MultiSelectOptionSet libraries, https://pbauerochse.github.io/searchable-option-list/"
       });
@@ -17352,7 +17688,7 @@
       control === null || control === void 0 || control.insertAdjacentElement('afterend', div);
       errorMessageElement = document.querySelector("#".concat(fieldName, "_error_message"));
       if (!errorMessageElement) {
-        logger$m.error({
+        logger$n.error({
           fn: getFieldErrorDiv,
           message: "Failed to find field error div, fieldName: ".concat(fieldName)
         });
@@ -17362,7 +17698,7 @@
     return errorMessageElement;
   }
   function setFieldValueToEmptyState(fieldName) {
-    logger$m.info({
+    logger$n.info({
       fn: setFieldValueToEmptyState,
       message: "setting fieldName: ".concat(fieldName, " value to empty")
     });
@@ -17392,13 +17728,13 @@
       }
     });
     if (!matchingElement) {
-      logger$m.error({
+      logger$n.error({
         fn: renameSectionLabel,
         message: "Failed to find fieldset for name: ".concat(name, ", type: ").concat(type, ", newLabel: ").concat(newLabel)
       });
       return;
     }
-    logger$m.info({
+    logger$n.info({
       fn: renameSectionLabel,
       message: "Succesfully renamed section name: ".concat(name, ", to newLabel: ").concat(newLabel)
     });
@@ -17418,7 +17754,7 @@
         }
       });
     } else {
-      logger$m.warn({
+      logger$n.warn({
         fn: removeDropdownOptions,
         message: "No dropdown found with name or id: ".concat(name),
         data: {
@@ -17431,14 +17767,14 @@
   function moveTableRow(rowIdToMove, referenceRowId) {
     var _document$getElementB, _document$getElementB2;
     var position = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 'after';
-    logger$m.info({
+    logger$n.info({
       fn: moveTableRow,
       message: "moveTableRow called with rowIdToMove: ".concat(rowIdToMove, ", referenceRowId: ").concat(referenceRowId, ", position: ").concat(position)
     });
     var rowToMove = (_document$getElementB = document.getElementById(rowIdToMove)) === null || _document$getElementB === void 0 ? void 0 : _document$getElementB.closest('tr');
     var referenceRow = (_document$getElementB2 = document.getElementById(referenceRowId)) === null || _document$getElementB2 === void 0 ? void 0 : _document$getElementB2.closest('tr');
     if (!rowToMove || !referenceRow) {
-      logger$m.error({
+      logger$n.error({
         fn: moveTableRow,
         message: 'One or both of the specified rows were not found.'
       });
@@ -17477,7 +17813,7 @@
   function isSignatureFilled() {
     var canvas = document.querySelector('.drawCanvas');
     if (!canvas) {
-      logger$m.error({
+      logger$n.error({
         fn: isSignatureFilled,
         message: "Could not find signature canvas"
       });
@@ -17486,7 +17822,7 @@
     // @ts-ignore
     var ctx = canvas.getContext('2d');
     if (!ctx || !canvas.width || !canvas.height) {
-      logger$m.error({
+      logger$n.error({
         fn: isSignatureFilled,
         message: "Could not get context, canvas width or height",
         data: {
@@ -17511,7 +17847,7 @@
     return false; // Canvas is empty
   }
 
-  var logger$l = Logger('common/utils');
+  var logger$m = Logger('common/utils');
   POWERPOD.utils = {
     enableDebugging: enableDebugging,
     disableDebugging: disableDebugging,
@@ -17542,7 +17878,7 @@
       JSON.parse(jsonString);
       return true; // JSON is valid
     } catch (e) {
-      logger$l.error({
+      logger$m.error({
         fn: isValidJSON,
         message: "Invalid JSON for jsonString: ".concat(jsonString)
       });
@@ -17578,7 +17914,7 @@
 
   // Merges two arrays of objects joining on a given prop, e.g. "name"
   function mergeFieldArrays(a, b, prop) {
-    logger$l.info({
+    logger$m.info({
       fn: mergeFieldArrays,
       message: "mergeFieldArrays with the following data:",
       data: {
@@ -17603,7 +17939,7 @@
     }
     var result = prop ? Object.values(mergedObj) : mergedObj;
     // Check if the result should be an array or object
-    logger$l.info({
+    logger$m.info({
       fn: mergeFieldArrays,
       message: "mergeFieldArrays done with result:",
       data: {
@@ -17703,7 +18039,7 @@
               _context.next = 5;
               break;
             }
-            logger$l.error({
+            logger$m.error({
               fn: saveBrowserInfo,
               message: 'Failed to get browser info'
             });
@@ -17753,7 +18089,7 @@
           case 21:
             _context.sent;
           case 22:
-            logger$l.info({
+            logger$m.info({
               fn: saveBrowserInfo,
               message: "successfully patched form data with browser information payload: ".concat(JSON.stringify(payload)),
               data: {
@@ -17767,7 +18103,7 @@
           case 25:
             _context.prev = 25;
             _context.t0 = _context["catch"](8);
-            logger$l.error({
+            logger$m.error({
               fn: saveBrowserInfo,
               message: "failed to patch form data with browser info for formType: ".concat(formType, ", payload: ").concat(JSON.stringify(payload)),
               data: {
@@ -17831,7 +18167,7 @@
     return originals;
   }
 
-  var logger$k = Logger('common/loading');
+  var logger$l = Logger('common/loading');
 
   /**
    * Hides the loading animation by removing the div and the styling element.
@@ -17841,12 +18177,12 @@
    * @function
    */
   function hideLoadingAnimation() {
-    logger$k.info({
+    logger$l.info({
       fn: hideLoadingAnimation,
       message: 'attempting to hide loading animation...'
     });
     if (POWERPOD.doNotUnhideLoader) {
-      logger$k.info({
+      logger$l.info({
         fn: hideLoadingAnimation,
         message: 'abort unhiding due to POWERPOD.doNotUnhideLoader flag set to true'
       });
@@ -17856,13 +18192,13 @@
     var loader = doc.getElementById('loader');
     if (loader) {
       var _loader$parentNode;
-      logger$k.info({
+      logger$l.info({
         fn: hideLoadingAnimation,
         message: 'loader found & finished loading, removing element'
       });
       (_loader$parentNode = loader.parentNode) === null || _loader$parentNode === void 0 || _loader$parentNode.removeChild(loader);
     } else {
-      logger$k.warn({
+      logger$l.warn({
         fn: hideLoadingAnimation,
         message: 'loader not found!'
       });
@@ -17870,21 +18206,21 @@
     var loaderStyle = doc.getElementById('loader-style');
     if (loaderStyle) {
       var _loaderStyle$parentNo;
-      logger$k.info({
+      logger$l.info({
         fn: hideLoadingAnimation,
         message: 'loaderStyle found & finished loading, removing element'
       });
       (_loaderStyle$parentNo = loaderStyle.parentNode) === null || _loaderStyle$parentNo === void 0 || _loaderStyle$parentNo.removeChild(loaderStyle);
       window.scrollTo(0, 0);
     } else {
-      logger$k.warn({
+      logger$l.warn({
         fn: hideLoadingAnimation,
         message: 'loaderStyle not found!'
       });
     }
   }
 
-  var logger$j = Logger('common/fieldConditionalLogicLegacy');
+  var logger$k = Logger('common/fieldConditionalLogicLegacy');
   function shouldRequireDependentField(_ref) {
     var _POWERPOD$state;
     var shouldBeRequired = _ref.shouldBeRequired,
@@ -17897,7 +18233,7 @@
     var requiredFieldRow = requiredFieldLabelElement === null || requiredFieldLabelElement === void 0 ? void 0 : requiredFieldLabelElement.closest('tr');
     var requiredFieldInputElement = document.querySelector("#".concat(requiredFieldTag));
     if (!requiredFieldLabelElement || !requiredFieldRow || !requiredFieldInputElement) {
-      logger$j.error({
+      logger$k.error({
         fn: shouldRequireDependentField,
         message: 'Failed to find required elements',
         data: {
@@ -17913,7 +18249,7 @@
     var loadingAllFieldConfig = POWERPOD.configuringFields;
     var loadingFieldConfig = (_POWERPOD$state = POWERPOD.state) === null || _POWERPOD$state === void 0 || (_POWERPOD$state = _POWERPOD$state.fields) === null || _POWERPOD$state === void 0 || (_POWERPOD$state = _POWERPOD$state[requiredFieldTag]) === null || _POWERPOD$state === void 0 ? void 0 : _POWERPOD$state.loading;
     if (shouldBeRequired) {
-      logger$j.info({
+      logger$k.info({
         fn: shouldRequireDependentField,
         message: "Setting dynamic field to visible requiredFieldTag: ".concat(requiredFieldTag, ", loadingAllFieldConfig: ").concat(loadingAllFieldConfig, ", loadingFieldConfig: ").concat(loadingFieldConfig)
       });
@@ -17943,7 +18279,7 @@
           var _fieldConfig$visibleI2 = fieldConfig.visibleIf.valueIfVisible,
             type = _fieldConfig$visibleI2.type,
             value = _fieldConfig$visibleI2.value;
-          logger$j.info({
+          logger$k.info({
             fn: shouldRequireDependentField,
             message: "visibleIf.valueIfVisible has been configured for fieldName: ".concat(requiredFieldTag, ", start setup with values:"),
             data: {
@@ -17951,7 +18287,7 @@
             }
           });
           if (type === 'raw' && (value !== undefined || value !== null)) {
-            logger$j.info({
+            logger$k.info({
               fn: shouldRequireDependentField,
               message: "visibleIf.valueIfVisible has been configured, setting value: ".concat(value, " for fieldName: ").concat(requiredFieldTag)
             });
@@ -17959,7 +18295,7 @@
           } else if (type === 'function') {
             var valueGeneratorFunction = POWERPOD.valueGeneration[value];
             if (!valueGeneratorFunction || typeof valueGeneratorFunction !== 'function') {
-              logger$j.error({
+              logger$k.error({
                 fn: shouldRequireDependentField,
                 message: "for fieldName: ".concat(requiredFieldTag, " could not find valueGeneration function for value: ").concat(value)
               });
@@ -17967,13 +18303,13 @@
             }
             var newValue = valueGeneratorFunction();
             if (newValue == undefined) {
-              logger$j.info({
+              logger$k.info({
                 fn: shouldRequireDependentField,
                 message: "visibleIf.valueIfVisible has been configured, valueGenerator: ".concat(value, " returned undefined, skipping setting value for fieldName: ").concat(requiredFieldTag)
               });
               return;
             }
-            logger$j.info({
+            logger$k.info({
               fn: shouldRequireDependentField,
               message: "visibleIf.valueIfVisible has been configured, valueGenerator: ".concat(value, " returned and setting value: ").concat(newValue, " for fieldName: ").concat(requiredFieldTag)
             });
@@ -17990,7 +18326,7 @@
       }
     } else {
       var _fieldConfig$visibleI3;
-      logger$j.info({
+      logger$k.info({
         fn: shouldRequireDependentField,
         message: "Setting dynamic field to hidden requiredFieldTag: ".concat(requiredFieldTag, ", fieldConfig: ").concat(JSON.stringify(fieldConfig)),
         data: {
@@ -18026,7 +18362,7 @@
           _type = _fieldConfig$visibleI4.type,
           fieldNames = _fieldConfig$visibleI4.fieldNames;
           _fieldConfig$visibleI4.value;
-        logger$j.info({
+        logger$k.info({
           fn: shouldRequireDependentField,
           message: "visibleIf.valueIfHidden has been configured for fieldName: ".concat(requiredFieldTag, ", start setup with values:"),
           data: {
@@ -18041,7 +18377,7 @@
             fieldValues.push(inputValue);
           });
           var _newValue = fieldValues.join(' ');
-          logger$j.info({
+          logger$k.info({
             fn: shouldRequireDependentField,
             message: "visibleIf.valueIfHidden has been configured, setting value: ".concat(_newValue, " for fieldName: ").concat(requiredFieldTag)
           });
@@ -18067,7 +18403,7 @@
       customFunc = _ref2.customFunc;
     var dependentOnElement = document.querySelector("#".concat(dependentOnElementTag));
     if (!dependentOnElement) {
-      logger$j.error({
+      logger$k.error({
         fn: initOnChange_DependentRequiredField,
         message: "Could not find field for dependentOnElementTag: ".concat(dependentOnElementTag)
       });
@@ -18117,7 +18453,7 @@
       customFunc = _ref3.customFunc;
     var dependentOnElement = document.querySelector("#".concat(dependentOnElementTag));
     if (!dependentOnElement) {
-      logger$j.error({
+      logger$k.error({
         fn: setupDependentRequiredField,
         message: "requiredFieldTag: ".concat(requiredFieldTag, ", could not find field for dependentOnElementTag: ").concat(dependentOnElementTag)
       });
@@ -18130,12 +18466,12 @@
       tr: tr,
       raw: true
     });
-    logger$j.info({
+    logger$k.info({
       fn: setupDependentRequiredField,
       message: "requiredFieldTag: ".concat(requiredFieldTag, ", setting up dependent field dependentOnElementTag: ").concat(dependentOnElementTag, " with value: ").concat(input !== null && input !== void 0 ? input : '')
     });
     if (overrideTruthyClause != undefined) {
-      logger$j.info({
+      logger$k.info({
         fn: setupDependentRequiredField,
         message: "requiredFieldTag: ".concat(requiredFieldTag, ", overriding truthy clause overrideTruthyClause: ").concat(overrideTruthyClause),
         data: {
@@ -18164,7 +18500,7 @@
       }
     } else {
       if (input === dependentOnValue || input === "".concat(dependentOnValue) || dependentOnValueArray.includes(input) || input !== null && input !== void 0 && input.includes(dependentOnValue) || Number(input) && dependentOnValueArray.includes(Number(input))) {
-        logger$j.info({
+        logger$k.info({
           fn: setupDependentRequiredField,
           message: "requiredFieldTag: ".concat(requiredFieldTag, ", value matches visibleIf condition, dependentOnElementTag: ").concat(dependentOnElementTag),
           data: {
@@ -18184,7 +18520,7 @@
           customFunc: customFunc
         });
       } else {
-        logger$j.info({
+        logger$k.info({
           fn: setupDependentRequiredField,
           message: "requiredFieldTag: ".concat(requiredFieldTag, ", value DOES NOT match visibleIf condition"),
           data: {
@@ -18207,7 +18543,7 @@
     }
   }
 
-  const logger$i = Logger('common/commodities');
+  const logger$j = Logger('common/commodities');
   POWERPOD.commodities = {
       getCommodities,
       processCommoditiesData,
@@ -18215,12 +18551,12 @@
   async function getCommodities() {
       const { data } = await getCommoditiesData();
       if (data) {
-          logger$i.info({
+          logger$j.info({
               fn: getCommodities,
               message: 'successfully extracted commodity options',
           });
           const res = processCommoditiesData(data);
-          logger$i.info({
+          logger$j.info({
               fn: getCommodities,
               message: 'successfully extracted commodities:',
               data: res,
@@ -18228,7 +18564,7 @@
           return Promise.resolve(res);
       }
       let errorMsg = 'failed to extract commodities from data';
-      logger$i.warn({
+      logger$j.warn({
           fn: getCommodities,
           message: errorMsg,
           data,
@@ -18262,7 +18598,7 @@
       return res;
   }
 
-  var logger$h = Logger('application/steps/applicantInfo');
+  var logger$i = Logger('application/steps/applicantInfo');
   function customizeApplicantInfoStep$1() {
     setupApplicantInfoStepFields();
     initOnChange_PreviouslyReceivedKttpFunding();
@@ -18310,13 +18646,13 @@
     var selectOptionControl = $('#quartech_hasthisorganizationreceivedkttpfundingin');
     var selectedValue = selectOptionControl.val();
     hideShow_for_PreviouslyReceivedKttpFunding(selectedValue);
-    logger$h.info({
+    logger$i.info({
       fn: initOnChange_PreviouslyReceivedKttpFunding,
       message: 'initOnChange_PreviouslyReceivedKttpFunding called.'
     });
     selectOptionControl.on('change', function () {
       var selectedValue = $(this).val();
-      logger$h.info({
+      logger$i.info({
         fn: initOnChange_PreviouslyReceivedKttpFunding,
         message: "Selected Value: ".concat(selectedValue)
       });
@@ -18335,13 +18671,13 @@
     var organizationReceivedFundingFromBC_SelectCtr = $('#quartech_hasthisorganizationreceivedfundingfrmother');
     var selectedValue = organizationReceivedFundingFromBC_SelectCtr.val();
     hideShow_for_OrganizationReceivedFundingFromBC(selectedValue);
-    logger$h.info({
+    logger$i.info({
       fn: initOnChange_OrganizationReceivedFundingFromBC,
       message: 'initOnChange_OrganizationReceivedFundingFromBC called.'
     });
     organizationReceivedFundingFromBC_SelectCtr.on('change', function () {
       var selectedValue = $(this).val();
-      logger$h.info({
+      logger$i.info({
         fn: initOnChange_OrganizationReceivedFundingFromBC,
         message: "Selected Value: ".concat(selectedValue)
       });
@@ -18360,13 +18696,13 @@
     var collaboratingWithOtherOrgsControl = $('#quartech_areyoucollaboratingwithanyotherorg');
     var selectedValue = collaboratingWithOtherOrgsControl.val();
     hideShow_for_CollaboratingWithOtherOrgsControl(selectedValue);
-    logger$h.info({
+    logger$i.info({
       fn: initOnChange_IsCollaboratingWithOtherOrganizationQuestion,
       message: 'initOnChange_IsCollaboratingWithOtherOrganizationQuestion called.'
     });
     collaboratingWithOtherOrgsControl.on('change', function () {
       var selectedValue = $(this).val();
-      logger$h.info({
+      logger$i.info({
         fn: initOnChange_IsCollaboratingWithOtherOrganizationQuestion,
         message: "Selected Value: ".concat(selectedValue)
       });
@@ -18389,13 +18725,13 @@
     var selectOptionControl = $('#quartech_doestheactivitytakeplaceovermultipleday');
     var selectedValue = selectOptionControl.val();
     hideShow_for_ActivityOverMultipleDays(selectedValue);
-    logger$h.info({
+    logger$i.info({
       fn: initOnChange_ActivityOverMultipleDays,
       message: 'initOnChange_ActivityOverMultipleDays called.'
     });
     selectOptionControl.on('change', function () {
       var selectedValue = $(this).val();
-      logger$h.info({
+      logger$i.info({
         fn: initOnChange_ActivityOverMultipleDays,
         message: "Selected Value: ".concat(selectedValue)
       });
@@ -18416,13 +18752,13 @@
     var selectOptionControl = $('#quartech_theprocessoflearningandprocessingknowledge');
     var selectedValue = selectOptionControl.val();
     hideShow_for_AdaptedEventForAdultLearning(selectedValue);
-    logger$h.info({
+    logger$i.info({
       fn: initOnChange_AdaptedEventForAdultLearning,
       message: 'initOnChange_AdaptedEventForAdultLearning called.'
     });
     selectOptionControl.on('change', function () {
       var selectedValue = $(this).val();
-      logger$h.info({
+      logger$i.info({
         fn: initOnChange_AdaptedEventForAdultLearning,
         message: "Selected Value: ".concat(selectedValue)
       });
@@ -18474,7 +18810,7 @@
       });
       getTopicCredentials(topic || null);
     }).fail(function (e) {
-      logger$h.error({
+      logger$i.error({
         fn: getTopic,
         message: 'Unable to get topic',
         data: e
@@ -18495,7 +18831,7 @@
       });
       updateBusinessNumberField(topic, latestValidCredentials);
     }).fail(function (e) {
-      logger$h.error({
+      logger$i.error({
         fn: getTopicCredentials,
         message: 'Unable to get topic credentials',
         data: e
@@ -18616,7 +18952,7 @@
     if (businessOverviewFieldSetElement) businessOverviewFieldSetElement.css('display', 'none');
   }
   function initCommoditiesMultiSelect() {
-    logger$h.info({
+    logger$i.info({
       fn: initCommoditiesMultiSelect,
       message: 'start initializing commodities multiselect'
     });
@@ -18633,7 +18969,7 @@
     var commodityFieldId = 'quartech_organizationsectororcommodity';
     if (!$("#".concat(commodityFieldId))) return;
     var commoditiesGroupedByCategoryKey = processCommoditiesData(commoditiesJson);
-    logger$h.info({
+    logger$i.info({
       fn: addCommodityMultiSelect,
       message: "got processed commodities data:",
       data: commoditiesGroupedByCategoryKey
@@ -18657,7 +18993,7 @@
     useScript('chosen', setupChosen$1);
   }
   function setupChosen$1() {
-    logger$h.info({
+    logger$i.info({
       fn: setupChosen$1,
       message: 'setting up chosen...'
     });
@@ -18703,7 +19039,7 @@
         value: stringToPassToFieldInput
       });
     });
-    logger$h.info({
+    logger$i.info({
       fn: setupChosen$1,
       message: 'successfully setup chosen...'
     });
@@ -18728,7 +19064,7 @@
       return res;
   }
 
-  var logger$g = Logger('application/steps/project');
+  var logger$h = Logger('application/steps/project');
   function customizeProjectStep(programData) {
     setProjectStepRequiredFields();
     customizeActivityTypesDropDownList(programData);
@@ -18801,7 +19137,7 @@
     ];
     var container = document.querySelector('#subgrid_ProjectStep_New_TF_Inventory');
     if (!container) {
-      logger$g.error({
+      logger$h.error({
         fn: setNewTFInventoryColWidths,
         message: "TF Inventory subgrid not found."
       });
@@ -18809,7 +19145,7 @@
     }
     var headerRow = container.querySelector('tr');
     if (!headerRow) {
-      logger$g.error({
+      logger$h.error({
         fn: setNewTFInventoryColWidths,
         message: "No header row found in subgrid."
       });
@@ -18845,7 +19181,7 @@
     ];
     var container = document.querySelector('#subgrid_ProjectStep_Import_TF_Inventory');
     if (!container) {
-      logger$g.error({
+      logger$h.error({
         fn: setNewTFInventoryColWidths,
         message: "TF Inventory subgrid not found."
       });
@@ -18853,7 +19189,7 @@
     }
     var headerRow = container.querySelector('tr');
     if (!headerRow) {
-      logger$g.error({
+      logger$h.error({
         fn: setNewTFInventoryColWidths,
         message: "No header row found in subgrid."
       });
@@ -18890,13 +19226,13 @@
     var q2Control = $('#quartech_willthisactivitybeopentotheentirepublic');
     var selectedValue = q2Control.val();
     hideShow_WhyActiviyNotOpenToPublic(selectedValue);
-    logger$g.info({
+    logger$h.info({
       fn: initOnChange_ActiviyOpenToPublic,
       message: 'initOnChange_ActiviyOpenToPublic called.'
     });
     q2Control.on('change', function () {
       var selectedValue = $(this).val();
-      logger$g.info({
+      logger$h.info({
         fn: initOnChange_ActiviyOpenToPublic,
         message: "Selected Value: ".concat(selectedValue)
       });
@@ -19100,7 +19436,7 @@
     useScript('chosen', setupChosen);
   }
   function setupChosen() {
-    logger$g.info({
+    logger$h.info({
       fn: setupChosen,
       message: 'setting up chosen...'
     });
@@ -19151,7 +19487,7 @@
       tooltipText: 'Project locations in addition to what you have provided in the question above',
       tooltipTargetElementId: 'additionalLocationControl_chosen'
     });
-    logger$g.info({
+    logger$h.info({
       fn: setupChosen,
       message: 'successfully setup chosen...'
     });
@@ -19243,14 +19579,14 @@
     }
   };
 
-  var logger$f = Logger('common/saveButton');
+  var logger$g = Logger('common/saveButton');
   POWERPOD.saveButton = {
     addSaveButton: addSaveButton
   };
   function addSaveButton() {
     var currentStep = getCurrentStep();
     if (currentStep === FormStep.DeclarationAndConsent) {
-      logger$f.info({
+      logger$g.info({
         fn: addSaveButton,
         message: "Skip adding save button on currentStep: ".concat(currentStep)
       });
@@ -19265,7 +19601,7 @@
     actionsDiv === null || actionsDiv === void 0 || actionsDiv.append(divElement);
     var saveButton = document.getElementById('quartechSaveBtn');
     if (!saveButton) {
-      logger$f.error({
+      logger$g.error({
         fn: addSaveButton,
         message: 'Could not get saveButton after adding it to the DOM'
       });
@@ -19299,13 +19635,13 @@
               _context2.next = 5;
               break;
             }
-            logger$f.error({
+            logger$g.error({
               fn: saveFormData,
               message: 'Could not get saveButton after adding it to the DOM'
             });
             return _context2.abrupt("return");
           case 5:
-            logger$f.info({
+            logger$g.info({
               fn: saveFormData,
               message: 'Start saving form data...',
               data: {
@@ -19316,7 +19652,7 @@
             saveButton.value = 'Saving...';
             formJsonRes = generateFormJson();
             if (!formJsonRes) {
-              logger$f.error({
+              logger$g.error({
                 fn: saveButton,
                 message: "Failed to generateFormJson"
               });
@@ -19325,7 +19661,7 @@
               _context2.next = 13;
               break;
             }
-            logger$f.warn({
+            logger$g.warn({
               fn: saveFormData,
               message: 'No field data to save'
             });
@@ -19336,12 +19672,12 @@
             payload = {};
             fields = Object.keys(fieldsStore);
             fields.forEach(function (field) {
-              logger$f.info({
+              logger$g.info({
                 fn: saveFormData,
                 message: "processing stored data for field: ".concat(field)
               });
               var fieldData = fieldsStore[field];
-              logger$f.info({
+              logger$g.info({
                 fn: saveFormData,
                 message: "found stored data for field: ".concat(field, ", fieldData: ").concat(JSON.stringify(fieldData))
               });
@@ -19353,14 +19689,14 @@
                 dataFormat = fieldData.dataFormat,
                 forceSave = fieldData.forceSave;
               if (elementType === HtmlElementType.MultiSelectPicklist && (!value || !value.length)) {
-                logger$f.warn({
+                logger$g.warn({
                   fn: saveFormData,
                   message: "skipping saving EMPTY data for elementType: ".concat(HtmlElementType.MultiSelectPicklist, " field name: ").concat(field)
                 });
                 return;
               }
               if (!forceSave && (error && error.length || !touched)) {
-                logger$f.warn({
+                logger$g.warn({
                   fn: saveFormData,
                   message: "skipping saving data for field name: ".concat(field)
                 });
@@ -19385,7 +19721,7 @@
                 payload = _objectSpread2(_objectSpread2(_objectSpread2(_objectSpread2({}, value !== undefined && formattedValue === undefined && _defineProperty({}, field, value)), value !== undefined && formattedValue !== undefined && _defineProperty({}, field, formattedValue)), payload), ((_Object$keys2 = Object.keys(customPayload)) === null || _Object$keys2 === void 0 ? void 0 : _Object$keys2.length) && customPayload);
               }
               if (customPayload && Object.keys(customPayload).length > 0) {
-                logger$f.info({
+                logger$g.info({
                   fn: saveFormData,
                   message: "Adding custom payload to form save data payload: ".concat(JSON.stringify(customPayload)),
                   data: {
@@ -19399,7 +19735,7 @@
               _context2.next = 21;
               break;
             }
-            logger$f.warn({
+            logger$g.warn({
               fn: saveFormData,
               message: 'no payload data to save'
             });
@@ -19439,7 +19775,7 @@
           case 36:
             _context2.sent;
           case 37:
-            logger$f.info({
+            logger$g.info({
               fn: saveFormData,
               message: 'successfully patched form data with payload',
               data: {
@@ -19453,7 +19789,7 @@
           case 40:
             _context2.prev = 40;
             _context2.t0 = _context2["catch"](26);
-            logger$f.error({
+            logger$g.error({
               fn: saveFormData,
               message: "failed to patch form data for formType: ".concat(formType),
               data: {
@@ -19477,9 +19813,9 @@
     return _saveFormData.apply(this, arguments);
   }
 
-  var logger$e = Logger('application/steps/demographicInfo');
+  var logger$f = Logger('application/steps/demographicInfo');
   function customizeDemographicInfoStep(programData) {
-    logger$e.info({
+    logger$f.info({
       fn: customizeDemographicInfoStep,
       message: "Start customizing demographic info step, quartech_disabledchefsdemographicinfo: ".concat(programData === null || programData === void 0 ? void 0 : programData.quartech_disabledchefsdemographicinfo)
     });
@@ -19531,7 +19867,7 @@
       return _regeneratorRuntime().wrap(function _callee$(_context) {
         while (1) switch (_context.prev = _context.next) {
           case 0:
-            logger$e.info({
+            logger$f.info({
               fn: addDemographicInfoChefsIframe,
               message: "Start adding chefs iframe... v1.1"
             });
@@ -19552,7 +19888,7 @@
             // Logic has since changed, if there's an ID present, we don't need to do anything.
             // chefsUrl = `https://submit.digital.gov.bc.ca/app/form/success?s=${chefsSubmissionGuid}`;
 
-            logger$e.info({
+            logger$f.info({
               fn: addDemographicInfoChefsIframe,
               message: "Demographic info survey has already been completed, chefsSubmissionGuid: ".concat(chefsSubmissionGuid, ", chefsSubmissionId: ").concat(chefsSubmissionId)
             });
@@ -19587,7 +19923,7 @@
               chefsDemographicDataFormId = quartech_ChefsDemographicDataFormId;
               chefsDemographicDataIndividualsFormId = quartech_ChefsDemographicDataIndividualsFormId;
             }
-            logger$e.info({
+            logger$f.info({
               fn: addDemographicInfoChefsIframe,
               message: "Retrieved params for iframe, chefsDemographicDataFormId: ".concat(chefsDemographicDataFormId, ", chefsDemographicDataIndividualsFormId: ").concat(chefsDemographicDataIndividualsFormId)
             });
@@ -19599,7 +19935,7 @@
           case 25:
             applicationDataRes = _context.sent;
             if (!(applicationDataRes !== null && applicationDataRes !== void 0 && (_applicationDataRes$d = applicationDataRes.data) !== null && _applicationDataRes$d !== void 0 && (_applicationDataRes$d = _applicationDataRes$d.value) !== null && _applicationDataRes$d !== void 0 && _applicationDataRes$d[0])) {
-              logger$e.error({
+              logger$f.error({
                 fn: addDemographicInfoChefsIframe,
                 message: "Could not get application data result to determine whether individual or business"
               });
@@ -19607,7 +19943,7 @@
             _applicationDataRes$d2 = applicationDataRes === null || applicationDataRes === void 0 || (_applicationDataRes$d3 = applicationDataRes.data) === null || _applicationDataRes$d3 === void 0 || (_applicationDataRes$d3 = _applicationDataRes$d3.value) === null || _applicationDataRes$d3 === void 0 ? void 0 : _applicationDataRes$d3[0], quartech_nocragstnumber = _applicationDataRes$d2.quartech_nocragstnumber; // If no CRA number then it's an individual
             if (quartech_nocragstnumber) {
               if (!chefsDemographicDataIndividualsFormId) {
-                logger$e.error({
+                logger$f.error({
                   fn: addDemographicInfoChefsIframe,
                   message: "Bad config: Env Vars should contain the quartech_ChefsDemographicDataFormId element"
                 });
@@ -19616,7 +19952,7 @@
             } else {
               // Otherwise it's a business
               if (!chefsDemographicDataFormId) {
-                logger$e.error({
+                logger$f.error({
                   fn: addDemographicInfoChefsIframe,
                   message: "Bad config: Env Vars should contain the quartech_ChefsDemographicDataFormId element"
                 });
@@ -19631,13 +19967,13 @@
               if (!containSubmissionId) return;
               var submissionPayload = JSON.parse(event.data);
               var chefsSubmissionGuidResult = submissionPayload.submissionId;
-              logger$e.info({
+              logger$f.info({
                 fn: addDemographicInfoChefsIframe,
                 message: 'received chefsSubmissionGuidResult: ' + chefsSubmissionGuidResult
               });
               var chefsSubmissionId = chefsSubmissionGuidResult.substring(0, 8).toUpperCase();
               if (!chefsSubmissionId || !chefsSubmissionGuidResult) {
-                logger$e.error({
+                logger$f.error({
                   fn: addDemographicInfoChefsIframe,
                   message: "Failed to get chefsSubmissionId"
                 });
@@ -19672,10 +20008,10 @@
     return _addDemographicInfoChefsIframe.apply(this, arguments);
   }
 
-  var logger$d = Logger('steps/documents');
+  var logger$e = Logger('steps/documents');
   function customizeDocumentsStep$1() {
     var programAbbreviation = getProgramAbbreviation();
-    logger$d.info({
+    logger$e.info({
       fn: customizeDocumentsStep$1,
       message: "Start customizing documents step"
     });
@@ -19697,7 +20033,7 @@
       return _regeneratorRuntime().wrap(function _callee$(_context) {
         while (1) switch (_context.prev = _context.next) {
           case 0:
-            logger$d.info({
+            logger$e.info({
               fn: customizeDocumentsStepForTFCCRF,
               message: "Start customizing documents step for TFCCRF"
             });
@@ -19709,13 +20045,13 @@
           case 4:
             applicationDataRes = _context.sent;
             if (!(applicationDataRes !== null && applicationDataRes !== void 0 && (_applicationDataRes$d = applicationDataRes.data) !== null && _applicationDataRes$d !== void 0 && (_applicationDataRes$d = _applicationDataRes$d.value) !== null && _applicationDataRes$d !== void 0 && _applicationDataRes$d[0])) {
-              logger$d.error({
+              logger$e.error({
                 fn: customizeDocumentsStepForTFCCRF,
                 message: "Could not get application data result to determine whether individual or business"
               });
             }
             _applicationDataRes$d2 = applicationDataRes === null || applicationDataRes === void 0 || (_applicationDataRes$d3 = applicationDataRes.data) === null || _applicationDataRes$d3 === void 0 || (_applicationDataRes$d3 = _applicationDataRes$d3.value) === null || _applicationDataRes$d3 === void 0 ? void 0 : _applicationDataRes$d3[0], quartech_ownorleaseland = _applicationDataRes$d2.quartech_ownorleaseland, quartech_originalsource = _applicationDataRes$d2.quartech_originalsource, quartech_reportnewtreefruitinventory = _applicationDataRes$d2.quartech_reportnewtreefruitinventory;
-            logger$d.info({
+            logger$e.info({
               fn: customizeDocumentsStepForTFCCRF,
               message: "Found application value quartech_originalsource: ".concat(quartech_originalsource)
             });
@@ -19728,7 +20064,7 @@
                 fieldName: 'quartech_taxdocument'
               });
             }
-            logger$d.info({
+            logger$e.info({
               fn: customizeDocumentsStep$1,
               message: "Found application value quartech_ownorleaseland: ".concat(quartech_ownorleaseland)
             });
@@ -19754,13 +20090,13 @@
                 fieldName: 'quartech_leaseagreement'
               });
             }
-            logger$d.info({
+            logger$e.info({
               fn: customizeDocumentsStepForTFCCRF,
               message: "Found application value quartech_reportnewtreefruitinventory: ".concat(quartech_reportnewtreefruitinventory)
             });
             // Mandatory if quartech_originalsource != Import OR quartech_reportnewtreefruitinventory = YES
             if ([255550000, 255550002].includes(quartech_originalsource) || quartech_reportnewtreefruitinventory === 255550000) {
-              logger$d.info({
+              logger$e.info({
                 fn: customizeDocumentsStepForTFCCRF,
                 message: "Found application value quartech_reportnewtreefruitinventory: ".concat(quartech_reportnewtreefruitinventory, ", setting quartech_uploadasitemap to REQUIRED")
               });
@@ -19774,7 +20110,7 @@
               validateStepFields();
             } else {
               // hideFieldRow({ fieldName: 'quartech_uploadasitemap' });
-              logger$d.info({
+              logger$e.info({
                 fn: customizeDocumentsStepForTFCCRF,
                 message: "Found application value quartech_reportnewtreefruitinventory: ".concat(quartech_reportnewtreefruitinventory, ", setting quartech_uploadasitemap to NOT required")
               });
@@ -19796,16 +20132,16 @@
     return _customizeDocumentsStepForTFCCRF.apply(this, arguments);
   }
 
-  var logger$c = Logger('application/steps/success');
+  var logger$d = Logger('application/steps/success');
   function customizeSuccessStep(programData) {
-    logger$c.info({
+    logger$d.info({
       fn: customizeSuccessStep,
       message: "Start customizing success step..."
     });
     configureFields();
   }
 
-  var logger$b = Logger('application/application');
+  var logger$c = Logger('application/application');
   function initApplication() {
     preloadRequestVerificationToken();
     hideFieldsAndSections();
@@ -19879,7 +20215,7 @@
             formId = fetchedFormId;
             redirect = fetchedRedirect || false;
           case 11:
-            logger$b.info({
+            logger$c.info({
               fn: updatePageForSelectedProgram$1,
               message: "Determining redirect for programId: ".concat(programId, ", found formId: ").concat(formId, ", found redirect: ").concat(redirect)
             });
@@ -19887,7 +20223,7 @@
               _context.next = 16;
               break;
             }
-            logger$b.info({
+            logger$c.info({
               fn: updatePageForSelectedProgram$1,
               message: "Stop updating page,redirect to new formId: ".concat(formId),
               data: {
@@ -19902,7 +20238,7 @@
               _context.next = 20;
               break;
             }
-            logger$b.info({
+            logger$c.info({
               fn: updatePageForSelectedProgram$1,
               message: 'Could not find programid, retry when DOM readyState is comlete',
               data: {
@@ -19921,7 +20257,7 @@
               break;
             }
             hideLoadingAnimation();
-            logger$b.error({
+            logger$c.error({
               fn: updatePageForSelectedProgram$1,
               message: 'Missing programid, or unknown current step',
               data: {
@@ -19931,14 +20267,14 @@
             });
             return _context.abrupt("return");
           case 26:
-            logger$b.info({
+            logger$c.info({
               fn: updatePageForSelectedProgram$1,
               message: "Retrieving Program data for the selected programid querystring: ".concat(programId)
             });
             getApplicationFormData({
               programId: programId,
               beforeSend: function beforeSend() {
-                logger$b.info({
+                logger$c.info({
                   fn: updatePageForSelectedProgram$1,
                   message: 'clear any cached data from previous page loads'
                 });
@@ -19948,13 +20284,13 @@
               },
               onSuccess: function onSuccess(programData, textStatus, xhr) {
                 if (programData) {
-                  logger$b.info({
+                  logger$c.info({
                     fn: updatePageForSelectedProgram$1,
                     message: 'Retrieved Program data:',
                     data: programData
                   });
                   localStorage.setItem('programData', JSON.stringify(programData));
-                  logger$b.info({
+                  logger$c.info({
                     fn: updatePageForSelectedProgram$1,
                     message: 'Update application page with the program data.',
                     data: {
@@ -19997,7 +20333,7 @@
     }
   }
   function updateFormStepForSelectedProgram(programData) {
-    logger$b.info({
+    logger$c.info({
       fn: updateFormStepForSelectedProgram,
       message: 'Begin updating form step for program'
     });
@@ -27111,7 +27447,7 @@
   }
   customElements.define("fa-icon", FaIcon);
 
-  var logger$a = Logger('claim/steps/claimInfoStep');
+  var logger$b = Logger('claim/steps/claimInfoStep');
   function customizeClaimInfoStep() {
     configureFields();
     var programAbbreviation = getProgramAbbreviation();
@@ -27132,7 +27468,7 @@
       // @ts-ignore
       iframe.contentWindow.document;
       var numberOfStudentsApprovedFieldElement = innerDoc === null || innerDoc === void 0 ? void 0 : innerDoc.getElementById('quartech_numberofstudentsapproved');
-      logger$a.info({
+      logger$b.info({
         fn: addVVTSApprovedFundingAmount,
         message: "Change detected...",
         data: {
@@ -27373,7 +27709,7 @@
       },
       customEvent: 'onChangeClaimInfoGridVLBData',
       customEventHandler: function customEventHandler(event, customElement) {
-        logger$a.info({
+        logger$b.info({
           fn: addClaimInfoGrid,
           message: 'onChangeClaimInfoGridVLBData event listener triggered',
           data: {
@@ -27409,7 +27745,7 @@
       //   });
       // },
       initValuesFn: function initValuesFn(mappedValueKey, existingValue, customElement) {
-        logger$a.info({
+        logger$b.info({
           fn: addExpenseReportGrid,
           message: "Running initValuesFn for Expense Report Grid...",
           data: {
@@ -27428,7 +27764,7 @@
         }
       }
     });
-    logger$a.info({
+    logger$b.info({
       fn: addClaimInfoGrid,
       message: 'Successfully added VLB claim info grid'
     });
@@ -27462,7 +27798,7 @@
       },
       customEvent: 'onChangeExpenseReportData',
       customEventHandler: function customEventHandler(event, customElement) {
-        logger$a.info({
+        logger$b.info({
           fn: customizeClaimInfoStep,
           message: 'onChangeExpenseReportData event listener triggered',
           data: {
@@ -27495,7 +27831,7 @@
         verifyTotalSumEqualsRequestedAmount();
       },
       initValuesFn: function initValuesFn(mappedValueKey, existingValue, customElement) {
-        logger$a.info({
+        logger$b.info({
           fn: addExpenseReportGrid,
           message: "Running initValuesFn for Expense Report Grid...",
           data: {
@@ -27514,7 +27850,7 @@
         }
       }
     });
-    logger$a.info({
+    logger$b.info({
       fn: addExpenseReportGrid,
       message: 'Successfully added expense report grid'
     });
@@ -27552,7 +27888,7 @@
       },
       customEvent: 'onChangeExpenseReportData',
       customEventHandler: function customEventHandler(event, customElement) {
-        logger$a.info({
+        logger$b.info({
           fn: customizeClaimInfoStep,
           message: 'onChangeExpenseReportData event listener triggered',
           data: {
@@ -27591,7 +27927,7 @@
         calculateTotalRequestedAmountForKTTP();
       },
       initValuesFn: function initValuesFn(mappedValueKey, existingValue, customElement) {
-        logger$a.info({
+        logger$b.info({
           fn: addExpenseReportGridForKTTP,
           message: "Running initValuesFn for Expense Report Grid...",
           data: {
@@ -27610,7 +27946,7 @@
         }
       }
     });
-    logger$a.info({
+    logger$b.info({
       fn: addExpenseReportGridForKTTP,
       message: 'Successfully added expense report grid'
     });
@@ -27654,7 +27990,7 @@
       },
       customEvent: 'onChangeExpenseInvoicesData',
       customEventHandler: function customEventHandler(event, customElement) {
-        logger$a.info({
+        logger$b.info({
           fn: customizeClaimInfoStep,
           message: 'onChangeExpenseInvoicesData event listener triggered',
           data: {
@@ -27692,7 +28028,7 @@
         verifyTotalSumEqualsRequestedAmount();
       },
       initValuesFn: function initValuesFn(mappedValueKey, existingValue, customElement) {
-        logger$a.info({
+        logger$b.info({
           fn: addExpenseReportGrid,
           message: "Running initValuesFn for Expense Report Grid...",
           data: {
@@ -27711,7 +28047,7 @@
         }
       }
     });
-    logger$a.info({
+    logger$b.info({
       fn: addExpenseReportGrid,
       message: 'Successfully added expense invoices grid'
     });
@@ -27747,7 +28083,7 @@
     $('#quartech_declarationandconsent_label').text('I / We agree to the above statement.');
   }
 
-  var logger$9 = Logger('claim/steps/documents');
+  var logger$a = Logger('claim/steps/documents');
   function customizeDocumentsStep() {
     return _customizeDocumentsStep.apply(this, arguments);
   }
@@ -27799,7 +28135,7 @@
       return _regeneratorRuntime().wrap(function _callee2$(_context2) {
         while (1) switch (_context2.prev = _context2.next) {
           case 0:
-            logger$9.info({
+            logger$a.info({
               fn: customizeDocumentsStepForKTTP,
               message: "Start customizing documents step for KTTP"
             });
@@ -27816,13 +28152,13 @@
           case 8:
             claimDataRes = _context2.sent;
             if (!(claimDataRes !== null && claimDataRes !== void 0 && claimDataRes.data)) {
-              logger$9.error({
+              logger$a.error({
                 fn: customizeDocumentsStepForKTTP,
                 message: "Could not get claim data result to determine whether admission fee was required in project results step"
               });
             }
             _claimDataRes$data = claimDataRes === null || claimDataRes === void 0 ? void 0 : claimDataRes.data, quartech_admissionfeerequired = _claimDataRes$data.quartech_admissionfeerequired;
-            logger$9.info({
+            logger$a.info({
               fn: customizeDocumentsStepForKTTP,
               message: "Found claim value quartech_admissionfeerequired: ".concat(quartech_admissionfeerequired)
             });
@@ -27868,7 +28204,7 @@
             // Logic has since changed, if there's an ID present, we don't need to do anything.
             // chefsUrl = `https://submit.digital.gov.bc.ca/app/form/success?s=${chefsSubmissionGuid}`;
 
-            logger$9.info({
+            logger$a.info({
               fn: addChefsVVTSIframe,
               message: "VVTS Chefs already been completed, chefsSubmissionGuid: ".concat(chefsSubmissionGuid, ", chefsSubmissionId: ").concat(chefsSubmissionId)
             });
@@ -27880,7 +28216,7 @@
             _yield$getEnvVars = _context3.sent;
             chefsVVTSFormId = _yield$getEnvVars.quartech_ChefsVVTSFormId;
             if (!chefsVVTSFormId) {
-              logger$9.error({
+              logger$a.error({
                 fn: addSatisfactionSurveyChefsIframe,
                 message: 'Bad config: Applicant Portal Config should contain the quartech_ChefsVVTSFormId element',
                 data: {
@@ -27957,7 +28293,7 @@
             // Logic has since changed, if there's an ID present, we don't need to do anything.
             // chefsUrl = `https://submit.digital.gov.bc.ca/app/form/success?s=${chefsSubmissionGuid}`;
 
-            logger$9.info({
+            logger$a.info({
               fn: addSatisfactionSurveyChefsIframeForABPP,
               message: "Satisfaction survey has already been completed, chefsSubmissionGuid: ".concat(chefsSubmissionGuid, ", chefsSubmissionId: ").concat(chefsSubmissionId)
             });
@@ -27970,7 +28306,7 @@
               chefsABPPSatisfactionSurveyFormId = 'bc502ff8-4c19-4836-9e32-5445dece02c8';
             }
             if (!chefsABPPSatisfactionSurveyFormId) {
-              logger$9.error({
+              logger$a.error({
                 fn: addSatisfactionSurveyChefsIframeForABPP,
                 message: 'Bad config: Could not get the chefsABPPSatisfactionSurveyFormId element',
                 data: {
@@ -28047,7 +28383,7 @@
             // Logic has since changed, if there's an ID present, we don't need to do anything.
             // chefsUrl = `https://submit.digital.gov.bc.ca/app/form/success?s=${chefsSubmissionGuid}`;
 
-            logger$9.info({
+            logger$a.info({
               fn: addSatisfactionSurveyChefsIframe,
               message: "Satisfaction survey has already been completed, chefsSubmissionGuid: ".concat(chefsSubmissionGuid, ", chefsSubmissionId: ").concat(chefsSubmissionId)
             });
@@ -28059,7 +28395,7 @@
             _yield$getEnvVars2 = _context5.sent;
             chefsNefbaSatisfactionSurveyFormId = _yield$getEnvVars2.quartech_ChefsNefbaSatisfactionSurveyFormId;
             if (!chefsNefbaSatisfactionSurveyFormId) {
-              logger$9.error({
+              logger$a.error({
                 fn: addSatisfactionSurveyChefsIframe,
                 message: 'Bad config: Applicant Portal Config should contain the quartech_ChefsNefbaSatisfactionSurveyFormId element',
                 data: {
@@ -28143,7 +28479,7 @@
     }
   }
 
-  var logger$8 = Logger('claim/claim');
+  var logger$9 = Logger('claim/claim');
   function initClaim() {
     preloadRequestVerificationToken();
     hideFieldsAndSections();
@@ -28168,7 +28504,7 @@
               _context.next = 8;
               break;
             }
-            logger$8.info({
+            logger$9.info({
               fn: updatePageForSelectedProgram,
               message: 'Could not find programid, retry when DOM readyState is comlete',
               data: {
@@ -28187,7 +28523,7 @@
               break;
             }
             hideLoadingAnimation();
-            logger$8.error({
+            logger$9.error({
               fn: updatePageForSelectedProgram,
               message: 'Missing programid, or unknown current step',
               data: {
@@ -28197,14 +28533,14 @@
             });
             return _context.abrupt("return");
           case 14:
-            logger$8.info({
+            logger$9.info({
               fn: updatePageForSelectedProgram,
               message: "Retrieving Program data for the selected programid querystring: ".concat(programId)
             });
             getClaimFormData({
               programId: programId,
               beforeSend: function beforeSend() {
-                logger$8.info({
+                logger$9.info({
                   fn: updatePageForSelectedProgram,
                   message: 'clear any cached data from previous page loads'
                 });
@@ -28214,13 +28550,13 @@
               },
               onSuccess: function onSuccess(programData, textStatus, xhr) {
                 if (programData) {
-                  logger$8.info({
+                  logger$9.info({
                     fn: updatePageForSelectedProgram,
                     message: 'Retrieved Program data:',
                     data: programData
                   });
                   localStorage.setItem('programData', JSON.stringify(programData));
-                  logger$8.info({
+                  logger$9.info({
                     fn: updatePageForSelectedProgram,
                     message: 'Update application page with the program data.'
                   });
@@ -30273,7 +30609,7 @@
       t$1('date-multiselect')
   ], DateMultiSelect);
 
-  const logger$7 = Logger('common/typesOfFood');
+  const logger$8 = Logger('common/typesOfFood');
   POWERPOD.typesOfFood = {
       getTypesOfFood,
       processTypesOfFoodData,
@@ -30281,12 +30617,12 @@
   async function getTypesOfFood() {
       const { data } = await getTypesOfFoodData();
       if (data) {
-          logger$7.info({
+          logger$8.info({
               fn: getTypesOfFood,
               message: 'successfully extracted types of food options',
           });
           const res = processTypesOfFoodData(data);
-          logger$7.info({
+          logger$8.info({
               fn: getTypesOfFood,
               message: 'successfully extracted types of food:',
               data: res,
@@ -30294,7 +30630,7 @@
           return Promise.resolve(res);
       }
       let errorMsg = 'failed to extract types of food from data';
-      logger$7.warn({
+      logger$8.warn({
           fn: getTypesOfFood,
           message: errorMsg,
           data,
@@ -30314,7 +30650,7 @@
   }
 
   var ClaimInfoGridVLB_1;
-  const logger$6 = Logger('components/ClaimInfoGridVLB');
+  const logger$7 = Logger('components/ClaimInfoGridVLB');
   let ClaimInfoGridVLB = ClaimInfoGridVLB_1 = class ClaimInfoGridVLB extends s$1 {
       constructor() {
           super(...arguments);
@@ -30443,7 +30779,7 @@
           .options=${this.typesOfFood}
           .selectedOptions=${cellValue}
           @onChangeDropdownMultiselectValues=${(e) => {
-                logger$6.info({
+                logger$7.info({
                     fn: 'ClaimInfoGridVLB',
                     message: `onChangeDropdownMultiselectValues called`,
                     data: {
@@ -31216,7 +31552,7 @@
       t$1('efp-breadcrumbs')
   ], EFPBreadcrumbs);
 
-  var logger$5 = Logger('common/workbook');
+  var logger$6 = Logger('common/workbook');
   POWERPOD.workbookUtils = {
     getWorkbookId: getWorkbookId,
     loadWorkbookData: loadWorkbookData,
@@ -31239,7 +31575,7 @@
     var params = new URLSearchParams(window.location.search);
     var workbookId = params.get('id');
     if (workbookId) {
-      logger$5.info({
+      logger$6.info({
         fn: getWorkbookId,
         message: "Successfully retrieved workbook id from url params: ".concat(workbookId)
       });
@@ -31250,13 +31586,13 @@
     var workbookElement = document.querySelector('#quartech_workbook');
     if (workbookElement && 'value' in workbookElement && typeof workbookElement.value === 'string') {
       workbookId = workbookElement.value;
-      logger$5.info({
+      logger$6.info({
         fn: getWorkbookId,
         message: "Successfully retrieved workbook id from DOM element: ".concat(workbookId)
       });
       return workbookId;
     }
-    logger$5.warn({
+    logger$6.warn({
       fn: getWorkbookId,
       message: 'Could not find workbook id in URL params or DOM elements'
     });
@@ -31286,14 +31622,14 @@
               _context.next = 3;
               break;
             }
-            logger$5.warn({
+            logger$6.warn({
               fn: loadWorkbookData,
               message: 'No workbook ID provided'
             });
             return _context.abrupt("return", null);
           case 3:
             _context.prev = 3;
-            logger$5.info({
+            logger$6.info({
               fn: loadWorkbookData,
               message: "Fetching workbook data for ID: ".concat(workbookId)
             });
@@ -31304,7 +31640,7 @@
           case 7:
             response = _context.sent;
             workbookData = response.data;
-            logger$5.info({
+            logger$6.info({
               fn: loadWorkbookData,
               message: 'Successfully fetched workbook data',
               data: workbookData
@@ -31321,7 +31657,7 @@
           case 14:
             _context.prev = 14;
             _context.t0 = _context["catch"](3);
-            logger$5.error({
+            logger$6.error({
               fn: loadWorkbookData,
               message: 'Failed to fetch workbook data',
               data: {
@@ -31374,7 +31710,7 @@
     return ((_POWERPOD$workbook4 = POWERPOD.workbook) === null || _POWERPOD$workbook4 === void 0 ? void 0 : _POWERPOD$workbook4.nestedStructure) || null;
   }
 
-  var logger$4 = Logger('common/chaptersAndQuestions');
+  var logger$5 = Logger('common/chaptersAndQuestions');
   POWERPOD.chaptersAndQuestionsUtils = {
     loadChaptersAndQuestions: loadChaptersAndQuestions,
     getStoredChaptersData: getStoredChaptersData,
@@ -31403,7 +31739,7 @@
         while (1) switch (_context.prev = _context.next) {
           case 0:
             _context.prev = 0;
-            logger$4.info({
+            logger$5.info({
               fn: loadChaptersAndQuestions,
               message: 'Loading chapters and workbook questions data...'
             });
@@ -31418,7 +31754,7 @@
             questionsResponse = _yield$Promise$all2[1];
             chaptersData = chaptersResponse.data;
             questionsData = questionsResponse.data;
-            logger$4.info({
+            logger$5.info({
               fn: loadChaptersAndQuestions,
               message: 'Successfully loaded chapters and workbook questions data',
               data: {
@@ -31443,7 +31779,7 @@
           case 18:
             _context.prev = 18;
             _context.t0 = _context["catch"](0);
-            logger$4.error({
+            logger$5.error({
               fn: loadChaptersAndQuestions,
               message: 'Failed to load chapters and workbook questions data',
               data: {
@@ -31731,6 +32067,615 @@
       };
     });
   }
+
+  var logger$4 = Logger('common/workbookResponseHelper');
+
+  /**
+   * WorkbookResponseHelper - Common utility for managing workbook responses
+   * Provides high-level methods for CRUD operations on workbook responses
+   */
+  var WorkbookResponseHelper = /*#__PURE__*/function () {
+    function WorkbookResponseHelper() {
+      _classCallCheck(this, WorkbookResponseHelper);
+    }
+    return _createClass(WorkbookResponseHelper, null, [{
+      key: "getResponsesForWorkbook",
+      value: (
+      /**
+       * Fetch all responses for a specific workbook
+       * @param {string} workbookId - The workbook ID
+       * @param {Object} options - Additional fetch options
+       * @returns {Promise<Object>} Response data with metadata
+       */
+      function () {
+        var _getResponsesForWorkbook = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee(workbookId) {
+          var options,
+            _result$data,
+            _result$data2,
+            _result$data3,
+            _result$data4,
+            result,
+            responses,
+            _args = arguments;
+          return _regeneratorRuntime().wrap(function _callee$(_context) {
+            while (1) switch (_context.prev = _context.next) {
+              case 0:
+                options = _args.length > 1 && _args[1] !== undefined ? _args[1] : {};
+                _context.prev = 1;
+                logger$4.info({
+                  fn: 'getResponsesForWorkbook',
+                  message: "Fetching responses for workbook: ".concat(workbookId),
+                  data: {
+                    workbookId: workbookId,
+                    options: options
+                  }
+                });
+                _context.next = 5;
+                return POWERPOD.fetch.getWorkbookResponsesByWorkbook(_objectSpread2({
+                  workbookId: workbookId
+                }, options));
+              case 5:
+                result = _context.sent;
+                responses = (result === null || result === void 0 || (_result$data = result.data) === null || _result$data === void 0 ? void 0 : _result$data.value) || [];
+                logger$4.info({
+                  fn: 'getResponsesForWorkbook',
+                  message: "Found ".concat(responses.length, " responses for workbook ").concat(workbookId),
+                  data: {
+                    workbookId: workbookId,
+                    responseCount: responses.length
+                  }
+                });
+                return _context.abrupt("return", {
+                  responses: responses,
+                  totalCount: (result === null || result === void 0 || (_result$data2 = result.data) === null || _result$data2 === void 0 ? void 0 : _result$data2['@odata.count']) || responses.length,
+                  metadata: {
+                    context: result === null || result === void 0 || (_result$data3 = result.data) === null || _result$data3 === void 0 ? void 0 : _result$data3['@odata.context'],
+                    nextLink: result === null || result === void 0 || (_result$data4 = result.data) === null || _result$data4 === void 0 ? void 0 : _result$data4['@odata.nextLink']
+                  },
+                  workbookId: workbookId
+                });
+              case 11:
+                _context.prev = 11;
+                _context.t0 = _context["catch"](1);
+                logger$4.error({
+                  fn: 'getResponsesForWorkbook',
+                  message: "Failed to fetch responses for workbook ".concat(workbookId),
+                  data: {
+                    workbookId: workbookId,
+                    error: _context.t0.message
+                  }
+                });
+                throw new Error("Failed to fetch workbook responses: ".concat(_context.t0.message));
+              case 15:
+              case "end":
+                return _context.stop();
+            }
+          }, _callee, null, [[1, 11]]);
+        }));
+        function getResponsesForWorkbook(_x) {
+          return _getResponsesForWorkbook.apply(this, arguments);
+        }
+        return getResponsesForWorkbook;
+      }()
+      /**
+       * Fetch responses for a specific workbook and question
+       * @param {string} workbookId - The workbook ID
+       * @param {string} questionId - The question ID
+       * @param {Object} options - Additional fetch options
+       * @returns {Promise<Object>} Response data with metadata
+       */
+      )
+    }, {
+      key: "getResponsesForWorkbookAndQuestion",
+      value: (function () {
+        var _getResponsesForWorkbookAndQuestion = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee2(workbookId, questionId) {
+          var options,
+            _result$data5,
+            _result$data6,
+            _result$data7,
+            _result$data8,
+            result,
+            responses,
+            _args2 = arguments;
+          return _regeneratorRuntime().wrap(function _callee2$(_context2) {
+            while (1) switch (_context2.prev = _context2.next) {
+              case 0:
+                options = _args2.length > 2 && _args2[2] !== undefined ? _args2[2] : {};
+                _context2.prev = 1;
+                logger$4.info({
+                  fn: 'getResponsesForWorkbookAndQuestion',
+                  message: "Fetching responses for workbook: ".concat(workbookId, ", question: ").concat(questionId),
+                  data: {
+                    workbookId: workbookId,
+                    questionId: questionId,
+                    options: options
+                  }
+                });
+                _context2.next = 5;
+                return POWERPOD.fetch.getWorkbookResponsesByWorkbookAndQuestion(_objectSpread2({
+                  workbookId: workbookId,
+                  questionId: questionId
+                }, options));
+              case 5:
+                result = _context2.sent;
+                responses = (result === null || result === void 0 || (_result$data5 = result.data) === null || _result$data5 === void 0 ? void 0 : _result$data5.value) || [];
+                logger$4.info({
+                  fn: 'getResponsesForWorkbookAndQuestion',
+                  message: "Found ".concat(responses.length, " responses for workbook ").concat(workbookId, ", question ").concat(questionId),
+                  data: {
+                    workbookId: workbookId,
+                    questionId: questionId,
+                    responseCount: responses.length
+                  }
+                });
+                return _context2.abrupt("return", {
+                  responses: responses,
+                  totalCount: (result === null || result === void 0 || (_result$data6 = result.data) === null || _result$data6 === void 0 ? void 0 : _result$data6['@odata.count']) || responses.length,
+                  metadata: {
+                    context: result === null || result === void 0 || (_result$data7 = result.data) === null || _result$data7 === void 0 ? void 0 : _result$data7['@odata.context'],
+                    nextLink: result === null || result === void 0 || (_result$data8 = result.data) === null || _result$data8 === void 0 ? void 0 : _result$data8['@odata.nextLink']
+                  },
+                  workbookId: workbookId,
+                  questionId: questionId
+                });
+              case 11:
+                _context2.prev = 11;
+                _context2.t0 = _context2["catch"](1);
+                logger$4.error({
+                  fn: 'getResponsesForWorkbookAndQuestion',
+                  message: "Failed to fetch responses for workbook ".concat(workbookId, ", question ").concat(questionId),
+                  data: {
+                    workbookId: workbookId,
+                    questionId: questionId,
+                    error: _context2.t0.message
+                  }
+                });
+                throw new Error("Failed to fetch workbook responses: ".concat(_context2.t0.message));
+              case 15:
+              case "end":
+                return _context2.stop();
+            }
+          }, _callee2, null, [[1, 11]]);
+        }));
+        function getResponsesForWorkbookAndQuestion(_x2, _x3) {
+          return _getResponsesForWorkbookAndQuestion.apply(this, arguments);
+        }
+        return getResponsesForWorkbookAndQuestion;
+      }()
+      /**
+       * Create a new workbook response
+       * @param {string} workbookId - The workbook ID
+       * @param {string} questionId - The question ID
+       * @param {string} response - The response text
+       * @param {Object} options - Additional fetch options
+       * @returns {Promise<Object>} Created response data
+       */
+      )
+    }, {
+      key: "createResponse",
+      value: (function () {
+        var _createResponse = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee3(questionId, response) {
+          var options,
+            workbookId,
+            _result$data9,
+            result,
+            _args3 = arguments;
+          return _regeneratorRuntime().wrap(function _callee3$(_context3) {
+            while (1) switch (_context3.prev = _context3.next) {
+              case 0:
+                options = _args3.length > 2 && _args3[2] !== undefined ? _args3[2] : {};
+                workbookId = getCurrentWorkbookId();
+                if (workbookId) {
+                  _context3.next = 4;
+                  break;
+                }
+                throw new Error('No workbook ID available');
+              case 4:
+                _context3.prev = 4;
+                logger$4.info({
+                  fn: 'createResponse',
+                  message: "Creating response for workbook: ".concat(workbookId, ", question: ").concat(questionId),
+                  data: {
+                    workbookId: workbookId,
+                    questionId: questionId,
+                    response: (response === null || response === void 0 ? void 0 : response.substring(0, 100)) + '...'
+                  }
+                });
+                _context3.next = 8;
+                return POWERPOD.fetch.postWorkbookResponseData(_objectSpread2({
+                  workbookId: workbookId,
+                  questionId: questionId,
+                  response: response
+                }, options));
+              case 8:
+                result = _context3.sent;
+                logger$4.info({
+                  fn: 'createResponse',
+                  message: "Successfully created response",
+                  data: {
+                    workbookId: workbookId,
+                    questionId: questionId,
+                    responseId: result === null || result === void 0 || (_result$data9 = result.data) === null || _result$data9 === void 0 ? void 0 : _result$data9.quartech_workbookresponseid
+                  }
+                });
+                return _context3.abrupt("return", {
+                  response: result === null || result === void 0 ? void 0 : result.data,
+                  success: true,
+                  workbookId: workbookId,
+                  questionId: questionId
+                });
+              case 13:
+                _context3.prev = 13;
+                _context3.t0 = _context3["catch"](4);
+                logger$4.error({
+                  fn: 'createResponse',
+                  message: "Failed to create response for workbook ".concat(workbookId, ", question ").concat(questionId),
+                  data: {
+                    workbookId: workbookId,
+                    questionId: questionId,
+                    error: _context3.t0.message
+                  }
+                });
+                throw new Error("Failed to create workbook response: ".concat(_context3.t0.message));
+              case 17:
+              case "end":
+                return _context3.stop();
+            }
+          }, _callee3, null, [[4, 13]]);
+        }));
+        function createResponse(_x4, _x5) {
+          return _createResponse.apply(this, arguments);
+        }
+        return createResponse;
+      }()
+      /**
+       * Update an existing workbook response
+       * @param {string} responseId - The response ID to update
+       * @param {string} response - The new response text (optional)
+       * @param {Object} options - Additional fetch options
+       * @returns {Promise<Object>} Update result
+       */
+      )
+    }, {
+      key: "updateResponse",
+      value: (function () {
+        var _updateResponse = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee4(responseId) {
+          var response,
+            options,
+            result,
+            _args4 = arguments;
+          return _regeneratorRuntime().wrap(function _callee4$(_context4) {
+            while (1) switch (_context4.prev = _context4.next) {
+              case 0:
+                response = _args4.length > 1 && _args4[1] !== undefined ? _args4[1] : null;
+                options = _args4.length > 2 && _args4[2] !== undefined ? _args4[2] : {};
+                _context4.prev = 2;
+                logger$4.info({
+                  fn: 'updateResponse',
+                  message: "Updating response: ".concat(responseId),
+                  data: {
+                    responseId: responseId,
+                    hasResponse: !!response
+                  }
+                });
+                _context4.next = 6;
+                return POWERPOD.fetch.patchWorkbookResponseData(_objectSpread2({
+                  id: responseId,
+                  response: response
+                }, options));
+              case 6:
+                result = _context4.sent;
+                logger$4.info({
+                  fn: 'updateResponse',
+                  message: "Successfully updated response ".concat(responseId),
+                  data: {
+                    responseId: responseId
+                  }
+                });
+                return _context4.abrupt("return", {
+                  success: true,
+                  responseId: responseId,
+                  updated: result === null || result === void 0 ? void 0 : result.data
+                });
+              case 11:
+                _context4.prev = 11;
+                _context4.t0 = _context4["catch"](2);
+                logger$4.error({
+                  fn: 'updateResponse',
+                  message: "Failed to update response ".concat(responseId),
+                  data: {
+                    responseId: responseId,
+                    error: _context4.t0.message
+                  }
+                });
+                throw new Error("Failed to update workbook response: ".concat(_context4.t0.message));
+              case 15:
+              case "end":
+                return _context4.stop();
+            }
+          }, _callee4, null, [[2, 11]]);
+        }));
+        function updateResponse(_x6) {
+          return _updateResponse.apply(this, arguments);
+        }
+        return updateResponse;
+      }()
+      /**
+       * Delete a workbook response
+       * @param {string} responseId - The response ID to delete
+       * @param {Object} options - Additional fetch options
+       * @returns {Promise<Object>} Delete result
+       */
+      )
+    }, {
+      key: "deleteResponse",
+      value: (function () {
+        var _deleteResponse = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee5(responseId) {
+          var options,
+            _args5 = arguments;
+          return _regeneratorRuntime().wrap(function _callee5$(_context5) {
+            while (1) switch (_context5.prev = _context5.next) {
+              case 0:
+                options = _args5.length > 1 && _args5[1] !== undefined ? _args5[1] : {};
+                _context5.prev = 1;
+                logger$4.info({
+                  fn: 'deleteResponse',
+                  message: "Deleting response: ".concat(responseId),
+                  data: {
+                    responseId: responseId
+                  }
+                });
+                _context5.next = 5;
+                return POWERPOD.fetch.deleteWorkbookResponseData(_objectSpread2({
+                  id: responseId
+                }, options));
+              case 5:
+                logger$4.info({
+                  fn: 'deleteResponse',
+                  message: "Successfully deleted response ".concat(responseId),
+                  data: {
+                    responseId: responseId
+                  }
+                });
+                return _context5.abrupt("return", {
+                  success: true,
+                  responseId: responseId,
+                  deleted: true
+                });
+              case 9:
+                _context5.prev = 9;
+                _context5.t0 = _context5["catch"](1);
+                logger$4.error({
+                  fn: 'deleteResponse',
+                  message: "Failed to delete response ".concat(responseId),
+                  data: {
+                    responseId: responseId,
+                    error: _context5.t0.message
+                  }
+                });
+                throw new Error("Failed to delete workbook response: ".concat(_context5.t0.message));
+              case 13:
+              case "end":
+                return _context5.stop();
+            }
+          }, _callee5, null, [[1, 9]]);
+        }));
+        function deleteResponse(_x7) {
+          return _deleteResponse.apply(this, arguments);
+        }
+        return deleteResponse;
+      }()
+      /**
+       * Get the most recent response for a specific workbook and question
+       * @param {string} workbookId - The workbook ID
+       * @param {string} questionId - The question ID
+       * @param {Object} options - Additional fetch options
+       * @returns {Promise<Object|null>} Most recent response or null if none found
+       */
+      )
+    }, {
+      key: "getLatestResponse",
+      value: (function () {
+        var _getLatestResponse = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee6(workbookId, questionId) {
+          var options,
+            result,
+            latestResponse,
+            _args6 = arguments;
+          return _regeneratorRuntime().wrap(function _callee6$(_context6) {
+            while (1) switch (_context6.prev = _context6.next) {
+              case 0:
+                options = _args6.length > 2 && _args6[2] !== undefined ? _args6[2] : {};
+                _context6.prev = 1;
+                _context6.next = 4;
+                return this.getResponsesForWorkbookAndQuestion(workbookId, questionId, options);
+              case 4:
+                result = _context6.sent;
+                if (!(result.responses && result.responses.length > 0)) {
+                  _context6.next = 9;
+                  break;
+                }
+                // Responses are ordered by createdon desc, so first one is most recent
+                latestResponse = result.responses[0];
+                logger$4.info({
+                  fn: 'getLatestResponse',
+                  message: "Found latest response for workbook ".concat(workbookId, ", question ").concat(questionId),
+                  data: {
+                    workbookId: workbookId,
+                    questionId: questionId,
+                    responseId: latestResponse.quartech_workbookresponseid,
+                    createdOn: latestResponse.createdon
+                  }
+                });
+                return _context6.abrupt("return", latestResponse);
+              case 9:
+                logger$4.info({
+                  fn: 'getLatestResponse',
+                  message: "No responses found for workbook ".concat(workbookId, ", question ").concat(questionId),
+                  data: {
+                    workbookId: workbookId,
+                    questionId: questionId
+                  }
+                });
+                return _context6.abrupt("return", null);
+              case 13:
+                _context6.prev = 13;
+                _context6.t0 = _context6["catch"](1);
+                logger$4.error({
+                  fn: 'getLatestResponse',
+                  message: "Failed to get latest response for workbook ".concat(workbookId, ", question ").concat(questionId),
+                  data: {
+                    workbookId: workbookId,
+                    questionId: questionId,
+                    error: _context6.t0.message
+                  }
+                });
+                throw _context6.t0;
+              case 17:
+              case "end":
+                return _context6.stop();
+            }
+          }, _callee6, this, [[1, 13]]);
+        }));
+        function getLatestResponse(_x8, _x9) {
+          return _getLatestResponse.apply(this, arguments);
+        }
+        return getLatestResponse;
+      }()
+      /**
+       * Check if a response exists for a specific workbook and question
+       * @param {string} workbookId - The workbook ID
+       * @param {string} questionId - The question ID
+       * @param {Object} options - Additional fetch options
+       * @returns {Promise<boolean>} True if response exists, false otherwise
+       */
+      )
+    }, {
+      key: "hasResponse",
+      value: (function () {
+        var _hasResponse = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee7(workbookId, questionId) {
+          var options,
+            latestResponse,
+            _args7 = arguments;
+          return _regeneratorRuntime().wrap(function _callee7$(_context7) {
+            while (1) switch (_context7.prev = _context7.next) {
+              case 0:
+                options = _args7.length > 2 && _args7[2] !== undefined ? _args7[2] : {};
+                _context7.prev = 1;
+                _context7.next = 4;
+                return this.getLatestResponse(workbookId, questionId, options);
+              case 4:
+                latestResponse = _context7.sent;
+                return _context7.abrupt("return", latestResponse !== null);
+              case 8:
+                _context7.prev = 8;
+                _context7.t0 = _context7["catch"](1);
+                logger$4.error({
+                  fn: 'hasResponse',
+                  message: "Failed to check if response exists for workbook ".concat(workbookId, ", question ").concat(questionId),
+                  data: {
+                    workbookId: workbookId,
+                    questionId: questionId,
+                    error: _context7.t0.message
+                  }
+                });
+                return _context7.abrupt("return", false);
+              case 12:
+              case "end":
+                return _context7.stop();
+            }
+          }, _callee7, this, [[1, 8]]);
+        }));
+        function hasResponse(_x10, _x11) {
+          return _hasResponse.apply(this, arguments);
+        }
+        return hasResponse;
+      }()
+      /**
+       * Get response statistics for a workbook
+       * @param {string} workbookId - The workbook ID
+       * @param {Object} options - Additional fetch options
+       * @returns {Promise<Object>} Response statistics
+       */
+      )
+    }, {
+      key: "getResponseStats",
+      value: (function () {
+        var _getResponseStats = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee8(workbookId) {
+          var options,
+            result,
+            responses,
+            responsesByQuestion,
+            stats,
+            _args8 = arguments;
+          return _regeneratorRuntime().wrap(function _callee8$(_context8) {
+            while (1) switch (_context8.prev = _context8.next) {
+              case 0:
+                options = _args8.length > 1 && _args8[1] !== undefined ? _args8[1] : {};
+                _context8.prev = 1;
+                _context8.next = 4;
+                return this.getResponsesForWorkbook(workbookId, options);
+              case 4:
+                result = _context8.sent;
+                responses = result.responses || []; // Group responses by question
+                responsesByQuestion = new Map();
+                responses.forEach(function (response) {
+                  var questionId = response._quartech_question_value;
+                  if (!responsesByQuestion.has(questionId)) {
+                    responsesByQuestion.set(questionId, []);
+                  }
+                  responsesByQuestion.get(questionId).push(response);
+                });
+                stats = {
+                  totalResponses: responses.length,
+                  uniqueQuestions: responsesByQuestion.size,
+                  questionsWithMultipleResponses: 0,
+                  averageResponsesPerQuestion: 0,
+                  responsesByQuestion: Object.fromEntries(responsesByQuestion),
+                  workbookId: workbookId
+                }; // Calculate additional stats
+                responsesByQuestion.forEach(function (questionResponses) {
+                  if (questionResponses.length > 1) {
+                    stats.questionsWithMultipleResponses++;
+                  }
+                });
+                if (stats.uniqueQuestions > 0) {
+                  stats.averageResponsesPerQuestion = (stats.totalResponses / stats.uniqueQuestions).toFixed(2);
+                }
+                logger$4.info({
+                  fn: 'getResponseStats',
+                  message: "Generated response statistics for workbook ".concat(workbookId),
+                  data: {
+                    workbookId: workbookId,
+                    stats: stats
+                  }
+                });
+                return _context8.abrupt("return", stats);
+              case 15:
+                _context8.prev = 15;
+                _context8.t0 = _context8["catch"](1);
+                logger$4.error({
+                  fn: 'getResponseStats',
+                  message: "Failed to get response statistics for workbook ".concat(workbookId),
+                  data: {
+                    workbookId: workbookId,
+                    error: _context8.t0.message
+                  }
+                });
+                throw new Error("Failed to get response statistics: ".concat(_context8.t0.message));
+              case 19:
+              case "end":
+                return _context8.stop();
+            }
+          }, _callee8, this, [[1, 15]]);
+        }));
+        function getResponseStats(_x12) {
+          return _getResponseStats.apply(this, arguments);
+        }
+        return getResponseStats;
+      }())
+    }]);
+  }();
+  POWERPOD.workbookResponseHelper = WorkbookResponseHelper;
 
   // src/components/details/details.styles.ts
   var details_styles_default = i$4`

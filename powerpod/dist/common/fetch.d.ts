@@ -118,6 +118,31 @@ export function getWorkbookDataById({ id, ...options }: {
 }): Promise<any>;
 export function getChaptersData({ ...options }?: {}): Promise<any>;
 export function getWorkbookQuestionsData({ ...options }?: {}): Promise<any>;
+export function getWorkbookResponsesData({ ...options }?: {}): Promise<any>;
+export function getWorkbookResponsesByWorkbook({ workbookId, ...options }: {
+    [x: string]: any;
+    workbookId: any;
+}): Promise<any>;
+export function getWorkbookResponsesByWorkbookAndQuestion({ workbookId, questionId, ...options }: {
+    [x: string]: any;
+    workbookId: any;
+    questionId: any;
+}): Promise<any>;
+export function postWorkbookResponseData({ workbookId, questionId, response, ...options }: {
+    [x: string]: any;
+    workbookId: any;
+    questionId: any;
+    response: any;
+}): Promise<any>;
+export function patchWorkbookResponseData({ id, response, ...options }: {
+    [x: string]: any;
+    id: any;
+    response?: null | undefined;
+}): Promise<any>;
+export function deleteWorkbookResponseData({ id, ...options }: {
+    [x: string]: any;
+    id: any;
+}): Promise<any>;
 export namespace ENDPOINT_URL {
     let get_env_vars_data: string;
     function get_application_form_data(programId: any): string;
@@ -148,4 +173,10 @@ export namespace ENDPOINT_URL {
     function get_workbook_data_by_id(id: any): string;
     let get_chapters_data: string;
     let get_workbookquestions_data: string;
+    let get_workbookresponses_data: string;
+    function get_workbookresponses_by_workbook(workbookId: any): string;
+    function get_workbookresponses_by_workbook_and_question(workbookId: any, questionId: any): string;
+    let post_workbookresponse_data: string;
+    function patch_workbookresponse_data(id: any): string;
+    function delete_workbookresponse_data(id: any): string;
 }

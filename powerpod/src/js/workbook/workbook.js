@@ -4,13 +4,15 @@ import { hideLoadingAnimation } from '../common/loading.js';
 import {
   getWorkbookId,
   loadWorkbookData,
-  isWorkbookInitialized
+  isWorkbookInitialized,
 } from '../common/workbookUtils.js';
 import {
   loadChaptersAndQuestions,
-  getChaptersWithNestedQuestionsAndSubchapters
+  getChaptersWithNestedQuestionsAndSubchapters,
 } from '../common/chaptersAndQuestionsUtils.js';
 import { POWERPOD } from '../common/constants.js';
+import '../examples/workbookResponseUsage.js';
+import '../common/workbookResponseHelper.js';
 import '../components/EFPEntryForm.ts';
 
 const logger = Logger('workbook/workbook');
@@ -36,16 +38,18 @@ function updateEFPEntryFormWithNestedStructure(nestedStructure) {
       logger.info({
         // @ts-ignore
         fn: updateEFPEntryFormWithNestedStructure,
-        message: 'Successfully updated EFP Entry Form with nested chapter structure',
+        message:
+          'Successfully updated EFP Entry Form with nested chapter structure',
         data: {
-          chaptersCount: nestedStructure.length
-        }
+          chaptersCount: nestedStructure.length,
+        },
       });
     } else {
       logger.warn({
         // @ts-ignore
         fn: updateEFPEntryFormWithNestedStructure,
-        message: 'EFP Entry Form component does not support updateNestedChapterStructure method',
+        message:
+          'EFP Entry Form component does not support updateNestedChapterStructure method',
       });
 
       // Try alternative approach - set property directly
@@ -83,7 +87,9 @@ export async function initWorkbook() {
   }
 
   // Check if token already exists to avoid redundant calls
-  const existingToken = document.querySelector('input[name=__RequestVerificationToken]');
+  const existingToken = document.querySelector(
+    'input[name=__RequestVerificationToken]'
+  );
   if (!existingToken) {
     await preloadRequestVerificationToken();
   }
@@ -123,11 +129,20 @@ export async function initWorkbook() {
       message: 'Successfully built nested chapter structure',
       data: {
         chaptersCount: nestedStructure.length,
-        totalSubchapters: nestedStructure.reduce((sum, chapter) => sum + chapter.subchapters.length, 0),
-        totalQuestions: nestedStructure.reduce((sum, chapter) =>
-          sum + chapter.questions.length +
-          chapter.subchapters.reduce((subSum, subchapter) => subSum + subchapter.questions.length, 0), 0
-        )
+        totalSubchapters: nestedStructure.reduce(
+          (sum, chapter) => sum + chapter.subchapters.length,
+          0
+        ),
+        totalQuestions: nestedStructure.reduce(
+          (sum, chapter) =>
+            sum +
+            chapter.questions.length +
+            chapter.subchapters.reduce(
+              (subSum, subchapter) => subSum + subchapter.questions.length,
+              0
+            ),
+          0
+        ),
       },
     });
 
@@ -150,7 +165,6 @@ export async function initWorkbook() {
     setTimeout(() => {
       updateEFPEntryFormWithNestedStructure(nestedStructure);
     }, 500);
-
   } catch (error) {
     logger.error({
       fn: initWorkbook,

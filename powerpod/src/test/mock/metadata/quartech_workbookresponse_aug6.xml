@@ -1,0 +1,101 @@
+<EntityType Name="quartech_workbookresponse" BaseType="mscrm.crmbaseentity">
+  <Key>
+    <PropertyRef Name="quartech_workbookresponseid" />
+  </Key>
+  <Property Name="quartech_chapterskipped" Type="Edm.Int32" />
+  <Property Name="_createdonbehalfby_value" Type="Edm.Guid" />
+  <Property Name="_ownerid_value" Type="Edm.Guid" />
+  <Property Name="utcconversiontimezonecode" Type="Edm.Int32" />
+  <Property Name="statecode" Type="Edm.Int32" />
+  <Property Name="statuscode" Type="Edm.Int32" />
+  <Property Name="_owningbusinessunit_value" Type="Edm.Guid" />
+  <Property Name="_quartech_chapter_value" Type="Edm.Guid" />
+  <Property Name="_modifiedonbehalfby_value" Type="Edm.Guid" />
+  <Property Name="_quartech_question_value" Type="Edm.Guid" />
+  <Property Name="_owningteam_value" Type="Edm.Guid" />
+  <Property Name="modifiedon" Type="Edm.DateTimeOffset" />
+  <Property Name="timezoneruleversionnumber" Type="Edm.Int32" />
+  <Property Name="versionnumber" Type="Edm.Int64" />
+  <Property Name="importsequencenumber" Type="Edm.Int32" />
+  <Property Name="quartech_workbookresponseid" Type="Edm.Guid" />
+  <Property Name="quartech_response" Type="Edm.String" Unicode="false" />
+  <Property Name="overriddencreatedon" Type="Edm.DateTimeOffset" />
+  <Property Name="_modifiedby_value" Type="Edm.Guid" />
+  <Property Name="_createdby_value" Type="Edm.Guid" />
+  <Property Name="_quartech_workbook_value" Type="Edm.Guid" />
+  <Property Name="quartech_name" Type="Edm.String" Unicode="false" />
+  <Property Name="createdon" Type="Edm.DateTimeOffset" />
+  <Property Name="_owninguser_value" Type="Edm.Guid" />
+  <NavigationProperty Name="createdby" Type="mscrm.systemuser" Nullable="false"
+    Partner="lk_quartech_workbookresponse_createdby">
+    <ReferentialConstraint Property="_createdby_value" ReferencedProperty="systemuserid" />
+  </NavigationProperty>
+  <NavigationProperty Name="createdonbehalfby" Type="mscrm.systemuser" Nullable="false"
+    Partner="lk_quartech_workbookresponse_createdonbehalfby">
+    <ReferentialConstraint Property="_createdonbehalfby_value"
+      ReferencedProperty="systemuserid" />
+  </NavigationProperty>
+  <NavigationProperty Name="modifiedby" Type="mscrm.systemuser" Nullable="false"
+    Partner="lk_quartech_workbookresponse_modifiedby">
+    <ReferentialConstraint Property="_modifiedby_value" ReferencedProperty="systemuserid" />
+  </NavigationProperty>
+  <NavigationProperty Name="modifiedonbehalfby" Type="mscrm.systemuser" Nullable="false"
+    Partner="lk_quartech_workbookresponse_modifiedonbehalfby">
+    <ReferentialConstraint Property="_modifiedonbehalfby_value"
+      ReferencedProperty="systemuserid" />
+  </NavigationProperty>
+  <NavigationProperty Name="owninguser" Type="mscrm.systemuser" Nullable="false"
+    Partner="user_quartech_workbookresponse">
+    <ReferentialConstraint Property="_owninguser_value" ReferencedProperty="systemuserid" />
+  </NavigationProperty>
+  <NavigationProperty Name="owningteam" Type="mscrm.team" Nullable="false"
+    Partner="team_quartech_workbookresponse">
+    <ReferentialConstraint Property="_owningteam_value" ReferencedProperty="teamid" />
+  </NavigationProperty>
+  <NavigationProperty Name="ownerid" Type="mscrm.principal" Nullable="false"
+    Partner="owner_quartech_workbookresponse">
+    <ReferentialConstraint Property="_ownerid_value" ReferencedProperty="ownerid" />
+  </NavigationProperty>
+  <NavigationProperty Name="owningbusinessunit" Type="mscrm.businessunit" Nullable="false"
+    Partner="business_unit_quartech_workbookresponse">
+    <ReferentialConstraint Property="_owningbusinessunit_value"
+      ReferencedProperty="businessunitid" />
+  </NavigationProperty>
+  <NavigationProperty Name="quartech_workbookresponse_SyncErrors"
+    Type="Collection(mscrm.syncerror)" Partner="regardingobjectid_quartech_workbookresponse" />
+  <NavigationProperty Name="quartech_workbookresponse_DuplicateMatchingRecord"
+    Type="Collection(mscrm.duplicaterecord)"
+    Partner="duplicaterecordid_quartech_workbookresponse" />
+  <NavigationProperty Name="quartech_workbookresponse_DuplicateBaseRecord"
+    Type="Collection(mscrm.duplicaterecord)" Partner="baserecordid_quartech_workbookresponse" />
+  <NavigationProperty Name="quartech_workbookresponse_AsyncOperations"
+    Type="Collection(mscrm.asyncoperation)"
+    Partner="regardingobjectid_quartech_workbookresponse" />
+  <NavigationProperty Name="quartech_workbookresponse_MailboxTrackingFolders"
+    Type="Collection(mscrm.mailboxtrackingfolder)"
+    Partner="regardingobjectid_quartech_workbookresponse" />
+  <NavigationProperty Name="quartech_workbookresponse_ProcessSession"
+    Type="Collection(mscrm.processsession)"
+    Partner="regardingobjectid_quartech_workbookresponse" />
+  <NavigationProperty Name="quartech_workbookresponse_BulkDeleteFailures"
+    Type="Collection(mscrm.bulkdeletefailure)"
+    Partner="regardingobjectid_quartech_workbookresponse" />
+  <NavigationProperty Name="quartech_workbookresponse_PrincipalObjectAttributeAccesses"
+    Type="Collection(mscrm.principalobjectattributeaccess)"
+    Partner="objectid_quartech_workbookresponse" />
+  <NavigationProperty Name="quartech_Workbook" Type="mscrm.quartech_workbook" Nullable="false"
+    Partner="quartech_workbookresponse_Workbook_quartech_workbook">
+    <ReferentialConstraint Property="_quartech_workbook_value"
+      ReferencedProperty="quartech_workbookid" />
+  </NavigationProperty>
+  <NavigationProperty Name="quartech_Question" Type="mscrm.quartech_workbookquestion"
+    Nullable="false" Partner="quartech_workbookresponse_Question_quartech_workbookquestion">
+    <ReferentialConstraint Property="_quartech_question_value"
+      ReferencedProperty="quartech_workbookquestionid" />
+  </NavigationProperty>
+  <NavigationProperty Name="quartech_Chapter" Type="mscrm.quartech_chapter" Nullable="false"
+    Partner="quartech_workbookresponse_Chapter_quartech_chapter">
+    <ReferentialConstraint Property="_quartech_chapter_value"
+      ReferencedProperty="quartech_chapterid" />
+  </NavigationProperty>
+</EntityType>
