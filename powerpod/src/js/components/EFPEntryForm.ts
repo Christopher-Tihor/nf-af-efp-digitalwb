@@ -1248,6 +1248,10 @@ class EFPEntryForm extends LitElement {
 
   // Computed properties
   private get completionPercent(): number {
+    // Use workbook responses completion if available, otherwise fall back to static completion
+    if (POWERPOD.workbookQuestionsAndResponses.isLoaded) {
+      return POWERPOD.workbookQuestionsAndResponses.stats.completionPercentage;
+    }
     return EFPCompletionUtils.calculateOverallCompletion(this.sections);
   }
 
@@ -1495,7 +1499,10 @@ class EFPEntryForm extends LitElement {
       // Update memory structures
       await this.updateMemoryStructuresForRating(questionId, responseData, !existingResponse);
 
-      // Trigger re-render
+      // Update completion and navigation icons
+      this.updateCompletionAndNavigation();
+
+      // Trigger re-render (already called by updateCompletionAndNavigation, but keeping for clarity)
       this.requestUpdate();
 
     } catch (error) {
@@ -1906,7 +1913,8 @@ class EFPEntryForm extends LitElement {
     // Re-render rating questions when workbook responses are loaded/updated
     if (changedProps.has('workbookResponses')) {
       console.log('📋 Workbook responses updated, rating questions will re-render with selected values');
-      // The template will automatically re-render with updated selectedValue properties
+      // Update completion and navigation icons when responses change
+      this.updateCompletionAndNavigation();
     }
   }
 
@@ -2012,6 +2020,92 @@ class EFPEntryForm extends LitElement {
   // Sync local component state from POWERPOD memory
   private syncFromPOWERPOD() {
     this.workbookResponses = POWERPOD.workbookResponses.data;
+
+    // Update completion and navigation icons
+    this.updateCompletionAndNavigation();
+  }
+
+  // Update completion tracking and navigation icons based on current responses
+  private updateCompletionAndNavigation() {
+    console.log('🔄 Updating completion and navigation icons...');
+
+    // Update section completion status based on workbook responses
+    this.updateSectionCompletionStatus();
+
+    // Trigger re-render to update progress bar and navigation icons
+    this.requestUpdate();
+
+    // Log current completion status
+    const completionPercent = this.completionPercent;
+    console.log(`📊 Overall completion: ${completionPercent}%`);
+
+    if (POWERPOD.workbookQuestionsAndResponses.isLoaded) {
+      const stats = POWERPOD.workbookQuestionsAndResponses.stats;
+      console.log(`📈 Workbook stats: ${stats.answeredQuestions}/${stats.totalQuestions} questions answered`);
+    }
+  }
+
+  // Update section completion status based on workbook responses
+  private updateSectionCompletionStatus() {
+    if (!POWERPOD.workbookQuestionsAndResponses.isLoaded) {
+      console.log('⚠️ Workbook responses not loaded, skipping section completion update');
+      return;
+    }
+
+    const questionsWithResponses = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses;
+    const questionsByChapter = POWERPOD.workbookQuestionsAndResponses.questionsByChapter;
+
+    console.log(`🔍 Updating completion for ${questionsByChapter.size} chapters`);
+
+    // Update section completion based on chapter completion
+    this.sections.forEach(section => {
+      this.updateSectionItemsCompletion(section.items, questionsWithResponses);
+    });
+  }
+
+  // Recursively update completion status for section items
+  private updateSectionItemsCompletion(items: any[], questionsWithResponses: Map<string, any>) {
+    items.forEach(item => {
+      if ('items' in item && Array.isArray(item.items)) {
+        // Recursively update nested items
+        this.updateSectionItemsCompletion(item.items, questionsWithResponses);
+
+        // Update parent item completion based on children
+        const childItems = this.getAllLeafItems(item.items);
+        const completedChildren = childItems.filter(child => child.complete).length;
+        item.complete = completedChildren === childItems.length && childItems.length > 0;
+
+        console.log(`📁 Section "${item.label}": ${completedChildren}/${childItems.length} items complete`);
+
+      } else if (item.questionId) {
+        // This is a question item - check if it has a response
+        const questionResponse = questionsWithResponses.get(item.questionId);
+        const wasComplete = item.complete;
+        item.complete = questionResponse && questionResponse.response !== null;
+
+        if (wasComplete !== item.complete) {
+          console.log(`${item.complete ? '✅' : '❌'} Question "${item.label}" completion changed: ${wasComplete} → ${item.complete}`);
+        }
+      }
+    });
+  }
+
+  // Helper method to get all leaf items from a nested structure
+  private getAllLeafItems(items: any[]): any[] {
+    const leafItems: any[] = [];
+
+    const collect = (itemList: any[]) => {
+      for (const item of itemList) {
+        if ('items' in item && Array.isArray(item.items)) {
+          collect(item.items);
+        } else {
+          leafItems.push(item);
+        }
+      }
+    };
+
+    collect(items);
+    return leafItems;
   }
 
   // Helper method to get response for a specific question
