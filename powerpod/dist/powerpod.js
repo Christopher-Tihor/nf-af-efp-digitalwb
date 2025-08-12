@@ -35427,12 +35427,12 @@
                           // This is a decimal order (e.g., 7.1), show as "7.1 Title"
                           const cleanTitle = subchapterTitle.replace(/^CHAPTER\s+\d+(\.\d+)?\s+/i, '');
                           formattedSubchapterTitle = `${subchapterOrder} ${EFPTextUtils.formatChapterTitle(cleanTitle)}`;
-                          console.log(`Subchapter: ${subchapterOrder} -> "${formattedSubchapterTitle}"`);
+                          // console.log(`Subchapter: ${subchapterOrder} -> "${formattedSubchapterTitle}"`);
                       }
                       else {
                           // Fallback to original formatting
                           formattedSubchapterTitle = EFPTextUtils.formatChapterTitle(subchapterTitle);
-                          console.log(`Subchapter (no order): "${formattedSubchapterTitle}"`);
+                          // console.log(`Subchapter (no order): "${formattedSubchapterTitle}"`);
                       }
                       const subchapterItem = {
                           label: formattedSubchapterTitle,
@@ -35451,13 +35451,13 @@
                                   // Show order number with title (e.g., "7.11 Plant Biodiversity")
                                   const cleanTitle = subSubTitle.replace(/^CHAPTER\s+\d+(\.\d+)?\s+/i, '');
                                   formattedSubSubTitle = `${subSubOrder} ${EFPTextUtils.formatChapterTitle(cleanTitle)}`;
-                                  console.log(`Sub-subchapter: ${subSubOrder} -> "${formattedSubSubTitle}"`);
+                                  // console.log(`Sub-subchapter: ${subSubOrder} -> "${formattedSubSubTitle}"`);
                               }
                               else {
                                   // Fallback: remove chapter prefix and format
                                   const subSubLabel = subSubTitle.replace(/^CHAPTER\s+\d+\.\d+\s+/i, '');
                                   formattedSubSubTitle = EFPTextUtils.formatChapterTitle(subSubLabel);
-                                  console.log(`Sub-subchapter (no order): "${formattedSubSubTitle}"`);
+                                  // console.log(`Sub-subchapter (no order): "${formattedSubSubTitle}"`);
                               }
                               return {
                                   label: formattedSubSubTitle,
