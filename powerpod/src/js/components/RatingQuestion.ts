@@ -16,6 +16,13 @@ export class RatingQuestion extends LitElement {
   
   @state() private hoveredValue = '';
 
+  // Debug lifecycle to see when selectedValue changes
+  updated(changedProperties: Map<string, unknown>) {
+    if (changedProperties.has('selectedValue')) {
+      console.log(`🎯 RatingQuestion updated for question ${this.questionId}: selectedValue = "${this.selectedValue}"`);
+    }
+  }
+
   static styles = css`
     .rating-container {
       display: flex;

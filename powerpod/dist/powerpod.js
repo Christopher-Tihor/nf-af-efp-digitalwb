@@ -35003,6 +35003,12 @@
           this.selectedValue = '';
           this.hoveredValue = '';
       }
+      // Debug lifecycle to see when selectedValue changes
+      updated(changedProperties) {
+          if (changedProperties.has('selectedValue')) {
+              console.log(`🎯 RatingQuestion updated for question ${this.questionId}: selectedValue = "${this.selectedValue}"`);
+          }
+      }
       getDefaultOptions(questionType) {
           switch (questionType) {
               case 'Yes/No/NA':
@@ -35981,11 +35987,16 @@
           switch (questionType) {
               case 'Yes/No/NA':
               case 'Point Rating':
+                  // Get existing response value for this question
+                  const existingResponse = this.getResponseForQuestion(question.id);
+                  const selectedValue = (existingResponse === null || existingResponse === void 0 ? void 0 : existingResponse.quartech_response) || '';
                   console.log(`🎯 Binding rating-changed event for question ${question.id} to handleRatingChanged method`);
+                  console.log(`📋 Existing response for question ${question.id}:`, selectedValue);
                   return x `
           <rating-question
             .questionId=${question.id}
             .questionType=${questionType}
+            .selectedValue=${selectedValue}
             @rating-changed=${this.handleRatingChanged}
           ></rating-question>
         `;
@@ -36554,6 +36565,11 @@
           }
           if (changedProps.has('currentSectionIndex')) {
               EFPLifecycleUtils.handleSectionIndexChange(this.currentSectionIndex, this.tabGroupEl);
+          }
+          // Re-render rating questions when workbook responses are loaded/updated
+          if (changedProps.has('workbookResponses')) {
+              console.log('📋 Workbook responses updated, rating questions will re-render with selected values');
+              // The template will automatically re-render with updated selectedValue properties
           }
       }
       // Lifecycle methods
