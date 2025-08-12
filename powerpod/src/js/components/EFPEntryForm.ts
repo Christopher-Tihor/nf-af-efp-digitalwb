@@ -16,6 +16,7 @@ import './EFPBreadcrumbs';
 import WorkbookResponseHelper from '../common/workbookResponseHelper.js';
 import { getWorkbookId } from '../common/workbookUtils.js';
 import { POWERPOD } from '../common/constants.js';
+import { EFPEventUtils as EFPEventUtilsImported } from './efp/event-utils.js';
 
 // Type definitions for better type safety
 interface EFPStep {
@@ -639,25 +640,7 @@ class EFPEventUtils {
     }
   }
 
-  static handleRatingChanged(
-    event: CustomEvent,
-    onAnswerUpdate?: (questionId: string, value: any) => void
-  ): void {
-    const { questionId, value } = event.detail;
-    console.log(`Question ${questionId} answered with: ${value}`);
-
-    // Call the optional callback to update answers
-    onAnswerUpdate?.(questionId, value);
-
-    // Dispatch a custom event for parent components
-    const answerEvent = new CustomEvent('efp-answer-changed', {
-      detail: { questionId, value },
-      bubbles: true,
-      composed: true
-    });
-
-    event.target?.dispatchEvent(answerEvent);
-  }
+  // Static method removed - using instance method instead for proper response saving
 }
 
 // Utility class for lifecycle management
@@ -1168,6 +1151,7 @@ class EFPEntryForm extends LitElement {
     switch (questionType) {
       case 'Yes/No/NA':
       case 'Point Rating':
+        console.log(`🎯 Binding rating-changed event for question ${question.id} to handleRatingChanged method`);
         return html`
           <rating-question
             .questionId=${question.id}
@@ -1408,15 +1392,143 @@ class EFPEntryForm extends LitElement {
   }
 
   // Question interaction event handler
-  private handleRatingChanged(event: CustomEvent) {
-    EFPEventUtils.handleRatingChanged(
-      event,
-      (questionId: string, value: any) => {
-        // Store the answer in your data model if needed
-        // For example: this.answers[questionId] = value;
-        EFPLogger.log(`Storing answer for question ${questionId}: ${value}`);
+  private async handleRatingChanged(event: CustomEvent) {
+    console.log('🎯 EFPEntryForm.handleRatingChanged called!', event.detail);
+    const { questionId, value } = event.detail;
+
+    try {
+      console.log(`🔄 Starting to save rating for question ${questionId}: ${value}`);
+      EFPLogger.log(`Rating changed for question ${questionId}: ${value}`);
+
+      // Save the rating as a workbook response
+      await this.saveRatingResponse(questionId, value);
+
+      console.log(`✅ Successfully saved rating response for question ${questionId}`);
+      EFPLogger.log(`Successfully saved rating response for question ${questionId}`);
+
+      // Also call the original handler for any additional processing
+      EFPEventUtilsImported.handleRatingChanged(
+        event,
+        (questionId: string, value: any) => {
+          EFPLogger.log(`Rating stored in memory for question ${questionId}: ${value}`);
+        }
+      );
+
+    } catch (error) {
+      console.error(`❌ Failed to save rating response for question ${questionId}:`, error);
+      EFPLogger.error(`Failed to save rating response: ${(error as Error).message}`);
+
+      // Still call the original handler even if save fails
+      EFPEventUtilsImported.handleRatingChanged(
+        event,
+        (questionId: string, value: any) => {
+          EFPLogger.log(`Rating stored locally for question ${questionId}: ${value} (save failed)`);
+        }
+      );
+    }
+  }
+
+  // Helper method to save rating responses
+  private async saveRatingResponse(questionId: string, ratingValue: any): Promise<void> {
+    console.log(`🚀 saveRatingResponse called for question ${questionId} with value ${ratingValue}`);
+    try {
+      const responseText = String(ratingValue);
+      const notes = `Rating: ${ratingValue}`;
+
+      console.log(`📝 Prepared response text: "${responseText}", notes: "${notes}"`);
+
+      // Check if response already exists
+      const existingResponse = this.getResponseForQuestion(questionId);
+      console.log(`🔍 Existing response check:`, existingResponse ? 'Found existing response' : 'No existing response');
+
+      let result;
+      let responseData;
+
+      if (existingResponse) {
+        // Update existing response
+        console.log(`Updating existing rating response: ${existingResponse.quartech_workbookresponseid}`);
+        result = await WorkbookResponseHelper.updateResponse(
+          existingResponse.quartech_workbookresponseid,
+          responseText,
+          { notes }
+        );
+
+        // Create updated response data
+        responseData = {
+          ...existingResponse,
+          quartech_response: responseText,
+          quartech_notes: notes,
+          modifiedon: new Date().toISOString()
+        };
+
+        console.log('Rating response updated successfully');
+
+      } else {
+        // Create new response
+        console.log('Creating new rating response');
+        result = await WorkbookResponseHelper.createResponse(questionId, responseText, { notes });
+
+        const workbookId = getWorkbookId();
+
+        // Create new response data
+        responseData = {
+          quartech_workbookresponseid: result.response?.quartech_workbookresponseid,
+          quartech_response: responseText,
+          quartech_notes: notes,
+          _quartech_question_value: questionId,
+          _quartech_workbook_value: workbookId,
+          createdon: new Date().toISOString(),
+          modifiedon: new Date().toISOString(),
+          ...result.response
+        };
+
+        console.log('New rating response created successfully');
       }
-    );
+
+      // Update memory structures
+      await this.updateMemoryStructuresForRating(questionId, responseData, !existingResponse);
+
+      // Trigger re-render
+      this.requestUpdate();
+
+    } catch (error) {
+      console.error('Failed to save rating response:', error);
+      throw error;
+    }
+  }
+
+  // Update memory structures for rating responses
+  private async updateMemoryStructuresForRating(questionId: string, responseData: any, isNewResponse: boolean) {
+    try {
+      // Update new nested structure using helper function
+      WorkbookResponseHelper.updateResponseInMemory(questionId, responseData);
+
+      // Update old structure for backward compatibility
+      POWERPOD.workbookResponses.responsesByQuestion.set(questionId, responseData);
+
+      if (isNewResponse) {
+        // Add to beginning of data array (most recent first)
+        POWERPOD.workbookResponses.data.unshift(responseData);
+      } else {
+        // Update existing entry in data array
+        const dataIndex = POWERPOD.workbookResponses.data.findIndex(
+          (r: any) => r.quartech_workbookresponseid === responseData.quartech_workbookresponseid
+        );
+        if (dataIndex !== -1) {
+          POWERPOD.workbookResponses.data[dataIndex] = responseData;
+        }
+      }
+
+      // Update memory metadata for both structures
+      POWERPOD.workbookResponses.lastUpdated = new Date().toISOString();
+      POWERPOD.workbookQuestionsAndResponses.lastUpdated = new Date().toISOString();
+
+      console.log(`Updated memory structures for rating question ${questionId}`);
+
+    } catch (error) {
+      console.error('Failed to update memory structures for rating:', error);
+      // Don't throw - this is a memory update issue, not a save issue
+    }
   }
 
   // Navigation item click event handler

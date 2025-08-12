@@ -35198,6 +35198,115 @@
   ], RatingQuestion);
 
   // Utility class for logging (can be disabled in production)
+  class EFPLogger$1 {
+      static log(...args) {
+          if (EFPLogger$1.DEBUG) {
+              console.log('[EFP]', ...args);
+          }
+      }
+      static warn(...args) {
+          if (EFPLogger$1.DEBUG) {
+              console.warn('[EFP]', ...args);
+          }
+      }
+      static error(...args) {
+          if (EFPLogger$1.DEBUG) {
+              console.error('[EFP]', ...args);
+          }
+      }
+      static setDebug(enabled) {
+          EFPLogger$1.DEBUG = enabled;
+      }
+      static isDebugEnabled() {
+          return EFPLogger$1.DEBUG;
+      }
+  }
+  EFPLogger$1.DEBUG = true; // Set to false in production
+
+  // Utility class for event handling helpers
+  class EFPEventUtils$1 {
+      static handleItemClick(item, flatSteps, onStepChange, onNavigationUpdate) {
+          const index = flatSteps.findIndex((i) => i.label === item.label);
+          EFPLogger$1.log(`Navigation click: Looking for "${item.label}", found at index: ${index}`);
+          if (index !== -1) {
+              const sectionIndex = flatSteps[index].sectionIndex;
+              EFPLogger$1.log(`Set currentStepIndex to ${index}, currentSectionIndex to ${sectionIndex}`);
+              onStepChange(index, sectionIndex);
+              onNavigationUpdate(item.label);
+          }
+          else {
+              EFPLogger$1.warn(`Step "${item.label}" not found in flatSteps. Available steps:`, flatSteps.map(s => s.label));
+          }
+      }
+      static handleSectionChange(newSectionIndex, isNavigating, flatSteps, onStepChange, onNavigationUpdate) {
+          EFPLogger$1.log('Section changed to:', newSectionIndex, 'isNavigating:', isNavigating);
+          // If we're in the middle of programmatic navigation, don't interfere
+          if (isNavigating) {
+              EFPLogger$1.log('Ignoring section change during navigation');
+              return;
+          }
+          // Find the first CONTENT step in the new section (skip section headers)
+          const stepsInSection = flatSteps.filter(step => step.sectionIndex === newSectionIndex);
+          // Skip the first step if it's just the section header
+          let firstContentStep = stepsInSection.find(step => !step.label.startsWith('Section ') &&
+              step.content &&
+              step.content.trim() !== '' &&
+              step.content !== step.label);
+          // If no content step found, fall back to the first step after the section header
+          if (!firstContentStep && stepsInSection.length > 1) {
+              firstContentStep = stepsInSection[1];
+          }
+          // If still no step found, use the first step in the section
+          if (!firstContentStep && stepsInSection.length > 0) {
+              firstContentStep = stepsInSection[0];
+          }
+          if (firstContentStep) {
+              const stepIndex = flatSteps.indexOf(firstContentStep);
+              onStepChange(stepIndex, newSectionIndex);
+              onNavigationUpdate(firstContentStep.label);
+              EFPLogger$1.log('Navigated to first content step in section:', firstContentStep.label);
+          }
+          else {
+              EFPLogger$1.warn('No steps found for section:', newSectionIndex);
+          }
+      }
+      static handleRatingChanged(event, onAnswerUpdate) {
+          var _a;
+          const { questionId, value } = event.detail;
+          EFPLogger$1.log(`Question ${questionId} answered with: ${value}`);
+          // Call the optional callback to update answers
+          onAnswerUpdate === null || onAnswerUpdate === void 0 ? void 0 : onAnswerUpdate(questionId, value);
+          // Dispatch a custom event for parent components
+          const answerEvent = new CustomEvent('efp-answer-changed', {
+              detail: { questionId, value },
+              bubbles: true,
+              composed: true
+          });
+          (_a = event.target) === null || _a === void 0 ? void 0 : _a.dispatchEvent(answerEvent);
+      }
+      static handleNavigationPrevious(goToPrevious) {
+          goToPrevious();
+      }
+      static handleNavigationSkip(event, onSectionChange) {
+          onSectionChange(event.detail.sectionIndex);
+      }
+      static handleNavigationContinue(goToNext) {
+          goToNext();
+      }
+      static createTabShowHandler(onSectionChange) {
+          return (e) => {
+              const tabIndex = parseInt(e.detail.name.replace('section-', ''));
+              onSectionChange(tabIndex);
+          };
+      }
+      static createItemClickHandler(flatSteps, onStepChange, onNavigationUpdate) {
+          return (item) => {
+              EFPEventUtils$1.handleItemClick(item, flatSteps, onStepChange, onNavigationUpdate);
+          };
+      }
+  }
+
+  // Utility class for logging (can be disabled in production)
   class EFPLogger {
       static log(...args) {
           if (EFPLogger.DEBUG) {
@@ -35692,20 +35801,6 @@
               console.warn('No steps found for section:', newSectionIndex);
           }
       }
-      static handleRatingChanged(event, onAnswerUpdate) {
-          var _a;
-          const { questionId, value } = event.detail;
-          console.log(`Question ${questionId} answered with: ${value}`);
-          // Call the optional callback to update answers
-          onAnswerUpdate === null || onAnswerUpdate === void 0 ? void 0 : onAnswerUpdate(questionId, value);
-          // Dispatch a custom event for parent components
-          const answerEvent = new CustomEvent('efp-answer-changed', {
-              detail: { questionId, value },
-              bubbles: true,
-              composed: true
-          });
-          (_a = event.target) === null || _a === void 0 ? void 0 : _a.dispatchEvent(answerEvent);
-      }
   }
   // Utility class for lifecycle management
   class EFPLifecycleUtils {
@@ -35886,6 +35981,7 @@
           switch (questionType) {
               case 'Yes/No/NA':
               case 'Point Rating':
+                  console.log(`🎯 Binding rating-changed event for question ${question.id} to handleRatingChanged method`);
                   return x `
           <rating-question
             .questionId=${question.id}
@@ -36068,12 +36164,111 @@
           }, (label) => this.updateNavigationState(label));
       }
       // Question interaction event handler
-      handleRatingChanged(event) {
-          EFPEventUtils.handleRatingChanged(event, (questionId, value) => {
-              // Store the answer in your data model if needed
-              // For example: this.answers[questionId] = value;
-              EFPLogger.log(`Storing answer for question ${questionId}: ${value}`);
-          });
+      async handleRatingChanged(event) {
+          console.log('🎯 EFPEntryForm.handleRatingChanged called!', event.detail);
+          const { questionId, value } = event.detail;
+          try {
+              console.log(`🔄 Starting to save rating for question ${questionId}: ${value}`);
+              EFPLogger.log(`Rating changed for question ${questionId}: ${value}`);
+              // Save the rating as a workbook response
+              await this.saveRatingResponse(questionId, value);
+              console.log(`✅ Successfully saved rating response for question ${questionId}`);
+              EFPLogger.log(`Successfully saved rating response for question ${questionId}`);
+              // Also call the original handler for any additional processing
+              EFPEventUtils$1.handleRatingChanged(event, (questionId, value) => {
+                  EFPLogger.log(`Rating stored in memory for question ${questionId}: ${value}`);
+              });
+          }
+          catch (error) {
+              console.error(`❌ Failed to save rating response for question ${questionId}:`, error);
+              EFPLogger.error(`Failed to save rating response: ${error.message}`);
+              // Still call the original handler even if save fails
+              EFPEventUtils$1.handleRatingChanged(event, (questionId, value) => {
+                  EFPLogger.log(`Rating stored locally for question ${questionId}: ${value} (save failed)`);
+              });
+          }
+      }
+      // Helper method to save rating responses
+      async saveRatingResponse(questionId, ratingValue) {
+          var _a;
+          console.log(`🚀 saveRatingResponse called for question ${questionId} with value ${ratingValue}`);
+          try {
+              const responseText = String(ratingValue);
+              const notes = `Rating: ${ratingValue}`;
+              console.log(`📝 Prepared response text: "${responseText}", notes: "${notes}"`);
+              // Check if response already exists
+              const existingResponse = this.getResponseForQuestion(questionId);
+              console.log(`🔍 Existing response check:`, existingResponse ? 'Found existing response' : 'No existing response');
+              let result;
+              let responseData;
+              if (existingResponse) {
+                  // Update existing response
+                  console.log(`Updating existing rating response: ${existingResponse.quartech_workbookresponseid}`);
+                  result = await WorkbookResponseHelper.updateResponse(existingResponse.quartech_workbookresponseid, responseText, { notes });
+                  // Create updated response data
+                  responseData = {
+                      ...existingResponse,
+                      quartech_response: responseText,
+                      quartech_notes: notes,
+                      modifiedon: new Date().toISOString()
+                  };
+                  console.log('Rating response updated successfully');
+              }
+              else {
+                  // Create new response
+                  console.log('Creating new rating response');
+                  result = await WorkbookResponseHelper.createResponse(questionId, responseText, { notes });
+                  const workbookId = getWorkbookId();
+                  // Create new response data
+                  responseData = {
+                      quartech_workbookresponseid: (_a = result.response) === null || _a === void 0 ? void 0 : _a.quartech_workbookresponseid,
+                      quartech_response: responseText,
+                      quartech_notes: notes,
+                      _quartech_question_value: questionId,
+                      _quartech_workbook_value: workbookId,
+                      createdon: new Date().toISOString(),
+                      modifiedon: new Date().toISOString(),
+                      ...result.response
+                  };
+                  console.log('New rating response created successfully');
+              }
+              // Update memory structures
+              await this.updateMemoryStructuresForRating(questionId, responseData, !existingResponse);
+              // Trigger re-render
+              this.requestUpdate();
+          }
+          catch (error) {
+              console.error('Failed to save rating response:', error);
+              throw error;
+          }
+      }
+      // Update memory structures for rating responses
+      async updateMemoryStructuresForRating(questionId, responseData, isNewResponse) {
+          try {
+              // Update new nested structure using helper function
+              WorkbookResponseHelper.updateResponseInMemory(questionId, responseData);
+              // Update old structure for backward compatibility
+              POWERPOD.workbookResponses.responsesByQuestion.set(questionId, responseData);
+              if (isNewResponse) {
+                  // Add to beginning of data array (most recent first)
+                  POWERPOD.workbookResponses.data.unshift(responseData);
+              }
+              else {
+                  // Update existing entry in data array
+                  const dataIndex = POWERPOD.workbookResponses.data.findIndex((r) => r.quartech_workbookresponseid === responseData.quartech_workbookresponseid);
+                  if (dataIndex !== -1) {
+                      POWERPOD.workbookResponses.data[dataIndex] = responseData;
+                  }
+              }
+              // Update memory metadata for both structures
+              POWERPOD.workbookResponses.lastUpdated = new Date().toISOString();
+              POWERPOD.workbookQuestionsAndResponses.lastUpdated = new Date().toISOString();
+              console.log(`Updated memory structures for rating question ${questionId}`);
+          }
+          catch (error) {
+              console.error('Failed to update memory structures for rating:', error);
+              // Don't throw - this is a memory update issue, not a save issue
+          }
       }
       // Navigation item click event handler
       handleItemClick(item) {
