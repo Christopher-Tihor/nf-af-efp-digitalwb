@@ -691,7 +691,16 @@
     commodities: {},
     expenseTypes: {},
     examples: {},
-    workbookResponseHelper: null
+    workbookResponseHelper: null,
+    workbookResponses: {
+      data: [],
+      responsesByQuestion: new Map(),
+      isLoaded: false,
+      isLoading: false,
+      workbookId: null,
+      lastUpdated: null,
+      error: null
+    }
   };
 
   POWERPOD.logger = {
@@ -1394,7 +1403,7 @@
     get_workbookquestions_data: "/_api/quartech_workbookquestions",
     get_workbookresponses_data: "/_api/quartech_workbookresponses",
     get_workbookresponses_by_workbook: function get_workbookresponses_by_workbook(workbookId) {
-      return "/_api/quartech_workbooks(".concat(workbookId, ")?$expand=quartech_workbookresponse_Workbook_quartech_workbook($select=quartech_workbookresponseid,quartech_response,createdon,modifiedon,_quartech_question_value;$expand=quartech_Question($select=quartech_questiontext,quartech_questiontype);$orderby=createdon desc)");
+      return "/_api/quartech_workbooks(".concat(workbookId, ")?$expand=quartech_workbookresponse_Workbook_quartech_workbook");
     },
     get_workbookresponses_by_workbook_and_question: function get_workbookresponses_by_workbook_and_question(workbookId, questionId) {
       return "/_api/quartech_workbooks(".concat(workbookId, ")?$expand=quartech_workbookresponse_Workbook_quartech_workbook($filter=_quartech_question_value eq ").concat(questionId, ";$select=quartech_workbookresponseid,quartech_response,createdon,modifiedon,_quartech_question_value;$expand=quartech_Question($select=quartech_questiontext,quartech_questiontype);$orderby=createdon desc)");
@@ -32576,7 +32585,10 @@
     return _getResponseStats.apply(this, arguments);
   }
 
-  // Maintain backward compatibility by creating an object with all functions
+  /**
+   * Get workbook responses from POWERPOD memory (if loaded)
+   * @returns {Object} Workbook responses data from memory
+   */
   function _getResponseStats() {
     _getResponseStats = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee8(workbookId) {
       var options,
@@ -32648,6 +32660,83 @@
     }));
     return _getResponseStats.apply(this, arguments);
   }
+  function getFromMemory() {
+    return {
+      data: POWERPOD.workbookResponses.data,
+      responsesByQuestion: POWERPOD.workbookResponses.responsesByQuestion,
+      isLoaded: POWERPOD.workbookResponses.isLoaded,
+      isLoading: POWERPOD.workbookResponses.isLoading,
+      workbookId: POWERPOD.workbookResponses.workbookId,
+      lastUpdated: POWERPOD.workbookResponses.lastUpdated,
+      error: POWERPOD.workbookResponses.error
+    };
+  }
+
+  /**
+   * Get response for a specific question from memory
+   * @param {string} questionId - The question ID
+   * @returns {Object|null} Response object or null if not found
+   */
+  function getResponseFromMemory(questionId) {
+    if (!POWERPOD.workbookResponses.isLoaded) {
+      logger$4.warn({
+        fn: 'getResponseFromMemory',
+        message: 'Workbook responses not loaded in memory',
+        data: {
+          questionId: questionId
+        }
+      });
+      return null;
+    }
+    return POWERPOD.workbookResponses.responsesByQuestion.get(questionId) || null;
+  }
+
+  /**
+   * Check if responses are loaded in memory for a specific workbook
+   * @param {string} workbookId - The workbook ID to check
+   * @returns {boolean} True if responses are loaded for this workbook
+   */
+  function isLoadedInMemory(workbookId) {
+    return POWERPOD.workbookResponses.isLoaded && POWERPOD.workbookResponses.workbookId === workbookId;
+  }
+
+  /**
+   * Clear workbook responses from memory
+   */
+  function clearMemory() {
+    logger$4.info({
+      fn: 'clearMemory',
+      message: 'Clearing workbook responses from memory'
+    });
+    POWERPOD.workbookResponses.data = [];
+    POWERPOD.workbookResponses.responsesByQuestion.clear();
+    POWERPOD.workbookResponses.isLoaded = false;
+    POWERPOD.workbookResponses.isLoading = false;
+    POWERPOD.workbookResponses.workbookId = null;
+    POWERPOD.workbookResponses.lastUpdated = null;
+    POWERPOD.workbookResponses.error = null;
+  }
+
+  /**
+   * Get memory statistics
+   * @returns {Object} Memory usage statistics
+   */
+  function getMemoryStats() {
+    var responses = POWERPOD.workbookResponses.data;
+    var responsesByQuestion = POWERPOD.workbookResponses.responsesByQuestion;
+    return {
+      totalResponses: responses.length,
+      uniqueQuestions: responsesByQuestion.size,
+      isLoaded: POWERPOD.workbookResponses.isLoaded,
+      isLoading: POWERPOD.workbookResponses.isLoading,
+      workbookId: POWERPOD.workbookResponses.workbookId,
+      lastUpdated: POWERPOD.workbookResponses.lastUpdated,
+      hasError: !!POWERPOD.workbookResponses.error,
+      error: POWERPOD.workbookResponses.error
+    };
+  }
+
+  // Maintain backward compatibility by creating an object with all functions
   var WorkbookResponseHelper = {
     getResponsesForWorkbook: getResponsesForWorkbook,
     getResponsesForWorkbookAndQuestion: getResponsesForWorkbookAndQuestion,
@@ -32656,7 +32745,13 @@
     deleteResponse: deleteResponse,
     getLatestResponse: getLatestResponse,
     hasResponse: hasResponse,
-    getResponseStats: getResponseStats
+    getResponseStats: getResponseStats,
+    // Memory utility functions
+    getFromMemory: getFromMemory,
+    getResponseFromMemory: getResponseFromMemory,
+    isLoadedInMemory: isLoadedInMemory,
+    clearMemory: clearMemory,
+    getMemoryStats: getMemoryStats
   };
   POWERPOD.workbookResponseHelper = WorkbookResponseHelper;
 
@@ -35184,6 +35279,8 @@
           this.currentSectionIndex = 0;
           this.currentStepIndex = 0;
           this.nestedChapterStructure = [];
+          this.workbookResponses = [];
+          this.isLoadingResponses = false;
           this.isNavigating = false; // Flag to prevent tab change interference
           this.activeContent = {
               title: 'Introduction to the Environmental Farm Plan (EFP)',
@@ -35202,6 +35299,7 @@
           <h3>Farm Business Name</h3>
           <p>Please enter the legal name under which your farm operates. This should match your tax documents and business registration.</p>
           <p>If your farm uses a different operating name or DBA ("doing business as"), include that as well.</p>
+          ${this.renderResponsesSummary()}
         `,
                           complete: true,
                       },
@@ -35806,6 +35904,8 @@
       firstUpdated() {
           // Initialize to the first selectable step instead of potentially a section header
           this.initializeToFirstSelectableStep();
+          // Load workbook responses
+          this.loadWorkbookResponses();
       }
       willUpdate(changedProps) {
           if (changedProps.has('currentStepIndex')) {
@@ -35813,6 +35913,126 @@
                   this.activeContent = newContent;
               });
           }
+      }
+      // Workbook response loading
+      async loadWorkbookResponses() {
+          try {
+              this.isLoadingResponses = true;
+              POWERPOD.workbookResponses.isLoading = true;
+              POWERPOD.workbookResponses.error = null;
+              const workbookId = getWorkbookId();
+              if (!workbookId) {
+                  console.warn('No workbook ID found, skipping response loading');
+                  return;
+              }
+              // Check if we already have responses for this workbook
+              if (POWERPOD.workbookResponses.isLoaded &&
+                  POWERPOD.workbookResponses.workbookId === workbookId) {
+                  console.log('Workbook responses already loaded from memory');
+                  this.syncFromPOWERPOD();
+                  return;
+              }
+              console.log(`Loading workbook responses for workbook: ${workbookId}`);
+              const result = await WorkbookResponseHelper.getResponsesForWorkbook(workbookId);
+              const responses = result.responses || [];
+              // Store in POWERPOD for global access
+              POWERPOD.workbookResponses.data = responses;
+              POWERPOD.workbookResponses.workbookId = workbookId;
+              POWERPOD.workbookResponses.isLoaded = true;
+              POWERPOD.workbookResponses.lastUpdated = new Date().toISOString();
+              // Build quick lookup map for responses by question ID
+              POWERPOD.workbookResponses.responsesByQuestion.clear();
+              responses.forEach(response => {
+                  const questionId = response._quartech_question_value;
+                  if (questionId) {
+                      // Store the most recent response for each question (responses are ordered by createdon desc)
+                      if (!POWERPOD.workbookResponses.responsesByQuestion.has(questionId)) {
+                          POWERPOD.workbookResponses.responsesByQuestion.set(questionId, response);
+                      }
+                  }
+              });
+              // Sync to local component state for UI binding
+              this.syncFromPOWERPOD();
+              console.log(`Loaded ${responses.length} workbook responses into POWERPOD memory`);
+              console.log(`Responses for ${POWERPOD.workbookResponses.responsesByQuestion.size} unique questions`);
+              // Debug: Log some response details
+              if (responses.length > 0) {
+                  console.log('Sample response:', responses[0]);
+                  console.log('Response by question map:', Array.from(POWERPOD.workbookResponses.responsesByQuestion.entries()).slice(0, 3));
+              }
+              // Trigger a re-render to update the UI with loaded responses
+              this.requestUpdate();
+          }
+          catch (error) {
+              console.error('Failed to load workbook responses:', error);
+              POWERPOD.workbookResponses.error = error.message || 'Failed to load responses';
+              // Don't throw - we want the component to still work even if responses fail to load
+          }
+          finally {
+              this.isLoadingResponses = false;
+              POWERPOD.workbookResponses.isLoading = false;
+          }
+      }
+      // Sync local component state from POWERPOD memory
+      syncFromPOWERPOD() {
+          this.workbookResponses = POWERPOD.workbookResponses.data;
+      }
+      // Helper method to get response for a specific question
+      getResponseForQuestion(questionId) {
+          return POWERPOD.workbookResponses.responsesByQuestion.get(questionId) || null;
+      }
+      // Helper method to render response information for a question
+      renderResponseInfo(questionId) {
+          const response = this.getResponseForQuestion(questionId);
+          if (!response) {
+              return '<p style="color: var(--sl-color-neutral-600); font-style: italic;"><em>No response yet.</em></p>';
+          }
+          const createdDate = new Date(response.createdon).toLocaleDateString();
+          const modifiedDate = new Date(response.modifiedon).toLocaleDateString();
+          return `
+      <div style="margin-top: 1.5rem; padding: 1rem; background-color: var(--sl-color-success-50); border-radius: var(--sl-border-radius-medium); border-left: 4px solid var(--sl-color-success-600);">
+        <h4 style="margin: 0 0 0.75rem 0; color: var(--sl-color-success-800); font-size: 1.1rem;">Your Previous Response</h4>
+        <div style="background-color: white; padding: 0.75rem; border-radius: var(--sl-border-radius-small); margin-bottom: 0.75rem;">
+          <p style="margin: 0; line-height: 1.5; color: var(--sl-color-neutral-800);">${response.quartech_response || 'No response text available.'}</p>
+        </div>
+        <div style="font-size: 0.875rem; color: var(--sl-color-neutral-600);">
+          <p style="margin: 0;"><strong>Created:</strong> ${createdDate}</p>
+          ${createdDate !== modifiedDate ? `<p style="margin: 0;"><strong>Last Modified:</strong> ${modifiedDate}</p>` : ''}
+        </div>
+      </div>
+    `;
+      }
+      // Helper method to render all responses summary (for debugging/admin)
+      renderResponsesSummary() {
+          const responses = POWERPOD.workbookResponses.data;
+          const responsesByQuestion = POWERPOD.workbookResponses.responsesByQuestion;
+          if (!POWERPOD.workbookResponses.isLoaded) {
+              return '<p><em>Responses not loaded yet.</em></p>';
+          }
+          if (responses.length === 0) {
+              return '<p><em>No responses found for this workbook.</em></p>';
+          }
+          return `
+      <div style="margin-top: 1rem;">
+        <h4>Workbook Responses Summary</h4>
+        <p><strong>Total Responses:</strong> ${responses.length}</p>
+        <p><strong>Questions Answered:</strong> ${responsesByQuestion.size}</p>
+        <p><strong>Last Updated:</strong> ${POWERPOD.workbookResponses.lastUpdated ? new Date(POWERPOD.workbookResponses.lastUpdated).toLocaleString() : 'Unknown'}</p>
+        <p><strong>Workbook ID:</strong> ${POWERPOD.workbookResponses.workbookId || 'Unknown'}</p>
+        <details style="margin-top: 1rem;">
+          <summary style="cursor: pointer; font-weight: 500;">View All Responses</summary>
+          <div style="margin-top: 0.5rem; max-height: 300px; overflow-y: auto;">
+            ${responses.map(response => `
+              <div style="padding: 0.5rem; margin: 0.5rem 0; background-color: var(--sl-color-neutral-50); border-radius: var(--sl-border-radius-small);">
+                <p style="margin: 0 0 0.25rem 0; font-weight: 500;">Question ID: ${response._quartech_question_value}</p>
+                <p style="margin: 0 0 0.25rem 0;">${response.quartech_response || 'No response text'}</p>
+                <p style="margin: 0; font-size: 0.875rem; color: var(--sl-color-neutral-600);">Created: ${new Date(response.createdon).toLocaleString()}</p>
+              </div>
+            `).join('')}
+          </div>
+        </details>
+      </div>
+    `;
       }
       render() {
           return x `
@@ -35822,6 +36042,17 @@
           <div class="card">
             <div><strong>EFP Workbook:</strong> Test</div>
             <div><strong>Status:</strong> In Progress</div>
+            <div>
+              <strong>Responses:</strong>
+              ${POWERPOD.workbookResponses.isLoading
+            ? x `<span style="color: var(--sl-color-warning-600);">Loading...</span>`
+            : POWERPOD.workbookResponses.error
+                ? x `<span style="color: var(--sl-color-danger-600);">Error loading</span>`
+                : x `<span style="color: var(--sl-color-success-600);">${POWERPOD.workbookResponses.data.length} loaded</span>`}
+            </div>
+            ${POWERPOD.workbookResponses.responsesByQuestion.size > 0
+            ? x `<div><strong>Questions Answered:</strong> ${POWERPOD.workbookResponses.responsesByQuestion.size}</div>`
+            : ''}
           </div>
 
           <sl-tab-group
@@ -36221,6 +36452,12 @@
   __decorate([
       n$2({ type: Array, attribute: false })
   ], EFPEntryForm.prototype, "nestedChapterStructure", void 0);
+  __decorate([
+      n$2({ type: Array, attribute: false })
+  ], EFPEntryForm.prototype, "workbookResponses", void 0);
+  __decorate([
+      n$2({ type: Boolean, attribute: false })
+  ], EFPEntryForm.prototype, "isLoadingResponses", void 0);
   __decorate([
       n$2({ type: Object })
   ], EFPEntryForm.prototype, "activeContent", void 0);

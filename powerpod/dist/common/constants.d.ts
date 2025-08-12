@@ -111,4 +111,13 @@ export namespace POWERPOD {
     let expenseTypes: {};
     let examples: {};
     let workbookResponseHelper: null;
+    namespace workbookResponses {
+        let data: never[];
+        let responsesByQuestion: Map<any, any>;
+        let isLoaded: boolean;
+        let isLoading: boolean;
+        let workbookId: null;
+        let lastUpdated: null;
+        let error: null;
+    }
 }

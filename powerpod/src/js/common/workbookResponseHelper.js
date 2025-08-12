@@ -374,6 +374,88 @@ export async function getResponseStats(workbookId, options = {}) {
   }
 }
 
+/**
+ * Get workbook responses from POWERPOD memory (if loaded)
+ * @returns {Object} Workbook responses data from memory
+ */
+export function getFromMemory() {
+  return {
+    data: POWERPOD.workbookResponses.data,
+    responsesByQuestion: POWERPOD.workbookResponses.responsesByQuestion,
+    isLoaded: POWERPOD.workbookResponses.isLoaded,
+    isLoading: POWERPOD.workbookResponses.isLoading,
+    workbookId: POWERPOD.workbookResponses.workbookId,
+    lastUpdated: POWERPOD.workbookResponses.lastUpdated,
+    error: POWERPOD.workbookResponses.error
+  };
+}
+
+/**
+ * Get response for a specific question from memory
+ * @param {string} questionId - The question ID
+ * @returns {Object|null} Response object or null if not found
+ */
+export function getResponseFromMemory(questionId) {
+  if (!POWERPOD.workbookResponses.isLoaded) {
+    logger.warn({
+      fn: 'getResponseFromMemory',
+      message: 'Workbook responses not loaded in memory',
+      data: { questionId }
+    });
+    return null;
+  }
+
+  return POWERPOD.workbookResponses.responsesByQuestion.get(questionId) || null;
+}
+
+/**
+ * Check if responses are loaded in memory for a specific workbook
+ * @param {string} workbookId - The workbook ID to check
+ * @returns {boolean} True if responses are loaded for this workbook
+ */
+export function isLoadedInMemory(workbookId) {
+  return POWERPOD.workbookResponses.isLoaded &&
+         POWERPOD.workbookResponses.workbookId === workbookId;
+}
+
+/**
+ * Clear workbook responses from memory
+ */
+export function clearMemory() {
+  logger.info({
+    fn: 'clearMemory',
+    message: 'Clearing workbook responses from memory'
+  });
+
+  POWERPOD.workbookResponses.data = [];
+  POWERPOD.workbookResponses.responsesByQuestion.clear();
+  POWERPOD.workbookResponses.isLoaded = false;
+  POWERPOD.workbookResponses.isLoading = false;
+  POWERPOD.workbookResponses.workbookId = null;
+  POWERPOD.workbookResponses.lastUpdated = null;
+  POWERPOD.workbookResponses.error = null;
+}
+
+/**
+ * Get memory statistics
+ * @returns {Object} Memory usage statistics
+ */
+export function getMemoryStats() {
+  const responses = POWERPOD.workbookResponses.data;
+  const responsesByQuestion = POWERPOD.workbookResponses.responsesByQuestion;
+
+  return {
+    totalResponses: responses.length,
+    uniqueQuestions: responsesByQuestion.size,
+    isLoaded: POWERPOD.workbookResponses.isLoaded,
+    isLoading: POWERPOD.workbookResponses.isLoading,
+    workbookId: POWERPOD.workbookResponses.workbookId,
+    lastUpdated: POWERPOD.workbookResponses.lastUpdated,
+    hasError: !!POWERPOD.workbookResponses.error,
+    error: POWERPOD.workbookResponses.error
+  };
+}
+
 // Maintain backward compatibility by creating an object with all functions
 const WorkbookResponseHelper = {
   getResponsesForWorkbook,
@@ -384,6 +466,12 @@ const WorkbookResponseHelper = {
   getLatestResponse,
   hasResponse,
   getResponseStats,
+  // Memory utility functions
+  getFromMemory,
+  getResponseFromMemory,
+  isLoadedInMemory,
+  clearMemory,
+  getMemoryStats,
 };
 
 export default WorkbookResponseHelper;

@@ -160,4 +160,13 @@ export const POWERPOD = {
   expenseTypes: {},
   examples: {},
   workbookResponseHelper: null,
+  workbookResponses: {
+    data: [],
+    responsesByQuestion: new Map(),
+    isLoaded: false,
+    isLoading: false,
+    workbookId: null,
+    lastUpdated: null,
+    error: null
+  },
 };

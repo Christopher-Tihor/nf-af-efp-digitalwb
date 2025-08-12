@@ -50,7 +50,7 @@ export const ENDPOINT_URL = {
   get_workbookquestions_data: `/_api/quartech_workbookquestions`,
   get_workbookresponses_data: `/_api/quartech_workbookresponses`,
   get_workbookresponses_by_workbook: (workbookId) =>
-    `/_api/quartech_workbooks(${workbookId})?$expand=quartech_workbookresponse_Workbook_quartech_workbook($select=quartech_workbookresponseid,quartech_response,createdon,modifiedon,_quartech_question_value;$expand=quartech_Question($select=quartech_questiontext,quartech_questiontype);$orderby=createdon desc)`,
+    `/_api/quartech_workbooks(${workbookId})?$expand=quartech_workbookresponse_Workbook_quartech_workbook`,
   get_workbookresponses_by_workbook_and_question: (workbookId, questionId) =>
     `/_api/quartech_workbooks(${workbookId})?$expand=quartech_workbookresponse_Workbook_quartech_workbook($filter=_quartech_question_value eq ${questionId};$select=quartech_workbookresponseid,quartech_response,createdon,modifiedon,_quartech_question_value;$expand=quartech_Question($select=quartech_questiontext,quartech_questiontype);$orderby=createdon desc)`,
   post_workbookresponse_data: `/_api/quartech_workbookresponses`,
