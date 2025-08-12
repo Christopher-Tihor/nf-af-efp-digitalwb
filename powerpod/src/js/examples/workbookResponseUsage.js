@@ -5,7 +5,7 @@
  * for common operations like fetching, creating, updating, and deleting responses.
  */
 
-import { WorkbookResponseHelper } from '../common/workbookResponseHelper.js';
+import WorkbookResponseHelper from '../common/workbookResponseHelper.js';
 import { POWERPOD } from '../common/constants.js';
 import { getWorkbookId } from '../common/workbookUtils.js';
 

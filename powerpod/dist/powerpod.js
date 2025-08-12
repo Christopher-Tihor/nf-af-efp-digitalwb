@@ -32071,610 +32071,593 @@
   var logger$4 = Logger('common/workbookResponseHelper');
 
   /**
-   * WorkbookResponseHelper - Common utility for managing workbook responses
-   * Provides high-level methods for CRUD operations on workbook responses
+   * Fetch all responses for a specific workbook
+   * @param {string} workbookId - The workbook ID
+   * @param {Object} options - Additional fetch options
+   * @returns {Promise<Object>} Response data with metadata
    */
-  var WorkbookResponseHelper = /*#__PURE__*/function () {
-    function WorkbookResponseHelper() {
-      _classCallCheck(this, WorkbookResponseHelper);
-    }
-    return _createClass(WorkbookResponseHelper, null, [{
-      key: "getResponsesForWorkbook",
-      value: (
-      /**
-       * Fetch all responses for a specific workbook
-       * @param {string} workbookId - The workbook ID
-       * @param {Object} options - Additional fetch options
-       * @returns {Promise<Object>} Response data with metadata
-       */
-      function () {
-        var _getResponsesForWorkbook = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee(workbookId) {
-          var options,
-            _result$data,
-            _result$data2,
-            _result$data3,
-            _result$data4,
-            result,
-            responses,
-            _args = arguments;
-          return _regeneratorRuntime().wrap(function _callee$(_context) {
-            while (1) switch (_context.prev = _context.next) {
-              case 0:
-                options = _args.length > 1 && _args[1] !== undefined ? _args[1] : {};
-                _context.prev = 1;
-                logger$4.info({
-                  fn: 'getResponsesForWorkbook',
-                  message: "Fetching responses for workbook: ".concat(workbookId),
-                  data: {
-                    workbookId: workbookId,
-                    options: options
-                  }
-                });
-                _context.next = 5;
-                return POWERPOD.fetch.getWorkbookResponsesByWorkbook(_objectSpread2({
-                  workbookId: workbookId
-                }, options));
-              case 5:
-                result = _context.sent;
-                responses = (result === null || result === void 0 || (_result$data = result.data) === null || _result$data === void 0 ? void 0 : _result$data.value) || [];
-                logger$4.info({
-                  fn: 'getResponsesForWorkbook',
-                  message: "Found ".concat(responses.length, " responses for workbook ").concat(workbookId),
-                  data: {
-                    workbookId: workbookId,
-                    responseCount: responses.length
-                  }
-                });
-                return _context.abrupt("return", {
-                  responses: responses,
-                  totalCount: (result === null || result === void 0 || (_result$data2 = result.data) === null || _result$data2 === void 0 ? void 0 : _result$data2['@odata.count']) || responses.length,
-                  metadata: {
-                    context: result === null || result === void 0 || (_result$data3 = result.data) === null || _result$data3 === void 0 ? void 0 : _result$data3['@odata.context'],
-                    nextLink: result === null || result === void 0 || (_result$data4 = result.data) === null || _result$data4 === void 0 ? void 0 : _result$data4['@odata.nextLink']
-                  },
-                  workbookId: workbookId
-                });
-              case 11:
-                _context.prev = 11;
-                _context.t0 = _context["catch"](1);
-                logger$4.error({
-                  fn: 'getResponsesForWorkbook',
-                  message: "Failed to fetch responses for workbook ".concat(workbookId),
-                  data: {
-                    workbookId: workbookId,
-                    error: _context.t0.message
-                  }
-                });
-                throw new Error("Failed to fetch workbook responses: ".concat(_context.t0.message));
-              case 15:
-              case "end":
-                return _context.stop();
-            }
-          }, _callee, null, [[1, 11]]);
-        }));
-        function getResponsesForWorkbook(_x) {
-          return _getResponsesForWorkbook.apply(this, arguments);
+  function getResponsesForWorkbook(_x) {
+    return _getResponsesForWorkbook.apply(this, arguments);
+  }
+
+  /**
+   * Fetch responses for a specific workbook and question
+   * @param {string} workbookId - The workbook ID
+   * @param {string} questionId - The question ID
+   * @param {Object} options - Additional fetch options
+   * @returns {Promise<Object>} Response data with metadata
+   */
+  function _getResponsesForWorkbook() {
+    _getResponsesForWorkbook = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee(workbookId) {
+      var options,
+        _result$data,
+        _result$data2,
+        _result$data3,
+        _result$data4,
+        result,
+        responses,
+        _args = arguments;
+      return _regeneratorRuntime().wrap(function _callee$(_context) {
+        while (1) switch (_context.prev = _context.next) {
+          case 0:
+            options = _args.length > 1 && _args[1] !== undefined ? _args[1] : {};
+            _context.prev = 1;
+            logger$4.info({
+              fn: 'getResponsesForWorkbook',
+              message: "Fetching responses for workbook: ".concat(workbookId),
+              data: {
+                workbookId: workbookId,
+                options: options
+              }
+            });
+            _context.next = 5;
+            return POWERPOD.fetch.getWorkbookResponsesByWorkbook(_objectSpread2({
+              workbookId: workbookId
+            }, options));
+          case 5:
+            result = _context.sent;
+            responses = (result === null || result === void 0 || (_result$data = result.data) === null || _result$data === void 0 ? void 0 : _result$data.value) || [];
+            logger$4.info({
+              fn: 'getResponsesForWorkbook',
+              message: "Found ".concat(responses.length, " responses for workbook ").concat(workbookId),
+              data: {
+                workbookId: workbookId,
+                responseCount: responses.length
+              }
+            });
+            return _context.abrupt("return", {
+              responses: responses,
+              totalCount: (result === null || result === void 0 || (_result$data2 = result.data) === null || _result$data2 === void 0 ? void 0 : _result$data2['@odata.count']) || responses.length,
+              metadata: {
+                context: result === null || result === void 0 || (_result$data3 = result.data) === null || _result$data3 === void 0 ? void 0 : _result$data3['@odata.context'],
+                nextLink: result === null || result === void 0 || (_result$data4 = result.data) === null || _result$data4 === void 0 ? void 0 : _result$data4['@odata.nextLink']
+              },
+              workbookId: workbookId
+            });
+          case 11:
+            _context.prev = 11;
+            _context.t0 = _context["catch"](1);
+            logger$4.error({
+              fn: 'getResponsesForWorkbook',
+              message: "Failed to fetch responses for workbook ".concat(workbookId),
+              data: {
+                workbookId: workbookId,
+                error: _context.t0.message
+              }
+            });
+            throw new Error("Failed to fetch workbook responses: ".concat(_context.t0.message));
+          case 15:
+          case "end":
+            return _context.stop();
         }
-        return getResponsesForWorkbook;
-      }()
-      /**
-       * Fetch responses for a specific workbook and question
-       * @param {string} workbookId - The workbook ID
-       * @param {string} questionId - The question ID
-       * @param {Object} options - Additional fetch options
-       * @returns {Promise<Object>} Response data with metadata
-       */
-      )
-    }, {
-      key: "getResponsesForWorkbookAndQuestion",
-      value: (function () {
-        var _getResponsesForWorkbookAndQuestion = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee2(workbookId, questionId) {
-          var options,
-            _result$data5,
-            _result$data6,
-            _result$data7,
-            _result$data8,
-            result,
-            responses,
-            _args2 = arguments;
-          return _regeneratorRuntime().wrap(function _callee2$(_context2) {
-            while (1) switch (_context2.prev = _context2.next) {
-              case 0:
-                options = _args2.length > 2 && _args2[2] !== undefined ? _args2[2] : {};
-                _context2.prev = 1;
-                logger$4.info({
-                  fn: 'getResponsesForWorkbookAndQuestion',
-                  message: "Fetching responses for workbook: ".concat(workbookId, ", question: ").concat(questionId),
-                  data: {
-                    workbookId: workbookId,
-                    questionId: questionId,
-                    options: options
-                  }
-                });
-                _context2.next = 5;
-                return POWERPOD.fetch.getWorkbookResponsesByWorkbookAndQuestion(_objectSpread2({
-                  workbookId: workbookId,
-                  questionId: questionId
-                }, options));
-              case 5:
-                result = _context2.sent;
-                responses = (result === null || result === void 0 || (_result$data5 = result.data) === null || _result$data5 === void 0 ? void 0 : _result$data5.value) || [];
-                logger$4.info({
-                  fn: 'getResponsesForWorkbookAndQuestion',
-                  message: "Found ".concat(responses.length, " responses for workbook ").concat(workbookId, ", question ").concat(questionId),
-                  data: {
-                    workbookId: workbookId,
-                    questionId: questionId,
-                    responseCount: responses.length
-                  }
-                });
-                return _context2.abrupt("return", {
-                  responses: responses,
-                  totalCount: (result === null || result === void 0 || (_result$data6 = result.data) === null || _result$data6 === void 0 ? void 0 : _result$data6['@odata.count']) || responses.length,
-                  metadata: {
-                    context: result === null || result === void 0 || (_result$data7 = result.data) === null || _result$data7 === void 0 ? void 0 : _result$data7['@odata.context'],
-                    nextLink: result === null || result === void 0 || (_result$data8 = result.data) === null || _result$data8 === void 0 ? void 0 : _result$data8['@odata.nextLink']
-                  },
-                  workbookId: workbookId,
-                  questionId: questionId
-                });
-              case 11:
-                _context2.prev = 11;
-                _context2.t0 = _context2["catch"](1);
-                logger$4.error({
-                  fn: 'getResponsesForWorkbookAndQuestion',
-                  message: "Failed to fetch responses for workbook ".concat(workbookId, ", question ").concat(questionId),
-                  data: {
-                    workbookId: workbookId,
-                    questionId: questionId,
-                    error: _context2.t0.message
-                  }
-                });
-                throw new Error("Failed to fetch workbook responses: ".concat(_context2.t0.message));
-              case 15:
-              case "end":
-                return _context2.stop();
-            }
-          }, _callee2, null, [[1, 11]]);
-        }));
-        function getResponsesForWorkbookAndQuestion(_x2, _x3) {
-          return _getResponsesForWorkbookAndQuestion.apply(this, arguments);
+      }, _callee, null, [[1, 11]]);
+    }));
+    return _getResponsesForWorkbook.apply(this, arguments);
+  }
+  function getResponsesForWorkbookAndQuestion(_x2, _x3) {
+    return _getResponsesForWorkbookAndQuestion.apply(this, arguments);
+  }
+
+  /**
+   * Create a new workbook response
+   * @param {string} questionId - The question ID
+   * @param {string} response - The response text
+   * @param {Object} options - Additional fetch options
+   * @returns {Promise<Object>} Created response data
+   */
+  function _getResponsesForWorkbookAndQuestion() {
+    _getResponsesForWorkbookAndQuestion = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee2(workbookId, questionId) {
+      var options,
+        _result$data5,
+        _result$data6,
+        _result$data7,
+        _result$data8,
+        result,
+        responses,
+        _args2 = arguments;
+      return _regeneratorRuntime().wrap(function _callee2$(_context2) {
+        while (1) switch (_context2.prev = _context2.next) {
+          case 0:
+            options = _args2.length > 2 && _args2[2] !== undefined ? _args2[2] : {};
+            _context2.prev = 1;
+            logger$4.info({
+              fn: 'getResponsesForWorkbookAndQuestion',
+              message: "Fetching responses for workbook: ".concat(workbookId, ", question: ").concat(questionId),
+              data: {
+                workbookId: workbookId,
+                questionId: questionId,
+                options: options
+              }
+            });
+            _context2.next = 5;
+            return POWERPOD.fetch.getWorkbookResponsesByWorkbookAndQuestion(_objectSpread2({
+              workbookId: workbookId,
+              questionId: questionId
+            }, options));
+          case 5:
+            result = _context2.sent;
+            responses = (result === null || result === void 0 || (_result$data5 = result.data) === null || _result$data5 === void 0 ? void 0 : _result$data5.value) || [];
+            logger$4.info({
+              fn: 'getResponsesForWorkbookAndQuestion',
+              message: "Found ".concat(responses.length, " responses for workbook ").concat(workbookId, ", question ").concat(questionId),
+              data: {
+                workbookId: workbookId,
+                questionId: questionId,
+                responseCount: responses.length
+              }
+            });
+            return _context2.abrupt("return", {
+              responses: responses,
+              totalCount: (result === null || result === void 0 || (_result$data6 = result.data) === null || _result$data6 === void 0 ? void 0 : _result$data6['@odata.count']) || responses.length,
+              metadata: {
+                context: result === null || result === void 0 || (_result$data7 = result.data) === null || _result$data7 === void 0 ? void 0 : _result$data7['@odata.context'],
+                nextLink: result === null || result === void 0 || (_result$data8 = result.data) === null || _result$data8 === void 0 ? void 0 : _result$data8['@odata.nextLink']
+              },
+              workbookId: workbookId,
+              questionId: questionId
+            });
+          case 11:
+            _context2.prev = 11;
+            _context2.t0 = _context2["catch"](1);
+            logger$4.error({
+              fn: 'getResponsesForWorkbookAndQuestion',
+              message: "Failed to fetch responses for workbook ".concat(workbookId, ", question ").concat(questionId),
+              data: {
+                workbookId: workbookId,
+                questionId: questionId,
+                error: _context2.t0.message
+              }
+            });
+            throw new Error("Failed to fetch workbook responses: ".concat(_context2.t0.message));
+          case 15:
+          case "end":
+            return _context2.stop();
         }
-        return getResponsesForWorkbookAndQuestion;
-      }()
-      /**
-       * Create a new workbook response
-       * @param {string} workbookId - The workbook ID
-       * @param {string} questionId - The question ID
-       * @param {string} response - The response text
-       * @param {Object} options - Additional fetch options
-       * @returns {Promise<Object>} Created response data
-       */
-      )
-    }, {
-      key: "createResponse",
-      value: (function () {
-        var _createResponse = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee3(questionId, response) {
-          var options,
-            workbookId,
-            _result$data9,
-            result,
-            _args3 = arguments;
-          return _regeneratorRuntime().wrap(function _callee3$(_context3) {
-            while (1) switch (_context3.prev = _context3.next) {
-              case 0:
-                options = _args3.length > 2 && _args3[2] !== undefined ? _args3[2] : {};
-                workbookId = getCurrentWorkbookId();
-                if (workbookId) {
-                  _context3.next = 4;
-                  break;
-                }
-                throw new Error('No workbook ID available');
-              case 4:
-                _context3.prev = 4;
-                logger$4.info({
-                  fn: 'createResponse',
-                  message: "Creating response for workbook: ".concat(workbookId, ", question: ").concat(questionId),
-                  data: {
-                    workbookId: workbookId,
-                    questionId: questionId,
-                    response: (response === null || response === void 0 ? void 0 : response.substring(0, 100)) + '...'
-                  }
-                });
-                _context3.next = 8;
-                return POWERPOD.fetch.postWorkbookResponseData(_objectSpread2({
-                  workbookId: workbookId,
-                  questionId: questionId,
-                  response: response
-                }, options));
-              case 8:
-                result = _context3.sent;
-                logger$4.info({
-                  fn: 'createResponse',
-                  message: "Successfully created response",
-                  data: {
-                    workbookId: workbookId,
-                    questionId: questionId,
-                    responseId: result === null || result === void 0 || (_result$data9 = result.data) === null || _result$data9 === void 0 ? void 0 : _result$data9.quartech_workbookresponseid
-                  }
-                });
-                return _context3.abrupt("return", {
-                  response: result === null || result === void 0 ? void 0 : result.data,
-                  success: true,
-                  workbookId: workbookId,
-                  questionId: questionId
-                });
-              case 13:
-                _context3.prev = 13;
-                _context3.t0 = _context3["catch"](4);
-                logger$4.error({
-                  fn: 'createResponse',
-                  message: "Failed to create response for workbook ".concat(workbookId, ", question ").concat(questionId),
-                  data: {
-                    workbookId: workbookId,
-                    questionId: questionId,
-                    error: _context3.t0.message
-                  }
-                });
-                throw new Error("Failed to create workbook response: ".concat(_context3.t0.message));
-              case 17:
-              case "end":
-                return _context3.stop();
+      }, _callee2, null, [[1, 11]]);
+    }));
+    return _getResponsesForWorkbookAndQuestion.apply(this, arguments);
+  }
+  function createResponse(_x4, _x5) {
+    return _createResponse.apply(this, arguments);
+  }
+
+  /**
+   * Update an existing workbook response
+   * @param {string} responseId - The response ID to update
+   * @param {string} response - The new response text (optional)
+   * @param {Object} options - Additional fetch options
+   * @returns {Promise<Object>} Update result
+   */
+  function _createResponse() {
+    _createResponse = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee3(questionId, response) {
+      var options,
+        workbookId,
+        _result$data9,
+        result,
+        _args3 = arguments;
+      return _regeneratorRuntime().wrap(function _callee3$(_context3) {
+        while (1) switch (_context3.prev = _context3.next) {
+          case 0:
+            options = _args3.length > 2 && _args3[2] !== undefined ? _args3[2] : {};
+            workbookId = getCurrentWorkbookId();
+            if (workbookId) {
+              _context3.next = 4;
+              break;
             }
-          }, _callee3, null, [[4, 13]]);
-        }));
-        function createResponse(_x4, _x5) {
-          return _createResponse.apply(this, arguments);
+            throw new Error('No workbook ID available');
+          case 4:
+            _context3.prev = 4;
+            logger$4.info({
+              fn: 'createResponse',
+              message: "Creating response for workbook: ".concat(workbookId, ", question: ").concat(questionId),
+              data: {
+                workbookId: workbookId,
+                questionId: questionId,
+                response: (response === null || response === void 0 ? void 0 : response.substring(0, 100)) + '...'
+              }
+            });
+            _context3.next = 8;
+            return POWERPOD.fetch.postWorkbookResponseData(_objectSpread2({
+              workbookId: workbookId,
+              questionId: questionId,
+              response: response
+            }, options));
+          case 8:
+            result = _context3.sent;
+            logger$4.info({
+              fn: 'createResponse',
+              message: "Successfully created response",
+              data: {
+                workbookId: workbookId,
+                questionId: questionId,
+                responseId: result === null || result === void 0 || (_result$data9 = result.data) === null || _result$data9 === void 0 ? void 0 : _result$data9.quartech_workbookresponseid
+              }
+            });
+            return _context3.abrupt("return", {
+              response: result === null || result === void 0 ? void 0 : result.data,
+              success: true,
+              workbookId: workbookId,
+              questionId: questionId
+            });
+          case 13:
+            _context3.prev = 13;
+            _context3.t0 = _context3["catch"](4);
+            logger$4.error({
+              fn: 'createResponse',
+              message: "Failed to create response for workbook ".concat(workbookId, ", question ").concat(questionId),
+              data: {
+                workbookId: workbookId,
+                questionId: questionId,
+                error: _context3.t0.message
+              }
+            });
+            throw new Error("Failed to create workbook response: ".concat(_context3.t0.message));
+          case 17:
+          case "end":
+            return _context3.stop();
         }
-        return createResponse;
-      }()
-      /**
-       * Update an existing workbook response
-       * @param {string} responseId - The response ID to update
-       * @param {string} response - The new response text (optional)
-       * @param {Object} options - Additional fetch options
-       * @returns {Promise<Object>} Update result
-       */
-      )
-    }, {
-      key: "updateResponse",
-      value: (function () {
-        var _updateResponse = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee4(responseId) {
-          var response,
-            options,
-            result,
-            _args4 = arguments;
-          return _regeneratorRuntime().wrap(function _callee4$(_context4) {
-            while (1) switch (_context4.prev = _context4.next) {
-              case 0:
-                response = _args4.length > 1 && _args4[1] !== undefined ? _args4[1] : null;
-                options = _args4.length > 2 && _args4[2] !== undefined ? _args4[2] : {};
-                _context4.prev = 2;
-                logger$4.info({
-                  fn: 'updateResponse',
-                  message: "Updating response: ".concat(responseId),
-                  data: {
-                    responseId: responseId,
-                    hasResponse: !!response
-                  }
-                });
-                _context4.next = 6;
-                return POWERPOD.fetch.patchWorkbookResponseData(_objectSpread2({
-                  id: responseId,
-                  response: response
-                }, options));
-              case 6:
-                result = _context4.sent;
-                logger$4.info({
-                  fn: 'updateResponse',
-                  message: "Successfully updated response ".concat(responseId),
-                  data: {
-                    responseId: responseId
-                  }
-                });
-                return _context4.abrupt("return", {
-                  success: true,
-                  responseId: responseId,
-                  updated: result === null || result === void 0 ? void 0 : result.data
-                });
-              case 11:
-                _context4.prev = 11;
-                _context4.t0 = _context4["catch"](2);
-                logger$4.error({
-                  fn: 'updateResponse',
-                  message: "Failed to update response ".concat(responseId),
-                  data: {
-                    responseId: responseId,
-                    error: _context4.t0.message
-                  }
-                });
-                throw new Error("Failed to update workbook response: ".concat(_context4.t0.message));
-              case 15:
-              case "end":
-                return _context4.stop();
+      }, _callee3, null, [[4, 13]]);
+    }));
+    return _createResponse.apply(this, arguments);
+  }
+  function updateResponse(_x6) {
+    return _updateResponse.apply(this, arguments);
+  }
+
+  /**
+   * Delete a workbook response
+   * @param {string} responseId - The response ID to delete
+   * @param {Object} options - Additional fetch options
+   * @returns {Promise<Object>} Delete result
+   */
+  function _updateResponse() {
+    _updateResponse = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee4(responseId) {
+      var response,
+        options,
+        result,
+        _args4 = arguments;
+      return _regeneratorRuntime().wrap(function _callee4$(_context4) {
+        while (1) switch (_context4.prev = _context4.next) {
+          case 0:
+            response = _args4.length > 1 && _args4[1] !== undefined ? _args4[1] : null;
+            options = _args4.length > 2 && _args4[2] !== undefined ? _args4[2] : {};
+            _context4.prev = 2;
+            logger$4.info({
+              fn: 'updateResponse',
+              message: "Updating response: ".concat(responseId),
+              data: {
+                responseId: responseId,
+                hasResponse: !!response
+              }
+            });
+            _context4.next = 6;
+            return POWERPOD.fetch.patchWorkbookResponseData(_objectSpread2({
+              id: responseId,
+              response: response
+            }, options));
+          case 6:
+            result = _context4.sent;
+            logger$4.info({
+              fn: 'updateResponse',
+              message: "Successfully updated response ".concat(responseId),
+              data: {
+                responseId: responseId
+              }
+            });
+            return _context4.abrupt("return", {
+              success: true,
+              responseId: responseId,
+              updated: result === null || result === void 0 ? void 0 : result.data
+            });
+          case 11:
+            _context4.prev = 11;
+            _context4.t0 = _context4["catch"](2);
+            logger$4.error({
+              fn: 'updateResponse',
+              message: "Failed to update response ".concat(responseId),
+              data: {
+                responseId: responseId,
+                error: _context4.t0.message
+              }
+            });
+            throw new Error("Failed to update workbook response: ".concat(_context4.t0.message));
+          case 15:
+          case "end":
+            return _context4.stop();
+        }
+      }, _callee4, null, [[2, 11]]);
+    }));
+    return _updateResponse.apply(this, arguments);
+  }
+  function deleteResponse(_x7) {
+    return _deleteResponse.apply(this, arguments);
+  }
+
+  /**
+   * Get the most recent response for a specific workbook and question
+   * @param {string} workbookId - The workbook ID
+   * @param {string} questionId - The question ID
+   * @param {Object} options - Additional fetch options
+   * @returns {Promise<Object|null>} Most recent response or null if none found
+   */
+  function _deleteResponse() {
+    _deleteResponse = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee5(responseId) {
+      var options,
+        _args5 = arguments;
+      return _regeneratorRuntime().wrap(function _callee5$(_context5) {
+        while (1) switch (_context5.prev = _context5.next) {
+          case 0:
+            options = _args5.length > 1 && _args5[1] !== undefined ? _args5[1] : {};
+            _context5.prev = 1;
+            logger$4.info({
+              fn: 'deleteResponse',
+              message: "Deleting response: ".concat(responseId),
+              data: {
+                responseId: responseId
+              }
+            });
+            _context5.next = 5;
+            return POWERPOD.fetch.deleteWorkbookResponseData(_objectSpread2({
+              id: responseId
+            }, options));
+          case 5:
+            logger$4.info({
+              fn: 'deleteResponse',
+              message: "Successfully deleted response ".concat(responseId),
+              data: {
+                responseId: responseId
+              }
+            });
+            return _context5.abrupt("return", {
+              success: true,
+              responseId: responseId,
+              deleted: true
+            });
+          case 9:
+            _context5.prev = 9;
+            _context5.t0 = _context5["catch"](1);
+            logger$4.error({
+              fn: 'deleteResponse',
+              message: "Failed to delete response ".concat(responseId),
+              data: {
+                responseId: responseId,
+                error: _context5.t0.message
+              }
+            });
+            throw new Error("Failed to delete workbook response: ".concat(_context5.t0.message));
+          case 13:
+          case "end":
+            return _context5.stop();
+        }
+      }, _callee5, null, [[1, 9]]);
+    }));
+    return _deleteResponse.apply(this, arguments);
+  }
+  function getLatestResponse(_x8, _x9) {
+    return _getLatestResponse.apply(this, arguments);
+  }
+
+  /**
+   * Check if a response exists for a specific workbook and question
+   * @param {string} workbookId - The workbook ID
+   * @param {string} questionId - The question ID
+   * @param {Object} options - Additional fetch options
+   * @returns {Promise<boolean>} True if response exists, false otherwise
+   */
+  function _getLatestResponse() {
+    _getLatestResponse = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee6(workbookId, questionId) {
+      var options,
+        result,
+        latestResponse,
+        _args6 = arguments;
+      return _regeneratorRuntime().wrap(function _callee6$(_context6) {
+        while (1) switch (_context6.prev = _context6.next) {
+          case 0:
+            options = _args6.length > 2 && _args6[2] !== undefined ? _args6[2] : {};
+            _context6.prev = 1;
+            _context6.next = 4;
+            return getResponsesForWorkbookAndQuestion(workbookId, questionId, options);
+          case 4:
+            result = _context6.sent;
+            if (!(result.responses && result.responses.length > 0)) {
+              _context6.next = 9;
+              break;
             }
-          }, _callee4, null, [[2, 11]]);
-        }));
-        function updateResponse(_x6) {
-          return _updateResponse.apply(this, arguments);
+            latestResponse = result.responses[0];
+            logger$4.info({
+              fn: 'getLatestResponse',
+              message: "Found latest response for workbook ".concat(workbookId, ", question ").concat(questionId),
+              data: {
+                workbookId: workbookId,
+                questionId: questionId,
+                responseId: latestResponse.quartech_workbookresponseid,
+                createdOn: latestResponse.createdon
+              }
+            });
+            return _context6.abrupt("return", latestResponse);
+          case 9:
+            logger$4.info({
+              fn: 'getLatestResponse',
+              message: "No responses found for workbook ".concat(workbookId, ", question ").concat(questionId),
+              data: {
+                workbookId: workbookId,
+                questionId: questionId
+              }
+            });
+            return _context6.abrupt("return", null);
+          case 13:
+            _context6.prev = 13;
+            _context6.t0 = _context6["catch"](1);
+            logger$4.error({
+              fn: 'getLatestResponse',
+              message: "Failed to get latest response for workbook ".concat(workbookId, ", question ").concat(questionId),
+              data: {
+                workbookId: workbookId,
+                questionId: questionId,
+                error: _context6.t0.message
+              }
+            });
+            throw _context6.t0;
+          case 17:
+          case "end":
+            return _context6.stop();
         }
-        return updateResponse;
-      }()
-      /**
-       * Delete a workbook response
-       * @param {string} responseId - The response ID to delete
-       * @param {Object} options - Additional fetch options
-       * @returns {Promise<Object>} Delete result
-       */
-      )
-    }, {
-      key: "deleteResponse",
-      value: (function () {
-        var _deleteResponse = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee5(responseId) {
-          var options,
-            _args5 = arguments;
-          return _regeneratorRuntime().wrap(function _callee5$(_context5) {
-            while (1) switch (_context5.prev = _context5.next) {
-              case 0:
-                options = _args5.length > 1 && _args5[1] !== undefined ? _args5[1] : {};
-                _context5.prev = 1;
-                logger$4.info({
-                  fn: 'deleteResponse',
-                  message: "Deleting response: ".concat(responseId),
-                  data: {
-                    responseId: responseId
-                  }
-                });
-                _context5.next = 5;
-                return POWERPOD.fetch.deleteWorkbookResponseData(_objectSpread2({
-                  id: responseId
-                }, options));
-              case 5:
-                logger$4.info({
-                  fn: 'deleteResponse',
-                  message: "Successfully deleted response ".concat(responseId),
-                  data: {
-                    responseId: responseId
-                  }
-                });
-                return _context5.abrupt("return", {
-                  success: true,
-                  responseId: responseId,
-                  deleted: true
-                });
-              case 9:
-                _context5.prev = 9;
-                _context5.t0 = _context5["catch"](1);
-                logger$4.error({
-                  fn: 'deleteResponse',
-                  message: "Failed to delete response ".concat(responseId),
-                  data: {
-                    responseId: responseId,
-                    error: _context5.t0.message
-                  }
-                });
-                throw new Error("Failed to delete workbook response: ".concat(_context5.t0.message));
-              case 13:
-              case "end":
-                return _context5.stop();
+      }, _callee6, null, [[1, 13]]);
+    }));
+    return _getLatestResponse.apply(this, arguments);
+  }
+  function hasResponse(_x10, _x11) {
+    return _hasResponse.apply(this, arguments);
+  }
+
+  /**
+   * Get response statistics for a workbook
+   * @param {string} workbookId - The workbook ID
+   * @param {Object} options - Additional fetch options
+   * @returns {Promise<Object>} Response statistics
+   */
+  function _hasResponse() {
+    _hasResponse = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee7(workbookId, questionId) {
+      var options,
+        latestResponse,
+        _args7 = arguments;
+      return _regeneratorRuntime().wrap(function _callee7$(_context7) {
+        while (1) switch (_context7.prev = _context7.next) {
+          case 0:
+            options = _args7.length > 2 && _args7[2] !== undefined ? _args7[2] : {};
+            _context7.prev = 1;
+            _context7.next = 4;
+            return getLatestResponse(workbookId, questionId, options);
+          case 4:
+            latestResponse = _context7.sent;
+            return _context7.abrupt("return", latestResponse !== null);
+          case 8:
+            _context7.prev = 8;
+            _context7.t0 = _context7["catch"](1);
+            logger$4.error({
+              fn: 'hasResponse',
+              message: "Failed to check if response exists for workbook ".concat(workbookId, ", question ").concat(questionId),
+              data: {
+                workbookId: workbookId,
+                questionId: questionId,
+                error: _context7.t0.message
+              }
+            });
+            return _context7.abrupt("return", false);
+          case 12:
+          case "end":
+            return _context7.stop();
+        }
+      }, _callee7, null, [[1, 8]]);
+    }));
+    return _hasResponse.apply(this, arguments);
+  }
+  function getResponseStats(_x12) {
+    return _getResponseStats.apply(this, arguments);
+  }
+
+  // Maintain backward compatibility by creating an object with all functions
+  function _getResponseStats() {
+    _getResponseStats = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee8(workbookId) {
+      var options,
+        result,
+        responses,
+        responsesByQuestion,
+        stats,
+        _args8 = arguments;
+      return _regeneratorRuntime().wrap(function _callee8$(_context8) {
+        while (1) switch (_context8.prev = _context8.next) {
+          case 0:
+            options = _args8.length > 1 && _args8[1] !== undefined ? _args8[1] : {};
+            _context8.prev = 1;
+            _context8.next = 4;
+            return getResponsesForWorkbook(workbookId, options);
+          case 4:
+            result = _context8.sent;
+            responses = result.responses || [];
+            responsesByQuestion = new Map();
+            responses.forEach(function (response) {
+              var questionId = response._quartech_question_value;
+              if (!responsesByQuestion.has(questionId)) {
+                responsesByQuestion.set(questionId, []);
+              }
+              responsesByQuestion.get(questionId).push(response);
+            });
+            stats = {
+              totalResponses: responses.length,
+              uniqueQuestions: responsesByQuestion.size,
+              questionsWithMultipleResponses: 0,
+              averageResponsesPerQuestion: 0,
+              responsesByQuestion: Object.fromEntries(responsesByQuestion),
+              workbookId: workbookId
+            };
+            responsesByQuestion.forEach(function (questionResponses) {
+              if (questionResponses.length > 1) {
+                stats.questionsWithMultipleResponses++;
+              }
+            });
+            if (stats.uniqueQuestions > 0) {
+              stats.averageResponsesPerQuestion = (stats.totalResponses / stats.uniqueQuestions).toFixed(2);
             }
-          }, _callee5, null, [[1, 9]]);
-        }));
-        function deleteResponse(_x7) {
-          return _deleteResponse.apply(this, arguments);
+            logger$4.info({
+              fn: 'getResponseStats',
+              message: "Generated response statistics for workbook ".concat(workbookId),
+              data: {
+                workbookId: workbookId,
+                stats: stats
+              }
+            });
+            return _context8.abrupt("return", stats);
+          case 15:
+            _context8.prev = 15;
+            _context8.t0 = _context8["catch"](1);
+            logger$4.error({
+              fn: 'getResponseStats',
+              message: "Failed to get response statistics for workbook ".concat(workbookId),
+              data: {
+                workbookId: workbookId,
+                error: _context8.t0.message
+              }
+            });
+            throw new Error("Failed to get response statistics: ".concat(_context8.t0.message));
+          case 19:
+          case "end":
+            return _context8.stop();
         }
-        return deleteResponse;
-      }()
-      /**
-       * Get the most recent response for a specific workbook and question
-       * @param {string} workbookId - The workbook ID
-       * @param {string} questionId - The question ID
-       * @param {Object} options - Additional fetch options
-       * @returns {Promise<Object|null>} Most recent response or null if none found
-       */
-      )
-    }, {
-      key: "getLatestResponse",
-      value: (function () {
-        var _getLatestResponse = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee6(workbookId, questionId) {
-          var options,
-            result,
-            latestResponse,
-            _args6 = arguments;
-          return _regeneratorRuntime().wrap(function _callee6$(_context6) {
-            while (1) switch (_context6.prev = _context6.next) {
-              case 0:
-                options = _args6.length > 2 && _args6[2] !== undefined ? _args6[2] : {};
-                _context6.prev = 1;
-                _context6.next = 4;
-                return this.getResponsesForWorkbookAndQuestion(workbookId, questionId, options);
-              case 4:
-                result = _context6.sent;
-                if (!(result.responses && result.responses.length > 0)) {
-                  _context6.next = 9;
-                  break;
-                }
-                // Responses are ordered by createdon desc, so first one is most recent
-                latestResponse = result.responses[0];
-                logger$4.info({
-                  fn: 'getLatestResponse',
-                  message: "Found latest response for workbook ".concat(workbookId, ", question ").concat(questionId),
-                  data: {
-                    workbookId: workbookId,
-                    questionId: questionId,
-                    responseId: latestResponse.quartech_workbookresponseid,
-                    createdOn: latestResponse.createdon
-                  }
-                });
-                return _context6.abrupt("return", latestResponse);
-              case 9:
-                logger$4.info({
-                  fn: 'getLatestResponse',
-                  message: "No responses found for workbook ".concat(workbookId, ", question ").concat(questionId),
-                  data: {
-                    workbookId: workbookId,
-                    questionId: questionId
-                  }
-                });
-                return _context6.abrupt("return", null);
-              case 13:
-                _context6.prev = 13;
-                _context6.t0 = _context6["catch"](1);
-                logger$4.error({
-                  fn: 'getLatestResponse',
-                  message: "Failed to get latest response for workbook ".concat(workbookId, ", question ").concat(questionId),
-                  data: {
-                    workbookId: workbookId,
-                    questionId: questionId,
-                    error: _context6.t0.message
-                  }
-                });
-                throw _context6.t0;
-              case 17:
-              case "end":
-                return _context6.stop();
-            }
-          }, _callee6, this, [[1, 13]]);
-        }));
-        function getLatestResponse(_x8, _x9) {
-          return _getLatestResponse.apply(this, arguments);
-        }
-        return getLatestResponse;
-      }()
-      /**
-       * Check if a response exists for a specific workbook and question
-       * @param {string} workbookId - The workbook ID
-       * @param {string} questionId - The question ID
-       * @param {Object} options - Additional fetch options
-       * @returns {Promise<boolean>} True if response exists, false otherwise
-       */
-      )
-    }, {
-      key: "hasResponse",
-      value: (function () {
-        var _hasResponse = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee7(workbookId, questionId) {
-          var options,
-            latestResponse,
-            _args7 = arguments;
-          return _regeneratorRuntime().wrap(function _callee7$(_context7) {
-            while (1) switch (_context7.prev = _context7.next) {
-              case 0:
-                options = _args7.length > 2 && _args7[2] !== undefined ? _args7[2] : {};
-                _context7.prev = 1;
-                _context7.next = 4;
-                return this.getLatestResponse(workbookId, questionId, options);
-              case 4:
-                latestResponse = _context7.sent;
-                return _context7.abrupt("return", latestResponse !== null);
-              case 8:
-                _context7.prev = 8;
-                _context7.t0 = _context7["catch"](1);
-                logger$4.error({
-                  fn: 'hasResponse',
-                  message: "Failed to check if response exists for workbook ".concat(workbookId, ", question ").concat(questionId),
-                  data: {
-                    workbookId: workbookId,
-                    questionId: questionId,
-                    error: _context7.t0.message
-                  }
-                });
-                return _context7.abrupt("return", false);
-              case 12:
-              case "end":
-                return _context7.stop();
-            }
-          }, _callee7, this, [[1, 8]]);
-        }));
-        function hasResponse(_x10, _x11) {
-          return _hasResponse.apply(this, arguments);
-        }
-        return hasResponse;
-      }()
-      /**
-       * Get response statistics for a workbook
-       * @param {string} workbookId - The workbook ID
-       * @param {Object} options - Additional fetch options
-       * @returns {Promise<Object>} Response statistics
-       */
-      )
-    }, {
-      key: "getResponseStats",
-      value: (function () {
-        var _getResponseStats = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee8(workbookId) {
-          var options,
-            result,
-            responses,
-            responsesByQuestion,
-            stats,
-            _args8 = arguments;
-          return _regeneratorRuntime().wrap(function _callee8$(_context8) {
-            while (1) switch (_context8.prev = _context8.next) {
-              case 0:
-                options = _args8.length > 1 && _args8[1] !== undefined ? _args8[1] : {};
-                _context8.prev = 1;
-                _context8.next = 4;
-                return this.getResponsesForWorkbook(workbookId, options);
-              case 4:
-                result = _context8.sent;
-                responses = result.responses || []; // Group responses by question
-                responsesByQuestion = new Map();
-                responses.forEach(function (response) {
-                  var questionId = response._quartech_question_value;
-                  if (!responsesByQuestion.has(questionId)) {
-                    responsesByQuestion.set(questionId, []);
-                  }
-                  responsesByQuestion.get(questionId).push(response);
-                });
-                stats = {
-                  totalResponses: responses.length,
-                  uniqueQuestions: responsesByQuestion.size,
-                  questionsWithMultipleResponses: 0,
-                  averageResponsesPerQuestion: 0,
-                  responsesByQuestion: Object.fromEntries(responsesByQuestion),
-                  workbookId: workbookId
-                }; // Calculate additional stats
-                responsesByQuestion.forEach(function (questionResponses) {
-                  if (questionResponses.length > 1) {
-                    stats.questionsWithMultipleResponses++;
-                  }
-                });
-                if (stats.uniqueQuestions > 0) {
-                  stats.averageResponsesPerQuestion = (stats.totalResponses / stats.uniqueQuestions).toFixed(2);
-                }
-                logger$4.info({
-                  fn: 'getResponseStats',
-                  message: "Generated response statistics for workbook ".concat(workbookId),
-                  data: {
-                    workbookId: workbookId,
-                    stats: stats
-                  }
-                });
-                return _context8.abrupt("return", stats);
-              case 15:
-                _context8.prev = 15;
-                _context8.t0 = _context8["catch"](1);
-                logger$4.error({
-                  fn: 'getResponseStats',
-                  message: "Failed to get response statistics for workbook ".concat(workbookId),
-                  data: {
-                    workbookId: workbookId,
-                    error: _context8.t0.message
-                  }
-                });
-                throw new Error("Failed to get response statistics: ".concat(_context8.t0.message));
-              case 19:
-              case "end":
-                return _context8.stop();
-            }
-          }, _callee8, this, [[1, 15]]);
-        }));
-        function getResponseStats(_x12) {
-          return _getResponseStats.apply(this, arguments);
-        }
-        return getResponseStats;
-      }())
-    }]);
-  }();
+      }, _callee8, null, [[1, 15]]);
+    }));
+    return _getResponseStats.apply(this, arguments);
+  }
+  var WorkbookResponseHelper = {
+    getResponsesForWorkbook: getResponsesForWorkbook,
+    getResponsesForWorkbookAndQuestion: getResponsesForWorkbookAndQuestion,
+    createResponse: createResponse,
+    updateResponse: updateResponse,
+    deleteResponse: deleteResponse,
+    getLatestResponse: getLatestResponse,
+    hasResponse: hasResponse,
+    getResponseStats: getResponseStats
+  };
   POWERPOD.workbookResponseHelper = WorkbookResponseHelper;
 
   // src/components/details/details.styles.ts
