@@ -169,4 +169,33 @@ export const POWERPOD = {
     lastUpdated: null,
     error: null
   },
+  workbookQuestions: {
+    data: [],
+    questionsById: new Map(),
+    questionsByChapter: new Map(),
+    isLoaded: false,
+    isLoading: false,
+    workbookId: null,
+    lastUpdated: null,
+    error: null
+  },
+  workbookQuestionsAndResponses: {
+    // Nested structure: questionId -> { question: {...}, response: {...} | null }
+    questionsWithResponses: new Map(),
+    // Organized by chapter: chapterId -> [{ question: {...}, response: {...} | null }]
+    questionsByChapter: new Map(),
+    // Statistics
+    stats: {
+      totalQuestions: 0,
+      answeredQuestions: 0,
+      unansweredQuestions: 0,
+      completionPercentage: 0,
+      lastUpdated: null
+    },
+    isLoaded: false,
+    isLoading: false,
+    workbookId: null,
+    lastUpdated: null,
+    error: null
+  },
 };

@@ -1811,8 +1811,8 @@ class EFPEntryForm extends LitElement {
   private async loadWorkbookResponses() {
     try {
       this.isLoadingResponses = true;
-      POWERPOD.workbookResponses.isLoading = true;
-      POWERPOD.workbookResponses.error = null;
+      POWERPOD.workbookQuestionsAndResponses.isLoading = true;
+      POWERPOD.workbookQuestionsAndResponses.error = null;
 
       const workbookId = getWorkbookId();
       if (!workbookId) {
@@ -1820,32 +1820,34 @@ class EFPEntryForm extends LitElement {
         return;
       }
 
-      // Check if we already have responses for this workbook
-      if (POWERPOD.workbookResponses.isLoaded &&
-          POWERPOD.workbookResponses.workbookId === workbookId) {
-        console.log('Workbook responses already loaded from memory');
+      // Check if we already have questions and responses for this workbook
+      if (POWERPOD.workbookQuestionsAndResponses.isLoaded &&
+          POWERPOD.workbookQuestionsAndResponses.workbookId === workbookId) {
+        console.log('Workbook questions and responses already loaded from memory');
         this.syncFromPOWERPOD();
         return;
       }
 
-      console.log(`Loading workbook responses for workbook: ${workbookId}`);
+      console.log(`Loading workbook questions and responses for workbook: ${workbookId}`);
 
-      const result = await WorkbookResponseHelper.getResponsesForWorkbook(workbookId);
+      // Load questions and responses into nested structure
+      const result = await WorkbookResponseHelper.loadQuestionsAndResponses(workbookId);
 
-      const responses = result.responses || [];
+      // Also maintain backward compatibility with old structure
+      const responses = Array.from(result.questionsWithResponses.values())
+        .map(entry => entry.response)
+        .filter(response => response !== null);
 
-      // Store in POWERPOD for global access
       POWERPOD.workbookResponses.data = responses;
       POWERPOD.workbookResponses.workbookId = workbookId;
       POWERPOD.workbookResponses.isLoaded = true;
       POWERPOD.workbookResponses.lastUpdated = new Date().toISOString();
 
-      // Build quick lookup map for responses by question ID
+      // Build quick lookup map for backward compatibility
       POWERPOD.workbookResponses.responsesByQuestion.clear();
       responses.forEach(response => {
         const questionId = response._quartech_question_value;
         if (questionId) {
-          // Store the most recent response for each question (responses are ordered by createdon desc)
           if (!POWERPOD.workbookResponses.responsesByQuestion.has(questionId)) {
             POWERPOD.workbookResponses.responsesByQuestion.set(questionId, response);
           }
@@ -1855,25 +1857,30 @@ class EFPEntryForm extends LitElement {
       // Sync to local component state for UI binding
       this.syncFromPOWERPOD();
 
-      console.log(`Loaded ${responses.length} workbook responses into POWERPOD memory`);
-      console.log(`Responses for ${POWERPOD.workbookResponses.responsesByQuestion.size} unique questions`);
+      console.log(`Loaded ${result.stats.totalQuestions} questions with ${result.stats.answeredQuestions} responses (${result.stats.completionPercentage}% complete)`);
+      console.log('Questions and responses structure:', {
+        totalQuestions: result.stats.totalQuestions,
+        answeredQuestions: result.stats.answeredQuestions,
+        completionPercentage: result.stats.completionPercentage,
+        chapterCount: result.questionsByChapter.size
+      });
 
-      // Debug: Log some response details
-      if (responses.length > 0) {
-        console.log('Sample response:', responses[0]);
-        console.log('Response by question map:', Array.from(POWERPOD.workbookResponses.responsesByQuestion.entries()).slice(0, 3));
+      // Debug: Log some sample data
+      if (result.questionsWithResponses.size > 0) {
+        const sampleEntries = Array.from(result.questionsWithResponses.entries()).slice(0, 3);
+        console.log('Sample question/response entries:', sampleEntries);
       }
 
-      // Trigger a re-render to update the UI with loaded responses
+      // Trigger a re-render to update the UI with loaded data
       this.requestUpdate();
 
     } catch (error) {
-      console.error('Failed to load workbook responses:', error);
-      POWERPOD.workbookResponses.error = error.message || 'Failed to load responses';
-      // Don't throw - we want the component to still work even if responses fail to load
+      console.error('Failed to load workbook questions and responses:', error);
+      POWERPOD.workbookQuestionsAndResponses.error = error.message || 'Failed to load questions and responses';
+      // Don't throw - we want the component to still work even if loading fails
     } finally {
       this.isLoadingResponses = false;
-      POWERPOD.workbookResponses.isLoading = false;
+      POWERPOD.workbookQuestionsAndResponses.isLoading = false;
     }
   }
 
@@ -1884,7 +1891,37 @@ class EFPEntryForm extends LitElement {
 
   // Helper method to get response for a specific question
   getResponseForQuestion(questionId: string): any | null {
+    // Use new nested structure first, fall back to old structure
+    const questionAndResponse = WorkbookResponseHelper.getQuestionAndResponseFromMemory(questionId);
+    if (questionAndResponse) {
+      return questionAndResponse.response;
+    }
+
+    // Fallback to old structure for backward compatibility
     return POWERPOD.workbookResponses.responsesByQuestion.get(questionId) || null;
+  }
+
+  // Helper method to get question data for a specific question
+  getQuestionForQuestion(questionId: string): any | null {
+    const questionAndResponse = WorkbookResponseHelper.getQuestionAndResponseFromMemory(questionId);
+    return questionAndResponse?.question || null;
+  }
+
+  // Helper method to get both question and response data
+  getQuestionAndResponse(questionId: string): { question: any | null, response: any | null } {
+    const questionAndResponse = WorkbookResponseHelper.getQuestionAndResponseFromMemory(questionId);
+    if (questionAndResponse) {
+      return {
+        question: questionAndResponse.question,
+        response: questionAndResponse.response
+      };
+    }
+
+    // Fallback to old structure
+    return {
+      question: null,
+      response: this.getResponseForQuestion(questionId)
+    };
   }
 
   // Helper method to render response information for a question
@@ -1913,32 +1950,86 @@ class EFPEntryForm extends LitElement {
 
   // Helper method to render all responses summary (for debugging/admin)
   renderResponsesSummary(): string {
-    const responses = POWERPOD.workbookResponses.data;
-    const responsesByQuestion = POWERPOD.workbookResponses.responsesByQuestion;
+    const questionsAndResponses = POWERPOD.workbookQuestionsAndResponses;
 
-    if (!POWERPOD.workbookResponses.isLoaded) {
-      return '<p><em>Responses not loaded yet.</em></p>';
+    if (!questionsAndResponses.isLoaded) {
+      return '<p><em>Questions and responses not loaded yet.</em></p>';
     }
 
-    if (responses.length === 0) {
-      return '<p><em>No responses found for this workbook.</em></p>';
+    const stats = questionsAndResponses.stats;
+    if (stats.totalQuestions === 0) {
+      return '<p><em>No questions found for this workbook.</em></p>';
     }
 
     return `
       <div style="margin-top: 1rem;">
-        <h4>Workbook Responses Summary</h4>
-        <p><strong>Total Responses:</strong> ${responses.length}</p>
-        <p><strong>Questions Answered:</strong> ${responsesByQuestion.size}</p>
-        <p><strong>Last Updated:</strong> ${POWERPOD.workbookResponses.lastUpdated ? new Date(POWERPOD.workbookResponses.lastUpdated).toLocaleString() : 'Unknown'}</p>
-        <p><strong>Workbook ID:</strong> ${POWERPOD.workbookResponses.workbookId || 'Unknown'}</p>
+        <h4>Questions & Responses Summary</h4>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+          <div>
+            <p><strong>Total Questions:</strong> ${stats.totalQuestions}</p>
+            <p><strong>Answered Questions:</strong> ${stats.answeredQuestions}</p>
+            <p><strong>Unanswered Questions:</strong> ${stats.unansweredQuestions}</p>
+          </div>
+          <div>
+            <p><strong>Completion:</strong> ${stats.completionPercentage}%</p>
+            <p><strong>Chapters:</strong> ${questionsAndResponses.questionsByChapter.size}</p>
+            <p><strong>Last Updated:</strong> ${questionsAndResponses.lastUpdated ? new Date(questionsAndResponses.lastUpdated).toLocaleString() : 'Unknown'}</p>
+          </div>
+        </div>
+
         <details style="margin-top: 1rem;">
-          <summary style="cursor: pointer; font-weight: 500;">View All Responses</summary>
+          <summary style="cursor: pointer; font-weight: 500;">View Questions & Responses by Chapter</summary>
+          <div style="margin-top: 0.5rem; max-height: 400px; overflow-y: auto;">
+            ${Array.from(questionsAndResponses.questionsByChapter.entries()).map(([chapterId, chapterQuestions]) => `
+              <div style="margin-bottom: 1.5rem; padding: 1rem; background-color: var(--sl-color-neutral-50); border-radius: var(--sl-border-radius-medium);">
+                <h5 style="margin: 0 0 0.75rem 0; color: var(--sl-color-primary-600);">Chapter: ${chapterId}</h5>
+                <p style="margin: 0 0 0.75rem 0; font-size: 0.875rem; color: var(--sl-color-neutral-600);">
+                  ${chapterQuestions.length} questions, ${chapterQuestions.filter(q => q.response).length} answered
+                </p>
+                ${chapterQuestions.map(entry => `
+                  <div style="padding: 0.5rem; margin: 0.5rem 0; background-color: white; border-radius: var(--sl-border-radius-small); border-left: 3px solid ${entry.response ? 'var(--sl-color-success-600)' : 'var(--sl-color-neutral-300)'};">
+                    <p style="margin: 0 0 0.25rem 0; font-weight: 500; font-size: 0.875rem;">
+                      ${entry.question ? entry.question.quartech_questiontext || 'Question text not available' : 'Question data not loaded'}
+                    </p>
+                    ${entry.response ? `
+                      <p style="margin: 0 0 0.25rem 0; color: var(--sl-color-success-800);">
+                        <strong>Response:</strong> ${entry.response.quartech_response || 'No response text'}
+                      </p>
+                      <p style="margin: 0; font-size: 0.75rem; color: var(--sl-color-neutral-600);">
+                        Answered: ${new Date(entry.response.createdon).toLocaleString()}
+                      </p>
+                    ` : `
+                      <p style="margin: 0; font-style: italic; color: var(--sl-color-neutral-500);">Not answered yet</p>
+                    `}
+                  </div>
+                `).join('')}
+              </div>
+            `).join('')}
+          </div>
+        </details>
+
+        <details style="margin-top: 1rem;">
+          <summary style="cursor: pointer; font-weight: 500;">View All Questions & Responses (Flat List)</summary>
           <div style="margin-top: 0.5rem; max-height: 300px; overflow-y: auto;">
-            ${responses.map(response => `
-              <div style="padding: 0.5rem; margin: 0.5rem 0; background-color: var(--sl-color-neutral-50); border-radius: var(--sl-border-radius-small);">
-                <p style="margin: 0 0 0.25rem 0; font-weight: 500;">Question ID: ${response._quartech_question_value}</p>
-                <p style="margin: 0 0 0.25rem 0;">${response.quartech_response || 'No response text'}</p>
-                <p style="margin: 0; font-size: 0.875rem; color: var(--sl-color-neutral-600);">Created: ${new Date(response.createdon).toLocaleString()}</p>
+            ${Array.from(questionsAndResponses.questionsWithResponses.entries()).map(([questionId, entry]) => `
+              <div style="padding: 0.5rem; margin: 0.5rem 0; background-color: var(--sl-color-neutral-50); border-radius: var(--sl-border-radius-small); border-left: 3px solid ${entry.response ? 'var(--sl-color-success-600)' : 'var(--sl-color-neutral-300)'};">
+                <p style="margin: 0 0 0.25rem 0; font-weight: 500; font-size: 0.875rem;">Question ID: ${questionId}</p>
+                ${entry.question ? `
+                  <p style="margin: 0 0 0.25rem 0; color: var(--sl-color-neutral-700);">
+                    <strong>Question:</strong> ${entry.question.quartech_questiontext || 'No question text'}
+                  </p>
+                ` : ''}
+                ${entry.response ? `
+                  <p style="margin: 0 0 0.25rem 0; color: var(--sl-color-success-800);">
+                    <strong>Response:</strong> ${entry.response.quartech_response || 'No response text'}
+                  </p>
+                  <p style="margin: 0; font-size: 0.75rem; color: var(--sl-color-neutral-600);">
+                    Created: ${new Date(entry.response.createdon).toLocaleString()}
+                    ${entry.response.modifiedon !== entry.response.createdon ? ` | Modified: ${new Date(entry.response.modifiedon).toLocaleString()}` : ''}
+                  </p>
+                ` : `
+                  <p style="margin: 0; font-style: italic; color: var(--sl-color-neutral-500);">Not answered yet</p>
+                `}
               </div>
             `).join('')}
           </div>
@@ -1956,16 +2047,21 @@ class EFPEntryForm extends LitElement {
             <div><strong>EFP Workbook:</strong> Test</div>
             <div><strong>Status:</strong> In Progress</div>
             <div>
-              <strong>Responses:</strong>
-              ${POWERPOD.workbookResponses.isLoading
+              <strong>Questions & Responses:</strong>
+              ${POWERPOD.workbookQuestionsAndResponses.isLoading
                 ? html`<span style="color: var(--sl-color-warning-600);">Loading...</span>`
-                : POWERPOD.workbookResponses.error
+                : POWERPOD.workbookQuestionsAndResponses.error
                   ? html`<span style="color: var(--sl-color-danger-600);">Error loading</span>`
-                  : html`<span style="color: var(--sl-color-success-600);">${POWERPOD.workbookResponses.data.length} loaded</span>`
+                  : html`<span style="color: var(--sl-color-success-600);">Loaded</span>`
               }
             </div>
-            ${POWERPOD.workbookResponses.responsesByQuestion.size > 0
-              ? html`<div><strong>Questions Answered:</strong> ${POWERPOD.workbookResponses.responsesByQuestion.size}</div>`
+            ${POWERPOD.workbookQuestionsAndResponses.isLoaded
+              ? html`
+                <div><strong>Total Questions:</strong> ${POWERPOD.workbookQuestionsAndResponses.stats.totalQuestions}</div>
+                <div><strong>Answered:</strong> ${POWERPOD.workbookQuestionsAndResponses.stats.answeredQuestions}</div>
+                <div><strong>Completion:</strong> ${POWERPOD.workbookQuestionsAndResponses.stats.completionPercentage}%</div>
+                <div><strong>Chapters:</strong> ${POWERPOD.workbookQuestionsAndResponses.questionsByChapter.size}</div>
+              `
               : ''
             }
           </div>

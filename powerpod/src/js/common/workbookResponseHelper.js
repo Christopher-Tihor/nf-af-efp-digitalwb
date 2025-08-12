@@ -1,6 +1,7 @@
 import { POWERPOD } from './constants.js';
 import { Logger } from './logger.js';
 import { getCurrentWorkbookId } from './workbookUtils.js';
+import { loadChaptersAndQuestions, getStoredQuestionsData, isChaptersAndQuestionsLoaded } from './chaptersAndQuestionsUtils.js';
 
 const logger = Logger('common/workbookResponseHelper');
 
@@ -456,6 +457,380 @@ export function getMemoryStats() {
   };
 }
 
+/**
+ * Load and organize workbook questions and responses into nested structure
+ * @param {string} workbookId - The workbook ID
+ * @param {Object} options - Additional options
+ * @returns {Promise<Object>} Organized questions and responses data
+ */
+export async function loadQuestionsAndResponses(workbookId, options = {}) {
+  try {
+    logger.info({
+      fn: 'loadQuestionsAndResponses',
+      message: `Loading questions and responses for workbook: ${workbookId}`,
+      data: { workbookId }
+    });
+
+    POWERPOD.workbookQuestionsAndResponses.isLoading = true;
+    POWERPOD.workbookQuestionsAndResponses.error = null;
+
+    // Check if already loaded for this workbook
+    if (POWERPOD.workbookQuestionsAndResponses.isLoaded &&
+        POWERPOD.workbookQuestionsAndResponses.workbookId === workbookId) {
+      logger.info({
+        fn: 'loadQuestionsAndResponses',
+        message: 'Questions and responses already loaded from memory',
+        data: { workbookId }
+      });
+      return getQuestionsAndResponsesFromMemory();
+    }
+
+    // Load questions using existing chaptersAndQuestionsUtils
+    let questions = [];
+    try {
+      // Check if questions are already loaded in POWERPOD.workbook
+      if (isChaptersAndQuestionsLoaded()) {
+        console.log('Questions already loaded, using cached data');
+        const questionsData = getStoredQuestionsData();
+        questions = questionsData?.value || [];
+      } else {
+        console.log('Loading questions using loadChaptersAndQuestions');
+        const result = await loadChaptersAndQuestions();
+        if (result && result.questionsData) {
+          questions = result.questionsData.value || [];
+        } else {
+          console.warn('Failed to load questions data');
+        }
+      }
+
+      console.log(`Loaded ${questions.length} questions from API`);
+    } catch (error) {
+      logger.warn({
+        fn: 'loadQuestionsAndResponses',
+        message: 'Failed to load questions, continuing with responses only',
+        data: { workbookId, error: error.message }
+      });
+    }
+
+    // Load responses
+    const responsesResult = await getResponsesForWorkbook(workbookId, options);
+    const responses = responsesResult.responses || [];
+
+    // Clear existing data
+    POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.clear();
+    POWERPOD.workbookQuestionsAndResponses.questionsByChapter.clear();
+
+    // Create nested structure
+    const questionsWithResponses = new Map();
+    const questionsByChapter = new Map();
+
+    // First, add all questions (if we have them)
+    questions.forEach(question => {
+      const questionId = question.quartech_workbookquestionid;
+      const chapterId = question._quartech_chapter_value;
+
+      if (questionId) {
+        questionsWithResponses.set(questionId, {
+          question: question,
+          response: null
+        });
+
+        // Organize by chapter
+        if (chapterId) {
+          if (!questionsByChapter.has(chapterId)) {
+            questionsByChapter.set(chapterId, []);
+          }
+          questionsByChapter.get(chapterId).push({
+            question: question,
+            response: null
+          });
+        }
+      }
+    });
+
+    console.log(`Processed ${questions.length} questions into nested structure`);
+    console.log(`Questions organized into ${questionsByChapter.size} chapters`);
+
+    // Debug: Log some sample question data
+    if (questions.length > 0) {
+      console.log('Sample question:', {
+        id: questions[0].quartech_workbookquestionid,
+        name: questions[0].quartech_name,
+        label: questions[0].quartech_label,
+        questionType: questions[0].quartech_questiontype,
+        chapterId: questions[0]._quartech_chapter_value,
+        order: questions[0].quartech_order
+      });
+    }
+
+    // Then, add responses to their corresponding questions
+    responses.forEach(response => {
+      const questionId = response._quartech_question_value;
+
+      if (questionId) {
+        if (questionsWithResponses.has(questionId)) {
+          // Update existing question entry
+          const entry = questionsWithResponses.get(questionId);
+          entry.response = response;
+        } else {
+          // Create entry for response without question data
+          questionsWithResponses.set(questionId, {
+            question: null, // Question data not available
+            response: response
+          });
+        }
+      }
+    });
+
+    // Update chapter organization with responses
+    questionsByChapter.forEach((chapterQuestions, chapterId) => {
+      chapterQuestions.forEach(entry => {
+        const questionId = entry.question?.quartech_workbookquestionid;
+        if (questionId && questionsWithResponses.has(questionId)) {
+          entry.response = questionsWithResponses.get(questionId).response;
+        }
+      });
+    });
+
+    // Calculate statistics
+    const totalQuestions = questionsWithResponses.size;
+    const answeredQuestions = Array.from(questionsWithResponses.values())
+      .filter(entry => entry.response !== null).length;
+    const unansweredQuestions = totalQuestions - answeredQuestions;
+    const completionPercentage = totalQuestions > 0 ?
+      Math.round((answeredQuestions / totalQuestions) * 100) : 0;
+
+    // Store in POWERPOD memory
+    POWERPOD.workbookQuestionsAndResponses.questionsWithResponses = questionsWithResponses;
+    POWERPOD.workbookQuestionsAndResponses.questionsByChapter = questionsByChapter;
+    POWERPOD.workbookQuestionsAndResponses.stats = {
+      totalQuestions,
+      answeredQuestions,
+      unansweredQuestions,
+      completionPercentage,
+      lastUpdated: new Date().toISOString()
+    };
+    POWERPOD.workbookQuestionsAndResponses.workbookId = workbookId;
+    POWERPOD.workbookQuestionsAndResponses.isLoaded = true;
+    POWERPOD.workbookQuestionsAndResponses.lastUpdated = new Date().toISOString();
+
+    logger.info({
+      fn: 'loadQuestionsAndResponses',
+      message: `Loaded ${totalQuestions} questions with ${answeredQuestions} responses (${completionPercentage}% complete)`,
+      data: {
+        workbookId,
+        totalQuestions,
+        answeredQuestions,
+        completionPercentage
+      }
+    });
+
+    return getQuestionsAndResponsesFromMemory();
+
+  } catch (error) {
+    logger.error({
+      fn: 'loadQuestionsAndResponses',
+      message: `Failed to load questions and responses for workbook ${workbookId}`,
+      data: { workbookId, error: error.message }
+    });
+
+    POWERPOD.workbookQuestionsAndResponses.error = error.message || 'Failed to load questions and responses';
+    throw error;
+  } finally {
+    POWERPOD.workbookQuestionsAndResponses.isLoading = false;
+  }
+}
+
+/**
+ * Get questions and responses from memory
+ * @returns {Object} Questions and responses data from memory
+ */
+export function getQuestionsAndResponsesFromMemory() {
+  return {
+    questionsWithResponses: POWERPOD.workbookQuestionsAndResponses.questionsWithResponses,
+    questionsByChapter: POWERPOD.workbookQuestionsAndResponses.questionsByChapter,
+    stats: POWERPOD.workbookQuestionsAndResponses.stats,
+    isLoaded: POWERPOD.workbookQuestionsAndResponses.isLoaded,
+    isLoading: POWERPOD.workbookQuestionsAndResponses.isLoading,
+    workbookId: POWERPOD.workbookQuestionsAndResponses.workbookId,
+    lastUpdated: POWERPOD.workbookQuestionsAndResponses.lastUpdated,
+    error: POWERPOD.workbookQuestionsAndResponses.error
+  };
+}
+
+/**
+ * Get question and response data for a specific question
+ * @param {string} questionId - The question ID
+ * @returns {Object|null} Question and response data or null if not found
+ */
+export function getQuestionAndResponseFromMemory(questionId) {
+  if (!POWERPOD.workbookQuestionsAndResponses.isLoaded) {
+    logger.warn({
+      fn: 'getQuestionAndResponseFromMemory',
+      message: 'Questions and responses not loaded in memory',
+      data: { questionId }
+    });
+    return null;
+  }
+
+  return POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.get(questionId) || null;
+}
+
+/**
+ * Get questions and responses for a specific chapter
+ * @param {string} chapterId - The chapter ID
+ * @returns {Array} Array of question and response objects
+ */
+export function getChapterQuestionsAndResponsesFromMemory(chapterId) {
+  if (!POWERPOD.workbookQuestionsAndResponses.isLoaded) {
+    logger.warn({
+      fn: 'getChapterQuestionsAndResponsesFromMemory',
+      message: 'Questions and responses not loaded in memory',
+      data: { chapterId }
+    });
+    return [];
+  }
+
+  return POWERPOD.workbookQuestionsAndResponses.questionsByChapter.get(chapterId) || [];
+}
+
+/**
+ * Update response in the nested structure
+ * @param {string} questionId - The question ID
+ * @param {Object} responseData - The response data
+ */
+export function updateResponseInMemory(questionId, responseData) {
+  if (!POWERPOD.workbookQuestionsAndResponses.isLoaded) {
+    logger.warn({
+      fn: 'updateResponseInMemory',
+      message: 'Questions and responses not loaded in memory',
+      data: { questionId }
+    });
+    return;
+  }
+
+  // Update in main structure
+  const entry = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.get(questionId);
+  if (entry) {
+    entry.response = responseData;
+  } else {
+    // Create new entry if question doesn't exist
+    POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.set(questionId, {
+      question: null,
+      response: responseData
+    });
+  }
+
+  // Update in chapter structure
+  POWERPOD.workbookQuestionsAndResponses.questionsByChapter.forEach((chapterQuestions) => {
+    chapterQuestions.forEach(chapterEntry => {
+      if (chapterEntry.question?.quartech_workbookquestionid === questionId) {
+        chapterEntry.response = responseData;
+      }
+    });
+  });
+
+  // Update statistics
+  updateQuestionsAndResponsesStats();
+
+  // Update timestamp
+  POWERPOD.workbookQuestionsAndResponses.lastUpdated = new Date().toISOString();
+
+  logger.info({
+    fn: 'updateResponseInMemory',
+    message: `Updated response for question ${questionId} in memory`,
+    data: { questionId, hasResponse: !!responseData }
+  });
+}
+
+/**
+ * Remove response from the nested structure
+ * @param {string} questionId - The question ID
+ */
+export function removeResponseFromMemory(questionId) {
+  if (!POWERPOD.workbookQuestionsAndResponses.isLoaded) {
+    logger.warn({
+      fn: 'removeResponseFromMemory',
+      message: 'Questions and responses not loaded in memory',
+      data: { questionId }
+    });
+    return;
+  }
+
+  // Remove from main structure
+  const entry = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.get(questionId);
+  if (entry) {
+    entry.response = null;
+  }
+
+  // Remove from chapter structure
+  POWERPOD.workbookQuestionsAndResponses.questionsByChapter.forEach((chapterQuestions) => {
+    chapterQuestions.forEach(chapterEntry => {
+      if (chapterEntry.question?.quartech_workbookquestionid === questionId) {
+        chapterEntry.response = null;
+      }
+    });
+  });
+
+  // Update statistics
+  updateQuestionsAndResponsesStats();
+
+  // Update timestamp
+  POWERPOD.workbookQuestionsAndResponses.lastUpdated = new Date().toISOString();
+
+  logger.info({
+    fn: 'removeResponseFromMemory',
+    message: `Removed response for question ${questionId} from memory`,
+    data: { questionId }
+  });
+}
+
+/**
+ * Update statistics for questions and responses
+ */
+function updateQuestionsAndResponsesStats() {
+  const questionsWithResponses = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses;
+  const totalQuestions = questionsWithResponses.size;
+  const answeredQuestions = Array.from(questionsWithResponses.values())
+    .filter(entry => entry.response !== null).length;
+  const unansweredQuestions = totalQuestions - answeredQuestions;
+  const completionPercentage = totalQuestions > 0 ?
+    Math.round((answeredQuestions / totalQuestions) * 100) : 0;
+
+  POWERPOD.workbookQuestionsAndResponses.stats = {
+    totalQuestions,
+    answeredQuestions,
+    unansweredQuestions,
+    completionPercentage,
+    lastUpdated: new Date().toISOString()
+  };
+}
+
+/**
+ * Clear questions and responses from memory
+ */
+export function clearQuestionsAndResponsesMemory() {
+  logger.info({
+    fn: 'clearQuestionsAndResponsesMemory',
+    message: 'Clearing questions and responses from memory'
+  });
+
+  POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.clear();
+  POWERPOD.workbookQuestionsAndResponses.questionsByChapter.clear();
+  POWERPOD.workbookQuestionsAndResponses.stats = {
+    totalQuestions: 0,
+    answeredQuestions: 0,
+    unansweredQuestions: 0,
+    completionPercentage: 0,
+    lastUpdated: null
+  };
+  POWERPOD.workbookQuestionsAndResponses.isLoaded = false;
+  POWERPOD.workbookQuestionsAndResponses.isLoading = false;
+  POWERPOD.workbookQuestionsAndResponses.workbookId = null;
+  POWERPOD.workbookQuestionsAndResponses.lastUpdated = null;
+  POWERPOD.workbookQuestionsAndResponses.error = null;
+}
+
 // Maintain backward compatibility by creating an object with all functions
 const WorkbookResponseHelper = {
   getResponsesForWorkbook,
@@ -472,6 +847,14 @@ const WorkbookResponseHelper = {
   isLoadedInMemory,
   clearMemory,
   getMemoryStats,
+  // Questions and responses nested structure functions
+  loadQuestionsAndResponses,
+  getQuestionsAndResponsesFromMemory,
+  getQuestionAndResponseFromMemory,
+  getChapterQuestionsAndResponsesFromMemory,
+  updateResponseInMemory,
+  removeResponseFromMemory,
+  clearQuestionsAndResponsesMemory,
 };
 
 export default WorkbookResponseHelper;

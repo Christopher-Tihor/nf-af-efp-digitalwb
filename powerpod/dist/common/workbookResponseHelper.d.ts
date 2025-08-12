@@ -85,6 +85,45 @@ export function clearMemory(): void;
  * @returns {Object} Memory usage statistics
  */
 export function getMemoryStats(): Object;
+/**
+ * Load and organize workbook questions and responses into nested structure
+ * @param {string} workbookId - The workbook ID
+ * @param {Object} options - Additional options
+ * @returns {Promise<Object>} Organized questions and responses data
+ */
+export function loadQuestionsAndResponses(workbookId: string, options?: Object): Promise<Object>;
+/**
+ * Get questions and responses from memory
+ * @returns {Object} Questions and responses data from memory
+ */
+export function getQuestionsAndResponsesFromMemory(): Object;
+/**
+ * Get question and response data for a specific question
+ * @param {string} questionId - The question ID
+ * @returns {Object|null} Question and response data or null if not found
+ */
+export function getQuestionAndResponseFromMemory(questionId: string): Object | null;
+/**
+ * Get questions and responses for a specific chapter
+ * @param {string} chapterId - The chapter ID
+ * @returns {Array} Array of question and response objects
+ */
+export function getChapterQuestionsAndResponsesFromMemory(chapterId: string): any[];
+/**
+ * Update response in the nested structure
+ * @param {string} questionId - The question ID
+ * @param {Object} responseData - The response data
+ */
+export function updateResponseInMemory(questionId: string, responseData: Object): void;
+/**
+ * Remove response from the nested structure
+ * @param {string} questionId - The question ID
+ */
+export function removeResponseFromMemory(questionId: string): void;
+/**
+ * Clear questions and responses from memory
+ */
+export function clearQuestionsAndResponsesMemory(): void;
 export default WorkbookResponseHelper;
 declare namespace WorkbookResponseHelper {
     export { getResponsesForWorkbook };
@@ -100,4 +139,11 @@ declare namespace WorkbookResponseHelper {
     export { isLoadedInMemory };
     export { clearMemory };
     export { getMemoryStats };
+    export { loadQuestionsAndResponses };
+    export { getQuestionsAndResponsesFromMemory };
+    export { getQuestionAndResponseFromMemory };
+    export { getChapterQuestionsAndResponsesFromMemory };
+    export { updateResponseInMemory };
+    export { removeResponseFromMemory };
+    export { clearQuestionsAndResponsesMemory };
 }

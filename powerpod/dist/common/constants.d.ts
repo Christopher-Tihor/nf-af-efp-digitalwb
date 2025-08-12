@@ -120,4 +120,43 @@ export namespace POWERPOD {
         let lastUpdated: null;
         let error: null;
     }
+    namespace workbookQuestions {
+        let data_1: never[];
+        export { data_1 as data };
+        export let questionsById: Map<any, any>;
+        export let questionsByChapter: Map<any, any>;
+        let isLoaded_1: boolean;
+        export { isLoaded_1 as isLoaded };
+        let isLoading_1: boolean;
+        export { isLoading_1 as isLoading };
+        let workbookId_1: null;
+        export { workbookId_1 as workbookId };
+        let lastUpdated_1: null;
+        export { lastUpdated_1 as lastUpdated };
+        let error_1: null;
+        export { error_1 as error };
+    }
+    namespace workbookQuestionsAndResponses {
+        export let questionsWithResponses: Map<any, any>;
+        let questionsByChapter_1: Map<any, any>;
+        export { questionsByChapter_1 as questionsByChapter };
+        export namespace stats {
+            export let totalQuestions: number;
+            export let answeredQuestions: number;
+            export let unansweredQuestions: number;
+            export let completionPercentage: number;
+            let lastUpdated_2: null;
+            export { lastUpdated_2 as lastUpdated };
+        }
+        let isLoaded_2: boolean;
+        export { isLoaded_2 as isLoaded };
+        let isLoading_2: boolean;
+        export { isLoading_2 as isLoading };
+        let workbookId_2: null;
+        export { workbookId_2 as workbookId };
+        let lastUpdated_3: null;
+        export { lastUpdated_3 as lastUpdated };
+        let error_2: null;
+        export { error_2 as error };
+    }
 }
