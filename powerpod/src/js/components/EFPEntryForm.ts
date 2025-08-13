@@ -18,6 +18,8 @@ import { getWorkbookId } from '../common/workbookUtils.js';
 import { POWERPOD } from '../common/constants.js';
 import {
   getQuestionnaireFromStore,
+  getChapterFromStore,
+  getQuestionFromStore,
   updateQuestionResponse,
   isQuestionnaireLoaded
 } from '../common/questionnaire.js';
@@ -547,13 +549,14 @@ class EFPRenderUtils {
     html: any,
     activeContentTitle: string,
     onItemClick: (item: EFPSectionItem) => void,
-    renderItems: (items: EFPSectionItem[]) => any
+    renderItems: (items: EFPSectionItem[]) => any,
+    getCompletion?: (item: EFPSectionItem) => boolean
   ): any {
     return items.map((item) => {
       if ('items' in item && Array.isArray(item.items)) {
         return html`
           <sl-details summary=${item.title}>
-            ${renderItems(item.items)}
+            ${EFPRenderUtils.renderItems(item.items, html, activeContentTitle, onItemClick, renderItems, getCompletion)}
           </sl-details>
         `;
       } else {
@@ -566,8 +569,8 @@ class EFPRenderUtils {
             @click=${() => onItemClick(item)}
           >
             <sl-icon
-              name=${item.complete ? 'check-circle' : 'pencil'}
-              style="color: ${item.complete ? 'var(--sl-color-success-600)' : 'var(--sl-color-warning-600)'}"
+              name=${getCompletion ? (getCompletion(item) ? 'check-circle' : 'pencil') : (item.complete ? 'check-circle' : 'pencil')}
+              style="color: ${getCompletion ? (getCompletion(item) ? 'var(--sl-color-success-600)' : 'var(--sl-color-warning-600)') : (item.complete ? 'var(--sl-color-success-600)' : 'var(--sl-color-warning-600)')}"
             ></sl-icon>
             ${item.label}
           </div>
@@ -1078,7 +1081,7 @@ class EFPEntryForm extends LitElement {
     {
       tab: 'Section B',
       title: 'Environmental Farm Plan Questionnaire',
-      items: EFPSectionGenerator.generateSectionBItems(this.getQuestionnaireChapters()),
+      items: this.getSectionBItemsFromStore(),
     },
     {
       tab: 'Section C',
@@ -1249,6 +1252,178 @@ class EFPEntryForm extends LitElement {
     }
     // Fallback to the property if store is not loaded
     return this.nestedChapterStructure;
+  }
+
+  // Generate Section B items directly from questionnaire store
+  private getSectionBItemsFromStore(): EFPSectionItem[] {
+    const questionnaire = getQuestionnaireFromStore();
+
+    // If questionnaire store is not loaded, fallback to generateSectionBItems
+    if (!questionnaire?.chapters?.length) {
+      console.log('📋 Questionnaire store not loaded, using generateSectionBItems fallback');
+      return EFPSectionGenerator.generateSectionBItems(this.getQuestionnaireChapters());
+    }
+
+    console.log('📋 Generating Section B items directly from questionnaire store');
+
+    const chapters = questionnaire.chapters[0] || [];
+    const items: EFPSectionItem[] = [];
+
+    chapters.forEach((chapter: any) => {
+      // Extract chapter number from the main chapter
+      const chapterNumber = Math.floor(chapter.order || 0);
+
+      // Create the main chapter container (collapsible parent)
+      const chapterItem: EFPSectionItem = {
+        label: `Chapter ${chapterNumber}`,
+        title: `Chapter ${chapterNumber}`,
+        content: '', // No content for the parent container
+        complete: chapter.complete || false, // Use completion from store
+        isContainer: true,
+        chapterId: chapter.id, // Store chapter ID for completion lookup
+        items: []
+      };
+
+      // Add all subchapters as direct clickable items under the main chapter
+      if (chapter.subchapters && chapter.subchapters.length > 0) {
+        chapter.subchapters.forEach((subchapter: any) => {
+          // Add the subchapter as a clickable item
+          const formattedSubchapterTitle = EFPTextUtils.formatChapterTitle(subchapter.name || subchapter.label);
+          const subchapterItem: EFPSectionItem = {
+            label: formattedSubchapterTitle,
+            content: EFPSectionGenerator.renderSubchapterContent(subchapter),
+            complete: subchapter.complete || false, // Use completion from store
+            chapterId: subchapter.id, // Store chapter ID for completion lookup
+            subchapterData: subchapter, // Keep for backward compatibility
+          };
+
+          // If subchapter has sub-subchapters, add them as nested items
+          if (subchapter.subchapters && subchapter.subchapters.length > 0) {
+            subchapterItem.items = subchapter.subchapters.map((subSubchapter: any) => {
+              // Format sub-subchapter title
+              let subSubLabel = subSubchapter.name || subSubchapter.label;
+              subSubLabel = subSubLabel.replace(/^CHAPTER\s+\d+\.\d+\s+/i, '');
+              const formattedSubSubTitle = EFPTextUtils.formatChapterTitle(subSubLabel);
+
+              return {
+                label: formattedSubSubTitle,
+                content: EFPSectionGenerator.renderSubchapterContent(subSubchapter),
+                complete: subSubchapter.complete || false, // Use completion from store
+                chapterId: subSubchapter.id, // Store chapter ID for completion lookup
+                subchapterData: subSubchapter, // Keep for backward compatibility
+              };
+            });
+
+            // Add title property for sl-details rendering
+            subchapterItem.title = subchapterItem.label;
+          }
+
+          // Always add the subchapter to the main chapter items
+          chapterItem.items!.push(subchapterItem);
+        });
+      } else {
+        // If no subchapters, add the main chapter itself as a clickable item
+        const formattedTitle = EFPTextUtils.formatChapterTitle(chapter.name || chapter.label);
+        chapterItem.items!.push({
+          label: formattedTitle,
+          content: EFPSectionGenerator.renderChapterContent(chapter),
+          complete: chapter.complete || false, // Use completion from store
+          chapterId: chapter.id, // Store chapter ID for completion lookup
+          chapterData: chapter // Keep for backward compatibility
+        });
+      }
+
+      items.push(chapterItem);
+    });
+
+    console.log(`📋 Generated ${items.length} chapter items from questionnaire store`);
+    return items;
+  }
+
+  // Get completion status from questionnaire store for navigation items
+  private getCompletionFromStore(item: any): boolean {
+    console.log(`getCompletionFromStore: Checking completion for item:`, item.label);
+    console.log(item);
+
+    if (!isQuestionnaireLoaded()) {
+      // Fallback to item's current complete status
+      console.log(`getCompletionFromStore: Store not loaded, using item.complete = ${item.complete}`);
+      return item.complete || false;
+    }
+
+    try {
+      // Check if this is a chapter item (new chapterId property from store)
+      if (item.chapterId) {
+        const chapter = getChapterFromStore(item.chapterId);
+        const storeComplete = chapter?.complete || false;
+        console.log(`getCompletionFromStore: Chapter ${item.chapterId} completion from store = ${storeComplete}`);
+        return storeComplete;
+      }
+
+      // Check if this is a question item
+      if (item.questionId) {
+        const question = getQuestionFromStore(item.questionId);
+        const storeComplete = question?.complete || false;
+        console.log(`getCompletionFromStore: Question ${item.questionId} completion from store = ${storeComplete}`);
+        return storeComplete;
+      }
+
+      // For nested items (containers), check children completion
+      if ('items' in item && Array.isArray(item.items)) {
+        // All child items must be complete for parent to be complete
+        const childrenComplete = item.items.every((child: any) => this.getCompletionFromStore(child));
+        console.log(`getCompletionFromStore: Container ${item.label} children completion = ${childrenComplete}`);
+        return childrenComplete;
+      }
+
+      // Fallback to item's current status
+      console.log(`getCompletionFromStore: Using fallback item.complete = ${item.complete}`);
+      return item.complete || false;
+
+    } catch (error) {
+      console.warn('Failed to get completion from questionnaire store:', error);
+      return item.complete || false;
+    }
+  }
+
+  // Get section completion status from questionnaire store
+  private getSectionCompletionFromStore(section: any): boolean {
+    // For Section B, use questionnaire store completion
+    if (section.tab === 'Section B' && isQuestionnaireLoaded()) {
+      try {
+        // Import questionnaire stats dynamically to avoid circular imports
+        const questionnaire = getQuestionnaireFromStore();
+        if (questionnaire) {
+          // Calculate completion based on questionnaire store data
+          let totalQuestions = 0;
+          let answeredQuestions = 0;
+
+          const countInChapters = (chapters: any[]) => {
+            chapters.forEach((chapter: any) => {
+              if (chapter.questions) {
+                totalQuestions += chapter.questions.length;
+                answeredQuestions += chapter.questions.filter((q: any) => q.complete).length;
+              }
+              if (chapter.subchapters) {
+                countInChapters(chapter.subchapters);
+              }
+            });
+          };
+
+          if (questionnaire.chapters && questionnaire.chapters.length > 0) {
+            countInChapters(questionnaire.chapters[0]);
+          }
+
+          // Section is complete if all questions are answered
+          return totalQuestions > 0 && answeredQuestions === totalQuestions;
+        }
+      } catch (error) {
+        console.warn('Failed to get section completion from questionnaire store:', error);
+      }
+    }
+
+    // Fallback to existing logic
+    return this.isSectionComplete(section);
   }
 
   // Public API methods
@@ -1950,7 +2125,8 @@ class EFPEntryForm extends LitElement {
       html,
       this.activeContent.title,
       (item: EFPSectionItem) => this.handleItemClick(item),
-      (items: EFPSectionItem[]) => this.renderItems(items)
+      (items: EFPSectionItem[]) => this.renderItems(items),
+      (item: EFPSectionItem) => this.getCompletionFromStore(item)
     );
   }
 
@@ -2432,7 +2608,7 @@ class EFPEntryForm extends LitElement {
           >
             ${this.sections.map((section, index) => {
               const isActive = index === this.currentSectionIndex;
-              const isComplete = this.isSectionComplete(section);
+              const isComplete = this.getSectionCompletionFromStore(section);
               const icon = isComplete ? 'check-circle' : 'pencil';
               const color = isActive ? 'orange' : isComplete ? 'green' : 'gray';
 

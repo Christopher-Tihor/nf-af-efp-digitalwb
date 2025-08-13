@@ -262,7 +262,80 @@ private async handleRatingChanged(event: CustomEvent) {
 
   // Update store with full response data
   updateQuestionResponse(questionId, value, true, responseData);
+  // ✅ Completion status automatically recalculated
+  // ✅ Navigation icons automatically updated
 }
+```
+
+### Navigation Integration
+
+The EFP navigation now uses the questionnaire store to determine icon display:
+
+```javascript
+// Navigation icons are automatically determined by completion status
+// ✅ Complete chapters/questions → check-circle (green)
+// ✏️ Incomplete chapters/questions → pencil (orange/gray)
+
+// In EFPEntryForm.ts
+private getCompletionFromStore(item: any): boolean {
+  // Gets completion status from questionnaire store
+  if (item.chapterId) {
+    const chapter = getChapterFromStore(item.chapterId);
+    return chapter?.complete || false;
+  }
+
+  if (item.questionId) {
+    const question = getQuestionFromStore(item.questionId);
+    return question?.complete || false;
+  }
+
+  // Fallback to item's current status
+  return item.complete || false;
+}
+
+// Section tabs also use questionnaire store
+private getSectionCompletionFromStore(section: any): boolean {
+  // For Section B, calculates completion from questionnaire store
+  // Section is complete when ALL questions are answered
+}
+```
+
+### Direct Store Usage for Navigation
+
+The EFP navigation now uses questionnaire store data directly instead of transformation layers:
+
+```javascript
+// Before: Used generateSectionBItems transformation
+items: EFPSectionGenerator.generateSectionBItems(this.getQuestionnaireChapters())
+
+// After: Direct store usage
+items: this.getSectionBItemsFromStore()
+
+// Direct store access
+private getSectionBItemsFromStore(): EFPSectionItem[] {
+  const questionnaire = getQuestionnaireFromStore();
+  const chapters = questionnaire.chapters[0] || [];
+
+  return chapters.map(chapter => ({
+    label: `Chapter ${Math.floor(chapter.order || 0)}`,
+    complete: chapter.complete, // ✅ Direct from store
+    chapterId: chapter.id,      // ✅ Store chapter ID for lookups
+    items: chapter.subchapters?.map(subchapter => ({
+      label: formatTitle(subchapter.name),
+      complete: subchapter.complete, // ✅ Direct from store
+      chapterId: subchapter.id       // ✅ Store chapter ID for lookups
+    }))
+  }));
+}
+```
+
+#### Benefits of Direct Store Usage
+
+1. **No Transformation Layer**: Eliminates `generateSectionBItems` complexity
+2. **Real-time Completion**: Uses live completion status from store
+3. **Direct Lookups**: Chapter IDs available for `getChapterFromStore()` calls
+4. **Simpler Data Flow**: Store → Navigation (no intermediate transformations)
+5. **Automatic Updates**: Navigation reflects store changes immediately
 ```
 
 ## Benefits

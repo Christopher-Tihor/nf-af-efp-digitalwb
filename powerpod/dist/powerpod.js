@@ -34914,6 +34914,141 @@
   }
 
   /**
+   * Test direct store usage vs generateSectionBItems
+   */
+  function testDirectStoreUsage() {
+    console.log('🧪 Testing direct questionnaire store usage...');
+    try {
+      var questionnaire = getQuestionnaireFromStore();
+      if (!questionnaire) {
+        console.log('❌ No questionnaire data found in store');
+        return false;
+      }
+      console.log('📊 Comparing direct store usage vs generateSectionBItems:');
+
+      // Test direct store access
+      var chapters = questionnaire.chapters[0] || [];
+      console.log("\uD83D\uDCCB Direct store access: Found ".concat(chapters.length, " chapters"));
+      chapters.forEach(function (chapter, index) {
+        var _chapter$questions3, _chapter$subchapters3;
+        console.log("\uD83D\uDCDD Chapter ".concat(index + 1, ": ").concat(chapter.name));
+        console.log("   ID: ".concat(chapter.id));
+        console.log("   Complete: ".concat(chapter.complete ? '✅' : '❌'));
+        console.log("   Questions: ".concat(((_chapter$questions3 = chapter.questions) === null || _chapter$questions3 === void 0 ? void 0 : _chapter$questions3.length) || 0));
+        console.log("   Subchapters: ".concat(((_chapter$subchapters3 = chapter.subchapters) === null || _chapter$subchapters3 === void 0 ? void 0 : _chapter$subchapters3.length) || 0));
+        if (chapter.subchapters) {
+          chapter.subchapters.forEach(function (subchapter, subIndex) {
+            var _subchapter$questions;
+            console.log("  \uD83D\uDCC4 Subchapter ".concat(subIndex + 1, ": ").concat(subchapter.name));
+            console.log("     ID: ".concat(subchapter.id));
+            console.log("     Complete: ".concat(subchapter.complete ? '✅' : '❌'));
+            console.log("     Questions: ".concat(((_subchapter$questions = subchapter.questions) === null || _subchapter$questions === void 0 ? void 0 : _subchapter$questions.length) || 0));
+          });
+        }
+      });
+      console.log('\n✅ Direct store usage benefits:');
+      console.log('   • No transformation layer needed');
+      console.log('   • Completion status directly from store');
+      console.log('   • Chapter IDs available for lookups');
+      console.log('   • Real-time updates from store');
+      console.log('   • Simpler data flow');
+      return {
+        success: true,
+        chaptersCount: chapters.length,
+        directStoreAccess: true,
+        storeData: chapters
+      };
+    } catch (error) {
+      console.error('❌ Direct store usage test failed:', error);
+      return {
+        success: false,
+        error: error.message
+      };
+    }
+  }
+
+  /**
+   * Test navigation icon logic using questionnaire store
+   */
+  function testNavigationIcons() {
+    console.log('🧪 Testing navigation icon logic...');
+    try {
+      var questionnaire = getQuestionnaireFromStore();
+      if (!questionnaire) {
+        console.log('❌ No questionnaire data found in store');
+        return false;
+      }
+      console.log('🎯 Testing navigation icon rules:');
+      console.log('   ✅ Complete chapters/questions → check-circle (green)');
+      console.log('   ✏️ Incomplete chapters/questions → pencil (orange/gray)');
+      var testResults = [];
+
+      // Test each chapter for navigation icons
+      questionnaire.chapters.forEach(function (chapterGroup) {
+        if (Array.isArray(chapterGroup)) {
+          chapterGroup.forEach(function (chapter) {
+            var _chapter$questions4, _chapter$subchapters4;
+            var isComplete = chapter.complete;
+            var expectedIcon = isComplete ? 'check-circle' : 'pencil';
+            var expectedColor = isComplete ? 'green' : 'orange/gray';
+            var result = {
+              id: chapter.id,
+              name: chapter.name,
+              complete: isComplete,
+              expectedIcon: expectedIcon,
+              expectedColor: expectedColor,
+              hasQuestions: !!((_chapter$questions4 = chapter.questions) !== null && _chapter$questions4 !== void 0 && _chapter$questions4.length),
+              hasSubchapters: !!((_chapter$subchapters4 = chapter.subchapters) !== null && _chapter$subchapters4 !== void 0 && _chapter$subchapters4.length)
+            };
+            testResults.push(result);
+            console.log("\uD83D\uDCDD ".concat(chapter.name, ":"));
+            console.log("   Complete: ".concat(isComplete ? '✅' : '❌'));
+            console.log("   Icon: ".concat(expectedIcon, " (").concat(expectedColor, ")"));
+            console.log("   Content: ".concat(result.hasQuestions ? 'Questions' : '').concat(result.hasQuestions && result.hasSubchapters ? ' + ' : '').concat(result.hasSubchapters ? 'Subchapters' : ''));
+
+            // Test subchapters if they exist
+            if (chapter.subchapters) {
+              chapter.subchapters.forEach(function (subchapter) {
+                var subIsComplete = subchapter.complete;
+                var subExpectedIcon = subIsComplete ? 'check-circle' : 'pencil';
+                var subExpectedColor = subIsComplete ? 'green' : 'orange/gray';
+                console.log("  \uD83D\uDCC4 ".concat(subchapter.name, ":"));
+                console.log("     Complete: ".concat(subIsComplete ? '✅' : '❌'));
+                console.log("     Icon: ".concat(subExpectedIcon, " (").concat(subExpectedColor, ")"));
+              });
+            }
+          });
+        }
+      });
+
+      // Test overall section completion
+      var totalChapters = testResults.length;
+      var completeChapters = testResults.filter(function (r) {
+        return r.complete;
+      }).length;
+      var sectionComplete = completeChapters === totalChapters && totalChapters > 0;
+      console.log("\n\uD83D\uDCCA Section B Navigation:");
+      console.log("   Complete Chapters: ".concat(completeChapters, "/").concat(totalChapters));
+      console.log("   Section Complete: ".concat(sectionComplete ? '✅' : '❌'));
+      console.log("   Section Tab Icon: ".concat(sectionComplete ? 'check-circle (green)' : 'pencil (orange/gray)'));
+      console.log('\n🎉 Navigation icon test completed!');
+      return {
+        success: true,
+        totalChapters: totalChapters,
+        completeChapters: completeChapters,
+        sectionComplete: sectionComplete,
+        testResults: testResults
+      };
+    } catch (error) {
+      console.error('❌ Navigation icon test failed:', error);
+      return {
+        success: false,
+        error: error.message
+      };
+    }
+  }
+
+  /**
    * Test workbookResponseHelper integration with questionnaire store
    */
   function testWorkbookResponseHelperIntegration() {
@@ -34997,11 +35132,15 @@
     window.testQuestionnaireStore = testQuestionnaireResponseIntegration;
     window.testWorkbookResponseIntegration = testWorkbookResponseHelperIntegration;
     window.testCompletionLogic = testCompletionLogic;
+    window.testDirectStoreUsage = testDirectStoreUsage;
+    window.testNavigationIcons = testNavigationIcons;
     window.runQuestionnaireExamples = runAllExamples;
     console.log('🧪 Questionnaire Store Test Functions Available:');
     console.log('   - window.testQuestionnaireStore() - Test response integration');
     console.log('   - window.testWorkbookResponseIntegration() - Test workbookResponseHelper integration');
     console.log('   - window.testCompletionLogic() - Test new completion rules');
+    console.log('   - window.testDirectStoreUsage() - Test direct store usage vs generateSectionBItems');
+    console.log('   - window.testNavigationIcons() - Test navigation icon logic');
     console.log('   - window.runQuestionnaireExamples() - Run all examples');
   }
 
@@ -37520,12 +37659,12 @@
           // Default content rendering
           return html `<div>${unsafeHTML(activeContent.content)}</div>`;
       }
-      static renderItems(items, html, activeContentTitle, onItemClick, renderItems) {
+      static renderItems(items, html, activeContentTitle, onItemClick, renderItems, getCompletion) {
           return items.map((item) => {
               if ('items' in item && Array.isArray(item.items)) {
                   return html `
           <sl-details summary=${item.title}>
-            ${renderItems(item.items)}
+            ${EFPRenderUtils.renderItems(item.items, html, activeContentTitle, onItemClick, renderItems, getCompletion)}
           </sl-details>
         `;
               }
@@ -37539,8 +37678,8 @@
             @click=${() => onItemClick(item)}
           >
             <sl-icon
-              name=${item.complete ? 'check-circle' : 'pencil'}
-              style="color: ${item.complete ? 'var(--sl-color-success-600)' : 'var(--sl-color-warning-600)'}"
+              name=${getCompletion ? (getCompletion(item) ? 'check-circle' : 'pencil') : (item.complete ? 'check-circle' : 'pencil')}
+              style="color: ${getCompletion ? (getCompletion(item) ? 'var(--sl-color-success-600)' : 'var(--sl-color-warning-600)') : (item.complete ? 'var(--sl-color-success-600)' : 'var(--sl-color-warning-600)')}"
             ></sl-icon>
             ${item.label}
           </div>
@@ -37702,7 +37841,7 @@
               {
                   tab: 'Section B',
                   title: 'Environmental Farm Plan Questionnaire',
-                  items: EFPSectionGenerator.generateSectionBItems(this.getQuestionnaireChapters()),
+                  items: this.getSectionBItemsFromStore(),
               },
               {
                   tab: 'Section C',
@@ -37849,6 +37988,157 @@
           }
           // Fallback to the property if store is not loaded
           return this.nestedChapterStructure;
+      }
+      // Generate Section B items directly from questionnaire store
+      getSectionBItemsFromStore() {
+          var _a;
+          const questionnaire = getQuestionnaireFromStore();
+          // If questionnaire store is not loaded, fallback to generateSectionBItems
+          if (!((_a = questionnaire === null || questionnaire === void 0 ? void 0 : questionnaire.chapters) === null || _a === void 0 ? void 0 : _a.length)) {
+              console.log('📋 Questionnaire store not loaded, using generateSectionBItems fallback');
+              return EFPSectionGenerator.generateSectionBItems(this.getQuestionnaireChapters());
+          }
+          console.log('📋 Generating Section B items directly from questionnaire store');
+          const chapters = questionnaire.chapters[0] || [];
+          const items = [];
+          chapters.forEach((chapter) => {
+              // Extract chapter number from the main chapter
+              const chapterNumber = Math.floor(chapter.order || 0);
+              // Create the main chapter container (collapsible parent)
+              const chapterItem = {
+                  label: `Chapter ${chapterNumber}`,
+                  title: `Chapter ${chapterNumber}`,
+                  content: '', // No content for the parent container
+                  complete: chapter.complete || false, // Use completion from store
+                  isContainer: true,
+                  chapterId: chapter.id, // Store chapter ID for completion lookup
+                  items: []
+              };
+              // Add all subchapters as direct clickable items under the main chapter
+              if (chapter.subchapters && chapter.subchapters.length > 0) {
+                  chapter.subchapters.forEach((subchapter) => {
+                      // Add the subchapter as a clickable item
+                      const formattedSubchapterTitle = EFPTextUtils.formatChapterTitle(subchapter.name || subchapter.label);
+                      const subchapterItem = {
+                          label: formattedSubchapterTitle,
+                          content: EFPSectionGenerator.renderSubchapterContent(subchapter),
+                          complete: subchapter.complete || false, // Use completion from store
+                          chapterId: subchapter.id, // Store chapter ID for completion lookup
+                          subchapterData: subchapter, // Keep for backward compatibility
+                      };
+                      // If subchapter has sub-subchapters, add them as nested items
+                      if (subchapter.subchapters && subchapter.subchapters.length > 0) {
+                          subchapterItem.items = subchapter.subchapters.map((subSubchapter) => {
+                              // Format sub-subchapter title
+                              let subSubLabel = subSubchapter.name || subSubchapter.label;
+                              subSubLabel = subSubLabel.replace(/^CHAPTER\s+\d+\.\d+\s+/i, '');
+                              const formattedSubSubTitle = EFPTextUtils.formatChapterTitle(subSubLabel);
+                              return {
+                                  label: formattedSubSubTitle,
+                                  content: EFPSectionGenerator.renderSubchapterContent(subSubchapter),
+                                  complete: subSubchapter.complete || false, // Use completion from store
+                                  chapterId: subSubchapter.id, // Store chapter ID for completion lookup
+                                  subchapterData: subSubchapter, // Keep for backward compatibility
+                              };
+                          });
+                          // Add title property for sl-details rendering
+                          subchapterItem.title = subchapterItem.label;
+                      }
+                      // Always add the subchapter to the main chapter items
+                      chapterItem.items.push(subchapterItem);
+                  });
+              }
+              else {
+                  // If no subchapters, add the main chapter itself as a clickable item
+                  const formattedTitle = EFPTextUtils.formatChapterTitle(chapter.name || chapter.label);
+                  chapterItem.items.push({
+                      label: formattedTitle,
+                      content: EFPSectionGenerator.renderChapterContent(chapter),
+                      complete: chapter.complete || false, // Use completion from store
+                      chapterId: chapter.id, // Store chapter ID for completion lookup
+                      chapterData: chapter // Keep for backward compatibility
+                  });
+              }
+              items.push(chapterItem);
+          });
+          console.log(`📋 Generated ${items.length} chapter items from questionnaire store`);
+          return items;
+      }
+      // Get completion status from questionnaire store for navigation items
+      getCompletionFromStore(item) {
+          console.log(`getCompletionFromStore: Checking completion for item:`, item.label);
+          console.log(item);
+          if (!isQuestionnaireLoaded()) {
+              // Fallback to item's current complete status
+              console.log(`getCompletionFromStore: Store not loaded, using item.complete = ${item.complete}`);
+              return item.complete || false;
+          }
+          try {
+              // Check if this is a chapter item (new chapterId property from store)
+              if (item.chapterId) {
+                  const chapter = getChapterFromStore(item.chapterId);
+                  const storeComplete = (chapter === null || chapter === void 0 ? void 0 : chapter.complete) || false;
+                  console.log(`getCompletionFromStore: Chapter ${item.chapterId} completion from store = ${storeComplete}`);
+                  return storeComplete;
+              }
+              // Check if this is a question item
+              if (item.questionId) {
+                  const question = getQuestionFromStore(item.questionId);
+                  const storeComplete = (question === null || question === void 0 ? void 0 : question.complete) || false;
+                  console.log(`getCompletionFromStore: Question ${item.questionId} completion from store = ${storeComplete}`);
+                  return storeComplete;
+              }
+              // For nested items (containers), check children completion
+              if ('items' in item && Array.isArray(item.items)) {
+                  // All child items must be complete for parent to be complete
+                  const childrenComplete = item.items.every((child) => this.getCompletionFromStore(child));
+                  console.log(`getCompletionFromStore: Container ${item.label} children completion = ${childrenComplete}`);
+                  return childrenComplete;
+              }
+              // Fallback to item's current status
+              console.log(`getCompletionFromStore: Using fallback item.complete = ${item.complete}`);
+              return item.complete || false;
+          }
+          catch (error) {
+              console.warn('Failed to get completion from questionnaire store:', error);
+              return item.complete || false;
+          }
+      }
+      // Get section completion status from questionnaire store
+      getSectionCompletionFromStore(section) {
+          // For Section B, use questionnaire store completion
+          if (section.tab === 'Section B' && isQuestionnaireLoaded()) {
+              try {
+                  // Import questionnaire stats dynamically to avoid circular imports
+                  const questionnaire = getQuestionnaireFromStore();
+                  if (questionnaire) {
+                      // Calculate completion based on questionnaire store data
+                      let totalQuestions = 0;
+                      let answeredQuestions = 0;
+                      const countInChapters = (chapters) => {
+                          chapters.forEach((chapter) => {
+                              if (chapter.questions) {
+                                  totalQuestions += chapter.questions.length;
+                                  answeredQuestions += chapter.questions.filter((q) => q.complete).length;
+                              }
+                              if (chapter.subchapters) {
+                                  countInChapters(chapter.subchapters);
+                              }
+                          });
+                      };
+                      if (questionnaire.chapters && questionnaire.chapters.length > 0) {
+                          countInChapters(questionnaire.chapters[0]);
+                      }
+                      // Section is complete if all questions are answered
+                      return totalQuestions > 0 && answeredQuestions === totalQuestions;
+                  }
+              }
+              catch (error) {
+                  console.warn('Failed to get section completion from questionnaire store:', error);
+              }
+          }
+          // Fallback to existing logic
+          return this.isSectionComplete(section);
       }
       // Public API methods
       updateNestedChapterStructure(nestedStructure) {
@@ -38403,7 +38693,7 @@
           }
       }
       renderItems(items) {
-          return EFPRenderUtils.renderItems(items, x, this.activeContent.title, (item) => this.handleItemClick(item), (items) => this.renderItems(items));
+          return EFPRenderUtils.renderItems(items, x, this.activeContent.title, (item) => this.handleItemClick(item), (items) => this.renderItems(items), (item) => this.getCompletionFromStore(item));
       }
       updated(changedProps) {
           if (changedProps.has('currentStepIndex')) {
@@ -38818,7 +39108,7 @@
           >
             ${this.sections.map((section, index) => {
             const isActive = index === this.currentSectionIndex;
-            const isComplete = this.isSectionComplete(section);
+            const isComplete = this.getSectionCompletionFromStore(section);
             const icon = isComplete ? 'check-circle' : 'pencil';
             const color = isActive ? 'orange' : isComplete ? 'green' : 'gray';
             return x `

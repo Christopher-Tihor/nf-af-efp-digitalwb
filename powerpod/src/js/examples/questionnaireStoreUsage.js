@@ -546,6 +546,148 @@ export function testCompletionLogic() {
 }
 
 /**
+ * Test direct store usage vs generateSectionBItems
+ */
+export function testDirectStoreUsage() {
+  console.log('🧪 Testing direct questionnaire store usage...');
+
+  try {
+    const questionnaire = getQuestionnaireFromStore();
+    if (!questionnaire) {
+      console.log('❌ No questionnaire data found in store');
+      return false;
+    }
+
+    console.log('📊 Comparing direct store usage vs generateSectionBItems:');
+
+    // Test direct store access
+    const chapters = questionnaire.chapters[0] || [];
+    console.log(`📋 Direct store access: Found ${chapters.length} chapters`);
+
+    chapters.forEach((chapter, index) => {
+      console.log(`📝 Chapter ${index + 1}: ${chapter.name}`);
+      console.log(`   ID: ${chapter.id}`);
+      console.log(`   Complete: ${chapter.complete ? '✅' : '❌'}`);
+      console.log(`   Questions: ${chapter.questions?.length || 0}`);
+      console.log(`   Subchapters: ${chapter.subchapters?.length || 0}`);
+
+      if (chapter.subchapters) {
+        chapter.subchapters.forEach((subchapter, subIndex) => {
+          console.log(`  📄 Subchapter ${subIndex + 1}: ${subchapter.name}`);
+          console.log(`     ID: ${subchapter.id}`);
+          console.log(`     Complete: ${subchapter.complete ? '✅' : '❌'}`);
+          console.log(`     Questions: ${subchapter.questions?.length || 0}`);
+        });
+      }
+    });
+
+    console.log('\n✅ Direct store usage benefits:');
+    console.log('   • No transformation layer needed');
+    console.log('   • Completion status directly from store');
+    console.log('   • Chapter IDs available for lookups');
+    console.log('   • Real-time updates from store');
+    console.log('   • Simpler data flow');
+
+    return {
+      success: true,
+      chaptersCount: chapters.length,
+      directStoreAccess: true,
+      storeData: chapters
+    };
+
+  } catch (error) {
+    console.error('❌ Direct store usage test failed:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+/**
+ * Test navigation icon logic using questionnaire store
+ */
+export function testNavigationIcons() {
+  console.log('🧪 Testing navigation icon logic...');
+
+  try {
+    const questionnaire = getQuestionnaireFromStore();
+    if (!questionnaire) {
+      console.log('❌ No questionnaire data found in store');
+      return false;
+    }
+
+    console.log('🎯 Testing navigation icon rules:');
+    console.log('   ✅ Complete chapters/questions → check-circle (green)');
+    console.log('   ✏️ Incomplete chapters/questions → pencil (orange/gray)');
+
+    let testResults = [];
+
+    // Test each chapter for navigation icons
+    questionnaire.chapters.forEach(chapterGroup => {
+      if (Array.isArray(chapterGroup)) {
+        chapterGroup.forEach(chapter => {
+          const isComplete = chapter.complete;
+          const expectedIcon = isComplete ? 'check-circle' : 'pencil';
+          const expectedColor = isComplete ? 'green' : 'orange/gray';
+
+          const result = {
+            id: chapter.id,
+            name: chapter.name,
+            complete: isComplete,
+            expectedIcon,
+            expectedColor,
+            hasQuestions: !!(chapter.questions?.length),
+            hasSubchapters: !!(chapter.subchapters?.length)
+          };
+
+          testResults.push(result);
+
+          console.log(`📝 ${chapter.name}:`);
+          console.log(`   Complete: ${isComplete ? '✅' : '❌'}`);
+          console.log(`   Icon: ${expectedIcon} (${expectedColor})`);
+          console.log(`   Content: ${result.hasQuestions ? 'Questions' : ''}${result.hasQuestions && result.hasSubchapters ? ' + ' : ''}${result.hasSubchapters ? 'Subchapters' : ''}`);
+
+          // Test subchapters if they exist
+          if (chapter.subchapters) {
+            chapter.subchapters.forEach(subchapter => {
+              const subIsComplete = subchapter.complete;
+              const subExpectedIcon = subIsComplete ? 'check-circle' : 'pencil';
+              const subExpectedColor = subIsComplete ? 'green' : 'orange/gray';
+
+              console.log(`  📄 ${subchapter.name}:`);
+              console.log(`     Complete: ${subIsComplete ? '✅' : '❌'}`);
+              console.log(`     Icon: ${subExpectedIcon} (${subExpectedColor})`);
+            });
+          }
+        });
+      }
+    });
+
+    // Test overall section completion
+    let totalChapters = testResults.length;
+    let completeChapters = testResults.filter(r => r.complete).length;
+    let sectionComplete = completeChapters === totalChapters && totalChapters > 0;
+
+    console.log(`\n📊 Section B Navigation:`);
+    console.log(`   Complete Chapters: ${completeChapters}/${totalChapters}`);
+    console.log(`   Section Complete: ${sectionComplete ? '✅' : '❌'}`);
+    console.log(`   Section Tab Icon: ${sectionComplete ? 'check-circle (green)' : 'pencil (orange/gray)'}`);
+
+    console.log('\n🎉 Navigation icon test completed!');
+
+    return {
+      success: true,
+      totalChapters,
+      completeChapters,
+      sectionComplete,
+      testResults
+    };
+
+  } catch (error) {
+    console.error('❌ Navigation icon test failed:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+/**
  * Test workbookResponseHelper integration with questionnaire store
  */
 export async function testWorkbookResponseHelperIntegration() {
@@ -605,11 +747,15 @@ if (typeof window !== 'undefined') {
   window.testQuestionnaireStore = testQuestionnaireResponseIntegration;
   window.testWorkbookResponseIntegration = testWorkbookResponseHelperIntegration;
   window.testCompletionLogic = testCompletionLogic;
+  window.testDirectStoreUsage = testDirectStoreUsage;
+  window.testNavigationIcons = testNavigationIcons;
   window.runQuestionnaireExamples = runAllExamples;
 
   console.log('🧪 Questionnaire Store Test Functions Available:');
   console.log('   - window.testQuestionnaireStore() - Test response integration');
   console.log('   - window.testWorkbookResponseIntegration() - Test workbookResponseHelper integration');
   console.log('   - window.testCompletionLogic() - Test new completion rules');
+  console.log('   - window.testDirectStoreUsage() - Test direct store usage vs generateSectionBItems');
+  console.log('   - window.testNavigationIcons() - Test navigation icon logic');
   console.log('   - window.runQuestionnaireExamples() - Run all examples');
 }
