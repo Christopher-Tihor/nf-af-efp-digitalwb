@@ -3,8 +3,9 @@
  * This demonstrates how to use the new questionnaire state management
  */
 
-import { 
+import {
   loadQuestionnaireIntoStore,
+  loadQuestionnaireWithResponses,
   getQuestionnaireFromStore,
   getChapterFromStore,
   getQuestionFromStore,
@@ -20,7 +21,61 @@ import { Logger } from '../common/logger.js';
 const logger = Logger('examples/questionnaireStoreUsage');
 
 /**
- * Example: Load questionnaire data into the store
+ * Example: Load questionnaire data with responses into the store
+ */
+export async function exampleLoadQuestionnaireWithResponses(workbookId = "example-workbook-id") {
+  logger.info({
+    fn: exampleLoadQuestionnaireWithResponses,
+    message: 'Loading example questionnaire data with responses into store'
+  });
+
+  // Example nested chapter structure (this would normally come from the API)
+  const exampleNestedStructure = [
+    {
+      id: "chapter-1",
+      name: "Chapter 1: Farm Overview",
+      label: "Farm Overview",
+      order: 1,
+      complete: false,
+      description: "Basic information about your farm",
+      questions: [
+        {
+          id: "question-1-1",
+          name: "Farm Size",
+          label: "What is the total size of your farm?",
+          order: 1,
+          questionType: 100000001,
+          complete: false,
+          response: null
+        }
+      ],
+      subchapters: []
+    }
+  ];
+
+  try {
+    // Load with responses
+    const result = await loadQuestionnaireWithResponses(exampleNestedStructure, workbookId);
+
+    logger.info({
+      fn: exampleLoadQuestionnaireWithResponses,
+      message: 'Successfully loaded questionnaire with responses into store',
+      data: { result }
+    });
+
+    return result;
+  } catch (error) {
+    logger.error({
+      fn: exampleLoadQuestionnaireWithResponses,
+      message: 'Failed to load questionnaire with responses',
+      data: { error: error.message }
+    });
+    throw error;
+  }
+}
+
+/**
+ * Example: Load questionnaire data into the store (without responses)
  */
 export function exampleLoadQuestionnaire() {
   logger.info({
@@ -156,18 +211,30 @@ export function exampleUpdateQuestionResponse(questionId = "question-1-1", respo
     message: `Updating response for question ${questionId}`
   });
 
-  updateQuestionResponse(questionId, response, true);
-  
+  // Example response data (this would normally come from the API)
+  const exampleResponseData = {
+    quartech_workbookresponseid: "response-id-123",
+    quartech_response: response,
+    quartech_notes: `Response: ${response}`,
+    _quartech_question_value: questionId,
+    _quartech_workbook_value: "workbook-id-123",
+    createdon: new Date().toISOString(),
+    modifiedon: new Date().toISOString()
+  };
+
+  updateQuestionResponse(questionId, response, true, exampleResponseData);
+
   // Verify the update
   const question = getQuestionFromStore(questionId);
   if (question) {
     logger.info({
       fn: exampleUpdateQuestionResponse,
       message: 'Question response updated successfully',
-      data: { 
+      data: {
         questionId,
         response: question.response,
-        complete: question.complete
+        complete: question.complete,
+        hasResponseData: !!question.responseData
       }
     });
   }
@@ -239,46 +306,51 @@ export function exampleCheckLoaded() {
 /**
  * Run all examples
  */
-export function runAllExamples() {
+export async function runAllExamples() {
   logger.info({
     fn: runAllExamples,
     message: 'Running all questionnaire store examples'
   });
 
   console.log('=== Questionnaire Store Examples ===');
-  
+
   // 1. Check if loaded
   console.log('1. Checking if questionnaire is loaded...');
   const initialLoaded = exampleCheckLoaded();
-  
+
   // 2. Load questionnaire if not loaded
   if (!initialLoaded) {
-    console.log('2. Loading questionnaire data...');
-    exampleLoadQuestionnaire();
+    console.log('2. Loading questionnaire data with responses...');
+    try {
+      await exampleLoadQuestionnaireWithResponses();
+    } catch (error) {
+      console.log('2b. Falling back to loading without responses...');
+      exampleLoadQuestionnaire();
+    }
   }
-  
+
   // 3. Get questionnaire
   console.log('3. Getting questionnaire data...');
   exampleGetQuestionnaire();
-  
+
   // 4. Get a chapter
   console.log('4. Getting a specific chapter...');
   exampleGetChapter();
-  
+
   // 5. Update question response
   console.log('5. Updating a question response...');
   exampleUpdateQuestionResponse();
-  
+
   // 6. Update chapter completion
   console.log('6. Updating chapter completion...');
   exampleUpdateChapterCompletion();
-  
+
   // 7. Get statistics
   console.log('7. Getting questionnaire statistics...');
   exampleGetStats();
-  
+
   console.log('=== Examples completed ===');
-  
+
   // Return current state for inspection
   return {
     questionnaire: getQuestionnaireFromStore(),

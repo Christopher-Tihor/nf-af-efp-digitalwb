@@ -37,7 +37,9 @@ The questionnaire data is stored in `state.questionnaire` with the following str
               tooltip: null,
               responseOptionColor: null,
               response: null,
-              complete: false
+              responseData: null,
+              complete: false,
+              hasResponse: false
             }
           ],
           subchapters: [
@@ -73,11 +75,15 @@ The questionnaire data is stored in `state.questionnaire` with the following str
 ### Loading Questionnaire Data
 
 ```javascript
-import { loadQuestionnaireIntoStore } from '../common/questionnaire.js';
+import { loadQuestionnaireIntoStore, loadQuestionnaireWithResponses } from '../common/questionnaire.js';
 
-// Load nested chapter structure into store
+// Load nested chapter structure into store (without responses)
 const nestedStructure = getChaptersWithNestedQuestionsAndSubchapters();
 loadQuestionnaireIntoStore(nestedStructure);
+
+// Load questionnaire with response data (recommended)
+const workbookId = getWorkbookId();
+await loadQuestionnaireWithResponses(nestedStructure, workbookId);
 ```
 
 ### Getting Questionnaire Data
@@ -108,8 +114,20 @@ const question = getQuestionFromStore('question-id');
 ```javascript
 import { updateQuestionResponse } from '../common/questionnaire.js';
 
-// Update a question response
+// Update a question response (simple)
 updateQuestionResponse('question-id', 'response-value', true);
+
+// Update a question response with full response data (recommended)
+const responseData = {
+  quartech_workbookresponseid: "response-id",
+  quartech_response: "response-value",
+  quartech_notes: "Additional notes",
+  _quartech_question_value: "question-id",
+  _quartech_workbook_value: "workbook-id",
+  createdon: new Date().toISOString(),
+  modifiedon: new Date().toISOString()
+};
+updateQuestionResponse('question-id', 'response-value', true, responseData);
 ```
 
 ### Updating Chapter Completion
@@ -135,15 +153,23 @@ console.log(`Answered: ${stats.answeredQuestions}/${stats.totalQuestions}`);
 
 ### Workbook Initialization
 
-The questionnaire store is automatically populated during workbook initialization:
+The questionnaire store is automatically populated with response data during workbook initialization:
 
 ```javascript
 // In powerpod/src/js/workbook/workbook.js
-import { loadQuestionnaireIntoStore } from '../common/questionnaire.js';
+import { loadQuestionnaireWithResponses } from '../common/questionnaire.js';
 
 // After building nested structure
 const nestedStructure = getChaptersWithNestedQuestionsAndSubchapters();
-loadQuestionnaireIntoStore(nestedStructure);
+const workbookId = getWorkbookId();
+
+// Load questionnaire with responses
+if (workbookId) {
+  await loadQuestionnaireWithResponses(nestedStructure, workbookId);
+} else {
+  // Fallback to loading without responses
+  loadQuestionnaireIntoStore(nestedStructure);
+}
 ```
 
 ### EFP Entry Form
@@ -163,25 +189,27 @@ private getQuestionnaireChapters(): any[] {
   return this.nestedChapterStructure; // fallback
 }
 
-// Update responses in store
+// Update responses in store with full response data
 private async handleRatingChanged(event: CustomEvent) {
   const { questionId, value } = event.detail;
-  
-  // Save to API
-  await this.saveRatingResponse(questionId, value);
-  
-  // Update store
-  updateQuestionResponse(questionId, value, true);
+
+  // Save to API and get response data
+  const responseData = await this.saveRatingResponse(questionId, value);
+
+  // Update store with full response data
+  updateQuestionResponse(questionId, value, true, responseData);
 }
 ```
 
 ## Benefits
 
-1. **Single Source of Truth**: All questionnaire data is centralized in the store
+1. **Single Source of Truth**: All questionnaire data and responses are centralized in the store
 2. **Consistent State Management**: Uses the same pattern as fields store
 3. **Real-time Updates**: Changes are immediately reflected across components
-4. **Easy Testing**: Helper functions make it easy to test questionnaire logic
-5. **Performance**: Reduces redundant API calls and data processing
+4. **Integrated Response Data**: Response data is stored alongside questions for easy access
+5. **Easy Testing**: Helper functions make it easy to test questionnaire logic
+6. **Performance**: Reduces redundant API calls and data processing
+7. **Backward Compatibility**: Works with existing POWERPOD response structures
 
 ## Migration Notes
 
@@ -198,12 +226,13 @@ See `powerpod/src/js/examples/questionnaireStoreUsage.js` for complete working e
 
 ### Helper Functions
 
-- `loadQuestionnaireIntoStore(nestedStructure, forceRefresh)`: Load data into store
+- `loadQuestionnaireIntoStore(nestedStructure, forceRefresh, responseData)`: Load data into store
+- `loadQuestionnaireWithResponses(nestedStructure, workbookId, forceRefresh)`: Load data with responses
 - `getQuestionnaireFromStore()`: Get questionnaire data from store
 - `getChapterFromStore(chapterId)`: Get specific chapter
 - `getQuestionFromStore(questionId)`: Get specific question
 - `updateChapterCompletion(chapterId, complete)`: Update chapter completion
-- `updateQuestionResponse(questionId, response, complete)`: Update question response
+- `updateQuestionResponse(questionId, response, complete, responseData)`: Update question response
 - `getQuestionsForChapter(chapterId)`: Get all questions for a chapter
 - `getQuestionnaireStats()`: Get completion statistics
 - `isQuestionnaireLoaded()`: Check if questionnaire is loaded

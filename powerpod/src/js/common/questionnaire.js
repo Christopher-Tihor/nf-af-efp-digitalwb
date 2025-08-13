@@ -5,18 +5,89 @@ import store from '../store/index.js';
 const logger = Logger('common/questionnaire');
 
 /**
+ * Merge response data with questions in the nested chapter structure
+ * @param {Array} nestedChapterStructure - The nested chapter structure
+ * @param {Object} responseData - Response data from workbookQuestionsAndResponses
+ * @returns {Array} Enhanced structure with response data
+ */
+function mergeResponsesWithQuestions(nestedChapterStructure, responseData) {
+  logger.info({
+    fn: mergeResponsesWithQuestions,
+    message: 'Merging response data with questions',
+    data: {
+      chaptersCount: nestedChapterStructure?.length || 0,
+      hasResponseData: !!responseData
+    },
+  });
+
+  if (!responseData || !responseData.questionsWithResponses) {
+    logger.warn({
+      fn: mergeResponsesWithQuestions,
+      message: 'No response data provided, returning original structure'
+    });
+    return nestedChapterStructure;
+  }
+
+  const questionsWithResponses = responseData.questionsWithResponses;
+
+  // Deep clone the structure to avoid mutating the original
+  const enhancedStructure = JSON.parse(JSON.stringify(nestedChapterStructure));
+
+  // Recursive function to enhance questions with response data
+  const enhanceQuestionsInChapters = (chapters) => {
+    if (!Array.isArray(chapters)) return;
+
+    chapters.forEach(chapter => {
+      // Enhance questions in main chapter
+      if (chapter.questions && Array.isArray(chapter.questions)) {
+        chapter.questions.forEach(question => {
+          const responseEntry = questionsWithResponses.get(question.id);
+          if (responseEntry && responseEntry.response) {
+            question.response = responseEntry.response.quartech_response;
+            question.responseData = responseEntry.response;
+            question.complete = true;
+            question.hasResponse = true;
+          } else {
+            question.response = null;
+            question.responseData = null;
+            question.complete = false;
+            question.hasResponse = false;
+          }
+        });
+      }
+
+      // Enhance questions in subchapters recursively
+      if (chapter.subchapters && Array.isArray(chapter.subchapters)) {
+        enhanceQuestionsInChapters(chapter.subchapters);
+      }
+    });
+  };
+
+  enhanceQuestionsInChapters(enhancedStructure);
+
+  logger.info({
+    fn: mergeResponsesWithQuestions,
+    message: 'Successfully merged response data with questions'
+  });
+
+  return enhancedStructure;
+}
+
+/**
  * Load questionnaire data into the store from the nested chapter structure
  * @param {Array} nestedChapterStructure - The nested chapter structure from the API
  * @param {boolean} forceRefresh - Whether to force refresh the data
+ * @param {Object} responseData - Optional response data to merge with questions
  * @returns {Object} The questionnaire data
  */
-export function loadQuestionnaireIntoStore(nestedChapterStructure, forceRefresh = false) {
+export function loadQuestionnaireIntoStore(nestedChapterStructure, forceRefresh = false, responseData = null) {
   logger.info({
     fn: loadQuestionnaireIntoStore,
     message: 'Loading questionnaire data into store',
-    data: { 
+    data: {
       chaptersCount: nestedChapterStructure?.length || 0,
-      forceRefresh 
+      forceRefresh,
+      hasResponseData: !!responseData
     },
   });
 
@@ -30,10 +101,16 @@ export function loadQuestionnaireIntoStore(nestedChapterStructure, forceRefresh 
     return POWERPOD.state.questionnaire;
   }
 
+  // Merge response data with questions if provided
+  let enrichedStructure = nestedChapterStructure;
+  if (responseData) {
+    enrichedStructure = mergeResponsesWithQuestions(nestedChapterStructure, responseData);
+  }
+
   // Transform the nested structure to match our store format
   const questionnaireData = {
     title: "Environmental Farm Plan Questionnaire",
-    chapters: [nestedChapterStructure] // Wrap in array to match the example structure
+    chapters: [enrichedStructure] // Wrap in array to match the example structure
   };
 
   // Dispatch to store
@@ -155,18 +232,38 @@ export function updateChapterCompletion(chapterId, complete) {
  * @param {string} questionId - The question ID to update
  * @param {any} response - The response value
  * @param {boolean} complete - Whether the question is complete
+ * @param {Object} responseData - Full response data object (optional)
  */
-export function updateQuestionResponse(questionId, response, complete = true) {
+export function updateQuestionResponse(questionId, response, complete = true, responseData = null) {
   logger.info({
     fn: updateQuestionResponse,
     message: 'Updating question response',
-    data: { questionId, response, complete },
+    data: { questionId, response, complete, hasResponseData: !!responseData },
   });
+
+  const updateData = {
+    response,
+    complete,
+    hasResponse: !!response
+  };
+
+  // Include full response data if provided
+  if (responseData) {
+    updateData.responseData = responseData;
+  }
 
   store.dispatch('updateQuestionnaireQuestion', {
     questionId,
-    updateData: { response, complete }
+    updateData
   });
+
+  // Also update the POWERPOD workbookQuestionsAndResponses if it exists
+  if (POWERPOD.workbookQuestionsAndResponses.isLoaded) {
+    const entry = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.get(questionId);
+    if (entry && responseData) {
+      entry.response = responseData;
+    }
+  }
 }
 
 /**
@@ -252,6 +349,83 @@ export function getQuestionnaireStats() {
     totalChapters,
     completedChapters
   };
+}
+
+/**
+ * Load questionnaire data with responses into the store
+ * @param {Array} nestedChapterStructure - The nested chapter structure from the API
+ * @param {string} workbookId - The workbook ID to load responses for
+ * @param {boolean} forceRefresh - Whether to force refresh the data
+ * @returns {Promise<Object>} The questionnaire data with responses
+ */
+export async function loadQuestionnaireWithResponses(nestedChapterStructure, workbookId, forceRefresh = false) {
+  logger.info({
+    fn: loadQuestionnaireWithResponses,
+    message: 'Loading questionnaire data with responses into store',
+    data: {
+      chaptersCount: nestedChapterStructure?.length || 0,
+      workbookId,
+      forceRefresh
+    },
+  });
+
+  try {
+    // Load response data if workbookId is provided
+    let responseData = null;
+    if (workbookId) {
+      // Check if responses are already loaded in POWERPOD
+      if (POWERPOD.workbookQuestionsAndResponses.isLoaded &&
+          POWERPOD.workbookQuestionsAndResponses.workbookId === workbookId) {
+        logger.info({
+          fn: loadQuestionnaireWithResponses,
+          message: 'Using existing response data from memory'
+        });
+        responseData = {
+          questionsWithResponses: POWERPOD.workbookQuestionsAndResponses.questionsWithResponses,
+          questionsByChapter: POWERPOD.workbookQuestionsAndResponses.questionsByChapter,
+          stats: POWERPOD.workbookQuestionsAndResponses.stats
+        };
+      } else {
+        // Load responses using the existing helper
+        logger.info({
+          fn: loadQuestionnaireWithResponses,
+          message: 'Loading response data from API'
+        });
+
+        // Import the response helper dynamically to avoid circular imports
+        const { loadQuestionsAndResponses } = await import('./workbookResponseHelper.js');
+        responseData = await loadQuestionsAndResponses(workbookId);
+      }
+    }
+
+    // Load questionnaire with response data
+    const questionnaireData = loadQuestionnaireIntoStore(nestedChapterStructure, forceRefresh, responseData);
+
+    logger.info({
+      fn: loadQuestionnaireWithResponses,
+      message: 'Successfully loaded questionnaire with responses into store',
+      data: {
+        hasResponses: !!responseData,
+        workbookId
+      }
+    });
+
+    return questionnaireData;
+
+  } catch (error) {
+    logger.error({
+      fn: loadQuestionnaireWithResponses,
+      message: 'Failed to load questionnaire with responses',
+      data: { error: error.message, workbookId }
+    });
+
+    // Fallback to loading without responses
+    logger.info({
+      fn: loadQuestionnaireWithResponses,
+      message: 'Falling back to loading questionnaire without responses'
+    });
+    return loadQuestionnaireIntoStore(nestedChapterStructure, forceRefresh);
+  }
 }
 
 /**

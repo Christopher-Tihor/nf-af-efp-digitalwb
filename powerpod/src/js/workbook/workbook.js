@@ -10,7 +10,7 @@ import {
   loadChaptersAndQuestions,
   getChaptersWithNestedQuestionsAndSubchapters,
 } from '../common/chaptersAndQuestionsUtils.js';
-import { loadQuestionnaireIntoStore } from '../common/questionnaire.js';
+import { loadQuestionnaireWithResponses } from '../common/questionnaire.js';
 import { POWERPOD } from '../common/constants.js';
 import '../examples/workbookResponseUsage.js';
 import '../examples/questionnaireStoreUsage.js';
@@ -154,8 +154,26 @@ export async function initWorkbook() {
     // @ts-ignore
     POWERPOD.workbook.nestedStructure = nestedStructure;
 
-    // Load questionnaire data into the store
-    loadQuestionnaireIntoStore(nestedStructure);
+    // Load questionnaire data with responses into the store
+    const workbookId = getWorkbookId();
+    if (workbookId) {
+      loadQuestionnaireWithResponses(nestedStructure, workbookId).catch(error => {
+        logger.error({
+          fn: initWorkbook,
+          message: 'Failed to load questionnaire with responses, continuing without responses',
+          data: { error: error.message }
+        });
+      });
+    } else {
+      logger.warn({
+        fn: initWorkbook,
+        message: 'No workbook ID available, loading questionnaire without responses'
+      });
+      // Import the basic function dynamically
+      import('../common/questionnaire.js').then(({ loadQuestionnaireIntoStore }) => {
+        loadQuestionnaireIntoStore(nestedStructure);
+      });
+    }
 
     // Update the EFP Entry Form component with the nested structure
     // Use multiple attempts to ensure the component gets updated

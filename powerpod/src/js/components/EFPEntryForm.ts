@@ -1436,11 +1436,11 @@ class EFPEntryForm extends LitElement {
       console.log(`🔄 Starting to save rating for question ${questionId}: ${value}`);
       EFPLogger.log(`Rating changed for question ${questionId}: ${value}`);
 
-      // Save the rating as a workbook response
-      await this.saveRatingResponse(questionId, value);
+      // Save the rating as a workbook response and get the response data
+      const responseData = await this.saveRatingResponse(questionId, value);
 
-      // Update the questionnaire store
-      updateQuestionResponse(questionId, value, true);
+      // Update the questionnaire store with the full response data
+      updateQuestionResponse(questionId, value, true, responseData);
 
       console.log(`✅ Successfully saved rating response for question ${questionId}`);
       EFPLogger.log(`Successfully saved rating response for question ${questionId}`);
@@ -1468,7 +1468,7 @@ class EFPEntryForm extends LitElement {
   }
 
   // Helper method to save rating responses
-  private async saveRatingResponse(questionId: string, ratingValue: any): Promise<void> {
+  private async saveRatingResponse(questionId: string, ratingValue: any): Promise<any> {
     console.log(`🚀 saveRatingResponse called for question ${questionId} with value ${ratingValue}`);
     try {
       const responseText = String(ratingValue);
@@ -1532,6 +1532,9 @@ class EFPEntryForm extends LitElement {
 
       // Trigger re-render (already called by updateCompletionAndNavigation, but keeping for clarity)
       this.requestUpdate();
+
+      // Return the response data for use in questionnaire store
+      return responseData;
 
     } catch (error) {
       console.error('Failed to save rating response:', error);
