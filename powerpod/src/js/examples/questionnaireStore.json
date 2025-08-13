@@ -1,0 +1,167 @@
+{
+  "questionnaire": {
+    "title": "Environmental Farm Plan Questionnaire",
+    "chapters": [
+      [
+        {
+          "id": "e1841bc0-ec72-f011-bec2-000d3a0c38d2",
+          "name": "2. FARMSTEAD",
+          "label": "<div class=\"ck-content\" data-wrapper=\"true\" dir=\"ltr\" style=\"--ck-image-style-spacing: 1.5em; --ck-inline-image-style-spacing: calc(var(--ck-image-style-spacing) / 2); font-family: Segoe UI; font-size: 11pt;\"><p style=\"margin: 0;\">2. FARMSTEAD</p></div>",
+          "order": 2,
+          "complete": false,
+          "description": null,
+          "tooltip": null,
+          "imageUrl": null,
+          "questions": [],
+          "subchapters": [
+            {
+              "id": "51ece562-4c63-f011-bec2-002248afff4e",
+              "name": "CHAPTER 2 BUILDINGS AND ROADS",
+              "label": "<div class=\"ck-content\" data-wrapper=\"true\" dir=\"ltr\" style=\"--ck-image-style-spacing: 1.5em; --ck-inline-image-style-spacing: calc(var(--ck-image-style-spacing) / 2); font-family: Segoe UI; font-size: 11pt;\"><p style=\"margin: 0;\"><strong>Buildings and Roads</strong></p></div>",
+              "order": 2.1,
+              "complete": false,
+              "description": "<div class=\"ck-content\" data-wrapper=\"true\" dir=\"ltr\" style=\"--ck-image-style-spacing: 1.5em; --ck-inline-image-style-spacing: calc(var(--ck-image-style-spacing) / 2); font-family: Segoe UI; font-size: 11pt;\"><p style=\"margin: 0;\">On most farms, the yard, buildings and access roads are the heart of day‑to‑day work. How you place, build and maintain them can protect water, soil, air and habitat—and also reduce complaints from neighbours. Roofs, paved yards and roads change how rain runs off your land, which can lead to erosion or flooding if not managed well. Stream crossings and work near ditches or creeks can affect fish and wildlife. This section explains these risks in plain terms and shows you how to manage them.</p><p style=\"margin: 0;\">&nbsp;</p><p style=\"margin: 0;\">Planning ahead pays off. This chapter points to the rules that may apply to your farm and reminds you to factor in climate risks like wildfire and heavy rain that can raise flood risk. Smart siting, drainage, and construction choices can lower those risks and protect your operation for the long term.</p><p style=\"margin: 0;\">&nbsp;</p><p style=\"margin: 0;\">If you’re completing an Environmental Farm Plan, use this section alongside support from an EFP Planning Advisor. Walk your yard after a storm to see where water flows, note any crossings, and check whether building locations and roads are working with—not against—your land and neighbours.</p></div>",
+              "tooltip": null,
+              "imageUrl": null,
+              "parentChapterId": "e1841bc0-ec72-f011-bec2-000d3a0c38d2",
+              "questions": [],
+              "subchapters": []
+            },
+            {
+              "id": "0c70869d-3063-f011-bec3-000d3a0c38d2",
+              "name": "CHAPTER 2 CHEMICAL FERTILIZER",
+              "label": "<div class=\"ck-content\" data-wrapper=\"true\" dir=\"ltr\" style=\"--ck-image-style-spacing: 1.5em; --ck-inline-image-style-spacing: calc(var(--ck-image-style-spacing) / 2); font-family: Segoe UI; font-size: 11pt;\"><p style=\"margin: 0;\"><strong>Chemical Fertilizer</strong></p></div>",
+              "order": 2.2,
+              "complete": false,
+              "description": "<div class=\"ck-content\" data-wrapper=\"true\" dir=\"ltr\" style=\"--ck-image-style-spacing: 1.5em; --ck-inline-image-style-spacing: calc(var(--ck-image-style-spacing) / 2); font-family: Segoe UI; font-size: 11pt;\"><p style=\"margin: 0;\">Fertilizers help crops grow, but if they’re not handled properly, they can harm water, soil, and air. Extra nutrients can wash into streams and lakes, causing algae blooms and fish kills. Spills or poor storage can also contaminate drinking water. Some fertilizers, like ammonium nitrate, are even a fire risk if stored near fuel or heat sources.</p><p style=\"margin: 0;\">&nbsp;</p><p style=\"margin: 0;\">This section explains how to store, handle, and apply fertilizers safely. You’ll learn about the rules that apply in B.C. and practical steps to reduce risk—like keeping fertilizers away from wells and ditches, using proper containment, and applying the right amount at the right time.</p><p style=\"margin: 0;\">Good fertilizer management saves money and protects your land. It also helps you meet environmental standards and avoid complaints from neighbors. If you’re working on your Environmental Farm Plan, use this section with your Planning Advisor to check your current practices and plan improvements.</p><p style=\"margin: 0;\">&nbsp;</p><p style=\"margin: 0;\">The goal is simple: keep nutrients where your crops need them and out of places they don’t belong.</p></div>",
+              "tooltip": null,
+              "imageUrl": null,
+              "parentChapterId": "e1841bc0-ec72-f011-bec2-000d3a0c38d2",
+              "questions": [],
+              "subchapters": []
+            },
+            {
+              "id": "c801a189-4c63-f011-bec2-002248afff4e",
+              "name": "CHAPTER 2 FARM WASTE",
+              "label": "<div class=\"ck-content\" data-wrapper=\"true\" dir=\"ltr\" style=\"--ck-image-style-spacing: 1.5em; --ck-inline-image-style-spacing: calc(var(--ck-image-style-spacing) / 2); font-family: Segoe UI; font-size: 11pt;\"><p style=\"margin: 0;\"><strong>FARM WASTE</strong></p></div>",
+              "order": 2.3,
+              "complete": false,
+              "description": "<div class=\"ck-content\" data-wrapper=\"true\" dir=\"ltr\" style=\"--ck-image-style-spacing: 1.5em; --ck-inline-image-style-spacing: calc(var(--ck-image-style-spacing) / 2); font-family: Segoe UI; font-size: 11pt;\"><p style=\"margin: 0;\">Every farm produces waste—old fencing, plastic, used oil, animal health products, and more. If these materials aren’t managed properly, they can pollute soil and water, harm wildlife, and create safety hazards. Burning or dumping waste in the wrong place can also break the law and damage your reputation.</p><p style=\"margin: 0;\">&nbsp;</p><p style=\"margin: 0;\">This section covers the main types of farm waste and how to deal with them responsibly. You’ll find tips on reducing waste, reusing materials, and recycling where possible. For items that can’t be reused, we explain safe disposal options, including permitted landfills and take-back programs for things like paint and pesticides.</p><p style=\"margin: 0;\">&nbsp;</p><p style=\"margin: 0;\">Managing waste well isn’t just about compliance—it’s about protecting your farm and community. It reduces fire risk, keeps harmful chemicals out of the environment, and shows customers you care about sustainability.</p><p style=\"margin: 0;\">&nbsp;</p><p style=\"margin: 0;\">If you’re completing an Environmental Farm Plan, walk through this section with your Planning Advisor. Together, you can identify problem areas and set up a plan that works for your operation.</p></div>",
+              "tooltip": null,
+              "imageUrl": null,
+              "parentChapterId": "e1841bc0-ec72-f011-bec2-000d3a0c38d2",
+              "questions": [],
+              "subchapters": []
+            }
+          ]
+        },
+        {
+          "id": "c5b93ce4-ec72-f011-bec2-000d3a0c38d2",
+          "name": "3. LIVESTOCK",
+          "label": "<div class=\"ck-content\" data-wrapper=\"true\" dir=\"ltr\" style=\"--ck-image-style-spacing: 1.5em; --ck-inline-image-style-spacing: calc(var(--ck-image-style-spacing) / 2); font-family: Segoe UI; font-size: 11pt;\"><p style=\"margin: 0;\">3. LIVESTOCK</p></div>",
+          "order": 3,
+          "complete": false,
+          "description": null,
+          "tooltip": null,
+          "imageUrl": null,
+          "questions": [],
+          "subchapters": [
+            {
+              "id": "096dc4ca-4c63-f011-bec2-002248afff4e",
+              "name": "CHAPTER 3 OUTDOOR LIVESTOCK AND POULTRY AREAS",
+              "label": "<div class=\"ck-content\" data-wrapper=\"true\" dir=\"ltr\" style=\"--ck-image-style-spacing: 1.5em; --ck-inline-image-style-spacing: calc(var(--ck-image-style-spacing) / 2); font-family: Segoe UI; font-size: 11pt;\"><p style=\"margin: 0;\">3.10 OUTDOOR LIVESTOCK AND POULTRY AREAS</p></div>",
+              "order": 3.1,
+              "complete": false,
+              "description": null,
+              "tooltip": null,
+              "imageUrl": null,
+              "parentChapterId": "c5b93ce4-ec72-f011-bec2-000d3a0c38d2",
+              "questions": [],
+              "subchapters": [
+                {
+                  "id": "e44b587b-8378-f011-b4cc-000d3a0c38d2",
+                  "name": "Outdoor Livestock (New)",
+                  "label": "<div class=\"ck-content\" data-wrapper=\"true\" dir=\"ltr\" style=\"--ck-image-style-spacing: 1.5em; --ck-inline-image-style-spacing: calc(var(--ck-image-style-spacing) / 2); font-family: Segoe UI; font-size: 11pt;\"><p style=\"margin: 0;\">3.11 Outdoor Livestock (New)</p></div>",
+                  "order": 3.11,
+                  "complete": false,
+                  "description": null,
+                  "tooltip": null,
+                  "imageUrl": null,
+                  "parentChapterId": "096dc4ca-4c63-f011-bec2-002248afff4e",
+                  "questions": [
+                    {
+                        "id": "ca95a1c0-1073-f011-bec2-000d3a0c38d2",
+                        "complete": true,
+                        "name": "310",
+                        "label": "<div class=\"ck-content\" data-wrapper=\"true\" dir=\"ltr\" style=\"--ck-image-style-spacing: 1.5em; --ck-inline-image-style-spacing: calc(var(--ck-image-style-spacing) / 2); font-family: Segoe UI; font-size: 11pt;\"><p style=\"margin: 0;\"><span style=\"font-family:&quot;BC Sans&quot;;font-size:11.0pt;\"><span style=\"line-height:107%;\" lang=\"EN-US\"><strong>310. Do you manage livestock watering in a way that protects water and habitat?&nbsp;</strong></span></span></p></div>",
+                        "order": 95,
+                        "questionType": 100000001,
+                        "textAboveQuestion": null,
+                        "textBelowQuestion": "<div class=\"ck-content\" data-wrapper=\"true\" dir=\"ltr\" style=\"--ck-image-style-spacing: 1.5em; --ck-inline-image-style-spacing: calc(var(--ck-image-style-spacing) / 2); font-family: Segoe UI; font-size: 11pt;\"><div style=\"font-family:Segoe UI;font-size:11pt;\"><p style=\"line-height: normal; margin: 0cm 0cm 0cm 0;\">Recommended practices include:</p><ul style=\"list-style-position: inside;\"><li>Keeping water troughs clean and placed properly so that manure or runoff doesn’t flow into nearby streams, wells, or onto neighboring land.</li><li>Limit livestock access to nearby streams</li><li>Make sure animals don’t damage nearby streambanks or habitat</li><li>Use watering systems that don’t rely on direct access to streams</li></ul></div><p style=\"margin: 0;\">&nbsp;</p><p style=\"margin: 0;\"><u>Risk ratings for this question:</u></p><p style=\"margin: 0;\">&nbsp;</p><table class=\"table\" style=\"border-collapse:collapse;border-color:inherit;border-style:none;display:block;width:inherit;\" display=\"block\" width=\"inherit\" cellpadding=\"0\" cellspacing=\"0\" border=\"inherit\"><tbody><tr><td style=\"background-color:#00B050;border-color:windowtext;padding:0px 7px;vertical-align:top;width:151px;\" aria-label=\"Table cell\" width=\"151\"><p style=\"line-height: normal; margin: 0cm;\"><span style=\"color:black;font-family:&quot;BC Sans&quot;;font-size:12pt;\"><b><span lang=\"EN-US\">Risk Rating 1</span></b></span></p></td><td style=\"background-color:yellow;border-bottom-style:solid;border-color:windowtext;border-left-style:none;border-right-style:solid;border-top-style:solid;padding:0px 7px;vertical-align:top;width:151px;\" aria-label=\"Table cell\" width=\"151\"><p style=\"line-height: normal; margin: 0cm;\"><span style=\"color:black;font-family:&quot;BC Sans&quot;;font-size:12pt;\"><b><span lang=\"EN-US\">Risk Rating 2</span></b></span></p></td><td style=\"background-color:#FFC000;border-bottom-style:solid;border-color:windowtext;border-left-style:none;border-right-style:solid;border-top-style:solid;padding:0px 7px;vertical-align:top;width:151px;\" aria-label=\"Table cell\" width=\"151\"><p style=\"line-height: normal; margin: 0cm;\"><span style=\"color:black;font-family:&quot;BC Sans&quot;;font-size:12pt;\"><b><span lang=\"EN-US\">Risk Rating 3</span></b></span></p></td><td style=\"background-color:#EE0000;border-bottom-style:solid;border-color:windowtext;border-left-style:none;border-right-style:solid;border-top-style:solid;padding:0px 7px;vertical-align:top;width:151px;\" aria-label=\"Table cell\" width=\"151\"><p style=\"line-height: normal; margin: 0cm;\"><span style=\"color:black;font-family:&quot;BC Sans&quot;;font-size:12pt;\"><b><span lang=\"EN-US\">Risk Rating 4</span></b></span></p></td></tr><tr><td style=\"border-bottom-style:solid;border-color:windowtext;border-left-style:solid;border-right-style:solid;border-top-style:none;padding:0px 7px;vertical-align:top;width:151px;\" aria-label=\"Table cell\" width=\"151\"><p style=\"line-height: normal; margin: 0cm 0cm 0cm 0;\">I use all of the recommended practices</p></td><td style=\"border-bottom:1px solid windowtext;border-left-style:none;border-right:1px solid windowtext;border-top-style:none;padding:0px 7px;vertical-align:top;width:151px;\" aria-label=\"Table cell\" width=\"151\"><p style=\"line-height: normal; margin: 0cm 0cm 0cm 0;\">I use some of the recommended practices</p></td><td style=\"border-bottom:1px solid windowtext;border-left-style:none;border-right:1px solid windowtext;border-top-style:none;padding:0px 7px;vertical-align:top;width:151px;\" aria-label=\"Table cell\" width=\"151\"><p style=\"line-height: normal; margin: 0cm 0cm 0cm 0;\">I do not use any of the recommended practices</p></td><td style=\"border-bottom:1px solid windowtext;border-left-style:none;border-right:1px solid windowtext;border-top-style:none;padding:0px 7px;vertical-align:top;width:151px;\" aria-label=\"Table cell\" width=\"151\"><p style=\"margin: 0;\">Manure near water troughs can enter watercourses&nbsp;<br>&nbsp;</p><p style=\"margin: 0;\">OR&nbsp;<br>&nbsp;</p><p style=\"margin: 0;\">Livestock are not prevented from accessing streams, causing possible damage to habitat</p></td></tr><tr><td aria-label=\"Table cell\">&nbsp;</td><td aria-label=\"Table cell\">&nbsp;</td><td aria-label=\"Table cell\">&nbsp;</td><td aria-label=\"Table cell\">&nbsp;</td></tr></tbody></table><p style=\"margin: 0;\"><br>&nbsp;</p></div>",
+                        "tooltip": null,
+                        "responseOptionColor": null,
+                        "response": "yes"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "a9ab491a-ed72-f011-bec2-000d3a0c38d2",
+          "name": "6. NUTRIENT APPLICATION",
+          "label": "<div class=\"ck-content\" data-wrapper=\"true\" dir=\"ltr\" style=\"--ck-image-style-spacing: 1.5em; --ck-inline-image-style-spacing: calc(var(--ck-image-style-spacing) / 2); font-family: Segoe UI; font-size: 11pt;\"><p style=\"margin: 0;\">6. NUTRIENT APPLICATION</p></div>",
+          "order": 6,
+          "complete": true,
+          "description": "<div class=\"ck-content\" data-wrapper=\"true\" dir=\"ltr\" style=\"--ck-image-style-spacing: 1.5em; --ck-inline-image-style-spacing: calc(var(--ck-image-style-spacing) / 2); font-family: Segoe UI; font-size: 11pt;\"><div class=\"ck-content stickystyles-wrapper-insert\" style=\"font-family:Segoe UI;font-size:11pt;\" dir=\"ltr\" data-wrapper=\"true\"><p style=\"margin: 0;\">Applying nutrients to your farm—like manure, compost, or fertilizer—is essential for growing healthy crops. But how and when you apply them matters.&nbsp;</p><p style=\"margin: 0;\">&nbsp;</p><p style=\"margin: 0;\">One key approach is the “4R” method: using the Right Source, at the Right Rate, at the Right Time, and in the Right Place. This helps you match nutrients to your crop’s needs while reducing waste and environmental risks.&nbsp;</p><p style=\"margin: 0;\">&nbsp;</p><p style=\"margin: 0;\">Check out <a href=\"https://www2.gov.bc.ca/assets/gov/farming-natural-resources-and-industry/agriculture-and-seafood/agricultural-land-and-environment/environmental-farm-planning/efp-reference-guide/chapters/rg-chp6.pdf\" target=\"_blank\" rel=\"noopener noreferrer\">BC's EFP Reference Guide Chapter 6</a> for practical tips for managing manure, choosing soil amendments, and planning nutrient applications throughout the year.&nbsp;</p><p style=\"margin: 0;\">&nbsp;</p><p style=\"margin: 0;\">Whether you’re growing forage, berries, vegetables, or tree fruit, this chapter helps you make informed decisions that benefit your farm and the land around it.</p></div></div>",
+          "tooltip": null,
+          "imageUrl": null,
+          "questions": [],
+          "subchapters": [
+            {
+              "id": "b2a16a4e-4d63-f011-bec2-002248afff4e",
+              "name": "CHAPTER 6 NUTRIENT APPLICATION",
+              "label": "NUTRIENT APPLICATION",
+              "order": 6.1,
+              "complete": true,
+              "description": "<div class=\"ck-content\" data-wrapper=\"true\" dir=\"ltr\" style=\"--ck-image-style-spacing: 1.5em; --ck-inline-image-style-spacing: calc(var(--ck-image-style-spacing) / 2); font-family: Segoe UI; font-size: 11pt;\"><p style=\"margin: 0;\"><strong><u>Nutrient Sources and the Environment: what you need to know</u></strong><br>&nbsp;</p><p style=\"margin: 0;\"><strong>Why nutrients matter</strong><br>Plants need nutrients to grow. Those nutrients come from fertilizers, manure, soil amendments, and nitrogen fixed by legumes. Each source behaves differently in soil and water—and each can create risk if over‑applied or poorly managed.</p><p style=\"margin: 0;\">&nbsp;</p><p style=\"margin: 0;\"><strong>Understand the basics</strong><br>This section explains how nitrogen, phosphorus, and potassium work, and why soil pH and salts matter. It also covers secondary nutrients, micronutrients, and metals, plus the difference between nutrient sources and soil conditioners.</p><p style=\"margin: 0;\">&nbsp;</p><p style=\"margin: 0;\"><strong>Watch for problem areas</strong><br>Learn how to avoid phosphorus build‑up, check amendments for contaminants, and choose the right material for your fields.</p><p style=\"margin: 0;\">&nbsp;</p><p style=\"margin: 0;\"><strong>Plan with confidence</strong><br>Pair this section with tools like the Nutrient Management Calculator and your EFP Planning Advisor to keep nutrients where crops need them and out of waterways.</p><p style=\"margin: 0;\">&nbsp;</p><p style=\"margin: 0;\"><strong><u>Nutrient Application: the 4R basics</u></strong><br>&nbsp;</p><p style=\"margin: 0;\"><strong>Start with the 4Rs</strong><br>Right Source, Right Rate, Right Time, Right Place—this section shows how to apply these principles on your farm.</p><p style=\"margin: 0;\">&nbsp;</p><p style=\"margin: 0;\"><strong>Match source to crop and soil</strong><br>Choose the right product for your crop and conditions.</p><p style=\"margin: 0;\">&nbsp;</p><p style=\"margin: 0;\"><strong>Set a rate you can defend</strong><br>Use soil tests and realistic yield goals to avoid over‑application.</p><p style=\"margin: 0;\">&nbsp;</p><p style=\"margin: 0;\"><strong>Time it to crop demand</strong><br>Apply nutrients when plants can use them. Split applications may help for long‑season crops.</p><p style=\"margin: 0;\">&nbsp;</p><p style=\"margin: 0;\"><strong>Place to protect water</strong><br>Position nutrients so crops get them and waterways don’t.</p><p style=\"margin: 0;\">&nbsp;</p><p style=\"margin: 0;\"><strong>Check your work</strong><br>Calibrate spreaders and sprayers, and use post‑harvest nitrate tests to see if your plan worked.</p><p style=\"margin: 0;\">&nbsp;</p><p style=\"margin: 0;\"><strong>Know the rules</strong><br>This section also summarizes B.C. regulations and setbacks for nutrient application.</p></div>",
+              "tooltip": null,
+              "imageUrl": null,
+              "parentChapterId": "a9ab491a-ed72-f011-bec2-000d3a0c38d2",
+              "questions": [],
+              "subchapters": [
+                {
+                  "id": "a884b5c6-4d63-f011-bec2-002248afff4e",
+                  "name": "Nutrient Application (Manure, Fertilizer, Compost, etc.)",
+                  "label": "Nutrient Application (Manure, Fertilizer, Compost, etc.)",
+                  "order": 6.11,
+                  "complete": true,
+                  "description": null,
+                  "tooltip": null,
+                  "imageUrl": null,
+                  "parentChapterId": "b2a16a4e-4d63-f011-bec2-002248afff4e",
+                  "questions": [
+                    {
+                      "id": "8a427564-fc65-f011-bec2-002248afff4e",
+                      "name": "253",
+                      "label": "<div class=\"ck-content\" data-wrapper=\"true\" dir=\"ltr\" style=\"--ck-image-style-spacing: 1.5em; --ck-inline-image-style-spacing: calc(var(--ck-image-style-spacing) / 2); font-family: Segoe UI; font-size: 11pt;\"><div style=\"font-family:Segoe UI;font-size:11pt;\"><span><strong>253. Is </strong></span><a href=\"https://www2.gov.bc.ca/gov/content/industry/agriculture-seafood/agricultural-land-and-environment/soil-nutrients/nutrient-management/what-to-apply/soil-nutrient-testing\" target=\"_blank\" rel=\"noopener noreferrer\"><span><strong>soil testing</strong></span></a><span><strong> conducted annually for fields where nutrients are applied?</strong></span></div></div>",
+                      "order": 253,
+                      "complete": true,
+                      "questionType": 100000001,
+                      "textAboveQuestion": null,
+                      "textBelowQuestion": "<div class=\"ck-content\" data-wrapper=\"true\" dir=\"ltr\" style=\"--ck-image-style-spacing: 1.5em; --ck-inline-image-style-spacing: calc(var(--ck-image-style-spacing) / 2); font-family: Segoe UI; font-size: 11pt;\"><div style=\"font-family:Segoe UI;font-size:11pt;\"><div style=\"font-family:Segoe UI;font-size:11pt;\">This includes testing for pH, macronutrients, micronutrients, EC, base saturation, and post-harvest nitrate.</div><div style=\"font-family:Segoe UI;font-size:11pt;\">&nbsp;</div><div style=\"font-family:Segoe UI;font-size:11pt;\"><u>Risk Ratings for this question:</u></div><div style=\"font-family:Segoe UI;font-size:11pt;\">&nbsp;</div><table class=\"table\" style=\"border-collapse:collapse;border-color:inherit;border-style:none;display:block;width:inherit;\" display=\"block\" width=\"inherit\" cellpadding=\"0\" cellspacing=\"0\" border=\"inherit\"><tbody><tr><td style=\"background-color:#00B050;border-color:windowtext;padding:0px 7px;vertical-align:top;width:151px;\" aria-label=\"Table cell\" width=\"151\"><p style=\"line-height: normal; margin: 0cm;\"><span style=\"color:black;font-family:&quot;BC Sans&quot;;font-size:12pt;\"><b><span lang=\"EN-US\">Risk Rating 1</span></b></span></p></td><td style=\"background-color:yellow;border-bottom-style:solid;border-color:windowtext;border-left-style:none;border-right-style:solid;border-top-style:solid;padding:0px 7px;vertical-align:top;width:151px;\" aria-label=\"Table cell\" width=\"151\"><p style=\"line-height: normal; margin: 0cm;\"><span style=\"color:black;font-family:&quot;BC Sans&quot;;font-size:12pt;\"><b><span lang=\"EN-US\">Risk Rating 2</span></b></span></p></td><td style=\"background-color:#FFC000;border-bottom-style:solid;border-color:windowtext;border-left-style:none;border-right-style:solid;border-top-style:solid;padding:0px 7px;vertical-align:top;width:151px;\" aria-label=\"Table cell\" width=\"151\"><p style=\"line-height: normal; margin: 0cm;\"><span style=\"color:black;font-family:&quot;BC Sans&quot;;font-size:12pt;\"><b><span lang=\"EN-US\">Risk Rating 3</span></b></span></p></td><td style=\"background-color:#EE0000;border-bottom-style:solid;border-color:windowtext;border-left-style:none;border-right-style:solid;border-top-style:solid;padding:0px 7px;vertical-align:top;width:151px;\" aria-label=\"Table cell\" width=\"151\"><p style=\"line-height: normal; margin: 0cm;\"><span style=\"color:black;font-family:&quot;BC Sans&quot;;font-size:12pt;\"><b><span lang=\"EN-US\">Risk Rating 4</span></b></span></p></td></tr><tr><td style=\"border-bottom-style:solid;border-color:windowtext;border-left-style:solid;border-right-style:solid;border-top-style:none;padding:0px 7px;vertical-align:top;width:151px;\" aria-label=\"Table cell\" width=\"151\"><p style=\"line-height: normal; margin: 0cm;\">Annual testing for all analytes</p><p style=\"line-height: normal; margin: 0cm;\">AND</p><p style=\"line-height: normal; margin: 0cm;\">Results kept for 5 years</p></td><td style=\"border-bottom:1px solid windowtext;border-left-style:none;border-right:1px solid windowtext;border-top-style:none;padding:0px 7px;vertical-align:top;width:151px;\" aria-label=\"Table cell\" width=\"151\"><p style=\"line-height: normal; margin: 0cm;\">Testing every 2-3 years</p><p style=\"line-height: normal; margin: 0cm;\">AND</p><p style=\"line-height: normal; margin: 0cm;\">Testing for post-harvest nitrate in the following year if it exceeds 100 kg/ha for a field</p><p style=\"line-height: normal; margin: 0cm;\">AND</p><p style=\"line-height: normal; margin: 0cm;\">Results kept for 3 years</p></td><td style=\"border-bottom:1px solid windowtext;border-left-style:none;border-right:1px solid windowtext;border-top-style:none;padding:0px 7px;vertical-align:top;width:151px;\" aria-label=\"Table cell\" width=\"151\"><p style=\"line-height: normal; margin: 0cm;\">N/A for this question</p></td><td style=\"border-bottom:1px solid windowtext;border-left-style:none;border-right:1px solid windowtext;border-top-style:none;padding:0px 7px;vertical-align:top;width:151px;\" aria-label=\"Table cell\" width=\"151\"><p style=\"line-height: normal; margin: 0cm;\">Testing has not been completed in the past 3 years</p><p style=\"line-height: normal; margin: 0cm;\">OR</p><p style=\"line-height: normal; margin: 0cm;\">Post-harvest nitrate not tested in the following year for fields that exceed 100 kg/ha</p><p style=\"line-height: normal; margin: 0cm;\">OR</p><p style=\"line-height: normal; margin: 0cm;\">No soil test results on record for past 3 years</p></td></tr></tbody></table></div><p style=\"margin: 0;\">&nbsp;</p><p style=\"margin: 0;\">&nbsp;</p><p style=\"margin: 0;\">&nbsp;</p><p style=\"margin: 0;\">&nbsp;</p><p style=\"margin: 0;\">&nbsp;</p><p style=\"margin: 0;\">&nbsp;</p><p style=\"margin: 0;\">&nbsp;</p></div>",
+                      "tooltip": "<div class=\"ck-content\" data-wrapper=\"true\" dir=\"ltr\" style=\"--ck-image-style-spacing: 1.5em; --ck-inline-image-style-spacing: calc(var(--ck-image-style-spacing) / 2); font-family: Segoe UI; font-size: 11pt;\"><p style=\"margin: 0;\">Question 253 and 254</p></div>",
+                      "responseOptionColor": null,
+                      "response": "4"
+                    },
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    ]
+  }
+}

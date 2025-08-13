@@ -10,8 +10,10 @@ import {
   loadChaptersAndQuestions,
   getChaptersWithNestedQuestionsAndSubchapters,
 } from '../common/chaptersAndQuestionsUtils.js';
+import { loadQuestionnaireIntoStore } from '../common/questionnaire.js';
 import { POWERPOD } from '../common/constants.js';
 import '../examples/workbookResponseUsage.js';
+import '../examples/questionnaireStoreUsage.js';
 import '../common/workbookResponseHelper.js';
 import '../components/EFPEntryForm.ts';
 
@@ -151,6 +153,9 @@ export async function initWorkbook() {
     POWERPOD.workbook = POWERPOD.workbook || {};
     // @ts-ignore
     POWERPOD.workbook.nestedStructure = nestedStructure;
+
+    // Load questionnaire data into the store
+    loadQuestionnaireIntoStore(nestedStructure);
 
     // Update the EFP Entry Form component with the nested structure
     // Use multiple attempts to ensure the component gets updated

@@ -16,6 +16,11 @@ import './EFPBreadcrumbs';
 import WorkbookResponseHelper from '../common/workbookResponseHelper.js';
 import { getWorkbookId } from '../common/workbookUtils.js';
 import { POWERPOD } from '../common/constants.js';
+import {
+  getQuestionnaireFromStore,
+  updateQuestionResponse,
+  isQuestionnaireLoaded
+} from '../common/questionnaire.js';
 import { EFPEventUtils as EFPEventUtilsImported } from './efp/event-utils.js';
 
 // Type definitions for better type safety
@@ -1073,7 +1078,7 @@ class EFPEntryForm extends LitElement {
     {
       tab: 'Section B',
       title: 'Environmental Farm Plan Questionnaire',
-      items: EFPSectionGenerator.generateSectionBItems(this.nestedChapterStructure),
+      items: EFPSectionGenerator.generateSectionBItems(this.getQuestionnaireChapters()),
     },
     {
       tab: 'Section C',
@@ -1235,11 +1240,31 @@ class EFPEntryForm extends LitElement {
     );
   }
 
+  // Get questionnaire chapters from store, fallback to nestedChapterStructure
+  private getQuestionnaireChapters(): any[] {
+    const questionnaire = getQuestionnaireFromStore();
+    if (questionnaire?.chapters?.length > 0) {
+      // Extract the nested structure from the store format
+      return questionnaire.chapters[0] || [];
+    }
+    // Fallback to the property if store is not loaded
+    return this.nestedChapterStructure;
+  }
+
   // Public API methods
   public updateNestedChapterStructure(nestedStructure: any[]) {
     EFPLogger.log('updateNestedChapterStructure called with', nestedStructure?.length || 0, 'chapters');
 
     this.nestedChapterStructure = nestedStructure;
+
+    // Also update the questionnaire store if not already loaded
+    if (!isQuestionnaireLoaded()) {
+      EFPLogger.log('Loading questionnaire data into store from updateNestedChapterStructure');
+      // Import the loadQuestionnaireIntoStore function dynamically to avoid circular imports
+      import('../common/questionnaire.js').then(({ loadQuestionnaireIntoStore }) => {
+        loadQuestionnaireIntoStore(nestedStructure);
+      });
+    }
 
     // The @property decorator will automatically trigger a re-render
     // But we can force it to be sure
@@ -1413,6 +1438,9 @@ class EFPEntryForm extends LitElement {
 
       // Save the rating as a workbook response
       await this.saveRatingResponse(questionId, value);
+
+      // Update the questionnaire store
+      updateQuestionResponse(questionId, value, true);
 
       console.log(`✅ Successfully saved rating response for question ${questionId}`);
       EFPLogger.log(`Successfully saved rating response for question ${questionId}`);

@@ -17,4 +17,13 @@ export default {
   addToFieldOrder(context, payload) {
     context.commit('addToFieldOrder', payload);
   },
+  setQuestionnaireData(context, payload) {
+    context.commit('setQuestionnaireData', payload);
+  },
+  updateQuestionnaireChapter(context, payload) {
+    context.commit('updateQuestionnaireChapter', payload);
+  },
+  updateQuestionnaireQuestion(context, payload) {
+    context.commit('updateQuestionnaireQuestion', payload);
+  },
 };

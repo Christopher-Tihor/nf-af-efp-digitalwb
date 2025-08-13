@@ -36,6 +36,92 @@ export default {
     state.fields[payload.name] = fieldData;
     return state;
   },
+  setQuestionnaireData(state, payload) {
+    logger.info({
+      fn: this.setQuestionnaireData,
+      message: 'Updated questionnaire data in state',
+      data: { state, payload },
+    });
+    state.questionnaire = payload.questionnaire;
+    return state;
+  },
+  updateQuestionnaireChapter(state, payload) {
+    logger.info({
+      fn: this.updateQuestionnaireChapter,
+      message: 'Update questionnaire chapter in state',
+      data: { state, payload },
+    });
+
+    if (!state.questionnaire.chapters) {
+      state.questionnaire.chapters = [];
+    }
+
+    // Find and update the chapter in the nested structure
+    const updateChapterInArray = (chapters, chapterId, updateData) => {
+      for (let i = 0; i < chapters.length; i++) {
+        const chapterGroup = chapters[i];
+        if (Array.isArray(chapterGroup)) {
+          // Handle nested array structure
+          for (let j = 0; j < chapterGroup.length; j++) {
+            const chapter = chapterGroup[j];
+            if (chapter.id === chapterId) {
+              chapters[i][j] = { ...chapter, ...updateData };
+              return true;
+            }
+            // Check subchapters
+            if (chapter.subchapters) {
+              if (updateChapterInArray([chapter.subchapters], chapterId, updateData)) {
+                return true;
+              }
+            }
+          }
+        }
+      }
+      return false;
+    };
+
+    updateChapterInArray(state.questionnaire.chapters, payload.chapterId, payload.updateData);
+    return state;
+  },
+  updateQuestionnaireQuestion(state, payload) {
+    logger.info({
+      fn: this.updateQuestionnaireQuestion,
+      message: 'Update questionnaire question in state',
+      data: { state, payload },
+    });
+
+    if (!state.questionnaire.chapters) {
+      return state;
+    }
+
+    // Find and update the question in the nested structure
+    const updateQuestionInChapters = (chapters, questionId, updateData) => {
+      for (const chapterGroup of chapters) {
+        if (Array.isArray(chapterGroup)) {
+          for (const chapter of chapterGroup) {
+            // Check questions in main chapter
+            if (chapter.questions) {
+              const questionIndex = chapter.questions.findIndex(q => q.id === questionId);
+              if (questionIndex !== -1) {
+                chapter.questions[questionIndex] = { ...chapter.questions[questionIndex], ...updateData };
+                return true;
+              }
+            }
+            // Check questions in subchapters
+            if (chapter.subchapters) {
+              if (updateQuestionInChapters([chapter.subchapters], questionId, updateData)) {
+                return true;
+              }
+            }
+          }
+        }
+      }
+      return false;
+    };
+
+    updateQuestionInChapters(state.questionnaire.chapters, payload.questionId, payload.updateData);
+    return state;
+  },
   setValidationError(state, payload) {
     if (state.validationError === payload) {
       logger.warn({
