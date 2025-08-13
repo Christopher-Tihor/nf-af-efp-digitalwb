@@ -130,12 +130,44 @@ const responseData = {
 updateQuestionResponse('question-id', 'response-value', true, responseData);
 ```
 
-### Updating Chapter Completion
+### Automatic Completion Logic
+
+The questionnaire store now uses intelligent completion rules that automatically calculate chapter completion status:
+
+```javascript
+import {
+  updateQuestionnaireCompletion,
+  calculateChapterCompletion
+} from '../common/questionnaire.js';
+
+// Automatically update all chapter completion based on rules
+updateQuestionnaireCompletion();
+
+// Calculate completion for a specific chapter
+const chapter = getChapterFromStore('chapter-id');
+const shouldBeComplete = calculateChapterCompletion(chapter);
+```
+
+#### Completion Rules
+
+1. **Empty Chapters**: If a chapter has no questions and no subchapters → marked complete
+2. **Questions-Only**: If a chapter has only questions → complete when all questions are answered
+3. **Subchapters-Only**: If a chapter has only subchapters → complete when all subchapters are complete
+4. **Mixed Content**: If a chapter has both questions and subchapters → complete when ALL questions AND ALL subchapters are complete
+
+#### Automatic Updates
+
+Completion status is automatically recalculated when:
+- Questionnaire data is loaded into the store
+- Question responses are updated
+- The `updateQuestionnaireCompletion()` function is called
+
+### Manual Chapter Completion (Legacy)
 
 ```javascript
 import { updateChapterCompletion } from '../common/questionnaire.js';
 
-// Mark a chapter as complete
+// Manually mark a chapter as complete (not recommended - use automatic logic)
 updateChapterCompletion('chapter-id', true);
 ```
 
@@ -266,7 +298,9 @@ See `powerpod/src/js/examples/questionnaireStoreUsage.js` for complete working e
 - `getQuestionnaireFromStore()`: Get questionnaire data from store
 - `getChapterFromStore(chapterId)`: Get specific chapter
 - `getQuestionFromStore(questionId)`: Get specific question
-- `updateChapterCompletion(chapterId, complete)`: Update chapter completion
+- `calculateChapterCompletion(chapter)`: Calculate if chapter should be complete based on rules
+- `updateQuestionnaireCompletion()`: Update all chapter completion status automatically
+- `updateChapterCompletion(chapterId, complete)`: Manually update chapter completion (legacy)
 - `updateQuestionResponse(questionId, response, complete, responseData)`: Update question response
 - `getQuestionsForChapter(chapterId)`: Get all questions for a chapter
 - `getQuestionnaireStats()`: Get completion statistics

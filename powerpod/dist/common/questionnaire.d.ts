@@ -63,6 +63,17 @@ export function loadQuestionnaireWithResponses(nestedChapterStructure: any[], wo
  */
 export function refreshQuestionnaireResponses(workbookId: string): Promise<boolean>;
 /**
+ * Calculate completion status for a chapter based on questionnaire store rules
+ * @param {Object} chapter - The chapter object
+ * @returns {boolean} True if the chapter should be marked complete
+ */
+export function calculateChapterCompletion(chapter: Object): boolean;
+/**
+ * Update completion status for all chapters in the questionnaire store
+ * This applies the completion rules recursively to all chapters and subchapters
+ */
+export function updateQuestionnaireCompletion(): number | undefined;
+/**
  * Check if questionnaire data is loaded in the store
  * @returns {boolean} True if questionnaire data is loaded
  */

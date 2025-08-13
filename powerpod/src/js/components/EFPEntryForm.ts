@@ -1273,6 +1273,39 @@ class EFPEntryForm extends LitElement {
 
   // Computed properties
   private get completionPercent(): number {
+    // Use questionnaire store completion if available (preferred method)
+    if (isQuestionnaireLoaded()) {
+      try {
+        // Get stats synchronously from questionnaire store
+        const questionnaire = getQuestionnaireFromStore();
+        if (questionnaire) {
+          // Calculate completion percentage from questionnaire store
+          let totalQuestions = 0;
+          let answeredQuestions = 0;
+
+          const countInChapters = (chapters: any[]) => {
+            chapters.forEach((chapter: any) => {
+              if (chapter.questions) {
+                totalQuestions += chapter.questions.length;
+                answeredQuestions += chapter.questions.filter((q: any) => q.complete).length;
+              }
+              if (chapter.subchapters) {
+                countInChapters(chapter.subchapters);
+              }
+            });
+          };
+
+          if (questionnaire.chapters && questionnaire.chapters.length > 0) {
+            countInChapters(questionnaire.chapters[0]);
+          }
+
+          return totalQuestions > 0 ? Math.round((answeredQuestions / totalQuestions) * 100) : 0;
+        }
+      } catch (error) {
+        console.warn('Failed to get completion from questionnaire store, falling back');
+      }
+    }
+
     // Use workbook responses completion if available, otherwise fall back to static completion
     if (POWERPOD.workbookQuestionsAndResponses.isLoaded) {
       return POWERPOD.workbookQuestionsAndResponses.stats.completionPercentage;
@@ -2076,13 +2109,31 @@ class EFPEntryForm extends LitElement {
     }
   }
 
-  // Update section completion status based on workbook responses
+  // Update section completion status using questionnaire store
   private updateSectionCompletionStatus() {
+    // Try to use questionnaire store first (preferred method)
+    if (isQuestionnaireLoaded()) {
+      console.log('🔍 Updating completion using questionnaire store');
+      try {
+        // Import the completion function dynamically to avoid circular imports
+        import('../common/questionnaire.js').then(({ updateQuestionnaireCompletion }) => {
+          updateQuestionnaireCompletion();
+          this.updateSectionItemsFromQuestionnaireStore();
+          console.log('✅ Updated completion using questionnaire store');
+        });
+        return;
+      } catch (error) {
+        console.warn('⚠️ Failed to use questionnaire store for completion, falling back to legacy method');
+      }
+    }
+
+    // Fallback to legacy method if questionnaire store is not available
     if (!POWERPOD.workbookQuestionsAndResponses.isLoaded) {
-      console.log('⚠️ Workbook responses not loaded, skipping section completion update');
+      console.log('⚠️ Neither questionnaire store nor workbook responses loaded, skipping completion update');
       return;
     }
 
+    console.log('🔄 Using legacy completion method');
     const questionsWithResponses = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses;
     const questionsByChapter = POWERPOD.workbookQuestionsAndResponses.questionsByChapter;
 
@@ -2094,7 +2145,63 @@ class EFPEntryForm extends LitElement {
     });
   }
 
-  // Recursively update completion status for section items
+  // Update section items using questionnaire store data
+  private updateSectionItemsFromQuestionnaireStore() {
+    console.log('🔄 Updating section items from questionnaire store');
+
+    this.sections.forEach(section => {
+      if (section.tab === 'Section B') {
+        // Update Section B items using questionnaire store
+        this.updateSectionItemsFromStore(section.items);
+      }
+    });
+  }
+
+  // Recursively update section items using questionnaire store
+  private updateSectionItemsFromStore(items: any[]) {
+    items.forEach(item => {
+      if ('items' in item && Array.isArray(item.items)) {
+        // Recursively update nested items
+        this.updateSectionItemsFromStore(item.items);
+
+        // Update parent completion based on children
+        const allChildrenComplete = item.items.every((child: any) => {
+          if ('items' in child && Array.isArray(child.items)) {
+            return child.complete;
+          } else if (child.questionId) {
+            // Import questionnaire functions dynamically
+            import('../common/questionnaire.js').then(({ getQuestionFromStore }) => {
+              const question = getQuestionFromStore(child.questionId);
+              child.complete = question?.complete || false;
+            });
+            return child.complete;
+          }
+          return child.complete;
+        });
+
+        item.complete = allChildrenComplete;
+
+      } else if (item.chapterId) {
+        // This is a chapter item - get completion from questionnaire store
+        import('../common/questionnaire.js').then(({ getChapterFromStore }) => {
+          const chapter = getChapterFromStore(item.chapterId);
+          if (chapter) {
+            item.complete = chapter.complete;
+          }
+        });
+      } else if (item.questionId) {
+        // This is a question item - get completion from questionnaire store
+        import('../common/questionnaire.js').then(({ getQuestionFromStore }) => {
+          const question = getQuestionFromStore(item.questionId);
+          if (question) {
+            item.complete = question.complete;
+          }
+        });
+      }
+    });
+  }
+
+  // Recursively update completion status for section items (legacy method)
   private updateSectionItemsCompletion(items: any[], questionsWithResponses: Map<string, any>) {
     items.forEach(item => {
       if ('items' in item && Array.isArray(item.items)) {

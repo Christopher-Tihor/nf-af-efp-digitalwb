@@ -14,7 +14,9 @@ import {
   updateQuestionResponse,
   getQuestionsForChapter,
   getQuestionnaireStats,
-  isQuestionnaireLoaded
+  isQuestionnaireLoaded,
+  calculateChapterCompletion,
+  updateQuestionnaireCompletion
 } from '../common/questionnaire.js';
 import { POWERPOD } from '../common/constants.js';
 import { Logger } from '../common/logger.js';
@@ -350,8 +352,17 @@ export async function runAllExamples() {
   console.log('7. Getting questionnaire statistics...');
   exampleGetStats();
 
-  // 8. Demonstrate response refresh
-  console.log('8. Refreshing questionnaire responses...');
+  // 8. Test completion logic
+  console.log('8. Testing completion logic...');
+  try {
+    testCompletionLogic();
+    console.log('✅ Completion logic test completed');
+  } catch (error) {
+    console.log('❌ Completion logic test failed:', error.message);
+  }
+
+  // 9. Demonstrate response refresh
+  console.log('9. Refreshing questionnaire responses...');
   try {
     await refreshQuestionnaireResponses('example-workbook-id');
     console.log('✅ Successfully refreshed responses');
@@ -446,6 +457,95 @@ export function testQuestionnaireResponseIntegration() {
 // setTimeout(testQuestionnaireResponseIntegration, 2000);
 
 /**
+ * Test the new completion logic based on questionnaire store rules
+ */
+export function testCompletionLogic() {
+  console.log('🧪 Testing questionnaire completion logic...');
+
+  try {
+    const questionnaire = getQuestionnaireFromStore();
+    if (!questionnaire) {
+      console.log('❌ No questionnaire data found in store');
+      return false;
+    }
+
+    console.log('📊 Testing completion rules:');
+    console.log('   1. Empty chapters (no questions/subchapters) → complete');
+    console.log('   2. Questions-only chapters → complete when all questions answered');
+    console.log('   3. Subchapters-only chapters → complete when all subchapters complete');
+    console.log('   4. Mixed chapters → complete when both questions AND subchapters complete');
+
+    let testResults = [];
+
+    // Test each chapter
+    questionnaire.chapters.forEach(chapterGroup => {
+      if (Array.isArray(chapterGroup)) {
+        chapterGroup.forEach(chapter => {
+          const hasQuestions = chapter.questions?.length > 0;
+          const hasSubchapters = chapter.subchapters?.length > 0;
+          const calculatedComplete = calculateChapterCompletion(chapter);
+          const currentComplete = chapter.complete;
+
+          let ruleApplied = '';
+          if (!hasQuestions && !hasSubchapters) {
+            ruleApplied = 'Empty → Complete';
+          } else if (hasQuestions && !hasSubchapters) {
+            ruleApplied = 'Questions-only';
+          } else if (!hasQuestions && hasSubchapters) {
+            ruleApplied = 'Subchapters-only';
+          } else {
+            ruleApplied = 'Mixed (Questions + Subchapters)';
+          }
+
+          const result = {
+            id: chapter.id,
+            name: chapter.name,
+            ruleApplied,
+            hasQuestions,
+            hasSubchapters,
+            currentComplete,
+            calculatedComplete,
+            shouldUpdate: currentComplete !== calculatedComplete
+          };
+
+          testResults.push(result);
+
+          console.log(`📝 ${chapter.name}:`);
+          console.log(`   Rule: ${ruleApplied}`);
+          console.log(`   Current: ${currentComplete ? '✅' : '❌'} | Calculated: ${calculatedComplete ? '✅' : '❌'}`);
+          console.log(`   ${result.shouldUpdate ? '🔄 Needs Update' : '✓ Correct'}`);
+        });
+      }
+    });
+
+    // Test the update function
+    console.log('\n🔄 Running completion update...');
+    const updatedCount = updateQuestionnaireCompletion();
+    console.log(`✅ Updated ${updatedCount} chapters`);
+
+    // Verify results
+    const needsUpdate = testResults.filter(r => r.shouldUpdate).length;
+    console.log(`\n📈 Test Results:`);
+    console.log(`   Total chapters tested: ${testResults.length}`);
+    console.log(`   Chapters needing updates: ${needsUpdate}`);
+    console.log(`   Chapters updated: ${updatedCount}`);
+    console.log(`   ${needsUpdate === updatedCount ? '✅ All updates applied correctly' : '❌ Update mismatch'}`);
+
+    return {
+      success: true,
+      totalChapters: testResults.length,
+      needsUpdate,
+      updatedCount,
+      testResults
+    };
+
+  } catch (error) {
+    console.error('❌ Completion logic test failed:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+/**
  * Test workbookResponseHelper integration with questionnaire store
  */
 export async function testWorkbookResponseHelperIntegration() {
@@ -504,10 +604,12 @@ export async function testWorkbookResponseHelperIntegration() {
 if (typeof window !== 'undefined') {
   window.testQuestionnaireStore = testQuestionnaireResponseIntegration;
   window.testWorkbookResponseIntegration = testWorkbookResponseHelperIntegration;
+  window.testCompletionLogic = testCompletionLogic;
   window.runQuestionnaireExamples = runAllExamples;
 
   console.log('🧪 Questionnaire Store Test Functions Available:');
   console.log('   - window.testQuestionnaireStore() - Test response integration');
   console.log('   - window.testWorkbookResponseIntegration() - Test workbookResponseHelper integration');
+  console.log('   - window.testCompletionLogic() - Test new completion rules');
   console.log('   - window.runQuestionnaireExamples() - Run all examples');
 }

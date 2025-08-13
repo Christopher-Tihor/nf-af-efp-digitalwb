@@ -160,6 +160,21 @@ export function loadQuestionnaireIntoStore(nestedChapterStructure, forceRefresh 
   // Dispatch to store
   store.dispatch('setQuestionnaireData', { questionnaire: questionnaireData });
 
+  // Update completion status based on the new rules
+  try {
+    updateQuestionnaireCompletion();
+    logger.info({
+      fn: loadQuestionnaireIntoStore,
+      message: 'Updated questionnaire completion status after loading'
+    });
+  } catch (error) {
+    logger.warn({
+      fn: loadQuestionnaireIntoStore,
+      message: 'Failed to update completion status after loading',
+      data: { error: error.message }
+    });
+  }
+
   logger.info({
     fn: loadQuestionnaireIntoStore,
     message: 'Successfully loaded questionnaire data into store',
@@ -307,6 +322,17 @@ export function updateQuestionResponse(questionId, response, complete = true, re
     if (entry && responseData) {
       entry.response = responseData;
     }
+  }
+
+  // Trigger completion update after question response changes
+  try {
+    updateQuestionnaireCompletion();
+  } catch (error) {
+    logger.warn({
+      fn: updateQuestionResponse,
+      message: 'Failed to update questionnaire completion after question response change',
+      data: { error: error.message, questionId }
+    });
   }
 }
 
@@ -515,6 +541,117 @@ export async function refreshQuestionnaireResponses(workbookId) {
     });
     return false;
   }
+}
+
+/**
+ * Calculate completion status for a chapter based on questionnaire store rules
+ * @param {Object} chapter - The chapter object
+ * @returns {boolean} True if the chapter should be marked complete
+ */
+export function calculateChapterCompletion(chapter) {
+  if (!chapter) return false;
+
+  const hasQuestions = chapter.questions && Array.isArray(chapter.questions) && chapter.questions.length > 0;
+  const hasSubchapters = chapter.subchapters && Array.isArray(chapter.subchapters) && chapter.subchapters.length > 0;
+
+  // Rule: If a parent contains neither questions nor subchapters, mark it complete
+  if (!hasQuestions && !hasSubchapters) {
+    return true;
+  }
+
+  // Rule: If a parent has only questions, mark it complete when all questions are completed
+  if (hasQuestions && !hasSubchapters) {
+    return chapter.questions.every(question => question.complete);
+  }
+
+  // Rule: If a parent has only subchapters, mark it complete when all subchapters are complete
+  if (!hasQuestions && hasSubchapters) {
+    return chapter.subchapters.every(subchapter => calculateChapterCompletion(subchapter));
+  }
+
+  // Rule: If a parent has both questions and subchapters, mark it complete when all questions and subchapters are complete
+  if (hasQuestions && hasSubchapters) {
+    const allQuestionsComplete = chapter.questions.every(question => question.complete);
+    const allSubchaptersComplete = chapter.subchapters.every(subchapter => calculateChapterCompletion(subchapter));
+    return allQuestionsComplete && allSubchaptersComplete;
+  }
+
+  return false;
+}
+
+/**
+ * Update completion status for all chapters in the questionnaire store
+ * This applies the completion rules recursively to all chapters and subchapters
+ */
+export function updateQuestionnaireCompletion() {
+  logger.info({
+    fn: updateQuestionnaireCompletion,
+    message: 'Updating questionnaire completion status based on store rules'
+  });
+
+  const questionnaire = getQuestionnaireFromStore();
+  if (!questionnaire?.chapters?.length) {
+    logger.warn({
+      fn: updateQuestionnaireCompletion,
+      message: 'No questionnaire data found, cannot update completion'
+    });
+    return;
+  }
+
+  let updatedCount = 0;
+
+  // Recursive function to update completion for chapters and subchapters
+  const updateChapterCompletionRecursive = (chapters) => {
+    if (!Array.isArray(chapters)) return;
+
+    chapters.forEach(chapter => {
+      // First, update subchapters recursively (bottom-up approach)
+      if (chapter.subchapters && Array.isArray(chapter.subchapters)) {
+        updateChapterCompletionRecursive(chapter.subchapters);
+      }
+
+      // Calculate completion status based on rules
+      const shouldBeComplete = calculateChapterCompletion(chapter);
+
+      // Update if status has changed
+      if (chapter.complete !== shouldBeComplete) {
+        chapter.complete = shouldBeComplete;
+        updatedCount++;
+
+        logger.info({
+          fn: updateQuestionnaireCompletion,
+          message: `Updated completion for chapter ${chapter.id}`,
+          data: {
+            chapterId: chapter.id,
+            name: chapter.name,
+            complete: shouldBeComplete,
+            hasQuestions: !!(chapter.questions?.length),
+            hasSubchapters: !!(chapter.subchapters?.length)
+          }
+        });
+
+        // Update the store
+        store.dispatch('updateQuestionnaireChapter', {
+          chapterId: chapter.id,
+          updateData: { complete: shouldBeComplete }
+        });
+      }
+    });
+  };
+
+  // Process all chapters
+  questionnaire.chapters.forEach(chapterGroup => {
+    if (Array.isArray(chapterGroup)) {
+      updateChapterCompletionRecursive(chapterGroup);
+    }
+  });
+
+  logger.info({
+    fn: updateQuestionnaireCompletion,
+    message: `Completion update finished - updated ${updatedCount} chapters`
+  });
+
+  return updatedCount;
 }
 
 /**

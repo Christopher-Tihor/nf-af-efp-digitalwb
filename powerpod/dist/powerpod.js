@@ -32382,6 +32382,23 @@
     store.dispatch('setQuestionnaireData', {
       questionnaire: questionnaireData
     });
+
+    // Update completion status based on the new rules
+    try {
+      updateQuestionnaireCompletion();
+      logger$6.info({
+        fn: loadQuestionnaireIntoStore,
+        message: 'Updated questionnaire completion status after loading'
+      });
+    } catch (error) {
+      logger$6.warn({
+        fn: loadQuestionnaireIntoStore,
+        message: 'Failed to update completion status after loading',
+        data: {
+          error: error.message
+        }
+      });
+    }
     logger$6.info({
       fn: loadQuestionnaireIntoStore,
       message: 'Successfully loaded questionnaire data into store',
@@ -32575,6 +32592,20 @@
       if (entry && responseData) {
         entry.response = responseData;
       }
+    }
+
+    // Trigger completion update after question response changes
+    try {
+      updateQuestionnaireCompletion();
+    } catch (error) {
+      logger$6.warn({
+        fn: updateQuestionResponse,
+        message: 'Failed to update questionnaire completion after question response change',
+        data: {
+          error: error.message,
+          questionId: questionId
+        }
+      });
     }
   }
 
@@ -32802,12 +32833,13 @@
   }
 
   /**
-   * Check if questionnaire data is loaded in the store
-   * @returns {boolean} True if questionnaire data is loaded
+   * Calculate completion status for a chapter based on questionnaire store rules
+   * @param {Object} chapter - The chapter object
+   * @returns {boolean} True if the chapter should be marked complete
    */
   function _refreshQuestionnaireResponses() {
     _refreshQuestionnaireResponses = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee2(workbookId) {
-      var _questionnaire$chapte, questionnaire, originalStructure, _yield$import2, loadQuestionsAndResponses, responseData;
+      var _questionnaire$chapte2, questionnaire, originalStructure, _yield$import2, loadQuestionsAndResponses, responseData;
       return _regeneratorRuntime().wrap(function _callee2$(_context2) {
         while (1) switch (_context2.prev = _context2.next) {
           case 0:
@@ -32820,7 +32852,7 @@
             });
             _context2.prev = 1;
             questionnaire = getQuestionnaireFromStore();
-            if (questionnaire !== null && questionnaire !== void 0 && (_questionnaire$chapte = questionnaire.chapters) !== null && _questionnaire$chapte !== void 0 && _questionnaire$chapte.length) {
+            if (questionnaire !== null && questionnaire !== void 0 && (_questionnaire$chapte2 = questionnaire.chapters) !== null && _questionnaire$chapte2 !== void 0 && _questionnaire$chapte2.length) {
               _context2.next = 6;
               break;
             }
@@ -32868,6 +32900,120 @@
     }));
     return _refreshQuestionnaireResponses.apply(this, arguments);
   }
+  function calculateChapterCompletion(chapter) {
+    if (!chapter) return false;
+    var hasQuestions = chapter.questions && Array.isArray(chapter.questions) && chapter.questions.length > 0;
+    var hasSubchapters = chapter.subchapters && Array.isArray(chapter.subchapters) && chapter.subchapters.length > 0;
+
+    // Rule: If a parent contains neither questions nor subchapters, mark it complete
+    if (!hasQuestions && !hasSubchapters) {
+      return true;
+    }
+
+    // Rule: If a parent has only questions, mark it complete when all questions are completed
+    if (hasQuestions && !hasSubchapters) {
+      return chapter.questions.every(function (question) {
+        return question.complete;
+      });
+    }
+
+    // Rule: If a parent has only subchapters, mark it complete when all subchapters are complete
+    if (!hasQuestions && hasSubchapters) {
+      return chapter.subchapters.every(function (subchapter) {
+        return calculateChapterCompletion(subchapter);
+      });
+    }
+
+    // Rule: If a parent has both questions and subchapters, mark it complete when all questions and subchapters are complete
+    if (hasQuestions && hasSubchapters) {
+      var allQuestionsComplete = chapter.questions.every(function (question) {
+        return question.complete;
+      });
+      var allSubchaptersComplete = chapter.subchapters.every(function (subchapter) {
+        return calculateChapterCompletion(subchapter);
+      });
+      return allQuestionsComplete && allSubchaptersComplete;
+    }
+    return false;
+  }
+
+  /**
+   * Update completion status for all chapters in the questionnaire store
+   * This applies the completion rules recursively to all chapters and subchapters
+   */
+  function updateQuestionnaireCompletion() {
+    var _questionnaire$chapte;
+    logger$6.info({
+      fn: updateQuestionnaireCompletion,
+      message: 'Updating questionnaire completion status based on store rules'
+    });
+    var questionnaire = getQuestionnaireFromStore();
+    if (!(questionnaire !== null && questionnaire !== void 0 && (_questionnaire$chapte = questionnaire.chapters) !== null && _questionnaire$chapte !== void 0 && _questionnaire$chapte.length)) {
+      logger$6.warn({
+        fn: updateQuestionnaireCompletion,
+        message: 'No questionnaire data found, cannot update completion'
+      });
+      return;
+    }
+    var updatedCount = 0;
+
+    // Recursive function to update completion for chapters and subchapters
+    var _updateChapterCompletionRecursive = function updateChapterCompletionRecursive(chapters) {
+      if (!Array.isArray(chapters)) return;
+      chapters.forEach(function (chapter) {
+        // First, update subchapters recursively (bottom-up approach)
+        if (chapter.subchapters && Array.isArray(chapter.subchapters)) {
+          _updateChapterCompletionRecursive(chapter.subchapters);
+        }
+
+        // Calculate completion status based on rules
+        var shouldBeComplete = calculateChapterCompletion(chapter);
+
+        // Update if status has changed
+        if (chapter.complete !== shouldBeComplete) {
+          var _chapter$questions, _chapter$subchapters;
+          chapter.complete = shouldBeComplete;
+          updatedCount++;
+          logger$6.info({
+            fn: updateQuestionnaireCompletion,
+            message: "Updated completion for chapter ".concat(chapter.id),
+            data: {
+              chapterId: chapter.id,
+              name: chapter.name,
+              complete: shouldBeComplete,
+              hasQuestions: !!((_chapter$questions = chapter.questions) !== null && _chapter$questions !== void 0 && _chapter$questions.length),
+              hasSubchapters: !!((_chapter$subchapters = chapter.subchapters) !== null && _chapter$subchapters !== void 0 && _chapter$subchapters.length)
+            }
+          });
+
+          // Update the store
+          store.dispatch('updateQuestionnaireChapter', {
+            chapterId: chapter.id,
+            updateData: {
+              complete: shouldBeComplete
+            }
+          });
+        }
+      });
+    };
+
+    // Process all chapters
+    questionnaire.chapters.forEach(function (chapterGroup) {
+      if (Array.isArray(chapterGroup)) {
+        _updateChapterCompletionRecursive(chapterGroup);
+      }
+    });
+    logger$6.info({
+      fn: updateQuestionnaireCompletion,
+      message: "Completion update finished - updated ".concat(updatedCount, " chapters")
+    });
+    return updatedCount;
+  }
+
+  /**
+   * Check if questionnaire data is loaded in the store
+   * @returns {boolean} True if questionnaire data is loaded
+   */
   function isQuestionnaireLoaded() {
     var _POWERPOD$state3;
     return !!(((_POWERPOD$state3 = POWERPOD.state) === null || _POWERPOD$state3 === void 0 || (_POWERPOD$state3 = _POWERPOD$state3.questionnaire) === null || _POWERPOD$state3 === void 0 || (_POWERPOD$state3 = _POWERPOD$state3.chapters) === null || _POWERPOD$state3 === void 0 ? void 0 : _POWERPOD$state3.length) > 0);
@@ -32885,6 +33031,8 @@
     getQuestionnaireStats: getQuestionnaireStats,
     loadQuestionnaireWithResponses: loadQuestionnaireWithResponses,
     refreshQuestionnaireResponses: refreshQuestionnaireResponses,
+    calculateChapterCompletion: calculateChapterCompletion,
+    updateQuestionnaireCompletion: updateQuestionnaireCompletion,
     isQuestionnaireLoaded: isQuestionnaireLoaded
   });
 
@@ -34573,20 +34721,29 @@
             console.log('7. Getting questionnaire statistics...');
             exampleGetStats();
 
-            // 8. Demonstrate response refresh
-            console.log('8. Refreshing questionnaire responses...');
-            _context2.prev = 26;
-            _context2.next = 29;
+            // 8. Test completion logic
+            console.log('8. Testing completion logic...');
+            try {
+              testCompletionLogic();
+              console.log('✅ Completion logic test completed');
+            } catch (error) {
+              console.log('❌ Completion logic test failed:', error.message);
+            }
+
+            // 9. Demonstrate response refresh
+            console.log('9. Refreshing questionnaire responses...');
+            _context2.prev = 28;
+            _context2.next = 31;
             return refreshQuestionnaireResponses('example-workbook-id');
-          case 29:
+          case 31:
             console.log('✅ Successfully refreshed responses');
-            _context2.next = 35;
+            _context2.next = 37;
             break;
-          case 32:
-            _context2.prev = 32;
-            _context2.t1 = _context2["catch"](26);
+          case 34:
+            _context2.prev = 34;
+            _context2.t1 = _context2["catch"](28);
             console.log('❌ Failed to refresh responses:', _context2.t1.message);
-          case 35:
+          case 37:
             console.log('=== Examples completed ===');
 
             // Return current state for inspection
@@ -34595,11 +34752,11 @@
               stats: getQuestionnaireStats(),
               storeState: (_POWERPOD$state = POWERPOD.state) === null || _POWERPOD$state === void 0 ? void 0 : _POWERPOD$state.questionnaire
             });
-          case 37:
+          case 39:
           case "end":
             return _context2.stop();
         }
-      }, _callee2, null, [[6, 11], [26, 32]]);
+      }, _callee2, null, [[6, 11], [28, 34]]);
     }));
     return _runAllExamples.apply(this, arguments);
   }
@@ -34669,6 +34826,92 @@
   // Test response integration after a delay to allow for initialization
   // Uncomment the line below to automatically test response integration
   // setTimeout(testQuestionnaireResponseIntegration, 2000);
+
+  /**
+   * Test the new completion logic based on questionnaire store rules
+   */
+  function testCompletionLogic() {
+    console.log('🧪 Testing questionnaire completion logic...');
+    try {
+      var questionnaire = getQuestionnaireFromStore();
+      if (!questionnaire) {
+        console.log('❌ No questionnaire data found in store');
+        return false;
+      }
+      console.log('📊 Testing completion rules:');
+      console.log('   1. Empty chapters (no questions/subchapters) → complete');
+      console.log('   2. Questions-only chapters → complete when all questions answered');
+      console.log('   3. Subchapters-only chapters → complete when all subchapters complete');
+      console.log('   4. Mixed chapters → complete when both questions AND subchapters complete');
+      var testResults = [];
+
+      // Test each chapter
+      questionnaire.chapters.forEach(function (chapterGroup) {
+        if (Array.isArray(chapterGroup)) {
+          chapterGroup.forEach(function (chapter) {
+            var _chapter$questions2, _chapter$subchapters2;
+            var hasQuestions = ((_chapter$questions2 = chapter.questions) === null || _chapter$questions2 === void 0 ? void 0 : _chapter$questions2.length) > 0;
+            var hasSubchapters = ((_chapter$subchapters2 = chapter.subchapters) === null || _chapter$subchapters2 === void 0 ? void 0 : _chapter$subchapters2.length) > 0;
+            var calculatedComplete = calculateChapterCompletion(chapter);
+            var currentComplete = chapter.complete;
+            var ruleApplied = '';
+            if (!hasQuestions && !hasSubchapters) {
+              ruleApplied = 'Empty → Complete';
+            } else if (hasQuestions && !hasSubchapters) {
+              ruleApplied = 'Questions-only';
+            } else if (!hasQuestions && hasSubchapters) {
+              ruleApplied = 'Subchapters-only';
+            } else {
+              ruleApplied = 'Mixed (Questions + Subchapters)';
+            }
+            var result = {
+              id: chapter.id,
+              name: chapter.name,
+              ruleApplied: ruleApplied,
+              hasQuestions: hasQuestions,
+              hasSubchapters: hasSubchapters,
+              currentComplete: currentComplete,
+              calculatedComplete: calculatedComplete,
+              shouldUpdate: currentComplete !== calculatedComplete
+            };
+            testResults.push(result);
+            console.log("\uD83D\uDCDD ".concat(chapter.name, ":"));
+            console.log("   Rule: ".concat(ruleApplied));
+            console.log("   Current: ".concat(currentComplete ? '✅' : '❌', " | Calculated: ").concat(calculatedComplete ? '✅' : '❌'));
+            console.log("   ".concat(result.shouldUpdate ? '🔄 Needs Update' : '✓ Correct'));
+          });
+        }
+      });
+
+      // Test the update function
+      console.log('\n🔄 Running completion update...');
+      var updatedCount = updateQuestionnaireCompletion();
+      console.log("\u2705 Updated ".concat(updatedCount, " chapters"));
+
+      // Verify results
+      var needsUpdate = testResults.filter(function (r) {
+        return r.shouldUpdate;
+      }).length;
+      console.log("\n\uD83D\uDCC8 Test Results:");
+      console.log("   Total chapters tested: ".concat(testResults.length));
+      console.log("   Chapters needing updates: ".concat(needsUpdate));
+      console.log("   Chapters updated: ".concat(updatedCount));
+      console.log("   ".concat(needsUpdate === updatedCount ? '✅ All updates applied correctly' : '❌ Update mismatch'));
+      return {
+        success: true,
+        totalChapters: testResults.length,
+        needsUpdate: needsUpdate,
+        updatedCount: updatedCount,
+        testResults: testResults
+      };
+    } catch (error) {
+      console.error('❌ Completion logic test failed:', error);
+      return {
+        success: false,
+        error: error.message
+      };
+    }
+  }
 
   /**
    * Test workbookResponseHelper integration with questionnaire store
@@ -34753,10 +34996,12 @@
   if (typeof window !== 'undefined') {
     window.testQuestionnaireStore = testQuestionnaireResponseIntegration;
     window.testWorkbookResponseIntegration = testWorkbookResponseHelperIntegration;
+    window.testCompletionLogic = testCompletionLogic;
     window.runQuestionnaireExamples = runAllExamples;
     console.log('🧪 Questionnaire Store Test Functions Available:');
     console.log('   - window.testQuestionnaireStore() - Test response integration');
     console.log('   - window.testWorkbookResponseIntegration() - Test workbookResponseHelper integration');
+    console.log('   - window.testCompletionLogic() - Test new completion rules');
     console.log('   - window.runQuestionnaireExamples() - Run all examples');
   }
 
@@ -37623,6 +37868,36 @@
       }
       // Computed properties
       get completionPercent() {
+          // Use questionnaire store completion if available (preferred method)
+          if (isQuestionnaireLoaded()) {
+              try {
+                  // Get stats synchronously from questionnaire store
+                  const questionnaire = getQuestionnaireFromStore();
+                  if (questionnaire) {
+                      // Calculate completion percentage from questionnaire store
+                      let totalQuestions = 0;
+                      let answeredQuestions = 0;
+                      const countInChapters = (chapters) => {
+                          chapters.forEach((chapter) => {
+                              if (chapter.questions) {
+                                  totalQuestions += chapter.questions.length;
+                                  answeredQuestions += chapter.questions.filter((q) => q.complete).length;
+                              }
+                              if (chapter.subchapters) {
+                                  countInChapters(chapter.subchapters);
+                              }
+                          });
+                      };
+                      if (questionnaire.chapters && questionnaire.chapters.length > 0) {
+                          countInChapters(questionnaire.chapters[0]);
+                      }
+                      return totalQuestions > 0 ? Math.round((answeredQuestions / totalQuestions) * 100) : 0;
+                  }
+              }
+              catch (error) {
+                  console.warn('Failed to get completion from questionnaire store, falling back');
+              }
+          }
           // Use workbook responses completion if available, otherwise fall back to static completion
           if (POWERPOD.workbookQuestionsAndResponses.isLoaded) {
               return POWERPOD.workbookQuestionsAndResponses.stats.completionPercentage;
@@ -38247,12 +38522,30 @@
               console.log(`📈 Workbook stats: ${stats.answeredQuestions}/${stats.totalQuestions} questions answered`);
           }
       }
-      // Update section completion status based on workbook responses
+      // Update section completion status using questionnaire store
       updateSectionCompletionStatus() {
+          // Try to use questionnaire store first (preferred method)
+          if (isQuestionnaireLoaded()) {
+              console.log('🔍 Updating completion using questionnaire store');
+              try {
+                  // Import the completion function dynamically to avoid circular imports
+                  Promise.resolve().then(function () { return questionnaire; }).then(({ updateQuestionnaireCompletion }) => {
+                      updateQuestionnaireCompletion();
+                      this.updateSectionItemsFromQuestionnaireStore();
+                      console.log('✅ Updated completion using questionnaire store');
+                  });
+                  return;
+              }
+              catch (error) {
+                  console.warn('⚠️ Failed to use questionnaire store for completion, falling back to legacy method');
+              }
+          }
+          // Fallback to legacy method if questionnaire store is not available
           if (!POWERPOD.workbookQuestionsAndResponses.isLoaded) {
-              console.log('⚠️ Workbook responses not loaded, skipping section completion update');
+              console.log('⚠️ Neither questionnaire store nor workbook responses loaded, skipping completion update');
               return;
           }
+          console.log('🔄 Using legacy completion method');
           const questionsWithResponses = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses;
           const questionsByChapter = POWERPOD.workbookQuestionsAndResponses.questionsByChapter;
           console.log(`🔍 Updating completion for ${questionsByChapter.size} chapters`);
@@ -38261,7 +38554,60 @@
               this.updateSectionItemsCompletion(section.items, questionsWithResponses);
           });
       }
-      // Recursively update completion status for section items
+      // Update section items using questionnaire store data
+      updateSectionItemsFromQuestionnaireStore() {
+          console.log('🔄 Updating section items from questionnaire store');
+          this.sections.forEach(section => {
+              if (section.tab === 'Section B') {
+                  // Update Section B items using questionnaire store
+                  this.updateSectionItemsFromStore(section.items);
+              }
+          });
+      }
+      // Recursively update section items using questionnaire store
+      updateSectionItemsFromStore(items) {
+          items.forEach(item => {
+              if ('items' in item && Array.isArray(item.items)) {
+                  // Recursively update nested items
+                  this.updateSectionItemsFromStore(item.items);
+                  // Update parent completion based on children
+                  const allChildrenComplete = item.items.every((child) => {
+                      if ('items' in child && Array.isArray(child.items)) {
+                          return child.complete;
+                      }
+                      else if (child.questionId) {
+                          // Import questionnaire functions dynamically
+                          Promise.resolve().then(function () { return questionnaire; }).then(({ getQuestionFromStore }) => {
+                              const question = getQuestionFromStore(child.questionId);
+                              child.complete = (question === null || question === void 0 ? void 0 : question.complete) || false;
+                          });
+                          return child.complete;
+                      }
+                      return child.complete;
+                  });
+                  item.complete = allChildrenComplete;
+              }
+              else if (item.chapterId) {
+                  // This is a chapter item - get completion from questionnaire store
+                  Promise.resolve().then(function () { return questionnaire; }).then(({ getChapterFromStore }) => {
+                      const chapter = getChapterFromStore(item.chapterId);
+                      if (chapter) {
+                          item.complete = chapter.complete;
+                      }
+                  });
+              }
+              else if (item.questionId) {
+                  // This is a question item - get completion from questionnaire store
+                  Promise.resolve().then(function () { return questionnaire; }).then(({ getQuestionFromStore }) => {
+                      const question = getQuestionFromStore(item.questionId);
+                      if (question) {
+                          item.complete = question.complete;
+                      }
+                  });
+              }
+          });
+      }
+      // Recursively update completion status for section items (legacy method)
       updateSectionItemsCompletion(items, questionsWithResponses) {
           items.forEach(item => {
               if ('items' in item && Array.isArray(item.items)) {
