@@ -39,7 +39,7 @@ export class EFPSectionGenerator {
       if (chapter.subchapters && chapter.subchapters.length > 0) {
         chapter.subchapters.forEach((subchapter: any) => {
           // Add the subchapter as a clickable item
-          const formattedSubchapterTitle = EFPTextUtils.formatChapterTitle(subchapter.name || subchapter.label);
+          const formattedSubchapterTitle = EFPTextUtils.formatChapterTitle(subchapter);
           const subchapterItem: EFPSectionItem = {
             label: formattedSubchapterTitle,
             content: EFPSectionGenerator.renderSubchapterContent(subchapter),
@@ -50,11 +50,8 @@ export class EFPSectionGenerator {
           // If subchapter has sub-subchapters, add them as nested items
           if (subchapter.subchapters && subchapter.subchapters.length > 0) {
             subchapterItem.items = subchapter.subchapters.map((subSubchapter: any) => {
-              // Format sub-subchapter title (remove "CHAPTER X.Y" prefix, keep just the descriptive part)
-              let subSubLabel = subSubchapter.name || subSubchapter.label;
-              // Remove chapter prefix if it exists (e.g., "CHAPTER 7.11 Plant Biodiversity" -> "Plant Biodiversity")
-              subSubLabel = subSubLabel.replace(/^CHAPTER\s+\d+\.\d+\s+/i, '');
-              const formattedSubSubTitle = EFPTextUtils.formatChapterTitle(subSubLabel);
+              // Format sub-subchapter title
+              const formattedSubSubTitle = EFPTextUtils.formatChapterTitle(subSubchapter);
 
               return {
                 label: formattedSubSubTitle,
@@ -73,7 +70,7 @@ export class EFPSectionGenerator {
         });
       } else {
         // If no subchapters, add the main chapter itself as a clickable item
-        const formattedTitle = EFPTextUtils.formatChapterTitle(chapter.name || chapter.label);
+        const formattedTitle = EFPTextUtils.formatChapterTitle(chapter);
         chapterItem.items!.push({
           label: formattedTitle,
           content: EFPSectionGenerator.renderChapterContent(chapter),
@@ -107,7 +104,7 @@ export class EFPSectionGenerator {
   }
 
   static renderChapterContent(chapter: any): string {
-    const formattedTitle = EFPTextUtils.formatChapterTitle(chapter.name);
+    const formattedTitle = EFPTextUtils.formatChapterTitle(chapter);
     return `
       <div class="chapter-content">
         <h3 style="font-family: var(--chapter-font); font-weight: 700; font-size: 1.75rem; color: var(--sl-color-primary-900); margin-bottom: 1rem; letter-spacing: -0.025em;">${formattedTitle}</h3>

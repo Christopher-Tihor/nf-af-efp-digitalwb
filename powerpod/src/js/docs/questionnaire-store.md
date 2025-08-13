@@ -349,6 +349,64 @@ private getSectionBItemsFromStore(): EFPSectionItem[] {
 6. **Simpler Data Flow**: Store → Navigation (no intermediate transformations)
 7. **Automatic Updates**: Navigation reflects store changes immediately
 8. **Reactive Updates**: Component re-renders when store becomes available
+
+### Enhanced Chapter Title Formatting
+
+The `EFPTextUtils.formatChapterTitle` function has been updated to handle chapter objects and format them based on their type:
+
+```javascript
+// Updated function signature
+static formatChapterTitle(chapterOrName: any): string
+
+// Usage examples
+const parentChapterWithoutNumber = {
+  name: 'NUTRIENT APPLICATION',
+  order: 6
+};
+const formattedParent1 = EFPTextUtils.formatChapterTitle(parentChapterWithoutNumber);
+// Result: "Chapter 6: Nutrient Application"
+
+const parentChapterWithNumber = {
+  name: '2. FARMSTEAD',
+  order: 2
+};
+const formattedParent2 = EFPTextUtils.formatChapterTitle(parentChapterWithNumber);
+// Result: "Chapter 2. Farmstead" (no duplication)
+
+const subchapter = {
+  name: 'CHAPTER 6 NUTRIENT APPLICATION',
+  order: 6.1
+};
+const formattedSub = EFPTextUtils.formatChapterTitle(subchapter);
+// Result: "6.1 Nutrient Application"
+
+// Backward compatibility with strings
+const legacyFormatted = EFPTextUtils.formatChapterTitle('CHAPTER 2 BUILDINGS');
+// Result: "Chapter 2: Buildings"
+```
+
+#### Formatting Rules
+
+1. **Parent Chapters** (order without decimal or ending in .0):
+   - **With number in name**: Prepend "Chapter" only
+     - Example: `{ name: "2. FARMSTEAD", order: 2 }` → "Chapter 2. Farmstead"
+   - **Without number in name**: Prepend "Chapter" + number + ":"
+     - Example: `{ name: "NUTRIENT APPLICATION", order: 6 }` → "Chapter 6: Nutrient Application"
+
+2. **Subchapters** (order with decimal):
+   - Prepend order number directly
+   - Example: `{ name: "BUILDINGS AND ROADS", order: 6.1 }` → "6.1 Buildings And Roads"
+
+3. **String Input** (backward compatibility):
+   - Uses legacy formatting logic
+   - Handles existing "CHAPTER X" patterns
+
+#### Benefits
+
+- **Consistent Formatting**: All chapter titles follow the same rules
+- **Object-Based**: Works directly with chapter objects from store
+- **Automatic Prefixing**: No manual string manipulation needed
+- **Backward Compatible**: Existing string usage still works
 ```
 
 ## Benefits

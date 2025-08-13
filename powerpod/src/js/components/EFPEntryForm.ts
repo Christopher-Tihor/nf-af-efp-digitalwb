@@ -83,22 +83,61 @@ class EFPLogger {
 
 // Utility class for text formatting
 class EFPTextUtils {
-  static formatChapterTitle(chapterName: string): string {
-    // Transform "CHAPTER 2 BUILDINGS AND ROADS" to "Chapter 2: Buildings and Roads"
-    // Transform "PLANT BIODIVERSITY" to "Plant Biodiversity"
-    if (!chapterName) return '';
+  static formatChapterTitle(chapterOrName: any): string {
+    // Handle both chapter objects and string names
+    // For parent chapters: prepend "Chapter"
+    // For subchapters: prepend order number
 
-    // Convert to title case and handle the chapter format
-    const titleCase = chapterName.toLowerCase().replace(/\b\w/g, l => l.toUpperCase());
+    if (!chapterOrName) return '';
 
-    // If it starts with "Chapter" and has a number, add a colon after the number
-    const chapterMatch = titleCase.match(/^Chapter (\d+(?:\.\d+)?) (.+)$/);
-    if (chapterMatch) {
-      const [, chapterNum, chapterTitle] = chapterMatch;
-      return `Chapter ${chapterNum}: ${chapterTitle}`;
+    // If it's a string (legacy usage), handle it the old way
+    if (typeof chapterOrName === 'string') {
+      const chapterName = chapterOrName;
+      const titleCase = chapterName.toLowerCase().replace(/\b\w/g, l => l.toUpperCase());
+
+      // If it starts with "Chapter" and has a number, add a colon after the number
+      const chapterMatch = titleCase.match(/^Chapter (\d+(?:\.\d+)?) (.+)$/);
+      if (chapterMatch) {
+        const [, chapterNum, chapterTitle] = chapterMatch;
+        return `Chapter ${chapterNum}: ${chapterTitle}`;
+      }
+
+      return titleCase;
     }
 
-    return titleCase;
+    // Handle chapter/subchapter objects
+    const chapter = chapterOrName;
+    const name = chapter.name || chapter.label || '';
+    const order = chapter.order || 0;
+
+    if (!name) return '';
+
+    // Clean the name - remove any existing "CHAPTER X" prefixes
+    let cleanName = name.replace(/^CHAPTER\s+\d+(?:\.\d+)?\s+/i, '').trim();
+
+    // Convert to title case
+    const titleCase = cleanName.toLowerCase().replace(/\b\w/g, (l: string) => l.toUpperCase());
+
+    // Determine if this is a parent chapter or subchapter based on order
+    const orderStr = order.toString();
+    const isParentChapter = !orderStr.includes('.') || orderStr.endsWith('.0');
+
+    if (isParentChapter) {
+      // Parent chapter: check if name already starts with the chapter number
+      const chapterNumber = Math.floor(order);
+      const startsWithNumber = titleCase.match(/^\d+\.\s/);
+
+      if (startsWithNumber) {
+        // Name already contains the number (e.g., "2. Farmstead"), just prepend "Chapter"
+        return `Chapter ${titleCase}`;
+      } else {
+        // Name doesn't contain number, prepend "Chapter X:"
+        return `Chapter ${chapterNumber}: ${titleCase}`;
+      }
+    } else {
+      // Subchapter: prepend order number
+      return `${order} ${titleCase}`;
+    }
   }
 
   static truncateText(text: string, maxLength: number): string {
@@ -171,7 +210,7 @@ class EFPSectionGenerator {
   }
 
   static renderChapterContent(chapter: any): string {
-    const formattedTitle = EFPTextUtils.formatChapterTitle(chapter.name);
+    const formattedTitle = EFPTextUtils.formatChapterTitle(chapter);
     return `
       <div class="chapter-content">
         <h3 style="font-family: var(--chapter-font); font-weight: 700; font-size: 1.75rem; color: var(--sl-color-primary-900); margin-bottom: 1rem; letter-spacing: -0.025em;">${formattedTitle}</h3>
@@ -1216,8 +1255,8 @@ class EFPEntryForm extends LitElement {
 
       // Create the main chapter container (collapsible parent)
       const chapterItem: EFPSectionItem = {
-        label: EFPTextUtils.formatChapterTitle(`CHAPTER ${chapter.name}`),
-        title: EFPTextUtils.formatChapterTitle(`CHAPTER ${chapter.name}`),
+        label: EFPTextUtils.formatChapterTitle(chapter),
+        title: EFPTextUtils.formatChapterTitle(chapter),
         content: '', // No content for the parent container
         complete: chapter.complete || false, // Use completion from store
         isContainer: true,
@@ -1229,7 +1268,7 @@ class EFPEntryForm extends LitElement {
       if (chapter.subchapters && chapter.subchapters.length > 0) {
         chapter.subchapters.forEach((subchapter: any) => {
           // Add the subchapter as a clickable item
-          const formattedSubchapterTitle = EFPTextUtils.formatChapterTitle(subchapter.name || subchapter.label);
+          const formattedSubchapterTitle = EFPTextUtils.formatChapterTitle(subchapter);
           const subchapterItem: EFPSectionItem = {
             label: formattedSubchapterTitle,
             content: EFPSectionGenerator.renderSubchapterContent(subchapter),
@@ -1242,9 +1281,7 @@ class EFPEntryForm extends LitElement {
           if (subchapter.subchapters && subchapter.subchapters.length > 0) {
             subchapterItem.items = subchapter.subchapters.map((subSubchapter: any) => {
               // Format sub-subchapter title
-              let subSubLabel = subSubchapter.name || subSubchapter.label;
-              subSubLabel = subSubLabel.replace(/^CHAPTER\s+\d+\.\d+\s+/i, '');
-              const formattedSubSubTitle = EFPTextUtils.formatChapterTitle(subSubLabel);
+              const formattedSubSubTitle = EFPTextUtils.formatChapterTitle(subSubchapter);
 
               return {
                 label: formattedSubSubTitle,
@@ -1264,7 +1301,7 @@ class EFPEntryForm extends LitElement {
         });
       } else {
         // If no subchapters, add the main chapter itself as a clickable item
-        const formattedTitle = EFPTextUtils.formatChapterTitle(chapter.name || chapter.label);
+        const formattedTitle = EFPTextUtils.formatChapterTitle(chapter);
         chapterItem.items!.push({
           label: formattedTitle,
           content: EFPSectionGenerator.renderChapterContent(chapter),

@@ -1,21 +1,60 @@
 // Utility class for text formatting
 export class EFPTextUtils {
-  static formatChapterTitle(chapterName: string): string {
-    // Transform "CHAPTER 2 BUILDINGS AND ROADS" to "Chapter 2: Buildings and Roads"
-    // Transform "PLANT BIODIVERSITY" to "Plant Biodiversity"
-    if (!chapterName) return '';
+  static formatChapterTitle(chapterOrName: any): string {
+    // Handle both chapter objects and string names
+    // For parent chapters: prepend "Chapter"
+    // For subchapters: prepend order number
 
-    // Convert to title case and handle the chapter format
-    const titleCase = chapterName.toLowerCase().replace(/\b\w/g, l => l.toUpperCase());
+    if (!chapterOrName) return '';
 
-    // If it starts with "Chapter" and has a number, add a colon after the number
-    const chapterMatch = titleCase.match(/^Chapter (\d+(?:\.\d+)?) (.+)$/);
-    if (chapterMatch) {
-      const [, chapterNum, chapterTitle] = chapterMatch;
-      return `Chapter ${chapterNum}: ${chapterTitle}`;
+    // If it's a string (legacy usage), handle it the old way
+    if (typeof chapterOrName === 'string') {
+      const chapterName = chapterOrName;
+      const titleCase = chapterName.toLowerCase().replace(/\b\w/g, l => l.toUpperCase());
+
+      // If it starts with "Chapter" and has a number, add a colon after the number
+      const chapterMatch = titleCase.match(/^Chapter (\d+(?:\.\d+)?) (.+)$/);
+      if (chapterMatch) {
+        const [, chapterNum, chapterTitle] = chapterMatch;
+        return `Chapter ${chapterNum}: ${chapterTitle}`;
+      }
+
+      return titleCase;
     }
 
-    return titleCase;
+    // Handle chapter/subchapter objects
+    const chapter = chapterOrName;
+    const name = chapter.name || chapter.label || '';
+    const order = chapter.order || 0;
+
+    if (!name) return '';
+
+    // Clean the name - remove any existing "CHAPTER X" prefixes
+    let cleanName = name.replace(/^CHAPTER\s+\d+(?:\.\d+)?\s+/i, '').trim();
+
+    // Convert to title case
+    const titleCase = cleanName.toLowerCase().replace(/\b\w/g, l => l.toUpperCase());
+
+    // Determine if this is a parent chapter or subchapter based on order
+    const orderStr = order.toString();
+    const isParentChapter = !orderStr.includes('.') || orderStr.endsWith('.0');
+
+    if (isParentChapter) {
+      // Parent chapter: check if name already starts with the chapter number
+      const chapterNumber = Math.floor(order);
+      const startsWithNumber = titleCase.match(/^\d+\.\s/);
+
+      if (startsWithNumber) {
+        // Name already contains the number (e.g., "2. Farmstead"), just prepend "Chapter"
+        return `Chapter ${titleCase}`;
+      } else {
+        // Name doesn't contain number, prepend "Chapter X:"
+        return `Chapter ${chapterNumber}: ${titleCase}`;
+      }
+    } else {
+      // Subchapter: prepend order number
+      return `${order} ${titleCase}`;
+    }
   }
 
   static truncateText(text: string, maxLength: number): string {
