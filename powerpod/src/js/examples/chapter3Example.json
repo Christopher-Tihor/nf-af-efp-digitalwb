@@ -1,0 +1,118 @@
+{
+    "id": "293da3df-4c63-f011-bec2-002248afff4e",
+    "name": "CHAPTER 3 MORTALITY DISPOSAL",
+    "label": "<div class=\"ck-content\" data-wrapper=\"true\" dir=\"ltr\" style=\"--ck-image-style-spacing: 1.5em; --ck-inline-image-style-spacing: calc(var(--ck-image-style-spacing) / 2); font-family: Segoe UI; font-size: 11pt;\"><p style=\"margin: 0;\">3.4 MORTALITY DISPOSAL</p></div>",
+    "order": 3.4,
+    "description": null,
+    "tooltip": null,
+    "imageUrl": null,
+    "parentChapterId": "c5b93ce4-ec72-f011-bec2-000d3a0c38d2",
+    "questions": [
+        {
+            "id": "a973d4c1-af73-f011-b4cc-002248b21f96",
+            "name": "161",
+            "label": "<div class=\"ck-content\" data-wrapper=\"true\" dir=\"ltr\" style=\"--ck-image-style-spacing: 1.5em; --ck-inline-image-style-spacing: calc(var(--ck-image-style-spacing) / 2); font-family: Segoe UI; font-size: 11pt;\"><p style=\"margin: 0;\"><strong>161. Are mortalities handled in a way that protects water, air, and nearby properties, and keeps animals and pests away?</strong></p></div>",
+            "order": 161,
+            "questionType": 100000000,
+            "textAboveQuestion": "<div class=\"ck-content\" data-wrapper=\"true\" dir=\"ltr\" style=\"--ck-image-style-spacing: 1.5em; --ck-inline-image-style-spacing: calc(var(--ck-image-style-spacing) / 2); font-family: Segoe UI; font-size: 11pt;\"><p style=\"margin: 0;\">The Code of Practice for Agricultural Environmental Management makes provisions for <a href=\"https://www.bclaws.gov.bc.ca/civix/document/id/complete/statreg/8_2019#division_d1e6873\" target=\"_blank\" rel=\"noopener noreferrer\"><strong>on-farm mortality disposal</strong></a> through composting, burial and incineration provided that the disposal activities are carried out on the farm&nbsp; where the animal died.&nbsp;</p><p style=\"margin: 0;\">&nbsp;</p><p style=\"margin: 0;\">&nbsp;</p></div>",
+            "textBelowQuestion": "<div class=\"ck-content\" data-wrapper=\"true\" dir=\"ltr\" style=\"--ck-image-style-spacing: 1.5em; --ck-inline-image-style-spacing: calc(var(--ck-image-style-spacing) / 2); font-family: Segoe UI; font-size: 11pt;\"><p style=\"margin: 0;\">Follow these practices to safely handle mortalities and stay within AEM Code regulations:</p><ul style=\"list-style-position: inside;\"><li>Mortalities disposed of on the farm are from your farm.</li><li>Mortalities are kept out of watercourses.</li><li>Runoff, leachate, solids, and air emissions from mortality disposal do not enter surface water, groundwater, or cross property boundaries.</li><li>Odours and particles are controlled, and the site does not attract pets, wildlife, or pests.</li><li>Mortalities are stored in a way that prevents rotting and leaking.&nbsp;<br>&nbsp;</li></ul></div>",
+            "tooltip": null,
+            "responseOptionColor": null
+        },
+        {
+            "id": "ad3f604a-b273-f011-b4cc-002248b21f96",
+            "name": "167",
+            "label": "<div class=\"ck-content\" data-wrapper=\"true\" dir=\"ltr\" style=\"--ck-image-style-spacing: 1.5em; --ck-inline-image-style-spacing: calc(var(--ck-image-style-spacing) / 2); font-family: Segoe UI; font-size: 11pt;\"><p style=\"margin: 0;\"><strong>167. Are mortalities disposed of using the most preferred method?</strong></p></div>",
+            "order": 167,
+            "questionType": 100000000,
+            "textAboveQuestion": null,
+            "textBelowQuestion": "<div class=\"ck-content\" data-wrapper=\"true\" dir=\"ltr\" style=\"--ck-image-style-spacing: 1.5em; --ck-inline-image-style-spacing: calc(var(--ck-image-style-spacing) / 2); font-family: Segoe UI; font-size: 11pt;\"><p style=\"margin: 0;\">Refer to <a href=\"https://www2.gov.bc.ca/assets/gov/farming-natural-resources-and-industry/agriculture-and-seafood/agricultural-land-and-environment/environmental-farm-planning/efp-reference-guide/chapters/rg-chp3.pdf#page56\" target=\"_blank\" rel=\"noopener noreferrer\">Table 3.5</a> for preferred methods of mortality disposal based on cause of death.</p></div>",
+            "tooltip": null,
+            "responseOptionColor": null
+        },
+        {
+            "id": "6e6dcd92-b273-f011-b4cc-002248b21f96",
+            "name": "168",
+            "label": "<div class=\"ck-content\" data-wrapper=\"true\" dir=\"ltr\" style=\"--ck-image-style-spacing: 1.5em; --ck-inline-image-style-spacing: calc(var(--ck-image-style-spacing) / 2); font-family: Segoe UI; font-size: 11pt;\"><h2 style=\"margin:0cm;\"><span style=\"font-family:&quot;BC Sans&quot;;font-size:11pt;\"><span lang=\"EN-US\">168. Are mortality composting sites the required distance away from water sources and property boundaries?</span></span></h2></div>",
+            "order": 168,
+            "questionType": 100000000,
+            "textAboveQuestion": null,
+            "textBelowQuestion": "<div class=\"ck-content\" data-wrapper=\"true\" dir=\"ltr\" style=\"--ck-image-style-spacing: 1.5em; --ck-inline-image-style-spacing: calc(var(--ck-image-style-spacing) / 2); font-family: Segoe UI; font-size: 11pt;\"><ul style=\"list-style-position: inside;\"><li>30 m (100 ft) from a drinking water source or watercourse</li><li>15 m (50 ft) from a watercourse if composting is done in a structure</li><li>4.5 m (13.5 ft) from a property boundary</li></ul></div>",
+            "tooltip": null,
+            "responseOptionColor": null
+        },
+        {
+            "id": "5e9a545a-b373-f011-b4cc-002248b21f96",
+            "name": "169",
+            "label": "<div class=\"ck-content\" data-wrapper=\"true\" dir=\"ltr\" style=\"--ck-image-style-spacing: 1.5em; --ck-inline-image-style-spacing: calc(var(--ck-image-style-spacing) / 2); font-family: Segoe UI; font-size: 11pt;\"><div class=\"ck-content stickystyles-wrapper-insert\" style=\"font-family:Segoe UI;font-size:11pt;\" dir=\"ltr\" data-wrapper=\"true\"><strong>169. Is mortality composting done in a way that protects water, air, and soil, and follows composting best practices?</strong></div></div>",
+            "order": 169,
+            "questionType": 100000001,
+            "textAboveQuestion": null,
+            "textBelowQuestion": "<div class=\"ck-content\" data-wrapper=\"true\" dir=\"ltr\" style=\"--ck-image-style-spacing: 1.5em; --ck-inline-image-style-spacing: calc(var(--ck-image-style-spacing) / 2); font-family: Segoe UI; font-size: 11pt;\"><p style=\"margin: 0;\">When composting mortalities, you must meet these conditions:</p><ul style=\"list-style-position: inside;\"><li>Composting is done in a structure or outdoor pile that prevents runoff, leachate, and solids from escaping.</li><li>Air emissions from composting do not cross property boundaries.</li><li>Mortalities are fully decomposed before land application, and if exporting poultry mortality compost, it is mixed with poultry manure at barn clean-out (max 10% of total volume).</li><li>Outdoor composting piles are placed away from standing water, saturated soil, or flood-prone areas. </li><li>Outdoor composting piles are moved within 15 months.</li><li>The same composting location is not used more than once every 3 years.</li></ul></div>",
+            "tooltip": null,
+            "responseOptionColor": null
+        },
+        {
+            "id": "05a76284-b373-f011-b4cc-002248b21f96",
+            "name": "175",
+            "label": "<div class=\"ck-content\" data-wrapper=\"true\" dir=\"ltr\" style=\"--ck-image-style-spacing: 1.5em; --ck-inline-image-style-spacing: calc(var(--ck-image-style-spacing) / 2); font-family: Segoe UI; font-size: 11pt;\"><p style=\"margin: 0;\"><strong>175. If you compost specified risk material (SRM), do you only apply it to land that isn’t used for food crops or grazing animals?</strong></p></div>",
+            "order": 175,
+            "questionType": 100000000,
+            "textAboveQuestion": null,
+            "textBelowQuestion": "<div class=\"ck-content\" data-wrapper=\"true\" dir=\"ltr\" style=\"--ck-image-style-spacing: 1.5em; --ck-inline-image-style-spacing: calc(var(--ck-image-style-spacing) / 2); font-family: Segoe UI; font-size: 11pt;\"><p style=\"margin: 0;\">“<i>Specified risk material</i>” means parts of a cow that could carry disease, including:</p><ul style=\"list-style-position: inside;\"><li>Brain, spinal cord, and related tissues from cattle 30 months or older.</li><li>A section of the gut (distal ileum) from any cattle.&nbsp;</li></ul></div>",
+            "tooltip": null,
+            "responseOptionColor": null
+        }
+    ],
+    "subchapters": [
+        {
+            "id": "7d735631-8578-f011-b4cc-000d3a0c38d2",
+            "name": "Mortality Disposal",
+            "label": "<div class=\"ck-content\" data-wrapper=\"true\" dir=\"ltr\" style=\"--ck-image-style-spacing: 1.5em; --ck-inline-image-style-spacing: calc(var(--ck-image-style-spacing) / 2); font-family: Segoe UI; font-size: 11pt;\"><p style=\"margin: 0;\">3.41 Mortality Disposal</p></div>",
+            "order": 3.41,
+            "description": null,
+            "tooltip": null,
+            "imageUrl": null,
+            "parentChapterId": "293da3df-4c63-f011-bec2-002248afff4e",
+            "questions": [],
+            "complete": true
+        },
+        {
+            "id": "be331be3-b773-f011-b4cc-002248b21f96",
+            "name": "Mortality Disposal - Composting",
+            "label": "<div class=\"ck-content\" data-wrapper=\"true\" dir=\"ltr\" style=\"--ck-image-style-spacing: 1.5em; --ck-inline-image-style-spacing: calc(var(--ck-image-style-spacing) / 2); font-family: Segoe UI; font-size: 11pt;\"><p style=\"margin: 0;\">3.42 Mortality Disposal - Composting</p></div>",
+            "order": 3.42,
+            "description": null,
+            "tooltip": null,
+            "imageUrl": null,
+            "parentChapterId": "293da3df-4c63-f011-bec2-002248afff4e",
+            "questions": [],
+            "complete": true
+        },
+        {
+            "id": "6196fd3f-8578-f011-b4cc-000d3a0c38d2",
+            "name": "Mortality Disposal - Burial",
+            "label": "<div class=\"ck-content\" data-wrapper=\"true\" dir=\"ltr\" style=\"--ck-image-style-spacing: 1.5em; --ck-inline-image-style-spacing: calc(var(--ck-image-style-spacing) / 2); font-family: Segoe UI; font-size: 11pt;\"><p style=\"margin: 0;\">3.43 Mortality Disposal - Burial</p></div>",
+            "order": 3.43,
+            "description": null,
+            "tooltip": null,
+            "imageUrl": null,
+            "parentChapterId": "293da3df-4c63-f011-bec2-002248afff4e",
+            "questions": [],
+            "complete": true
+        },
+        {
+            "id": "07a6354c-8578-f011-b4cc-000d3a0c38d2",
+            "name": "Mortality Disposal - Incineration",
+            "label": "<div class=\"ck-content\" data-wrapper=\"true\" dir=\"ltr\" style=\"--ck-image-style-spacing: 1.5em; --ck-inline-image-style-spacing: calc(var(--ck-image-style-spacing) / 2); font-family: Segoe UI; font-size: 11pt;\"><p style=\"margin: 0;\">3.44 Mortality Disposal - Incineration</p></div>",
+            "order": 3.44,
+            "description": null,
+            "tooltip": null,
+            "imageUrl": null,
+            "parentChapterId": "293da3df-4c63-f011-bec2-002248afff4e",
+            "questions": [],
+            "complete": true
+        }
+    ],
+    "complete": false
+}

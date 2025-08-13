@@ -35264,8 +35264,88 @@
     console.log('   - window.testDirectStoreUsage() - Test direct store usage vs generateSectionBItems');
     console.log('   - window.testChapterTitleFormatting() - Test updated formatChapterTitle function');
     console.log('   - window.testNavigationIcons() - Test navigation icon logic');
+    console.log('   - window.testUnifiedNavigation() - Test unified navigation rendering');
     console.log('   - window.runQuestionnaireExamples() - Run all examples');
   }
+
+  /**
+   * Test function for unified navigation rendering approach
+   */
+  function testUnifiedNavigation() {
+    var _questionnaire$chapte2;
+    console.log('\n🧪 Testing unified navigation rendering...');
+    var questionnaire = getQuestionnaireFromStore();
+    if (!(questionnaire !== null && questionnaire !== void 0 && (_questionnaire$chapte2 = questionnaire.chapters) !== null && _questionnaire$chapte2 !== void 0 && _questionnaire$chapte2.length)) {
+      console.log('❌ Questionnaire store not loaded');
+      return;
+    }
+    console.log('🔍 Analyzing navigation items by content type...');
+    var results = {
+      questionsOnly: [],
+      subchaptersOnly: [],
+      mixed: [],
+      empty: []
+    };
+    var _analyzeItems = function analyzeItems(items) {
+      var level = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+      items.forEach(function (item) {
+        var _item$questions, _item$subchapters, _item$questions2, _item$subchapters2, _item$subchapters3;
+        var hasQuestions = ((_item$questions = item.questions) === null || _item$questions === void 0 ? void 0 : _item$questions.length) > 0;
+        var hasSubchapters = ((_item$subchapters = item.subchapters) === null || _item$subchapters === void 0 ? void 0 : _item$subchapters.length) > 0;
+        var indent = '  '.repeat(level);
+        var itemInfo = {
+          name: item.name,
+          level: level,
+          questionsCount: ((_item$questions2 = item.questions) === null || _item$questions2 === void 0 ? void 0 : _item$questions2.length) || 0,
+          subchaptersCount: ((_item$subchapters2 = item.subchapters) === null || _item$subchapters2 === void 0 ? void 0 : _item$subchapters2.length) || 0
+        };
+        if (hasQuestions && hasSubchapters) {
+          results.mixed.push(itemInfo);
+          console.log("".concat(indent, "\uD83D\uDCDD\uD83D\uDCC1 MIXED: ").concat(item.name));
+          console.log("".concat(indent, "   \u2192 Clickable AND expandable in one line"));
+          console.log("".concat(indent, "   \u2192 ").concat(item.questions.length, " questions + ").concat(item.subchapters.length, " subchapters"));
+        } else if (hasQuestions) {
+          results.questionsOnly.push(itemInfo);
+          console.log("".concat(indent, "\uD83D\uDCDD QUESTIONS ONLY: ").concat(item.name));
+          console.log("".concat(indent, "   \u2192 Clickable only"));
+          console.log("".concat(indent, "   \u2192 ").concat(item.questions.length, " questions"));
+        } else if (hasSubchapters) {
+          results.subchaptersOnly.push(itemInfo);
+          console.log("".concat(indent, "\uD83D\uDCC1 SUBCHAPTERS ONLY: ").concat(item.name));
+          console.log("".concat(indent, "   \u2192 Expandable only"));
+          console.log("".concat(indent, "   \u2192 ").concat(item.subchapters.length, " subchapters"));
+        } else {
+          results.empty.push(itemInfo);
+          console.log("".concat(indent, "\u26AA EMPTY: ").concat(item.name));
+          console.log("".concat(indent, "   \u2192 Container only (no interaction)"));
+        }
+
+        // Recursively analyze subchapters
+        if (((_item$subchapters3 = item.subchapters) === null || _item$subchapters3 === void 0 ? void 0 : _item$subchapters3.length) > 0) {
+          _analyzeItems(item.subchapters, level + 1);
+        }
+      });
+    };
+    questionnaire.chapters.forEach(function (chapterGroup) {
+      if (Array.isArray(chapterGroup)) {
+        _analyzeItems(chapterGroup);
+      }
+    });
+    console.log("\n\uD83D\uDCCA Unified Navigation Summary:");
+    console.log("   \uD83D\uDCDD Questions only: ".concat(results.questionsOnly.length, " items \u2192 Clickable only"));
+    console.log("   \uD83D\uDCC1 Subchapters only: ".concat(results.subchaptersOnly.length, " items \u2192 Expandable only"));
+    console.log("   \uD83D\uDCDD\uD83D\uDCC1 Mixed (both): ".concat(results.mixed.length, " items \u2192 Clickable AND expandable"));
+    console.log("   \u26AA Empty: ".concat(results.empty.length, " items \u2192 Container only"));
+    console.log("\n\uD83C\uDFAF Navigation Behavior Rules:");
+    console.log("   1. hasContent && hasSubitems \u2192 sl-details with clickable summary");
+    console.log("   2. !hasContent && hasSubitems \u2192 sl-details with non-clickable summary");
+    console.log("   3. hasContent && !hasSubitems \u2192 div with click handler");
+    console.log("   4. !hasContent && !hasSubitems \u2192 container only");
+    return results;
+  }
+
+  // Attach test function to window
+  window.testUnifiedNavigation = testUnifiedNavigation;
 
   // src/components/details/details.styles.ts
   var details_styles_default = i$4`
@@ -37719,10 +37799,39 @@
       }
       static renderItems(items, html, activeContentTitle, onItemClick, renderItems, getCompletion) {
           return items.map((item) => {
-              if ('items' in item && Array.isArray(item.items)) {
-                  const isComplete = getCompletion ? getCompletion(item) : (item.complete || false);
-                  const iconName = isComplete ? 'check-circle' : 'pencil';
-                  const iconColor = isComplete ? 'var(--sl-color-success-600)' : 'var(--sl-color-warning-600)';
+              const isComplete = getCompletion ? getCompletion(item) : (item.complete || false);
+              const iconName = isComplete ? 'check-circle' : 'pencil';
+              const iconColor = isComplete ? 'var(--sl-color-success-600)' : 'var(--sl-color-warning-600)';
+              // Determine item capabilities based on content
+              const hasContent = item.content && item.content.trim() !== '';
+              const hasSubitems = 'items' in item && Array.isArray(item.items) && item.items.length > 0;
+              if (hasContent && hasSubitems) {
+                  // BOTH clickable AND expandable - render in one line with sl-details
+                  return html `
+          <sl-details data-container-title="${item.title || item.label}">
+            <div
+              slot="summary"
+              style="display: flex; align-items: center; gap: 8px; cursor: pointer; ${activeContentTitle === item.label
+                    ? 'font-weight: 600; background-color: var(--sl-color-primary-50); color: var(--sl-color-primary-800);'
+                    : 'font-weight: 500;'}"
+              @click=${(e) => {
+                    // Prevent expansion when clicking the title for navigation
+                    e.stopPropagation();
+                    onItemClick(item);
+                }}
+            >
+              <sl-icon
+                name=${iconName}
+                style="color: ${iconColor}"
+              ></sl-icon>
+              <span>${item.title || item.label}</span>
+            </div>
+            ${EFPRenderUtils.renderItems(item.items || [], html, activeContentTitle, onItemClick, renderItems, getCompletion)}
+          </sl-details>
+        `;
+              }
+              else if (hasSubitems) {
+                  // Only expandable - pure container
                   return html `
           <sl-details data-container-title="${item.title || item.label}">
             <div slot="summary" style="display: flex; align-items: center; gap: 8px;">
@@ -37732,11 +37841,12 @@
               ></sl-icon>
               <span>${item.title || item.label}</span>
             </div>
-            ${EFPRenderUtils.renderItems(item.items, html, activeContentTitle, onItemClick, renderItems, getCompletion)}
+            ${EFPRenderUtils.renderItems(item.items || [], html, activeContentTitle, onItemClick, renderItems, getCompletion)}
           </sl-details>
         `;
               }
               else {
+                  // Only clickable - simple item
                   return html `
           <div
             class="nav-subchapter-title"
@@ -37746,8 +37856,8 @@
             @click=${() => onItemClick(item)}
           >
             <sl-icon
-              name=${getCompletion ? (getCompletion(item) ? 'check-circle' : 'pencil') : (item.complete ? 'check-circle' : 'pencil')}
-              style="color: ${getCompletion ? (getCompletion(item) ? 'var(--sl-color-success-600)' : 'var(--sl-color-warning-600)') : (item.complete ? 'var(--sl-color-success-600)' : 'var(--sl-color-warning-600)')}"
+              name=${iconName}
+              style="color: ${iconColor}"
             ></sl-icon>
             ${item.label}
           </div>

@@ -345,6 +345,43 @@ Icons are now displayed at **all navigation levels**:
    - ✅ Show completion icons in the tab header
    - Icon reflects completion of entire section
 
+#### Unified Navigation Rendering
+
+All navigation items are now rendered consistently based on their content, regardless of hierarchy level:
+
+| Content Type | Behavior | Rendering | Example |
+|--------------|----------|-----------|---------|
+| **Questions Only** | Clickable only | `<div @click>` | Simple subchapter with questions |
+| **Subchapters Only** | Expandable only | `<sl-details>` | Chapter container with subchapters |
+| **Both Questions + Subchapters** | Clickable AND expandable | `<sl-details>` with clickable summary | Mixed chapter/subchapter |
+| **Empty** | Container only | `<sl-details>` (non-interactive) | Placeholder containers |
+
+#### Mixed Items (Questions + Subchapters)
+
+Items with both questions and subchapters render as **clickable AND expandable in one line**:
+
+```html
+<sl-details data-container-title="Chapter 3.4 Mortality Disposal">
+  <div
+    slot="summary"
+    style="cursor: pointer; ..."
+    @click=${(e) => {
+      e.stopPropagation(); // Prevent expansion
+      onItemClick(item);   // Navigate to questions
+    }}
+  >
+    <sl-icon name="pencil"></sl-icon>
+    <span>Chapter 3.4 Mortality Disposal</span>
+  </div>
+  <!-- Subchapters rendered here when expanded -->
+</sl-details>
+```
+
+**User Experience**:
+- **Click the title** → Navigate to item's questions
+- **Click the expand arrow** → Show/hide subchapters
+- **Same visual styling** → Consistent across all hierarchy levels
+
 ### Direct Store Usage for Navigation
 
 The EFP navigation now uses questionnaire store data directly instead of transformation layers:

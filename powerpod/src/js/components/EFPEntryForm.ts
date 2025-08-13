@@ -482,11 +482,40 @@ class EFPRenderUtils {
     getCompletion?: (item: EFPSectionItem) => boolean
   ): any {
     return items.map((item) => {
-      if ('items' in item && Array.isArray(item.items)) {
-        const isComplete = getCompletion ? getCompletion(item) : (item.complete || false);
-        const iconName = isComplete ? 'check-circle' : 'pencil';
-        const iconColor = isComplete ? 'var(--sl-color-success-600)' : 'var(--sl-color-warning-600)';
+      const isComplete = getCompletion ? getCompletion(item) : (item.complete || false);
+      const iconName = isComplete ? 'check-circle' : 'pencil';
+      const iconColor = isComplete ? 'var(--sl-color-success-600)' : 'var(--sl-color-warning-600)';
 
+      // Determine item capabilities based on content
+      const hasContent = item.content && item.content.trim() !== '';
+      const hasSubitems = 'items' in item && Array.isArray(item.items) && item.items.length > 0;
+
+      if (hasContent && hasSubitems) {
+        // BOTH clickable AND expandable - render in one line with sl-details
+        return html`
+          <sl-details data-container-title="${item.title || item.label}">
+            <div
+              slot="summary"
+              style="display: flex; align-items: center; gap: 8px; cursor: pointer; ${activeContentTitle === item.label
+                ? 'font-weight: 600; background-color: var(--sl-color-primary-50); color: var(--sl-color-primary-800);'
+                : 'font-weight: 500;'}"
+              @click=${(e: Event) => {
+                // Prevent expansion when clicking the title for navigation
+                e.stopPropagation();
+                onItemClick(item);
+              }}
+            >
+              <sl-icon
+                name=${iconName}
+                style="color: ${iconColor}"
+              ></sl-icon>
+              <span>${item.title || item.label}</span>
+            </div>
+            ${EFPRenderUtils.renderItems(item.items || [], html, activeContentTitle, onItemClick, renderItems, getCompletion)}
+          </sl-details>
+        `;
+      } else if (hasSubitems) {
+        // Only expandable - pure container
         return html`
           <sl-details data-container-title="${item.title || item.label}">
             <div slot="summary" style="display: flex; align-items: center; gap: 8px;">
@@ -496,10 +525,11 @@ class EFPRenderUtils {
               ></sl-icon>
               <span>${item.title || item.label}</span>
             </div>
-            ${EFPRenderUtils.renderItems(item.items, html, activeContentTitle, onItemClick, renderItems, getCompletion)}
+            ${EFPRenderUtils.renderItems(item.items || [], html, activeContentTitle, onItemClick, renderItems, getCompletion)}
           </sl-details>
         `;
       } else {
+        // Only clickable - simple item
         return html`
           <div
             class="nav-subchapter-title"
@@ -509,8 +539,8 @@ class EFPRenderUtils {
             @click=${() => onItemClick(item)}
           >
             <sl-icon
-              name=${getCompletion ? (getCompletion(item) ? 'check-circle' : 'pencil') : (item.complete ? 'check-circle' : 'pencil')}
-              style="color: ${getCompletion ? (getCompletion(item) ? 'var(--sl-color-success-600)' : 'var(--sl-color-warning-600)') : (item.complete ? 'var(--sl-color-success-600)' : 'var(--sl-color-warning-600)')}"
+              name=${iconName}
+              style="color: ${iconColor}"
             ></sl-icon>
             ${item.label}
           </div>

@@ -882,5 +882,92 @@ if (typeof window !== 'undefined') {
   console.log('   - window.testDirectStoreUsage() - Test direct store usage vs generateSectionBItems');
   console.log('   - window.testChapterTitleFormatting() - Test updated formatChapterTitle function');
   console.log('   - window.testNavigationIcons() - Test navigation icon logic');
+  console.log('   - window.testUnifiedNavigation() - Test unified navigation rendering');
   console.log('   - window.runQuestionnaireExamples() - Run all examples');
 }
+
+/**
+ * Test function for unified navigation rendering approach
+ */
+function testUnifiedNavigation() {
+  console.log('\n🧪 Testing unified navigation rendering...');
+
+  const questionnaire = getQuestionnaireFromStore();
+  if (!questionnaire?.chapters?.length) {
+    console.log('❌ Questionnaire store not loaded');
+    return;
+  }
+
+  console.log('🔍 Analyzing navigation items by content type...');
+
+  const results = {
+    questionsOnly: [],
+    subchaptersOnly: [],
+    mixed: [],
+    empty: []
+  };
+
+  const analyzeItems = (items, level = 0) => {
+    items.forEach(item => {
+      const hasQuestions = item.questions?.length > 0;
+      const hasSubchapters = item.subchapters?.length > 0;
+      const indent = '  '.repeat(level);
+
+      const itemInfo = {
+        name: item.name,
+        level: level,
+        questionsCount: item.questions?.length || 0,
+        subchaptersCount: item.subchapters?.length || 0
+      };
+
+      if (hasQuestions && hasSubchapters) {
+        results.mixed.push(itemInfo);
+        console.log(`${indent}📝📁 MIXED: ${item.name}`);
+        console.log(`${indent}   → Clickable AND expandable in one line`);
+        console.log(`${indent}   → ${item.questions.length} questions + ${item.subchapters.length} subchapters`);
+      } else if (hasQuestions) {
+        results.questionsOnly.push(itemInfo);
+        console.log(`${indent}📝 QUESTIONS ONLY: ${item.name}`);
+        console.log(`${indent}   → Clickable only`);
+        console.log(`${indent}   → ${item.questions.length} questions`);
+      } else if (hasSubchapters) {
+        results.subchaptersOnly.push(itemInfo);
+        console.log(`${indent}📁 SUBCHAPTERS ONLY: ${item.name}`);
+        console.log(`${indent}   → Expandable only`);
+        console.log(`${indent}   → ${item.subchapters.length} subchapters`);
+      } else {
+        results.empty.push(itemInfo);
+        console.log(`${indent}⚪ EMPTY: ${item.name}`);
+        console.log(`${indent}   → Container only (no interaction)`);
+      }
+
+      // Recursively analyze subchapters
+      if (item.subchapters?.length > 0) {
+        analyzeItems(item.subchapters, level + 1);
+      }
+    });
+  };
+
+  questionnaire.chapters.forEach(chapterGroup => {
+    if (Array.isArray(chapterGroup)) {
+      analyzeItems(chapterGroup);
+    }
+  });
+
+  console.log(`\n📊 Unified Navigation Summary:`);
+  console.log(`   📝 Questions only: ${results.questionsOnly.length} items → Clickable only`);
+  console.log(`   📁 Subchapters only: ${results.subchaptersOnly.length} items → Expandable only`);
+  console.log(`   📝📁 Mixed (both): ${results.mixed.length} items → Clickable AND expandable`);
+  console.log(`   ⚪ Empty: ${results.empty.length} items → Container only`);
+
+  console.log(`\n🎯 Navigation Behavior Rules:`);
+  console.log(`   1. hasContent && hasSubitems → sl-details with clickable summary`);
+  console.log(`   2. !hasContent && hasSubitems → sl-details with non-clickable summary`);
+  console.log(`   3. hasContent && !hasSubitems → div with click handler`);
+  console.log(`   4. !hasContent && !hasSubitems → container only`);
+
+  return results;
+}
+
+// Attach test function to window
+window.testUnifiedNavigation = testUnifiedNavigation;
