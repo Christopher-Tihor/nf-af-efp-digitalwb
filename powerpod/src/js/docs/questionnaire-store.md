@@ -151,9 +151,33 @@ console.log(`Answered: ${stats.answeredQuestions}/${stats.totalQuestions}`);
 
 ## Integration Points
 
+### Automatic Response Synchronization
+
+The `workbookResponseHelper.js` has been updated to automatically synchronize with the questionnaire store:
+
+```javascript
+// All response operations now update both POWERPOD and questionnaire store
+import { createResponse, updateResponse, deleteResponse } from '../common/workbookResponseHelper.js';
+
+// Creating a response updates both systems
+const result = await createResponse(workbookId, questionId, "response value");
+// ✅ Updates POWERPOD.workbookQuestionsAndResponses
+// ✅ Updates questionnaire store automatically
+
+// Updating a response syncs both systems
+await updateResponse(responseId, "new response value");
+// ✅ Updates POWERPOD.workbookQuestionsAndResponses
+// ✅ Updates questionnaire store automatically
+
+// Deleting a response removes from both systems
+await deleteResponse(responseId);
+// ✅ Removes from POWERPOD.workbookQuestionsAndResponses
+// ✅ Removes from questionnaire store automatically
+```
+
 ### Workbook Initialization
 
-The questionnaire store is automatically populated with response data during workbook initialization:
+The questionnaire store is automatically populated with **all existing response data** during workbook initialization:
 
 ```javascript
 // In powerpod/src/js/workbook/workbook.js
@@ -163,14 +187,22 @@ import { loadQuestionnaireWithResponses } from '../common/questionnaire.js';
 const nestedStructure = getChaptersWithNestedQuestionsAndSubchapters();
 const workbookId = getWorkbookId();
 
-// Load questionnaire with responses
+// Load questionnaire with ALL existing responses
 if (workbookId) {
   await loadQuestionnaireWithResponses(nestedStructure, workbookId);
+  // This automatically loads all existing workbook responses and merges them with questions
 } else {
   // Fallback to loading without responses
   loadQuestionnaireIntoStore(nestedStructure);
 }
 ```
+
+### Response Loading Process
+
+1. **Fresh Response Data**: Always loads the latest response data from the API
+2. **Complete Merge**: All existing responses are merged with their corresponding questions
+3. **Response Statistics**: Calculates completion percentages and statistics
+4. **Memory Integration**: Updates both questionnaire store and existing POWERPOD structures
 
 ### EFP Entry Form
 
@@ -207,9 +239,11 @@ private async handleRatingChanged(event: CustomEvent) {
 2. **Consistent State Management**: Uses the same pattern as fields store
 3. **Real-time Updates**: Changes are immediately reflected across components
 4. **Integrated Response Data**: Response data is stored alongside questions for easy access
-5. **Easy Testing**: Helper functions make it easy to test questionnaire logic
-6. **Performance**: Reduces redundant API calls and data processing
-7. **Backward Compatibility**: Works with existing POWERPOD response structures
+5. **Automatic Synchronization**: workbookResponseHelper.js automatically updates questionnaire store
+6. **Bidirectional Updates**: Changes in either POWERPOD or questionnaire store sync to both
+7. **Easy Testing**: Helper functions make it easy to test questionnaire logic
+8. **Performance**: Reduces redundant API calls and data processing
+9. **Backward Compatibility**: Works with existing POWERPOD response structures
 
 ## Migration Notes
 
@@ -227,7 +261,8 @@ See `powerpod/src/js/examples/questionnaireStoreUsage.js` for complete working e
 ### Helper Functions
 
 - `loadQuestionnaireIntoStore(nestedStructure, forceRefresh, responseData)`: Load data into store
-- `loadQuestionnaireWithResponses(nestedStructure, workbookId, forceRefresh)`: Load data with responses
+- `loadQuestionnaireWithResponses(nestedStructure, workbookId, forceRefresh)`: Load data with ALL responses
+- `refreshQuestionnaireResponses(workbookId)`: Refresh store with latest response data
 - `getQuestionnaireFromStore()`: Get questionnaire data from store
 - `getChapterFromStore(chapterId)`: Get specific chapter
 - `getQuestionFromStore(questionId)`: Get specific question

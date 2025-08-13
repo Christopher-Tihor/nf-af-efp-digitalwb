@@ -33,6 +33,15 @@ function mergeResponsesWithQuestions(nestedChapterStructure, responseData) {
   // Deep clone the structure to avoid mutating the original
   const enhancedStructure = JSON.parse(JSON.stringify(nestedChapterStructure));
 
+  logger.info({
+    fn: mergeResponsesWithQuestions,
+    message: 'Starting to merge responses with questions',
+    data: {
+      totalResponseEntries: questionsWithResponses.size,
+      structureType: typeof enhancedStructure
+    }
+  });
+
   // Recursive function to enhance questions with response data
   const enhanceQuestionsInChapters = (chapters) => {
     if (!Array.isArray(chapters)) return;
@@ -47,6 +56,16 @@ function mergeResponsesWithQuestions(nestedChapterStructure, responseData) {
             question.responseData = responseEntry.response;
             question.complete = true;
             question.hasResponse = true;
+
+            logger.info({
+              fn: mergeResponsesWithQuestions,
+              message: `Merged response for question ${question.id}`,
+              data: {
+                questionId: question.id,
+                response: question.response,
+                hasResponseData: !!question.responseData
+              }
+            });
           } else {
             question.response = null;
             question.responseData = null;
@@ -65,9 +84,34 @@ function mergeResponsesWithQuestions(nestedChapterStructure, responseData) {
 
   enhanceQuestionsInChapters(enhancedStructure);
 
+  // Count how many questions got responses
+  let questionsWithResponsesCount = 0;
+  let totalQuestionsCount = 0;
+
+  const countQuestions = (chapters) => {
+    if (!Array.isArray(chapters)) return;
+
+    chapters.forEach(chapter => {
+      if (chapter.questions && Array.isArray(chapter.questions)) {
+        totalQuestionsCount += chapter.questions.length;
+        questionsWithResponsesCount += chapter.questions.filter(q => q.hasResponse).length;
+      }
+      if (chapter.subchapters && Array.isArray(chapter.subchapters)) {
+        countQuestions(chapter.subchapters);
+      }
+    });
+  };
+
+  countQuestions(enhancedStructure);
+
   logger.info({
     fn: mergeResponsesWithQuestions,
-    message: 'Successfully merged response data with questions'
+    message: 'Successfully merged response data with questions',
+    data: {
+      totalQuestions: totalQuestionsCount,
+      questionsWithResponses: questionsWithResponsesCount,
+      mergePercentage: totalQuestionsCount > 0 ? Math.round((questionsWithResponsesCount / totalQuestionsCount) * 100) : 0
+    }
   });
 
   return enhancedStructure;
@@ -370,43 +414,39 @@ export async function loadQuestionnaireWithResponses(nestedChapterStructure, wor
   });
 
   try {
-    // Load response data if workbookId is provided
+    // Always load fresh response data to ensure we have all responses
     let responseData = null;
     if (workbookId) {
-      // Check if responses are already loaded in POWERPOD
-      if (POWERPOD.workbookQuestionsAndResponses.isLoaded &&
-          POWERPOD.workbookQuestionsAndResponses.workbookId === workbookId) {
-        logger.info({
-          fn: loadQuestionnaireWithResponses,
-          message: 'Using existing response data from memory'
-        });
-        responseData = {
-          questionsWithResponses: POWERPOD.workbookQuestionsAndResponses.questionsWithResponses,
-          questionsByChapter: POWERPOD.workbookQuestionsAndResponses.questionsByChapter,
-          stats: POWERPOD.workbookQuestionsAndResponses.stats
-        };
-      } else {
-        // Load responses using the existing helper
-        logger.info({
-          fn: loadQuestionnaireWithResponses,
-          message: 'Loading response data from API'
-        });
+      logger.info({
+        fn: loadQuestionnaireWithResponses,
+        message: 'Loading all response data from API for questionnaire integration'
+      });
 
-        // Import the response helper dynamically to avoid circular imports
-        const { loadQuestionsAndResponses } = await import('./workbookResponseHelper.js');
-        responseData = await loadQuestionsAndResponses(workbookId);
-      }
+      // Import the response helper dynamically to avoid circular imports
+      const { loadQuestionsAndResponses } = await import('./workbookResponseHelper.js');
+      responseData = await loadQuestionsAndResponses(workbookId);
+
+      logger.info({
+        fn: loadQuestionnaireWithResponses,
+        message: 'Successfully loaded response data',
+        data: {
+          totalQuestions: responseData?.stats?.totalQuestions || 0,
+          answeredQuestions: responseData?.stats?.answeredQuestions || 0,
+          completionPercentage: responseData?.stats?.completionPercentage || 0
+        }
+      });
     }
 
-    // Load questionnaire with response data
+    // Load questionnaire with response data merged in
     const questionnaireData = loadQuestionnaireIntoStore(nestedChapterStructure, forceRefresh, responseData);
 
     logger.info({
       fn: loadQuestionnaireWithResponses,
-      message: 'Successfully loaded questionnaire with responses into store',
+      message: 'Successfully loaded questionnaire with all responses into store',
       data: {
         hasResponses: !!responseData,
-        workbookId
+        workbookId,
+        responseStats: responseData?.stats
       }
     });
 
@@ -425,6 +465,55 @@ export async function loadQuestionnaireWithResponses(nestedChapterStructure, wor
       message: 'Falling back to loading questionnaire without responses'
     });
     return loadQuestionnaireIntoStore(nestedChapterStructure, forceRefresh);
+  }
+}
+
+/**
+ * Refresh questionnaire store with latest response data
+ * @param {string} workbookId - The workbook ID to refresh responses for
+ * @returns {Promise<boolean>} True if refresh was successful
+ */
+export async function refreshQuestionnaireResponses(workbookId) {
+  logger.info({
+    fn: refreshQuestionnaireResponses,
+    message: 'Refreshing questionnaire responses from latest data',
+    data: { workbookId }
+  });
+
+  try {
+    const questionnaire = getQuestionnaireFromStore();
+    if (!questionnaire?.chapters?.length) {
+      logger.warn({
+        fn: refreshQuestionnaireResponses,
+        message: 'No questionnaire data loaded, cannot refresh responses'
+      });
+      return false;
+    }
+
+    // Get the original nested structure (without responses)
+    const originalStructure = questionnaire.chapters[0];
+
+    // Load fresh response data
+    const { loadQuestionsAndResponses } = await import('./workbookResponseHelper.js');
+    const responseData = await loadQuestionsAndResponses(workbookId);
+
+    // Reload questionnaire with fresh responses
+    loadQuestionnaireIntoStore(originalStructure, true, responseData);
+
+    logger.info({
+      fn: refreshQuestionnaireResponses,
+      message: 'Successfully refreshed questionnaire responses'
+    });
+
+    return true;
+
+  } catch (error) {
+    logger.error({
+      fn: refreshQuestionnaireResponses,
+      message: 'Failed to refresh questionnaire responses',
+      data: { error: error.message, workbookId }
+    });
+    return false;
   }
 }
 

@@ -2,6 +2,7 @@ import { POWERPOD } from './constants.js';
 import { Logger } from './logger.js';
 import { getCurrentWorkbookId } from './workbookUtils.js';
 import { loadChaptersAndQuestions, getStoredQuestionsData, isChaptersAndQuestionsLoaded } from './chaptersAndQuestionsUtils.js';
+import { updateQuestionResponse, isQuestionnaireLoaded } from './questionnaire.js';
 
 const logger = Logger('common/workbookResponseHelper');
 
@@ -145,6 +146,23 @@ export async function createResponse(questionId, response, options = {}) {
       },
     });
 
+    // Update questionnaire store if loaded
+    if (isQuestionnaireLoaded() && result?.data) {
+      try {
+        updateQuestionResponse(questionId, response, true, result.data);
+        logger.info({
+          fn: 'createResponse',
+          message: `Updated questionnaire store for question ${questionId}`,
+        });
+      } catch (error) {
+        logger.warn({
+          fn: 'createResponse',
+          message: `Failed to update questionnaire store for question ${questionId}`,
+          data: { error: error.message },
+        });
+      }
+    }
+
     return {
       response: result?.data,
       success: true,
@@ -188,6 +206,26 @@ export async function updateResponse(responseId, response = null, options = {}) 
       data: { responseId },
     });
 
+    // Update questionnaire store if loaded and we have question ID
+    if (isQuestionnaireLoaded() && result?.data) {
+      const questionId = result.data._quartech_question_value;
+      if (questionId) {
+        try {
+          updateQuestionResponse(questionId, response, true, result.data);
+          logger.info({
+            fn: 'updateResponse',
+            message: `Updated questionnaire store for question ${questionId}`,
+          });
+        } catch (error) {
+          logger.warn({
+            fn: 'updateResponse',
+            message: `Failed to update questionnaire store for question ${questionId}`,
+            data: { error: error.message },
+          });
+        }
+      }
+    }
+
     return {
       success: true,
       responseId,
@@ -217,6 +255,38 @@ export async function deleteResponse(responseId, options = {}) {
       data: { responseId },
     });
 
+    // Get question ID from existing POWERPOD response data before deleting
+    let questionId = null;
+    if (isQuestionnaireLoaded() && POWERPOD.workbookQuestionsAndResponses.isLoaded) {
+      try {
+        // Find the response in the existing data
+        for (const [qId, entry] of POWERPOD.workbookQuestionsAndResponses.questionsWithResponses) {
+          if (entry.response && entry.response.quartech_workbookresponseid === responseId) {
+            questionId = qId;
+            break;
+          }
+        }
+
+        if (questionId) {
+          logger.info({
+            fn: 'deleteResponse',
+            message: `Found question ID ${questionId} for response ${responseId}`,
+          });
+        } else {
+          logger.warn({
+            fn: 'deleteResponse',
+            message: `Could not find question ID for response ${responseId} in existing data`,
+          });
+        }
+      } catch (error) {
+        logger.warn({
+          fn: 'deleteResponse',
+          message: `Error finding question ID for response deletion`,
+          data: { responseId, error: error.message },
+        });
+      }
+    }
+
     await POWERPOD.fetch.deleteWorkbookResponseData({
       id: responseId,
       ...options,
@@ -227,6 +297,23 @@ export async function deleteResponse(responseId, options = {}) {
       message: `Successfully deleted response ${responseId}`,
       data: { responseId },
     });
+
+    // Update questionnaire store to remove response
+    if (isQuestionnaireLoaded() && questionId) {
+      try {
+        updateQuestionResponse(questionId, null, false, null);
+        logger.info({
+          fn: 'deleteResponse',
+          message: `Updated questionnaire store to remove response for question ${questionId}`,
+        });
+      } catch (error) {
+        logger.warn({
+          fn: 'deleteResponse',
+          message: `Failed to update questionnaire store for deleted question ${questionId}`,
+          data: { error: error.message },
+        });
+      }
+    }
 
     return {
       success: true,
@@ -625,6 +712,34 @@ export async function loadQuestionsAndResponses(workbookId, options = {}) {
       }
     });
 
+    // Update questionnaire store if it's loaded
+    if (isQuestionnaireLoaded()) {
+      try {
+        logger.info({
+          fn: 'loadQuestionsAndResponses',
+          message: 'Updating questionnaire store with loaded response data'
+        });
+
+        // Update each question in the questionnaire store with its response
+        questionsWithResponses.forEach((entry, questionId) => {
+          if (entry.response) {
+            updateQuestionResponse(questionId, entry.response.quartech_response, true, entry.response);
+          }
+        });
+
+        logger.info({
+          fn: 'loadQuestionsAndResponses',
+          message: `Updated questionnaire store with ${answeredQuestions} responses`
+        });
+      } catch (error) {
+        logger.warn({
+          fn: 'loadQuestionsAndResponses',
+          message: 'Failed to update questionnaire store with response data',
+          data: { error: error.message }
+        });
+      }
+    }
+
     return getQuestionsAndResponsesFromMemory();
 
   } catch (error) {
@@ -741,6 +856,23 @@ export function updateResponseInMemory(questionId, responseData) {
     message: `Updated response for question ${questionId} in memory`,
     data: { questionId, hasResponse: !!responseData }
   });
+
+  // Also update questionnaire store if loaded
+  if (isQuestionnaireLoaded() && responseData) {
+    try {
+      updateQuestionResponse(questionId, responseData.quartech_response, true, responseData);
+      logger.info({
+        fn: 'updateResponseInMemory',
+        message: `Updated questionnaire store for question ${questionId}`
+      });
+    } catch (error) {
+      logger.warn({
+        fn: 'updateResponseInMemory',
+        message: `Failed to update questionnaire store for question ${questionId}`,
+        data: { error: error.message }
+      });
+    }
+  }
 }
 
 /**
@@ -783,6 +915,23 @@ export function removeResponseFromMemory(questionId) {
     message: `Removed response for question ${questionId} from memory`,
     data: { questionId }
   });
+
+  // Also update questionnaire store if loaded
+  if (isQuestionnaireLoaded()) {
+    try {
+      updateQuestionResponse(questionId, null, false, null);
+      logger.info({
+        fn: 'removeResponseFromMemory',
+        message: `Removed response from questionnaire store for question ${questionId}`
+      });
+    } catch (error) {
+      logger.warn({
+        fn: 'removeResponseFromMemory',
+        message: `Failed to remove response from questionnaire store for question ${questionId}`,
+        data: { error: error.message }
+      });
+    }
+  }
 }
 
 /**

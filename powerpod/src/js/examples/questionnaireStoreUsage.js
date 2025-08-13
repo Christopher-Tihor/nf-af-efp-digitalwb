@@ -6,6 +6,7 @@
 import {
   loadQuestionnaireIntoStore,
   loadQuestionnaireWithResponses,
+  refreshQuestionnaireResponses,
   getQuestionnaireFromStore,
   getChapterFromStore,
   getQuestionFromStore,
@@ -349,6 +350,15 @@ export async function runAllExamples() {
   console.log('7. Getting questionnaire statistics...');
   exampleGetStats();
 
+  // 8. Demonstrate response refresh
+  console.log('8. Refreshing questionnaire responses...');
+  try {
+    await refreshQuestionnaireResponses('example-workbook-id');
+    console.log('✅ Successfully refreshed responses');
+  } catch (error) {
+    console.log('❌ Failed to refresh responses:', error.message);
+  }
+
   console.log('=== Examples completed ===');
 
   // Return current state for inspection
@@ -359,6 +369,145 @@ export async function runAllExamples() {
   };
 }
 
+/**
+ * Test function to verify questionnaire store loads all responses
+ * Call this after workbook initialization to verify response integration
+ */
+export function testQuestionnaireResponseIntegration() {
+  console.log('🧪 Testing Questionnaire Response Integration...');
+
+  const questionnaire = getQuestionnaireFromStore();
+  if (!questionnaire) {
+    console.log('❌ No questionnaire data found in store');
+    return false;
+  }
+
+  console.log('✅ Questionnaire data found in store');
+  console.log(`📊 Title: ${questionnaire.title}`);
+
+  // Count questions and responses
+  let totalQuestions = 0;
+  let questionsWithResponses = 0;
+
+  const countInChapters = (chapters) => {
+    if (!Array.isArray(chapters)) return;
+
+    chapters.forEach(chapter => {
+      if (chapter.questions && Array.isArray(chapter.questions)) {
+        totalQuestions += chapter.questions.length;
+        questionsWithResponses += chapter.questions.filter(q => q.hasResponse).length;
+
+        // Log some examples
+        chapter.questions.slice(0, 3).forEach(question => {
+          console.log(`📝 Question ${question.id}: ${question.hasResponse ? '✅ Has Response' : '❌ No Response'}`);
+          if (question.hasResponse) {
+            console.log(`   Response: ${question.response}`);
+            console.log(`   Response Data: ${question.responseData ? 'Available' : 'Missing'}`);
+          }
+        });
+      }
+
+      if (chapter.subchapters && Array.isArray(chapter.subchapters)) {
+        countInChapters(chapter.subchapters);
+      }
+    });
+  };
+
+  if (questionnaire.chapters && questionnaire.chapters.length > 0) {
+    countInChapters(questionnaire.chapters[0]);
+  }
+
+  console.log(`📈 Total Questions: ${totalQuestions}`);
+  console.log(`✅ Questions with Responses: ${questionsWithResponses}`);
+  console.log(`📊 Response Coverage: ${totalQuestions > 0 ? Math.round((questionsWithResponses / totalQuestions) * 100) : 0}%`);
+
+  // Compare with POWERPOD response data
+  const powerpodStats = POWERPOD.workbookQuestionsAndResponses?.stats;
+  if (powerpodStats) {
+    console.log(`🔄 POWERPOD Stats - Total: ${powerpodStats.totalQuestions}, Answered: ${powerpodStats.answeredQuestions}`);
+    console.log(`🔄 Store Integration: ${questionsWithResponses === powerpodStats.answeredQuestions ? '✅ Synchronized' : '❌ Out of Sync'}`);
+  }
+
+  return {
+    success: true,
+    totalQuestions,
+    questionsWithResponses,
+    responseCoverage: totalQuestions > 0 ? Math.round((questionsWithResponses / totalQuestions) * 100) : 0,
+    synchronized: questionsWithResponses === (powerpodStats?.answeredQuestions || 0)
+  };
+}
+
 // Auto-run examples if this file is imported
 // Uncomment the line below to automatically run examples when this file is loaded
 // setTimeout(runAllExamples, 1000);
+
+// Test response integration after a delay to allow for initialization
+// Uncomment the line below to automatically test response integration
+// setTimeout(testQuestionnaireResponseIntegration, 2000);
+
+/**
+ * Test workbookResponseHelper integration with questionnaire store
+ */
+export async function testWorkbookResponseHelperIntegration() {
+  console.log('🧪 Testing workbookResponseHelper integration with questionnaire store...');
+
+  try {
+    // Import the helper functions
+    const { createResponse, updateResponse, deleteResponse } = await import('../common/workbookResponseHelper.js');
+    const workbookId = POWERPOD.workbook?.workbookId || 'test-workbook-id';
+    const testQuestionId = 'test-question-id';
+
+    console.log('1. Testing response creation...');
+
+    // Test creating a response
+    const createResult = await createResponse(workbookId, testQuestionId, 'Test response value');
+    console.log('✅ Response created:', createResult.success);
+
+    // Check if questionnaire store was updated
+    const questionAfterCreate = getQuestionFromStore(testQuestionId);
+    console.log('✅ Questionnaire store updated:', !!questionAfterCreate?.hasResponse);
+
+    if (createResult.response?.quartech_workbookresponseid) {
+      const responseId = createResult.response.quartech_workbookresponseid;
+
+      console.log('2. Testing response update...');
+
+      // Test updating the response
+      await updateResponse(responseId, 'Updated test response value');
+      console.log('✅ Response updated');
+
+      // Check if questionnaire store was updated
+      const questionAfterUpdate = getQuestionFromStore(testQuestionId);
+      console.log('✅ Questionnaire store updated:', questionAfterUpdate?.response === 'Updated test response value');
+
+      console.log('3. Testing response deletion...');
+
+      // Test deleting the response
+      await deleteResponse(responseId);
+      console.log('✅ Response deleted');
+
+      // Check if questionnaire store was updated
+      const questionAfterDelete = getQuestionFromStore(testQuestionId);
+      console.log('✅ Questionnaire store updated:', !questionAfterDelete?.hasResponse);
+    }
+
+    console.log('🎉 workbookResponseHelper integration test completed successfully!');
+    return true;
+
+  } catch (error) {
+    console.error('❌ workbookResponseHelper integration test failed:', error);
+    return false;
+  }
+}
+
+// Make test function available globally for console testing
+if (typeof window !== 'undefined') {
+  window.testQuestionnaireStore = testQuestionnaireResponseIntegration;
+  window.testWorkbookResponseIntegration = testWorkbookResponseHelperIntegration;
+  window.runQuestionnaireExamples = runAllExamples;
+
+  console.log('🧪 Questionnaire Store Test Functions Available:');
+  console.log('   - window.testQuestionnaireStore() - Test response integration');
+  console.log('   - window.testWorkbookResponseIntegration() - Test workbookResponseHelper integration');
+  console.log('   - window.runQuestionnaireExamples() - Run all examples');
+}

@@ -57,6 +57,12 @@ export function getQuestionnaireStats(): Object;
  */
 export function loadQuestionnaireWithResponses(nestedChapterStructure: any[], workbookId: string, forceRefresh?: boolean): Promise<Object>;
 /**
+ * Refresh questionnaire store with latest response data
+ * @param {string} workbookId - The workbook ID to refresh responses for
+ * @returns {Promise<boolean>} True if refresh was successful
+ */
+export function refreshQuestionnaireResponses(workbookId: string): Promise<boolean>;
+/**
  * Check if questionnaire data is loaded in the store
  * @returns {boolean} True if questionnaire data is loaded
  */
