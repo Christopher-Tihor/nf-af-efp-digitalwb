@@ -152,116 +152,6 @@ class EFPCompletionUtils {
 
 // Utility class for section generation
 class EFPSectionGenerator {
-  static generateSectionBItems(nestedChapterStructure: any[]): EFPSectionItem[] {
-    if (!nestedChapterStructure || nestedChapterStructure.length === 0) {
-      EFPLogger.log('SectionGenerator: No nested chapter structure available, showing loading message');
-      return [
-        {
-          label: 'Loading Chapters...',
-          content: `
-            <h3>Loading Environmental Farm Plan Chapters</h3>
-            <p>Please wait while we load the questionnaire chapters and questions...</p>
-          `,
-          complete: false,
-        }
-      ];
-    }
-
-    const items: EFPSectionItem[] = [];
-
-    nestedChapterStructure.forEach((chapter: any) => {
-      // Extract chapter number from the main chapter
-      const chapterNumber = Math.floor(chapter.order || 0);
-
-      // Create the main chapter container (collapsible parent)
-      const chapterItem: EFPSectionItem = {
-        label: `Chapter ${chapterNumber}`,
-        title: `Chapter ${chapterNumber}`,
-        content: '', // No content for the parent container
-        complete: false,
-        isContainer: true, // Mark as container only
-        items: []
-      };
-
-      // Add all subchapters as direct clickable items under the main chapter
-      if (chapter.subchapters && chapter.subchapters.length > 0) {
-        chapter.subchapters.forEach((subchapter: any) => {
-          // Add the subchapter as a clickable item with order number
-          const subchapterOrder = subchapter.order || 0;
-          const subchapterTitle = subchapter.name || subchapter.label;
-
-          // Format subchapter title to include order number (e.g., "7.1 Biodiversity")
-          let formattedSubchapterTitle;
-          if (subchapterOrder && subchapterOrder !== Math.floor(subchapterOrder)) {
-            // This is a decimal order (e.g., 7.1), show as "7.1 Title"
-            const cleanTitle = subchapterTitle.replace(/^CHAPTER\s+\d+(\.\d+)?\s+/i, '');
-            formattedSubchapterTitle = `${subchapterOrder} ${EFPTextUtils.formatChapterTitle(cleanTitle)}`;
-            // console.log(`Subchapter: ${subchapterOrder} -> "${formattedSubchapterTitle}"`);
-          } else {
-            // Fallback to original formatting
-            formattedSubchapterTitle = EFPTextUtils.formatChapterTitle(subchapterTitle);
-            // console.log(`Subchapter (no order): "${formattedSubchapterTitle}"`);
-          }
-
-          const subchapterItem: EFPSectionItem = {
-            label: formattedSubchapterTitle,
-            content: EFPSectionGenerator.renderSubchapterContent(subchapter),
-            complete: false,
-            subchapterData: subchapter,
-          };
-
-          // If subchapter has sub-subchapters, add them as nested items
-          if (subchapter.subchapters && subchapter.subchapters.length > 0) {
-            subchapterItem.items = subchapter.subchapters.map((subSubchapter: any) => {
-              // Format sub-subchapter title with order number (e.g., "7.11 Plant Biodiversity")
-              const subSubOrder = subSubchapter.order || 0;
-              const subSubTitle = subSubchapter.name || subSubchapter.label;
-
-              let formattedSubSubTitle;
-              if (subSubOrder) {
-                // Show order number with title (e.g., "7.11 Plant Biodiversity")
-                const cleanTitle = subSubTitle.replace(/^CHAPTER\s+\d+(\.\d+)?\s+/i, '');
-                formattedSubSubTitle = `${subSubOrder} ${EFPTextUtils.formatChapterTitle(cleanTitle)}`;
-                // console.log(`Sub-subchapter: ${subSubOrder} -> "${formattedSubSubTitle}"`);
-              } else {
-                // Fallback: remove chapter prefix and format
-                const subSubLabel = subSubTitle.replace(/^CHAPTER\s+\d+\.\d+\s+/i, '');
-                formattedSubSubTitle = EFPTextUtils.formatChapterTitle(subSubLabel);
-                // console.log(`Sub-subchapter (no order): "${formattedSubSubTitle}"`);
-              }
-
-              return {
-                label: formattedSubSubTitle,
-                content: EFPSectionGenerator.renderSubchapterContent(subSubchapter),
-                complete: false,
-                subchapterData: subSubchapter,
-              };
-            });
-
-            // Add title property for sl-details rendering
-            subchapterItem.title = subchapterItem.label;
-          }
-
-          // Always add the subchapter to the main chapter items
-          chapterItem.items!.push(subchapterItem);
-        });
-      } else {
-        // If no subchapters, add the main chapter itself as a clickable item
-        const formattedTitle = EFPTextUtils.formatChapterTitle(chapter.name || chapter.label);
-        chapterItem.items!.push({
-          label: formattedTitle,
-          content: EFPSectionGenerator.renderChapterContent(chapter),
-          complete: false,
-          chapterData: chapter
-        });
-      }
-
-      items.push(chapterItem);
-    });
-
-    return items;
-  }
-
   static renderSubchapterContent(subchapter: any): string {
     const subSubchaptersCount = subchapter.subchapters?.length || 0;
     const subSubchaptersInfo = subSubchaptersCount > 0
@@ -1314,19 +1204,20 @@ class EFPEntryForm extends LitElement {
       ];
     }
 
-    console.log('📋 Generating Section B items directly from questionnaire store');
+    // console.log('📋 Generating Section B items directly from questionnaire store');
 
     const chapters = questionnaire.chapters[0] || [];
     const items: EFPSectionItem[] = [];
 
     chapters.forEach((chapter: any) => {
+      console.log(`Processing chapter ${chapter.name}...`, chapter);
       // Extract chapter number from the main chapter
       const chapterNumber = Math.floor(chapter.order || 0);
 
       // Create the main chapter container (collapsible parent)
       const chapterItem: EFPSectionItem = {
-        label: `Chapter ${chapterNumber}`,
-        title: `Chapter ${chapterNumber}`,
+        label: EFPTextUtils.formatChapterTitle(`CHAPTER ${chapter.name}`),
+        title: EFPTextUtils.formatChapterTitle(`CHAPTER ${chapter.name}`),
         content: '', // No content for the parent container
         complete: chapter.complete || false, // Use completion from store
         isContainer: true,
@@ -1386,18 +1277,17 @@ class EFPEntryForm extends LitElement {
       items.push(chapterItem);
     });
 
-    console.log(`📋 Generated ${items.length} chapter items from questionnaire store`);
+    // console.log(`📋 Generated ${items.length} chapter items from questionnaire store`);
     return items;
   }
 
   // Get completion status from questionnaire store for navigation items
   private getCompletionFromStore(item: any): boolean {
-    console.log(`getCompletionFromStore: Checking completion for item:`, item.label);
-    console.log(item);
+    // console.log(`getCompletionFromStore: Checking completion for item:`, item.label);
 
     if (!isQuestionnaireLoaded()) {
       // Fallback to item's current complete status
-      console.log(`getCompletionFromStore: Store not loaded, using item.complete = ${item.complete}`);
+      // console.log(`getCompletionFromStore: Store not loaded, using item.complete = ${item.complete}`);
       return item.complete || false;
     }
 
@@ -1406,7 +1296,7 @@ class EFPEntryForm extends LitElement {
       if (item.chapterId) {
         const chapter = getChapterFromStore(item.chapterId);
         const storeComplete = chapter?.complete || false;
-        console.log(`getCompletionFromStore: Chapter ${item.chapterId} completion from store = ${storeComplete}`);
+        // console.log(`getCompletionFromStore: Chapter ${item.chapterId} completion from store = ${storeComplete}`);
         return storeComplete;
       }
 
@@ -1414,7 +1304,7 @@ class EFPEntryForm extends LitElement {
       if (item.questionId) {
         const question = getQuestionFromStore(item.questionId);
         const storeComplete = question?.complete || false;
-        console.log(`getCompletionFromStore: Question ${item.questionId} completion from store = ${storeComplete}`);
+        // console.log(`getCompletionFromStore: Question ${item.questionId} completion from store = ${storeComplete}`);
         return storeComplete;
       }
 
@@ -1422,12 +1312,12 @@ class EFPEntryForm extends LitElement {
       if ('items' in item && Array.isArray(item.items)) {
         // All child items must be complete for parent to be complete
         const childrenComplete = item.items.every((child: any) => this.getCompletionFromStore(child));
-        console.log(`getCompletionFromStore: Container ${item.label} children completion = ${childrenComplete}`);
+        // console.log(`getCompletionFromStore: Container ${item.label} children completion = ${childrenComplete}`);
         return childrenComplete;
       }
 
       // Fallback to item's current status
-      console.log(`getCompletionFromStore: Using fallback item.complete = ${item.complete}`);
+      // console.log(`getCompletionFromStore: Using fallback item.complete = ${item.complete}`);
       return item.complete || false;
 
     } catch (error) {
