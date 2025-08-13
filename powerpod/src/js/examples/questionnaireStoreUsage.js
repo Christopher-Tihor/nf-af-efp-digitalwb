@@ -546,7 +546,7 @@ export function testCompletionLogic() {
 }
 
 /**
- * Test direct store usage vs generateSectionBItems
+ * Test direct store usage (waits for store to load)
  */
 export function testDirectStoreUsage() {
   console.log('🧪 Testing direct questionnaire store usage...');
@@ -554,11 +554,16 @@ export function testDirectStoreUsage() {
   try {
     const questionnaire = getQuestionnaireFromStore();
     if (!questionnaire) {
-      console.log('❌ No questionnaire data found in store');
-      return false;
+      console.log('⏳ Questionnaire store not loaded yet - navigation will show loading state');
+      console.log('📋 Navigation will automatically update when store loads');
+      return {
+        success: true,
+        storeLoaded: false,
+        message: 'Store not loaded - showing loading state'
+      };
     }
 
-    console.log('📊 Comparing direct store usage vs generateSectionBItems:');
+    console.log('📊 Direct store usage (no fallback to generateSectionBItems):');
 
     // Test direct store access
     const chapters = questionnaire.chapters[0] || [];
@@ -583,6 +588,8 @@ export function testDirectStoreUsage() {
 
     console.log('\n✅ Direct store usage benefits:');
     console.log('   • No transformation layer needed');
+    console.log('   • No fallback to generateSectionBItems');
+    console.log('   • Waits for store to load instead of fallback');
     console.log('   • Completion status directly from store');
     console.log('   • Chapter IDs available for lookups');
     console.log('   • Real-time updates from store');
@@ -590,6 +597,7 @@ export function testDirectStoreUsage() {
 
     return {
       success: true,
+      storeLoaded: true,
       chaptersCount: chapters.length,
       directStoreAccess: true,
       storeData: chapters

@@ -34914,17 +34914,22 @@
   }
 
   /**
-   * Test direct store usage vs generateSectionBItems
+   * Test direct store usage (waits for store to load)
    */
   function testDirectStoreUsage() {
     console.log('🧪 Testing direct questionnaire store usage...');
     try {
       var questionnaire = getQuestionnaireFromStore();
       if (!questionnaire) {
-        console.log('❌ No questionnaire data found in store');
-        return false;
+        console.log('⏳ Questionnaire store not loaded yet - navigation will show loading state');
+        console.log('📋 Navigation will automatically update when store loads');
+        return {
+          success: true,
+          storeLoaded: false,
+          message: 'Store not loaded - showing loading state'
+        };
       }
-      console.log('📊 Comparing direct store usage vs generateSectionBItems:');
+      console.log('📊 Direct store usage (no fallback to generateSectionBItems):');
 
       // Test direct store access
       var chapters = questionnaire.chapters[0] || [];
@@ -34948,12 +34953,15 @@
       });
       console.log('\n✅ Direct store usage benefits:');
       console.log('   • No transformation layer needed');
+      console.log('   • No fallback to generateSectionBItems');
+      console.log('   • Waits for store to load instead of fallback');
       console.log('   • Completion status directly from store');
       console.log('   • Chapter IDs available for lookups');
       console.log('   • Real-time updates from store');
       console.log('   • Simpler data flow');
       return {
         success: true,
+        storeLoaded: true,
         chaptersCount: chapters.length,
         directStoreAccess: true,
         storeData: chapters
@@ -37771,11 +37779,45 @@
           this.nestedChapterStructure = [];
           this.workbookResponses = [];
           this.isLoadingResponses = false;
+          this.questionnaireStoreLoaded = false;
           this.isNavigating = false; // Flag to prevent tab change interference
           this.activeContent = {
               title: 'Introduction to the Environmental Farm Plan (EFP)',
               content: 'The purpose of the EFP is to assess the features and management of your farm to identify environmental risks and develop an action plan.',
           };
+      }
+      connectedCallback() {
+          super.connectedCallback();
+          EFPLogger.log('EFPEntryForm connected');
+          // Check if questionnaire store is already loaded
+          this.updateQuestionnaireStoreStatus();
+          // Set up periodic check for questionnaire store loading
+          this.setupQuestionnaireStoreWatcher();
+      }
+      // Update the reactive property based on store status
+      updateQuestionnaireStoreStatus() {
+          const wasLoaded = this.questionnaireStoreLoaded;
+          this.questionnaireStoreLoaded = isQuestionnaireLoaded();
+          if (!wasLoaded && this.questionnaireStoreLoaded) {
+              console.log('📋 Questionnaire store loaded, updating navigation');
+              this.requestUpdate(); // Force re-render when store becomes available
+          }
+      }
+      // Set up watcher for questionnaire store loading
+      setupQuestionnaireStoreWatcher() {
+          // Check every 500ms if store is loaded (only if not already loaded)
+          const checkInterval = setInterval(() => {
+              if (!this.questionnaireStoreLoaded) {
+                  this.updateQuestionnaireStoreStatus();
+              }
+              else {
+                  clearInterval(checkInterval); // Stop checking once loaded
+              }
+          }, 500);
+          // Clear interval after 30 seconds to prevent infinite checking
+          setTimeout(() => {
+              clearInterval(checkInterval);
+          }, 30000);
       }
       get sections() {
           return [
@@ -37993,10 +38035,20 @@
       getSectionBItemsFromStore() {
           var _a;
           const questionnaire = getQuestionnaireFromStore();
-          // If questionnaire store is not loaded, fallback to generateSectionBItems
+          // If questionnaire store is not loaded, show loading state
           if (!((_a = questionnaire === null || questionnaire === void 0 ? void 0 : questionnaire.chapters) === null || _a === void 0 ? void 0 : _a.length)) {
-              console.log('📋 Questionnaire store not loaded, using generateSectionBItems fallback');
-              return EFPSectionGenerator.generateSectionBItems(this.getQuestionnaireChapters());
+              console.log('📋 Questionnaire store not loaded, showing loading state');
+              return [
+                  {
+                      label: 'Loading Environmental Farm Plan...',
+                      content: `
+            <h3>Loading Environmental Farm Plan Questionnaire</h3>
+            <p>Please wait while we load the questionnaire chapters and questions from the store...</p>
+            <p><em>The questionnaire store is being initialized...</em></p>
+          `,
+                      complete: false,
+                  }
+              ];
           }
           console.log('📋 Generating Section B items directly from questionnaire store');
           const chapters = questionnaire.chapters[0] || [];
@@ -39502,6 +39554,9 @@
   __decorate([
       n$2({ type: Boolean, attribute: false })
   ], EFPEntryForm.prototype, "isLoadingResponses", void 0);
+  __decorate([
+      n$2({ type: Boolean, attribute: false })
+  ], EFPEntryForm.prototype, "questionnaireStoreLoaded", void 0);
   __decorate([
       n$2({ type: Object })
   ], EFPEntryForm.prototype, "activeContent", void 0);

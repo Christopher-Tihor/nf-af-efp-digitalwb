@@ -701,6 +701,7 @@ class EFPEntryForm extends LitElement {
   @property({ type: Array, attribute: false }) nestedChapterStructure: any[] = [];
   @property({ type: Array, attribute: false }) workbookResponses: any[] = [];
   @property({ type: Boolean, attribute: false }) isLoadingResponses = false;
+  @property({ type: Boolean, attribute: false }) questionnaireStoreLoaded = false;
   private isNavigating = false; // Flag to prevent tab change interference
   @property({ type: Object }) activeContent: EFPActiveContent = {
     title: 'Introduction to the Environmental Farm Plan (EFP)',
@@ -710,6 +711,45 @@ class EFPEntryForm extends LitElement {
   @query('sl-tab-group') tabGroupEl!: HTMLElement & {
     show: (tabName: string) => void;
   };
+
+  connectedCallback() {
+    super.connectedCallback();
+    EFPLogger.log('EFPEntryForm connected');
+
+    // Check if questionnaire store is already loaded
+    this.updateQuestionnaireStoreStatus();
+
+    // Set up periodic check for questionnaire store loading
+    this.setupQuestionnaireStoreWatcher();
+  }
+
+  // Update the reactive property based on store status
+  private updateQuestionnaireStoreStatus() {
+    const wasLoaded = this.questionnaireStoreLoaded;
+    this.questionnaireStoreLoaded = isQuestionnaireLoaded();
+
+    if (!wasLoaded && this.questionnaireStoreLoaded) {
+      console.log('📋 Questionnaire store loaded, updating navigation');
+      this.requestUpdate(); // Force re-render when store becomes available
+    }
+  }
+
+  // Set up watcher for questionnaire store loading
+  private setupQuestionnaireStoreWatcher() {
+    // Check every 500ms if store is loaded (only if not already loaded)
+    const checkInterval = setInterval(() => {
+      if (!this.questionnaireStoreLoaded) {
+        this.updateQuestionnaireStoreStatus();
+      } else {
+        clearInterval(checkInterval); // Stop checking once loaded
+      }
+    }, 500);
+
+    // Clear interval after 30 seconds to prevent infinite checking
+    setTimeout(() => {
+      clearInterval(checkInterval);
+    }, 30000);
+  }
 
   static styles = css`
     @import url('https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@400;500;600;700&display=swap');
@@ -1258,10 +1298,20 @@ class EFPEntryForm extends LitElement {
   private getSectionBItemsFromStore(): EFPSectionItem[] {
     const questionnaire = getQuestionnaireFromStore();
 
-    // If questionnaire store is not loaded, fallback to generateSectionBItems
+    // If questionnaire store is not loaded, show loading state
     if (!questionnaire?.chapters?.length) {
-      console.log('📋 Questionnaire store not loaded, using generateSectionBItems fallback');
-      return EFPSectionGenerator.generateSectionBItems(this.getQuestionnaireChapters());
+      console.log('📋 Questionnaire store not loaded, showing loading state');
+      return [
+        {
+          label: 'Loading Environmental Farm Plan...',
+          content: `
+            <h3>Loading Environmental Farm Plan Questionnaire</h3>
+            <p>Please wait while we load the questionnaire chapters and questions from the store...</p>
+            <p><em>The questionnaire store is being initialized...</em></p>
+          `,
+          complete: false,
+        }
+      ];
     }
 
     console.log('📋 Generating Section B items directly from questionnaire store');

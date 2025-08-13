@@ -311,9 +311,19 @@ items: EFPSectionGenerator.generateSectionBItems(this.getQuestionnaireChapters()
 // After: Direct store usage
 items: this.getSectionBItemsFromStore()
 
-// Direct store access
+// Direct store access with loading state
 private getSectionBItemsFromStore(): EFPSectionItem[] {
   const questionnaire = getQuestionnaireFromStore();
+
+  // Show loading state if store not loaded (no fallback)
+  if (!questionnaire?.chapters?.length) {
+    return [{
+      label: 'Loading Environmental Farm Plan...',
+      content: '<h3>Loading...</h3><p>Waiting for questionnaire store...</p>',
+      complete: false
+    }];
+  }
+
   const chapters = questionnaire.chapters[0] || [];
 
   return chapters.map(chapter => ({
@@ -332,10 +342,13 @@ private getSectionBItemsFromStore(): EFPSectionItem[] {
 #### Benefits of Direct Store Usage
 
 1. **No Transformation Layer**: Eliminates `generateSectionBItems` complexity
-2. **Real-time Completion**: Uses live completion status from store
-3. **Direct Lookups**: Chapter IDs available for `getChapterFromStore()` calls
-4. **Simpler Data Flow**: Store → Navigation (no intermediate transformations)
-5. **Automatic Updates**: Navigation reflects store changes immediately
+2. **No Fallback Logic**: Waits for store to load instead of using fallbacks
+3. **Loading State**: Shows proper loading UI while waiting for store
+4. **Real-time Completion**: Uses live completion status from store
+5. **Direct Lookups**: Chapter IDs available for `getChapterFromStore()` calls
+6. **Simpler Data Flow**: Store → Navigation (no intermediate transformations)
+7. **Automatic Updates**: Navigation reflects store changes immediately
+8. **Reactive Updates**: Component re-renders when store becomes available
 ```
 
 ## Benefits
