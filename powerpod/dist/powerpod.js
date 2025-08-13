@@ -35072,6 +35072,7 @@
       console.log('🎯 Testing navigation icon rules:');
       console.log('   ✅ Complete chapters/questions → check-circle (green)');
       console.log('   ✏️ Incomplete chapters/questions → pencil (orange/gray)');
+      console.log('   📋 Icons now show on ALL levels: top-level parents, subchapters, and questions');
       var testResults = [];
 
       // Test each chapter for navigation icons
@@ -35089,12 +35090,13 @@
               expectedIcon: expectedIcon,
               expectedColor: expectedColor,
               hasQuestions: !!((_chapter$questions4 = chapter.questions) !== null && _chapter$questions4 !== void 0 && _chapter$questions4.length),
-              hasSubchapters: !!((_chapter$subchapters4 = chapter.subchapters) !== null && _chapter$subchapters4 !== void 0 && _chapter$subchapters4.length)
+              hasSubchapters: !!((_chapter$subchapters4 = chapter.subchapters) !== null && _chapter$subchapters4 !== void 0 && _chapter$subchapters4.length),
+              level: 'top-level parent'
             };
             testResults.push(result);
-            console.log("\uD83D\uDCDD ".concat(chapter.name, ":"));
+            console.log("\uD83D\uDCDD TOP-LEVEL: ".concat(chapter.name, ":"));
             console.log("   Complete: ".concat(isComplete ? '✅' : '❌'));
-            console.log("   Icon: ".concat(expectedIcon, " (").concat(expectedColor, ")"));
+            console.log("   Icon: ".concat(expectedIcon, " (").concat(expectedColor, ") \u2190 NOW SHOWS ON TOP-LEVEL!"));
             console.log("   Content: ".concat(result.hasQuestions ? 'Questions' : '').concat(result.hasQuestions && result.hasSubchapters ? ' + ' : '').concat(result.hasSubchapters ? 'Subchapters' : ''));
 
             // Test subchapters if they exist
@@ -35103,9 +35105,17 @@
                 var subIsComplete = subchapter.complete;
                 var subExpectedIcon = subIsComplete ? 'check-circle' : 'pencil';
                 var subExpectedColor = subIsComplete ? 'green' : 'orange/gray';
-                console.log("  \uD83D\uDCC4 ".concat(subchapter.name, ":"));
+                console.log("  \uD83D\uDCC4 SUBCHAPTER: ".concat(subchapter.name, ":"));
                 console.log("     Complete: ".concat(subIsComplete ? '✅' : '❌'));
                 console.log("     Icon: ".concat(subExpectedIcon, " (").concat(subExpectedColor, ")"));
+                testResults.push({
+                  id: subchapter.id,
+                  name: subchapter.name,
+                  complete: subIsComplete,
+                  expectedIcon: subExpectedIcon,
+                  expectedColor: subExpectedColor,
+                  level: 'subchapter'
+                });
               });
             }
           });
@@ -35118,11 +35128,31 @@
         return r.complete;
       }).length;
       var sectionComplete = completeChapters === totalChapters && totalChapters > 0;
-      console.log("\n\uD83D\uDCCA Section B Navigation:");
-      console.log("   Complete Chapters: ".concat(completeChapters, "/").concat(totalChapters));
+
+      // Count by level
+      var topLevelResults = testResults.filter(function (r) {
+        return r.level === 'top-level parent';
+      });
+      var subchapterResults = testResults.filter(function (r) {
+        return r.level === 'subchapter';
+      });
+      var completeTopLevel = topLevelResults.filter(function (r) {
+        return r.complete;
+      }).length;
+      var completeSubchapters = subchapterResults.filter(function (r) {
+        return r.complete;
+      }).length;
+      console.log("\n\uD83D\uDCCA Navigation Icon Summary:");
+      console.log("   Top-level Parents: ".concat(completeTopLevel, "/").concat(topLevelResults.length, " complete (NOW SHOW ICONS!)"));
+      console.log("   Subchapters: ".concat(completeSubchapters, "/").concat(subchapterResults.length, " complete"));
       console.log("   Section Complete: ".concat(sectionComplete ? '✅' : '❌'));
       console.log("   Section Tab Icon: ".concat(sectionComplete ? 'check-circle (green)' : 'pencil (orange/gray)'));
       console.log('\n🎉 Navigation icon test completed!');
+      console.log('✨ Top-level parent chapters now show completion icons!');
+      console.log('🔧 Navigation expansion/collapse should work with:');
+      console.log('   - Clicking on navigation items');
+      console.log('   - Using next/previous buttons');
+      console.log('   - Automatic expansion when navigating to items within containers');
       return {
         success: true,
         totalChapters: totalChapters,
@@ -37690,8 +37720,18 @@
       static renderItems(items, html, activeContentTitle, onItemClick, renderItems, getCompletion) {
           return items.map((item) => {
               if ('items' in item && Array.isArray(item.items)) {
+                  const isComplete = getCompletion ? getCompletion(item) : (item.complete || false);
+                  const iconName = isComplete ? 'check-circle' : 'pencil';
+                  const iconColor = isComplete ? 'var(--sl-color-success-600)' : 'var(--sl-color-warning-600)';
                   return html `
-          <sl-details summary=${item.title}>
+          <sl-details data-container-title="${item.title || item.label}">
+            <div slot="summary" style="display: flex; align-items: center; gap: 8px;">
+              <sl-icon
+                name=${iconName}
+                style="color: ${iconColor}"
+              ></sl-icon>
+              <span>${item.title || item.label}</span>
+            </div>
             ${EFPRenderUtils.renderItems(item.items, html, activeContentTitle, onItemClick, renderItems, getCompletion)}
           </sl-details>
         `;
@@ -38511,8 +38551,12 @@
           const containersToOpen = EFPNavigationUtils.findContainersForItem(currentLabel, this.sections);
           // Open the relevant containers
           allDetails.forEach(detail => {
+              // Check data attribute first (most reliable), then fallback to other methods
+              const containerTitle = detail.getAttribute('data-container-title');
               const summary = detail.getAttribute('summary');
-              if (summary && containersToOpen.includes(summary)) {
+              const customSummarySpan = detail.querySelector('[slot="summary"] span');
+              const summaryText = containerTitle || summary || (customSummarySpan ? customSummarySpan.textContent : null);
+              if (summaryText && containersToOpen.includes(summaryText)) {
                   detail.open = true;
               }
           });

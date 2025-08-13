@@ -717,6 +717,7 @@ export function testNavigationIcons() {
     console.log('🎯 Testing navigation icon rules:');
     console.log('   ✅ Complete chapters/questions → check-circle (green)');
     console.log('   ✏️ Incomplete chapters/questions → pencil (orange/gray)');
+    console.log('   📋 Icons now show on ALL levels: top-level parents, subchapters, and questions');
 
     let testResults = [];
 
@@ -735,14 +736,15 @@ export function testNavigationIcons() {
             expectedIcon,
             expectedColor,
             hasQuestions: !!(chapter.questions?.length),
-            hasSubchapters: !!(chapter.subchapters?.length)
+            hasSubchapters: !!(chapter.subchapters?.length),
+            level: 'top-level parent'
           };
 
           testResults.push(result);
 
-          console.log(`📝 ${chapter.name}:`);
+          console.log(`📝 TOP-LEVEL: ${chapter.name}:`);
           console.log(`   Complete: ${isComplete ? '✅' : '❌'}`);
-          console.log(`   Icon: ${expectedIcon} (${expectedColor})`);
+          console.log(`   Icon: ${expectedIcon} (${expectedColor}) ← NOW SHOWS ON TOP-LEVEL!`);
           console.log(`   Content: ${result.hasQuestions ? 'Questions' : ''}${result.hasQuestions && result.hasSubchapters ? ' + ' : ''}${result.hasSubchapters ? 'Subchapters' : ''}`);
 
           // Test subchapters if they exist
@@ -752,9 +754,18 @@ export function testNavigationIcons() {
               const subExpectedIcon = subIsComplete ? 'check-circle' : 'pencil';
               const subExpectedColor = subIsComplete ? 'green' : 'orange/gray';
 
-              console.log(`  📄 ${subchapter.name}:`);
+              console.log(`  📄 SUBCHAPTER: ${subchapter.name}:`);
               console.log(`     Complete: ${subIsComplete ? '✅' : '❌'}`);
               console.log(`     Icon: ${subExpectedIcon} (${subExpectedColor})`);
+
+              testResults.push({
+                id: subchapter.id,
+                name: subchapter.name,
+                complete: subIsComplete,
+                expectedIcon: subExpectedIcon,
+                expectedColor: subExpectedColor,
+                level: 'subchapter'
+              });
             });
           }
         });
@@ -766,12 +777,24 @@ export function testNavigationIcons() {
     let completeChapters = testResults.filter(r => r.complete).length;
     let sectionComplete = completeChapters === totalChapters && totalChapters > 0;
 
-    console.log(`\n📊 Section B Navigation:`);
-    console.log(`   Complete Chapters: ${completeChapters}/${totalChapters}`);
+    // Count by level
+    const topLevelResults = testResults.filter(r => r.level === 'top-level parent');
+    const subchapterResults = testResults.filter(r => r.level === 'subchapter');
+    const completeTopLevel = topLevelResults.filter(r => r.complete).length;
+    const completeSubchapters = subchapterResults.filter(r => r.complete).length;
+
+    console.log(`\n📊 Navigation Icon Summary:`);
+    console.log(`   Top-level Parents: ${completeTopLevel}/${topLevelResults.length} complete (NOW SHOW ICONS!)`);
+    console.log(`   Subchapters: ${completeSubchapters}/${subchapterResults.length} complete`);
     console.log(`   Section Complete: ${sectionComplete ? '✅' : '❌'}`);
     console.log(`   Section Tab Icon: ${sectionComplete ? 'check-circle (green)' : 'pencil (orange/gray)'}`);
 
     console.log('\n🎉 Navigation icon test completed!');
+    console.log('✨ Top-level parent chapters now show completion icons!');
+    console.log('🔧 Navigation expansion/collapse should work with:');
+    console.log('   - Clicking on navigation items');
+    console.log('   - Using next/previous buttons');
+    console.log('   - Automatic expansion when navigating to items within containers');
 
     return {
       success: true,

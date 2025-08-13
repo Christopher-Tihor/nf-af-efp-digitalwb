@@ -483,8 +483,19 @@ class EFPRenderUtils {
   ): any {
     return items.map((item) => {
       if ('items' in item && Array.isArray(item.items)) {
+        const isComplete = getCompletion ? getCompletion(item) : (item.complete || false);
+        const iconName = isComplete ? 'check-circle' : 'pencil';
+        const iconColor = isComplete ? 'var(--sl-color-success-600)' : 'var(--sl-color-warning-600)';
+
         return html`
-          <sl-details summary=${item.title}>
+          <sl-details data-container-title="${item.title || item.label}">
+            <div slot="summary" style="display: flex; align-items: center; gap: 8px;">
+              <sl-icon
+                name=${iconName}
+                style="color: ${iconColor}"
+              ></sl-icon>
+              <span>${item.title || item.label}</span>
+            </div>
             ${EFPRenderUtils.renderItems(item.items, html, activeContentTitle, onItemClick, renderItems, getCompletion)}
           </sl-details>
         `;
@@ -1790,8 +1801,13 @@ class EFPEntryForm extends LitElement {
 
     // Open the relevant containers
     allDetails.forEach(detail => {
+      // Check data attribute first (most reliable), then fallback to other methods
+      const containerTitle = detail.getAttribute('data-container-title');
       const summary = detail.getAttribute('summary');
-      if (summary && containersToOpen.includes(summary)) {
+      const customSummarySpan = detail.querySelector('[slot="summary"] span');
+      const summaryText = containerTitle || summary || (customSummarySpan ? customSummarySpan.textContent : null);
+
+      if (summaryText && containersToOpen.includes(summaryText)) {
         detail.open = true;
       }
     });

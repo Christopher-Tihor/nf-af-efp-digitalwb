@@ -275,6 +275,7 @@ The EFP navigation now uses the questionnaire store to determine icon display:
 // Navigation icons are automatically determined by completion status
 // ✅ Complete chapters/questions → check-circle (green)
 // ✏️ Incomplete chapters/questions → pencil (orange/gray)
+// 🎯 Icons now show at ALL levels: top-level parents, subchapters, and section tabs
 
 // In EFPEntryForm.ts
 private getCompletionFromStore(item: any): boolean {
@@ -298,7 +299,51 @@ private getSectionCompletionFromStore(section: any): boolean {
   // For Section B, calculates completion from questionnaire store
   // Section is complete when ALL questions are answered
 }
+
+// Top-level parent chapters now show completion icons
+// Updated rendering with icons in sl-details summary
+<sl-details data-container-title="${item.title}">
+  <div slot="summary" style="display: flex; align-items: center; gap: 8px;">
+    <sl-icon name=${isComplete ? 'check-circle' : 'pencil'}
+             style="color: ${isComplete ? 'var(--sl-color-success-600)' : 'var(--sl-color-warning-600)'}">
+    </sl-icon>
+    <span>${item.title}</span>
+  </div>
+  <!-- subchapters rendered here -->
+</sl-details>
+
+// Navigation state management updated to work with custom summary slots
+private updateNavigationState(currentLabel: string) {
+  const allDetails = this.shadowRoot?.querySelectorAll('sl-details');
+  const containersToOpen = EFPNavigationUtils.findContainersForItem(currentLabel, this.sections);
+
+  allDetails.forEach(detail => {
+    // Check data attribute first, then fallback to other methods
+    const containerTitle = detail.getAttribute('data-container-title');
+    const summary = detail.getAttribute('summary');
+    const customSummarySpan = detail.querySelector('[slot="summary"] span');
+    const summaryText = containerTitle || summary || customSummarySpan?.textContent;
+
+    detail.open = summaryText && containersToOpen.includes(summaryText);
+  });
+}
 ```
+
+#### Navigation Icon Levels
+
+Icons are now displayed at **all navigation levels**:
+
+1. **Top-level Parent Chapters** (e.g., "Chapter 2. Farmstead")
+   - ✅ Show completion icons in the collapsible header
+   - Icon reflects completion of all subchapters and questions within
+
+2. **Subchapters** (e.g., "2.1 Buildings And Roads")
+   - ✅ Show completion icons next to subchapter names
+   - Icon reflects completion of questions within the subchapter
+
+3. **Section Tabs** (e.g., "Section B")
+   - ✅ Show completion icons in the tab header
+   - Icon reflects completion of entire section
 
 ### Direct Store Usage for Navigation
 
