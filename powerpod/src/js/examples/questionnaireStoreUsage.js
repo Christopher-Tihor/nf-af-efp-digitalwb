@@ -825,7 +825,7 @@ export async function testWorkbookResponseHelperIntegration() {
     console.log('1. Testing response creation...');
 
     // Test creating a response
-    const createResult = await createResponse(workbookId, testQuestionId, 'Test response value');
+    const createResult = await createResponse(testQuestionId, 'Test response value');
     console.log('✅ Response created:', createResult.success);
 
     // Check if questionnaire store was updated

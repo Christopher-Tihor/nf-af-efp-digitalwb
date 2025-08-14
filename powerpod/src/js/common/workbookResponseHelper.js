@@ -2,9 +2,74 @@ import { POWERPOD } from './constants.js';
 import { Logger } from './logger.js';
 import { getCurrentWorkbookId } from './workbookUtils.js';
 import { loadChaptersAndQuestions, getStoredQuestionsData, isChaptersAndQuestionsLoaded } from './chaptersAndQuestionsUtils.js';
-import { updateQuestionResponse, isQuestionnaireLoaded } from './questionnaire.js';
+import { updateQuestionResponse, isQuestionnaireLoaded, getQuestionFromStore } from './questionnaire.js';
 
 const logger = Logger('common/workbookResponseHelper');
+
+/**
+ * Get chapterId for a given questionId
+ * @param {string} questionId - The question ID
+ * @returns {string|null} The chapter ID or null if not found
+ */
+function getChapterIdForQuestion(questionId) {
+  // First try to get from workbookQuestionsAndResponses memory (most reliable)
+  if (POWERPOD.workbookQuestionsAndResponses.isLoaded) {
+    const entry = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.get(questionId);
+    if (entry && entry.question && entry.question._quartech_chapter_value) {
+      return entry.question._quartech_chapter_value;
+    }
+  }
+
+  // Then try to get from stored questions data
+  if (isChaptersAndQuestionsLoaded()) {
+    const questionsData = getStoredQuestionsData();
+    if (questionsData && questionsData.value) {
+      const question = questionsData.value.find(q => q.quartech_workbookquestionid === questionId);
+      if (question && question._quartech_chapter_value) {
+        return question._quartech_chapter_value;
+      }
+    }
+  }
+
+  // Finally try to find chapterId by traversing questionnaire store structure
+  if (isQuestionnaireLoaded()) {
+    const questionnaire = POWERPOD.state?.questionnaire;
+    if (questionnaire?.chapters) {
+      const findChapterIdForQuestion = (chapters, currentChapterId = null) => {
+        for (const chapterGroup of chapters) {
+          if (Array.isArray(chapterGroup)) {
+            for (const chapter of chapterGroup) {
+              // Check questions in main chapter
+              if (chapter.questions) {
+                const question = chapter.questions.find(q => q.id === questionId);
+                if (question) return chapter.id;
+              }
+              // Check questions in subchapters
+              if (chapter.subchapters) {
+                const found = findChapterIdForQuestion([chapter.subchapters], chapter.id);
+                if (found) return found;
+              }
+            }
+          }
+        }
+        return null;
+      };
+
+      const chapterId = findChapterIdForQuestion(questionnaire.chapters);
+      if (chapterId) {
+        return chapterId;
+      }
+    }
+  }
+
+  logger.warn({
+    fn: 'getChapterIdForQuestion',
+    message: `Could not find chapterId for question ${questionId}`,
+    data: { questionId }
+  });
+
+  return null;
+}
 
 /**
  * Fetch all responses for a specific workbook
@@ -119,12 +184,16 @@ export async function createResponse(questionId, response, options = {}) {
     throw new Error('No workbook ID available');
   }
   try {
+    // Get chapterId for the question
+    const chapterId = getChapterIdForQuestion(questionId);
+
     logger.info({
       fn: 'createResponse',
       message: `Creating response for workbook: ${workbookId}, question: ${questionId}`,
       data: {
         workbookId,
         questionId,
+        chapterId,
         response: response?.substring(0, 100) + '...',
       },
     });
@@ -132,6 +201,7 @@ export async function createResponse(questionId, response, options = {}) {
     const result = await POWERPOD.fetch.postWorkbookResponseData({
       workbookId,
       questionId,
+      chapterId,
       response,
       ...options,
     });
@@ -188,15 +258,29 @@ export async function createResponse(questionId, response, options = {}) {
  */
 export async function updateResponse(responseId, response = null, options = {}) {
   try {
+    // Try to get chapterId if we can determine the questionId
+    let chapterId = null;
+
+    // First try to get questionId from existing response data in memory
+    if (POWERPOD.workbookQuestionsAndResponses.isLoaded) {
+      for (const [qId, entry] of POWERPOD.workbookQuestionsAndResponses.questionsWithResponses) {
+        if (entry.response && entry.response.quartech_workbookresponseid === responseId) {
+          chapterId = getChapterIdForQuestion(qId);
+          break;
+        }
+      }
+    }
+
     logger.info({
       fn: 'updateResponse',
       message: `Updating response: ${responseId}`,
-      data: { responseId, hasResponse: !!response },
+      data: { responseId, hasResponse: !!response, chapterId },
     });
 
     const result = await POWERPOD.fetch.patchWorkbookResponseData({
       id: responseId,
       response,
+      chapterId,
       ...options,
     });
 

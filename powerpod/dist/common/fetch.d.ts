@@ -128,16 +128,18 @@ export function getWorkbookResponsesByWorkbookAndQuestion({ workbookId, question
     workbookId: any;
     questionId: any;
 }): Promise<any>;
-export function postWorkbookResponseData({ workbookId, questionId, response, ...options }: {
+export function postWorkbookResponseData({ workbookId, questionId, chapterId, response, ...options }: {
     [x: string]: any;
     workbookId: any;
     questionId: any;
+    chapterId: any;
     response: any;
 }): Promise<any>;
-export function patchWorkbookResponseData({ id, response, ...options }: {
+export function patchWorkbookResponseData({ id, response, chapterId, ...options }: {
     [x: string]: any;
     id: any;
     response?: null | undefined;
+    chapterId?: null | undefined;
 }): Promise<any>;
 export function deleteWorkbookResponseData({ id, ...options }: {
     [x: string]: any;

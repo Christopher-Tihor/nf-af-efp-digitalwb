@@ -1,5 +1,5 @@
 /*!
-* powerpod 4.2.2
+* powerpod 4.2.3
 * https://github.com/bcgov/nr-af-pods/powerpod
 *
 * @license GPLv3 for open source use only
@@ -1487,8 +1487,8 @@
     _excluded23 = ["id"],
     _excluded24 = ["workbookId"],
     _excluded25 = ["workbookId", "questionId"],
-    _excluded26 = ["workbookId", "questionId", "response"],
-    _excluded27 = ["id", "response"],
+    _excluded26 = ["workbookId", "questionId", "chapterId", "response"],
+    _excluded27 = ["id", "response", "chapterId"],
     _excluded28 = ["id"];
   var logger$N = Logger('common/fetch');
   var ENDPOINT_URL = {
@@ -2757,11 +2757,11 @@
   }
   function _postWorkbookResponseData() {
     _postWorkbookResponseData = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee34(_ref33) {
-      var workbookId, questionId, response, options;
+      var workbookId, questionId, chapterId, response, options, payload;
       return _regeneratorRuntime().wrap(function _callee34$(_context34) {
         while (1) switch (_context34.prev = _context34.next) {
           case 0:
-            workbookId = _ref33.workbookId, questionId = _ref33.questionId, response = _ref33.response, options = _objectWithoutProperties(_ref33, _excluded26);
+            workbookId = _ref33.workbookId, questionId = _ref33.questionId, chapterId = _ref33.chapterId, response = _ref33.response, options = _objectWithoutProperties(_ref33, _excluded26);
             if (!(!workbookId || !questionId || response === undefined)) {
               _context34.next = 4;
               break;
@@ -2783,9 +2783,18 @@
               data: {
                 workbookId: workbookId,
                 questionId: questionId,
+                chapterId: chapterId,
                 response: response
               }
             });
+            payload = {
+              quartech_response: response,
+              'quartech_Workbook@odata.bind': "/quartech_workbooks(".concat(workbookId, ")"),
+              'quartech_Question@odata.bind': "/quartech_workbookquestions(".concat(questionId, ")")
+            }; // Add chapterId if provided
+            if (chapterId) {
+              payload['quartech_Chapter@odata.bind'] = "/quartech_chapters(".concat(chapterId, ")");
+            }
             return _context34.abrupt("return", fetch$1(_objectSpread2({
               method: 'POST',
               url: ENDPOINT_URL.post_workbookresponse_data,
@@ -2794,13 +2803,9 @@
               addRequestVerificationToken: true,
               processData: false,
               returnData: true,
-              data: JSON.stringify({
-                quartech_response: response,
-                'quartech_Workbook@odata.bind': "/quartech_workbooks(".concat(workbookId, ")"),
-                'quartech_Question@odata.bind': "/quartech_workbookquestions(".concat(questionId, ")")
-              })
+              data: JSON.stringify(payload)
             }, options)));
-          case 6:
+          case 8:
           case "end":
             return _context34.stop();
         }
@@ -2813,11 +2818,11 @@
   }
   function _patchWorkbookResponseData() {
     _patchWorkbookResponseData = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee35(_ref34) {
-      var id, _ref34$response, response, options, updateData;
+      var id, _ref34$response, response, _ref34$chapterId, chapterId, options, updateData;
       return _regeneratorRuntime().wrap(function _callee35$(_context35) {
         while (1) switch (_context35.prev = _context35.next) {
           case 0:
-            id = _ref34.id, _ref34$response = _ref34.response, response = _ref34$response === void 0 ? null : _ref34$response, options = _objectWithoutProperties(_ref34, _excluded27);
+            id = _ref34.id, _ref34$response = _ref34.response, response = _ref34$response === void 0 ? null : _ref34$response, _ref34$chapterId = _ref34.chapterId, chapterId = _ref34$chapterId === void 0 ? null : _ref34$chapterId, options = _objectWithoutProperties(_ref34, _excluded27);
             if (id) {
               _context35.next = 4;
               break;
@@ -2833,8 +2838,9 @@
           case 4:
             updateData = {};
             if (response !== null) updateData.quartech_response = response;
+            if (chapterId !== null) updateData['quartech_Chapter@odata.bind'] = "/quartech_chapters(".concat(chapterId, ")");
             if (!(Object.keys(updateData).length === 0)) {
-              _context35.next = 9;
+              _context35.next = 10;
               break;
             }
             logger$N.warn({
@@ -2842,13 +2848,14 @@
               message: 'No data to update',
               data: {
                 id: id,
-                response: response
+                response: response,
+                chapterId: chapterId
               }
             });
             return _context35.abrupt("return", Promise.resolve({
               data: null
             }));
-          case 9:
+          case 10:
             logger$N.info({
               fn: patchWorkbookResponseData,
               message: 'Updating workbook response',
@@ -2867,7 +2874,7 @@
               returnData: true,
               data: JSON.stringify(updateData)
             }, options)));
-          case 11:
+          case 12:
           case "end":
             return _context35.stop();
         }
@@ -33039,6 +33046,93 @@
   var logger$5 = Logger('common/workbookResponseHelper');
 
   /**
+   * Get chapterId for a given questionId
+   * @param {string} questionId - The question ID
+   * @returns {string|null} The chapter ID or null if not found
+   */
+  function getChapterIdForQuestion(questionId) {
+    // First try to get from workbookQuestionsAndResponses memory (most reliable)
+    if (POWERPOD.workbookQuestionsAndResponses.isLoaded) {
+      var entry = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.get(questionId);
+      if (entry && entry.question && entry.question._quartech_chapter_value) {
+        return entry.question._quartech_chapter_value;
+      }
+    }
+
+    // Then try to get from stored questions data
+    if (isChaptersAndQuestionsLoaded()) {
+      var questionsData = getStoredQuestionsData();
+      if (questionsData && questionsData.value) {
+        var question = questionsData.value.find(function (q) {
+          return q.quartech_workbookquestionid === questionId;
+        });
+        if (question && question._quartech_chapter_value) {
+          return question._quartech_chapter_value;
+        }
+      }
+    }
+
+    // Finally try to find chapterId by traversing questionnaire store structure
+    if (isQuestionnaireLoaded()) {
+      var _POWERPOD$state;
+      var questionnaire = (_POWERPOD$state = POWERPOD.state) === null || _POWERPOD$state === void 0 ? void 0 : _POWERPOD$state.questionnaire;
+      if (questionnaire !== null && questionnaire !== void 0 && questionnaire.chapters) {
+        var _findChapterIdForQuestion = function findChapterIdForQuestion(chapters) {
+          var _iterator = _createForOfIteratorHelper(chapters),
+            _step;
+          try {
+            for (_iterator.s(); !(_step = _iterator.n()).done;) {
+              var chapterGroup = _step.value;
+              if (Array.isArray(chapterGroup)) {
+                var _iterator2 = _createForOfIteratorHelper(chapterGroup),
+                  _step2;
+                try {
+                  for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
+                    var chapter = _step2.value;
+                    // Check questions in main chapter
+                    if (chapter.questions) {
+                      var _question = chapter.questions.find(function (q) {
+                        return q.id === questionId;
+                      });
+                      if (_question) return chapter.id;
+                    }
+                    // Check questions in subchapters
+                    if (chapter.subchapters) {
+                      var found = _findChapterIdForQuestion([chapter.subchapters], chapter.id);
+                      if (found) return found;
+                    }
+                  }
+                } catch (err) {
+                  _iterator2.e(err);
+                } finally {
+                  _iterator2.f();
+                }
+              }
+            }
+          } catch (err) {
+            _iterator.e(err);
+          } finally {
+            _iterator.f();
+          }
+          return null;
+        };
+        var chapterId = _findChapterIdForQuestion(questionnaire.chapters);
+        if (chapterId) {
+          return chapterId;
+        }
+      }
+    }
+    logger$5.warn({
+      fn: 'getChapterIdForQuestion',
+      message: "Could not find chapterId for question ".concat(questionId),
+      data: {
+        questionId: questionId
+      }
+    });
+    return null;
+  }
+
+  /**
    * Fetch all responses for a specific workbook
    * @param {string} workbookId - The workbook ID
    * @param {Object} options - Additional fetch options
@@ -33221,6 +33315,7 @@
       var options,
         workbookId,
         _result$data9,
+        chapterId,
         result,
         _args3 = arguments;
       return _regeneratorRuntime().wrap(function _callee3$(_context3) {
@@ -33235,22 +33330,26 @@
             throw new Error('No workbook ID available');
           case 4:
             _context3.prev = 4;
+            // Get chapterId for the question
+            chapterId = getChapterIdForQuestion(questionId);
             logger$5.info({
               fn: 'createResponse',
               message: "Creating response for workbook: ".concat(workbookId, ", question: ").concat(questionId),
               data: {
                 workbookId: workbookId,
                 questionId: questionId,
+                chapterId: chapterId,
                 response: (response === null || response === void 0 ? void 0 : response.substring(0, 100)) + '...'
               }
             });
-            _context3.next = 8;
+            _context3.next = 9;
             return POWERPOD.fetch.postWorkbookResponseData(_objectSpread2({
               workbookId: workbookId,
               questionId: questionId,
+              chapterId: chapterId,
               response: response
             }, options));
-          case 8:
+          case 9:
             result = _context3.sent;
             logger$5.info({
               fn: 'createResponse',
@@ -33286,8 +33385,8 @@
               workbookId: workbookId,
               questionId: questionId
             });
-          case 14:
-            _context3.prev = 14;
+          case 15:
+            _context3.prev = 15;
             _context3.t0 = _context3["catch"](4);
             logger$5.error({
               fn: 'createResponse',
@@ -33299,11 +33398,11 @@
               }
             });
             throw new Error("Failed to create workbook response: ".concat(_context3.t0.message));
-          case 18:
+          case 19:
           case "end":
             return _context3.stop();
         }
-      }, _callee3, null, [[4, 14]]);
+      }, _callee3, null, [[4, 15]]);
     }));
     return _createResponse.apply(this, arguments);
   }
@@ -33321,6 +33420,12 @@
     _updateResponse = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee4(responseId) {
       var response,
         options,
+        chapterId,
+        _iterator3,
+        _step3,
+        _step3$value,
+        qId,
+        entry,
         result,
         questionId,
         _args4 = arguments;
@@ -33330,20 +33435,58 @@
             response = _args4.length > 1 && _args4[1] !== undefined ? _args4[1] : null;
             options = _args4.length > 2 && _args4[2] !== undefined ? _args4[2] : {};
             _context4.prev = 2;
+            // Try to get chapterId if we can determine the questionId
+            chapterId = null; // First try to get questionId from existing response data in memory
+            if (!POWERPOD.workbookQuestionsAndResponses.isLoaded) {
+              _context4.next = 23;
+              break;
+            }
+            _iterator3 = _createForOfIteratorHelper(POWERPOD.workbookQuestionsAndResponses.questionsWithResponses);
+            _context4.prev = 6;
+            _iterator3.s();
+          case 8:
+            if ((_step3 = _iterator3.n()).done) {
+              _context4.next = 15;
+              break;
+            }
+            _step3$value = _slicedToArray(_step3.value, 2), qId = _step3$value[0], entry = _step3$value[1];
+            if (!(entry.response && entry.response.quartech_workbookresponseid === responseId)) {
+              _context4.next = 13;
+              break;
+            }
+            chapterId = getChapterIdForQuestion(qId);
+            return _context4.abrupt("break", 15);
+          case 13:
+            _context4.next = 8;
+            break;
+          case 15:
+            _context4.next = 20;
+            break;
+          case 17:
+            _context4.prev = 17;
+            _context4.t0 = _context4["catch"](6);
+            _iterator3.e(_context4.t0);
+          case 20:
+            _context4.prev = 20;
+            _iterator3.f();
+            return _context4.finish(20);
+          case 23:
             logger$5.info({
               fn: 'updateResponse',
               message: "Updating response: ".concat(responseId),
               data: {
                 responseId: responseId,
-                hasResponse: !!response
+                hasResponse: !!response,
+                chapterId: chapterId
               }
             });
-            _context4.next = 6;
+            _context4.next = 26;
             return POWERPOD.fetch.patchWorkbookResponseData(_objectSpread2({
               id: responseId,
-              response: response
+              response: response,
+              chapterId: chapterId
             }, options));
-          case 6:
+          case 26:
             result = _context4.sent;
             logger$5.info({
               fn: 'updateResponse',
@@ -33379,23 +33522,23 @@
               responseId: responseId,
               updated: result === null || result === void 0 ? void 0 : result.data
             });
-          case 12:
-            _context4.prev = 12;
-            _context4.t0 = _context4["catch"](2);
+          case 32:
+            _context4.prev = 32;
+            _context4.t1 = _context4["catch"](2);
             logger$5.error({
               fn: 'updateResponse',
               message: "Failed to update response ".concat(responseId),
               data: {
                 responseId: responseId,
-                error: _context4.t0.message
+                error: _context4.t1.message
               }
             });
-            throw new Error("Failed to update workbook response: ".concat(_context4.t0.message));
-          case 16:
+            throw new Error("Failed to update workbook response: ".concat(_context4.t1.message));
+          case 36:
           case "end":
             return _context4.stop();
         }
-      }, _callee4, null, [[2, 12]]);
+      }, _callee4, null, [[2, 32], [6, 17, 20, 23]]);
     }));
     return _updateResponse.apply(this, arguments);
   }
@@ -33414,9 +33557,9 @@
     _deleteResponse = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee5(responseId) {
       var options,
         questionId,
-        _iterator,
-        _step,
-        _step$value,
+        _iterator4,
+        _step4,
+        _step4$value,
         qId,
         entry,
         _args5 = arguments;
@@ -33441,15 +33584,15 @@
             }
             _context5.prev = 5;
             // Find the response in the existing data
-            _iterator = _createForOfIteratorHelper(POWERPOD.workbookQuestionsAndResponses.questionsWithResponses);
+            _iterator4 = _createForOfIteratorHelper(POWERPOD.workbookQuestionsAndResponses.questionsWithResponses);
             _context5.prev = 7;
-            _iterator.s();
+            _iterator4.s();
           case 9:
-            if ((_step = _iterator.n()).done) {
+            if ((_step4 = _iterator4.n()).done) {
               _context5.next = 16;
               break;
             }
-            _step$value = _slicedToArray(_step.value, 2), qId = _step$value[0], entry = _step$value[1];
+            _step4$value = _slicedToArray(_step4.value, 2), qId = _step4$value[0], entry = _step4$value[1];
             if (!(entry.response && entry.response.quartech_workbookresponseid === responseId)) {
               _context5.next = 14;
               break;
@@ -33465,10 +33608,10 @@
           case 18:
             _context5.prev = 18;
             _context5.t0 = _context5["catch"](7);
-            _iterator.e(_context5.t0);
+            _iterator4.e(_context5.t0);
           case 21:
             _context5.prev = 21;
-            _iterator.f();
+            _iterator4.f();
             return _context5.finish(21);
           case 24:
             if (questionId) {
@@ -35179,7 +35322,7 @@
   // Make test function available globally for console testing
   function _testWorkbookResponseHelperIntegration() {
     _testWorkbookResponseHelperIntegration = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee3() {
-      var _POWERPOD$workbook, _createResult$respons, _yield$import, createResponse, updateResponse, deleteResponse, workbookId, testQuestionId, createResult, questionAfterCreate, responseId, questionAfterUpdate, questionAfterDelete;
+      var _POWERPOD$workbook, _createResult$respons, _yield$import, createResponse, updateResponse, deleteResponse, testQuestionId, createResult, questionAfterCreate, responseId, questionAfterUpdate, questionAfterDelete;
       return _regeneratorRuntime().wrap(function _callee3$(_context3) {
         while (1) switch (_context3.prev = _context3.next) {
           case 0:
@@ -35192,13 +35335,13 @@
             createResponse = _yield$import.createResponse;
             updateResponse = _yield$import.updateResponse;
             deleteResponse = _yield$import.deleteResponse;
-            workbookId = ((_POWERPOD$workbook = POWERPOD.workbook) === null || _POWERPOD$workbook === void 0 ? void 0 : _POWERPOD$workbook.workbookId) || 'test-workbook-id';
+            ((_POWERPOD$workbook = POWERPOD.workbook) === null || _POWERPOD$workbook === void 0 ? void 0 : _POWERPOD$workbook.workbookId) || 'test-workbook-id';
             testQuestionId = 'test-question-id';
             console.log('1. Testing response creation...');
 
             // Test creating a response
             _context3.next = 13;
-            return createResponse(workbookId, testQuestionId, 'Test response value');
+            return createResponse(testQuestionId, 'Test response value');
           case 13:
             createResult = _context3.sent;
             console.log('✅ Response created:', createResult.success);
@@ -40053,7 +40196,7 @@
       };
     };
     // @ts-ignore
-    POWERPOD.version = '4.2.2';
+    POWERPOD.version = '4.2.3';
     // @ts-ignore
     window.powerpod = POWERPOD;
   }

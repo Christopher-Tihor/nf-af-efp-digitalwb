@@ -809,6 +809,7 @@ export async function getWorkbookResponsesByWorkbookAndQuestion({
 export async function postWorkbookResponseData({
   workbookId,
   questionId,
+  chapterId,
   response,
   ...options
 }) {
@@ -824,8 +825,19 @@ export async function postWorkbookResponseData({
   logger.info({
     fn: postWorkbookResponseData,
     message: 'Creating workbook response',
-    data: { workbookId, questionId, response },
+    data: { workbookId, questionId, chapterId, response },
   });
+
+  const payload = {
+    quartech_response: response,
+    'quartech_Workbook@odata.bind': `/quartech_workbooks(${workbookId})`,
+    'quartech_Question@odata.bind': `/quartech_workbookquestions(${questionId})`,
+  };
+
+  // Add chapterId if provided
+  if (chapterId) {
+    payload['quartech_Chapter@odata.bind'] = `/quartech_chapters(${chapterId})`;
+  }
 
   return fetch({
     method: 'POST',
@@ -835,11 +847,7 @@ export async function postWorkbookResponseData({
     addRequestVerificationToken: true,
     processData: false,
     returnData: true,
-    data: JSON.stringify({
-      quartech_response: response,
-      'quartech_Workbook@odata.bind': `/quartech_workbooks(${workbookId})`,
-      'quartech_Question@odata.bind': `/quartech_workbookquestions(${questionId})`,
-    }),
+    data: JSON.stringify(payload),
     ...options,
   });
 }
@@ -847,6 +855,7 @@ export async function postWorkbookResponseData({
 export async function patchWorkbookResponseData({
   id,
   response = null,
+  chapterId = null,
   ...options
 }) {
   if (!id) {
@@ -860,12 +869,13 @@ export async function patchWorkbookResponseData({
 
   const updateData = {};
   if (response !== null) updateData.quartech_response = response;
+  if (chapterId !== null) updateData['quartech_Chapter@odata.bind'] = `/quartech_chapters(${chapterId})`;
 
   if (Object.keys(updateData).length === 0) {
     logger.warn({
       fn: patchWorkbookResponseData,
       message: 'No data to update',
-      data: { id, response },
+      data: { id, response, chapterId },
     });
     return Promise.resolve({ data: null });
   }

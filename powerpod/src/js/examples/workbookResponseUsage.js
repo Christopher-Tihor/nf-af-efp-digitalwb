@@ -122,11 +122,10 @@ export async function exampleCreateResponse(questionId = 'your-question-id-here'
   if (!workbookId) {
     throw new Error('No workbook ID available');
   }
-  
+
   try {
     // Using the helper
     const result = await WorkbookResponseHelper.createResponse(
-      workbookId,
       questionId,
       responseText,
     );
@@ -310,7 +309,6 @@ export async function exampleCompleteWorkflow(questionId = 'your-question-id-her
     // 2. Create a new response
     console.log('2. Creating new response...');
     const createResult = await WorkbookResponseHelper.createResponse(
-      workbookId,
       questionId,
       'Initial response text',
     );
@@ -376,8 +374,8 @@ export async function exampleBatchOperations(questions = [
     console.log('=== Batch Operations ===');
     
     // Create multiple responses
-    const createPromises = questions.map(q => 
-      WorkbookResponseHelper.createResponse(workbookId, q.id, q.response)
+    const createPromises = questions.map(q =>
+      WorkbookResponseHelper.createResponse(q.id, q.response)
     );
     
     const createResults = await Promise.all(createPromises);
