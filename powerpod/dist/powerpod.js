@@ -1,5 +1,5 @@
 /*!
-* powerpod 4.2.4
+* powerpod 4.2.5
 * https://github.com/bcgov/nr-af-pods/powerpod
 *
 * @license GPLv3 for open source use only
@@ -39505,10 +39505,22 @@
         <main class="main-content">
           <div class="card">
             <strong>${POWERPOD.workbookQuestionsAndResponses.isLoaded ? POWERPOD.workbookQuestionsAndResponses.stats.completionPercentage : this.completionPercent}% Complete</strong>
-            <sl-progress
-              .value=${POWERPOD.workbookQuestionsAndResponses.isLoaded ? POWERPOD.workbookQuestionsAndResponses.stats.completionPercentage : this.completionPercent}
-              max="100"
-            ></sl-progress>
+            <div style="
+              width: 100%;
+              height: 0.75rem;
+              background-color: #e5e7eb;
+              border-radius: 0.375rem;
+              margin-top: 0.5rem;
+              overflow: hidden;
+            ">
+              <div style="
+                height: 100%;
+                background-color: #3b82f6;
+                border-radius: 0.375rem;
+                transition: width 0.3s ease;
+                width: ${POWERPOD.workbookQuestionsAndResponses.isLoaded ? POWERPOD.workbookQuestionsAndResponses.stats.completionPercentage : this.completionPercent}%;
+              "></div>
+            </div>
           </div>
 
           <!-- Navigation buttons above content -->
@@ -40196,7 +40208,7 @@
       };
     };
     // @ts-ignore
-    POWERPOD.version = '4.2.4';
+    POWERPOD.version = '4.2.5';
     // @ts-ignore
     window.powerpod = POWERPOD;
   }
