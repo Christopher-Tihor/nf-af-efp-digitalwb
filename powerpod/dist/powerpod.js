@@ -1,5 +1,5 @@
 /*!
-* powerpod 4.2.3
+* powerpod 4.2.4
 * https://github.com/bcgov/nr-af-pods/powerpod
 *
 * @license GPLv3 for open source use only
@@ -39369,14 +39369,14 @@
         <h4>Questions & Responses Summary</h4>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
           <div>
-            <p><strong>Total Questions:</strong> ${stats.totalQuestions}</p>
-            <p><strong>Answered Questions:</strong> ${stats.answeredQuestions}</p>
-            <p><strong>Unanswered Questions:</strong> ${stats.unansweredQuestions}</p>
+            <p><strong>Total Questions:</strong> ${POWERPOD.workbookQuestionsAndResponses.stats.totalQuestions}</p>
+            <p><strong>Answered Questions:</strong> ${POWERPOD.workbookQuestionsAndResponses.stats.answeredQuestions}</p>
+            <p><strong>Unanswered Questions:</strong> ${POWERPOD.workbookQuestionsAndResponses.stats.unansweredQuestions}</p>
           </div>
           <div>
-            <p><strong>Completion:</strong> ${stats.completionPercentage}%</p>
-            <p><strong>Chapters:</strong> ${questionsAndResponses.questionsByChapter.size}</p>
-            <p><strong>Last Updated:</strong> ${questionsAndResponses.lastUpdated ? new Date(questionsAndResponses.lastUpdated).toLocaleString() : 'Unknown'}</p>
+            <p><strong>Completion:</strong> ${POWERPOD.workbookQuestionsAndResponses.stats.completionPercentage}%</p>
+            <p><strong>Chapters:</strong> ${POWERPOD.workbookQuestionsAndResponses.questionsByChapter.size}</p>
+            <p><strong>Last Updated:</strong> ${POWERPOD.workbookQuestionsAndResponses.lastUpdated ? new Date(POWERPOD.workbookQuestionsAndResponses.lastUpdated).toLocaleString() : 'Unknown'}</p>
           </div>
         </div>
 
@@ -39504,9 +39504,9 @@
         <!-- Main Content -->
         <main class="main-content">
           <div class="card">
-            <strong>${this.completionPercent}% Complete</strong>
+            <strong>${POWERPOD.workbookQuestionsAndResponses.isLoaded ? POWERPOD.workbookQuestionsAndResponses.stats.completionPercentage : this.completionPercent}% Complete</strong>
             <sl-progress
-              .value=${this.completionPercent}
+              .value=${POWERPOD.workbookQuestionsAndResponses.isLoaded ? POWERPOD.workbookQuestionsAndResponses.stats.completionPercentage : this.completionPercent}
               max="100"
             ></sl-progress>
           </div>
@@ -40196,7 +40196,7 @@
       };
     };
     // @ts-ignore
-    POWERPOD.version = '4.2.3';
+    POWERPOD.version = '4.2.4';
     // @ts-ignore
     window.powerpod = POWERPOD;
   }
