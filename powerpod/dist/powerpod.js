@@ -37045,7 +37045,7 @@
           const wasLoaded = this.questionnaireStoreLoaded;
           this.questionnaireStoreLoaded = isQuestionnaireLoaded();
           if (!wasLoaded && this.questionnaireStoreLoaded) {
-              console.log('📋 Questionnaire store loaded, updating navigation');
+              logger$4.info({ message: '📋 Questionnaire store loaded, updating navigation' });
               this.requestUpdate(); // Force re-render when store becomes available
           }
       }
@@ -37275,8 +37275,6 @@
                   // Get existing response value for this question
                   const existingResponse = this.getResponseForQuestion(question.id);
                   const selectedValue = (existingResponse === null || existingResponse === void 0 ? void 0 : existingResponse.quartech_response) || '';
-                  console.log(`🎯 Binding rating-changed event for question ${question.id} to handleRatingChanged method`);
-                  console.log(`📋 Existing response for question ${question.id}:`, selectedValue);
                   return x `
           <rating-question
             .questionId=${question.id}
@@ -37341,7 +37339,7 @@
           const questionnaire = getQuestionnaireFromStore();
           // If questionnaire store is not loaded, show loading state
           if (!((_a = questionnaire === null || questionnaire === void 0 ? void 0 : questionnaire.chapters) === null || _a === void 0 ? void 0 : _a.length)) {
-              console.log('📋 Questionnaire store not loaded, showing loading state');
+              logger$4.info({ message: '📋 Questionnaire store not loaded, showing loading state' });
               return [
                   {
                       label: 'Loading Environmental Farm Plan...',
@@ -37354,11 +37352,9 @@
                   }
               ];
           }
-          // console.log('📋 Generating Section B items directly from questionnaire store');
           const chapters = questionnaire.chapters[0] || [];
           const items = [];
           chapters.forEach((chapter) => {
-              console.log(`Processing chapter ${chapter.name}...`, chapter);
               // Create the main chapter container (collapsible parent)
               const chapterItem = {
                   label: EFPTextUtils.formatChapterTitle(chapter),
@@ -37414,15 +37410,12 @@
               }
               items.push(chapterItem);
           });
-          // console.log(`📋 Generated ${items.length} chapter items from questionnaire store`);
           return items;
       }
       // Get completion status from questionnaire store for navigation items
       getCompletionFromStore(item) {
-          // console.log(`getCompletionFromStore: Checking completion for item:`, item.label);
           if (!isQuestionnaireLoaded()) {
               // Fallback to item's current complete status
-              // console.log(`getCompletionFromStore: Store not loaded, using item.complete = ${item.complete}`);
               return item.complete || false;
           }
           try {
@@ -37430,29 +37423,25 @@
               if (item.chapterId) {
                   const chapter = getChapterFromStore(item.chapterId);
                   const storeComplete = (chapter === null || chapter === void 0 ? void 0 : chapter.complete) || false;
-                  // console.log(`getCompletionFromStore: Chapter ${item.chapterId} completion from store = ${storeComplete}`);
                   return storeComplete;
               }
               // Check if this is a question item
               if (item.questionId) {
                   const question = getQuestionFromStore(item.questionId);
                   const storeComplete = (question === null || question === void 0 ? void 0 : question.complete) || false;
-                  // console.log(`getCompletionFromStore: Question ${item.questionId} completion from store = ${storeComplete}`);
                   return storeComplete;
               }
               // For nested items (containers), check children completion
               if ('items' in item && Array.isArray(item.items)) {
                   // All child items must be complete for parent to be complete
                   const childrenComplete = item.items.every((child) => this.getCompletionFromStore(child));
-                  // console.log(`getCompletionFromStore: Container ${item.label} children completion = ${childrenComplete}`);
                   return childrenComplete;
               }
               // Fallback to item's current status
-              // console.log(`getCompletionFromStore: Using fallback item.complete = ${item.complete}`);
               return item.complete || false;
           }
           catch (error) {
-              console.warn('Failed to get completion from questionnaire store:', error);
+              logger$4.warn({ message: `Failed to get completion from questionnaire store: ${String(error)}` });
               return item.complete || false;
           }
       }
@@ -37486,7 +37475,7 @@
                   }
               }
               catch (error) {
-                  console.warn('Failed to get section completion from questionnaire store:', error);
+                  logger$4.warn({ message: `Failed to get section completion from questionnaire store: ${String(error)}` });
               }
           }
           // Fallback to existing logic
@@ -37537,7 +37526,7 @@
                   }
               }
               catch (error) {
-                  console.warn('Failed to get completion from questionnaire store, falling back');
+                  logger$4.warn({ message: 'Failed to get completion from questionnaire store, falling back' });
               }
           }
           // Use workbook responses completion if available, otherwise fall back to static completion
@@ -37577,11 +37566,9 @@
                       const currentSectionIndex = currentStep.sectionIndex;
                       // Check if this is cross-section navigation (going to next section)
                       if (nextStep.sectionIndex > currentSectionIndex) {
-                          console.log(`Cross-section navigation detected: going from section ${currentSectionIndex} to section ${nextStep.sectionIndex}`);
                           // Find the FIRST selectable step in the next section
                           const firstStepInNextSection = EFPNavigationUtils.findFirstSelectableStepInSection(nextStep.sectionIndex, this.flatSteps, this.sections);
                           if (firstStepInNextSection) {
-                              console.log(`Navigating to first step in section ${nextStep.sectionIndex}: "${firstStepInNextSection.step.label}"`);
                               // Set navigation flag to prevent tab change interference
                               this.isNavigating = true;
                               this.currentStepIndex = firstStepInNextSection.index;
@@ -37660,16 +37647,13 @@
       }
       // Question interaction event handler
       async handleRatingChanged(event) {
-          console.log('🎯 EFPEntryForm.handleRatingChanged called!', event.detail);
           const { questionId, value } = event.detail;
           try {
-              console.log(`🔄 Starting to save rating for question ${questionId}: ${value}`);
               logger$4.info({ message: `Rating changed for question ${questionId}: ${value}` });
               // Save the rating as a workbook response and get the response data
               const responseData = await this.saveRatingResponse(questionId, value);
               // Update the questionnaire store with the full response data
               updateQuestionResponse(questionId, value, true, responseData);
-              console.log(`✅ Successfully saved rating response for question ${questionId}`);
               logger$4.info({ message: `Successfully saved rating response for question ${questionId}` });
               // Also call the original handler for any additional processing
               EFPEventUtils.handleRatingChanged(event, (questionId, value) => {
@@ -37677,7 +37661,6 @@
               });
           }
           catch (error) {
-              console.error(`❌ Failed to save rating response for question ${questionId}:`, error);
               logger$4.error({ message: `Failed to save rating response: ${error.message}` });
               // Still call the original handler even if save fails
               EFPEventUtils.handleRatingChanged(event, (questionId, value) => {
@@ -37688,19 +37671,15 @@
       // Helper method to save rating responses
       async saveRatingResponse(questionId, ratingValue) {
           var _a;
-          console.log(`🚀 saveRatingResponse called for question ${questionId} with value ${ratingValue}`);
           try {
               const responseText = String(ratingValue);
               const notes = `Rating: ${ratingValue}`;
-              console.log(`📝 Prepared response text: "${responseText}", notes: "${notes}"`);
               // Check if response already exists
               const existingResponse = this.getResponseForQuestion(questionId);
-              console.log(`🔍 Existing response check:`, existingResponse ? 'Found existing response' : 'No existing response');
               let result;
               let responseData;
               if (existingResponse) {
                   // Update existing response
-                  console.log(`Updating existing rating response: ${existingResponse.quartech_workbookresponseid}`);
                   result = await WorkbookResponseHelper.updateResponse(existingResponse.quartech_workbookresponseid, responseText, { notes });
                   // Create updated response data
                   responseData = {
@@ -37709,11 +37688,9 @@
                       quartech_notes: notes,
                       modifiedon: new Date().toISOString()
                   };
-                  console.log('Rating response updated successfully');
               }
               else {
                   // Create new response
-                  console.log('Creating new rating response');
                   result = await WorkbookResponseHelper.createResponse(questionId, responseText, { notes });
                   const workbookId = getWorkbookId();
                   // Create new response data
@@ -37727,7 +37704,6 @@
                       modifiedon: new Date().toISOString(),
                       ...result.response
                   };
-                  console.log('New rating response created successfully');
               }
               // Update memory structures
               await this.updateMemoryStructuresForRating(questionId, responseData, !existingResponse);
@@ -37739,7 +37715,7 @@
               return responseData;
           }
           catch (error) {
-              console.error('Failed to save rating response:', error);
+              logger$4.error({ message: `Failed to save rating response: ${String(error)}` });
               throw error;
           }
       }
@@ -37764,10 +37740,9 @@
               // Update memory metadata for both structures
               POWERPOD.workbookResponses.lastUpdated = new Date().toISOString();
               POWERPOD.workbookQuestionsAndResponses.lastUpdated = new Date().toISOString();
-              console.log(`Updated memory structures for rating question ${questionId}`);
           }
           catch (error) {
-              console.error('Failed to update memory structures for rating:', error);
+              logger$4.error({ message: `Failed to update memory structures for rating: ${String(error)}` });
               // Don't throw - this is a memory update issue, not a save issue
           }
       }
@@ -37831,14 +37806,11 @@
                   const isContainer = EFPNavigationUtils.isStepContainer(prevStep, this.sections);
                   if (!isContainer) {
                       // Found a selectable previous step
-                      console.log(`Found previous selectable step: "${prevStep.label}" at index ${prevIndex}, section ${prevStep.sectionIndex}`);
                       // Check if this step is in a different section (cross-section navigation)
                       if (prevStep.sectionIndex < currentSectionIndex) {
-                          console.log(`Cross-section navigation detected: going from section ${currentSectionIndex} to section ${prevStep.sectionIndex}`);
                           // Find the LAST selectable step in the previous section
                           const lastStepInPrevSection = EFPNavigationUtils.findLastSelectableStepInSection(prevStep.sectionIndex, this.flatSteps, this.sections);
                           if (lastStepInPrevSection) {
-                              console.log(`Navigating to last step in section ${prevStep.sectionIndex}: "${lastStepInPrevSection.step.label}"`);
                               // Set navigation flag to prevent tab change interference
                               this.isNavigating = true;
                               this.currentStepIndex = lastStepInPrevSection.index;
@@ -37937,14 +37909,12 @@
       initializeToFirstSelectableStep() {
           // Only initialize if we have sections and steps available
           if (!this.sections || this.sections.length === 0 || !this.flatSteps || this.flatSteps.length === 0) {
-              console.log('Sections or steps not ready yet, skipping initialization');
               return;
           }
           // Find the first selectable step in the first section
           const firstSelectableStep = EFPNavigationUtils.findFirstSelectableStepInSection(0, // First section
           this.flatSteps, this.sections);
           if (firstSelectableStep) {
-              console.log('Initializing to first selectable step:', firstSelectableStep.step.label);
               this.currentStepIndex = firstSelectableStep.index;
               this.currentSectionIndex = 0;
               // Update active content
@@ -37954,10 +37924,6 @@
               };
               // Update navigation state
               this.updateNavigationState(firstSelectableStep.step.label);
-          }
-          else {
-              console.log('No selectable step found, keeping default initialization');
-              // Keep the default initialization (currentStepIndex = 0, currentSectionIndex = 0)
           }
       }
       handleBreadcrumbNavigation(event) {
@@ -37998,11 +37964,9 @@
           }
       }
       navigateToSection(sectionIndex) {
-          console.log('Breadcrumb: Navigating to section', sectionIndex);
           // Navigate to first selectable step in section using the navigation utility
           const firstSelectableStep = EFPNavigationUtils.findFirstSelectableStepInSection(sectionIndex, this.flatSteps, this.sections);
           if (firstSelectableStep) {
-              console.log('Breadcrumb: Found first selectable step:', firstSelectableStep.step.label);
               this.currentStepIndex = firstSelectableStep.index;
               this.currentSectionIndex = sectionIndex;
               // Update active content
@@ -38015,12 +37979,10 @@
               this.requestUpdate();
           }
           else {
-              console.log('Breadcrumb: No selectable step found, using fallback');
               // Fallback: navigate to first step in section even if it's a container
               const firstStepInSection = this.flatSteps.find(step => step.sectionIndex === sectionIndex);
               if (firstStepInSection) {
                   const stepIndex = this.flatSteps.indexOf(firstStepInSection);
-                  console.log('Breadcrumb: Fallback to step:', firstStepInSection.label, 'at index:', stepIndex);
                   this.currentStepIndex = stepIndex;
                   this.currentSectionIndex = sectionIndex;
                   this.activeContent = {
@@ -38062,7 +38024,6 @@
           }
           // Re-render rating questions when workbook responses are loaded/updated
           if (changedProps.has('workbookResponses')) {
-              console.log('📋 Workbook responses updated, rating questions will re-render with selected values');
               // Update completion and navigation icons when responses change
               this.updateCompletionAndNavigation();
           }
@@ -38089,17 +38050,16 @@
               POWERPOD.workbookQuestionsAndResponses.error = null;
               const workbookId = getWorkbookId();
               if (!workbookId) {
-                  console.warn('No workbook ID found, skipping response loading');
+                  logger$4.warn({ message: 'No workbook ID found, skipping response loading' });
                   return;
               }
               // Check if we already have questions and responses for this workbook
               if (POWERPOD.workbookQuestionsAndResponses.isLoaded &&
                   POWERPOD.workbookQuestionsAndResponses.workbookId === workbookId) {
-                  console.log('Workbook questions and responses already loaded from memory');
                   this.syncFromPOWERPOD();
                   return;
               }
-              console.log(`Loading workbook questions and responses for workbook: ${workbookId}`);
+              logger$4.info({ message: `Loading workbook questions and responses for workbook: ${workbookId}` });
               // Load questions and responses into nested structure
               const result = await WorkbookResponseHelper.loadQuestionsAndResponses(workbookId);
               // Also maintain backward compatibility with old structure
@@ -38122,24 +38082,14 @@
               });
               // Sync to local component state for UI binding
               this.syncFromPOWERPOD();
-              console.log(`Loaded ${result.stats.totalQuestions} questions with ${result.stats.answeredQuestions} responses (${result.stats.completionPercentage}% complete)`);
-              console.log('Questions and responses structure:', {
-                  totalQuestions: result.stats.totalQuestions,
-                  answeredQuestions: result.stats.answeredQuestions,
-                  completionPercentage: result.stats.completionPercentage,
-                  chapterCount: result.questionsByChapter.size
-              });
-              // Debug: Log some sample data
-              if (result.questionsWithResponses.size > 0) {
-                  const sampleEntries = Array.from(result.questionsWithResponses.entries()).slice(0, 3);
-                  console.log('Sample question/response entries:', sampleEntries);
-              }
+              logger$4.info({ message: `Loaded ${result.stats.totalQuestions} questions with ${result.stats.answeredQuestions} responses (${result.stats.completionPercentage}% complete)` });
               // Trigger a re-render to update the UI with loaded data
               this.requestUpdate();
           }
           catch (error) {
-              console.error('Failed to load workbook questions and responses:', error);
-              POWERPOD.workbookQuestionsAndResponses.error = error.message || 'Failed to load questions and responses';
+              logger$4.error({ message: 'Failed to load workbook questions and responses' });
+              const errMsg = (error === null || error === void 0 ? void 0 : error.message) || 'Failed to load questions and responses';
+              POWERPOD.workbookQuestionsAndResponses.error = errMsg;
               // Don't throw - we want the component to still work even if loading fails
           }
           finally {
@@ -38155,46 +38105,41 @@
       }
       // Update completion tracking and navigation icons based on current responses
       updateCompletionAndNavigation() {
-          console.log('🔄 Updating completion and navigation icons...');
           // Update section completion status based on workbook responses
           this.updateSectionCompletionStatus();
           // Trigger re-render to update progress bar and navigation icons
           this.requestUpdate();
           // Log current completion status
           const completionPercent = this.completionPercent;
-          console.log(`📊 Overall completion: ${completionPercent}%`);
+          logger$4.info({ message: `📊 Overall completion: ${completionPercent}%` });
           if (POWERPOD.workbookQuestionsAndResponses.isLoaded) {
-              const stats = POWERPOD.workbookQuestionsAndResponses.stats;
-              console.log(`📈 Workbook stats: ${stats.answeredQuestions}/${stats.totalQuestions} questions answered`);
+              POWERPOD.workbookQuestionsAndResponses.stats;
           }
       }
       // Update section completion status using questionnaire store
       updateSectionCompletionStatus() {
           // Try to use questionnaire store first (preferred method)
           if (isQuestionnaireLoaded()) {
-              console.log('🔍 Updating completion using questionnaire store');
               try {
                   // Import the completion function dynamically to avoid circular imports
                   Promise.resolve().then(function () { return questionnaire; }).then(({ updateQuestionnaireCompletion }) => {
                       updateQuestionnaireCompletion();
                       this.updateSectionItemsFromQuestionnaireStore();
-                      console.log('✅ Updated completion using questionnaire store');
+                      logger$4.info({ message: '✅ Updated completion using questionnaire store' });
                   });
                   return;
               }
               catch (error) {
-                  console.warn('⚠️ Failed to use questionnaire store for completion, falling back to legacy method');
+                  logger$4.warn({ message: '⚠️ Failed to use questionnaire store for completion, falling back to legacy method' });
               }
           }
           // Fallback to legacy method if questionnaire store is not available
           if (!POWERPOD.workbookQuestionsAndResponses.isLoaded) {
-              console.log('⚠️ Neither questionnaire store nor workbook responses loaded, skipping completion update');
+              logger$4.warn({ message: '⚠️ Neither questionnaire store nor workbook responses loaded, skipping completion update' });
               return;
           }
-          console.log('🔄 Using legacy completion method');
           const questionsWithResponses = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses;
-          const questionsByChapter = POWERPOD.workbookQuestionsAndResponses.questionsByChapter;
-          console.log(`🔍 Updating completion for ${questionsByChapter.size} chapters`);
+          POWERPOD.workbookQuestionsAndResponses.questionsByChapter;
           // Update section completion based on chapter completion
           this.sections.forEach(section => {
               this.updateSectionItemsCompletion(section.items, questionsWithResponses);
@@ -38202,7 +38147,6 @@
       }
       // Update section items using questionnaire store data
       updateSectionItemsFromQuestionnaireStore() {
-          console.log('🔄 Updating section items from questionnaire store');
           this.sections.forEach(section => {
               if (section.tab === 'Section B') {
                   // Update Section B items using questionnaire store
@@ -38263,16 +38207,13 @@
                   const childItems = this.getAllLeafItems(item.items);
                   const completedChildren = childItems.filter(child => child.complete).length;
                   item.complete = completedChildren === childItems.length && childItems.length > 0;
-                  console.log(`📁 Section "${item.label}": ${completedChildren}/${childItems.length} items complete`);
               }
               else if (item.questionId) {
                   // This is a question item - check if it has a response
                   const questionResponse = questionsWithResponses.get(item.questionId);
                   const wasComplete = item.complete;
                   item.complete = questionResponse && questionResponse.response !== null;
-                  if (wasComplete !== item.complete) {
-                      console.log(`${item.complete ? '✅' : '❌'} Question "${item.label}" completion changed: ${wasComplete} → ${item.complete}`);
-                  }
+                  if (wasComplete !== item.complete) ;
               }
           });
       }

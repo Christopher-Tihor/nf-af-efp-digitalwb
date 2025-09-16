@@ -612,7 +612,7 @@ export class EFPEntryForm extends LitElement {
     this.questionnaireStoreLoaded = isQuestionnaireLoaded();
 
     if (!wasLoaded && this.questionnaireStoreLoaded) {
-      console.log('📋 Questionnaire store loaded, updating navigation');
+      logger.info({ message: '📋 Questionnaire store loaded, updating navigation' });
       this.requestUpdate(); // Force re-render when store becomes available
     }
   }
@@ -1168,8 +1168,8 @@ export class EFPEntryForm extends LitElement {
         const existingResponse = this.getResponseForQuestion(question.id);
         const selectedValue = existingResponse?.quartech_response || '';
 
-        console.log(`🎯 Binding rating-changed event for question ${question.id} to handleRatingChanged method`);
-        console.log(`📋 Existing response for question ${question.id}:`, selectedValue);
+
+
 
         return html`
           <rating-question
@@ -1256,7 +1256,7 @@ export class EFPEntryForm extends LitElement {
 
     // If questionnaire store is not loaded, show loading state
     if (!questionnaire?.chapters?.length) {
-      console.log('📋 Questionnaire store not loaded, showing loading state');
+      logger.info({ message: '📋 Questionnaire store not loaded, showing loading state' });
       return [
         {
           label: 'Loading Environmental Farm Plan...',
@@ -1270,13 +1270,13 @@ export class EFPEntryForm extends LitElement {
       ];
     }
 
-    // console.log('📋 Generating Section B items directly from questionnaire store');
+
 
     const chapters = questionnaire.chapters[0] || [];
     const items: EFPSectionItem[] = [];
 
     chapters.forEach((chapter: any) => {
-      console.log(`Processing chapter ${chapter.name}...`, chapter);
+
 
       // Create the main chapter container (collapsible parent)
       const chapterItem: EFPSectionItem = {
@@ -1339,17 +1339,17 @@ export class EFPEntryForm extends LitElement {
       items.push(chapterItem);
     });
 
-    // console.log(`📋 Generated ${items.length} chapter items from questionnaire store`);
+
     return items;
   }
 
   // Get completion status from questionnaire store for navigation items
   private getCompletionFromStore(item: any): boolean {
-    // console.log(`getCompletionFromStore: Checking completion for item:`, item.label);
+
 
     if (!isQuestionnaireLoaded()) {
       // Fallback to item's current complete status
-      // console.log(`getCompletionFromStore: Store not loaded, using item.complete = ${item.complete}`);
+
       return item.complete || false;
     }
 
@@ -1358,7 +1358,7 @@ export class EFPEntryForm extends LitElement {
       if (item.chapterId) {
         const chapter = getChapterFromStore(item.chapterId);
         const storeComplete = chapter?.complete || false;
-        // console.log(`getCompletionFromStore: Chapter ${item.chapterId} completion from store = ${storeComplete}`);
+
         return storeComplete;
       }
 
@@ -1366,7 +1366,7 @@ export class EFPEntryForm extends LitElement {
       if (item.questionId) {
         const question = getQuestionFromStore(item.questionId);
         const storeComplete = question?.complete || false;
-        // console.log(`getCompletionFromStore: Question ${item.questionId} completion from store = ${storeComplete}`);
+
         return storeComplete;
       }
 
@@ -1374,16 +1374,16 @@ export class EFPEntryForm extends LitElement {
       if ('items' in item && Array.isArray(item.items)) {
         // All child items must be complete for parent to be complete
         const childrenComplete = item.items.every((child: any) => this.getCompletionFromStore(child));
-        // console.log(`getCompletionFromStore: Container ${item.label} children completion = ${childrenComplete}`);
+
         return childrenComplete;
       }
 
       // Fallback to item's current status
-      // console.log(`getCompletionFromStore: Using fallback item.complete = ${item.complete}`);
+
       return item.complete || false;
 
     } catch (error) {
-      console.warn('Failed to get completion from questionnaire store:', error);
+      logger.warn({ message: `Failed to get completion from questionnaire store: ${String(error)}` });
       return item.complete || false;
     }
   }
@@ -1420,7 +1420,7 @@ export class EFPEntryForm extends LitElement {
           return totalQuestions > 0 && answeredQuestions === totalQuestions;
         }
       } catch (error) {
-        console.warn('Failed to get section completion from questionnaire store:', error);
+        logger.warn({ message: `Failed to get section completion from questionnaire store: ${String(error)}` });
       }
     }
 
@@ -1479,7 +1479,7 @@ export class EFPEntryForm extends LitElement {
           return totalQuestions > 0 ? Math.round((answeredQuestions / totalQuestions) * 100) : 0;
         }
       } catch (error) {
-        console.warn('Failed to get completion from questionnaire store, falling back');
+        logger.warn({ message: 'Failed to get completion from questionnaire store, falling back' });
       }
     }
 
@@ -1526,12 +1526,12 @@ export class EFPEntryForm extends LitElement {
 
           // Check if this is cross-section navigation (going to next section)
           if (nextStep.sectionIndex > currentSectionIndex) {
-            console.log(`Cross-section navigation detected: going from section ${currentSectionIndex} to section ${nextStep.sectionIndex}`);
+
 
             // Find the FIRST selectable step in the next section
             const firstStepInNextSection = EFPNavigationUtils.findFirstSelectableStepInSection(nextStep.sectionIndex, this.flatSteps, this.sections);
             if (firstStepInNextSection) {
-              console.log(`Navigating to first step in section ${nextStep.sectionIndex}: "${firstStepInNextSection.step.label}"`);
+
 
               // Set navigation flag to prevent tab change interference
               this.isNavigating = true;
@@ -1639,11 +1639,11 @@ export class EFPEntryForm extends LitElement {
 
   // Question interaction event handler
   private async handleRatingChanged(event: CustomEvent) {
-    console.log('🎯 EFPEntryForm.handleRatingChanged called!', event.detail);
+
     const { questionId, value } = event.detail;
 
     try {
-      console.log(`🔄 Starting to save rating for question ${questionId}: ${value}`);
+
       logger.info({ message: `Rating changed for question ${questionId}: ${value}` });
 
       // Save the rating as a workbook response and get the response data
@@ -1652,7 +1652,7 @@ export class EFPEntryForm extends LitElement {
       // Update the questionnaire store with the full response data
       updateQuestionResponse(questionId, value, true, responseData);
 
-      console.log(`✅ Successfully saved rating response for question ${questionId}`);
+
       logger.info({ message: `Successfully saved rating response for question ${questionId}` });
 
       // Also call the original handler for any additional processing
@@ -1664,7 +1664,7 @@ export class EFPEntryForm extends LitElement {
       );
 
     } catch (error) {
-      console.error(`❌ Failed to save rating response for question ${questionId}:`, error);
+
       logger.error({ message: `Failed to save rating response: ${(error as Error).message}` });
 
       // Still call the original handler even if save fails
@@ -1679,23 +1679,23 @@ export class EFPEntryForm extends LitElement {
 
   // Helper method to save rating responses
   private async saveRatingResponse(questionId: string, ratingValue: any): Promise<any> {
-    console.log(`🚀 saveRatingResponse called for question ${questionId} with value ${ratingValue}`);
+
     try {
       const responseText = String(ratingValue);
       const notes = `Rating: ${ratingValue}`;
 
-      console.log(`📝 Prepared response text: "${responseText}", notes: "${notes}"`);
+
 
       // Check if response already exists
       const existingResponse = this.getResponseForQuestion(questionId);
-      console.log(`🔍 Existing response check:`, existingResponse ? 'Found existing response' : 'No existing response');
+
 
       let result;
       let responseData;
 
       if (existingResponse) {
         // Update existing response
-        console.log(`Updating existing rating response: ${existingResponse.quartech_workbookresponseid}`);
+
         result = await WorkbookResponseHelper.updateResponse(
           existingResponse.quartech_workbookresponseid,
           responseText,
@@ -1710,11 +1710,11 @@ export class EFPEntryForm extends LitElement {
           modifiedon: new Date().toISOString()
         };
 
-        console.log('Rating response updated successfully');
+
 
       } else {
         // Create new response
-        console.log('Creating new rating response');
+
         result = await WorkbookResponseHelper.createResponse(questionId, responseText, { notes });
 
         const workbookId = getWorkbookId();
@@ -1731,7 +1731,7 @@ export class EFPEntryForm extends LitElement {
           ...result.response
         };
 
-        console.log('New rating response created successfully');
+
       }
 
       // Update memory structures
@@ -1747,7 +1747,7 @@ export class EFPEntryForm extends LitElement {
       return responseData;
 
     } catch (error) {
-      console.error('Failed to save rating response:', error);
+      logger.error({ message: `Failed to save rating response: ${String(error)}` });
       throw error;
     }
   }
@@ -1778,10 +1778,10 @@ export class EFPEntryForm extends LitElement {
       POWERPOD.workbookResponses.lastUpdated = new Date().toISOString();
       POWERPOD.workbookQuestionsAndResponses.lastUpdated = new Date().toISOString();
 
-      console.log(`Updated memory structures for rating question ${questionId}`);
+
 
     } catch (error) {
-      console.error('Failed to update memory structures for rating:', error);
+      logger.error({ message: `Failed to update memory structures for rating: ${String(error)}` });
       // Don't throw - this is a memory update issue, not a save issue
     }
   }
@@ -1858,16 +1858,16 @@ export class EFPEntryForm extends LitElement {
 
         if (!isContainer) {
           // Found a selectable previous step
-          console.log(`Found previous selectable step: "${prevStep.label}" at index ${prevIndex}, section ${prevStep.sectionIndex}`);
+
 
           // Check if this step is in a different section (cross-section navigation)
           if (prevStep.sectionIndex < currentSectionIndex) {
-            console.log(`Cross-section navigation detected: going from section ${currentSectionIndex} to section ${prevStep.sectionIndex}`);
+
 
             // Find the LAST selectable step in the previous section
             const lastStepInPrevSection = EFPNavigationUtils.findLastSelectableStepInSection(prevStep.sectionIndex, this.flatSteps, this.sections);
             if (lastStepInPrevSection) {
-              console.log(`Navigating to last step in section ${prevStep.sectionIndex}: "${lastStepInPrevSection.step.label}"`);
+
 
               // Set navigation flag to prevent tab change interference
               this.isNavigating = true;
@@ -1987,7 +1987,7 @@ export class EFPEntryForm extends LitElement {
   private initializeToFirstSelectableStep() {
     // Only initialize if we have sections and steps available
     if (!this.sections || this.sections.length === 0 || !this.flatSteps || this.flatSteps.length === 0) {
-      console.log('Sections or steps not ready yet, skipping initialization');
+
       return;
     }
 
@@ -1999,7 +1999,7 @@ export class EFPEntryForm extends LitElement {
     );
 
     if (firstSelectableStep) {
-      console.log('Initializing to first selectable step:', firstSelectableStep.step.label);
+
       this.currentStepIndex = firstSelectableStep.index;
       this.currentSectionIndex = 0;
 
@@ -2012,7 +2012,7 @@ export class EFPEntryForm extends LitElement {
       // Update navigation state
       this.updateNavigationState(firstSelectableStep.step.label);
     } else {
-      console.log('No selectable step found, keeping default initialization');
+
       // Keep the default initialization (currentStepIndex = 0, currentSectionIndex = 0)
     }
   }
@@ -2065,7 +2065,7 @@ export class EFPEntryForm extends LitElement {
   }
 
   private navigateToSection(sectionIndex: number) {
-    console.log('Breadcrumb: Navigating to section', sectionIndex);
+
 
     // Navigate to first selectable step in section using the navigation utility
     const firstSelectableStep = EFPNavigationUtils.findFirstSelectableStepInSection(
@@ -2075,7 +2075,7 @@ export class EFPEntryForm extends LitElement {
     );
 
     if (firstSelectableStep) {
-      console.log('Breadcrumb: Found first selectable step:', firstSelectableStep.step.label);
+
       this.currentStepIndex = firstSelectableStep.index;
       this.currentSectionIndex = sectionIndex;
 
@@ -2089,12 +2089,12 @@ export class EFPEntryForm extends LitElement {
       this.updateNavigationState(firstSelectableStep.step.label);
       this.requestUpdate();
     } else {
-      console.log('Breadcrumb: No selectable step found, using fallback');
+
       // Fallback: navigate to first step in section even if it's a container
       const firstStepInSection = this.flatSteps.find(step => step.sectionIndex === sectionIndex);
       if (firstStepInSection) {
         const stepIndex = this.flatSteps.indexOf(firstStepInSection);
-        console.log('Breadcrumb: Fallback to step:', firstStepInSection.label, 'at index:', stepIndex);
+
         this.currentStepIndex = stepIndex;
         this.currentSectionIndex = sectionIndex;
         this.activeContent = {
@@ -2159,7 +2159,7 @@ export class EFPEntryForm extends LitElement {
 
     // Re-render rating questions when workbook responses are loaded/updated
     if (changedProps.has('workbookResponses')) {
-      console.log('📋 Workbook responses updated, rating questions will re-render with selected values');
+
       // Update completion and navigation icons when responses change
       this.updateCompletionAndNavigation();
     }
@@ -2196,19 +2196,19 @@ export class EFPEntryForm extends LitElement {
 
       const workbookId = getWorkbookId();
       if (!workbookId) {
-        console.warn('No workbook ID found, skipping response loading');
+        logger.warn({ message: 'No workbook ID found, skipping response loading' });
         return;
       }
 
       // Check if we already have questions and responses for this workbook
       if (POWERPOD.workbookQuestionsAndResponses.isLoaded &&
           POWERPOD.workbookQuestionsAndResponses.workbookId === workbookId) {
-        console.log('Workbook questions and responses already loaded from memory');
+
         this.syncFromPOWERPOD();
         return;
       }
 
-      console.log(`Loading workbook questions and responses for workbook: ${workbookId}`);
+      logger.info({ message: `Loading workbook questions and responses for workbook: ${workbookId}` });
 
       // Load questions and responses into nested structure
       const result = await WorkbookResponseHelper.loadQuestionsAndResponses(workbookId);
@@ -2237,26 +2237,18 @@ export class EFPEntryForm extends LitElement {
       // Sync to local component state for UI binding
       this.syncFromPOWERPOD();
 
-      console.log(`Loaded ${result.stats.totalQuestions} questions with ${result.stats.answeredQuestions} responses (${result.stats.completionPercentage}% complete)`);
-      console.log('Questions and responses structure:', {
-        totalQuestions: result.stats.totalQuestions,
-        answeredQuestions: result.stats.answeredQuestions,
-        completionPercentage: result.stats.completionPercentage,
-        chapterCount: result.questionsByChapter.size
-      });
+      logger.info({ message: `Loaded ${result.stats.totalQuestions} questions with ${result.stats.answeredQuestions} responses (${result.stats.completionPercentage}% complete)` });
 
-      // Debug: Log some sample data
-      if (result.questionsWithResponses.size > 0) {
-        const sampleEntries = Array.from(result.questionsWithResponses.entries()).slice(0, 3);
-        console.log('Sample question/response entries:', sampleEntries);
-      }
+
+
 
       // Trigger a re-render to update the UI with loaded data
       this.requestUpdate();
 
     } catch (error) {
-      console.error('Failed to load workbook questions and responses:', error);
-      POWERPOD.workbookQuestionsAndResponses.error = error.message || 'Failed to load questions and responses';
+      logger.error({ message: 'Failed to load workbook questions and responses' });
+      const errMsg = (error as any)?.message || 'Failed to load questions and responses';
+      POWERPOD.workbookQuestionsAndResponses.error = errMsg;
       // Don't throw - we want the component to still work even if loading fails
     } finally {
       this.isLoadingResponses = false;
@@ -2274,7 +2266,7 @@ export class EFPEntryForm extends LitElement {
 
   // Update completion tracking and navigation icons based on current responses
   private updateCompletionAndNavigation() {
-    console.log('🔄 Updating completion and navigation icons...');
+
 
     // Update section completion status based on workbook responses
     this.updateSectionCompletionStatus();
@@ -2284,11 +2276,11 @@ export class EFPEntryForm extends LitElement {
 
     // Log current completion status
     const completionPercent = this.completionPercent;
-    console.log(`📊 Overall completion: ${completionPercent}%`);
+    logger.info({ message: `📊 Overall completion: ${completionPercent}%` });
 
     if (POWERPOD.workbookQuestionsAndResponses.isLoaded) {
       const stats = POWERPOD.workbookQuestionsAndResponses.stats;
-      console.log(`📈 Workbook stats: ${stats.answeredQuestions}/${stats.totalQuestions} questions answered`);
+
     }
   }
 
@@ -2296,31 +2288,31 @@ export class EFPEntryForm extends LitElement {
   private updateSectionCompletionStatus() {
     // Try to use questionnaire store first (preferred method)
     if (isQuestionnaireLoaded()) {
-      console.log('🔍 Updating completion using questionnaire store');
+
       try {
         // Import the completion function dynamically to avoid circular imports
         import('../common/questionnaire.js').then(({ updateQuestionnaireCompletion }) => {
           updateQuestionnaireCompletion();
           this.updateSectionItemsFromQuestionnaireStore();
-          console.log('✅ Updated completion using questionnaire store');
+          logger.info({ message: '✅ Updated completion using questionnaire store' });
         });
         return;
       } catch (error) {
-        console.warn('⚠️ Failed to use questionnaire store for completion, falling back to legacy method');
+        logger.warn({ message: '⚠️ Failed to use questionnaire store for completion, falling back to legacy method' });
       }
     }
 
     // Fallback to legacy method if questionnaire store is not available
     if (!POWERPOD.workbookQuestionsAndResponses.isLoaded) {
-      console.log('⚠️ Neither questionnaire store nor workbook responses loaded, skipping completion update');
+      logger.warn({ message: '⚠️ Neither questionnaire store nor workbook responses loaded, skipping completion update' });
       return;
     }
 
-    console.log('🔄 Using legacy completion method');
+
     const questionsWithResponses = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses;
     const questionsByChapter = POWERPOD.workbookQuestionsAndResponses.questionsByChapter;
 
-    console.log(`🔍 Updating completion for ${questionsByChapter.size} chapters`);
+
 
     // Update section completion based on chapter completion
     this.sections.forEach(section => {
@@ -2330,7 +2322,7 @@ export class EFPEntryForm extends LitElement {
 
   // Update section items using questionnaire store data
   private updateSectionItemsFromQuestionnaireStore() {
-    console.log('🔄 Updating section items from questionnaire store');
+
 
     this.sections.forEach(section => {
       if (section.tab === 'Section B') {
@@ -2396,7 +2388,7 @@ export class EFPEntryForm extends LitElement {
         const completedChildren = childItems.filter(child => child.complete).length;
         item.complete = completedChildren === childItems.length && childItems.length > 0;
 
-        console.log(`📁 Section "${item.label}": ${completedChildren}/${childItems.length} items complete`);
+
 
       } else if (item.questionId) {
         // This is a question item - check if it has a response
@@ -2405,7 +2397,7 @@ export class EFPEntryForm extends LitElement {
         item.complete = questionResponse && questionResponse.response !== null;
 
         if (wasComplete !== item.complete) {
-          console.log(`${item.complete ? '✅' : '❌'} Question "${item.label}" completion changed: ${wasComplete} → ${item.complete}`);
+
         }
       }
     });
