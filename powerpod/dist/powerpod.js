@@ -36896,6 +36896,103 @@
       }
   }
 
+  class EFPRenderUtils {
+      static renderMainContent(currentSectionIndex, flatSteps, currentStepIndex, activeContent, html, unsafeHTML, renderSubchapter, renderChapter) {
+          // Check if we're in Section B and have a chapter to render
+          if (currentSectionIndex === 1) {
+              // Section B is index 1
+              const currentStep = flatSteps[currentStepIndex];
+              // Check if it's a container item (should not be selectable)
+              if (currentStep && 'isContainer' in currentStep && currentStep.isContainer) {
+                  return html `
+          <div class="container-message">
+            <h3>Please select a specific chapter section from the navigation</h3>
+            <p>This is a chapter container. Click on one of the specific sections in the navigation to view its content.</p>
+          </div>
+        `;
+              }
+              // Check if it's a subchapter
+              else if (currentStep && 'subchapterData' in currentStep) {
+                  return renderSubchapter(currentStep.subchapterData);
+              }
+              // Check if it's a main chapter
+              else if (currentStep && 'chapterData' in currentStep) {
+                  return renderChapter(currentStep.chapterData);
+              }
+          }
+          // Default content rendering
+          return html `<div>${unsafeHTML(activeContent.content)}</div>`;
+      }
+      static renderItems(items, html, activeContentTitle, onItemClick, renderItems, getCompletion) {
+          return items.map((item) => {
+              const isComplete = getCompletion ? getCompletion(item) : (item.complete || false);
+              const iconName = isComplete ? 'check-circle' : 'pencil';
+              const iconColor = isComplete ? 'var(--sl-color-success-600)' : 'var(--sl-color-warning-600)';
+              // Determine item capabilities based on content
+              const hasContent = item.content && item.content.trim() !== '';
+              const hasSubitems = 'items' in item && Array.isArray(item.items) && item.items.length > 0;
+              if (hasContent && hasSubitems) {
+                  // BOTH clickable AND expandable - render in one line with sl-details
+                  return html `
+          <sl-details data-container-title="${item.title || item.label}">
+            <div
+              slot="summary"
+              style="display: flex; align-items: center; gap: 8px; cursor: pointer; ${activeContentTitle === item.label
+                    ? 'font-weight: 600; background-color: var(--sl-color-primary-50); color: var(--sl-color-primary-800);'
+                    : 'font-weight: 500;'}"
+              @click=${(e) => {
+                    // Prevent expansion when clicking the title for navigation
+                    e.stopPropagation();
+                    onItemClick(item);
+                }}
+            >
+              <sl-icon
+                name=${iconName}
+                style="color: ${iconColor}"
+              ></sl-icon>
+              <span>${item.title || item.label}</span>
+            </div>
+            ${EFPRenderUtils.renderItems(item.items || [], html, activeContentTitle, onItemClick, renderItems, getCompletion)}
+          </sl-details>
+        `;
+              }
+              else if (hasSubitems) {
+                  // Only expandable - pure container
+                  return html `
+          <sl-details data-container-title="${item.title || item.label}">
+            <div slot="summary" style="display: flex; align-items: center; gap: 8px;">
+              <sl-icon
+                name=${iconName}
+                style="color: ${iconColor}"
+              ></sl-icon>
+              <span>${item.title || item.label}</span>
+            </div>
+            ${EFPRenderUtils.renderItems(item.items || [], html, activeContentTitle, onItemClick, renderItems, getCompletion)}
+          </sl-details>
+        `;
+              }
+              else {
+                  // Only clickable - simple item
+                  return html `
+          <div
+            class="nav-subchapter-title"
+            style=${activeContentTitle === item.label
+                    ? 'font-weight: 600; background-color: var(--sl-color-primary-50); color: var(--sl-color-primary-800);'
+                    : 'font-weight: 500;'}
+            @click=${() => onItemClick(item)}
+          >
+            <sl-icon
+              name=${iconName}
+              style="color: ${iconColor}"
+            ></sl-icon>
+            ${item.label}
+          </div>
+        `;
+              }
+          });
+      }
+  }
+
   const efpEntryFormStyles = i$4 `
   @import url('https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@400;500;600;700&display=swap');
   @import url('https://cdn.jsdelivr.net/npm/@bcgov/bc-sans@2.0.0/css/BCSans.css');
@@ -37215,102 +37312,6 @@
 
   // Create logger instance for EFP components
   const logger$4 = Logger('components/EFPEntryForm');
-  // Utility class for rendering helpers
-  class EFPRenderUtils {
-      static renderMainContent(currentSectionIndex, flatSteps, currentStepIndex, activeContent, html, unsafeHTML, renderSubchapter, renderChapter) {
-          // Check if we're in Section B and have a chapter to render
-          if (currentSectionIndex === 1) { // Section B is index 1
-              const currentStep = flatSteps[currentStepIndex];
-              // Check if it's a container item (should not be selectable)
-              if (currentStep && 'isContainer' in currentStep && currentStep.isContainer) {
-                  return html `
-          <div class="container-message">
-            <h3>Please select a specific chapter section from the navigation</h3>
-            <p>This is a chapter container. Click on one of the specific sections in the navigation to view its content.</p>
-          </div>
-        `;
-              }
-              // Check if it's a subchapter
-              else if (currentStep && 'subchapterData' in currentStep) {
-                  return renderSubchapter(currentStep.subchapterData);
-              }
-              // Check if it's a main chapter
-              else if (currentStep && 'chapterData' in currentStep) {
-                  return renderChapter(currentStep.chapterData);
-              }
-          }
-          // Default content rendering
-          return html `<div>${unsafeHTML(activeContent.content)}</div>`;
-      }
-      static renderItems(items, html, activeContentTitle, onItemClick, renderItems, getCompletion) {
-          return items.map((item) => {
-              const isComplete = getCompletion ? getCompletion(item) : (item.complete || false);
-              const iconName = isComplete ? 'check-circle' : 'pencil';
-              const iconColor = isComplete ? 'var(--sl-color-success-600)' : 'var(--sl-color-warning-600)';
-              // Determine item capabilities based on content
-              const hasContent = item.content && item.content.trim() !== '';
-              const hasSubitems = 'items' in item && Array.isArray(item.items) && item.items.length > 0;
-              if (hasContent && hasSubitems) {
-                  // BOTH clickable AND expandable - render in one line with sl-details
-                  return html `
-          <sl-details data-container-title="${item.title || item.label}">
-            <div
-              slot="summary"
-              style="display: flex; align-items: center; gap: 8px; cursor: pointer; ${activeContentTitle === item.label
-                    ? 'font-weight: 600; background-color: var(--sl-color-primary-50); color: var(--sl-color-primary-800);'
-                    : 'font-weight: 500;'}"
-              @click=${(e) => {
-                    // Prevent expansion when clicking the title for navigation
-                    e.stopPropagation();
-                    onItemClick(item);
-                }}
-            >
-              <sl-icon
-                name=${iconName}
-                style="color: ${iconColor}"
-              ></sl-icon>
-              <span>${item.title || item.label}</span>
-            </div>
-            ${EFPRenderUtils.renderItems(item.items || [], html, activeContentTitle, onItemClick, renderItems, getCompletion)}
-          </sl-details>
-        `;
-              }
-              else if (hasSubitems) {
-                  // Only expandable - pure container
-                  return html `
-          <sl-details data-container-title="${item.title || item.label}">
-            <div slot="summary" style="display: flex; align-items: center; gap: 8px;">
-              <sl-icon
-                name=${iconName}
-                style="color: ${iconColor}"
-              ></sl-icon>
-              <span>${item.title || item.label}</span>
-            </div>
-            ${EFPRenderUtils.renderItems(item.items || [], html, activeContentTitle, onItemClick, renderItems, getCompletion)}
-          </sl-details>
-        `;
-              }
-              else {
-                  // Only clickable - simple item
-                  return html `
-          <div
-            class="nav-subchapter-title"
-            style=${activeContentTitle === item.label
-                    ? 'font-weight: 600; background-color: var(--sl-color-primary-50); color: var(--sl-color-primary-800);'
-                    : 'font-weight: 500;'}
-            @click=${() => onItemClick(item)}
-          >
-            <sl-icon
-              name=${iconName}
-              style="color: ${iconColor}"
-            ></sl-icon>
-            ${item.label}
-          </div>
-        `;
-              }
-          });
-      }
-  }
   let EFPEntryForm = class EFPEntryForm extends s$1 {
       constructor() {
           super(...arguments);
