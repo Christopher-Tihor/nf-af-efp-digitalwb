@@ -7,6 +7,7 @@ import '@shoelace-style/shoelace/dist/components/tab-group/tab-group.js';
 import '@shoelace-style/shoelace/dist/components/tab/tab.js';
 import '@shoelace-style/shoelace/dist/components/tab-panel/tab-panel.js';
 import '@shoelace-style/shoelace/dist/components/textarea/textarea.js';
+import '@shoelace-style/shoelace/dist/components/tooltip/tooltip.js';
 
 import { LitElement, css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
@@ -845,6 +846,19 @@ class EFPEntryForm extends LitElement {
       margin-bottom: 0.75rem;
       line-height: 1.4;
       color: var(--sl-color-neutral-900);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .question-tooltip-icon {
+      color: var(--sl-color-neutral-500);
+      cursor: help;
+      font-size: 1rem;
+    }
+
+    .question-tooltip-icon:hover {
+      color: var(--sl-color-primary-600);
     }
 
     .question-text {
@@ -1208,7 +1222,17 @@ class EFPEntryForm extends LitElement {
         ` : ''}
 
         <div class="question-label">
-          ${unsafeHTML(question.label)}
+          <span>${unsafeHTML(question.label)}</span>
+          ${question.tooltip ? html`
+            <sl-tooltip placement="top" style="--max-width: 300px;">
+              <div slot="content">${unsafeHTML(question.tooltip)}</div>
+              <sl-icon
+                name="question-circle"
+                class="question-tooltip-icon"
+                aria-label="Question help"
+              ></sl-icon>
+            </sl-tooltip>
+          ` : ''}
         </div>
 
         ${question.textBelowQuestion ? html`

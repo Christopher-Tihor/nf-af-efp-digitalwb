@@ -1,5 +1,5 @@
 /*!
-* powerpod 4.2.5
+* powerpod 4.2.6
 * https://github.com/bcgov/nr-af-pods/powerpod
 *
 * @license GPLv3 for open source use only
@@ -38310,7 +38310,17 @@
         ` : ''}
 
         <div class="question-label">
-          ${o$1(question.label)}
+          <span>${o$1(question.label)}</span>
+          ${question.tooltip ? x `
+            <sl-tooltip placement="top" style="--max-width: 300px;">
+              <div slot="content">${o$1(question.tooltip)}</div>
+              <sl-icon
+                name="question-circle"
+                class="question-tooltip-icon"
+                aria-label="Question help"
+              ></sl-icon>
+            </sl-tooltip>
+          ` : ''}
         </div>
 
         ${question.textBelowQuestion ? x `
@@ -39744,6 +39754,19 @@
       margin-bottom: 0.75rem;
       line-height: 1.4;
       color: var(--sl-color-neutral-900);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .question-tooltip-icon {
+      color: var(--sl-color-neutral-500);
+      cursor: help;
+      font-size: 1rem;
+    }
+
+    .question-tooltip-icon:hover {
+      color: var(--sl-color-primary-600);
     }
 
     .question-text {
@@ -40267,7 +40290,7 @@
       };
     };
     // @ts-ignore
-    POWERPOD.version = '4.2.5';
+    POWERPOD.version = '4.2.6';
     // @ts-ignore
     window.powerpod = POWERPOD;
   }

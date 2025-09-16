@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EFP Entry Form - Tooltip Test</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.15.0/cdn/themes/light.css" />
+    <script type="module" src="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.15.0/cdn/shoelace-autoloader.js"></script>
+    <style>
+        body {
+            font-family: 'BCSans', 'BC Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            max-width: 800px;
+        }
+        .question-container {
+            margin-bottom: 1.5rem;
+            padding: 1.25rem;
+            border: 1px solid var(--sl-color-neutral-200);
+            border-radius: var(--sl-border-radius-medium);
+            background-color: var(--sl-color-neutral-50);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+        .question-label {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 0.75rem;
+            line-height: 1.4;
+            color: var(--sl-color-neutral-900);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .question-tooltip-icon {
+            color: var(--sl-color-neutral-500);
+            cursor: help;
+            font-size: 1rem;
+        }
+        .question-tooltip-icon:hover {
+            color: var(--sl-color-primary-600);
+        }
+        .question-text {
+            margin-bottom: 1rem;
+            color: var(--sl-color-neutral-700);
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+        h1 {
+            color: var(--sl-color-primary-900);
+            margin-bottom: 1rem;
+        }
+        h2 {
+            color: var(--sl-color-neutral-800);
+            margin-bottom: 1rem;
+        }
+        .demo-note {
+            background: var(--sl-color-primary-50);
+            padding: 1rem;
+            border-radius: var(--sl-border-radius-medium);
+            border-left: 4px solid var(--sl-color-primary-600);
+            margin-bottom: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>EFP Entry Form - Tooltip Implementation Test</h1>
+        
+        <div class="demo-note">
+            <p><strong>Demo:</strong> This page demonstrates the tooltip functionality for questions in the EFP Entry Form. 
+            Hover over the question mark icons (?) next to question labels to see the tooltips.</p>
+        </div>
+
+        <h2>Sample Questions with Tooltips</h2>
+
+        <!-- Question with tooltip -->
+        <div class="question-container">
+            <div class="question-label">
+                <span>Are there soil test phosphorus and post-harvest nitrate results on record from within the last 3 years?</span>
+                <sl-tooltip content="Soil testing helps determine nutrient levels and guides fertilizer application decisions. Regular testing ensures optimal crop nutrition while minimizing environmental impact." placement="top" style="--max-width: 300px;">
+                    <sl-icon 
+                        name="question-circle" 
+                        class="question-tooltip-icon"
+                        aria-label="Question help"
+                    ></sl-icon>
+                </sl-tooltip>
+            </div>
+            <div class="question-text">
+                This question helps assess your farm's nutrient management practices.
+            </div>
+            <!-- Simulated rating buttons -->
+            <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
+                <sl-button variant="default" size="small">Yes</sl-button>
+                <sl-button variant="default" size="small">No</sl-button>
+                <sl-button variant="default" size="small">N/A</sl-button>
+            </div>
+        </div>
+
+        <!-- Question with HTML tooltip content -->
+        <div class="question-container">
+            <div class="question-label">
+                <span>Does the farm have an up-to-date nutrient management plan?</span>
+                <sl-tooltip placement="top" style="--max-width: 350px;">
+                    <div slot="content">
+                        <strong>Nutrient Management Plan Requirements:</strong><br/>
+                        • Updated within last 5 years<br/>
+                        • Based on soil test results<br/>
+                        • Considers crop requirements<br/>
+                        • Includes application timing
+                    </div>
+                    <sl-icon
+                        name="question-circle"
+                        class="question-tooltip-icon"
+                        aria-label="Question help"
+                    ></sl-icon>
+                </sl-tooltip>
+            </div>
+            <div class="question-text">
+                A nutrient management plan is required for certain farm operations based on size, location, and soil test levels.
+            </div>
+            <!-- Simulated rating buttons -->
+            <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
+                <sl-button variant="default" size="small">Yes</sl-button>
+                <sl-button variant="default" size="small">No</sl-button>
+                <sl-button variant="default" size="small">N/A</sl-button>
+            </div>
+        </div>
+
+        <!-- Question without tooltip -->
+        <div class="question-container">
+            <div class="question-label">
+                <span>What is the total size of your farm operation?</span>
+                <!-- No tooltip icon for this question -->
+            </div>
+            <div class="question-text">
+                This question does not have tooltip content, so no help icon is displayed.
+            </div>
+            <!-- Simulated text input -->
+            <sl-input placeholder="Enter farm size in hectares" style="margin-top: 1rem;"></sl-input>
+        </div>
+
+        <!-- Question with complex tooltip -->
+        <div class="question-container">
+            <div class="question-label">
+                <span>Is a risk assessment completed prior to nutrient application in high-precipitation areas?</span>
+                <sl-tooltip placement="top" style="--max-width: 400px;">
+                    <div slot="content" style="text-align: left;">
+                        <strong>Risk Assessment Requirements:</strong>
+                        <ul style="margin: 0.5rem 0; padding-left: 1.2rem;">
+                            <li>Weather conditions</li>
+                            <li>Soil moisture levels</li>
+                            <li>Slope and drainage</li>
+                            <li>Proximity to water bodies</li>
+                        </ul>
+                        <em>Required for applications in October, February, and March</em>
+                    </div>
+                    <sl-icon
+                        name="question-circle"
+                        class="question-tooltip-icon"
+                        aria-label="Question help"
+                    ></sl-icon>
+                </sl-tooltip>
+            </div>
+            <div class="question-text">
+                Risk assessments help prevent nutrient runoff during high-risk periods.
+            </div>
+            <!-- Simulated rating buttons -->
+            <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
+                <sl-button variant="default" size="small">Yes</sl-button>
+                <sl-button variant="default" size="small">No</sl-button>
+                <sl-button variant="default" size="small">N/A</sl-button>
+            </div>
+        </div>
+
+        <!-- Question with CKEditor-style HTML tooltip (like from questionnaire store) -->
+        <div class="question-container">
+            <div class="question-label">
+                <span>Example question with CKEditor-formatted tooltip content</span>
+                <sl-tooltip placement="top" style="--max-width: 350px;">
+                    <div slot="content">
+                        <div class="ck-content" data-wrapper="true" dir="ltr" style="--ck-image-style-spacing: 1.5em; --ck-inline-image-style-spacing: calc(var(--ck-image-style-spacing) / 2); font-family: Segoe UI; font-size: 11pt;">
+                            <p style="margin: 0;">
+                                <span style="color:#c82613;">
+                                    <i><u>This is an example of CKEditor-formatted tooltip content</u></i>
+                                </span>
+                            </p>
+                            <p style="margin: 0.5rem 0 0 0;">
+                                This demonstrates how the tooltip handles HTML content that comes from the CKEditor in the questionnaire management system.
+                            </p>
+                        </div>
+                    </div>
+                    <sl-icon
+                        name="question-circle"
+                        class="question-tooltip-icon"
+                        aria-label="Question help"
+                    ></sl-icon>
+                </sl-tooltip>
+            </div>
+            <div class="question-text">
+                This example shows how CKEditor-formatted HTML content from the questionnaire store is properly rendered in tooltips.
+            </div>
+            <!-- Simulated rating buttons -->
+            <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
+                <sl-button variant="default" size="small">Yes</sl-button>
+                <sl-button variant="default" size="small">No</sl-button>
+                <sl-button variant="default" size="small">N/A</sl-button>
+            </div>
+        </div>
+
+        <div class="demo-note" style="margin-top: 2rem;">
+            <h3>Implementation Details</h3>
+            <ul>
+                <li><strong>Tooltip Component:</strong> Uses Shoelace's <code>sl-tooltip</code> component</li>
+                <li><strong>Icon:</strong> Uses Shoelace's <code>sl-icon</code> with "question-circle" name</li>
+                <li><strong>Conditional Rendering:</strong> Tooltip only appears when question has tooltip content</li>
+                <li><strong>HTML Rendering:</strong> Uses <code>slot="content"</code> with <code>unsafeHTML()</code> for rich formatting</li>
+                <li><strong>CKEditor Support:</strong> Properly handles HTML content from CKEditor including styles and formatting</li>
+                <li><strong>Styling:</strong> Custom CSS for hover effects and positioning</li>
+                <li><strong>Accessibility:</strong> Includes aria-label for screen readers</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
