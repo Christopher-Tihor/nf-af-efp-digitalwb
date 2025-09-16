@@ -17,6 +17,7 @@ import './EFPBreadcrumbs';
 import WorkbookResponseHelper from '../common/workbookResponseHelper.js';
 import { getWorkbookId } from '../common/workbookUtils.js';
 import { POWERPOD } from '../common/constants.js';
+import { Logger } from '../common/logger.js';
 import {
   getQuestionnaireFromStore,
   getChapterFromStore,
@@ -59,28 +60,8 @@ interface EFPActiveContent {
   content: string;
 }
 
-// Utility class for logging (can be disabled in production)
-class EFPLogger {
-  private static DEBUG = true; // Set to false in production
-
-  static log(...args: any[]): void {
-    if (EFPLogger.DEBUG) {
-      console.log('[EFP]', ...args);
-    }
-  }
-
-  static warn(...args: any[]): void {
-    if (EFPLogger.DEBUG) {
-      console.warn('[EFP]', ...args);
-    }
-  }
-
-  static error(...args: any[]): void {
-    if (EFPLogger.DEBUG) {
-      console.error('[EFP]', ...args);
-    }
-  }
-}
+// Create logger instance for EFP components
+const logger = Logger('components/EFPEntryForm');
 
 // Utility class for text formatting
 class EFPTextUtils {
@@ -295,12 +276,12 @@ class EFPNavigationUtils {
       const isContainer = EFPNavigationUtils.isStepContainer(step, sections);
 
       if (!isContainer) {
-        EFPLogger.log(`Found last selectable step in section ${sectionIndex}: "${step.label}" at index ${index}`);
+        logger.info({ message: `Found last selectable step in section ${sectionIndex}: "${step.label}" at index ${index}` });
         return { step, index };
       }
     }
 
-    EFPLogger.warn(`No selectable steps found in section ${sectionIndex}`);
+    logger.warn({ message: `No selectable steps found in section ${sectionIndex}` });
     return null;
   }
 
@@ -321,12 +302,12 @@ class EFPNavigationUtils {
 
       // Skip section headers like "Section A", "Section B", etc.
       if (!isContainer && !step.label.startsWith('Section ')) {
-        EFPLogger.log(`Found first selectable step in section ${sectionIndex}: "${step.label}" at index ${index}`);
+        logger.info({ message: `Found first selectable step in section ${sectionIndex}: "${step.label}" at index ${index}` });
         return { step, index };
       }
     }
 
-    EFPLogger.warn(`No selectable steps found in section ${sectionIndex}`);
+    logger.warn({ message: `No selectable steps found in section ${sectionIndex}` });
     return null;
   }
 
@@ -685,7 +666,7 @@ export class EFPEntryForm extends LitElement {
 
   connectedCallback() {
     super.connectedCallback();
-    EFPLogger.log('EFPEntryForm connected');
+    logger.info({ message: 'EFPEntryForm connected' });
 
     // Check if questionnaire store is already loaded
     this.updateQuestionnaireStoreStatus();
@@ -1518,13 +1499,13 @@ export class EFPEntryForm extends LitElement {
 
   // Public API methods
   public updateNestedChapterStructure(nestedStructure: any[]) {
-    EFPLogger.log('updateNestedChapterStructure called with', nestedStructure?.length || 0, 'chapters');
+    logger.info({ message: `updateNestedChapterStructure called with ${nestedStructure?.length || 0} chapters` });
 
     this.nestedChapterStructure = nestedStructure;
 
     // Also update the questionnaire store if not already loaded
     if (!isQuestionnaireLoaded()) {
-      EFPLogger.log('Loading questionnaire data into store from updateNestedChapterStructure');
+      logger.info({ message: 'Loading questionnaire data into store from updateNestedChapterStructure' });
       // Import the loadQuestionnaireIntoStore function dynamically to avoid circular imports
       import('../common/questionnaire.js').then(({ loadQuestionnaireIntoStore }) => {
         loadQuestionnaireIntoStore(nestedStructure);
@@ -1580,17 +1561,17 @@ export class EFPEntryForm extends LitElement {
 
   // Navigation methods
   private goToNext() {
-    EFPLogger.log('goToNext called, current step:', this.currentStepIndex, this.flatSteps[this.currentStepIndex]?.label);
+    logger.info({ message: `goToNext called, current step: ${this.currentStepIndex}, ${this.flatSteps[this.currentStepIndex]?.label}` });
 
     // Handle case where currentStepIndex is -1 (step not found in flatSteps)
     if (this.currentStepIndex === -1) {
-      EFPLogger.warn('currentStepIndex is -1, trying to find current step by activeContent title');
+      logger.warn({ message: 'currentStepIndex is -1, trying to find current step by activeContent title' });
       const foundIndex = this.flatSteps.findIndex(step => step.label === this.activeContent.title);
       if (foundIndex !== -1) {
-        EFPLogger.log(`Found current step "${this.activeContent.title}" at index ${foundIndex}`);
+        logger.info({ message: `Found current step "${this.activeContent.title}" at index ${foundIndex}` });
         this.currentStepIndex = foundIndex;
       } else {
-        EFPLogger.error(`Could not find current step "${this.activeContent.title}" in flatSteps`);
+        logger.error({ message: `Could not find current step "${this.activeContent.title}" in flatSteps` });
         return; // Don't proceed with navigation if we can't find current position
       }
     }
@@ -1607,7 +1588,7 @@ export class EFPEntryForm extends LitElement {
 
         if (!isContainer) {
           // Found a selectable step
-          EFPLogger.log('Found selectable step:', nextStep.label, 'at index', nextIndex);
+          logger.info({ message: `Found selectable step: ${nextStep.label} at index ${nextIndex}` });
 
           const currentStep = this.flatSteps[this.currentStepIndex];
           const currentSectionIndex = currentStep.sectionIndex;
@@ -1677,7 +1658,7 @@ export class EFPEntryForm extends LitElement {
 
       // If we didn't find any selectable steps, just go to the last step
       if (nextIndex >= this.flatSteps.length && this.currentStepIndex < this.flatSteps.length - 1) {
-        EFPLogger.log('No more selectable steps found, going to last step');
+        logger.info({ message: 'No more selectable steps found, going to last step' });
         this.currentStepIndex = this.flatSteps.length - 1;
         this.currentSectionIndex = this.flatSteps[this.currentStepIndex].sectionIndex;
       }
@@ -1732,7 +1713,7 @@ export class EFPEntryForm extends LitElement {
 
     try {
       console.log(`🔄 Starting to save rating for question ${questionId}: ${value}`);
-      EFPLogger.log(`Rating changed for question ${questionId}: ${value}`);
+      logger.info({ message: `Rating changed for question ${questionId}: ${value}` });
 
       // Save the rating as a workbook response and get the response data
       const responseData = await this.saveRatingResponse(questionId, value);
@@ -1741,25 +1722,25 @@ export class EFPEntryForm extends LitElement {
       updateQuestionResponse(questionId, value, true, responseData);
 
       console.log(`✅ Successfully saved rating response for question ${questionId}`);
-      EFPLogger.log(`Successfully saved rating response for question ${questionId}`);
+      logger.info({ message: `Successfully saved rating response for question ${questionId}` });
 
       // Also call the original handler for any additional processing
       EFPEventUtilsImported.handleRatingChanged(
         event,
         (questionId: string, value: any) => {
-          EFPLogger.log(`Rating stored in memory for question ${questionId}: ${value}`);
+          logger.info({ message: `Rating stored in memory for question ${questionId}: ${value}` });
         }
       );
 
     } catch (error) {
       console.error(`❌ Failed to save rating response for question ${questionId}:`, error);
-      EFPLogger.error(`Failed to save rating response: ${(error as Error).message}`);
+      logger.error({ message: `Failed to save rating response: ${(error as Error).message}` });
 
       // Still call the original handler even if save fails
       EFPEventUtilsImported.handleRatingChanged(
         event,
         (questionId: string, value: any) => {
-          EFPLogger.log(`Rating stored locally for question ${questionId}: ${value} (save failed)`);
+          logger.info({ message: `Rating stored locally for question ${questionId}: ${value} (save failed)` });
         }
       );
     }
@@ -1916,17 +1897,17 @@ export class EFPEntryForm extends LitElement {
   }
 
   private goToPrevious() {
-    EFPLogger.log('goToPrevious called, current step:', this.currentStepIndex, this.flatSteps[this.currentStepIndex]?.label);
+    logger.info({ message: `goToPrevious called, current step: ${this.currentStepIndex}, ${this.flatSteps[this.currentStepIndex]?.label}` });
 
     // Handle case where currentStepIndex is -1 (step not found in flatSteps)
     if (this.currentStepIndex === -1) {
-      EFPLogger.warn('currentStepIndex is -1, trying to find current step by activeContent title');
+      logger.warn({ message: 'currentStepIndex is -1, trying to find current step by activeContent title' });
       const foundIndex = this.flatSteps.findIndex(step => step.label === this.activeContent.title);
       if (foundIndex !== -1) {
-        EFPLogger.log(`Found current step "${this.activeContent.title}" at index ${foundIndex}`);
+        logger.info({ message: `Found current step "${this.activeContent.title}" at index ${foundIndex}` });
         this.currentStepIndex = foundIndex;
       } else {
-        EFPLogger.error(`Could not find current step "${this.activeContent.title}" in flatSteps`);
+        logger.error({ message: `Could not find current step "${this.activeContent.title}" in flatSteps` });
         return; // Don't proceed with navigation if we can't find current position
       }
     }

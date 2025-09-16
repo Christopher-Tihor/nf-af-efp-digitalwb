@@ -1,5 +1,8 @@
 import { EFPSectionItem, EFPStep } from './types';
-import { EFPLogger } from './logger';
+import { Logger } from '../../common/logger.js';
+
+// Create logger instance for EFP event utilities
+const logger = Logger('components/efp/event-utils');
 
 // Utility class for event handling helpers
 export class EFPEventUtils {
@@ -10,16 +13,16 @@ export class EFPEventUtils {
     onNavigationUpdate: (label: string) => void
   ): void {
     const index = flatSteps.findIndex((i) => i.label === item.label);
-    EFPLogger.log(`Navigation click: Looking for "${item.label}", found at index: ${index}`);
-    
+    logger.info({ message: `Navigation click: Looking for "${item.label}", found at index: ${index}` });
+
     if (index !== -1) {
       const sectionIndex = flatSteps[index].sectionIndex;
-      EFPLogger.log(`Set currentStepIndex to ${index}, currentSectionIndex to ${sectionIndex}`);
-      
+      logger.info({ message: `Set currentStepIndex to ${index}, currentSectionIndex to ${sectionIndex}` });
+
       onStepChange(index, sectionIndex);
       onNavigationUpdate(item.label);
     } else {
-      EFPLogger.warn(`Step "${item.label}" not found in flatSteps. Available steps:`, flatSteps.map(s => s.label));
+      logger.warn({ message: `Step "${item.label}" not found in flatSteps. Available steps: ${flatSteps.map(s => s.label).join(', ')}` });
     }
   }
 
@@ -30,11 +33,11 @@ export class EFPEventUtils {
     onStepChange: (stepIndex: number, sectionIndex: number) => void,
     onNavigationUpdate: (label: string) => void
   ): void {
-    EFPLogger.log('Section changed to:', newSectionIndex, 'isNavigating:', isNavigating);
-    
+    logger.info({ message: `Section changed to: ${newSectionIndex}, isNavigating: ${isNavigating}` });
+
     // If we're in the middle of programmatic navigation, don't interfere
     if (isNavigating) {
-      EFPLogger.log('Ignoring section change during navigation');
+      logger.info({ message: 'Ignoring section change during navigation' });
       return;
     }
     
@@ -63,9 +66,9 @@ export class EFPEventUtils {
       const stepIndex = flatSteps.indexOf(firstContentStep);
       onStepChange(stepIndex, newSectionIndex);
       onNavigationUpdate(firstContentStep.label);
-      EFPLogger.log('Navigated to first content step in section:', firstContentStep.label);
+      logger.info({ message: `Navigated to first content step in section: ${firstContentStep.label}` });
     } else {
-      EFPLogger.warn('No steps found for section:', newSectionIndex);
+      logger.warn({ message: `No steps found for section: ${newSectionIndex}` });
     }
   }
 
@@ -74,7 +77,7 @@ export class EFPEventUtils {
     onAnswerUpdate?: (questionId: string, value: any) => void
   ): void {
     const { questionId, value } = event.detail;
-    EFPLogger.log(`Question ${questionId} answered with: ${value}`);
+    logger.info({ message: `Question ${questionId} answered with: ${value}` });
     
     // Call the optional callback to update answers
     onAnswerUpdate?.(questionId, value);
