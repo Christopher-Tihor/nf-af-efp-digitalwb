@@ -36502,7 +36502,7 @@
   // Create logger instance for EFP event utilities
   const logger$5 = Logger('components/efp/event-utils');
   // Utility class for event handling helpers
-  class EFPEventUtils$1 {
+  class EFPEventUtils {
       static handleItemClick(item, flatSteps, onStepChange, onNavigationUpdate) {
           const index = flatSteps.findIndex((i) => i.label === item.label);
           logger$5.info({ message: `Navigation click: Looking for "${item.label}", found at index: ${index}` });
@@ -36579,7 +36579,7 @@
       }
       static createItemClickHandler(flatSteps, onStepChange, onNavigationUpdate) {
           return (item) => {
-              EFPEventUtils$1.handleItemClick(item, flatSteps, onStepChange, onNavigationUpdate);
+              EFPEventUtils.handleItemClick(item, flatSteps, onStepChange, onNavigationUpdate);
           };
       }
   }
@@ -36988,54 +36988,6 @@
         `;
               }
           });
-      }
-  }
-  // Utility class for event handling helpers
-  class EFPEventUtils {
-      static handleItemClick(item, flatSteps, onStepChange, onNavigationUpdate) {
-          const index = flatSteps.findIndex((i) => i.label === item.label);
-          console.log(`Navigation click: Looking for "${item.label}", found at index: ${index}`);
-          if (index !== -1) {
-              const sectionIndex = flatSteps[index].sectionIndex;
-              console.log(`Set currentStepIndex to ${index}, currentSectionIndex to ${sectionIndex}`);
-              onStepChange(index, sectionIndex);
-              onNavigationUpdate(item.label);
-          }
-          else {
-              console.warn(`Step "${item.label}" not found in flatSteps. Available steps:`, flatSteps.map(s => s.label));
-          }
-      }
-      static handleSectionChange(newSectionIndex, isNavigating, flatSteps, onStepChange, onNavigationUpdate) {
-          console.log('Section changed to:', newSectionIndex, 'isNavigating:', isNavigating);
-          // If we're in the middle of programmatic navigation, don't interfere
-          if (isNavigating) {
-              console.log('Ignoring section change during navigation');
-              return;
-          }
-          // Find the first CONTENT step in the new section (skip section headers)
-          const stepsInSection = flatSteps.filter(step => step.sectionIndex === newSectionIndex);
-          // Skip the first step if it's just the section header
-          let firstContentStep = stepsInSection.find(step => !step.label.startsWith('Section ') &&
-              step.content &&
-              step.content.trim() !== '' &&
-              step.content !== step.label);
-          // If no content step found, fall back to the first step after the section header
-          if (!firstContentStep && stepsInSection.length > 1) {
-              firstContentStep = stepsInSection[1];
-          }
-          // If still no step found, use the first step in the section
-          if (!firstContentStep && stepsInSection.length > 0) {
-              firstContentStep = stepsInSection[0];
-          }
-          if (firstContentStep) {
-              const stepIndex = flatSteps.indexOf(firstContentStep);
-              onStepChange(stepIndex, newSectionIndex);
-              onNavigationUpdate(firstContentStep.label);
-              console.log('Navigated to first content step in section:', firstContentStep.label);
-          }
-          else {
-              console.warn('No steps found for section:', newSectionIndex);
-          }
       }
   }
   // Utility class for lifecycle management
@@ -37720,7 +37672,7 @@
               console.log(`✅ Successfully saved rating response for question ${questionId}`);
               logger$4.info({ message: `Successfully saved rating response for question ${questionId}` });
               // Also call the original handler for any additional processing
-              EFPEventUtils$1.handleRatingChanged(event, (questionId, value) => {
+              EFPEventUtils.handleRatingChanged(event, (questionId, value) => {
                   logger$4.info({ message: `Rating stored in memory for question ${questionId}: ${value}` });
               });
           }
@@ -37728,7 +37680,7 @@
               console.error(`❌ Failed to save rating response for question ${questionId}:`, error);
               logger$4.error({ message: `Failed to save rating response: ${error.message}` });
               // Still call the original handler even if save fails
-              EFPEventUtils$1.handleRatingChanged(event, (questionId, value) => {
+              EFPEventUtils.handleRatingChanged(event, (questionId, value) => {
                   logger$4.info({ message: `Rating stored locally for question ${questionId}: ${value} (save failed)` });
               });
           }

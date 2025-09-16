@@ -1,5 +1,26 @@
-import { EFPSectionItem, EFPStep } from './types';
 import { Logger } from '../../common/logger.js';
+
+// Type definitions (duplicated from EFPEntryForm.ts for now)
+interface EFPStep {
+  label: string;
+  content: string;
+  complete?: boolean;
+  sectionIndex: number;
+  chapterData?: any;
+  subchapterData?: any;
+  isContainer?: boolean;
+}
+
+interface EFPSectionItem {
+  label: string;
+  content?: string;
+  complete?: boolean;
+  items?: EFPSectionItem[];
+  title?: string;
+  isContainer?: boolean;
+  chapterData?: any;
+  subchapterData?: any;
+}
 
 // Create logger instance for EFP event utilities
 const logger = Logger('components/efp/event-utils');

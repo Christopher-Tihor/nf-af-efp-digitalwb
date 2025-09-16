@@ -1,4 +1,22 @@
-import { EFPSectionItem, EFPStep } from './types';
+interface EFPStep {
+    label: string;
+    content: string;
+    complete?: boolean;
+    sectionIndex: number;
+    chapterData?: any;
+    subchapterData?: any;
+    isContainer?: boolean;
+}
+interface EFPSectionItem {
+    label: string;
+    content?: string;
+    complete?: boolean;
+    items?: EFPSectionItem[];
+    title?: string;
+    isContainer?: boolean;
+    chapterData?: any;
+    subchapterData?: any;
+}
 export declare class EFPEventUtils {
     static handleItemClick(item: EFPSectionItem, flatSteps: EFPStep[], onStepChange: (stepIndex: number, sectionIndex: number) => void, onNavigationUpdate: (label: string) => void): void;
     static handleSectionChange(newSectionIndex: number, isNavigating: boolean, flatSteps: EFPStep[], onStepChange: (stepIndex: number, sectionIndex: number) => void, onNavigationUpdate: (label: string) => void): void;
@@ -9,3 +27,4 @@ export declare class EFPEventUtils {
     static createTabShowHandler(onSectionChange: (newSectionIndex: number) => void): (e: CustomEvent) => void;
     static createItemClickHandler(flatSteps: EFPStep[], onStepChange: (stepIndex: number, sectionIndex: number) => void, onNavigationUpdate: (label: string) => void): (item: EFPSectionItem) => void;
 }
+export {};
