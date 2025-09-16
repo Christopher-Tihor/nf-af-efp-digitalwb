@@ -27,6 +27,8 @@ import {
 } from '../common/questionnaire.js';
 import { EFPEventUtils } from './efp/event-utils.js';
 import { EFPTextUtils } from './efp/text-utils.js';
+import { EFPCompletionUtils } from './efp/completion-utils.js';
+
 
 
 import { efpEntryFormStyles } from './EFPEntryForm.styles';
@@ -68,48 +70,6 @@ interface EFPActiveContent {
 const logger = Logger('components/EFPEntryForm');
 
 
-// Utility class for completion calculations
-class EFPCompletionUtils {
-  static calculateOverallCompletion(sections: EFPSection[]): number {
-    const allItems: EFPSectionItem[] = [];
-
-    const collect = (items: EFPSectionItem[]) => {
-      for (const item of items) {
-        if ('items' in item && Array.isArray(item.items)) {
-          collect(item.items);
-        } else {
-          allItems.push(item);
-        }
-      }
-    };
-
-    for (const section of sections) {
-      collect(section.items);
-    }
-
-    const completed = allItems.filter((item) => item.complete).length;
-    return allItems.length === 0
-      ? 0
-      : Math.round((completed / allItems.length) * 100);
-  }
-
-  static isSectionComplete(section: EFPSection): boolean {
-    const leafItems: EFPSectionItem[] = [];
-
-    const collect = (items: EFPSectionItem[]) => {
-      for (const item of items) {
-        if ('items' in item && Array.isArray(item.items)) {
-          collect(item.items);
-        } else {
-          leafItems.push(item);
-        }
-      }
-    };
-
-    collect(section.items);
-    return leafItems.every((item) => item.complete);
-  }
-}
 
 // Utility class for section generation
 class EFPSectionGenerator {
@@ -1048,7 +1008,7 @@ export class EFPEntryForm extends LitElement {
     }
 
     // Fallback to existing logic
-    return this.isSectionComplete(section);
+    return EFPCompletionUtils.isSectionComplete(section);
   }
 
   // Public API methods
@@ -1603,9 +1563,6 @@ export class EFPEntryForm extends LitElement {
     return result;
   }
 
-  private isSectionComplete(section: EFPSection): boolean {
-    return EFPCompletionUtils.isSectionComplete(section);
-  }
 
   private initializeToFirstSelectableStep() {
     // Only initialize if we have sections and steps available

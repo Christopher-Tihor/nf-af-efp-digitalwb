@@ -36641,6 +36641,42 @@
       }
   }
 
+  class EFPCompletionUtils {
+      static calculateOverallCompletion(sections) {
+          const allItems = [];
+          const collect = (items) => {
+              for (const item of items) {
+                  if ('items' in item && Array.isArray(item.items)) {
+                      collect(item.items);
+                  }
+                  else {
+                      allItems.push(item);
+                  }
+              }
+          };
+          for (const section of sections) {
+              collect(section.items);
+          }
+          const completed = allItems.filter((item) => item.complete).length;
+          return allItems.length === 0 ? 0 : Math.round((completed / allItems.length) * 100);
+      }
+      static isSectionComplete(section) {
+          const leafItems = [];
+          const collect = (items) => {
+              for (const item of items) {
+                  if ('items' in item && Array.isArray(item.items)) {
+                      collect(item.items);
+                  }
+                  else {
+                      leafItems.push(item);
+                  }
+              }
+          };
+          collect(section.items);
+          return leafItems.every((item) => item.complete);
+      }
+  }
+
   const efpEntryFormStyles = i$4 `
   @import url('https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@400;500;600;700&display=swap');
   @import url('https://cdn.jsdelivr.net/npm/@bcgov/bc-sans@2.0.0/css/BCSans.css');
@@ -36960,44 +36996,6 @@
 
   // Create logger instance for EFP components
   const logger$4 = Logger('components/EFPEntryForm');
-  // Utility class for completion calculations
-  class EFPCompletionUtils {
-      static calculateOverallCompletion(sections) {
-          const allItems = [];
-          const collect = (items) => {
-              for (const item of items) {
-                  if ('items' in item && Array.isArray(item.items)) {
-                      collect(item.items);
-                  }
-                  else {
-                      allItems.push(item);
-                  }
-              }
-          };
-          for (const section of sections) {
-              collect(section.items);
-          }
-          const completed = allItems.filter((item) => item.complete).length;
-          return allItems.length === 0
-              ? 0
-              : Math.round((completed / allItems.length) * 100);
-      }
-      static isSectionComplete(section) {
-          const leafItems = [];
-          const collect = (items) => {
-              for (const item of items) {
-                  if ('items' in item && Array.isArray(item.items)) {
-                      collect(item.items);
-                  }
-                  else {
-                      leafItems.push(item);
-                  }
-              }
-          };
-          collect(section.items);
-          return leafItems.every((item) => item.complete);
-      }
-  }
   // Utility class for section generation
   class EFPSectionGenerator {
       static renderSubchapterContent(subchapter) {
@@ -37796,7 +37794,7 @@
               }
           }
           // Fallback to existing logic
-          return this.isSectionComplete(section);
+          return EFPCompletionUtils.isSectionComplete(section);
       }
       // Public API methods
       updateNestedChapterStructure(nestedStructure) {
@@ -38219,9 +38217,6 @@
               collect(section.items, index);
           });
           return result;
-      }
-      isSectionComplete(section) {
-          return EFPCompletionUtils.isSectionComplete(section);
       }
       initializeToFirstSelectableStep() {
           // Only initialize if we have sections and steps available

@@ -55,7 +55,6 @@ export declare class EFPEntryForm extends LitElement {
     private updateNavigationState;
     private goToPrevious;
     private get flatSteps();
-    private isSectionComplete;
     private initializeToFirstSelectableStep;
     private handleBreadcrumbNavigation;
     private navigateToHome;
