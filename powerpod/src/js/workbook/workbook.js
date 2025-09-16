@@ -12,8 +12,6 @@ import {
 } from '../common/chaptersAndQuestionsUtils.js';
 import { loadQuestionnaireWithResponses } from '../common/questionnaire.js';
 import { POWERPOD } from '../common/constants.js';
-import '../examples/workbookResponseUsage.js';
-import '../examples/questionnaireStoreUsage.js';
 import '../common/workbookResponseHelper.js';
 import '../components/EFPEntryForm.ts';
 

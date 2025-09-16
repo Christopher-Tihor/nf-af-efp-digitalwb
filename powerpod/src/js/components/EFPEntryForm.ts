@@ -666,7 +666,7 @@ class EFPLifecycleUtils {
 }
 
 @customElement('efp-entry-form')
-class EFPEntryForm extends LitElement {
+export class EFPEntryForm extends LitElement {
   @property({ type: Number }) currentSectionIndex = 0;
   @property({ type: Number }) currentStepIndex = 0;
   @property({ type: Array, attribute: false }) nestedChapterStructure: any[] = [];
@@ -1336,16 +1336,7 @@ class EFPEntryForm extends LitElement {
     );
   }
 
-  // Get questionnaire chapters from store, fallback to nestedChapterStructure
-  private getQuestionnaireChapters(): any[] {
-    const questionnaire = getQuestionnaireFromStore();
-    if (questionnaire?.chapters?.length > 0) {
-      // Extract the nested structure from the store format
-      return questionnaire.chapters[0] || [];
-    }
-    // Fallback to the property if store is not loaded
-    return this.nestedChapterStructure;
-  }
+
 
   // Generate Section B items directly from questionnaire store
   private getSectionBItemsFromStore(): EFPSectionItem[] {
@@ -1374,8 +1365,6 @@ class EFPEntryForm extends LitElement {
 
     chapters.forEach((chapter: any) => {
       console.log(`Processing chapter ${chapter.name}...`, chapter);
-      // Extract chapter number from the main chapter
-      const chapterNumber = Math.floor(chapter.order || 0);
 
       // Create the main chapter container (collapsible parent)
       const chapterItem: EFPSectionItem = {

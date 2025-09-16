@@ -22,7 +22,6 @@ import './components/ClaimInfoGridVLB.ts';
 import './components/CommoditiesMultiSelect.ts';
 import './components/ExpenseInvoicesTable.ts';
 import './components/EFPBreadcrumbs.ts';
-import { hideLoadingAnimation } from './common/loading.js';
 import { initHome } from './pages/home.js';
 import { initWorkbook } from './workbook/workbook.js';
 

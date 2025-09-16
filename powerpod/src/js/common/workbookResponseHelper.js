@@ -2,7 +2,7 @@ import { POWERPOD } from './constants.js';
 import { Logger } from './logger.js';
 import { getCurrentWorkbookId } from './workbookUtils.js';
 import { loadChaptersAndQuestions, getStoredQuestionsData, isChaptersAndQuestionsLoaded } from './chaptersAndQuestionsUtils.js';
-import { updateQuestionResponse, isQuestionnaireLoaded, getQuestionFromStore } from './questionnaire.js';
+import { updateQuestionResponse, isQuestionnaireLoaded } from './questionnaire.js';
 
 const logger = Logger('common/workbookResponseHelper');
 
@@ -35,7 +35,7 @@ function getChapterIdForQuestion(questionId) {
   if (isQuestionnaireLoaded()) {
     const questionnaire = POWERPOD.state?.questionnaire;
     if (questionnaire?.chapters) {
-      const findChapterIdForQuestion = (chapters, currentChapterId = null) => {
+      const findChapterIdForQuestion = (chapters) => {
         for (const chapterGroup of chapters) {
           if (Array.isArray(chapterGroup)) {
             for (const chapter of chapterGroup) {
@@ -46,7 +46,7 @@ function getChapterIdForQuestion(questionId) {
               }
               // Check questions in subchapters
               if (chapter.subchapters) {
-                const found = findChapterIdForQuestion([chapter.subchapters], chapter.id);
+                const found = findChapterIdForQuestion([chapter.subchapters]);
                 if (found) return found;
               }
             }
@@ -754,7 +754,7 @@ export async function loadQuestionsAndResponses(workbookId, options = {}) {
     });
 
     // Update chapter organization with responses
-    questionsByChapter.forEach((chapterQuestions, chapterId) => {
+    questionsByChapter.forEach((chapterQuestions) => {
       chapterQuestions.forEach(entry => {
         const questionId = entry.question?.quartech_workbookquestionid;
         if (questionId && questionsWithResponses.has(questionId)) {
