@@ -36862,6 +36862,40 @@
       }
   }
 
+  class EFPSectionGenerator {
+      static renderSubchapterContent(subchapter) {
+          var _a, _b;
+          const subSubchaptersCount = ((_a = subchapter.subchapters) === null || _a === void 0 ? void 0 : _a.length) || 0;
+          const subSubchaptersInfo = subSubchaptersCount > 0
+              ? `<p style="font-family: var(--body-font); font-weight: 500; color: var(--sl-color-neutral-600); margin: 0;"><strong>Sub-sections:</strong> ${subSubchaptersCount}</p>`
+              : '';
+          return `
+      <div class="subchapter-content">
+        <h3 style="font-family: var(--chapter-font); font-weight: 600; font-size: 1.5rem; color: var(--sl-color-neutral-800); margin-bottom: 1rem;">${subchapter.name || subchapter.label}</h3>
+        <div style="font-family: var(--body-font); line-height: 1.6; color: var(--sl-color-neutral-700); margin-bottom: 1rem;">${subchapter.description || ''}</div>
+        <div style="display: flex; gap: 2rem; margin-bottom: 1rem;">
+          <p style="font-family: var(--body-font); font-weight: 500; color: var(--sl-color-neutral-600); margin: 0;"><strong>Questions:</strong> ${((_b = subchapter.questions) === null || _b === void 0 ? void 0 : _b.length) || 0}</p>
+          ${subSubchaptersInfo}
+        </div>
+      </div>
+    `;
+      }
+      static renderChapterContent(chapter) {
+          var _a, _b;
+          const formattedTitle = EFPTextUtils.formatChapterTitle(chapter);
+          return `
+      <div class="chapter-content">
+        <h3 style="font-family: var(--chapter-font); font-weight: 700; font-size: 1.75rem; color: var(--sl-color-primary-900); margin-bottom: 1rem; letter-spacing: -0.025em;">${formattedTitle}</h3>
+        <div style="font-family: var(--body-font); line-height: 1.6; color: var(--sl-color-neutral-700); margin-bottom: 1.5rem; font-size: 1.05rem;">${chapter.description || ''}</div>
+        <div style="display: flex; gap: 2rem; margin-bottom: 1rem;">
+          <p style="font-family: var(--body-font); font-weight: 500; color: var(--sl-color-neutral-600); margin: 0;"><strong>Questions:</strong> ${((_a = chapter.questions) === null || _a === void 0 ? void 0 : _a.length) || 0}</p>
+          <p style="font-family: var(--body-font); font-weight: 500; color: var(--sl-color-neutral-600); margin: 0;"><strong>Subchapters:</strong> ${((_b = chapter.subchapters) === null || _b === void 0 ? void 0 : _b.length) || 0}</p>
+        </div>
+      </div>
+    `;
+      }
+  }
+
   const efpEntryFormStyles = i$4 `
   @import url('https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@400;500;600;700&display=swap');
   @import url('https://cdn.jsdelivr.net/npm/@bcgov/bc-sans@2.0.0/css/BCSans.css');
@@ -37181,40 +37215,6 @@
 
   // Create logger instance for EFP components
   const logger$4 = Logger('components/EFPEntryForm');
-  // Utility class for section generation
-  class EFPSectionGenerator {
-      static renderSubchapterContent(subchapter) {
-          var _a, _b;
-          const subSubchaptersCount = ((_a = subchapter.subchapters) === null || _a === void 0 ? void 0 : _a.length) || 0;
-          const subSubchaptersInfo = subSubchaptersCount > 0
-              ? `<p style="font-family: var(--body-font); font-weight: 500; color: var(--sl-color-neutral-600); margin: 0;"><strong>Sub-sections:</strong> ${subSubchaptersCount}</p>`
-              : '';
-          return `
-      <div class="subchapter-content">
-        <h3 style="font-family: var(--chapter-font); font-weight: 600; font-size: 1.5rem; color: var(--sl-color-neutral-800); margin-bottom: 1rem;">${subchapter.name || subchapter.label}</h3>
-        <div style="font-family: var(--body-font); line-height: 1.6; color: var(--sl-color-neutral-700); margin-bottom: 1rem;">${subchapter.description || ''}</div>
-        <div style="display: flex; gap: 2rem; margin-bottom: 1rem;">
-          <p style="font-family: var(--body-font); font-weight: 500; color: var(--sl-color-neutral-600); margin: 0;"><strong>Questions:</strong> ${((_b = subchapter.questions) === null || _b === void 0 ? void 0 : _b.length) || 0}</p>
-          ${subSubchaptersInfo}
-        </div>
-      </div>
-    `;
-      }
-      static renderChapterContent(chapter) {
-          var _a, _b;
-          const formattedTitle = EFPTextUtils.formatChapterTitle(chapter);
-          return `
-      <div class="chapter-content">
-        <h3 style="font-family: var(--chapter-font); font-weight: 700; font-size: 1.75rem; color: var(--sl-color-primary-900); margin-bottom: 1rem; letter-spacing: -0.025em;">${formattedTitle}</h3>
-        <div style="font-family: var(--body-font); line-height: 1.6; color: var(--sl-color-neutral-700); margin-bottom: 1.5rem; font-size: 1.05rem;">${chapter.description || ''}</div>
-        <div style="display: flex; gap: 2rem; margin-bottom: 1rem;">
-          <p style="font-family: var(--body-font); font-weight: 500; color: var(--sl-color-neutral-600); margin: 0;"><strong>Questions:</strong> ${((_a = chapter.questions) === null || _a === void 0 ? void 0 : _a.length) || 0}</p>
-          <p style="font-family: var(--body-font); font-weight: 500; color: var(--sl-color-neutral-600); margin: 0;"><strong>Subchapters:</strong> ${((_b = chapter.subchapters) === null || _b === void 0 ? void 0 : _b.length) || 0}</p>
-        </div>
-      </div>
-    `;
-      }
-  }
   // Utility class for rendering helpers
   class EFPRenderUtils {
       static renderMainContent(currentSectionIndex, flatSteps, currentStepIndex, activeContent, html, unsafeHTML, renderSubchapter, renderChapter) {
