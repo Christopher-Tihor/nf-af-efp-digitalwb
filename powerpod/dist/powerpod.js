@@ -36835,6 +36835,33 @@
       }
   }
 
+  class EFPLifecycleUtils {
+      static handleStepIndexChange(currentStepIndex, flatSteps, activeContent, onContentUpdate, onNavigationUpdate) {
+          const step = flatSteps[currentStepIndex];
+          if (step && (activeContent.title !== step.label || activeContent.content !== step.content)) {
+              const newContent = {
+                  title: step.label,
+                  content: step.content,
+              };
+              onContentUpdate(newContent);
+              onNavigationUpdate === null || onNavigationUpdate === void 0 ? void 0 : onNavigationUpdate(step.label);
+              return true; // Content was updated
+          }
+          return false; // No update needed
+      }
+      static handleSectionIndexChange(currentSectionIndex, tabGroupEl, onTabUpdate) {
+          var _a;
+          if (tabGroupEl) {
+              const activeTab = `section-${currentSectionIndex}`;
+              (_a = tabGroupEl.show) === null || _a === void 0 ? void 0 : _a.call(tabGroupEl, activeTab);
+              onTabUpdate === null || onTabUpdate === void 0 ? void 0 : onTabUpdate();
+          }
+      }
+      static shouldRequestUpdate(changedProps, watchedProps) {
+          return watchedProps.some(prop => changedProps.has(prop));
+      }
+  }
+
   const efpEntryFormStyles = i$4 `
   @import url('https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@400;500;600;700&display=swap');
   @import url('https://cdn.jsdelivr.net/npm/@bcgov/bc-sans@2.0.0/css/BCSans.css');
@@ -37282,33 +37309,6 @@
         `;
               }
           });
-      }
-  }
-  // Utility class for lifecycle management
-  class EFPLifecycleUtils {
-      static handleStepIndexChange(currentStepIndex, flatSteps, activeContent, onContentUpdate, onNavigationUpdate) {
-          const step = flatSteps[currentStepIndex];
-          if (step && (activeContent.title !== step.label || activeContent.content !== step.content)) {
-              const newContent = {
-                  title: step.label,
-                  content: step.content,
-              };
-              onContentUpdate(newContent);
-              onNavigationUpdate === null || onNavigationUpdate === void 0 ? void 0 : onNavigationUpdate(step.label);
-              return true; // Content was updated
-          }
-          return false; // No update needed
-      }
-      static handleSectionIndexChange(currentSectionIndex, tabGroupEl, onTabUpdate) {
-          var _a;
-          if (tabGroupEl) {
-              const activeTab = `section-${currentSectionIndex}`;
-              (_a = tabGroupEl.show) === null || _a === void 0 ? void 0 : _a.call(tabGroupEl, activeTab);
-              onTabUpdate === null || onTabUpdate === void 0 ? void 0 : onTabUpdate();
-          }
-      }
-      static shouldRequestUpdate(changedProps, watchedProps) {
-          return watchedProps.some(prop => changedProps.has(prop));
       }
   }
   let EFPEntryForm = class EFPEntryForm extends s$1 {
