@@ -1,32 +1,6 @@
 import { Logger } from '../../common/logger.js';
 
-// Type definitions (duplicated for module independence)
-export interface EFPStep {
-  label: string;
-  content: string;
-  complete?: boolean;
-  sectionIndex: number;
-  chapterData?: any;
-  subchapterData?: any;
-  isContainer?: boolean;
-}
-
-export interface EFPSection {
-  tab: string;
-  title: string;
-  items: EFPSectionItem[];
-}
-
-export interface EFPSectionItem {
-  label: string;
-  content?: string;
-  complete?: boolean;
-  items?: EFPSectionItem[];
-  title?: string;
-  isContainer?: boolean;
-  chapterData?: any;
-  subchapterData?: any;
-}
+import { EFPStep, EFPSection, EFPSectionItem } from './types.js';
 
 const logger = Logger('components/efp/navigation-utils');
 

@@ -38101,19 +38101,14 @@
           if (!this.sections || this.sections.length === 0 || !this.flatSteps || this.flatSteps.length === 0) {
               return;
           }
-          // Find the first selectable step in the first section
-          const firstSelectableStep = EFPNavigationUtils.findFirstSelectableStepInSection(0, // First section
-          this.flatSteps, this.sections);
-          if (firstSelectableStep) {
-              this.currentStepIndex = firstSelectableStep.index;
-              this.currentSectionIndex = 0;
-              // Update active content
-              this.activeContent = {
-                  title: firstSelectableStep.step.label,
-                  content: firstSelectableStep.step.content,
-              };
-              // Update navigation state
-              this.updateNavigationState(firstSelectableStep.step.label);
+          // Navigate to first selectable step in the first section via utils
+          const target = EFPNavigationUtils.navigateToSection(0, this.flatSteps, this.sections);
+          if (target) {
+              const step = this.flatSteps[target.stepIndex];
+              this.currentStepIndex = target.stepIndex;
+              this.currentSectionIndex = target.sectionIndex;
+              this.activeContent = { title: step.label, content: step.content };
+              this.updateNavigationState(step.label);
           }
       }
       handleBreadcrumbNavigation(event) {
@@ -38132,18 +38127,13 @@
       }
       navigateToHome() {
           // Navigate to first selectable step in first section
-          const firstSelectableStep = EFPNavigationUtils.findFirstSelectableStepInSection(0, // First section
-          this.flatSteps, this.sections);
-          if (firstSelectableStep) {
-              this.currentStepIndex = firstSelectableStep.index;
-              this.currentSectionIndex = 0;
-              // Update active content
-              this.activeContent = {
-                  title: firstSelectableStep.step.label,
-                  content: firstSelectableStep.step.content,
-              };
-              // Update navigation state
-              this.updateNavigationState(firstSelectableStep.step.label);
+          const target = EFPNavigationUtils.navigateToSection(0, this.flatSteps, this.sections);
+          if (target) {
+              const step = this.flatSteps[target.stepIndex];
+              this.currentStepIndex = target.stepIndex;
+              this.currentSectionIndex = target.sectionIndex;
+              this.activeContent = { title: step.label, content: step.content };
+              this.updateNavigationState(step.label);
               this.requestUpdate();
           }
           else {

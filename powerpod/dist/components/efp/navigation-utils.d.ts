@@ -1,27 +1,4 @@
-export interface EFPStep {
-    label: string;
-    content: string;
-    complete?: boolean;
-    sectionIndex: number;
-    chapterData?: any;
-    subchapterData?: any;
-    isContainer?: boolean;
-}
-export interface EFPSection {
-    tab: string;
-    title: string;
-    items: EFPSectionItem[];
-}
-export interface EFPSectionItem {
-    label: string;
-    content?: string;
-    complete?: boolean;
-    items?: EFPSectionItem[];
-    title?: string;
-    isContainer?: boolean;
-    chapterData?: any;
-    subchapterData?: any;
-}
+import { EFPStep, EFPSection, EFPSectionItem } from './types.js';
 export declare class EFPNavigationUtils {
     static isStepContainer(step: EFPStep, sections: EFPSection[]): boolean;
     static findLastSelectableStepInSection(sectionIndex: number, flatSteps: EFPStep[], sections: EFPSection[]): {

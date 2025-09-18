@@ -7,11 +7,6 @@ export interface EFPStep {
     subchapterData?: any;
     isContainer?: boolean;
 }
-export interface EFPSection {
-    tab: string;
-    title: string;
-    items: EFPSectionItem[];
-}
 export interface EFPSectionItem {
     label: string;
     content?: string;
@@ -22,29 +17,8 @@ export interface EFPSectionItem {
     chapterData?: any;
     subchapterData?: any;
 }
-export interface EFPActiveContent {
+export interface EFPSection {
+    tab: string;
     title: string;
-    content: string;
-}
-export interface EFPNavigationState {
-    currentSectionIndex: number;
-    currentStepIndex: number;
-    isNavigating: boolean;
-}
-export interface EFPSelectableStep {
-    step: EFPStep;
-    index: number;
-}
-export interface EFPChapterData {
-    name: string;
-    description?: string;
-    questions?: any[];
-    subchapters?: any[];
-}
-export interface EFPQuestion {
-    id: string;
-    text: string;
-    type: string;
-    options?: string[];
-    required?: boolean;
+    items: EFPSectionItem[];
 }
