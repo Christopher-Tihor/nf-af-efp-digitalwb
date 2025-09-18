@@ -100,5 +100,24 @@ describe('EFPNavigationUtils - flattening and navigation', () => {
     expect(flat[targetB.stepIndex].label).toBe('Sub 2.1');
     expect(targetB.sectionIndex).toBe(1);
   });
+
+  test('next/previous return null at boundaries', () => {
+    const sections = buildSections();
+    const flat = EFPNavigationUtils.getFlatStepsFromSections(sections);
+
+    const firstSelectable = EFPNavigationUtils.findNextSelectableStep(-1, flat, sections);
+    expect(firstSelectable).toBeGreaterThanOrEqual(0);
+
+    const lastIndex = flat.length - 1;
+    const lastSelectable = (() => {
+      for (let i = lastIndex; i >= 0; i--) {
+        if (!EFPNavigationUtils.isStepContainer(flat[i], sections) && !flat[i].label.startsWith('Section ')) return i;
+      }
+      return -1;
+    })();
+
+    expect(EFPNavigationUtils.findNextSelectableStep(lastSelectable, flat, sections)).toBeNull();
+    expect(EFPNavigationUtils.findPreviousSelectableStep(0, flat, sections)).toBeNull();
+  });
 });
 

@@ -43,6 +43,13 @@ function log({ namespace, fn, type, message, data }) {
   if (data && typeof data === 'object') logFn(data);
 }
 
+/**
+ * Create a namespaced logger
+ * @param {string|null} [namespace]
+ * @returns {{info: function({fn?: any, message?: any, data?: any}): void,
+ *            error: function({fn?: any, message?: any, data?: any}): void,
+ *            warn: function({fn?: any, message?: any, data?: any}): void}}
+ */
 export function Logger(namespace = null) {
   return {
     info: ({ fn = null, message, data = null }) =>

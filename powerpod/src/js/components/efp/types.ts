@@ -17,6 +17,8 @@ export interface EFPSectionItem {
   isContainer?: boolean;
   chapterData?: any;
   subchapterData?: any;
+  questionId?: string;
+  chapterId?: string;
 }
 
 export interface EFPSection {
@@ -25,3 +27,24 @@ export interface EFPSection {
   items: EFPSectionItem[];
 }
 
+export interface QuestionsAndResponsesEntry {
+  question: any | null;
+  response: any | null;
+}
+
+export interface QuestionsAndResponsesMemory {
+  questionsWithResponses: Map<string, QuestionsAndResponsesEntry>;
+  questionsByChapter: Map<string, QuestionsAndResponsesEntry[]>;
+  stats: {
+    totalQuestions: number;
+    answeredQuestions: number;
+    unansweredQuestions: number;
+    completionPercentage: number;
+    lastUpdated: string | null;
+  };
+  isLoaded: boolean;
+  isLoading: boolean;
+  workbookId: string | null;
+  lastUpdated: string | null;
+  error: string | null;
+}

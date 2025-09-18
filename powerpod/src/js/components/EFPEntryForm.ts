@@ -42,7 +42,7 @@ import { EFPRenderUtils } from './efp/render-utils.js';
 import { efpEntryFormStyles } from './EFPEntryForm.styles';
 
 // Shared type definitions
-import { EFPStep, EFPSection, EFPSectionItem } from './efp/types.js';
+import { EFPStep, EFPSection, EFPSectionItem, QuestionsAndResponsesMemory } from './efp/types.js';
 
 interface EFPActiveContent {
   title: string;
@@ -419,7 +419,7 @@ export class EFPEntryForm extends LitElement {
 
   // Generate Section B items directly from questionnaire store
   private getSectionBItemsFromStore(): EFPSectionItem[] {
-    const questionnaire = getQuestionnaireFromStore();
+    const questionnaire: any = getQuestionnaireFromStore();
 
     // If questionnaire store is not loaded, show loading state
     if (!questionnaire?.chapters?.length) {
@@ -1123,7 +1123,7 @@ export class EFPEntryForm extends LitElement {
       logger.info({ message: `Loading workbook questions and responses for workbook: ${workbookId}` });
 
       // Load questions and responses into nested structure
-      const result = await WorkbookResponseHelper.loadQuestionsAndResponses(workbookId);
+      const result = await WorkbookResponseHelper.loadQuestionsAndResponses(workbookId) as QuestionsAndResponsesMemory;
 
       // Also maintain backward compatibility with old structure
       const responses = Array.from(result.questionsWithResponses.values())

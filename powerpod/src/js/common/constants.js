@@ -161,13 +161,13 @@ export const POWERPOD = {
   examples: {},
   workbookResponseHelper: null,
   workbookResponses: {
-    data: [],
-    responsesByQuestion: new Map(),
+    data: /** @type {any[]} */ ([]),
+    responsesByQuestion: /** @type {Map<string, any>} */ (new Map()),
     isLoaded: false,
     isLoading: false,
-    workbookId: null,
-    lastUpdated: null,
-    error: null
+    workbookId: /** @type {string|null} */ (null),
+    lastUpdated: /** @type {string|null} */ (null),
+    error: /** @type {string|null} */ (null)
   },
   workbookQuestions: {
     data: [],
@@ -181,21 +181,21 @@ export const POWERPOD = {
   },
   workbookQuestionsAndResponses: {
     // Nested structure: questionId -> { question: {...}, response: {...} | null }
-    questionsWithResponses: new Map(),
+    questionsWithResponses: /** @type {Map<string, any>} */ (new Map()),
     // Organized by chapter: chapterId -> [{ question: {...}, response: {...} | null }]
-    questionsByChapter: new Map(),
+    questionsByChapter: /** @type {Map<string, any[]>} */ (new Map()),
     // Statistics
     stats: {
       totalQuestions: 0,
       answeredQuestions: 0,
       unansweredQuestions: 0,
       completionPercentage: 0,
-      lastUpdated: null
+      lastUpdated: /** @type {string|null} */ (null)
     },
     isLoaded: false,
     isLoading: false,
-    workbookId: null,
-    lastUpdated: null,
-    error: null
+    workbookId: /** @type {string|null} */ (null),
+    lastUpdated: /** @type {string|null} */ (null),
+    error: /** @type {string|null} */ (null)
   },
 };

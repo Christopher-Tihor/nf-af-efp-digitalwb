@@ -693,13 +693,13 @@
     examples: {},
     workbookResponseHelper: null,
     workbookResponses: {
-      data: [],
-      responsesByQuestion: new Map(),
+      data: (/** @type {any[]} */[]),
+      responsesByQuestion: (/** @type {Map<string, any>} */new Map()),
       isLoaded: false,
       isLoading: false,
-      workbookId: null,
-      lastUpdated: null,
-      error: null
+      workbookId: (/** @type {string|null} */null),
+      lastUpdated: (/** @type {string|null} */null),
+      error: (/** @type {string|null} */null)
     },
     workbookQuestions: {
       data: [],
@@ -713,22 +713,22 @@
     },
     workbookQuestionsAndResponses: {
       // Nested structure: questionId -> { question: {...}, response: {...} | null }
-      questionsWithResponses: new Map(),
+      questionsWithResponses: (/** @type {Map<string, any>} */new Map()),
       // Organized by chapter: chapterId -> [{ question: {...}, response: {...} | null }]
-      questionsByChapter: new Map(),
+      questionsByChapter: (/** @type {Map<string, any[]>} */new Map()),
       // Statistics
       stats: {
         totalQuestions: 0,
         answeredQuestions: 0,
         unansweredQuestions: 0,
         completionPercentage: 0,
-        lastUpdated: null
+        lastUpdated: (/** @type {string|null} */null)
       },
       isLoaded: false,
       isLoading: false,
-      workbookId: null,
-      lastUpdated: null,
-      error: null
+      workbookId: (/** @type {string|null} */null),
+      lastUpdated: (/** @type {string|null} */null),
+      error: (/** @type {string|null} */null)
     }
   };
 
@@ -770,6 +770,14 @@
     logFn('[POWERPOD]' + prefix + ': ' + message);
     if (data && _typeof(data) === 'object') logFn(data);
   }
+
+  /**
+   * Create a namespaced logger
+   * @param {string|null} [namespace]
+   * @returns {{info: function({fn?: any, message?: any, data?: any}): void,
+   *            error: function({fn?: any, message?: any, data?: any}): void,
+   *            warn: function({fn?: any, message?: any, data?: any}): void}}
+   */
   function Logger() {
     var namespace = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
     return {

@@ -112,13 +112,13 @@ export namespace POWERPOD {
     let examples: {};
     let workbookResponseHelper: null;
     namespace workbookResponses {
-        let data: never[];
-        let responsesByQuestion: Map<any, any>;
+        let data: any[];
+        let responsesByQuestion: Map<string, any>;
         let isLoaded: boolean;
         let isLoading: boolean;
-        let workbookId: null;
-        let lastUpdated: null;
-        let error: null;
+        let workbookId: string | null;
+        let lastUpdated: string | null;
+        let error: string | null;
     }
     namespace workbookQuestions {
         let data_1: never[];
@@ -137,26 +137,26 @@ export namespace POWERPOD {
         export { error_1 as error };
     }
     namespace workbookQuestionsAndResponses {
-        export let questionsWithResponses: Map<any, any>;
-        let questionsByChapter_1: Map<any, any>;
+        export let questionsWithResponses: Map<string, any>;
+        let questionsByChapter_1: Map<string, any[]>;
         export { questionsByChapter_1 as questionsByChapter };
         export namespace stats {
             export let totalQuestions: number;
             export let answeredQuestions: number;
             export let unansweredQuestions: number;
             export let completionPercentage: number;
-            let lastUpdated_2: null;
+            let lastUpdated_2: string | null;
             export { lastUpdated_2 as lastUpdated };
         }
         let isLoaded_2: boolean;
         export { isLoaded_2 as isLoaded };
         let isLoading_2: boolean;
         export { isLoading_2 as isLoading };
-        let workbookId_2: null;
+        let workbookId_2: string | null;
         export { workbookId_2 as workbookId };
-        let lastUpdated_3: null;
+        let lastUpdated_3: string | null;
         export { lastUpdated_3 as lastUpdated };
-        let error_2: null;
+        let error_2: string | null;
         export { error_2 as error };
     }
 }
