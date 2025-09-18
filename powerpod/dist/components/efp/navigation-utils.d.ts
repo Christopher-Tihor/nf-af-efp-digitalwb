@@ -34,5 +34,15 @@ export declare class EFPNavigationUtils {
     } | null;
     static findContainersForItem(itemLabel: string, sections: EFPSection[]): string[];
     static itemExistsInChildren(items: EFPSectionItem[], targetLabel: string): boolean;
-    private static getFlatStepsFromSections;
+    static getFlatStepsFromSections(sections: EFPSection[]): EFPStep[];
+    static findNextSelectableStep(currentIndex: number, flatSteps: EFPStep[], sections: EFPSection[]): number | null;
+    static findPreviousSelectableStep(currentIndex: number, flatSteps: EFPStep[], sections: EFPSection[]): number | null;
+    static navigateToStep(targetIndex: number, flatSteps: EFPStep[], sections: EFPSection[]): {
+        stepIndex: number;
+        sectionIndex: number;
+    } | null;
+    static navigateToSection(targetSectionIndex: number, flatSteps: EFPStep[], sections: EFPSection[]): {
+        stepIndex: number;
+        sectionIndex: number;
+    } | null;
 }

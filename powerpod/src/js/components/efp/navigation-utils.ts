@@ -175,7 +175,7 @@ export class EFPNavigationUtils {
     return false;
   }
 
-  private static getFlatStepsFromSections(sections: EFPSection[]): EFPStep[] {
+  static getFlatStepsFromSections(sections: EFPSection[]): EFPStep[] {
     const result: EFPStep[] = [];
 
     const collect = (items: EFPSectionItem[], sectionIndex: number) => {
@@ -223,6 +223,80 @@ export class EFPNavigationUtils {
     });
 
     return result;
+  }
+  static findNextSelectableStep(
+    currentIndex: number,
+    flatSteps: EFPStep[],
+    sections: EFPSection[]
+  ): number | null {
+    for (let i = currentIndex + 1; i < flatSteps.length; i++) {
+      if (!EFPNavigationUtils.isStepContainer(flatSteps[i], sections)) {
+        logger.info({ message: `Next selectable step: "${flatSteps[i].label}" at index ${i}` });
+        return i;
+      }
+    }
+    logger.warn({ message: `No next selectable step after index ${currentIndex}` });
+    return null;
+  }
+
+  static findPreviousSelectableStep(
+    currentIndex: number,
+    flatSteps: EFPStep[],
+    sections: EFPSection[]
+  ): number | null {
+    for (let i = currentIndex - 1; i >= 0; i--) {
+      if (!EFPNavigationUtils.isStepContainer(flatSteps[i], sections)) {
+        logger.info({ message: `Previous selectable step: "${flatSteps[i].label}" at index ${i}` });
+        return i;
+      }
+    }
+    logger.warn({ message: `No previous selectable step before index ${currentIndex}` });
+    return null;
+  }
+
+  static navigateToStep(
+    targetIndex: number,
+    flatSteps: EFPStep[],
+    sections: EFPSection[]
+  ): { stepIndex: number; sectionIndex: number } | null {
+    if (targetIndex < 0 || targetIndex >= flatSteps.length) {
+      logger.warn({ message: `navigateToStep: targetIndex ${targetIndex} out of range` });
+      return null;
+    }
+
+    let index = targetIndex;
+
+    if (EFPNavigationUtils.isStepContainer(flatSteps[index], sections)) {
+      const tryNext = EFPNavigationUtils.findNextSelectableStep(index, flatSteps, sections);
+      const tryPrev = EFPNavigationUtils.findPreviousSelectableStep(index, flatSteps, sections);
+      index = (tryNext ?? tryPrev) ?? -1;
+
+      if (index === -1) {
+        logger.warn({ message: `navigateToStep: no selectable step near container at index ${targetIndex}` });
+        return null;
+      }
+    }
+
+    return { stepIndex: index, sectionIndex: flatSteps[index].sectionIndex };
+  }
+
+  static navigateToSection(
+    targetSectionIndex: number,
+    flatSteps: EFPStep[],
+    sections: EFPSection[]
+  ): { stepIndex: number; sectionIndex: number } | null {
+    const first = EFPNavigationUtils.findFirstSelectableStepInSection(
+      targetSectionIndex,
+      flatSteps,
+      sections
+    );
+
+    if (!first) {
+      logger.warn({ message: `navigateToSection: no selectable step found in section ${targetSectionIndex}` });
+      return null;
+    }
+
+    return { stepIndex: first.index, sectionIndex: first.step.sectionIndex };
   }
 }
 
