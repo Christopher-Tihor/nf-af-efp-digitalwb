@@ -204,8 +204,9 @@ export class EFPNavigationUtils {
     sections: EFPSection[]
   ): number | null {
     for (let i = currentIndex + 1; i < flatSteps.length; i++) {
-      if (!EFPNavigationUtils.isStepContainer(flatSteps[i], sections)) {
-        logger.info({ message: `Next selectable step: "${flatSteps[i].label}" at index ${i}` });
+      const step = flatSteps[i];
+      if (!EFPNavigationUtils.isStepContainer(step, sections) && !step.label.startsWith('Section ')) {
+        logger.info({ message: `Next selectable step: "${step.label}" at index ${i}` });
         return i;
       }
     }
@@ -219,8 +220,9 @@ export class EFPNavigationUtils {
     sections: EFPSection[]
   ): number | null {
     for (let i = currentIndex - 1; i >= 0; i--) {
-      if (!EFPNavigationUtils.isStepContainer(flatSteps[i], sections)) {
-        logger.info({ message: `Previous selectable step: "${flatSteps[i].label}" at index ${i}` });
+      const step = flatSteps[i];
+      if (!EFPNavigationUtils.isStepContainer(step, sections) && !step.label.startsWith('Section ')) {
+        logger.info({ message: `Previous selectable step: "${step.label}" at index ${i}` });
         return i;
       }
     }

@@ -41,33 +41,8 @@ import { EFPRenderUtils } from './efp/render-utils.js';
 
 import { efpEntryFormStyles } from './EFPEntryForm.styles';
 
-// Type definitions for better type safety
-interface EFPStep {
-  label: string;
-  content: string;
-  complete?: boolean;
-  sectionIndex: number;
-  chapterData?: any;
-  subchapterData?: any;
-  isContainer?: boolean;
-}
-
-interface EFPSection {
-  tab: string;
-  title: string;
-  items: EFPSectionItem[];
-}
-
-interface EFPSectionItem {
-  label: string;
-  content?: string;
-  complete?: boolean;
-  items?: EFPSectionItem[];
-  title?: string;
-  isContainer?: boolean;
-  chapterData?: any;
-  subchapterData?: any;
-}
+// Shared type definitions
+import { EFPStep, EFPSection, EFPSectionItem } from './efp/types.js';
 
 interface EFPActiveContent {
   title: string;
@@ -973,7 +948,7 @@ export class EFPEntryForm extends LitElement {
   }
 
   private get flatSteps(): EFPStep[] {
-    return EFPNavigationUtils.getFlatStepsFromSections(this.sections as unknown as any);
+    return EFPNavigationUtils.getFlatStepsFromSections(this.sections);
   }
 
 
