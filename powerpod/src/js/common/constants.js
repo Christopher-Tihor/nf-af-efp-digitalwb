@@ -13,7 +13,10 @@ export const Hosts = {
     'af-efp-dev.powerappsportals.com',
     'af-pods-dev.crm3.dynamics.com',
   ],
-  [Environment.TEST]: ['af-pods-test.powerappsportals.com'],
+  [Environment.TEST]: [
+    'af-pods-test.powerappsportals.com',
+    'af-efp-test.powerappsportals.com',
+  ],
   [Environment.PROD]: ['af-pods.powerappsportals.com'],
 };
 export const ClaimPaths = ['/claim/', '/claim-dev/'];
@@ -167,7 +170,7 @@ export const POWERPOD = {
     isLoading: false,
     workbookId: /** @type {string|null} */ (null),
     lastUpdated: /** @type {string|null} */ (null),
-    error: /** @type {string|null} */ (null)
+    error: /** @type {string|null} */ (null),
   },
   workbookQuestions: {
     data: [],
@@ -177,7 +180,7 @@ export const POWERPOD = {
     isLoading: false,
     workbookId: null,
     lastUpdated: null,
-    error: null
+    error: null,
   },
   workbookQuestionsAndResponses: {
     // Nested structure: questionId -> { question: {...}, response: {...} | null }
@@ -190,12 +193,12 @@ export const POWERPOD = {
       answeredQuestions: 0,
       unansweredQuestions: 0,
       completionPercentage: 0,
-      lastUpdated: /** @type {string|null} */ (null)
+      lastUpdated: /** @type {string|null} */ (null),
     },
     isLoaded: false,
     isLoading: false,
     workbookId: /** @type {string|null} */ (null),
     lastUpdated: /** @type {string|null} */ (null),
-    error: /** @type {string|null} */ (null)
+    error: /** @type {string|null} */ (null),
   },
 };

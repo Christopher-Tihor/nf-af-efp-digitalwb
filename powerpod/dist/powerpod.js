@@ -1,5 +1,5 @@
 /*!
-* powerpod 4.2.7
+* powerpod 4.2.8
 * https://github.com/bcgov/nr-af-pods/powerpod
 *
 * @license GPLv3 for open source use only
@@ -588,7 +588,7 @@
     TEST: 'test',
     PROD: 'prod'
   };
-  var Hosts = _defineProperty(_defineProperty(_defineProperty({}, Environment.DEV, ['af-pods-dev.powerappsportals.com', 'af-efp-dev.powerappsportals.com', 'af-pods-dev.crm3.dynamics.com']), Environment.TEST, ['af-pods-test.powerappsportals.com']), Environment.PROD, ['af-pods.powerappsportals.com']);
+  var Hosts = _defineProperty(_defineProperty(_defineProperty({}, Environment.DEV, ['af-pods-dev.powerappsportals.com', 'af-efp-dev.powerappsportals.com', 'af-pods-dev.crm3.dynamics.com']), Environment.TEST, ['af-pods-test.powerappsportals.com', 'af-efp-test.powerappsportals.com']), Environment.PROD, ['af-pods.powerappsportals.com']);
   var ClaimPaths = ['/claim/', '/claim-dev/'];
   var ApplicationPaths = ['/application/', '/application-dev/'];
   var HomePaths = ['/', '/home-dev/'];
@@ -39005,7 +39005,7 @@
       };
     };
     // @ts-ignore
-    POWERPOD.version = '4.2.7';
+    POWERPOD.version = '4.2.8';
     // @ts-ignore
     window.powerpod = POWERPOD;
   }
