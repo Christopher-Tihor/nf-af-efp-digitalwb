@@ -1,5 +1,5 @@
 /*!
-* powerpod 4.2.8
+* powerpod 4.2.9
 * https://github.com/bcgov/nr-af-pods/powerpod
 *
 * @license GPLv3 for open source use only
@@ -13,6 +13,124 @@
   (global = typeof globalThis !== 'undefined' ? globalThis : global || self, global.powerpod = factory());
 })(this, (function () { 'use strict';
 
+  function _arrayLikeToArray(r, a) {
+    (null == a || a > r.length) && (a = r.length);
+    for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
+    return n;
+  }
+  function _arrayWithHoles(r) {
+    if (Array.isArray(r)) return r;
+  }
+  function _arrayWithoutHoles(r) {
+    if (Array.isArray(r)) return _arrayLikeToArray(r);
+  }
+  function asyncGeneratorStep(n, t, e, r, o, a, c) {
+    try {
+      var i = n[a](c),
+        u = i.value;
+    } catch (n) {
+      return void e(n);
+    }
+    i.done ? t(u) : Promise.resolve(u).then(r, o);
+  }
+  function _asyncToGenerator(n) {
+    return function () {
+      var t = this,
+        e = arguments;
+      return new Promise(function (r, o) {
+        var a = n.apply(t, e);
+        function _next(n) {
+          asyncGeneratorStep(a, r, o, _next, _throw, "next", n);
+        }
+        function _throw(n) {
+          asyncGeneratorStep(a, r, o, _next, _throw, "throw", n);
+        }
+        _next(void 0);
+      });
+    };
+  }
+  function _classCallCheck(a, n) {
+    if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function");
+  }
+  function _defineProperties(e, r) {
+    for (var t = 0; t < r.length; t++) {
+      var o = r[t];
+      o.enumerable = o.enumerable || !1, o.configurable = !0, "value" in o && (o.writable = !0), Object.defineProperty(e, _toPropertyKey(o.key), o);
+    }
+  }
+  function _createClass(e, r, t) {
+    return r && _defineProperties(e.prototype, r), t && _defineProperties(e, t), Object.defineProperty(e, "prototype", {
+      writable: !1
+    }), e;
+  }
+  function _createForOfIteratorHelper(r, e) {
+    var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
+    if (!t) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray(r)) || e && r && "number" == typeof r.length) {
+        t && (r = t);
+        var n = 0,
+          F = function () {};
+        return {
+          s: F,
+          n: function () {
+            return n >= r.length ? {
+              done: !0
+            } : {
+              done: !1,
+              value: r[n++]
+            };
+          },
+          e: function (r) {
+            throw r;
+          },
+          f: F
+        };
+      }
+      throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+    }
+    var o,
+      a = !0,
+      u = !1;
+    return {
+      s: function () {
+        t = t.call(r);
+      },
+      n: function () {
+        var r = t.next();
+        return a = r.done, r;
+      },
+      e: function (r) {
+        u = !0, o = r;
+      },
+      f: function () {
+        try {
+          a || null == t.return || t.return();
+        } finally {
+          if (u) throw o;
+        }
+      }
+    };
+  }
+  function _defineProperty(e, r, t) {
+    return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, {
+      value: t,
+      enumerable: !0,
+      configurable: !0,
+      writable: !0
+    }) : e[r] = t, e;
+  }
+  function _extends() {
+    return _extends = Object.assign ? Object.assign.bind() : function (n) {
+      for (var e = 1; e < arguments.length; e++) {
+        var t = arguments[e];
+        for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]);
+      }
+      return n;
+    }, _extends.apply(null, arguments);
+  }
+  function _iterableToArray(r) {
+    if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
+  }
   function _iterableToArrayLimit(r, l) {
     var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (null != t) {
@@ -40,6 +158,15 @@
       return a;
     }
   }
+  function _nonIterableRest() {
+    throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+  }
+  function _nonIterableSpread() {
+    throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+  }
+  function _objectDestructuringEmpty(t) {
+    if (null == t) throw new TypeError("Cannot destructure " + t);
+  }
   function ownKeys(e, r) {
     var t = Object.keys(e);
     if (Object.getOwnPropertySymbols) {
@@ -61,306 +188,139 @@
     }
     return e;
   }
-  function _regeneratorRuntime() {
-    _regeneratorRuntime = function () {
-      return e;
-    };
-    var t,
-      e = {},
-      r = Object.prototype,
-      n = r.hasOwnProperty,
-      o = Object.defineProperty || function (t, e, r) {
-        t[e] = r.value;
-      },
-      i = "function" == typeof Symbol ? Symbol : {},
-      a = i.iterator || "@@iterator",
-      c = i.asyncIterator || "@@asyncIterator",
-      u = i.toStringTag || "@@toStringTag";
-    function define(t, e, r) {
-      return Object.defineProperty(t, e, {
-        value: r,
-        enumerable: !0,
-        configurable: !0,
-        writable: !0
-      }), t[e];
+  function _objectWithoutProperties(e, t) {
+    if (null == e) return {};
+    var o,
+      r,
+      i = _objectWithoutPropertiesLoose(e, t);
+    if (Object.getOwnPropertySymbols) {
+      var n = Object.getOwnPropertySymbols(e);
+      for (r = 0; r < n.length; r++) o = n[r], -1 === t.indexOf(o) && {}.propertyIsEnumerable.call(e, o) && (i[o] = e[o]);
     }
-    try {
-      define({}, "");
-    } catch (t) {
-      define = function (t, e, r) {
-        return t[e] = r;
-      };
+    return i;
+  }
+  function _objectWithoutPropertiesLoose(r, e) {
+    if (null == r) return {};
+    var t = {};
+    for (var n in r) if ({}.hasOwnProperty.call(r, n)) {
+      if (-1 !== e.indexOf(n)) continue;
+      t[n] = r[n];
     }
-    function wrap(t, e, r, n) {
-      var i = e && e.prototype instanceof Generator ? e : Generator,
-        a = Object.create(i.prototype),
-        c = new Context(n || []);
-      return o(a, "_invoke", {
-        value: makeInvokeMethod(t, r, c)
-      }), a;
-    }
-    function tryCatch(t, e, r) {
-      try {
-        return {
-          type: "normal",
-          arg: t.call(e, r)
+    return t;
+  }
+  function _regenerator() {
+    /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/babel/babel/blob/main/packages/babel-helpers/LICENSE */
+    var e,
+      t,
+      r = "function" == typeof Symbol ? Symbol : {},
+      n = r.iterator || "@@iterator",
+      o = r.toStringTag || "@@toStringTag";
+    function i(r, n, o, i) {
+      var c = n && n.prototype instanceof Generator ? n : Generator,
+        u = Object.create(c.prototype);
+      return _regeneratorDefine(u, "_invoke", function (r, n, o) {
+        var i,
+          c,
+          u,
+          f = 0,
+          p = o || [],
+          y = !1,
+          G = {
+            p: 0,
+            n: 0,
+            v: e,
+            a: d,
+            f: d.bind(e, 4),
+            d: function (t, r) {
+              return i = t, c = 0, u = e, G.n = r, a;
+            }
+          };
+        function d(r, n) {
+          for (c = r, u = n, t = 0; !y && f && !o && t < p.length; t++) {
+            var o,
+              i = p[t],
+              d = G.p,
+              l = i[2];
+            r > 3 ? (o = l === n) && (u = i[(c = i[4]) ? 5 : (c = 3, 3)], i[4] = i[5] = e) : i[0] <= d && ((o = r < 2 && d < i[1]) ? (c = 0, G.v = n, G.n = i[1]) : d < l && (o = r < 3 || i[0] > n || n > l) && (i[4] = r, i[5] = n, G.n = l, c = 0));
+          }
+          if (o || r > 1) return a;
+          throw y = !0, n;
+        }
+        return function (o, p, l) {
+          if (f > 1) throw TypeError("Generator is already running");
+          for (y && 1 === p && d(p, l), c = p, u = l; (t = c < 2 ? e : u) || !y;) {
+            i || (c ? c < 3 ? (c > 1 && (G.n = -1), d(c, u)) : G.n = u : G.v = u);
+            try {
+              if (f = 2, i) {
+                if (c || (o = "next"), t = i[o]) {
+                  if (!(t = t.call(i, u))) throw TypeError("iterator result is not an object");
+                  if (!t.done) return t;
+                  u = t.value, c < 2 && (c = 0);
+                } else 1 === c && (t = i.return) && t.call(i), c < 2 && (u = TypeError("The iterator does not provide a '" + o + "' method"), c = 1);
+                i = e;
+              } else if ((t = (y = G.n < 0) ? u : r.call(n, G)) !== a) break;
+            } catch (t) {
+              i = e, c = 1, u = t;
+            } finally {
+              f = 1;
+            }
+          }
+          return {
+            value: t,
+            done: y
+          };
         };
-      } catch (t) {
-        return {
-          type: "throw",
-          arg: t
-        };
-      }
+      }(r, o, i), !0), u;
     }
-    e.wrap = wrap;
-    var h = "suspendedStart",
-      l = "suspendedYield",
-      f = "executing",
-      s = "completed",
-      y = {};
+    var a = {};
     function Generator() {}
     function GeneratorFunction() {}
     function GeneratorFunctionPrototype() {}
-    var p = {};
-    define(p, a, function () {
+    t = Object.getPrototypeOf;
+    var c = [][n] ? t(t([][n]())) : (_regeneratorDefine(t = {}, n, function () {
+        return this;
+      }), t),
+      u = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(c);
+    function f(e) {
+      return Object.setPrototypeOf ? Object.setPrototypeOf(e, GeneratorFunctionPrototype) : (e.__proto__ = GeneratorFunctionPrototype, _regeneratorDefine(e, o, "GeneratorFunction")), e.prototype = Object.create(u), e;
+    }
+    return GeneratorFunction.prototype = GeneratorFunctionPrototype, _regeneratorDefine(u, "constructor", GeneratorFunctionPrototype), _regeneratorDefine(GeneratorFunctionPrototype, "constructor", GeneratorFunction), GeneratorFunction.displayName = "GeneratorFunction", _regeneratorDefine(GeneratorFunctionPrototype, o, "GeneratorFunction"), _regeneratorDefine(u), _regeneratorDefine(u, o, "Generator"), _regeneratorDefine(u, n, function () {
       return this;
-    });
-    var d = Object.getPrototypeOf,
-      v = d && d(d(values([])));
-    v && v !== r && n.call(v, a) && (p = v);
-    var g = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(p);
-    function defineIteratorMethods(t) {
-      ["next", "throw", "return"].forEach(function (e) {
-        define(t, e, function (t) {
-          return this._invoke(e, t);
-        });
-      });
-    }
-    function AsyncIterator(t, e) {
-      function invoke(r, o, i, a) {
-        var c = tryCatch(t[r], t, o);
-        if ("throw" !== c.type) {
-          var u = c.arg,
-            h = u.value;
-          return h && "object" == typeof h && n.call(h, "__await") ? e.resolve(h.__await).then(function (t) {
-            invoke("next", t, i, a);
-          }, function (t) {
-            invoke("throw", t, i, a);
-          }) : e.resolve(h).then(function (t) {
-            u.value = t, i(u);
-          }, function (t) {
-            return invoke("throw", t, i, a);
-          });
-        }
-        a(c.arg);
-      }
-      var r;
-      o(this, "_invoke", {
-        value: function (t, n) {
-          function callInvokeWithMethodAndArg() {
-            return new e(function (e, r) {
-              invoke(t, n, e, r);
-            });
-          }
-          return r = r ? r.then(callInvokeWithMethodAndArg, callInvokeWithMethodAndArg) : callInvokeWithMethodAndArg();
-        }
-      });
-    }
-    function makeInvokeMethod(e, r, n) {
-      var o = h;
-      return function (i, a) {
-        if (o === f) throw new Error("Generator is already running");
-        if (o === s) {
-          if ("throw" === i) throw a;
-          return {
-            value: t,
-            done: !0
-          };
-        }
-        for (n.method = i, n.arg = a;;) {
-          var c = n.delegate;
-          if (c) {
-            var u = maybeInvokeDelegate(c, n);
-            if (u) {
-              if (u === y) continue;
-              return u;
-            }
-          }
-          if ("next" === n.method) n.sent = n._sent = n.arg;else if ("throw" === n.method) {
-            if (o === h) throw o = s, n.arg;
-            n.dispatchException(n.arg);
-          } else "return" === n.method && n.abrupt("return", n.arg);
-          o = f;
-          var p = tryCatch(e, r, n);
-          if ("normal" === p.type) {
-            if (o = n.done ? s : l, p.arg === y) continue;
-            return {
-              value: p.arg,
-              done: n.done
-            };
-          }
-          "throw" === p.type && (o = s, n.method = "throw", n.arg = p.arg);
-        }
-      };
-    }
-    function maybeInvokeDelegate(e, r) {
-      var n = r.method,
-        o = e.iterator[n];
-      if (o === t) return r.delegate = null, "throw" === n && e.iterator.return && (r.method = "return", r.arg = t, maybeInvokeDelegate(e, r), "throw" === r.method) || "return" !== n && (r.method = "throw", r.arg = new TypeError("The iterator does not provide a '" + n + "' method")), y;
-      var i = tryCatch(o, e.iterator, r.arg);
-      if ("throw" === i.type) return r.method = "throw", r.arg = i.arg, r.delegate = null, y;
-      var a = i.arg;
-      return a ? a.done ? (r[e.resultName] = a.value, r.next = e.nextLoc, "return" !== r.method && (r.method = "next", r.arg = t), r.delegate = null, y) : a : (r.method = "throw", r.arg = new TypeError("iterator result is not an object"), r.delegate = null, y);
-    }
-    function pushTryEntry(t) {
-      var e = {
-        tryLoc: t[0]
-      };
-      1 in t && (e.catchLoc = t[1]), 2 in t && (e.finallyLoc = t[2], e.afterLoc = t[3]), this.tryEntries.push(e);
-    }
-    function resetTryEntry(t) {
-      var e = t.completion || {};
-      e.type = "normal", delete e.arg, t.completion = e;
-    }
-    function Context(t) {
-      this.tryEntries = [{
-        tryLoc: "root"
-      }], t.forEach(pushTryEntry, this), this.reset(!0);
-    }
-    function values(e) {
-      if (e || "" === e) {
-        var r = e[a];
-        if (r) return r.call(e);
-        if ("function" == typeof e.next) return e;
-        if (!isNaN(e.length)) {
-          var o = -1,
-            i = function next() {
-              for (; ++o < e.length;) if (n.call(e, o)) return next.value = e[o], next.done = !1, next;
-              return next.value = t, next.done = !0, next;
-            };
-          return i.next = i;
-        }
-      }
-      throw new TypeError(typeof e + " is not iterable");
-    }
-    return GeneratorFunction.prototype = GeneratorFunctionPrototype, o(g, "constructor", {
-      value: GeneratorFunctionPrototype,
-      configurable: !0
-    }), o(GeneratorFunctionPrototype, "constructor", {
-      value: GeneratorFunction,
-      configurable: !0
-    }), GeneratorFunction.displayName = define(GeneratorFunctionPrototype, u, "GeneratorFunction"), e.isGeneratorFunction = function (t) {
-      var e = "function" == typeof t && t.constructor;
-      return !!e && (e === GeneratorFunction || "GeneratorFunction" === (e.displayName || e.name));
-    }, e.mark = function (t) {
-      return Object.setPrototypeOf ? Object.setPrototypeOf(t, GeneratorFunctionPrototype) : (t.__proto__ = GeneratorFunctionPrototype, define(t, u, "GeneratorFunction")), t.prototype = Object.create(g), t;
-    }, e.awrap = function (t) {
-      return {
-        __await: t
-      };
-    }, defineIteratorMethods(AsyncIterator.prototype), define(AsyncIterator.prototype, c, function () {
-      return this;
-    }), e.AsyncIterator = AsyncIterator, e.async = function (t, r, n, o, i) {
-      void 0 === i && (i = Promise);
-      var a = new AsyncIterator(wrap(t, r, n, o), i);
-      return e.isGeneratorFunction(r) ? a : a.next().then(function (t) {
-        return t.done ? t.value : a.next();
-      });
-    }, defineIteratorMethods(g), define(g, u, "Generator"), define(g, a, function () {
-      return this;
-    }), define(g, "toString", function () {
+    }), _regeneratorDefine(u, "toString", function () {
       return "[object Generator]";
-    }), e.keys = function (t) {
-      var e = Object(t),
-        r = [];
-      for (var n in e) r.push(n);
-      return r.reverse(), function next() {
-        for (; r.length;) {
-          var t = r.pop();
-          if (t in e) return next.value = t, next.done = !1, next;
-        }
-        return next.done = !0, next;
+    }), (_regenerator = function () {
+      return {
+        w: i,
+        m: f
       };
-    }, e.values = values, Context.prototype = {
-      constructor: Context,
-      reset: function (e) {
-        if (this.prev = 0, this.next = 0, this.sent = this._sent = t, this.done = !1, this.delegate = null, this.method = "next", this.arg = t, this.tryEntries.forEach(resetTryEntry), !e) for (var r in this) "t" === r.charAt(0) && n.call(this, r) && !isNaN(+r.slice(1)) && (this[r] = t);
-      },
-      stop: function () {
-        this.done = !0;
-        var t = this.tryEntries[0].completion;
-        if ("throw" === t.type) throw t.arg;
-        return this.rval;
-      },
-      dispatchException: function (e) {
-        if (this.done) throw e;
-        var r = this;
-        function handle(n, o) {
-          return a.type = "throw", a.arg = e, r.next = n, o && (r.method = "next", r.arg = t), !!o;
-        }
-        for (var o = this.tryEntries.length - 1; o >= 0; --o) {
-          var i = this.tryEntries[o],
-            a = i.completion;
-          if ("root" === i.tryLoc) return handle("end");
-          if (i.tryLoc <= this.prev) {
-            var c = n.call(i, "catchLoc"),
-              u = n.call(i, "finallyLoc");
-            if (c && u) {
-              if (this.prev < i.catchLoc) return handle(i.catchLoc, !0);
-              if (this.prev < i.finallyLoc) return handle(i.finallyLoc);
-            } else if (c) {
-              if (this.prev < i.catchLoc) return handle(i.catchLoc, !0);
-            } else {
-              if (!u) throw new Error("try statement without catch or finally");
-              if (this.prev < i.finallyLoc) return handle(i.finallyLoc);
-            }
-          }
-        }
-      },
-      abrupt: function (t, e) {
-        for (var r = this.tryEntries.length - 1; r >= 0; --r) {
-          var o = this.tryEntries[r];
-          if (o.tryLoc <= this.prev && n.call(o, "finallyLoc") && this.prev < o.finallyLoc) {
-            var i = o;
-            break;
-          }
-        }
-        i && ("break" === t || "continue" === t) && i.tryLoc <= e && e <= i.finallyLoc && (i = null);
-        var a = i ? i.completion : {};
-        return a.type = t, a.arg = e, i ? (this.method = "next", this.next = i.finallyLoc, y) : this.complete(a);
-      },
-      complete: function (t, e) {
-        if ("throw" === t.type) throw t.arg;
-        return "break" === t.type || "continue" === t.type ? this.next = t.arg : "return" === t.type ? (this.rval = this.arg = t.arg, this.method = "return", this.next = "end") : "normal" === t.type && e && (this.next = e), y;
-      },
-      finish: function (t) {
-        for (var e = this.tryEntries.length - 1; e >= 0; --e) {
-          var r = this.tryEntries[e];
-          if (r.finallyLoc === t) return this.complete(r.completion, r.afterLoc), resetTryEntry(r), y;
-        }
-      },
-      catch: function (t) {
-        for (var e = this.tryEntries.length - 1; e >= 0; --e) {
-          var r = this.tryEntries[e];
-          if (r.tryLoc === t) {
-            var n = r.completion;
-            if ("throw" === n.type) {
-              var o = n.arg;
-              resetTryEntry(r);
-            }
-            return o;
-          }
-        }
-        throw new Error("illegal catch attempt");
-      },
-      delegateYield: function (e, r, n) {
-        return this.delegate = {
-          iterator: values(e),
-          resultName: r,
-          nextLoc: n
-        }, "next" === this.method && (this.arg = t), y;
+    })();
+  }
+  function _regeneratorDefine(e, r, n, t) {
+    var i = Object.defineProperty;
+    try {
+      i({}, "", {});
+    } catch (e) {
+      i = 0;
+    }
+    _regeneratorDefine = function (e, r, n, t) {
+      function o(r, n) {
+        _regeneratorDefine(e, r, function (e) {
+          return this._invoke(r, n, e);
+        });
       }
-    }, e;
+      r ? i ? i(e, r, {
+        value: n,
+        enumerable: !t,
+        configurable: !t,
+        writable: !t
+      }) : e[r] = n : (o("next", 0), o("throw", 1), o("return", 2));
+    }, _regeneratorDefine(e, r, n, t);
+  }
+  function _slicedToArray(r, e) {
+    return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest();
+  }
+  function _toConsumableArray(r) {
+    return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread();
   }
   function _toPrimitive(t, r) {
     if ("object" != typeof t || !t) return t;
@@ -374,7 +334,7 @@
   }
   function _toPropertyKey(t) {
     var i = _toPrimitive(t, "string");
-    return "symbol" == typeof i ? i : String(i);
+    return "symbol" == typeof i ? i : i + "";
   }
   function _typeof(o) {
     "@babel/helpers - typeof";
@@ -385,200 +345,12 @@
       return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
     }, _typeof(o);
   }
-  function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) {
-    try {
-      var info = gen[key](arg);
-      var value = info.value;
-    } catch (error) {
-      reject(error);
-      return;
+  function _unsupportedIterableToArray(r, a) {
+    if (r) {
+      if ("string" == typeof r) return _arrayLikeToArray(r, a);
+      var t = {}.toString.call(r).slice(8, -1);
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0;
     }
-    if (info.done) {
-      resolve(value);
-    } else {
-      Promise.resolve(value).then(_next, _throw);
-    }
-  }
-  function _asyncToGenerator(fn) {
-    return function () {
-      var self = this,
-        args = arguments;
-      return new Promise(function (resolve, reject) {
-        var gen = fn.apply(self, args);
-        function _next(value) {
-          asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value);
-        }
-        function _throw(err) {
-          asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err);
-        }
-        _next(undefined);
-      });
-    };
-  }
-  function _classCallCheck(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
-  }
-  function _defineProperties(target, props) {
-    for (var i = 0; i < props.length; i++) {
-      var descriptor = props[i];
-      descriptor.enumerable = descriptor.enumerable || false;
-      descriptor.configurable = true;
-      if ("value" in descriptor) descriptor.writable = true;
-      Object.defineProperty(target, _toPropertyKey(descriptor.key), descriptor);
-    }
-  }
-  function _createClass(Constructor, protoProps, staticProps) {
-    if (protoProps) _defineProperties(Constructor.prototype, protoProps);
-    if (staticProps) _defineProperties(Constructor, staticProps);
-    Object.defineProperty(Constructor, "prototype", {
-      writable: false
-    });
-    return Constructor;
-  }
-  function _defineProperty(obj, key, value) {
-    key = _toPropertyKey(key);
-    if (key in obj) {
-      Object.defineProperty(obj, key, {
-        value: value,
-        enumerable: true,
-        configurable: true,
-        writable: true
-      });
-    } else {
-      obj[key] = value;
-    }
-    return obj;
-  }
-  function _extends() {
-    _extends = Object.assign ? Object.assign.bind() : function (target) {
-      for (var i = 1; i < arguments.length; i++) {
-        var source = arguments[i];
-        for (var key in source) {
-          if (Object.prototype.hasOwnProperty.call(source, key)) {
-            target[key] = source[key];
-          }
-        }
-      }
-      return target;
-    };
-    return _extends.apply(this, arguments);
-  }
-  function _objectDestructuringEmpty(obj) {
-    if (obj == null) throw new TypeError("Cannot destructure " + obj);
-  }
-  function _objectWithoutPropertiesLoose(source, excluded) {
-    if (source == null) return {};
-    var target = {};
-    var sourceKeys = Object.keys(source);
-    var key, i;
-    for (i = 0; i < sourceKeys.length; i++) {
-      key = sourceKeys[i];
-      if (excluded.indexOf(key) >= 0) continue;
-      target[key] = source[key];
-    }
-    return target;
-  }
-  function _objectWithoutProperties(source, excluded) {
-    if (source == null) return {};
-    var target = _objectWithoutPropertiesLoose(source, excluded);
-    var key, i;
-    if (Object.getOwnPropertySymbols) {
-      var sourceSymbolKeys = Object.getOwnPropertySymbols(source);
-      for (i = 0; i < sourceSymbolKeys.length; i++) {
-        key = sourceSymbolKeys[i];
-        if (excluded.indexOf(key) >= 0) continue;
-        if (!Object.prototype.propertyIsEnumerable.call(source, key)) continue;
-        target[key] = source[key];
-      }
-    }
-    return target;
-  }
-  function _slicedToArray(arr, i) {
-    return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest();
-  }
-  function _toConsumableArray(arr) {
-    return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread();
-  }
-  function _arrayWithoutHoles(arr) {
-    if (Array.isArray(arr)) return _arrayLikeToArray(arr);
-  }
-  function _arrayWithHoles(arr) {
-    if (Array.isArray(arr)) return arr;
-  }
-  function _iterableToArray(iter) {
-    if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter);
-  }
-  function _unsupportedIterableToArray(o, minLen) {
-    if (!o) return;
-    if (typeof o === "string") return _arrayLikeToArray(o, minLen);
-    var n = Object.prototype.toString.call(o).slice(8, -1);
-    if (n === "Object" && o.constructor) n = o.constructor.name;
-    if (n === "Map" || n === "Set") return Array.from(o);
-    if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen);
-  }
-  function _arrayLikeToArray(arr, len) {
-    if (len == null || len > arr.length) len = arr.length;
-    for (var i = 0, arr2 = new Array(len); i < len; i++) arr2[i] = arr[i];
-    return arr2;
-  }
-  function _nonIterableSpread() {
-    throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
-  }
-  function _nonIterableRest() {
-    throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
-  }
-  function _createForOfIteratorHelper(o, allowArrayLike) {
-    var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"];
-    if (!it) {
-      if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") {
-        if (it) o = it;
-        var i = 0;
-        var F = function () {};
-        return {
-          s: F,
-          n: function () {
-            if (i >= o.length) return {
-              done: true
-            };
-            return {
-              done: false,
-              value: o[i++]
-            };
-          },
-          e: function (e) {
-            throw e;
-          },
-          f: F
-        };
-      }
-      throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
-    }
-    var normalCompletion = true,
-      didErr = false,
-      err;
-    return {
-      s: function () {
-        it = it.call(o);
-      },
-      n: function () {
-        var step = it.next();
-        normalCompletion = step.done;
-        return step;
-      },
-      e: function (e) {
-        didErr = true;
-        err = e;
-      },
-      f: function () {
-        try {
-          if (!normalCompletion && it.return != null) it.return();
-        } finally {
-          if (didErr) throw err;
-        }
-      }
-    };
   }
 
   var win = window;
@@ -1479,25 +1251,25 @@
     _excluded7 = ["formId"],
     _excluded8 = ["annotationId"],
     _excluded9 = ["formId", "subject", "filename", "documentbody", "mimetype", "formType"],
-    _excluded10 = ["annotationId"],
-    _excluded11 = ["contactId"],
-    _excluded12 = ["id", "fieldData"],
-    _excluded13 = ["id"],
-    _excluded14 = ["id"],
-    _excluded15 = ["programid"],
-    _excluded16 = ["id", "programid", "contactid", "quartech_nocragstnumber"],
-    _excluded17 = ["claimId", "applicationId", "payload", "action", "type", "contactId"],
+    _excluded0 = ["annotationId"],
+    _excluded1 = ["contactId"],
+    _excluded10 = ["id", "fieldData"],
+    _excluded11 = ["id"],
+    _excluded12 = ["id"],
+    _excluded13 = ["programid"],
+    _excluded14 = ["id", "programid", "contactid", "quartech_nocragstnumber"],
+    _excluded15 = ["claimId", "applicationId", "payload", "action", "type", "contactId"],
+    _excluded16 = ["id", "fieldData"],
+    _excluded17 = ["id"],
     _excluded18 = ["id", "fieldData"],
-    _excluded19 = ["id"],
-    _excluded20 = ["id", "fieldData"],
-    _excluded21 = ["onSuccess"],
-    _excluded22 = ["onSuccess"],
-    _excluded23 = ["id"],
-    _excluded24 = ["workbookId"],
-    _excluded25 = ["workbookId", "questionId"],
-    _excluded26 = ["workbookId", "questionId", "chapterId", "response"],
-    _excluded27 = ["id", "response", "chapterId"],
-    _excluded28 = ["id"];
+    _excluded19 = ["onSuccess"],
+    _excluded20 = ["onSuccess"],
+    _excluded21 = ["id"],
+    _excluded22 = ["workbookId"],
+    _excluded23 = ["workbookId", "questionId"],
+    _excluded24 = ["workbookId", "questionId", "chapterId", "response"],
+    _excluded25 = ["id", "response", "chapterId"],
+    _excluded26 = ["id"];
   var logger$P = Logger('common/fetch');
   var ENDPOINT_URL = {
     get_env_vars_data: "/_api/environmentvariabledefinitions?$filter=contains(schemaname,'quartech_')&$select=schemaname,environmentvariabledefinitionid&$expand=environmentvariabledefinition_environmentvariablevalue($select=value)",
@@ -1650,10 +1422,10 @@
     return _fetch.apply(this, arguments);
   }
   function _fetch() {
-    _fetch = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee(params) {
+    _fetch = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee(params) {
       var _params$method, method, endpointUrl, _beforeSend, onSuccess, onError, _params$async, async, _params$data, data, _params$processData, processData, datatype, contentType, _params$includeODataH, includeODataHeaders, _params$skipCache, skipCache, _params$returnData, returnData, _params$addRequestVer, addRequestVerificationToken, _params$timeout, timeout, paramsToHash, reqHash, url, _POWERPOD$fetch$CACHE, _data, textStatus, jqXHR;
-      return _regeneratorRuntime().wrap(function _callee$(_context) {
-        while (1) switch (_context.prev = _context.next) {
+      return _regenerator().w(function (_context) {
+        while (1) switch (_context.n) {
           case 0:
             _params$method = params.method, method = _params$method === void 0 ? 'GET' : _params$method, endpointUrl = params.url, _beforeSend = params.beforeSend, onSuccess = params.onSuccess, onError = params.onError, _params$async = params.async, async = _params$async === void 0 ? true : _params$async, _params$data = params.data, data = _params$data === void 0 ? {} : _params$data, _params$processData = params.processData, processData = _params$processData === void 0 ? true : _params$processData, datatype = params.datatype, contentType = params.contentType, _params$includeODataH = params.includeODataHeaders, includeODataHeaders = _params$includeODataH === void 0 ? false : _params$includeODataH, _params$skipCache = params.skipCache, skipCache = _params$skipCache === void 0 ? false : _params$skipCache, _params$returnData = params.returnData, returnData = _params$returnData === void 0 ? false : _params$returnData, _params$addRequestVer = params.addRequestVerificationToken, addRequestVerificationToken = _params$addRequestVer === void 0 ? false : _params$addRequestVer, _params$timeout = params.timeout, timeout = _params$timeout === void 0 ? 60 * 1000 : _params$timeout; // check cache if used
             paramsToHash = params;
@@ -1673,7 +1445,7 @@
             });
             // caching is only supported for GET requests
             if (!(method === 'GET' && !skipCache && POWERPOD.fetch.CACHED_RESULTS[reqHash])) {
-              _context.next = 13;
+              _context.n = 2;
               break;
             }
             _POWERPOD$fetch$CACHE = POWERPOD.fetch.CACHED_RESULTS[reqHash], _data = _POWERPOD$fetch$CACHE.data, textStatus = _POWERPOD$fetch$CACHE.textStatus, jqXHR = _POWERPOD$fetch$CACHE.jqXHR;
@@ -1686,18 +1458,18 @@
               }
             });
             if (!returnData) {
-              _context.next = 12;
+              _context.n = 1;
               break;
             }
-            return _context.abrupt("return", Promise.resolve({
+            return _context.a(2, Promise.resolve({
               data: _data,
               textStatus: textStatus,
               jqXHR: jqXHR
             }));
-          case 12:
-            return _context.abrupt("return", Promise.resolve(onSuccess(_data, textStatus, jqXHR)));
-          case 13:
-            return _context.abrupt("return", $.ajax({
+          case 1:
+            return _context.a(2, Promise.resolve(onSuccess(_data, textStatus, jqXHR)));
+          case 2:
+            return _context.a(2, $.ajax({
               method: method,
               url: url,
               contentType: contentType,
@@ -1776,9 +1548,6 @@
                 });
               }
             }));
-          case 14:
-          case "end":
-            return _context.stop();
         }
       }, _callee);
     }));
@@ -1788,15 +1557,15 @@
     return _getEnvVarsData.apply(this, arguments);
   }
   function _getEnvVarsData() {
-    _getEnvVarsData = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee2() {
+    _getEnvVarsData = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee2() {
       var _ref,
         options,
         _args2 = arguments;
-      return _regeneratorRuntime().wrap(function _callee2$(_context2) {
-        while (1) switch (_context2.prev = _context2.next) {
+      return _regenerator().w(function (_context2) {
+        while (1) switch (_context2.n) {
           case 0:
             _ref = _args2.length > 0 && _args2[0] !== undefined ? _args2[0] : {}, options = _extends({}, (_objectDestructuringEmpty(_ref), _ref));
-            return _context2.abrupt("return", fetch$1(_objectSpread2({
+            return _context2.a(2, fetch$1(_objectSpread2({
               url: ENDPOINT_URL.get_env_vars_data,
               contentType: CONTENT_TYPE.json,
               datatype: DATATYPE.json,
@@ -1804,9 +1573,6 @@
               async: false,
               returnData: true
             }, options)));
-          case 2:
-          case "end":
-            return _context2.stop();
         }
       }, _callee2);
     }));
@@ -1816,13 +1582,13 @@
     return _getApplicationFormData.apply(this, arguments);
   }
   function _getApplicationFormData() {
-    _getApplicationFormData = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee3(_ref2) {
+    _getApplicationFormData = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee3(_ref2) {
       var programId, beforeSend, onSuccess, options;
-      return _regeneratorRuntime().wrap(function _callee3$(_context3) {
-        while (1) switch (_context3.prev = _context3.next) {
+      return _regenerator().w(function (_context3) {
+        while (1) switch (_context3.n) {
           case 0:
             programId = _ref2.programId, beforeSend = _ref2.beforeSend, onSuccess = _ref2.onSuccess, options = _objectWithoutProperties(_ref2, _excluded);
-            return _context3.abrupt("return", fetch$1(_objectSpread2({
+            return _context3.a(2, fetch$1(_objectSpread2({
               url: ENDPOINT_URL.get_application_form_data(programId),
               contentType: CONTENT_TYPE.json,
               datatype: DATATYPE.json,
@@ -1831,9 +1597,6 @@
               beforeSend: beforeSend,
               onSuccess: onSuccess
             }, options)));
-          case 2:
-          case "end":
-            return _context3.stop();
         }
       }, _callee3);
     }));
@@ -1843,14 +1606,14 @@
     return _getClaimFormData.apply(this, arguments);
   }
   function _getClaimFormData() {
-    _getClaimFormData = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee4(_ref3) {
+    _getClaimFormData = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee4(_ref3) {
       var programId, beforeSend, onSuccess, options;
-      return _regeneratorRuntime().wrap(function _callee4$(_context4) {
-        while (1) switch (_context4.prev = _context4.next) {
+      return _regenerator().w(function (_context4) {
+        while (1) switch (_context4.n) {
           case 0:
             programId = _ref3.programId, beforeSend = _ref3.beforeSend, onSuccess = _ref3.onSuccess, options = _objectWithoutProperties(_ref3, _excluded2);
             if (programId) {
-              _context4.next = 4;
+              _context4.n = 1;
               break;
             }
             logger$P.error({
@@ -1860,9 +1623,9 @@
                 programId: programId
               }
             });
-            return _context4.abrupt("return");
-          case 4:
-            return _context4.abrupt("return", fetch$1(_objectSpread2({
+            return _context4.a(2);
+          case 1:
+            return _context4.a(2, fetch$1(_objectSpread2({
               url: ENDPOINT_URL.get_claim_form_data(programId),
               contentType: CONTENT_TYPE.json,
               datatype: DATATYPE.json,
@@ -1871,9 +1634,6 @@
               beforeSend: beforeSend,
               onSuccess: onSuccess
             }, options)));
-          case 5:
-          case "end":
-            return _context4.stop();
         }
       }, _callee4);
     }));
@@ -1883,13 +1643,13 @@
     return _getMunicipalData.apply(this, arguments);
   }
   function _getMunicipalData() {
-    _getMunicipalData = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee5(_ref4) {
+    _getMunicipalData = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee5(_ref4) {
       var _ref4$onSuccess, onSuccess, options;
-      return _regeneratorRuntime().wrap(function _callee5$(_context5) {
-        while (1) switch (_context5.prev = _context5.next) {
+      return _regenerator().w(function (_context5) {
+        while (1) switch (_context5.n) {
           case 0:
             _ref4$onSuccess = _ref4.onSuccess, onSuccess = _ref4$onSuccess === void 0 ? null : _ref4$onSuccess, options = _objectWithoutProperties(_ref4, _excluded3);
-            return _context5.abrupt("return", fetch$1(_objectSpread2({
+            return _context5.a(2, fetch$1(_objectSpread2({
               url: ENDPOINT_URL.get_municipal_data,
               contentType: CONTENT_TYPE.json,
               datatype: DATATYPE.json,
@@ -1897,9 +1657,6 @@
               async: false,
               onSuccess: onSuccess
             }, options)));
-          case 2:
-          case "end":
-            return _context5.stop();
         }
       }, _callee5);
     }));
@@ -1909,15 +1666,15 @@
     return _getExpenseTypeData.apply(this, arguments);
   }
   function _getExpenseTypeData() {
-    _getExpenseTypeData = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee6() {
+    _getExpenseTypeData = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee6() {
       var _ref5,
         options,
         _args6 = arguments;
-      return _regeneratorRuntime().wrap(function _callee6$(_context6) {
-        while (1) switch (_context6.prev = _context6.next) {
+      return _regenerator().w(function (_context6) {
+        while (1) switch (_context6.n) {
           case 0:
             _ref5 = _args6.length > 0 && _args6[0] !== undefined ? _args6[0] : {}, options = _extends({}, (_objectDestructuringEmpty(_ref5), _ref5));
-            return _context6.abrupt("return", fetch$1(_objectSpread2({
+            return _context6.a(2, fetch$1(_objectSpread2({
               url: ENDPOINT_URL.get_expense_type_data,
               contentType: CONTENT_TYPE.json,
               datatype: DATATYPE.json,
@@ -1925,9 +1682,6 @@
               async: false,
               returnData: true
             }, options)));
-          case 2:
-          case "end":
-            return _context6.stop();
         }
       }, _callee6);
     }));
@@ -1937,13 +1691,13 @@
     return _getOrgbookAutocompleteData.apply(this, arguments);
   }
   function _getOrgbookAutocompleteData() {
-    _getOrgbookAutocompleteData = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee7(_ref6) {
+    _getOrgbookAutocompleteData = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee7(_ref6) {
       var searchStr, onSuccess, options;
-      return _regeneratorRuntime().wrap(function _callee7$(_context7) {
-        while (1) switch (_context7.prev = _context7.next) {
+      return _regenerator().w(function (_context7) {
+        while (1) switch (_context7.n) {
           case 0:
             searchStr = _ref6.searchStr, onSuccess = _ref6.onSuccess, options = _objectWithoutProperties(_ref6, _excluded4);
-            return _context7.abrupt("return", fetch$1(_objectSpread2({
+            return _context7.a(2, fetch$1(_objectSpread2({
               url: ENDPOINT_URL.get_orgbook_autocomplete_data,
               data: {
                 q: searchStr,
@@ -1953,9 +1707,6 @@
               },
               onSuccess: onSuccess
             }, options)));
-          case 2:
-          case "end":
-            return _context7.stop();
         }
       }, _callee7);
     }));
@@ -1965,21 +1716,18 @@
     return _getOrgbookTopicData.apply(this, arguments);
   }
   function _getOrgbookTopicData() {
-    _getOrgbookTopicData = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee8(_ref7) {
+    _getOrgbookTopicData = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee8(_ref7) {
       var topicSourceId, options;
-      return _regeneratorRuntime().wrap(function _callee8$(_context8) {
-        while (1) switch (_context8.prev = _context8.next) {
+      return _regenerator().w(function (_context8) {
+        while (1) switch (_context8.n) {
           case 0:
             topicSourceId = _ref7.topicSourceId, options = _objectWithoutProperties(_ref7, _excluded5);
-            return _context8.abrupt("return", fetch$1(_objectSpread2({
+            return _context8.a(2, fetch$1(_objectSpread2({
               url: ENDPOINT_URL.get_orgbook_topic_data,
               data: {
                 q: topicSourceId
               }
             }, options)));
-          case 2:
-          case "end":
-            return _context8.stop();
         }
       }, _callee8);
     }));
@@ -1989,18 +1737,15 @@
     return _getOrgbookCredentialsData.apply(this, arguments);
   }
   function _getOrgbookCredentialsData() {
-    _getOrgbookCredentialsData = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee9(_ref8) {
+    _getOrgbookCredentialsData = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee9(_ref8) {
       var topicId, options;
-      return _regeneratorRuntime().wrap(function _callee9$(_context9) {
-        while (1) switch (_context9.prev = _context9.next) {
+      return _regenerator().w(function (_context9) {
+        while (1) switch (_context9.n) {
           case 0:
             topicId = _ref8.topicId, options = _objectWithoutProperties(_ref8, _excluded6);
-            return _context9.abrupt("return", fetch$1(_objectSpread2({
+            return _context9.a(2, fetch$1(_objectSpread2({
               url: ENDPOINT_URL.get_orgbook_credentials_data(topicId)
             }, options)));
-          case 2:
-          case "end":
-            return _context9.stop();
         }
       }, _callee9);
     }));
@@ -2010,22 +1755,19 @@
     return _getDocumentsData.apply(this, arguments);
   }
   function _getDocumentsData() {
-    _getDocumentsData = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee10(_ref9) {
+    _getDocumentsData = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee0(_ref9) {
       var formId, options;
-      return _regeneratorRuntime().wrap(function _callee10$(_context10) {
-        while (1) switch (_context10.prev = _context10.next) {
+      return _regenerator().w(function (_context0) {
+        while (1) switch (_context0.n) {
           case 0:
             formId = _ref9.formId, options = _objectWithoutProperties(_ref9, _excluded7);
-            return _context10.abrupt("return", fetch$1(_objectSpread2({
+            return _context0.a(2, fetch$1(_objectSpread2({
               url: ENDPOINT_URL.get_documents_data(formId),
               returnData: true,
               skipCache: true
             }, options)));
-          case 2:
-          case "end":
-            return _context10.stop();
         }
-      }, _callee10);
+      }, _callee0);
     }));
     return _getDocumentsData.apply(this, arguments);
   }
@@ -2033,34 +1775,31 @@
     return _getDocumentData.apply(this, arguments);
   }
   function _getDocumentData() {
-    _getDocumentData = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee11(_ref10) {
+    _getDocumentData = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee1(_ref0) {
       var annotationId, options;
-      return _regeneratorRuntime().wrap(function _callee11$(_context11) {
-        while (1) switch (_context11.prev = _context11.next) {
+      return _regenerator().w(function (_context1) {
+        while (1) switch (_context1.n) {
           case 0:
-            annotationId = _ref10.annotationId, options = _objectWithoutProperties(_ref10, _excluded8);
-            return _context11.abrupt("return", fetch$1(_objectSpread2({
+            annotationId = _ref0.annotationId, options = _objectWithoutProperties(_ref0, _excluded8);
+            return _context1.a(2, fetch$1(_objectSpread2({
               url: ENDPOINT_URL.get_document_data(annotationId),
               returnData: true
             }, options)));
-          case 2:
-          case "end":
-            return _context11.stop();
         }
-      }, _callee11);
+      }, _callee1);
     }));
     return _getDocumentData.apply(this, arguments);
   }
-  function postDocumentData(_x10) {
+  function postDocumentData(_x0) {
     return _postDocumentData.apply(this, arguments);
   }
   function _postDocumentData() {
-    _postDocumentData = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee12(_ref11) {
-      var formId, subject, filename, documentbody, mimetype, formType, options, objecttypecode, objecttypecode_databind;
-      return _regeneratorRuntime().wrap(function _callee12$(_context12) {
-        while (1) switch (_context12.prev = _context12.next) {
+    _postDocumentData = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee10(_ref1) {
+      var formId, subject, filename, documentbody, mimetype, formType, options, objecttypecode, objecttypecode_databind, _t;
+      return _regenerator().w(function (_context10) {
+        while (1) switch (_context10.n) {
           case 0:
-            formId = _ref11.formId, subject = _ref11.subject, filename = _ref11.filename, documentbody = _ref11.documentbody, mimetype = _ref11.mimetype, formType = _ref11.formType, options = _objectWithoutProperties(_ref11, _excluded9);
+            formId = _ref1.formId, subject = _ref1.subject, filename = _ref1.filename, documentbody = _ref1.documentbody, mimetype = _ref1.mimetype, formType = _ref1.formType, options = _objectWithoutProperties(_ref1, _excluded9);
             logger$P.info({
               fn: postDocumentData,
               message: "postDocumentData called with payload:",
@@ -2073,22 +1812,22 @@
               }, options)
             });
             objecttypecode_databind = {};
-            _context12.t0 = formType;
-            _context12.next = _context12.t0 === Form.Claim ? 6 : _context12.t0 === Form.Application ? 9 : 12;
+            _t = formType;
+            _context10.n = _t === Form.Claim ? 1 : _t === Form.Application ? 2 : 3;
             break;
-          case 6:
+          case 1:
             objecttypecode = 'quartech_claim';
             objecttypecode_databind = {
               'objectid_quartech_claim@odata.bind': "/quartech_claims(".concat(formId, ")")
             };
-            return _context12.abrupt("break", 12);
-          case 9:
+            return _context10.a(3, 3);
+          case 2:
             objecttypecode = 'msgov_businessgrantapplication';
             objecttypecode_databind = {
               'objectid_msgov_businessgrantapplication@odata.bind': "/msgov_businessgrantapplications(".concat(formId, ")")
             };
-            return _context12.abrupt("break", 12);
-          case 12:
+            return _context10.a(3, 3);
+          case 3:
             logger$P.info({
               fn: postDocumentData,
               message: "postDocumentData called with objecttypecode: ".concat(objecttypecode, ", objecttypecode_databind: ").concat(JSON.stringify(objecttypecode_databind)),
@@ -2100,7 +1839,7 @@
                 formType: formType
               }, options)
             });
-            return _context12.abrupt("return", fetch$1(_objectSpread2({
+            return _context10.a(2, fetch$1(_objectSpread2({
               method: 'POST',
               url: ENDPOINT_URL.post_document_data,
               datatype: DATATYPE.json,
@@ -2117,71 +1856,62 @@
                 mimetype: mimetype
               }))
             }, options)));
-          case 14:
-          case "end":
-            return _context12.stop();
         }
-      }, _callee12);
+      }, _callee10);
     }));
     return _postDocumentData.apply(this, arguments);
   }
-  function deleteDocumentData(_x11) {
+  function deleteDocumentData(_x1) {
     return _deleteDocumentData.apply(this, arguments);
   }
   function _deleteDocumentData() {
-    _deleteDocumentData = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee13(_ref12) {
+    _deleteDocumentData = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee11(_ref10) {
       var annotationId, options;
-      return _regeneratorRuntime().wrap(function _callee13$(_context13) {
-        while (1) switch (_context13.prev = _context13.next) {
+      return _regenerator().w(function (_context11) {
+        while (1) switch (_context11.n) {
           case 0:
-            annotationId = _ref12.annotationId, options = _objectWithoutProperties(_ref12, _excluded10);
-            return _context13.abrupt("return", fetch$1(_objectSpread2({
+            annotationId = _ref10.annotationId, options = _objectWithoutProperties(_ref10, _excluded0);
+            return _context11.a(2, fetch$1(_objectSpread2({
               method: 'DELETE',
               url: ENDPOINT_URL.delete_document_data(annotationId),
               addRequestVerificationToken: true,
               returnData: true
             }, options)));
-          case 2:
-          case "end":
-            return _context13.stop();
         }
-      }, _callee13);
+      }, _callee11);
     }));
     return _deleteDocumentData.apply(this, arguments);
   }
-  function getContactData(_x12) {
+  function getContactData(_x10) {
     return _getContactData.apply(this, arguments);
   }
   function _getContactData() {
-    _getContactData = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee14(_ref13) {
+    _getContactData = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee12(_ref11) {
       var contactId, options;
-      return _regeneratorRuntime().wrap(function _callee14$(_context14) {
-        while (1) switch (_context14.prev = _context14.next) {
+      return _regenerator().w(function (_context12) {
+        while (1) switch (_context12.n) {
           case 0:
-            contactId = _ref13.contactId, options = _objectWithoutProperties(_ref13, _excluded11);
-            return _context14.abrupt("return", fetch$1(_objectSpread2({
+            contactId = _ref11.contactId, options = _objectWithoutProperties(_ref11, _excluded1);
+            return _context12.a(2, fetch$1(_objectSpread2({
               url: ENDPOINT_URL.get_contact_data(contactId),
               returnData: true
             }, options)));
-          case 2:
-          case "end":
-            return _context14.stop();
         }
-      }, _callee14);
+      }, _callee12);
     }));
     return _getContactData.apply(this, arguments);
   }
-  function patchClaimData(_x13) {
+  function patchClaimData(_x11) {
     return _patchClaimData.apply(this, arguments);
   }
   function _patchClaimData() {
-    _patchClaimData = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee15(_ref14) {
+    _patchClaimData = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee13(_ref12) {
       var id, fieldData, options;
-      return _regeneratorRuntime().wrap(function _callee15$(_context15) {
-        while (1) switch (_context15.prev = _context15.next) {
+      return _regenerator().w(function (_context13) {
+        while (1) switch (_context13.n) {
           case 0:
-            id = _ref14.id, fieldData = _ref14.fieldData, options = _objectWithoutProperties(_ref14, _excluded12);
-            return _context15.abrupt("return", fetch$1(_objectSpread2({
+            id = _ref12.id, fieldData = _ref12.fieldData, options = _objectWithoutProperties(_ref12, _excluded10);
+            return _context13.a(2, fetch$1(_objectSpread2({
               method: 'PATCH',
               url: ENDPOINT_URL.patch_quartech_claim_data(id),
               datatype: DATATYPE.json,
@@ -2191,91 +1921,79 @@
               returnData: true,
               data: JSON.stringify(_objectSpread2({}, fieldData))
             }, options)));
-          case 2:
-          case "end":
-            return _context15.stop();
         }
-      }, _callee15);
+      }, _callee13);
     }));
     return _patchClaimData.apply(this, arguments);
   }
-  function getApplicationData(_x14) {
+  function getApplicationData(_x12) {
     return _getApplicationData.apply(this, arguments);
   }
   function _getApplicationData() {
-    _getApplicationData = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee16(_ref15) {
+    _getApplicationData = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee14(_ref13) {
       var id, options;
-      return _regeneratorRuntime().wrap(function _callee16$(_context16) {
-        while (1) switch (_context16.prev = _context16.next) {
+      return _regenerator().w(function (_context14) {
+        while (1) switch (_context14.n) {
           case 0:
-            id = _ref15.id, options = _objectWithoutProperties(_ref15, _excluded13);
-            return _context16.abrupt("return", fetch$1(_objectSpread2({
+            id = _ref13.id, options = _objectWithoutProperties(_ref13, _excluded11);
+            return _context14.a(2, fetch$1(_objectSpread2({
               url: ENDPOINT_URL.get_application_data(id),
               returnData: true
             }, options)));
-          case 2:
-          case "end":
-            return _context16.stop();
         }
-      }, _callee16);
+      }, _callee14);
     }));
     return _getApplicationData.apply(this, arguments);
   }
-  function getClaimData(_x15) {
+  function getClaimData(_x13) {
     return _getClaimData.apply(this, arguments);
   }
   function _getClaimData() {
-    _getClaimData = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee17(_ref16) {
+    _getClaimData = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee15(_ref14) {
       var id, options;
-      return _regeneratorRuntime().wrap(function _callee17$(_context17) {
-        while (1) switch (_context17.prev = _context17.next) {
+      return _regenerator().w(function (_context15) {
+        while (1) switch (_context15.n) {
           case 0:
-            id = _ref16.id, options = _objectWithoutProperties(_ref16, _excluded14);
-            return _context17.abrupt("return", fetch$1(_objectSpread2({
+            id = _ref14.id, options = _objectWithoutProperties(_ref14, _excluded12);
+            return _context15.a(2, fetch$1(_objectSpread2({
               url: ENDPOINT_URL.get_claim_data(id),
               returnData: true
             }, options)));
-          case 2:
-          case "end":
-            return _context17.stop();
         }
-      }, _callee17);
+      }, _callee15);
     }));
     return _getClaimData.apply(this, arguments);
   }
-  function getDraftApplicationsForProgramIdData(_x16) {
+  function getDraftApplicationsForProgramIdData(_x14) {
     return _getDraftApplicationsForProgramIdData.apply(this, arguments);
   }
   function _getDraftApplicationsForProgramIdData() {
-    _getDraftApplicationsForProgramIdData = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee18(_ref17) {
+    _getDraftApplicationsForProgramIdData = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee16(_ref15) {
       var programid, options;
-      return _regeneratorRuntime().wrap(function _callee18$(_context18) {
-        while (1) switch (_context18.prev = _context18.next) {
+      return _regenerator().w(function (_context16) {
+        while (1) switch (_context16.n) {
           case 0:
-            programid = _ref17.programid, options = _objectWithoutProperties(_ref17, _excluded15);
-            return _context18.abrupt("return", fetch$1(_objectSpread2({
+            programid = _ref15.programid, options = _objectWithoutProperties(_ref15, _excluded13);
+            return _context16.a(2, fetch$1(_objectSpread2({
               url: ENDPOINT_URL.get_draft_applications_for_programid_data(programid),
               returnData: true
             }, options)));
-          case 2:
-          case "end":
-            return _context18.stop();
         }
-      }, _callee18);
+      }, _callee16);
     }));
     return _getDraftApplicationsForProgramIdData.apply(this, arguments);
   }
-  function postApplicationData(_x17) {
+  function postApplicationData(_x15) {
     return _postApplicationData.apply(this, arguments);
   }
   function _postApplicationData() {
-    _postApplicationData = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee19(_ref18) {
-      var id, programid, contactid, _ref18$quartech_nocra, quartech_nocragstnumber, options;
-      return _regeneratorRuntime().wrap(function _callee19$(_context19) {
-        while (1) switch (_context19.prev = _context19.next) {
+    _postApplicationData = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee17(_ref16) {
+      var id, programid, contactid, _ref16$quartech_nocra, quartech_nocragstnumber, options;
+      return _regenerator().w(function (_context17) {
+        while (1) switch (_context17.n) {
           case 0:
-            id = _ref18.id, programid = _ref18.programid, contactid = _ref18.contactid, _ref18$quartech_nocra = _ref18.quartech_nocragstnumber, quartech_nocragstnumber = _ref18$quartech_nocra === void 0 ? null : _ref18$quartech_nocra, options = _objectWithoutProperties(_ref18, _excluded16);
-            return _context19.abrupt("return", fetch$1(_objectSpread2({
+            id = _ref16.id, programid = _ref16.programid, contactid = _ref16.contactid, _ref16$quartech_nocra = _ref16.quartech_nocragstnumber, quartech_nocragstnumber = _ref16$quartech_nocra === void 0 ? null : _ref16$quartech_nocra, options = _objectWithoutProperties(_ref16, _excluded14);
+            return _context17.a(2, fetch$1(_objectSpread2({
               method: 'POST',
               url: ENDPOINT_URL.post_application_data,
               datatype: DATATYPE.json,
@@ -2292,25 +2010,22 @@
                 quartech_nocragstnumber: quartech_nocragstnumber
               }))
             }, options)));
-          case 2:
-          case "end":
-            return _context19.stop();
         }
-      }, _callee19);
+      }, _callee17);
     }));
     return _postApplicationData.apply(this, arguments);
   }
-  function postBrowserInformationData(_x18) {
+  function postBrowserInformationData(_x16) {
     return _postBrowserInformationData.apply(this, arguments);
   }
   function _postBrowserInformationData() {
-    _postBrowserInformationData = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee20(_ref19) {
-      var _ref19$claimId, claimId, _ref19$applicationId, applicationId, _ref19$payload, payload, action, type, contactId, options;
-      return _regeneratorRuntime().wrap(function _callee20$(_context20) {
-        while (1) switch (_context20.prev = _context20.next) {
+    _postBrowserInformationData = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee18(_ref17) {
+      var _ref17$claimId, claimId, _ref17$applicationId, applicationId, _ref17$payload, payload, action, type, contactId, options;
+      return _regenerator().w(function (_context18) {
+        while (1) switch (_context18.n) {
           case 0:
-            _ref19$claimId = _ref19.claimId, claimId = _ref19$claimId === void 0 ? null : _ref19$claimId, _ref19$applicationId = _ref19.applicationId, applicationId = _ref19$applicationId === void 0 ? null : _ref19$applicationId, _ref19$payload = _ref19.payload, payload = _ref19$payload === void 0 ? '' : _ref19$payload, action = _ref19.action, type = _ref19.type, contactId = _ref19.contactId, options = _objectWithoutProperties(_ref19, _excluded17);
-            return _context20.abrupt("return", fetch$1(_objectSpread2({
+            _ref17$claimId = _ref17.claimId, claimId = _ref17$claimId === void 0 ? null : _ref17$claimId, _ref17$applicationId = _ref17.applicationId, applicationId = _ref17$applicationId === void 0 ? null : _ref17$applicationId, _ref17$payload = _ref17.payload, payload = _ref17$payload === void 0 ? '' : _ref17$payload, action = _ref17.action, type = _ref17.type, contactId = _ref17.contactId, options = _objectWithoutProperties(_ref17, _excluded15);
+            return _context18.a(2, fetch$1(_objectSpread2({
               method: 'POST',
               url: ENDPOINT_URL.post_browserinformation_data,
               datatype: DATATYPE.json,
@@ -2331,25 +2046,22 @@
                 quartech_applicantbrowserinformation: payload
               }))
             }, options)));
-          case 2:
-          case "end":
-            return _context20.stop();
         }
-      }, _callee20);
+      }, _callee18);
     }));
     return _postBrowserInformationData.apply(this, arguments);
   }
-  function patchApplicationData(_x19) {
+  function patchApplicationData(_x17) {
     return _patchApplicationData.apply(this, arguments);
   }
   function _patchApplicationData() {
-    _patchApplicationData = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee21(_ref20) {
+    _patchApplicationData = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee19(_ref18) {
       var id, fieldData, options;
-      return _regeneratorRuntime().wrap(function _callee21$(_context21) {
-        while (1) switch (_context21.prev = _context21.next) {
+      return _regenerator().w(function (_context19) {
+        while (1) switch (_context19.n) {
           case 0:
-            id = _ref20.id, fieldData = _ref20.fieldData, options = _objectWithoutProperties(_ref20, _excluded18);
-            return _context21.abrupt("return", fetch$1(_objectSpread2({
+            id = _ref18.id, fieldData = _ref18.fieldData, options = _objectWithoutProperties(_ref18, _excluded16);
+            return _context19.a(2, fetch$1(_objectSpread2({
               method: 'PATCH',
               url: ENDPOINT_URL.patch_application_data(id),
               datatype: DATATYPE.json,
@@ -2359,47 +2071,41 @@
               returnData: true,
               data: JSON.stringify(_objectSpread2({}, fieldData))
             }, options)));
-          case 2:
-          case "end":
-            return _context21.stop();
         }
-      }, _callee21);
+      }, _callee19);
     }));
     return _patchApplicationData.apply(this, arguments);
   }
-  function getDemographicInfoData(_x20) {
+  function getDemographicInfoData(_x18) {
     return _getDemographicInfoData.apply(this, arguments);
   }
   function _getDemographicInfoData() {
-    _getDemographicInfoData = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee22(_ref21) {
+    _getDemographicInfoData = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee20(_ref19) {
       var id;
-      return _regeneratorRuntime().wrap(function _callee22$(_context22) {
-        while (1) switch (_context22.prev = _context22.next) {
+      return _regenerator().w(function (_context20) {
+        while (1) switch (_context20.n) {
           case 0:
-            id = _ref21.id, _objectWithoutProperties(_ref21, _excluded19);
-            return _context22.abrupt("return", fetch$1({
+            id = _ref19.id, _objectWithoutProperties(_ref19, _excluded17);
+            return _context20.a(2, fetch$1({
               url: ENDPOINT_URL.get_demographic_info_data(id),
               returnData: true
             }));
-          case 2:
-          case "end":
-            return _context22.stop();
         }
-      }, _callee22);
+      }, _callee20);
     }));
     return _getDemographicInfoData.apply(this, arguments);
   }
-  function patchDemographicInfoData(_x21) {
+  function patchDemographicInfoData(_x19) {
     return _patchDemographicInfoData.apply(this, arguments);
   }
   function _patchDemographicInfoData() {
-    _patchDemographicInfoData = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee23(_ref22) {
+    _patchDemographicInfoData = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee21(_ref20) {
       var id, fieldData, options;
-      return _regeneratorRuntime().wrap(function _callee23$(_context23) {
-        while (1) switch (_context23.prev = _context23.next) {
+      return _regenerator().w(function (_context21) {
+        while (1) switch (_context21.n) {
           case 0:
-            id = _ref22.id, fieldData = _ref22.fieldData, options = _objectWithoutProperties(_ref22, _excluded20);
-            return _context23.abrupt("return", fetch$1(_objectSpread2({
+            id = _ref20.id, fieldData = _ref20.fieldData, options = _objectWithoutProperties(_ref20, _excluded18);
+            return _context21.a(2, fetch$1(_objectSpread2({
               method: 'PATCH',
               url: ENDPOINT_URL.patch_demographic_info_data(id),
               datatype: DATATYPE.json,
@@ -2409,11 +2115,8 @@
               returnData: true,
               data: JSON.stringify(_objectSpread2({}, fieldData))
             }, options)));
-          case 2:
-          case "end":
-            return _context23.stop();
         }
-      }, _callee23);
+      }, _callee21);
     }));
     return _patchDemographicInfoData.apply(this, arguments);
   }
@@ -2433,15 +2136,15 @@
   //   });
   // }
   function _getTypesOfFoodData() {
-    _getTypesOfFoodData = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee24() {
-      var _ref23,
+    _getTypesOfFoodData = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee22() {
+      var _ref21,
         options,
-        _args24 = arguments;
-      return _regeneratorRuntime().wrap(function _callee24$(_context24) {
-        while (1) switch (_context24.prev = _context24.next) {
+        _args22 = arguments;
+      return _regenerator().w(function (_context22) {
+        while (1) switch (_context22.n) {
           case 0:
-            _ref23 = _args24.length > 0 && _args24[0] !== undefined ? _args24[0] : {}, options = _extends({}, (_objectDestructuringEmpty(_ref23), _ref23));
-            return _context24.abrupt("return", fetch$1(_objectSpread2({
+            _ref21 = _args22.length > 0 && _args22[0] !== undefined ? _args22[0] : {}, options = _extends({}, (_objectDestructuringEmpty(_ref21), _ref21));
+            return _context22.a(2, fetch$1(_objectSpread2({
               url: ENDPOINT_URL.get_types_of_food_data,
               contentType: CONTENT_TYPE.json,
               datatype: DATATYPE.json,
@@ -2449,25 +2152,22 @@
               async: false,
               returnData: true
             }, options)));
-          case 2:
-          case "end":
-            return _context24.stop();
         }
-      }, _callee24);
+      }, _callee22);
     }));
     return _getTypesOfFoodData.apply(this, arguments);
   }
-  function getCommoditiesData(_x22) {
+  function getCommoditiesData(_x20) {
     return _getCommoditiesData.apply(this, arguments);
   }
   function _getCommoditiesData() {
-    _getCommoditiesData = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee25(_ref24) {
-      var _ref24$onSuccess, onSuccess, options;
-      return _regeneratorRuntime().wrap(function _callee25$(_context25) {
-        while (1) switch (_context25.prev = _context25.next) {
+    _getCommoditiesData = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee23(_ref22) {
+      var _ref22$onSuccess, onSuccess, options;
+      return _regenerator().w(function (_context23) {
+        while (1) switch (_context23.n) {
           case 0:
-            _ref24$onSuccess = _ref24.onSuccess, onSuccess = _ref24$onSuccess === void 0 ? null : _ref24$onSuccess, options = _objectWithoutProperties(_ref24, _excluded21);
-            return _context25.abrupt("return", fetch$1(_objectSpread2({
+            _ref22$onSuccess = _ref22.onSuccess, onSuccess = _ref22$onSuccess === void 0 ? null : _ref22$onSuccess, options = _objectWithoutProperties(_ref22, _excluded19);
+            return _context23.a(2, fetch$1(_objectSpread2({
               url: ENDPOINT_URL.get_commodities_data,
               contentType: CONTENT_TYPE.json,
               datatype: DATATYPE.json,
@@ -2475,25 +2175,22 @@
               async: false,
               onSuccess: onSuccess
             }, options)));
-          case 2:
-          case "end":
-            return _context25.stop();
         }
-      }, _callee25);
+      }, _callee23);
     }));
     return _getCommoditiesData.apply(this, arguments);
   }
-  function getProgramIntakeData(_x23) {
+  function getProgramIntakeData(_x21) {
     return _getProgramIntakeData.apply(this, arguments);
   }
   function _getProgramIntakeData() {
-    _getProgramIntakeData = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee26(_ref25) {
-      var _ref25$onSuccess, onSuccess, options;
-      return _regeneratorRuntime().wrap(function _callee26$(_context26) {
-        while (1) switch (_context26.prev = _context26.next) {
+    _getProgramIntakeData = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee24(_ref23) {
+      var _ref23$onSuccess, onSuccess, options;
+      return _regenerator().w(function (_context24) {
+        while (1) switch (_context24.n) {
           case 0:
-            _ref25$onSuccess = _ref25.onSuccess, onSuccess = _ref25$onSuccess === void 0 ? null : _ref25$onSuccess, options = _objectWithoutProperties(_ref25, _excluded22);
-            return _context26.abrupt("return", fetch$1(_objectSpread2({
+            _ref23$onSuccess = _ref23.onSuccess, onSuccess = _ref23$onSuccess === void 0 ? null : _ref23$onSuccess, options = _objectWithoutProperties(_ref23, _excluded20);
+            return _context24.a(2, fetch$1(_objectSpread2({
               url: ENDPOINT_URL.get_program_intake_data,
               contentType: CONTENT_TYPE.json,
               datatype: DATATYPE.json,
@@ -2501,11 +2198,8 @@
               async: false,
               onSuccess: onSuccess
             }, options)));
-          case 2:
-          case "end":
-            return _context26.stop();
         }
-      }, _callee26);
+      }, _callee24);
     }));
     return _getProgramIntakeData.apply(this, arguments);
   }
@@ -2513,15 +2207,15 @@
     return _getProgramHomePageContentData.apply(this, arguments);
   }
   function _getProgramHomePageContentData() {
-    _getProgramHomePageContentData = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee27() {
-      var _ref26,
+    _getProgramHomePageContentData = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee25() {
+      var _ref24,
         options,
-        _args27 = arguments;
-      return _regeneratorRuntime().wrap(function _callee27$(_context27) {
-        while (1) switch (_context27.prev = _context27.next) {
+        _args25 = arguments;
+      return _regenerator().w(function (_context25) {
+        while (1) switch (_context25.n) {
           case 0:
-            _ref26 = _args27.length > 0 && _args27[0] !== undefined ? _args27[0] : {}, options = _extends({}, (_objectDestructuringEmpty(_ref26), _ref26));
-            return _context27.abrupt("return", fetch$1(_objectSpread2({
+            _ref24 = _args25.length > 0 && _args25[0] !== undefined ? _args25[0] : {}, options = _extends({}, (_objectDestructuringEmpty(_ref24), _ref24));
+            return _context25.a(2, fetch$1(_objectSpread2({
               url: ENDPOINT_URL.get_program_home_page_content_data,
               contentType: CONTENT_TYPE.json,
               datatype: DATATYPE.json,
@@ -2529,36 +2223,30 @@
               async: false,
               returnData: true
             }, options)));
-          case 2:
-          case "end":
-            return _context27.stop();
         }
-      }, _callee27);
+      }, _callee25);
     }));
     return _getProgramHomePageContentData.apply(this, arguments);
   }
-  function getWorkbookDataById(_x24) {
+  function getWorkbookDataById(_x22) {
     return _getWorkbookDataById.apply(this, arguments);
   }
   function _getWorkbookDataById() {
-    _getWorkbookDataById = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee28(_ref27) {
+    _getWorkbookDataById = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee26(_ref25) {
       var id, options;
-      return _regeneratorRuntime().wrap(function _callee28$(_context28) {
-        while (1) switch (_context28.prev = _context28.next) {
+      return _regenerator().w(function (_context26) {
+        while (1) switch (_context26.n) {
           case 0:
-            id = _ref27.id, options = _objectWithoutProperties(_ref27, _excluded23);
-            return _context28.abrupt("return", fetch$1(_objectSpread2({
+            id = _ref25.id, options = _objectWithoutProperties(_ref25, _excluded21);
+            return _context26.a(2, fetch$1(_objectSpread2({
               url: ENDPOINT_URL.get_workbook_data_by_id(id),
               contentType: CONTENT_TYPE.json,
               datatype: DATATYPE.json,
               includeODataHeaders: true,
               returnData: true
             }, options)));
-          case 2:
-          case "end":
-            return _context28.stop();
         }
-      }, _callee28);
+      }, _callee26);
     }));
     return _getWorkbookDataById.apply(this, arguments);
   }
@@ -2566,15 +2254,15 @@
     return _getChaptersData.apply(this, arguments);
   }
   function _getChaptersData() {
-    _getChaptersData = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee29() {
-      var _ref28,
+    _getChaptersData = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee27() {
+      var _ref26,
         options,
-        _args29 = arguments;
-      return _regeneratorRuntime().wrap(function _callee29$(_context29) {
-        while (1) switch (_context29.prev = _context29.next) {
+        _args27 = arguments;
+      return _regenerator().w(function (_context27) {
+        while (1) switch (_context27.n) {
           case 0:
-            _ref28 = _args29.length > 0 && _args29[0] !== undefined ? _args29[0] : {}, options = _extends({}, (_objectDestructuringEmpty(_ref28), _ref28));
-            return _context29.abrupt("return", fetch$1(_objectSpread2({
+            _ref26 = _args27.length > 0 && _args27[0] !== undefined ? _args27[0] : {}, options = _extends({}, (_objectDestructuringEmpty(_ref26), _ref26));
+            return _context27.a(2, fetch$1(_objectSpread2({
               url: ENDPOINT_URL.get_chapters_data,
               contentType: CONTENT_TYPE.json,
               datatype: DATATYPE.json,
@@ -2582,11 +2270,8 @@
               async: false,
               returnData: true
             }, options)));
-          case 2:
-          case "end":
-            return _context29.stop();
         }
-      }, _callee29);
+      }, _callee27);
     }));
     return _getChaptersData.apply(this, arguments);
   }
@@ -2596,15 +2281,15 @@
 
   // Workbook Response API Functions
   function _getWorkbookQuestionsData() {
-    _getWorkbookQuestionsData = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee30() {
-      var _ref29,
+    _getWorkbookQuestionsData = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee28() {
+      var _ref27,
         options,
-        _args30 = arguments;
-      return _regeneratorRuntime().wrap(function _callee30$(_context30) {
-        while (1) switch (_context30.prev = _context30.next) {
+        _args28 = arguments;
+      return _regenerator().w(function (_context28) {
+        while (1) switch (_context28.n) {
           case 0:
-            _ref29 = _args30.length > 0 && _args30[0] !== undefined ? _args30[0] : {}, options = _extends({}, (_objectDestructuringEmpty(_ref29), _ref29));
-            return _context30.abrupt("return", fetch$1(_objectSpread2({
+            _ref27 = _args28.length > 0 && _args28[0] !== undefined ? _args28[0] : {}, options = _extends({}, (_objectDestructuringEmpty(_ref27), _ref27));
+            return _context28.a(2, fetch$1(_objectSpread2({
               url: ENDPOINT_URL.get_workbookquestions_data,
               contentType: CONTENT_TYPE.json,
               datatype: DATATYPE.json,
@@ -2612,11 +2297,8 @@
               async: false,
               returnData: true
             }, options)));
-          case 2:
-          case "end":
-            return _context30.stop();
         }
-      }, _callee30);
+      }, _callee28);
     }));
     return _getWorkbookQuestionsData.apply(this, arguments);
   }
@@ -2624,41 +2306,38 @@
     return _getWorkbookResponsesData.apply(this, arguments);
   }
   function _getWorkbookResponsesData() {
-    _getWorkbookResponsesData = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee31() {
-      var _ref30,
+    _getWorkbookResponsesData = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee29() {
+      var _ref28,
         options,
-        _args31 = arguments;
-      return _regeneratorRuntime().wrap(function _callee31$(_context31) {
-        while (1) switch (_context31.prev = _context31.next) {
+        _args29 = arguments;
+      return _regenerator().w(function (_context29) {
+        while (1) switch (_context29.n) {
           case 0:
-            _ref30 = _args31.length > 0 && _args31[0] !== undefined ? _args31[0] : {}, options = _extends({}, (_objectDestructuringEmpty(_ref30), _ref30));
-            return _context31.abrupt("return", fetch$1(_objectSpread2({
+            _ref28 = _args29.length > 0 && _args29[0] !== undefined ? _args29[0] : {}, options = _extends({}, (_objectDestructuringEmpty(_ref28), _ref28));
+            return _context29.a(2, fetch$1(_objectSpread2({
               url: ENDPOINT_URL.get_workbookresponses_data,
               contentType: CONTENT_TYPE.json,
               datatype: DATATYPE.json,
               includeODataHeaders: true,
               returnData: true
             }, options)));
-          case 2:
-          case "end":
-            return _context31.stop();
         }
-      }, _callee31);
+      }, _callee29);
     }));
     return _getWorkbookResponsesData.apply(this, arguments);
   }
-  function getWorkbookResponsesByWorkbook(_x25) {
+  function getWorkbookResponsesByWorkbook(_x23) {
     return _getWorkbookResponsesByWorkbook.apply(this, arguments);
   }
   function _getWorkbookResponsesByWorkbook() {
-    _getWorkbookResponsesByWorkbook = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee32(_ref31) {
+    _getWorkbookResponsesByWorkbook = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee30(_ref29) {
       var workbookId, options, result, responses;
-      return _regeneratorRuntime().wrap(function _callee32$(_context32) {
-        while (1) switch (_context32.prev = _context32.next) {
+      return _regenerator().w(function (_context30) {
+        while (1) switch (_context30.n) {
           case 0:
-            workbookId = _ref31.workbookId, options = _objectWithoutProperties(_ref31, _excluded24);
+            workbookId = _ref29.workbookId, options = _objectWithoutProperties(_ref29, _excluded22);
             if (workbookId) {
-              _context32.next = 4;
+              _context30.n = 1;
               break;
             }
             logger$P.error({
@@ -2669,8 +2348,8 @@
               }
             });
             throw new Error('workbookId is required');
-          case 4:
-            _context32.next = 6;
+          case 1:
+            _context30.n = 2;
             return fetch$1(_objectSpread2({
               url: ENDPOINT_URL.get_workbookresponses_by_workbook(workbookId),
               contentType: CONTENT_TYPE.json,
@@ -2679,42 +2358,39 @@
               returnData: true,
               skipCache: true
             }, options));
-          case 6:
-            result = _context32.sent;
+          case 2:
+            result = _context30.v;
             if (!(result && result.data && result.data.quartech_workbookresponse_Workbook_quartech_workbook)) {
-              _context32.next = 10;
+              _context30.n = 3;
               break;
             }
             responses = result.data.quartech_workbookresponse_Workbook_quartech_workbook;
-            return _context32.abrupt("return", _objectSpread2(_objectSpread2({}, result), {}, {
+            return _context30.a(2, _objectSpread2(_objectSpread2({}, result), {}, {
               data: {
                 value: responses,
                 '@odata.count': responses.length,
                 '@odata.context': result.data['@odata.context']
               }
             }));
-          case 10:
-            return _context32.abrupt("return", result);
-          case 11:
-          case "end":
-            return _context32.stop();
+          case 3:
+            return _context30.a(2, result);
         }
-      }, _callee32);
+      }, _callee30);
     }));
     return _getWorkbookResponsesByWorkbook.apply(this, arguments);
   }
-  function getWorkbookResponsesByWorkbookAndQuestion(_x26) {
+  function getWorkbookResponsesByWorkbookAndQuestion(_x24) {
     return _getWorkbookResponsesByWorkbookAndQuestion.apply(this, arguments);
   }
   function _getWorkbookResponsesByWorkbookAndQuestion() {
-    _getWorkbookResponsesByWorkbookAndQuestion = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee33(_ref32) {
+    _getWorkbookResponsesByWorkbookAndQuestion = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee31(_ref30) {
       var workbookId, questionId, options, result, responses;
-      return _regeneratorRuntime().wrap(function _callee33$(_context33) {
-        while (1) switch (_context33.prev = _context33.next) {
+      return _regenerator().w(function (_context31) {
+        while (1) switch (_context31.n) {
           case 0:
-            workbookId = _ref32.workbookId, questionId = _ref32.questionId, options = _objectWithoutProperties(_ref32, _excluded25);
+            workbookId = _ref30.workbookId, questionId = _ref30.questionId, options = _objectWithoutProperties(_ref30, _excluded23);
             if (!(!workbookId || !questionId)) {
-              _context33.next = 4;
+              _context31.n = 1;
               break;
             }
             logger$P.error({
@@ -2726,8 +2402,8 @@
               }
             });
             throw new Error('workbookId and questionId are required');
-          case 4:
-            _context33.next = 6;
+          case 1:
+            _context31.n = 2;
             return fetch$1(_objectSpread2({
               url: ENDPOINT_URL.get_workbookresponses_by_workbook_and_question(workbookId, questionId),
               contentType: CONTENT_TYPE.json,
@@ -2736,42 +2412,39 @@
               returnData: true,
               skipCache: true
             }, options));
-          case 6:
-            result = _context33.sent;
+          case 2:
+            result = _context31.v;
             if (!(result && result.data && result.data.quartech_workbookresponse_Workbook_quartech_workbook)) {
-              _context33.next = 10;
+              _context31.n = 3;
               break;
             }
             responses = result.data.quartech_workbookresponse_Workbook_quartech_workbook;
-            return _context33.abrupt("return", _objectSpread2(_objectSpread2({}, result), {}, {
+            return _context31.a(2, _objectSpread2(_objectSpread2({}, result), {}, {
               data: {
                 value: responses,
                 '@odata.count': responses.length,
                 '@odata.context': result.data['@odata.context']
               }
             }));
-          case 10:
-            return _context33.abrupt("return", result);
-          case 11:
-          case "end":
-            return _context33.stop();
+          case 3:
+            return _context31.a(2, result);
         }
-      }, _callee33);
+      }, _callee31);
     }));
     return _getWorkbookResponsesByWorkbookAndQuestion.apply(this, arguments);
   }
-  function postWorkbookResponseData(_x27) {
+  function postWorkbookResponseData(_x25) {
     return _postWorkbookResponseData.apply(this, arguments);
   }
   function _postWorkbookResponseData() {
-    _postWorkbookResponseData = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee34(_ref33) {
+    _postWorkbookResponseData = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee32(_ref31) {
       var workbookId, questionId, chapterId, response, options, payload;
-      return _regeneratorRuntime().wrap(function _callee34$(_context34) {
-        while (1) switch (_context34.prev = _context34.next) {
+      return _regenerator().w(function (_context32) {
+        while (1) switch (_context32.n) {
           case 0:
-            workbookId = _ref33.workbookId, questionId = _ref33.questionId, chapterId = _ref33.chapterId, response = _ref33.response, options = _objectWithoutProperties(_ref33, _excluded26);
+            workbookId = _ref31.workbookId, questionId = _ref31.questionId, chapterId = _ref31.chapterId, response = _ref31.response, options = _objectWithoutProperties(_ref31, _excluded24);
             if (!(!workbookId || !questionId || response === undefined)) {
-              _context34.next = 4;
+              _context32.n = 1;
               break;
             }
             logger$P.error({
@@ -2784,7 +2457,7 @@
               }
             });
             throw new Error('workbookId, questionId, and response are required');
-          case 4:
+          case 1:
             logger$P.info({
               fn: postWorkbookResponseData,
               message: 'Creating workbook response',
@@ -2803,7 +2476,7 @@
             if (chapterId) {
               payload['quartech_Chapter@odata.bind'] = "/quartech_chapters(".concat(chapterId, ")");
             }
-            return _context34.abrupt("return", fetch$1(_objectSpread2({
+            return _context32.a(2, fetch$1(_objectSpread2({
               method: 'POST',
               url: ENDPOINT_URL.post_workbookresponse_data,
               datatype: DATATYPE.json,
@@ -2813,26 +2486,23 @@
               returnData: true,
               data: JSON.stringify(payload)
             }, options)));
-          case 8:
-          case "end":
-            return _context34.stop();
         }
-      }, _callee34);
+      }, _callee32);
     }));
     return _postWorkbookResponseData.apply(this, arguments);
   }
-  function patchWorkbookResponseData(_x28) {
+  function patchWorkbookResponseData(_x26) {
     return _patchWorkbookResponseData.apply(this, arguments);
   }
   function _patchWorkbookResponseData() {
-    _patchWorkbookResponseData = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee35(_ref34) {
-      var id, _ref34$response, response, _ref34$chapterId, chapterId, options, updateData;
-      return _regeneratorRuntime().wrap(function _callee35$(_context35) {
-        while (1) switch (_context35.prev = _context35.next) {
+    _patchWorkbookResponseData = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee33(_ref32) {
+      var id, _ref32$response, response, _ref32$chapterId, chapterId, options, updateData;
+      return _regenerator().w(function (_context33) {
+        while (1) switch (_context33.n) {
           case 0:
-            id = _ref34.id, _ref34$response = _ref34.response, response = _ref34$response === void 0 ? null : _ref34$response, _ref34$chapterId = _ref34.chapterId, chapterId = _ref34$chapterId === void 0 ? null : _ref34$chapterId, options = _objectWithoutProperties(_ref34, _excluded27);
+            id = _ref32.id, _ref32$response = _ref32.response, response = _ref32$response === void 0 ? null : _ref32$response, _ref32$chapterId = _ref32.chapterId, chapterId = _ref32$chapterId === void 0 ? null : _ref32$chapterId, options = _objectWithoutProperties(_ref32, _excluded25);
             if (id) {
-              _context35.next = 4;
+              _context33.n = 1;
               break;
             }
             logger$P.error({
@@ -2843,12 +2513,12 @@
               }
             });
             throw new Error('id is required');
-          case 4:
+          case 1:
             updateData = {};
             if (response !== null) updateData.quartech_response = response;
             if (chapterId !== null) updateData['quartech_Chapter@odata.bind'] = "/quartech_chapters(".concat(chapterId, ")");
             if (!(Object.keys(updateData).length === 0)) {
-              _context35.next = 10;
+              _context33.n = 2;
               break;
             }
             logger$P.warn({
@@ -2860,10 +2530,10 @@
                 chapterId: chapterId
               }
             });
-            return _context35.abrupt("return", Promise.resolve({
+            return _context33.a(2, Promise.resolve({
               data: null
             }));
-          case 10:
+          case 2:
             logger$P.info({
               fn: patchWorkbookResponseData,
               message: 'Updating workbook response',
@@ -2872,7 +2542,7 @@
                 updateData: updateData
               }
             });
-            return _context35.abrupt("return", fetch$1(_objectSpread2({
+            return _context33.a(2, fetch$1(_objectSpread2({
               method: 'PATCH',
               url: ENDPOINT_URL.patch_workbookresponse_data(id),
               datatype: DATATYPE.json,
@@ -2882,26 +2552,23 @@
               returnData: true,
               data: JSON.stringify(updateData)
             }, options)));
-          case 12:
-          case "end":
-            return _context35.stop();
         }
-      }, _callee35);
+      }, _callee33);
     }));
     return _patchWorkbookResponseData.apply(this, arguments);
   }
-  function deleteWorkbookResponseData(_x29) {
+  function deleteWorkbookResponseData(_x27) {
     return _deleteWorkbookResponseData.apply(this, arguments);
   }
   function _deleteWorkbookResponseData() {
-    _deleteWorkbookResponseData = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee36(_ref35) {
+    _deleteWorkbookResponseData = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee34(_ref33) {
       var id, options;
-      return _regeneratorRuntime().wrap(function _callee36$(_context36) {
-        while (1) switch (_context36.prev = _context36.next) {
+      return _regenerator().w(function (_context34) {
+        while (1) switch (_context34.n) {
           case 0:
-            id = _ref35.id, options = _objectWithoutProperties(_ref35, _excluded28);
+            id = _ref33.id, options = _objectWithoutProperties(_ref33, _excluded26);
             if (id) {
-              _context36.next = 4;
+              _context34.n = 1;
               break;
             }
             logger$P.error({
@@ -2912,7 +2579,7 @@
               }
             });
             throw new Error('id is required');
-          case 4:
+          case 1:
             logger$P.info({
               fn: deleteWorkbookResponseData,
               message: 'Deleting workbook response',
@@ -2920,17 +2587,14 @@
                 id: id
               }
             });
-            return _context36.abrupt("return", fetch$1(_objectSpread2({
+            return _context34.a(2, fetch$1(_objectSpread2({
               method: 'DELETE',
               url: ENDPOINT_URL.delete_workbookresponse_data(id),
               addRequestVerificationToken: true,
               returnData: true
             }, options)));
-          case 6:
-          case "end":
-            return _context36.stop();
         }
-      }, _callee36);
+      }, _callee34);
     }));
     return _deleteWorkbookResponseData.apply(this, arguments);
   }
@@ -3347,11 +3011,11 @@
     calculateNetChangeInProfit();
   }
   function calculateNetChangeInProfit() {
-    var _getCurrencyFieldValu9, _getCurrencyFieldValu10;
+    var _getCurrencyFieldValu9, _getCurrencyFieldValu0;
     var totalAddedIncomeAndReducedCostsId = 'quartech_totaladdedincomeandreducedcosts';
     var totalAddedCostsAndReducedIncomeId = 'quartech_totaladdedcostsandreducedincome';
     var totalAddedIncomeAndReducedCosts = (_getCurrencyFieldValu9 = getCurrencyFieldValue(totalAddedIncomeAndReducedCostsId)) !== null && _getCurrencyFieldValu9 !== void 0 ? _getCurrencyFieldValu9 : 0;
-    var totalAddedCostsAndReducedIncome = (_getCurrencyFieldValu10 = getCurrencyFieldValue(totalAddedCostsAndReducedIncomeId)) !== null && _getCurrencyFieldValu10 !== void 0 ? _getCurrencyFieldValu10 : 0;
+    var totalAddedCostsAndReducedIncome = (_getCurrencyFieldValu0 = getCurrencyFieldValue(totalAddedCostsAndReducedIncomeId)) !== null && _getCurrencyFieldValu0 !== void 0 ? _getCurrencyFieldValu0 : 0;
     var netChangeInProfit = totalAddedIncomeAndReducedCosts - totalAddedCostsAndReducedIncome;
     var netChangeInProfitWithCurrencyFormat = CURRENCY_FORMAT.format(netChangeInProfit);
     $('#quartech_netchangeinprofit').val(netChangeInProfitWithCurrencyFormat.replace('CA$', ''));
@@ -3725,7 +3389,7 @@
         // @ts-ignore
         currentInputCursor >= inputValue.length - 2 // || adding number after decimal place
         /*             inputValue.length <= totalMaxDigits */) {
-          var _document$getElementB10;
+          var _document$getElementB0;
           logger$L.info({
             fn: customizeCurrencyInput,
             message: 'KEYDOWN ACTION: Decimal input detected',
@@ -3738,9 +3402,9 @@
           _newVal[currentInputCursor] = String.fromCharCode(pressedKeyCode);
           _newVal = _newVal.join('');
           inputCtr.val(_newVal);
-          (_document$getElementB10 = document.getElementById(inputCtr[0].id)
+          (_document$getElementB0 = document.getElementById(inputCtr[0].id)
           // @ts-ignore
-          ) === null || _document$getElementB10 === void 0 || _document$getElementB10.setSelectionRange(currentInputCursor + 1, currentInputCursor + 1);
+          ) === null || _document$getElementB0 === void 0 || _document$getElementB0.setSelectionRange(currentInputCursor + 1, currentInputCursor + 1);
           // if (inputValue == "0.00") {
           //   inputCtr.val(""); // Solve issue when entering the 1st number before '0.00'
           // }
@@ -4695,36 +4359,36 @@
       return e.name = "SuppressedError", e.error = error, e.suppressed = suppressed, e;
   };
 
-  var shoelace = ":root,\n:host,\n.sl-theme-light {\n  color-scheme: light;\n\n  --sl-color-gray-50: hsl(0 0% 97.5%);\n  --sl-color-gray-100: hsl(240 4.8% 95.9%);\n  --sl-color-gray-200: hsl(240 5.9% 90%);\n  --sl-color-gray-300: hsl(240 4.9% 83.9%);\n  --sl-color-gray-400: hsl(240 5% 64.9%);\n  --sl-color-gray-500: hsl(240 3.8% 46.1%);\n  --sl-color-gray-600: hsl(240 5.2% 33.9%);\n  --sl-color-gray-700: hsl(240 5.3% 26.1%);\n  --sl-color-gray-800: hsl(240 3.7% 15.9%);\n  --sl-color-gray-900: hsl(240 5.9% 10%);\n  --sl-color-gray-950: hsl(240 7.3% 8%);\n\n  --sl-color-red-50: hsl(0 85.7% 97.3%);\n  --sl-color-red-100: hsl(0 93.3% 94.1%);\n  --sl-color-red-200: hsl(0 96.3% 89.4%);\n  --sl-color-red-300: hsl(0 93.5% 81.8%);\n  --sl-color-red-400: hsl(0 90.6% 70.8%);\n  --sl-color-red-500: hsl(0 84.2% 60.2%);\n  --sl-color-red-600: hsl(0 72.2% 50.6%);\n  --sl-color-red-700: hsl(0 73.7% 41.8%);\n  --sl-color-red-800: hsl(0 70% 35.3%);\n  --sl-color-red-900: hsl(0 62.8% 30.6%);\n  --sl-color-red-950: hsl(0 60% 19.6%);\n\n  --sl-color-orange-50: hsl(33.3 100% 96.5%);\n  --sl-color-orange-100: hsl(34.3 100% 91.8%);\n  --sl-color-orange-200: hsl(32.1 97.7% 83.1%);\n  --sl-color-orange-300: hsl(30.7 97.2% 72.4%);\n  --sl-color-orange-400: hsl(27 96% 61%);\n  --sl-color-orange-500: hsl(24.6 95% 53.1%);\n  --sl-color-orange-600: hsl(20.5 90.2% 48.2%);\n  --sl-color-orange-700: hsl(17.5 88.3% 40.4%);\n  --sl-color-orange-800: hsl(15 79.1% 33.7%);\n  --sl-color-orange-900: hsl(15.3 74.6% 27.8%);\n  --sl-color-orange-950: hsl(15.2 69.1% 19%);\n\n  --sl-color-amber-50: hsl(48 100% 96.1%);\n  --sl-color-amber-100: hsl(48 96.5% 88.8%);\n  --sl-color-amber-200: hsl(48 96.6% 76.7%);\n  --sl-color-amber-300: hsl(45.9 96.7% 64.5%);\n  --sl-color-amber-400: hsl(43.3 96.4% 56.3%);\n  --sl-color-amber-500: hsl(37.7 92.1% 50.2%);\n  --sl-color-amber-600: hsl(32.1 94.6% 43.7%);\n  --sl-color-amber-700: hsl(26 90.5% 37.1%);\n  --sl-color-amber-800: hsl(22.7 82.5% 31.4%);\n  --sl-color-amber-900: hsl(21.7 77.8% 26.5%);\n  --sl-color-amber-950: hsl(22.9 74.1% 16.7%);\n\n  --sl-color-yellow-50: hsl(54.5 91.7% 95.3%);\n  --sl-color-yellow-100: hsl(54.9 96.7% 88%);\n  --sl-color-yellow-200: hsl(52.8 98.3% 76.9%);\n  --sl-color-yellow-300: hsl(50.4 97.8% 63.5%);\n  --sl-color-yellow-400: hsl(47.9 95.8% 53.1%);\n  --sl-color-yellow-500: hsl(45.4 93.4% 47.5%);\n  --sl-color-yellow-600: hsl(40.6 96.1% 40.4%);\n  --sl-color-yellow-700: hsl(35.5 91.7% 32.9%);\n  --sl-color-yellow-800: hsl(31.8 81% 28.8%);\n  --sl-color-yellow-900: hsl(28.4 72.5% 25.7%);\n  --sl-color-yellow-950: hsl(33.1 69% 13.9%);\n\n  --sl-color-lime-50: hsl(78.3 92% 95.1%);\n  --sl-color-lime-100: hsl(79.6 89.1% 89.2%);\n  --sl-color-lime-200: hsl(80.9 88.5% 79.6%);\n  --sl-color-lime-300: hsl(82 84.5% 67.1%);\n  --sl-color-lime-400: hsl(82.7 78% 55.5%);\n  --sl-color-lime-500: hsl(83.7 80.5% 44.3%);\n  --sl-color-lime-600: hsl(84.8 85.2% 34.5%);\n  --sl-color-lime-700: hsl(85.9 78.4% 27.3%);\n  --sl-color-lime-800: hsl(86.3 69% 22.7%);\n  --sl-color-lime-900: hsl(87.6 61.2% 20.2%);\n  --sl-color-lime-950: hsl(86.5 60.6% 13.9%);\n\n  --sl-color-green-50: hsl(138.5 76.5% 96.7%);\n  --sl-color-green-100: hsl(140.6 84.2% 92.5%);\n  --sl-color-green-200: hsl(141 78.9% 85.1%);\n  --sl-color-green-300: hsl(141.7 76.6% 73.1%);\n  --sl-color-green-400: hsl(141.9 69.2% 58%);\n  --sl-color-green-500: hsl(142.1 70.6% 45.3%);\n  --sl-color-green-600: hsl(142.1 76.2% 36.3%);\n  --sl-color-green-700: hsl(142.4 71.8% 29.2%);\n  --sl-color-green-800: hsl(142.8 64.2% 24.1%);\n  --sl-color-green-900: hsl(143.8 61.2% 20.2%);\n  --sl-color-green-950: hsl(144.3 60.7% 12%);\n\n  --sl-color-emerald-50: hsl(151.8 81% 95.9%);\n  --sl-color-emerald-100: hsl(149.3 80.4% 90%);\n  --sl-color-emerald-200: hsl(152.4 76% 80.4%);\n  --sl-color-emerald-300: hsl(156.2 71.6% 66.9%);\n  --sl-color-emerald-400: hsl(158.1 64.4% 51.6%);\n  --sl-color-emerald-500: hsl(160.1 84.1% 39.4%);\n  --sl-color-emerald-600: hsl(161.4 93.5% 30.4%);\n  --sl-color-emerald-700: hsl(162.9 93.5% 24.3%);\n  --sl-color-emerald-800: hsl(163.1 88.1% 19.8%);\n  --sl-color-emerald-900: hsl(164.2 85.7% 16.5%);\n  --sl-color-emerald-950: hsl(164.3 87.5% 9.4%);\n\n  --sl-color-teal-50: hsl(166.2 76.5% 96.7%);\n  --sl-color-teal-100: hsl(167.2 85.5% 89.2%);\n  --sl-color-teal-200: hsl(168.4 83.8% 78.2%);\n  --sl-color-teal-300: hsl(170.6 76.9% 64.3%);\n  --sl-color-teal-400: hsl(172.5 66% 50.4%);\n  --sl-color-teal-500: hsl(173.4 80.4% 40%);\n  --sl-color-teal-600: hsl(174.7 83.9% 31.6%);\n  --sl-color-teal-700: hsl(175.3 77.4% 26.1%);\n  --sl-color-teal-800: hsl(176.1 69.4% 21.8%);\n  --sl-color-teal-900: hsl(175.9 60.8% 19%);\n  --sl-color-teal-950: hsl(176.5 58.6% 11.4%);\n\n  --sl-color-cyan-50: hsl(183.2 100% 96.3%);\n  --sl-color-cyan-100: hsl(185.1 95.9% 90.4%);\n  --sl-color-cyan-200: hsl(186.2 93.5% 81.8%);\n  --sl-color-cyan-300: hsl(187 92.4% 69%);\n  --sl-color-cyan-400: hsl(187.9 85.7% 53.3%);\n  --sl-color-cyan-500: hsl(188.7 94.5% 42.7%);\n  --sl-color-cyan-600: hsl(191.6 91.4% 36.5%);\n  --sl-color-cyan-700: hsl(192.9 82.3% 31%);\n  --sl-color-cyan-800: hsl(194.4 69.6% 27.1%);\n  --sl-color-cyan-900: hsl(196.4 63.6% 23.7%);\n  --sl-color-cyan-950: hsl(196.8 61% 16.1%);\n\n  --sl-color-sky-50: hsl(204 100% 97.1%);\n  --sl-color-sky-100: hsl(204 93.8% 93.7%);\n  --sl-color-sky-200: hsl(200.6 94.4% 86.1%);\n  --sl-color-sky-300: hsl(199.4 95.5% 73.9%);\n  --sl-color-sky-400: hsl(198.4 93.2% 59.6%);\n  --sl-color-sky-500: hsl(198.6 88.7% 48.4%);\n  --sl-color-sky-600: hsl(200.4 98% 39.4%);\n  --sl-color-sky-700: hsl(201.3 96.3% 32.2%);\n  --sl-color-sky-800: hsl(201 90% 27.5%);\n  --sl-color-sky-900: hsl(202 80.3% 23.9%);\n  --sl-color-sky-950: hsl(202.3 73.8% 16.5%);\n\n  --sl-color-blue-50: hsl(213.8 100% 96.9%);\n  --sl-color-blue-100: hsl(214.3 94.6% 92.7%);\n  --sl-color-blue-200: hsl(213.3 96.9% 87.3%);\n  --sl-color-blue-300: hsl(211.7 96.4% 78.4%);\n  --sl-color-blue-400: hsl(213.1 93.9% 67.8%);\n  --sl-color-blue-500: hsl(217.2 91.2% 59.8%);\n  --sl-color-blue-600: hsl(221.2 83.2% 53.3%);\n  --sl-color-blue-700: hsl(224.3 76.3% 48%);\n  --sl-color-blue-800: hsl(225.9 70.7% 40.2%);\n  --sl-color-blue-900: hsl(224.4 64.3% 32.9%);\n  --sl-color-blue-950: hsl(226.2 55.3% 18.4%);\n\n  --sl-color-indigo-50: hsl(225.9 100% 96.7%);\n  --sl-color-indigo-100: hsl(226.5 100% 93.9%);\n  --sl-color-indigo-200: hsl(228 96.5% 88.8%);\n  --sl-color-indigo-300: hsl(229.7 93.5% 81.8%);\n  --sl-color-indigo-400: hsl(234.5 89.5% 73.9%);\n  --sl-color-indigo-500: hsl(238.7 83.5% 66.7%);\n  --sl-color-indigo-600: hsl(243.4 75.4% 58.6%);\n  --sl-color-indigo-700: hsl(244.5 57.9% 50.6%);\n  --sl-color-indigo-800: hsl(243.7 54.5% 41.4%);\n  --sl-color-indigo-900: hsl(242.2 47.4% 34.3%);\n  --sl-color-indigo-950: hsl(243.5 43.6% 22.9%);\n\n  --sl-color-violet-50: hsl(250 100% 97.6%);\n  --sl-color-violet-100: hsl(251.4 91.3% 95.5%);\n  --sl-color-violet-200: hsl(250.5 95.2% 91.8%);\n  --sl-color-violet-300: hsl(252.5 94.7% 85.1%);\n  --sl-color-violet-400: hsl(255.1 91.7% 76.3%);\n  --sl-color-violet-500: hsl(258.3 89.5% 66.3%);\n  --sl-color-violet-600: hsl(262.1 83.3% 57.8%);\n  --sl-color-violet-700: hsl(263.4 70% 50.4%);\n  --sl-color-violet-800: hsl(263.4 69.3% 42.2%);\n  --sl-color-violet-900: hsl(263.5 67.4% 34.9%);\n  --sl-color-violet-950: hsl(265.1 61.5% 21.4%);\n\n  --sl-color-purple-50: hsl(270 100% 98%);\n  --sl-color-purple-100: hsl(268.7 100% 95.5%);\n  --sl-color-purple-200: hsl(268.6 100% 91.8%);\n  --sl-color-purple-300: hsl(269.2 97.4% 85.1%);\n  --sl-color-purple-400: hsl(270 95.2% 75.3%);\n  --sl-color-purple-500: hsl(270.7 91% 65.1%);\n  --sl-color-purple-600: hsl(271.5 81.3% 55.9%);\n  --sl-color-purple-700: hsl(272.1 71.7% 47.1%);\n  --sl-color-purple-800: hsl(272.9 67.2% 39.4%);\n  --sl-color-purple-900: hsl(273.6 65.6% 32%);\n  --sl-color-purple-950: hsl(276 59.5% 16.5%);\n\n  --sl-color-fuchsia-50: hsl(289.1 100% 97.8%);\n  --sl-color-fuchsia-100: hsl(287 100% 95.5%);\n  --sl-color-fuchsia-200: hsl(288.3 95.8% 90.6%);\n  --sl-color-fuchsia-300: hsl(291.1 93.1% 82.9%);\n  --sl-color-fuchsia-400: hsl(292 91.4% 72.5%);\n  --sl-color-fuchsia-500: hsl(292.2 84.1% 60.6%);\n  --sl-color-fuchsia-600: hsl(293.4 69.5% 48.8%);\n  --sl-color-fuchsia-700: hsl(294.7 72.4% 39.8%);\n  --sl-color-fuchsia-800: hsl(295.4 70.2% 32.9%);\n  --sl-color-fuchsia-900: hsl(296.7 63.6% 28%);\n  --sl-color-fuchsia-950: hsl(297.1 56.8% 14.5%);\n\n  --sl-color-pink-50: hsl(327.3 73.3% 97.1%);\n  --sl-color-pink-100: hsl(325.7 77.8% 94.7%);\n  --sl-color-pink-200: hsl(325.9 84.6% 89.8%);\n  --sl-color-pink-300: hsl(327.4 87.1% 81.8%);\n  --sl-color-pink-400: hsl(328.6 85.5% 70.2%);\n  --sl-color-pink-500: hsl(330.4 81.2% 60.4%);\n  --sl-color-pink-600: hsl(333.3 71.4% 50.6%);\n  --sl-color-pink-700: hsl(335.1 77.6% 42%);\n  --sl-color-pink-800: hsl(335.8 74.4% 35.3%);\n  --sl-color-pink-900: hsl(335.9 69% 30.4%);\n  --sl-color-pink-950: hsl(336.2 65.4% 15.9%);\n\n  --sl-color-rose-50: hsl(355.7 100% 97.3%);\n  --sl-color-rose-100: hsl(355.6 100% 94.7%);\n  --sl-color-rose-200: hsl(352.7 96.1% 90%);\n  --sl-color-rose-300: hsl(352.6 95.7% 81.8%);\n  --sl-color-rose-400: hsl(351.3 94.5% 71.4%);\n  --sl-color-rose-500: hsl(349.7 89.2% 60.2%);\n  --sl-color-rose-600: hsl(346.8 77.2% 49.8%);\n  --sl-color-rose-700: hsl(345.3 82.7% 40.8%);\n  --sl-color-rose-800: hsl(343.4 79.7% 34.7%);\n  --sl-color-rose-900: hsl(341.5 75.5% 30.4%);\n  --sl-color-rose-950: hsl(341.3 70.1% 17.1%);\n\n  --sl-color-primary-50: var(--sl-color-sky-50);\n  --sl-color-primary-100: var(--sl-color-sky-100);\n  --sl-color-primary-200: var(--sl-color-sky-200);\n  --sl-color-primary-300: var(--sl-color-sky-300);\n  --sl-color-primary-400: var(--sl-color-sky-400);\n  --sl-color-primary-500: var(--sl-color-sky-500);\n  --sl-color-primary-600: var(--sl-color-sky-600);\n  --sl-color-primary-700: var(--sl-color-sky-700);\n  --sl-color-primary-800: var(--sl-color-sky-800);\n  --sl-color-primary-900: var(--sl-color-sky-900);\n  --sl-color-primary-950: var(--sl-color-sky-950);\n\n  --sl-color-success-50: var(--sl-color-green-50);\n  --sl-color-success-100: var(--sl-color-green-100);\n  --sl-color-success-200: var(--sl-color-green-200);\n  --sl-color-success-300: var(--sl-color-green-300);\n  --sl-color-success-400: var(--sl-color-green-400);\n  --sl-color-success-500: var(--sl-color-green-500);\n  --sl-color-success-600: var(--sl-color-green-600);\n  --sl-color-success-700: var(--sl-color-green-700);\n  --sl-color-success-800: var(--sl-color-green-800);\n  --sl-color-success-900: var(--sl-color-green-900);\n  --sl-color-success-950: var(--sl-color-green-950);\n\n  --sl-color-warning-50: var(--sl-color-amber-50);\n  --sl-color-warning-100: var(--sl-color-amber-100);\n  --sl-color-warning-200: var(--sl-color-amber-200);\n  --sl-color-warning-300: var(--sl-color-amber-300);\n  --sl-color-warning-400: var(--sl-color-amber-400);\n  --sl-color-warning-500: var(--sl-color-amber-500);\n  --sl-color-warning-600: var(--sl-color-amber-600);\n  --sl-color-warning-700: var(--sl-color-amber-700);\n  --sl-color-warning-800: var(--sl-color-amber-800);\n  --sl-color-warning-900: var(--sl-color-amber-900);\n  --sl-color-warning-950: var(--sl-color-amber-950);\n\n  --sl-color-danger-50: var(--sl-color-red-50);\n  --sl-color-danger-100: var(--sl-color-red-100);\n  --sl-color-danger-200: var(--sl-color-red-200);\n  --sl-color-danger-300: var(--sl-color-red-300);\n  --sl-color-danger-400: var(--sl-color-red-400);\n  --sl-color-danger-500: var(--sl-color-red-500);\n  --sl-color-danger-600: var(--sl-color-red-600);\n  --sl-color-danger-700: var(--sl-color-red-700);\n  --sl-color-danger-800: var(--sl-color-red-800);\n  --sl-color-danger-900: var(--sl-color-red-900);\n  --sl-color-danger-950: var(--sl-color-red-950);\n\n  --sl-color-neutral-50: var(--sl-color-gray-50);\n  --sl-color-neutral-100: var(--sl-color-gray-100);\n  --sl-color-neutral-200: var(--sl-color-gray-200);\n  --sl-color-neutral-300: var(--sl-color-gray-300);\n  --sl-color-neutral-400: var(--sl-color-gray-400);\n  --sl-color-neutral-500: var(--sl-color-gray-500);\n  --sl-color-neutral-600: var(--sl-color-gray-600);\n  --sl-color-neutral-700: var(--sl-color-gray-700);\n  --sl-color-neutral-800: var(--sl-color-gray-800);\n  --sl-color-neutral-900: var(--sl-color-gray-900);\n  --sl-color-neutral-950: var(--sl-color-gray-950);\n\n  --sl-color-neutral-0: hsl(0, 0%, 100%);\n  --sl-color-neutral-1000: hsl(0, 0%, 0%);\n\n  --sl-border-radius-small: 0.1875rem;\n  --sl-border-radius-medium: 0.25rem;\n  --sl-border-radius-large: 0.5rem;\n  --sl-border-radius-x-large: 1rem;\n\n  --sl-border-radius-circle: 50%;\n  --sl-border-radius-pill: 9999px;\n\n  --sl-shadow-x-small: 0 1px 2px hsl(240 3.8% 46.1% / 6%);\n  --sl-shadow-small: 0 1px 2px hsl(240 3.8% 46.1% / 12%);\n  --sl-shadow-medium: 0 2px 4px hsl(240 3.8% 46.1% / 12%);\n  --sl-shadow-large: 0 2px 8px hsl(240 3.8% 46.1% / 12%);\n  --sl-shadow-x-large: 0 4px 16px hsl(240 3.8% 46.1% / 12%);\n\n  --sl-spacing-3x-small: 0.125rem;\n  --sl-spacing-2x-small: 0.25rem;\n  --sl-spacing-x-small: 0.5rem;\n  --sl-spacing-small: 0.75rem;\n  --sl-spacing-medium: 1rem;\n  --sl-spacing-large: 1.25rem;\n  --sl-spacing-x-large: 1.75rem;\n  --sl-spacing-2x-large: 2.25rem;\n  --sl-spacing-3x-large: 3rem;\n  --sl-spacing-4x-large: 4.5rem;\n\n  --sl-transition-x-slow: 1000ms;\n  --sl-transition-slow: 500ms;\n  --sl-transition-medium: 250ms;\n  --sl-transition-fast: 150ms;\n  --sl-transition-x-fast: 50ms;\n\n  --sl-font-mono: SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;\n  --sl-font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,\n    Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',\n    'Segoe UI Symbol';\n  --sl-font-serif: Georgia, 'Times New Roman', serif;\n\n  --sl-font-size-2x-small: 0.625rem;\n  --sl-font-size-x-small: 0.75rem;\n  --sl-font-size-small: 0.875rem;\n  --sl-font-size-medium: 1rem;\n  --sl-font-size-large: 1.25rem;\n  --sl-font-size-x-large: 1.5rem;\n  --sl-font-size-2x-large: 2.25rem;\n  --sl-font-size-3x-large: 3rem;\n  --sl-font-size-4x-large: 4.5rem;\n\n  --sl-font-weight-light: 300;\n  --sl-font-weight-normal: 400;\n  --sl-font-weight-semibold: 500;\n  --sl-font-weight-bold: 700;\n\n  --sl-letter-spacing-denser: -0.03em;\n  --sl-letter-spacing-dense: -0.015em;\n  --sl-letter-spacing-normal: normal;\n  --sl-letter-spacing-loose: 0.075em;\n  --sl-letter-spacing-looser: 0.15em;\n\n  --sl-line-height-denser: 1;\n  --sl-line-height-dense: 1.4;\n  --sl-line-height-normal: 1.8;\n  --sl-line-height-loose: 2.2;\n  --sl-line-height-looser: 2.6;\n\n  --sl-focus-ring-color: var(--sl-color-primary-600);\n  --sl-focus-ring-style: solid;\n  --sl-focus-ring-width: 3px;\n  --sl-focus-ring: var(--sl-focus-ring-style) var(--sl-focus-ring-width)\n    var(--sl-focus-ring-color);\n  --sl-focus-ring-offset: 1px;\n\n  --sl-button-font-size-small: var(--sl-font-size-x-small);\n  --sl-button-font-size-medium: var(--sl-font-size-small);\n  --sl-button-font-size-large: var(--sl-font-size-medium);\n\n  --sl-input-height-small: 1.875rem;\n  --sl-input-height-medium: 2.5rem;\n  --sl-input-height-large: 3.125rem;\n\n  --sl-input-background-color: var(--sl-color-neutral-0);\n  --sl-input-background-color-hover: var(--sl-input-background-color);\n  --sl-input-background-color-focus: var(--sl-input-background-color);\n  --sl-input-background-color-disabled: var(--sl-color-neutral-100);\n  --sl-input-border-color: var(--sl-color-neutral-300);\n  --sl-input-border-color-hover: var(--sl-color-neutral-400);\n  --sl-input-border-color-focus: var(--sl-color-primary-500);\n  --sl-input-border-color-disabled: var(--sl-color-neutral-300);\n  --sl-input-border-width: 1px;\n  --sl-input-required-content: '*';\n  --sl-input-required-content-offset: -2px;\n  --sl-input-required-content-color: var(--sl-input-label-color);\n\n  --sl-input-border-radius-small: var(--sl-border-radius-medium);\n  --sl-input-border-radius-medium: var(--sl-border-radius-medium);\n  --sl-input-border-radius-large: var(--sl-border-radius-medium);\n\n  --sl-input-font-family: var(--sl-font-sans);\n  --sl-input-font-weight: var(--sl-font-weight-normal);\n  --sl-input-font-size-small: var(--sl-font-size-small);\n  --sl-input-font-size-medium: var(--sl-font-size-medium);\n  --sl-input-font-size-large: var(--sl-font-size-large);\n  --sl-input-letter-spacing: var(--sl-letter-spacing-normal);\n\n  --sl-input-color: var(--sl-color-neutral-700);\n  --sl-input-color-hover: var(--sl-color-neutral-700);\n  --sl-input-color-focus: var(--sl-color-neutral-700);\n  --sl-input-color-disabled: var(--sl-color-neutral-900);\n  --sl-input-icon-color: var(--sl-color-neutral-500);\n  --sl-input-icon-color-hover: var(--sl-color-neutral-600);\n  --sl-input-icon-color-focus: var(--sl-color-neutral-600);\n  --sl-input-placeholder-color: var(--sl-color-neutral-500);\n  --sl-input-placeholder-color-disabled: var(--sl-color-neutral-600);\n  --sl-input-spacing-small: var(--sl-spacing-small);\n  --sl-input-spacing-medium: var(--sl-spacing-medium);\n  --sl-input-spacing-large: var(--sl-spacing-large);\n\n  --sl-input-focus-ring-color: hsl(198.6 88.7% 48.4% / 40%);\n  --sl-input-focus-ring-offset: 0;\n\n  --sl-input-filled-background-color: var(--sl-color-neutral-100);\n  --sl-input-filled-background-color-hover: var(--sl-color-neutral-100);\n  --sl-input-filled-background-color-focus: var(--sl-color-neutral-100);\n  --sl-input-filled-background-color-disabled: var(--sl-color-neutral-100);\n  --sl-input-filled-color: var(--sl-color-neutral-800);\n  --sl-input-filled-color-hover: var(--sl-color-neutral-800);\n  --sl-input-filled-color-focus: var(--sl-color-neutral-700);\n  --sl-input-filled-color-disabled: var(--sl-color-neutral-800);\n\n  --sl-input-label-font-size-small: var(--sl-font-size-small);\n  --sl-input-label-font-size-medium: var(--sl-font-size-medium);\n  --sl-input-label-font-size-large: var(--sl-font-size-large);\n  --sl-input-label-color: inherit;\n\n  --sl-input-help-text-font-size-small: var(--sl-font-size-x-small);\n  --sl-input-help-text-font-size-medium: var(--sl-font-size-small);\n  --sl-input-help-text-font-size-large: var(--sl-font-size-medium);\n  --sl-input-help-text-color: var(--sl-color-neutral-500);\n\n  --sl-toggle-size-small: 0.875rem;\n  --sl-toggle-size-medium: 1.125rem;\n  --sl-toggle-size-large: 1.375rem;\n\n  --sl-overlay-background-color: hsl(240 3.8% 46.1% / 33%);\n\n  --sl-panel-background-color: var(--sl-color-neutral-0);\n  --sl-panel-border-color: var(--sl-color-neutral-200);\n  --sl-panel-border-width: 1px;\n\n  --sl-tooltip-border-radius: var(--sl-border-radius-medium);\n  --sl-tooltip-background-color: var(--sl-color-neutral-800);\n  --sl-tooltip-color: var(--sl-color-neutral-0);\n  --sl-tooltip-font-family: var(--sl-font-sans);\n  --sl-tooltip-font-weight: var(--sl-font-weight-normal);\n  --sl-tooltip-font-size: var(--sl-font-size-small);\n  --sl-tooltip-line-height: var(--sl-line-height-dense);\n  --sl-tooltip-padding: var(--sl-spacing-2x-small) var(--sl-spacing-x-small);\n  --sl-tooltip-arrow-size: 6px;\n\n  --sl-z-index-drawer: 700;\n  --sl-z-index-dialog: 800;\n  --sl-z-index-dropdown: 900;\n  --sl-z-index-toast: 950;\n  --sl-z-index-tooltip: 1000;\n}\n\n@supports (scrollbar-gutter: stable) {\n  .sl-scroll-lock {\n    scrollbar-gutter: stable !important;\n    overflow: hidden !important;\n  }\n}\n\n@supports not (scrollbar-gutter: stable) {\n  .sl-scroll-lock body {\n    padding-right: var(--sl-scroll-lock-size) !important;\n    overflow: hidden !important;\n  }\n}\n\n.sl-toast-stack {\n  position: fixed;\n  top: 0;\n  inset-inline-end: 0;\n  z-index: var(--sl-z-index-toast);\n  width: 28rem;\n  max-width: 100%;\n  max-height: 100%;\n  overflow: auto;\n}\n\n.sl-toast-stack sl-alert {\n  margin: var(--sl-spacing-medium);\n}\n\n.sl-toast-stack sl-alert::part(base) {\n  box-shadow: var(--sl-shadow-large);\n}\n/*# sourceMappingURL=shoelace.css.map */";
+  var shoelace = ":root,\r\n:host,\r\n.sl-theme-light {\r\n  color-scheme: light;\r\n\r\n  --sl-color-gray-50: hsl(0 0% 97.5%);\r\n  --sl-color-gray-100: hsl(240 4.8% 95.9%);\r\n  --sl-color-gray-200: hsl(240 5.9% 90%);\r\n  --sl-color-gray-300: hsl(240 4.9% 83.9%);\r\n  --sl-color-gray-400: hsl(240 5% 64.9%);\r\n  --sl-color-gray-500: hsl(240 3.8% 46.1%);\r\n  --sl-color-gray-600: hsl(240 5.2% 33.9%);\r\n  --sl-color-gray-700: hsl(240 5.3% 26.1%);\r\n  --sl-color-gray-800: hsl(240 3.7% 15.9%);\r\n  --sl-color-gray-900: hsl(240 5.9% 10%);\r\n  --sl-color-gray-950: hsl(240 7.3% 8%);\r\n\r\n  --sl-color-red-50: hsl(0 85.7% 97.3%);\r\n  --sl-color-red-100: hsl(0 93.3% 94.1%);\r\n  --sl-color-red-200: hsl(0 96.3% 89.4%);\r\n  --sl-color-red-300: hsl(0 93.5% 81.8%);\r\n  --sl-color-red-400: hsl(0 90.6% 70.8%);\r\n  --sl-color-red-500: hsl(0 84.2% 60.2%);\r\n  --sl-color-red-600: hsl(0 72.2% 50.6%);\r\n  --sl-color-red-700: hsl(0 73.7% 41.8%);\r\n  --sl-color-red-800: hsl(0 70% 35.3%);\r\n  --sl-color-red-900: hsl(0 62.8% 30.6%);\r\n  --sl-color-red-950: hsl(0 60% 19.6%);\r\n\r\n  --sl-color-orange-50: hsl(33.3 100% 96.5%);\r\n  --sl-color-orange-100: hsl(34.3 100% 91.8%);\r\n  --sl-color-orange-200: hsl(32.1 97.7% 83.1%);\r\n  --sl-color-orange-300: hsl(30.7 97.2% 72.4%);\r\n  --sl-color-orange-400: hsl(27 96% 61%);\r\n  --sl-color-orange-500: hsl(24.6 95% 53.1%);\r\n  --sl-color-orange-600: hsl(20.5 90.2% 48.2%);\r\n  --sl-color-orange-700: hsl(17.5 88.3% 40.4%);\r\n  --sl-color-orange-800: hsl(15 79.1% 33.7%);\r\n  --sl-color-orange-900: hsl(15.3 74.6% 27.8%);\r\n  --sl-color-orange-950: hsl(15.2 69.1% 19%);\r\n\r\n  --sl-color-amber-50: hsl(48 100% 96.1%);\r\n  --sl-color-amber-100: hsl(48 96.5% 88.8%);\r\n  --sl-color-amber-200: hsl(48 96.6% 76.7%);\r\n  --sl-color-amber-300: hsl(45.9 96.7% 64.5%);\r\n  --sl-color-amber-400: hsl(43.3 96.4% 56.3%);\r\n  --sl-color-amber-500: hsl(37.7 92.1% 50.2%);\r\n  --sl-color-amber-600: hsl(32.1 94.6% 43.7%);\r\n  --sl-color-amber-700: hsl(26 90.5% 37.1%);\r\n  --sl-color-amber-800: hsl(22.7 82.5% 31.4%);\r\n  --sl-color-amber-900: hsl(21.7 77.8% 26.5%);\r\n  --sl-color-amber-950: hsl(22.9 74.1% 16.7%);\r\n\r\n  --sl-color-yellow-50: hsl(54.5 91.7% 95.3%);\r\n  --sl-color-yellow-100: hsl(54.9 96.7% 88%);\r\n  --sl-color-yellow-200: hsl(52.8 98.3% 76.9%);\r\n  --sl-color-yellow-300: hsl(50.4 97.8% 63.5%);\r\n  --sl-color-yellow-400: hsl(47.9 95.8% 53.1%);\r\n  --sl-color-yellow-500: hsl(45.4 93.4% 47.5%);\r\n  --sl-color-yellow-600: hsl(40.6 96.1% 40.4%);\r\n  --sl-color-yellow-700: hsl(35.5 91.7% 32.9%);\r\n  --sl-color-yellow-800: hsl(31.8 81% 28.8%);\r\n  --sl-color-yellow-900: hsl(28.4 72.5% 25.7%);\r\n  --sl-color-yellow-950: hsl(33.1 69% 13.9%);\r\n\r\n  --sl-color-lime-50: hsl(78.3 92% 95.1%);\r\n  --sl-color-lime-100: hsl(79.6 89.1% 89.2%);\r\n  --sl-color-lime-200: hsl(80.9 88.5% 79.6%);\r\n  --sl-color-lime-300: hsl(82 84.5% 67.1%);\r\n  --sl-color-lime-400: hsl(82.7 78% 55.5%);\r\n  --sl-color-lime-500: hsl(83.7 80.5% 44.3%);\r\n  --sl-color-lime-600: hsl(84.8 85.2% 34.5%);\r\n  --sl-color-lime-700: hsl(85.9 78.4% 27.3%);\r\n  --sl-color-lime-800: hsl(86.3 69% 22.7%);\r\n  --sl-color-lime-900: hsl(87.6 61.2% 20.2%);\r\n  --sl-color-lime-950: hsl(86.5 60.6% 13.9%);\r\n\r\n  --sl-color-green-50: hsl(138.5 76.5% 96.7%);\r\n  --sl-color-green-100: hsl(140.6 84.2% 92.5%);\r\n  --sl-color-green-200: hsl(141 78.9% 85.1%);\r\n  --sl-color-green-300: hsl(141.7 76.6% 73.1%);\r\n  --sl-color-green-400: hsl(141.9 69.2% 58%);\r\n  --sl-color-green-500: hsl(142.1 70.6% 45.3%);\r\n  --sl-color-green-600: hsl(142.1 76.2% 36.3%);\r\n  --sl-color-green-700: hsl(142.4 71.8% 29.2%);\r\n  --sl-color-green-800: hsl(142.8 64.2% 24.1%);\r\n  --sl-color-green-900: hsl(143.8 61.2% 20.2%);\r\n  --sl-color-green-950: hsl(144.3 60.7% 12%);\r\n\r\n  --sl-color-emerald-50: hsl(151.8 81% 95.9%);\r\n  --sl-color-emerald-100: hsl(149.3 80.4% 90%);\r\n  --sl-color-emerald-200: hsl(152.4 76% 80.4%);\r\n  --sl-color-emerald-300: hsl(156.2 71.6% 66.9%);\r\n  --sl-color-emerald-400: hsl(158.1 64.4% 51.6%);\r\n  --sl-color-emerald-500: hsl(160.1 84.1% 39.4%);\r\n  --sl-color-emerald-600: hsl(161.4 93.5% 30.4%);\r\n  --sl-color-emerald-700: hsl(162.9 93.5% 24.3%);\r\n  --sl-color-emerald-800: hsl(163.1 88.1% 19.8%);\r\n  --sl-color-emerald-900: hsl(164.2 85.7% 16.5%);\r\n  --sl-color-emerald-950: hsl(164.3 87.5% 9.4%);\r\n\r\n  --sl-color-teal-50: hsl(166.2 76.5% 96.7%);\r\n  --sl-color-teal-100: hsl(167.2 85.5% 89.2%);\r\n  --sl-color-teal-200: hsl(168.4 83.8% 78.2%);\r\n  --sl-color-teal-300: hsl(170.6 76.9% 64.3%);\r\n  --sl-color-teal-400: hsl(172.5 66% 50.4%);\r\n  --sl-color-teal-500: hsl(173.4 80.4% 40%);\r\n  --sl-color-teal-600: hsl(174.7 83.9% 31.6%);\r\n  --sl-color-teal-700: hsl(175.3 77.4% 26.1%);\r\n  --sl-color-teal-800: hsl(176.1 69.4% 21.8%);\r\n  --sl-color-teal-900: hsl(175.9 60.8% 19%);\r\n  --sl-color-teal-950: hsl(176.5 58.6% 11.4%);\r\n\r\n  --sl-color-cyan-50: hsl(183.2 100% 96.3%);\r\n  --sl-color-cyan-100: hsl(185.1 95.9% 90.4%);\r\n  --sl-color-cyan-200: hsl(186.2 93.5% 81.8%);\r\n  --sl-color-cyan-300: hsl(187 92.4% 69%);\r\n  --sl-color-cyan-400: hsl(187.9 85.7% 53.3%);\r\n  --sl-color-cyan-500: hsl(188.7 94.5% 42.7%);\r\n  --sl-color-cyan-600: hsl(191.6 91.4% 36.5%);\r\n  --sl-color-cyan-700: hsl(192.9 82.3% 31%);\r\n  --sl-color-cyan-800: hsl(194.4 69.6% 27.1%);\r\n  --sl-color-cyan-900: hsl(196.4 63.6% 23.7%);\r\n  --sl-color-cyan-950: hsl(196.8 61% 16.1%);\r\n\r\n  --sl-color-sky-50: hsl(204 100% 97.1%);\r\n  --sl-color-sky-100: hsl(204 93.8% 93.7%);\r\n  --sl-color-sky-200: hsl(200.6 94.4% 86.1%);\r\n  --sl-color-sky-300: hsl(199.4 95.5% 73.9%);\r\n  --sl-color-sky-400: hsl(198.4 93.2% 59.6%);\r\n  --sl-color-sky-500: hsl(198.6 88.7% 48.4%);\r\n  --sl-color-sky-600: hsl(200.4 98% 39.4%);\r\n  --sl-color-sky-700: hsl(201.3 96.3% 32.2%);\r\n  --sl-color-sky-800: hsl(201 90% 27.5%);\r\n  --sl-color-sky-900: hsl(202 80.3% 23.9%);\r\n  --sl-color-sky-950: hsl(202.3 73.8% 16.5%);\r\n\r\n  --sl-color-blue-50: hsl(213.8 100% 96.9%);\r\n  --sl-color-blue-100: hsl(214.3 94.6% 92.7%);\r\n  --sl-color-blue-200: hsl(213.3 96.9% 87.3%);\r\n  --sl-color-blue-300: hsl(211.7 96.4% 78.4%);\r\n  --sl-color-blue-400: hsl(213.1 93.9% 67.8%);\r\n  --sl-color-blue-500: hsl(217.2 91.2% 59.8%);\r\n  --sl-color-blue-600: hsl(221.2 83.2% 53.3%);\r\n  --sl-color-blue-700: hsl(224.3 76.3% 48%);\r\n  --sl-color-blue-800: hsl(225.9 70.7% 40.2%);\r\n  --sl-color-blue-900: hsl(224.4 64.3% 32.9%);\r\n  --sl-color-blue-950: hsl(226.2 55.3% 18.4%);\r\n\r\n  --sl-color-indigo-50: hsl(225.9 100% 96.7%);\r\n  --sl-color-indigo-100: hsl(226.5 100% 93.9%);\r\n  --sl-color-indigo-200: hsl(228 96.5% 88.8%);\r\n  --sl-color-indigo-300: hsl(229.7 93.5% 81.8%);\r\n  --sl-color-indigo-400: hsl(234.5 89.5% 73.9%);\r\n  --sl-color-indigo-500: hsl(238.7 83.5% 66.7%);\r\n  --sl-color-indigo-600: hsl(243.4 75.4% 58.6%);\r\n  --sl-color-indigo-700: hsl(244.5 57.9% 50.6%);\r\n  --sl-color-indigo-800: hsl(243.7 54.5% 41.4%);\r\n  --sl-color-indigo-900: hsl(242.2 47.4% 34.3%);\r\n  --sl-color-indigo-950: hsl(243.5 43.6% 22.9%);\r\n\r\n  --sl-color-violet-50: hsl(250 100% 97.6%);\r\n  --sl-color-violet-100: hsl(251.4 91.3% 95.5%);\r\n  --sl-color-violet-200: hsl(250.5 95.2% 91.8%);\r\n  --sl-color-violet-300: hsl(252.5 94.7% 85.1%);\r\n  --sl-color-violet-400: hsl(255.1 91.7% 76.3%);\r\n  --sl-color-violet-500: hsl(258.3 89.5% 66.3%);\r\n  --sl-color-violet-600: hsl(262.1 83.3% 57.8%);\r\n  --sl-color-violet-700: hsl(263.4 70% 50.4%);\r\n  --sl-color-violet-800: hsl(263.4 69.3% 42.2%);\r\n  --sl-color-violet-900: hsl(263.5 67.4% 34.9%);\r\n  --sl-color-violet-950: hsl(265.1 61.5% 21.4%);\r\n\r\n  --sl-color-purple-50: hsl(270 100% 98%);\r\n  --sl-color-purple-100: hsl(268.7 100% 95.5%);\r\n  --sl-color-purple-200: hsl(268.6 100% 91.8%);\r\n  --sl-color-purple-300: hsl(269.2 97.4% 85.1%);\r\n  --sl-color-purple-400: hsl(270 95.2% 75.3%);\r\n  --sl-color-purple-500: hsl(270.7 91% 65.1%);\r\n  --sl-color-purple-600: hsl(271.5 81.3% 55.9%);\r\n  --sl-color-purple-700: hsl(272.1 71.7% 47.1%);\r\n  --sl-color-purple-800: hsl(272.9 67.2% 39.4%);\r\n  --sl-color-purple-900: hsl(273.6 65.6% 32%);\r\n  --sl-color-purple-950: hsl(276 59.5% 16.5%);\r\n\r\n  --sl-color-fuchsia-50: hsl(289.1 100% 97.8%);\r\n  --sl-color-fuchsia-100: hsl(287 100% 95.5%);\r\n  --sl-color-fuchsia-200: hsl(288.3 95.8% 90.6%);\r\n  --sl-color-fuchsia-300: hsl(291.1 93.1% 82.9%);\r\n  --sl-color-fuchsia-400: hsl(292 91.4% 72.5%);\r\n  --sl-color-fuchsia-500: hsl(292.2 84.1% 60.6%);\r\n  --sl-color-fuchsia-600: hsl(293.4 69.5% 48.8%);\r\n  --sl-color-fuchsia-700: hsl(294.7 72.4% 39.8%);\r\n  --sl-color-fuchsia-800: hsl(295.4 70.2% 32.9%);\r\n  --sl-color-fuchsia-900: hsl(296.7 63.6% 28%);\r\n  --sl-color-fuchsia-950: hsl(297.1 56.8% 14.5%);\r\n\r\n  --sl-color-pink-50: hsl(327.3 73.3% 97.1%);\r\n  --sl-color-pink-100: hsl(325.7 77.8% 94.7%);\r\n  --sl-color-pink-200: hsl(325.9 84.6% 89.8%);\r\n  --sl-color-pink-300: hsl(327.4 87.1% 81.8%);\r\n  --sl-color-pink-400: hsl(328.6 85.5% 70.2%);\r\n  --sl-color-pink-500: hsl(330.4 81.2% 60.4%);\r\n  --sl-color-pink-600: hsl(333.3 71.4% 50.6%);\r\n  --sl-color-pink-700: hsl(335.1 77.6% 42%);\r\n  --sl-color-pink-800: hsl(335.8 74.4% 35.3%);\r\n  --sl-color-pink-900: hsl(335.9 69% 30.4%);\r\n  --sl-color-pink-950: hsl(336.2 65.4% 15.9%);\r\n\r\n  --sl-color-rose-50: hsl(355.7 100% 97.3%);\r\n  --sl-color-rose-100: hsl(355.6 100% 94.7%);\r\n  --sl-color-rose-200: hsl(352.7 96.1% 90%);\r\n  --sl-color-rose-300: hsl(352.6 95.7% 81.8%);\r\n  --sl-color-rose-400: hsl(351.3 94.5% 71.4%);\r\n  --sl-color-rose-500: hsl(349.7 89.2% 60.2%);\r\n  --sl-color-rose-600: hsl(346.8 77.2% 49.8%);\r\n  --sl-color-rose-700: hsl(345.3 82.7% 40.8%);\r\n  --sl-color-rose-800: hsl(343.4 79.7% 34.7%);\r\n  --sl-color-rose-900: hsl(341.5 75.5% 30.4%);\r\n  --sl-color-rose-950: hsl(341.3 70.1% 17.1%);\r\n\r\n  --sl-color-primary-50: var(--sl-color-sky-50);\r\n  --sl-color-primary-100: var(--sl-color-sky-100);\r\n  --sl-color-primary-200: var(--sl-color-sky-200);\r\n  --sl-color-primary-300: var(--sl-color-sky-300);\r\n  --sl-color-primary-400: var(--sl-color-sky-400);\r\n  --sl-color-primary-500: var(--sl-color-sky-500);\r\n  --sl-color-primary-600: var(--sl-color-sky-600);\r\n  --sl-color-primary-700: var(--sl-color-sky-700);\r\n  --sl-color-primary-800: var(--sl-color-sky-800);\r\n  --sl-color-primary-900: var(--sl-color-sky-900);\r\n  --sl-color-primary-950: var(--sl-color-sky-950);\r\n\r\n  --sl-color-success-50: var(--sl-color-green-50);\r\n  --sl-color-success-100: var(--sl-color-green-100);\r\n  --sl-color-success-200: var(--sl-color-green-200);\r\n  --sl-color-success-300: var(--sl-color-green-300);\r\n  --sl-color-success-400: var(--sl-color-green-400);\r\n  --sl-color-success-500: var(--sl-color-green-500);\r\n  --sl-color-success-600: var(--sl-color-green-600);\r\n  --sl-color-success-700: var(--sl-color-green-700);\r\n  --sl-color-success-800: var(--sl-color-green-800);\r\n  --sl-color-success-900: var(--sl-color-green-900);\r\n  --sl-color-success-950: var(--sl-color-green-950);\r\n\r\n  --sl-color-warning-50: var(--sl-color-amber-50);\r\n  --sl-color-warning-100: var(--sl-color-amber-100);\r\n  --sl-color-warning-200: var(--sl-color-amber-200);\r\n  --sl-color-warning-300: var(--sl-color-amber-300);\r\n  --sl-color-warning-400: var(--sl-color-amber-400);\r\n  --sl-color-warning-500: var(--sl-color-amber-500);\r\n  --sl-color-warning-600: var(--sl-color-amber-600);\r\n  --sl-color-warning-700: var(--sl-color-amber-700);\r\n  --sl-color-warning-800: var(--sl-color-amber-800);\r\n  --sl-color-warning-900: var(--sl-color-amber-900);\r\n  --sl-color-warning-950: var(--sl-color-amber-950);\r\n\r\n  --sl-color-danger-50: var(--sl-color-red-50);\r\n  --sl-color-danger-100: var(--sl-color-red-100);\r\n  --sl-color-danger-200: var(--sl-color-red-200);\r\n  --sl-color-danger-300: var(--sl-color-red-300);\r\n  --sl-color-danger-400: var(--sl-color-red-400);\r\n  --sl-color-danger-500: var(--sl-color-red-500);\r\n  --sl-color-danger-600: var(--sl-color-red-600);\r\n  --sl-color-danger-700: var(--sl-color-red-700);\r\n  --sl-color-danger-800: var(--sl-color-red-800);\r\n  --sl-color-danger-900: var(--sl-color-red-900);\r\n  --sl-color-danger-950: var(--sl-color-red-950);\r\n\r\n  --sl-color-neutral-50: var(--sl-color-gray-50);\r\n  --sl-color-neutral-100: var(--sl-color-gray-100);\r\n  --sl-color-neutral-200: var(--sl-color-gray-200);\r\n  --sl-color-neutral-300: var(--sl-color-gray-300);\r\n  --sl-color-neutral-400: var(--sl-color-gray-400);\r\n  --sl-color-neutral-500: var(--sl-color-gray-500);\r\n  --sl-color-neutral-600: var(--sl-color-gray-600);\r\n  --sl-color-neutral-700: var(--sl-color-gray-700);\r\n  --sl-color-neutral-800: var(--sl-color-gray-800);\r\n  --sl-color-neutral-900: var(--sl-color-gray-900);\r\n  --sl-color-neutral-950: var(--sl-color-gray-950);\r\n\r\n  --sl-color-neutral-0: hsl(0, 0%, 100%);\r\n  --sl-color-neutral-1000: hsl(0, 0%, 0%);\r\n\r\n  --sl-border-radius-small: 0.1875rem;\r\n  --sl-border-radius-medium: 0.25rem;\r\n  --sl-border-radius-large: 0.5rem;\r\n  --sl-border-radius-x-large: 1rem;\r\n\r\n  --sl-border-radius-circle: 50%;\r\n  --sl-border-radius-pill: 9999px;\r\n\r\n  --sl-shadow-x-small: 0 1px 2px hsl(240 3.8% 46.1% / 6%);\r\n  --sl-shadow-small: 0 1px 2px hsl(240 3.8% 46.1% / 12%);\r\n  --sl-shadow-medium: 0 2px 4px hsl(240 3.8% 46.1% / 12%);\r\n  --sl-shadow-large: 0 2px 8px hsl(240 3.8% 46.1% / 12%);\r\n  --sl-shadow-x-large: 0 4px 16px hsl(240 3.8% 46.1% / 12%);\r\n\r\n  --sl-spacing-3x-small: 0.125rem;\r\n  --sl-spacing-2x-small: 0.25rem;\r\n  --sl-spacing-x-small: 0.5rem;\r\n  --sl-spacing-small: 0.75rem;\r\n  --sl-spacing-medium: 1rem;\r\n  --sl-spacing-large: 1.25rem;\r\n  --sl-spacing-x-large: 1.75rem;\r\n  --sl-spacing-2x-large: 2.25rem;\r\n  --sl-spacing-3x-large: 3rem;\r\n  --sl-spacing-4x-large: 4.5rem;\r\n\r\n  --sl-transition-x-slow: 1000ms;\r\n  --sl-transition-slow: 500ms;\r\n  --sl-transition-medium: 250ms;\r\n  --sl-transition-fast: 150ms;\r\n  --sl-transition-x-fast: 50ms;\r\n\r\n  --sl-font-mono: SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;\r\n  --sl-font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,\r\n    Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',\r\n    'Segoe UI Symbol';\r\n  --sl-font-serif: Georgia, 'Times New Roman', serif;\r\n\r\n  --sl-font-size-2x-small: 0.625rem;\r\n  --sl-font-size-x-small: 0.75rem;\r\n  --sl-font-size-small: 0.875rem;\r\n  --sl-font-size-medium: 1rem;\r\n  --sl-font-size-large: 1.25rem;\r\n  --sl-font-size-x-large: 1.5rem;\r\n  --sl-font-size-2x-large: 2.25rem;\r\n  --sl-font-size-3x-large: 3rem;\r\n  --sl-font-size-4x-large: 4.5rem;\r\n\r\n  --sl-font-weight-light: 300;\r\n  --sl-font-weight-normal: 400;\r\n  --sl-font-weight-semibold: 500;\r\n  --sl-font-weight-bold: 700;\r\n\r\n  --sl-letter-spacing-denser: -0.03em;\r\n  --sl-letter-spacing-dense: -0.015em;\r\n  --sl-letter-spacing-normal: normal;\r\n  --sl-letter-spacing-loose: 0.075em;\r\n  --sl-letter-spacing-looser: 0.15em;\r\n\r\n  --sl-line-height-denser: 1;\r\n  --sl-line-height-dense: 1.4;\r\n  --sl-line-height-normal: 1.8;\r\n  --sl-line-height-loose: 2.2;\r\n  --sl-line-height-looser: 2.6;\r\n\r\n  --sl-focus-ring-color: var(--sl-color-primary-600);\r\n  --sl-focus-ring-style: solid;\r\n  --sl-focus-ring-width: 3px;\r\n  --sl-focus-ring: var(--sl-focus-ring-style) var(--sl-focus-ring-width)\r\n    var(--sl-focus-ring-color);\r\n  --sl-focus-ring-offset: 1px;\r\n\r\n  --sl-button-font-size-small: var(--sl-font-size-x-small);\r\n  --sl-button-font-size-medium: var(--sl-font-size-small);\r\n  --sl-button-font-size-large: var(--sl-font-size-medium);\r\n\r\n  --sl-input-height-small: 1.875rem;\r\n  --sl-input-height-medium: 2.5rem;\r\n  --sl-input-height-large: 3.125rem;\r\n\r\n  --sl-input-background-color: var(--sl-color-neutral-0);\r\n  --sl-input-background-color-hover: var(--sl-input-background-color);\r\n  --sl-input-background-color-focus: var(--sl-input-background-color);\r\n  --sl-input-background-color-disabled: var(--sl-color-neutral-100);\r\n  --sl-input-border-color: var(--sl-color-neutral-300);\r\n  --sl-input-border-color-hover: var(--sl-color-neutral-400);\r\n  --sl-input-border-color-focus: var(--sl-color-primary-500);\r\n  --sl-input-border-color-disabled: var(--sl-color-neutral-300);\r\n  --sl-input-border-width: 1px;\r\n  --sl-input-required-content: '*';\r\n  --sl-input-required-content-offset: -2px;\r\n  --sl-input-required-content-color: var(--sl-input-label-color);\r\n\r\n  --sl-input-border-radius-small: var(--sl-border-radius-medium);\r\n  --sl-input-border-radius-medium: var(--sl-border-radius-medium);\r\n  --sl-input-border-radius-large: var(--sl-border-radius-medium);\r\n\r\n  --sl-input-font-family: var(--sl-font-sans);\r\n  --sl-input-font-weight: var(--sl-font-weight-normal);\r\n  --sl-input-font-size-small: var(--sl-font-size-small);\r\n  --sl-input-font-size-medium: var(--sl-font-size-medium);\r\n  --sl-input-font-size-large: var(--sl-font-size-large);\r\n  --sl-input-letter-spacing: var(--sl-letter-spacing-normal);\r\n\r\n  --sl-input-color: var(--sl-color-neutral-700);\r\n  --sl-input-color-hover: var(--sl-color-neutral-700);\r\n  --sl-input-color-focus: var(--sl-color-neutral-700);\r\n  --sl-input-color-disabled: var(--sl-color-neutral-900);\r\n  --sl-input-icon-color: var(--sl-color-neutral-500);\r\n  --sl-input-icon-color-hover: var(--sl-color-neutral-600);\r\n  --sl-input-icon-color-focus: var(--sl-color-neutral-600);\r\n  --sl-input-placeholder-color: var(--sl-color-neutral-500);\r\n  --sl-input-placeholder-color-disabled: var(--sl-color-neutral-600);\r\n  --sl-input-spacing-small: var(--sl-spacing-small);\r\n  --sl-input-spacing-medium: var(--sl-spacing-medium);\r\n  --sl-input-spacing-large: var(--sl-spacing-large);\r\n\r\n  --sl-input-focus-ring-color: hsl(198.6 88.7% 48.4% / 40%);\r\n  --sl-input-focus-ring-offset: 0;\r\n\r\n  --sl-input-filled-background-color: var(--sl-color-neutral-100);\r\n  --sl-input-filled-background-color-hover: var(--sl-color-neutral-100);\r\n  --sl-input-filled-background-color-focus: var(--sl-color-neutral-100);\r\n  --sl-input-filled-background-color-disabled: var(--sl-color-neutral-100);\r\n  --sl-input-filled-color: var(--sl-color-neutral-800);\r\n  --sl-input-filled-color-hover: var(--sl-color-neutral-800);\r\n  --sl-input-filled-color-focus: var(--sl-color-neutral-700);\r\n  --sl-input-filled-color-disabled: var(--sl-color-neutral-800);\r\n\r\n  --sl-input-label-font-size-small: var(--sl-font-size-small);\r\n  --sl-input-label-font-size-medium: var(--sl-font-size-medium);\r\n  --sl-input-label-font-size-large: var(--sl-font-size-large);\r\n  --sl-input-label-color: inherit;\r\n\r\n  --sl-input-help-text-font-size-small: var(--sl-font-size-x-small);\r\n  --sl-input-help-text-font-size-medium: var(--sl-font-size-small);\r\n  --sl-input-help-text-font-size-large: var(--sl-font-size-medium);\r\n  --sl-input-help-text-color: var(--sl-color-neutral-500);\r\n\r\n  --sl-toggle-size-small: 0.875rem;\r\n  --sl-toggle-size-medium: 1.125rem;\r\n  --sl-toggle-size-large: 1.375rem;\r\n\r\n  --sl-overlay-background-color: hsl(240 3.8% 46.1% / 33%);\r\n\r\n  --sl-panel-background-color: var(--sl-color-neutral-0);\r\n  --sl-panel-border-color: var(--sl-color-neutral-200);\r\n  --sl-panel-border-width: 1px;\r\n\r\n  --sl-tooltip-border-radius: var(--sl-border-radius-medium);\r\n  --sl-tooltip-background-color: var(--sl-color-neutral-800);\r\n  --sl-tooltip-color: var(--sl-color-neutral-0);\r\n  --sl-tooltip-font-family: var(--sl-font-sans);\r\n  --sl-tooltip-font-weight: var(--sl-font-weight-normal);\r\n  --sl-tooltip-font-size: var(--sl-font-size-small);\r\n  --sl-tooltip-line-height: var(--sl-line-height-dense);\r\n  --sl-tooltip-padding: var(--sl-spacing-2x-small) var(--sl-spacing-x-small);\r\n  --sl-tooltip-arrow-size: 6px;\r\n\r\n  --sl-z-index-drawer: 700;\r\n  --sl-z-index-dialog: 800;\r\n  --sl-z-index-dropdown: 900;\r\n  --sl-z-index-toast: 950;\r\n  --sl-z-index-tooltip: 1000;\r\n}\r\n\r\n@supports (scrollbar-gutter: stable) {\r\n  .sl-scroll-lock {\r\n    scrollbar-gutter: stable !important;\r\n    overflow: hidden !important;\r\n  }\r\n}\r\n\r\n@supports not (scrollbar-gutter: stable) {\r\n  .sl-scroll-lock body {\r\n    padding-right: var(--sl-scroll-lock-size) !important;\r\n    overflow: hidden !important;\r\n  }\r\n}\r\n\r\n.sl-toast-stack {\r\n  position: fixed;\r\n  top: 0;\r\n  inset-inline-end: 0;\r\n  z-index: var(--sl-z-index-toast);\r\n  width: 28rem;\r\n  max-width: 100%;\r\n  max-height: 100%;\r\n  overflow: auto;\r\n}\r\n\r\n.sl-toast-stack sl-alert {\r\n  margin: var(--sl-spacing-medium);\r\n}\r\n\r\n.sl-toast-stack sl-alert::part(base) {\r\n  box-shadow: var(--sl-shadow-large);\r\n}\r\n/*# sourceMappingURL=shoelace.css.map */";
 
   /**
    * @license
    * Copyright 2019 Google LLC
    * SPDX-License-Identifier: BSD-3-Clause
    */
-  const t$3=globalThis,e$9=t$3.ShadowRoot&&(void 0===t$3.ShadyCSS||t$3.ShadyCSS.nativeShadow)&&"adoptedStyleSheets"in Document.prototype&&"replace"in CSSStyleSheet.prototype,s$3=Symbol(),o$7=new WeakMap;class n$5{constructor(t,e,o){if(this._$cssResult$=!0,o!==s$3)throw Error("CSSResult is not constructable. Use `unsafeCSS` or `css` instead.");this.cssText=t,this.t=e;}get styleSheet(){let t=this.o;const s=this.t;if(e$9&&void 0===t){const e=void 0!==s&&1===s.length;e&&(t=o$7.get(s)),void 0===t&&((this.o=t=new CSSStyleSheet).replaceSync(this.cssText),e&&o$7.set(s,t));}return t}toString(){return this.cssText}}const r$5=t=>new n$5("string"==typeof t?t:t+"",void 0,s$3),i$4=(t,...e)=>{const o=1===t.length?t[0]:e.reduce(((e,s,o)=>e+(t=>{if(!0===t._$cssResult$)return t.cssText;if("number"==typeof t)return t;throw Error("Value passed to 'css' function must be a 'css' function result: "+t+". Use 'unsafeCSS' to pass non-literal values, but take care to ensure page security.")})(s)+t[o+1]),t[0]);return new n$5(o,t,s$3)},S$1=(s,o)=>{if(e$9)s.adoptedStyleSheets=o.map((t=>t instanceof CSSStyleSheet?t:t.styleSheet));else for(const e of o){const o=document.createElement("style"),n=t$3.litNonce;void 0!==n&&o.setAttribute("nonce",n),o.textContent=e.cssText,s.appendChild(o);}},c$2=e$9?t=>t:t=>t instanceof CSSStyleSheet?(t=>{let e="";for(const s of t.cssRules)e+=s.cssText;return r$5(e)})(t):t;
+  const t$4=globalThis,e$8=t$4.ShadowRoot&&(void 0===t$4.ShadyCSS||t$4.ShadyCSS.nativeShadow)&&"adoptedStyleSheets"in Document.prototype&&"replace"in CSSStyleSheet.prototype,s$2=Symbol(),o$8=new WeakMap;class n$5{constructor(t,e,o){if(this._$cssResult$=!0,o!==s$2)throw Error("CSSResult is not constructable. Use `unsafeCSS` or `css` instead.");this.cssText=t,this.t=e;}get styleSheet(){let t=this.o;const s=this.t;if(e$8&&void 0===t){const e=void 0!==s&&1===s.length;e&&(t=o$8.get(s)),void 0===t&&((this.o=t=new CSSStyleSheet).replaceSync(this.cssText),e&&o$8.set(s,t));}return t}toString(){return this.cssText}}const r$4=t=>new n$5("string"==typeof t?t:t+"",void 0,s$2),i$6=(t,...e)=>{const o=1===t.length?t[0]:e.reduce(((e,s,o)=>e+(t=>{if(!0===t._$cssResult$)return t.cssText;if("number"==typeof t)return t;throw Error("Value passed to 'css' function must be a 'css' function result: "+t+". Use 'unsafeCSS' to pass non-literal values, but take care to ensure page security.")})(s)+t[o+1]),t[0]);return new n$5(o,t,s$2)},S$1=(s,o)=>{if(e$8)s.adoptedStyleSheets=o.map((t=>t instanceof CSSStyleSheet?t:t.styleSheet));else for(const e of o){const o=document.createElement("style"),n=t$4.litNonce;void 0!==n&&o.setAttribute("nonce",n),o.textContent=e.cssText,s.appendChild(o);}},c$2=e$8?t=>t:t=>t instanceof CSSStyleSheet?(t=>{let e="";for(const s of t.cssRules)e+=s.cssText;return r$4(e)})(t):t;
 
   /**
    * @license
    * Copyright 2017 Google LLC
    * SPDX-License-Identifier: BSD-3-Clause
-   */const{is:i$3,defineProperty:e$8,getOwnPropertyDescriptor:r$4,getOwnPropertyNames:h$1,getOwnPropertySymbols:o$6,getPrototypeOf:n$4}=Object,a$2=globalThis,c$1=a$2.trustedTypes,l$3=c$1?c$1.emptyScript:"",p$1=a$2.reactiveElementPolyfillSupport,d$1=(t,s)=>t,u$2={toAttribute(t,s){switch(s){case Boolean:t=t?l$3:null;break;case Object:case Array:t=null==t?t:JSON.stringify(t);}return t},fromAttribute(t,s){let i=t;switch(s){case Boolean:i=null!==t;break;case Number:i=null===t?null:Number(t);break;case Object:case Array:try{i=JSON.parse(t);}catch(t){i=null;}}return i}},f$2=(t,s)=>!i$3(t,s),y$1={attribute:!0,type:String,converter:u$2,reflect:!1,hasChanged:f$2};Symbol.metadata??=Symbol("metadata"),a$2.litPropertyMetadata??=new WeakMap;class b extends HTMLElement{static addInitializer(t){this._$Ei(),(this.l??=[]).push(t);}static get observedAttributes(){return this.finalize(),this._$Eh&&[...this._$Eh.keys()]}static createProperty(t,s=y$1){if(s.state&&(s.attribute=!1),this._$Ei(),this.elementProperties.set(t,s),!s.noAccessor){const i=Symbol(),r=this.getPropertyDescriptor(t,i,s);void 0!==r&&e$8(this.prototype,t,r);}}static getPropertyDescriptor(t,s,i){const{get:e,set:h}=r$4(this.prototype,t)??{get(){return this[s]},set(t){this[s]=t;}};return {get(){return e?.call(this)},set(s){const r=e?.call(this);h.call(this,s),this.requestUpdate(t,r,i);},configurable:!0,enumerable:!0}}static getPropertyOptions(t){return this.elementProperties.get(t)??y$1}static _$Ei(){if(this.hasOwnProperty(d$1("elementProperties")))return;const t=n$4(this);t.finalize(),void 0!==t.l&&(this.l=[...t.l]),this.elementProperties=new Map(t.elementProperties);}static finalize(){if(this.hasOwnProperty(d$1("finalized")))return;if(this.finalized=!0,this._$Ei(),this.hasOwnProperty(d$1("properties"))){const t=this.properties,s=[...h$1(t),...o$6(t)];for(const i of s)this.createProperty(i,t[i]);}const t=this[Symbol.metadata];if(null!==t){const s=litPropertyMetadata.get(t);if(void 0!==s)for(const[t,i]of s)this.elementProperties.set(t,i);}this._$Eh=new Map;for(const[t,s]of this.elementProperties){const i=this._$Eu(t,s);void 0!==i&&this._$Eh.set(i,t);}this.elementStyles=this.finalizeStyles(this.styles);}static finalizeStyles(s){const i=[];if(Array.isArray(s)){const e=new Set(s.flat(1/0).reverse());for(const s of e)i.unshift(c$2(s));}else void 0!==s&&i.push(c$2(s));return i}static _$Eu(t,s){const i=s.attribute;return !1===i?void 0:"string"==typeof i?i:"string"==typeof t?t.toLowerCase():void 0}constructor(){super(),this._$Ep=void 0,this.isUpdatePending=!1,this.hasUpdated=!1,this._$Em=null,this._$Ev();}_$Ev(){this._$ES=new Promise((t=>this.enableUpdating=t)),this._$AL=new Map,this._$E_(),this.requestUpdate(),this.constructor.l?.forEach((t=>t(this)));}addController(t){(this._$EO??=new Set).add(t),void 0!==this.renderRoot&&this.isConnected&&t.hostConnected?.();}removeController(t){this._$EO?.delete(t);}_$E_(){const t=new Map,s=this.constructor.elementProperties;for(const i of s.keys())this.hasOwnProperty(i)&&(t.set(i,this[i]),delete this[i]);t.size>0&&(this._$Ep=t);}createRenderRoot(){const t=this.shadowRoot??this.attachShadow(this.constructor.shadowRootOptions);return S$1(t,this.constructor.elementStyles),t}connectedCallback(){this.renderRoot??=this.createRenderRoot(),this.enableUpdating(!0),this._$EO?.forEach((t=>t.hostConnected?.()));}enableUpdating(t){}disconnectedCallback(){this._$EO?.forEach((t=>t.hostDisconnected?.()));}attributeChangedCallback(t,s,i){this._$AK(t,i);}_$EC(t,s){const i=this.constructor.elementProperties.get(t),e=this.constructor._$Eu(t,i);if(void 0!==e&&!0===i.reflect){const r=(void 0!==i.converter?.toAttribute?i.converter:u$2).toAttribute(s,i.type);this._$Em=t,null==r?this.removeAttribute(e):this.setAttribute(e,r),this._$Em=null;}}_$AK(t,s){const i=this.constructor,e=i._$Eh.get(t);if(void 0!==e&&this._$Em!==e){const t=i.getPropertyOptions(e),r="function"==typeof t.converter?{fromAttribute:t.converter}:void 0!==t.converter?.fromAttribute?t.converter:u$2;this._$Em=e,this[e]=r.fromAttribute(s,t.type),this._$Em=null;}}requestUpdate(t,s,i){if(void 0!==t){if(i??=this.constructor.getPropertyOptions(t),!(i.hasChanged??f$2)(this[t],s))return;this.P(t,s,i);}!1===this.isUpdatePending&&(this._$ES=this._$ET());}P(t,s,i){this._$AL.has(t)||this._$AL.set(t,s),!0===i.reflect&&this._$Em!==t&&(this._$Ej??=new Set).add(t);}async _$ET(){this.isUpdatePending=!0;try{await this._$ES;}catch(t){Promise.reject(t);}const t=this.scheduleUpdate();return null!=t&&await t,!this.isUpdatePending}scheduleUpdate(){return this.performUpdate()}performUpdate(){if(!this.isUpdatePending)return;if(!this.hasUpdated){if(this.renderRoot??=this.createRenderRoot(),this._$Ep){for(const[t,s]of this._$Ep)this[t]=s;this._$Ep=void 0;}const t=this.constructor.elementProperties;if(t.size>0)for(const[s,i]of t)!0!==i.wrapped||this._$AL.has(s)||void 0===this[s]||this.P(s,this[s],i);}let t=!1;const s=this._$AL;try{t=this.shouldUpdate(s),t?(this.willUpdate(s),this._$EO?.forEach((t=>t.hostUpdate?.())),this.update(s)):this._$EU();}catch(s){throw t=!1,this._$EU(),s}t&&this._$AE(s);}willUpdate(t){}_$AE(t){this._$EO?.forEach((t=>t.hostUpdated?.())),this.hasUpdated||(this.hasUpdated=!0,this.firstUpdated(t)),this.updated(t);}_$EU(){this._$AL=new Map,this.isUpdatePending=!1;}get updateComplete(){return this.getUpdateComplete()}getUpdateComplete(){return this._$ES}shouldUpdate(t){return !0}update(t){this._$Ej&&=this._$Ej.forEach((t=>this._$EC(t,this[t]))),this._$EU();}updated(t){}firstUpdated(t){}}b.elementStyles=[],b.shadowRootOptions={mode:"open"},b[d$1("elementProperties")]=new Map,b[d$1("finalized")]=new Map,p$1?.({ReactiveElement:b}),(a$2.reactiveElementVersions??=[]).push("2.0.4");
+   */const{is:i$5,defineProperty:e$7,getOwnPropertyDescriptor:h$1,getOwnPropertyNames:r$3,getOwnPropertySymbols:o$7,getPrototypeOf:n$4}=Object,a$2=globalThis,c$1=a$2.trustedTypes,l$3=c$1?c$1.emptyScript:"",p$1=a$2.reactiveElementPolyfillSupport,d$1=(t,s)=>t,u$3={toAttribute(t,s){switch(s){case Boolean:t=t?l$3:null;break;case Object:case Array:t=null==t?t:JSON.stringify(t);}return t},fromAttribute(t,s){let i=t;switch(s){case Boolean:i=null!==t;break;case Number:i=null===t?null:Number(t);break;case Object:case Array:try{i=JSON.parse(t);}catch(t){i=null;}}return i}},f$2=(t,s)=>!i$5(t,s),b={attribute:!0,type:String,converter:u$3,reflect:!1,useDefault:!1,hasChanged:f$2};Symbol.metadata??=Symbol("metadata"),a$2.litPropertyMetadata??=new WeakMap;class y$1 extends HTMLElement{static addInitializer(t){this._$Ei(),(this.l??=[]).push(t);}static get observedAttributes(){return this.finalize(),this._$Eh&&[...this._$Eh.keys()]}static createProperty(t,s=b){if(s.state&&(s.attribute=!1),this._$Ei(),this.prototype.hasOwnProperty(t)&&((s=Object.create(s)).wrapped=!0),this.elementProperties.set(t,s),!s.noAccessor){const i=Symbol(),h=this.getPropertyDescriptor(t,i,s);void 0!==h&&e$7(this.prototype,t,h);}}static getPropertyDescriptor(t,s,i){const{get:e,set:r}=h$1(this.prototype,t)??{get(){return this[s]},set(t){this[s]=t;}};return {get:e,set(s){const h=e?.call(this);r?.call(this,s),this.requestUpdate(t,h,i);},configurable:!0,enumerable:!0}}static getPropertyOptions(t){return this.elementProperties.get(t)??b}static _$Ei(){if(this.hasOwnProperty(d$1("elementProperties")))return;const t=n$4(this);t.finalize(),void 0!==t.l&&(this.l=[...t.l]),this.elementProperties=new Map(t.elementProperties);}static finalize(){if(this.hasOwnProperty(d$1("finalized")))return;if(this.finalized=!0,this._$Ei(),this.hasOwnProperty(d$1("properties"))){const t=this.properties,s=[...r$3(t),...o$7(t)];for(const i of s)this.createProperty(i,t[i]);}const t=this[Symbol.metadata];if(null!==t){const s=litPropertyMetadata.get(t);if(void 0!==s)for(const[t,i]of s)this.elementProperties.set(t,i);}this._$Eh=new Map;for(const[t,s]of this.elementProperties){const i=this._$Eu(t,s);void 0!==i&&this._$Eh.set(i,t);}this.elementStyles=this.finalizeStyles(this.styles);}static finalizeStyles(s){const i=[];if(Array.isArray(s)){const e=new Set(s.flat(1/0).reverse());for(const s of e)i.unshift(c$2(s));}else void 0!==s&&i.push(c$2(s));return i}static _$Eu(t,s){const i=s.attribute;return !1===i?void 0:"string"==typeof i?i:"string"==typeof t?t.toLowerCase():void 0}constructor(){super(),this._$Ep=void 0,this.isUpdatePending=!1,this.hasUpdated=!1,this._$Em=null,this._$Ev();}_$Ev(){this._$ES=new Promise((t=>this.enableUpdating=t)),this._$AL=new Map,this._$E_(),this.requestUpdate(),this.constructor.l?.forEach((t=>t(this)));}addController(t){(this._$EO??=new Set).add(t),void 0!==this.renderRoot&&this.isConnected&&t.hostConnected?.();}removeController(t){this._$EO?.delete(t);}_$E_(){const t=new Map,s=this.constructor.elementProperties;for(const i of s.keys())this.hasOwnProperty(i)&&(t.set(i,this[i]),delete this[i]);t.size>0&&(this._$Ep=t);}createRenderRoot(){const t=this.shadowRoot??this.attachShadow(this.constructor.shadowRootOptions);return S$1(t,this.constructor.elementStyles),t}connectedCallback(){this.renderRoot??=this.createRenderRoot(),this.enableUpdating(!0),this._$EO?.forEach((t=>t.hostConnected?.()));}enableUpdating(t){}disconnectedCallback(){this._$EO?.forEach((t=>t.hostDisconnected?.()));}attributeChangedCallback(t,s,i){this._$AK(t,i);}_$ET(t,s){const i=this.constructor.elementProperties.get(t),e=this.constructor._$Eu(t,i);if(void 0!==e&&!0===i.reflect){const h=(void 0!==i.converter?.toAttribute?i.converter:u$3).toAttribute(s,i.type);this._$Em=t,null==h?this.removeAttribute(e):this.setAttribute(e,h),this._$Em=null;}}_$AK(t,s){const i=this.constructor,e=i._$Eh.get(t);if(void 0!==e&&this._$Em!==e){const t=i.getPropertyOptions(e),h="function"==typeof t.converter?{fromAttribute:t.converter}:void 0!==t.converter?.fromAttribute?t.converter:u$3;this._$Em=e;const r=h.fromAttribute(s,t.type);this[e]=r??this._$Ej?.get(e)??r,this._$Em=null;}}requestUpdate(t,s,i){if(void 0!==t){const e=this.constructor,h=this[t];if(i??=e.getPropertyOptions(t),!((i.hasChanged??f$2)(h,s)||i.useDefault&&i.reflect&&h===this._$Ej?.get(t)&&!this.hasAttribute(e._$Eu(t,i))))return;this.C(t,s,i);}!1===this.isUpdatePending&&(this._$ES=this._$EP());}C(t,s,{useDefault:i,reflect:e,wrapped:h},r){i&&!(this._$Ej??=new Map).has(t)&&(this._$Ej.set(t,r??s??this[t]),!0!==h||void 0!==r)||(this._$AL.has(t)||(this.hasUpdated||i||(s=void 0),this._$AL.set(t,s)),!0===e&&this._$Em!==t&&(this._$Eq??=new Set).add(t));}async _$EP(){this.isUpdatePending=!0;try{await this._$ES;}catch(t){Promise.reject(t);}const t=this.scheduleUpdate();return null!=t&&await t,!this.isUpdatePending}scheduleUpdate(){return this.performUpdate()}performUpdate(){if(!this.isUpdatePending)return;if(!this.hasUpdated){if(this.renderRoot??=this.createRenderRoot(),this._$Ep){for(const[t,s]of this._$Ep)this[t]=s;this._$Ep=void 0;}const t=this.constructor.elementProperties;if(t.size>0)for(const[s,i]of t){const{wrapped:t}=i,e=this[s];!0!==t||this._$AL.has(s)||void 0===e||this.C(s,void 0,i,e);}}let t=!1;const s=this._$AL;try{t=this.shouldUpdate(s),t?(this.willUpdate(s),this._$EO?.forEach((t=>t.hostUpdate?.())),this.update(s)):this._$EM();}catch(s){throw t=!1,this._$EM(),s}t&&this._$AE(s);}willUpdate(t){}_$AE(t){this._$EO?.forEach((t=>t.hostUpdated?.())),this.hasUpdated||(this.hasUpdated=!0,this.firstUpdated(t)),this.updated(t);}_$EM(){this._$AL=new Map,this.isUpdatePending=!1;}get updateComplete(){return this.getUpdateComplete()}getUpdateComplete(){return this._$ES}shouldUpdate(t){return !0}update(t){this._$Eq&&=this._$Eq.forEach((t=>this._$ET(t,this[t]))),this._$EM();}updated(t){}firstUpdated(t){}}y$1.elementStyles=[],y$1.shadowRootOptions={mode:"open"},y$1[d$1("elementProperties")]=new Map,y$1[d$1("finalized")]=new Map,p$1?.({ReactiveElement:y$1}),(a$2.reactiveElementVersions??=[]).push("2.1.1");
 
   /**
    * @license
    * Copyright 2017 Google LLC
    * SPDX-License-Identifier: BSD-3-Clause
    */
-  const t$2=globalThis,i$2=t$2.trustedTypes,s$2=i$2?i$2.createPolicy("lit-html",{createHTML:t=>t}):void 0,e$7="$lit$",h=`lit$${(Math.random()+"").slice(9)}$`,o$5="?"+h,n$3=`<${o$5}>`,r$3=document,l$2=()=>r$3.createComment(""),c=t=>null===t||"object"!=typeof t&&"function"!=typeof t,a$1=Array.isArray,u$1=t=>a$1(t)||"function"==typeof t?.[Symbol.iterator],d="[ \t\n\f\r]",f$1=/<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g,v=/-->/g,_=/>/g,m$1=RegExp(`>|${d}(?:([^\\s"'>=/]+)(${d}*=${d}*(?:[^ \t\n\f\r"'\`<>=]|("|')|))|$)`,"g"),p=/'/g,g=/"/g,$$1=/^(?:script|style|textarea|title)$/i,y=t=>(i,...s)=>({_$litType$:t,strings:i,values:s}),x=y(1),w=Symbol.for("lit-noChange"),T=Symbol.for("lit-nothing"),A=new WeakMap,E=r$3.createTreeWalker(r$3,129);function C(t,i){if(!Array.isArray(t)||!t.hasOwnProperty("raw"))throw Error("invalid template strings array");return void 0!==s$2?s$2.createHTML(i):i}const P=(t,i)=>{const s=t.length-1,o=[];let r,l=2===i?"<svg>":"",c=f$1;for(let i=0;i<s;i++){const s=t[i];let a,u,d=-1,y=0;for(;y<s.length&&(c.lastIndex=y,u=c.exec(s),null!==u);)y=c.lastIndex,c===f$1?"!--"===u[1]?c=v:void 0!==u[1]?c=_:void 0!==u[2]?($$1.test(u[2])&&(r=RegExp("</"+u[2],"g")),c=m$1):void 0!==u[3]&&(c=m$1):c===m$1?">"===u[0]?(c=r??f$1,d=-1):void 0===u[1]?d=-2:(d=c.lastIndex-u[2].length,a=u[1],c=void 0===u[3]?m$1:'"'===u[3]?g:p):c===g||c===p?c=m$1:c===v||c===_?c=f$1:(c=m$1,r=void 0);const x=c===m$1&&t[i+1].startsWith("/>")?" ":"";l+=c===f$1?s+n$3:d>=0?(o.push(a),s.slice(0,d)+e$7+s.slice(d)+h+x):s+h+(-2===d?i:x);}return [C(t,l+(t[s]||"<?>")+(2===i?"</svg>":"")),o]};class V{constructor({strings:t,_$litType$:s},n){let r;this.parts=[];let c=0,a=0;const u=t.length-1,d=this.parts,[f,v]=P(t,s);if(this.el=V.createElement(f,n),E.currentNode=this.el.content,2===s){const t=this.el.content.firstChild;t.replaceWith(...t.childNodes);}for(;null!==(r=E.nextNode())&&d.length<u;){if(1===r.nodeType){if(r.hasAttributes())for(const t of r.getAttributeNames())if(t.endsWith(e$7)){const i=v[a++],s=r.getAttribute(t).split(h),e=/([.?@])?(.*)/.exec(i);d.push({type:1,index:c,name:e[2],strings:s,ctor:"."===e[1]?k:"?"===e[1]?H:"@"===e[1]?I:R}),r.removeAttribute(t);}else t.startsWith(h)&&(d.push({type:6,index:c}),r.removeAttribute(t));if($$1.test(r.tagName)){const t=r.textContent.split(h),s=t.length-1;if(s>0){r.textContent=i$2?i$2.emptyScript:"";for(let i=0;i<s;i++)r.append(t[i],l$2()),E.nextNode(),d.push({type:2,index:++c});r.append(t[s],l$2());}}}else if(8===r.nodeType)if(r.data===o$5)d.push({type:2,index:c});else {let t=-1;for(;-1!==(t=r.data.indexOf(h,t+1));)d.push({type:7,index:c}),t+=h.length-1;}c++;}}static createElement(t,i){const s=r$3.createElement("template");return s.innerHTML=t,s}}function N(t,i,s=t,e){if(i===w)return i;let h=void 0!==e?s._$Co?.[e]:s._$Cl;const o=c(i)?void 0:i._$litDirective$;return h?.constructor!==o&&(h?._$AO?.(!1),void 0===o?h=void 0:(h=new o(t),h._$AT(t,s,e)),void 0!==e?(s._$Co??=[])[e]=h:s._$Cl=h),void 0!==h&&(i=N(t,h._$AS(t,i.values),h,e)),i}class S{constructor(t,i){this._$AV=[],this._$AN=void 0,this._$AD=t,this._$AM=i;}get parentNode(){return this._$AM.parentNode}get _$AU(){return this._$AM._$AU}u(t){const{el:{content:i},parts:s}=this._$AD,e=(t?.creationScope??r$3).importNode(i,!0);E.currentNode=e;let h=E.nextNode(),o=0,n=0,l=s[0];for(;void 0!==l;){if(o===l.index){let i;2===l.type?i=new M(h,h.nextSibling,this,t):1===l.type?i=new l.ctor(h,l.name,l.strings,this,t):6===l.type&&(i=new L(h,this,t)),this._$AV.push(i),l=s[++n];}o!==l?.index&&(h=E.nextNode(),o++);}return E.currentNode=r$3,e}p(t){let i=0;for(const s of this._$AV)void 0!==s&&(void 0!==s.strings?(s._$AI(t,s,i),i+=s.strings.length-2):s._$AI(t[i])),i++;}}class M{get _$AU(){return this._$AM?._$AU??this._$Cv}constructor(t,i,s,e){this.type=2,this._$AH=T,this._$AN=void 0,this._$AA=t,this._$AB=i,this._$AM=s,this.options=e,this._$Cv=e?.isConnected??!0;}get parentNode(){let t=this._$AA.parentNode;const i=this._$AM;return void 0!==i&&11===t?.nodeType&&(t=i.parentNode),t}get startNode(){return this._$AA}get endNode(){return this._$AB}_$AI(t,i=this){t=N(this,t,i),c(t)?t===T||null==t||""===t?(this._$AH!==T&&this._$AR(),this._$AH=T):t!==this._$AH&&t!==w&&this._(t):void 0!==t._$litType$?this.$(t):void 0!==t.nodeType?this.T(t):u$1(t)?this.k(t):this._(t);}S(t){return this._$AA.parentNode.insertBefore(t,this._$AB)}T(t){this._$AH!==t&&(this._$AR(),this._$AH=this.S(t));}_(t){this._$AH!==T&&c(this._$AH)?this._$AA.nextSibling.data=t:this.T(r$3.createTextNode(t)),this._$AH=t;}$(t){const{values:i,_$litType$:s}=t,e="number"==typeof s?this._$AC(t):(void 0===s.el&&(s.el=V.createElement(C(s.h,s.h[0]),this.options)),s);if(this._$AH?._$AD===e)this._$AH.p(i);else {const t=new S(e,this),s=t.u(this.options);t.p(i),this.T(s),this._$AH=t;}}_$AC(t){let i=A.get(t.strings);return void 0===i&&A.set(t.strings,i=new V(t)),i}k(t){a$1(this._$AH)||(this._$AH=[],this._$AR());const i=this._$AH;let s,e=0;for(const h of t)e===i.length?i.push(s=new M(this.S(l$2()),this.S(l$2()),this,this.options)):s=i[e],s._$AI(h),e++;e<i.length&&(this._$AR(s&&s._$AB.nextSibling,e),i.length=e);}_$AR(t=this._$AA.nextSibling,i){for(this._$AP?.(!1,!0,i);t&&t!==this._$AB;){const i=t.nextSibling;t.remove(),t=i;}}setConnected(t){void 0===this._$AM&&(this._$Cv=t,this._$AP?.(t));}}class R{get tagName(){return this.element.tagName}get _$AU(){return this._$AM._$AU}constructor(t,i,s,e,h){this.type=1,this._$AH=T,this._$AN=void 0,this.element=t,this.name=i,this._$AM=e,this.options=h,s.length>2||""!==s[0]||""!==s[1]?(this._$AH=Array(s.length-1).fill(new String),this.strings=s):this._$AH=T;}_$AI(t,i=this,s,e){const h=this.strings;let o=!1;if(void 0===h)t=N(this,t,i,0),o=!c(t)||t!==this._$AH&&t!==w,o&&(this._$AH=t);else {const e=t;let n,r;for(t=h[0],n=0;n<h.length-1;n++)r=N(this,e[s+n],i,n),r===w&&(r=this._$AH[n]),o||=!c(r)||r!==this._$AH[n],r===T?t=T:t!==T&&(t+=(r??"")+h[n+1]),this._$AH[n]=r;}o&&!e&&this.j(t);}j(t){t===T?this.element.removeAttribute(this.name):this.element.setAttribute(this.name,t??"");}}class k extends R{constructor(){super(...arguments),this.type=3;}j(t){this.element[this.name]=t===T?void 0:t;}}class H extends R{constructor(){super(...arguments),this.type=4;}j(t){this.element.toggleAttribute(this.name,!!t&&t!==T);}}class I extends R{constructor(t,i,s,e,h){super(t,i,s,e,h),this.type=5;}_$AI(t,i=this){if((t=N(this,t,i,0)??T)===w)return;const s=this._$AH,e=t===T&&s!==T||t.capture!==s.capture||t.once!==s.once||t.passive!==s.passive,h=t!==T&&(s===T||e);e&&this.element.removeEventListener(this.name,this,s),h&&this.element.addEventListener(this.name,this,t),this._$AH=t;}handleEvent(t){"function"==typeof this._$AH?this._$AH.call(this.options?.host??this.element,t):this._$AH.handleEvent(t);}}class L{constructor(t,i,s){this.element=t,this.type=6,this._$AN=void 0,this._$AM=i,this.options=s;}get _$AU(){return this._$AM._$AU}_$AI(t){N(this,t);}}const Z=t$2.litHtmlPolyfillSupport;Z?.(V,M),(t$2.litHtmlVersions??=[]).push("3.1.2");const j=(t,i,s)=>{const e=s?.renderBefore??i;let h=e._$litPart$;if(void 0===h){const t=s?.renderBefore??null;e._$litPart$=h=new M(i.insertBefore(l$2(),t),t,void 0,s??{});}return h._$AI(t),h};
+  const t$3=globalThis,i$4=t$3.trustedTypes,s$1=i$4?i$4.createPolicy("lit-html",{createHTML:t=>t}):void 0,e$6="$lit$",h=`lit$${Math.random().toFixed(9).slice(2)}$`,o$6="?"+h,n$3=`<${o$6}>`,r$2=document,l$2=()=>r$2.createComment(""),c=t=>null===t||"object"!=typeof t&&"function"!=typeof t,a$1=Array.isArray,u$2=t=>a$1(t)||"function"==typeof t?.[Symbol.iterator],d="[ \t\n\f\r]",f$1=/<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g,v=/-->/g,_=/>/g,m$1=RegExp(`>|${d}(?:([^\\s"'>=/]+)(${d}*=${d}*(?:[^ \t\n\f\r"'\`<>=]|("|')|))|$)`,"g"),p=/'/g,g=/"/g,$$1=/^(?:script|style|textarea|title)$/i,y=t=>(i,...s)=>({_$litType$:t,strings:i,values:s}),x=y(1),T=Symbol.for("lit-noChange"),E=Symbol.for("lit-nothing"),A=new WeakMap,C=r$2.createTreeWalker(r$2,129);function P(t,i){if(!a$1(t)||!t.hasOwnProperty("raw"))throw Error("invalid template strings array");return void 0!==s$1?s$1.createHTML(i):i}const V=(t,i)=>{const s=t.length-1,o=[];let r,l=2===i?"<svg>":3===i?"<math>":"",c=f$1;for(let i=0;i<s;i++){const s=t[i];let a,u,d=-1,y=0;for(;y<s.length&&(c.lastIndex=y,u=c.exec(s),null!==u);)y=c.lastIndex,c===f$1?"!--"===u[1]?c=v:void 0!==u[1]?c=_:void 0!==u[2]?($$1.test(u[2])&&(r=RegExp("</"+u[2],"g")),c=m$1):void 0!==u[3]&&(c=m$1):c===m$1?">"===u[0]?(c=r??f$1,d=-1):void 0===u[1]?d=-2:(d=c.lastIndex-u[2].length,a=u[1],c=void 0===u[3]?m$1:'"'===u[3]?g:p):c===g||c===p?c=m$1:c===v||c===_?c=f$1:(c=m$1,r=void 0);const x=c===m$1&&t[i+1].startsWith("/>")?" ":"";l+=c===f$1?s+n$3:d>=0?(o.push(a),s.slice(0,d)+e$6+s.slice(d)+h+x):s+h+(-2===d?i:x);}return [P(t,l+(t[s]||"<?>")+(2===i?"</svg>":3===i?"</math>":"")),o]};class N{constructor({strings:t,_$litType$:s},n){let r;this.parts=[];let c=0,a=0;const u=t.length-1,d=this.parts,[f,v]=V(t,s);if(this.el=N.createElement(f,n),C.currentNode=this.el.content,2===s||3===s){const t=this.el.content.firstChild;t.replaceWith(...t.childNodes);}for(;null!==(r=C.nextNode())&&d.length<u;){if(1===r.nodeType){if(r.hasAttributes())for(const t of r.getAttributeNames())if(t.endsWith(e$6)){const i=v[a++],s=r.getAttribute(t).split(h),e=/([.?@])?(.*)/.exec(i);d.push({type:1,index:c,name:e[2],strings:s,ctor:"."===e[1]?H:"?"===e[1]?I:"@"===e[1]?L:k}),r.removeAttribute(t);}else t.startsWith(h)&&(d.push({type:6,index:c}),r.removeAttribute(t));if($$1.test(r.tagName)){const t=r.textContent.split(h),s=t.length-1;if(s>0){r.textContent=i$4?i$4.emptyScript:"";for(let i=0;i<s;i++)r.append(t[i],l$2()),C.nextNode(),d.push({type:2,index:++c});r.append(t[s],l$2());}}}else if(8===r.nodeType)if(r.data===o$6)d.push({type:2,index:c});else {let t=-1;for(;-1!==(t=r.data.indexOf(h,t+1));)d.push({type:7,index:c}),t+=h.length-1;}c++;}}static createElement(t,i){const s=r$2.createElement("template");return s.innerHTML=t,s}}function S(t,i,s=t,e){if(i===T)return i;let h=void 0!==e?s._$Co?.[e]:s._$Cl;const o=c(i)?void 0:i._$litDirective$;return h?.constructor!==o&&(h?._$AO?.(!1),void 0===o?h=void 0:(h=new o(t),h._$AT(t,s,e)),void 0!==e?(s._$Co??=[])[e]=h:s._$Cl=h),void 0!==h&&(i=S(t,h._$AS(t,i.values),h,e)),i}class M{constructor(t,i){this._$AV=[],this._$AN=void 0,this._$AD=t,this._$AM=i;}get parentNode(){return this._$AM.parentNode}get _$AU(){return this._$AM._$AU}u(t){const{el:{content:i},parts:s}=this._$AD,e=(t?.creationScope??r$2).importNode(i,!0);C.currentNode=e;let h=C.nextNode(),o=0,n=0,l=s[0];for(;void 0!==l;){if(o===l.index){let i;2===l.type?i=new R(h,h.nextSibling,this,t):1===l.type?i=new l.ctor(h,l.name,l.strings,this,t):6===l.type&&(i=new z(h,this,t)),this._$AV.push(i),l=s[++n];}o!==l?.index&&(h=C.nextNode(),o++);}return C.currentNode=r$2,e}p(t){let i=0;for(const s of this._$AV)void 0!==s&&(void 0!==s.strings?(s._$AI(t,s,i),i+=s.strings.length-2):s._$AI(t[i])),i++;}}class R{get _$AU(){return this._$AM?._$AU??this._$Cv}constructor(t,i,s,e){this.type=2,this._$AH=E,this._$AN=void 0,this._$AA=t,this._$AB=i,this._$AM=s,this.options=e,this._$Cv=e?.isConnected??!0;}get parentNode(){let t=this._$AA.parentNode;const i=this._$AM;return void 0!==i&&11===t?.nodeType&&(t=i.parentNode),t}get startNode(){return this._$AA}get endNode(){return this._$AB}_$AI(t,i=this){t=S(this,t,i),c(t)?t===E||null==t||""===t?(this._$AH!==E&&this._$AR(),this._$AH=E):t!==this._$AH&&t!==T&&this._(t):void 0!==t._$litType$?this.$(t):void 0!==t.nodeType?this.T(t):u$2(t)?this.k(t):this._(t);}O(t){return this._$AA.parentNode.insertBefore(t,this._$AB)}T(t){this._$AH!==t&&(this._$AR(),this._$AH=this.O(t));}_(t){this._$AH!==E&&c(this._$AH)?this._$AA.nextSibling.data=t:this.T(r$2.createTextNode(t)),this._$AH=t;}$(t){const{values:i,_$litType$:s}=t,e="number"==typeof s?this._$AC(t):(void 0===s.el&&(s.el=N.createElement(P(s.h,s.h[0]),this.options)),s);if(this._$AH?._$AD===e)this._$AH.p(i);else {const t=new M(e,this),s=t.u(this.options);t.p(i),this.T(s),this._$AH=t;}}_$AC(t){let i=A.get(t.strings);return void 0===i&&A.set(t.strings,i=new N(t)),i}k(t){a$1(this._$AH)||(this._$AH=[],this._$AR());const i=this._$AH;let s,e=0;for(const h of t)e===i.length?i.push(s=new R(this.O(l$2()),this.O(l$2()),this,this.options)):s=i[e],s._$AI(h),e++;e<i.length&&(this._$AR(s&&s._$AB.nextSibling,e),i.length=e);}_$AR(t=this._$AA.nextSibling,i){for(this._$AP?.(!1,!0,i);t!==this._$AB;){const i=t.nextSibling;t.remove(),t=i;}}setConnected(t){void 0===this._$AM&&(this._$Cv=t,this._$AP?.(t));}}class k{get tagName(){return this.element.tagName}get _$AU(){return this._$AM._$AU}constructor(t,i,s,e,h){this.type=1,this._$AH=E,this._$AN=void 0,this.element=t,this.name=i,this._$AM=e,this.options=h,s.length>2||""!==s[0]||""!==s[1]?(this._$AH=Array(s.length-1).fill(new String),this.strings=s):this._$AH=E;}_$AI(t,i=this,s,e){const h=this.strings;let o=!1;if(void 0===h)t=S(this,t,i,0),o=!c(t)||t!==this._$AH&&t!==T,o&&(this._$AH=t);else {const e=t;let n,r;for(t=h[0],n=0;n<h.length-1;n++)r=S(this,e[s+n],i,n),r===T&&(r=this._$AH[n]),o||=!c(r)||r!==this._$AH[n],r===E?t=E:t!==E&&(t+=(r??"")+h[n+1]),this._$AH[n]=r;}o&&!e&&this.j(t);}j(t){t===E?this.element.removeAttribute(this.name):this.element.setAttribute(this.name,t??"");}}class H extends k{constructor(){super(...arguments),this.type=3;}j(t){this.element[this.name]=t===E?void 0:t;}}class I extends k{constructor(){super(...arguments),this.type=4;}j(t){this.element.toggleAttribute(this.name,!!t&&t!==E);}}class L extends k{constructor(t,i,s,e,h){super(t,i,s,e,h),this.type=5;}_$AI(t,i=this){if((t=S(this,t,i,0)??E)===T)return;const s=this._$AH,e=t===E&&s!==E||t.capture!==s.capture||t.once!==s.once||t.passive!==s.passive,h=t!==E&&(s===E||e);e&&this.element.removeEventListener(this.name,this,s),h&&this.element.addEventListener(this.name,this,t),this._$AH=t;}handleEvent(t){"function"==typeof this._$AH?this._$AH.call(this.options?.host??this.element,t):this._$AH.handleEvent(t);}}class z{constructor(t,i,s){this.element=t,this.type=6,this._$AN=void 0,this._$AM=i,this.options=s;}get _$AU(){return this._$AM._$AU}_$AI(t){S(this,t);}}const j=t$3.litHtmlPolyfillSupport;j?.(N,R),(t$3.litHtmlVersions??=[]).push("3.3.1");const B=(t,i,s)=>{const e=s?.renderBefore??i;let h=e._$litPart$;if(void 0===h){const t=s?.renderBefore??null;e._$litPart$=h=new R(i.insertBefore(l$2(),t),t,void 0,s??{});}return h._$AI(t),h};
 
   /**
    * @license
    * Copyright 2017 Google LLC
    * SPDX-License-Identifier: BSD-3-Clause
-   */class s$1 extends b{constructor(){super(...arguments),this.renderOptions={host:this},this._$Do=void 0;}createRenderRoot(){const t=super.createRenderRoot();return this.renderOptions.renderBefore??=t.firstChild,t}update(t){const i=this.render();this.hasUpdated||(this.renderOptions.isConnected=this.isConnected),super.update(t),this._$Do=j(i,this.renderRoot,this.renderOptions);}connectedCallback(){super.connectedCallback(),this._$Do?.setConnected(!0);}disconnectedCallback(){super.disconnectedCallback(),this._$Do?.setConnected(!1);}render(){return w}}s$1._$litElement$=!0,s$1[("finalized")]=!0,globalThis.litElementHydrateSupport?.({LitElement:s$1});const r$2=globalThis.litElementPolyfillSupport;r$2?.({LitElement:s$1});(globalThis.litElementVersions??=[]).push("4.0.4");
+   */const s=globalThis;class i$3 extends y$1{constructor(){super(...arguments),this.renderOptions={host:this},this._$Do=void 0;}createRenderRoot(){const t=super.createRenderRoot();return this.renderOptions.renderBefore??=t.firstChild,t}update(t){const r=this.render();this.hasUpdated||(this.renderOptions.isConnected=this.isConnected),super.update(t),this._$Do=B(r,this.renderRoot,this.renderOptions);}connectedCallback(){super.connectedCallback(),this._$Do?.setConnected(!0);}disconnectedCallback(){super.disconnectedCallback(),this._$Do?.setConnected(!1);}render(){return T}}i$3._$litElement$=!0,i$3["finalized"]=!0,s.litElementHydrateSupport?.({LitElement:i$3});const o$5=s.litElementPolyfillSupport;o$5?.({LitElement:i$3});(s.litElementVersions??=[]).push("4.2.1");
 
   // src/components/card/card.styles.ts
-  var card_styles_default = i$4`
+  var card_styles_default = i$6`
   :host {
     --border-color: var(--sl-color-neutral-200);
     --border-radius: var(--sl-border-radius-medium);
@@ -4837,7 +4501,7 @@
   };
 
   // src/styles/component.styles.ts
-  var component_styles_default = i$4`
+  var component_styles_default = i$6`
   :host {
     box-sizing: border-box;
   }
@@ -4860,6 +4524,9 @@
   var __getOwnPropSymbols = Object.getOwnPropertySymbols;
   var __hasOwnProp = Object.prototype.hasOwnProperty;
   var __propIsEnum = Object.prototype.propertyIsEnumerable;
+  var __typeError = (msg) => {
+    throw TypeError(msg);
+  };
   var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
   var __spreadValues = (a, b) => {
     for (var prop in b || (b = {}))
@@ -4878,23 +4545,26 @@
     for (var i = decorators.length - 1, decorator; i >= 0; i--)
       if (decorator = decorators[i])
         result = (kind ? decorator(target, key, result) : decorator(result)) || result;
-    if (kind && result)
-      __defProp(target, key, result);
+    if (kind && result) __defProp(target, key, result);
     return result;
   };
+  var __accessCheck = (obj, member, msg) => member.has(obj) || __typeError("Cannot " + msg);
+  var __privateGet = (obj, member, getter) => (__accessCheck(obj, member, "read from private field"), getter ? getter.call(obj) : member.get(obj));
+  var __privateAdd = (obj, member, value) => member.has(obj) ? __typeError("Cannot add the same private member more than once") : member instanceof WeakSet ? member.add(obj) : member.set(obj, value);
+  var __privateSet = (obj, member, value, setter) => (__accessCheck(obj, member, "write to private field"), setter ? setter.call(obj, value) : member.set(obj, value), value);
 
   /**
    * @license
    * Copyright 2017 Google LLC
    * SPDX-License-Identifier: BSD-3-Clause
    */
-  const t$1=t=>(e,o)=>{void 0!==o?o.addInitializer((()=>{customElements.define(t,e);})):customElements.define(t,e);};
+  const t$2=t=>(e,o)=>{void 0!==o?o.addInitializer((()=>{customElements.define(t,e);})):customElements.define(t,e);};
 
   /**
    * @license
    * Copyright 2017 Google LLC
    * SPDX-License-Identifier: BSD-3-Clause
-   */const o$4={attribute:!0,type:String,converter:u$2,reflect:!1,hasChanged:f$2},r$1=(t=o$4,e,r)=>{const{kind:n,metadata:i}=r;let s=globalThis.litPropertyMetadata.get(i);if(void 0===s&&globalThis.litPropertyMetadata.set(i,s=new Map),s.set(r.name,t),"accessor"===n){const{name:o}=r;return {set(r){const n=e.get.call(this);e.set.call(this,r),this.requestUpdate(o,n,t);},init(e){return void 0!==e&&this.P(o,void 0,t),e}}}if("setter"===n){const{name:o}=r;return function(r){const n=this[o];e.call(this,r),this.requestUpdate(o,n,t);}}throw Error("Unsupported decorator location: "+n)};function n$2(t){return (e,o)=>"object"==typeof o?r$1(t,e,o):((t,e,o)=>{const r=e.hasOwnProperty(o);return e.constructor.createProperty(o,r?{...t,wrapped:!0}:t),r?Object.getOwnPropertyDescriptor(e,o):void 0})(t,e,o)}
+   */const o$4={attribute:!0,type:String,converter:u$3,reflect:!1,hasChanged:f$2},r$1=(t=o$4,e,r)=>{const{kind:n,metadata:i}=r;let s=globalThis.litPropertyMetadata.get(i);if(void 0===s&&globalThis.litPropertyMetadata.set(i,s=new Map),"setter"===n&&((t=Object.create(t)).wrapped=!0),s.set(r.name,t),"accessor"===n){const{name:o}=r;return {set(r){const n=e.get.call(this);e.set.call(this,r),this.requestUpdate(o,n,t);},init(e){return void 0!==e&&this.C(o,void 0,t,e),e}}}if("setter"===n){const{name:o}=r;return function(r){const n=this[o];e.call(this,r),this.requestUpdate(o,n,t);}}throw Error("Unsupported decorator location: "+n)};function n$2(t){return (e,o)=>"object"==typeof o?r$1(t,e,o):((t,e,o)=>{const r=e.hasOwnProperty(o);return e.constructor.createProperty(o,t),r?Object.getOwnPropertyDescriptor(e,o):void 0})(t,e,o)}
 
   /**
    * @license
@@ -4907,17 +4577,28 @@
    * Copyright 2017 Google LLC
    * SPDX-License-Identifier: BSD-3-Clause
    */
-  const e$6=(e,t,c)=>(c.configurable=!0,c.enumerable=!0,Reflect.decorate&&"object"!=typeof t&&Object.defineProperty(e,t,c),c);
+  function t$1(t){return (n,o)=>{const c="function"==typeof n?n:n[o];Object.assign(c,t);}}
 
   /**
    * @license
    * Copyright 2017 Google LLC
    * SPDX-License-Identifier: BSD-3-Clause
-   */function e$5(e,r){return (n,s,i)=>{const o=t=>t.renderRoot?.querySelector(e)??null;if(r){const{get:e,set:r}="object"==typeof s?n:i??(()=>{const t=Symbol();return {get(){return this[t]},set(e){this[t]=e;}}})();return e$6(n,s,{get(){let t=e.call(this);return void 0===t&&(t=o(this),(null!==t||this.hasUpdated)&&r.call(this,t)),t}})}return e$6(n,s,{get(){return o(this)}})}}
+   */
+  const e$5=(e,t,c)=>(c.configurable=!0,c.enumerable=!0,Reflect.decorate&&"object"!=typeof t&&Object.defineProperty(e,t,c),c);
 
-  var ShoelaceElement = class extends s$1 {
+  /**
+   * @license
+   * Copyright 2017 Google LLC
+   * SPDX-License-Identifier: BSD-3-Clause
+   */function e$4(e,r){return (n,s,i)=>{const o=t=>t.renderRoot?.querySelector(e)??null;if(r){const{get:e,set:r}="object"==typeof s?n:i??(()=>{const t=Symbol();return {get(){return this[t]},set(e){this[t]=e;}}})();return e$5(n,s,{get(){let t=e.call(this);return void 0===t&&(t=o(this),(null!==t||this.hasUpdated)&&r.call(this,t)),t}})}return e$5(n,s,{get(){return o(this)}})}}
+
+  var _hasRecordedInitialProperties;
+  var ShoelaceElement = class extends i$3 {
     constructor() {
       super();
+      __privateAdd(this, _hasRecordedInitialProperties, false);
+      // Store the constructor value of all `static properties = {}`
+      this.initialReflectedProperties = /* @__PURE__ */ new Map();
       Object.entries(this.constructor.dependencies).forEach(([name, component]) => {
         this.constructor.define(name, component);
       });
@@ -4936,8 +4617,12 @@
     static define(name, elementConstructor = this, options = {}) {
       const currentlyRegisteredConstructor = customElements.get(name);
       if (!currentlyRegisteredConstructor) {
-        customElements.define(name, class extends elementConstructor {
-        }, options);
+        try {
+          customElements.define(name, elementConstructor, options);
+        } catch (_err) {
+          customElements.define(name, class extends elementConstructor {
+          }, options);
+        }
         return;
       }
       let newVersion = " (unknown version)";
@@ -4955,10 +4640,32 @@
         `Attempted to register <${name}>${newVersion}, but <${name}>${existingVersion} has already been registered.`
       );
     }
+    attributeChangedCallback(name, oldValue, newValue) {
+      if (!__privateGet(this, _hasRecordedInitialProperties)) {
+        this.constructor.elementProperties.forEach(
+          (obj, prop) => {
+            if (obj.reflect && this[prop] != null) {
+              this.initialReflectedProperties.set(prop, this[prop]);
+            }
+          }
+        );
+        __privateSet(this, _hasRecordedInitialProperties, true);
+      }
+      super.attributeChangedCallback(name, oldValue, newValue);
+    }
+    willUpdate(changedProperties) {
+      super.willUpdate(changedProperties);
+      this.initialReflectedProperties.forEach((value, prop) => {
+        if (changedProperties.has(prop) && this[prop] == null) {
+          this[prop] = value;
+        }
+      });
+    }
   };
+  _hasRecordedInitialProperties = new WeakMap();
   /* eslint-disable */
   // @ts-expect-error This is auto-injected at build time.
-  ShoelaceElement.version = "2.15.0";
+  ShoelaceElement.version = "2.20.1";
   ShoelaceElement.dependencies = {};
   __decorateClass([
     n$2()
@@ -4972,13 +4679,13 @@
    * Copyright 2017 Google LLC
    * SPDX-License-Identifier: BSD-3-Clause
    */
-  const t={ATTRIBUTE:1,CHILD:2,PROPERTY:3,BOOLEAN_ATTRIBUTE:4,EVENT:5,ELEMENT:6},e$4=t=>(...e)=>({_$litDirective$:t,values:e});class i$1{constructor(t){}get _$AU(){return this._$AM._$AU}_$AT(t,e,i){this._$Ct=t,this._$AM=e,this._$Ci=i;}_$AS(t,e){return this.update(t,e)}update(t,e){return this.render(...e)}}
+  const t={ATTRIBUTE:1,CHILD:2,PROPERTY:3,BOOLEAN_ATTRIBUTE:4,EVENT:5,ELEMENT:6},e$3=t=>(...e)=>({_$litDirective$:t,values:e});class i$2{constructor(t){}get _$AU(){return this._$AM._$AU}_$AT(t,e,i){this._$Ct=t,this._$AM=e,this._$Ci=i;}_$AS(t,e){return this.update(t,e)}update(t,e){return this.render(...e)}}
 
   /**
    * @license
    * Copyright 2018 Google LLC
    * SPDX-License-Identifier: BSD-3-Clause
-   */const e$3=e$4(class extends i$1{constructor(t$1){if(super(t$1),t$1.type!==t.ATTRIBUTE||"class"!==t$1.name||t$1.strings?.length>2)throw Error("`classMap()` can only be used in the `class` attribute and must be the only part in the attribute.")}render(t){return " "+Object.keys(t).filter((s=>t[s])).join(" ")+" "}update(s,[i]){if(void 0===this.st){this.st=new Set,void 0!==s.strings&&(this.nt=new Set(s.strings.join(" ").split(/\s/).filter((t=>""!==t))));for(const t in i)i[t]&&!this.nt?.has(t)&&this.st.add(t);return this.render(i)}const r=s.element.classList;for(const t of this.st)t in i||(r.remove(t),this.st.delete(t));for(const t in i){const s=!!i[t];s===this.st.has(t)||this.nt?.has(t)||(s?(r.add(t),this.st.add(t)):(r.remove(t),this.st.delete(t)));}return w}});
+   */const e$2=e$3(class extends i$2{constructor(t$1){if(super(t$1),t$1.type!==t.ATTRIBUTE||"class"!==t$1.name||t$1.strings?.length>2)throw Error("`classMap()` can only be used in the `class` attribute and must be the only part in the attribute.")}render(t){return " "+Object.keys(t).filter((s=>t[s])).join(" ")+" "}update(s,[i]){if(void 0===this.st){this.st=new Set,void 0!==s.strings&&(this.nt=new Set(s.strings.join(" ").split(/\s/).filter((t=>""!==t))));for(const t in i)i[t]&&!this.nt?.has(t)&&this.st.add(t);return this.render(i)}const r=s.element.classList;for(const t of this.st)t in i||(r.remove(t),this.st.delete(t));for(const t in i){const s=!!i[t];s===this.st.has(t)||this.nt?.has(t)||(s?(r.add(t),this.st.add(t)):(r.remove(t),this.st.delete(t)));}return T}});
 
   var SlCard = class extends ShoelaceElement {
     constructor() {
@@ -4989,7 +4696,7 @@
       return x`
       <div
         part="base"
-        class=${e$3({
+        class=${e$2({
       card: true,
       "card--has-footer": this.hasSlotController.test("footer"),
       "card--has-image": this.hasSlotController.test("image"),
@@ -5009,7 +4716,7 @@
   SlCard.define("sl-card");
 
   // src/components/spinner/spinner.styles.ts
-  var spinner_styles_default = i$4`
+  var spinner_styles_default = i$6`
   :host {
     --track-width: 2px;
     --track-color: rgb(128 128 128 / 25%);
@@ -5069,15 +4776,20 @@
 `;
 
   const connectedElements = new Set();
-  const documentElementObserver = new MutationObserver(update);
   const translations = new Map();
-  let documentDirection = document.documentElement.dir || 'ltr';
-  let documentLanguage = document.documentElement.lang || navigator.language;
   let fallback;
-  documentElementObserver.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ['dir', 'lang']
-  });
+  let documentDirection = 'ltr';
+  let documentLanguage = 'en';
+  const isClient = (typeof MutationObserver !== "undefined" && typeof document !== "undefined" && typeof document.documentElement !== "undefined");
+  if (isClient) {
+      const documentElementObserver = new MutationObserver(update);
+      documentDirection = document.documentElement.dir || 'ltr';
+      documentLanguage = document.documentElement.lang || navigator.language;
+      documentElementObserver.observe(document.documentElement, {
+          attributes: true,
+          attributeFilter: ['dir', 'lang']
+      });
+  }
   function registerTranslation(...translation) {
       translation.map(t => {
           const code = t.$code.toLowerCase();
@@ -5094,8 +4806,10 @@
       update();
   }
   function update() {
-      documentDirection = document.documentElement.dir || 'ltr';
-      documentLanguage = document.documentElement.lang || navigator.language;
+      if (isClient) {
+          documentDirection = document.documentElement.dir || 'ltr';
+          documentLanguage = document.documentElement.lang || navigator.language;
+      }
       [...connectedElements.keys()].map((el) => {
           if (typeof el.requestUpdate === 'function') {
               el.requestUpdate();
@@ -5190,10 +4904,8 @@
     loading: "Loading",
     nextSlide: "Next slide",
     numOptionsSelected: (num) => {
-      if (num === 0)
-        return "No options selected";
-      if (num === 1)
-        return "1 option selected";
+      if (num === 0) return "No options selected";
+      if (num === 1) return "1 option selected";
       return `${num} options selected`;
     },
     previousSlide: "Previous slide",
@@ -5387,8 +5099,7 @@
       }
     }
     detachForm() {
-      if (!this.form)
-        return;
+      if (!this.form) return;
       const formCollection = formCollections.get(this.form);
       if (!formCollection) {
         return;
@@ -5522,7 +5233,7 @@
   }));
 
   // src/components/button/button.styles.ts
-  var button_styles_default = i$4`
+  var button_styles_default = i$6`
   :host {
     display: inline-block;
     position: relative;
@@ -5599,7 +5310,7 @@
   /* Default */
   .button--standard.button--default {
     background-color: var(--sl-color-neutral-0);
-    border-color: var(--sl-color-neutral-300);
+    border-color: var(--sl-input-border-color);
     color: var(--sl-color-neutral-700);
   }
 
@@ -5720,7 +5431,7 @@
 
   /* Default */
   .button--outline.button--default {
-    border-color: var(--sl-color-neutral-300);
+    border-color: var(--sl-input-border-color);
     color: var(--sl-color-neutral-700);
   }
 
@@ -6112,7 +5823,7 @@
 
   /* Focus and checked are always on top */
   :host([data-sl-button-group__button--focus]),
-  :host([data-sl-button-group__button[checked]]) {
+  :host([data-sl-button-group__button][checked]) {
     z-index: 2;
   }
 `;
@@ -6287,7 +5998,7 @@
   }
 
   // src/components/icon/icon.styles.ts
-  var icon_styles_default = i$4`
+  var icon_styles_default = i$6`
   :host {
     display: inline-block;
     width: 1em;
@@ -6332,7 +6043,7 @@
    * @license
    * Copyright 2020 Google LLC
    * SPDX-License-Identifier: BSD-3-Clause
-   */const e$2=(o,t)=>void 0===t?void 0!==o?._$litType$:o?._$litType$===t,f=o=>void 0===o.strings,u={},m=(o,t=u)=>o._$AH=t;
+   */const e$1=(o,t)=>void 0===t?void 0!==o?._$litType$:o?._$litType$===t,f=o=>void 0===o.strings,u$1={},m=(o,t=u$1)=>o._$AH=t;
 
   var CACHEABLE_ERROR = Symbol();
   var RETRYABLE_ERROR = Symbol();
@@ -6354,17 +6065,11 @@
         this.svg = x`<svg part="svg">
         <use part="use" href="${url}"></use>
       </svg>`;
-        await this.updateComplete;
-        const svg = this.shadowRoot.querySelector("[part='svg']");
-        if (typeof library.mutator === "function") {
-          library.mutator(svg);
-        }
         return this.svg;
       }
       try {
         fileData = await fetch(url, { mode: "cors" });
-        if (!fileData.ok)
-          return fileData.status === 410 ? CACHEABLE_ERROR : RETRYABLE_ERROR;
+        if (!fileData.ok) return fileData.status === 410 ? CACHEABLE_ERROR : RETRYABLE_ERROR;
       } catch (e) {
         return RETRYABLE_ERROR;
       }
@@ -6372,14 +6077,11 @@
         const div = document.createElement("div");
         div.innerHTML = await fileData.text();
         const svg = div.firstElementChild;
-        if (((_a = svg == null ? void 0 : svg.tagName) == null ? void 0 : _a.toLowerCase()) !== "svg")
-          return CACHEABLE_ERROR;
-        if (!parser)
-          parser = new DOMParser();
+        if (((_a = svg == null ? void 0 : svg.tagName) == null ? void 0 : _a.toLowerCase()) !== "svg") return CACHEABLE_ERROR;
+        if (!parser) parser = new DOMParser();
         const doc = parser.parseFromString(svg.outerHTML, "text/html");
         const svgEl = doc.body.querySelector("svg");
-        if (!svgEl)
-          return CACHEABLE_ERROR;
+        if (!svgEl) return CACHEABLE_ERROR;
         svgEl.part.add("svg");
         return document.adoptNode(svgEl);
       } catch (e) {
@@ -6446,8 +6148,15 @@
       if (url !== this.getIconSource().url) {
         return;
       }
-      if (e$2(svg)) {
+      if (e$1(svg)) {
         this.svg = svg;
+        if (library) {
+          await this.updateComplete;
+          const shadowSVG = this.shadowRoot.querySelector("[part='svg']");
+          if (typeof library.mutator === "function" && shadowSVG) {
+            library.mutator(shadowSVG);
+          }
+        }
         return;
       }
       switch (svg) {
@@ -6493,13 +6202,14 @@
    * @license
    * Copyright 2020 Google LLC
    * SPDX-License-Identifier: BSD-3-Clause
-   */const e$1=Symbol.for(""),o$3=t=>{if(t?.r===e$1)return t?._$litStatic$},s=(t,...r)=>({_$litStatic$:r.reduce(((r,e,o)=>r+(t=>{if(void 0!==t._$litStatic$)return t._$litStatic$;throw Error(`Value passed to 'literal' function must be a 'literal' result: ${t}. Use 'unsafeStatic' to pass non-literal values, but\n            take care to ensure page security.`)})(e)+t[o+1]),t[0]),r:e$1}),a=new Map,l$1=t=>(r,...e)=>{const i=e.length;let s,l;const n=[],u=[];let c,$=0,f=!1;for(;$<i;){for(c=r[$];$<i&&void 0!==(l=e[$],s=o$3(l));)c+=s+r[++$],f=!0;$!==i&&u.push(l),n.push(c),$++;}if($===i&&n.push(r[i]),f){const t=n.join("$$lit$$");void 0===(r=a.get(t))&&(n.raw=n,a.set(t,r=n)),e=u;}return t(r,...e)},n$1=l$1(x);
+   */
+  const a=Symbol.for(""),o$3=t=>{if(t?.r===a)return t?._$litStatic$},i$1=(t,...r)=>({_$litStatic$:r.reduce(((r,e,a)=>r+(t=>{if(void 0!==t._$litStatic$)return t._$litStatic$;throw Error(`Value passed to 'literal' function must be a 'literal' result: ${t}. Use 'unsafeStatic' to pass non-literal values, but\n            take care to ensure page security.`)})(e)+t[a+1]),t[0]),r:a}),l$1=new Map,n$1=t=>(r,...e)=>{const a=e.length;let s,i;const n=[],u=[];let c,$=0,f=!1;for(;$<a;){for(c=r[$];$<a&&void 0!==(i=e[$],s=o$3(i));)c+=s+r[++$],f=!0;$!==a&&u.push(i),n.push(c),$++;}if($===a&&n.push(r[a]),f){const t=n.join("$$lit$$");void 0===(r=l$1.get(t))&&(n.raw=n,l$1.set(t,r=n)),e=u;}return t(r,...e)},u=n$1(x);
 
   /**
    * @license
    * Copyright 2018 Google LLC
    * SPDX-License-Identifier: BSD-3-Clause
-   */const o$2=o=>o??T;
+   */const o$2=o=>o??E;
 
   var SlButton = class extends ShoelaceElement {
     constructor() {
@@ -6615,11 +6325,11 @@
     }
     render() {
       const isLink = this.isLink();
-      const tag = isLink ? s`a` : s`button`;
-      return n$1`
+      const tag = isLink ? i$1`a` : i$1`button`;
+      return u`
       <${tag}
         part="base"
-        class=${e$3({
+        class=${e$2({
       button: true,
       "button--default": this.variant === "default",
       "button--primary": this.variant === "primary",
@@ -6649,7 +6359,7 @@
         title=${this.title}
         name=${o$2(isLink ? void 0 : this.name)}
         value=${o$2(isLink ? void 0 : this.value)}
-        href=${o$2(isLink ? this.href : void 0)}
+        href=${o$2(isLink && !this.disabled ? this.href : void 0)}
         target=${o$2(isLink ? this.target : void 0)}
         download=${o$2(isLink ? this.download : void 0)}
         rel=${o$2(isLink ? this.rel : void 0)}
@@ -6664,8 +6374,8 @@
         <slot name="prefix" part="prefix" class="button__prefix"></slot>
         <slot part="label" class="button__label"></slot>
         <slot name="suffix" part="suffix" class="button__suffix"></slot>
-        ${this.caret ? n$1` <sl-icon part="caret" class="button__caret" library="system" name="caret"></sl-icon> ` : ""}
-        ${this.loading ? n$1`<sl-spinner part="spinner"></sl-spinner>` : ""}
+        ${this.caret ? u` <sl-icon part="caret" class="button__caret" library="system" name="caret"></sl-icon> ` : ""}
+        ${this.loading ? u`<sl-spinner part="spinner"></sl-spinner>` : ""}
       </${tag}>
     `;
     }
@@ -6676,7 +6386,7 @@
     "sl-spinner": SlSpinner
   };
   __decorateClass([
-    e$5(".button")
+    e$4(".button")
   ], SlButton.prototype, "button", 2);
   __decorateClass([
     r()
@@ -6759,7 +6469,7 @@
   SlIcon.define("sl-icon");
 
   // src/components/tooltip/tooltip.styles.ts
-  var tooltip_styles_default = i$4`
+  var tooltip_styles_default = i$6`
   :host {
     --max-width: 20rem;
     --hide-delay: 0ms;
@@ -6803,6 +6513,8 @@
     font-size: var(--sl-tooltip-font-size);
     font-weight: var(--sl-tooltip-font-weight);
     line-height: var(--sl-tooltip-line-height);
+    text-align: start;
+    white-space: normal;
     color: var(--sl-tooltip-color);
     padding: var(--sl-tooltip-padding);
     pointer-events: none;
@@ -6812,7 +6524,7 @@
 `;
 
   // src/components/popup/popup.styles.ts
-  var popup_styles_default = i$4`
+  var popup_styles_default = i$6`
   :host {
     --arrow-color: var(--sl-color-neutral-1000);
     --arrow-size: 6px;
@@ -6876,6 +6588,10 @@
    * Custom positioning reference element.
    * @see https://floating-ui.com/docs/virtual-elements
    */
+
+  const sides = ['top', 'right', 'bottom', 'left'];
+  const alignments = ['start', 'end'];
+  const placements = /*#__PURE__*/sides.reduce((acc, side) => acc.concat(side, side + "-" + alignments[0], side + "-" + alignments[1]), []);
   const min = Math.min;
   const max = Math.max;
   const round = Math.round;
@@ -6912,8 +6628,9 @@
   function getAxisLength(axis) {
     return axis === 'y' ? 'height' : 'width';
   }
+  const yAxisSides = /*#__PURE__*/new Set(['top', 'bottom']);
   function getSideAxis(placement) {
-    return ['top', 'bottom'].includes(getSide(placement)) ? 'y' : 'x';
+    return yAxisSides.has(getSide(placement)) ? 'y' : 'x';
   }
   function getAlignmentAxis(placement) {
     return getOppositeAxis(getSideAxis(placement));
@@ -6938,19 +6655,19 @@
   function getOppositeAlignmentPlacement(placement) {
     return placement.replace(/start|end/g, alignment => oppositeAlignmentMap[alignment]);
   }
+  const lrPlacement = ['left', 'right'];
+  const rlPlacement = ['right', 'left'];
+  const tbPlacement = ['top', 'bottom'];
+  const btPlacement = ['bottom', 'top'];
   function getSideList(side, isStart, rtl) {
-    const lr = ['left', 'right'];
-    const rl = ['right', 'left'];
-    const tb = ['top', 'bottom'];
-    const bt = ['bottom', 'top'];
     switch (side) {
       case 'top':
       case 'bottom':
-        if (rtl) return isStart ? rl : lr;
-        return isStart ? lr : rl;
+        if (rtl) return isStart ? rlPlacement : lrPlacement;
+        return isStart ? lrPlacement : rlPlacement;
       case 'left':
       case 'right':
-        return isStart ? tb : bt;
+        return isStart ? tbPlacement : btPlacement;
       default:
         return [];
     }
@@ -6987,12 +6704,21 @@
     };
   }
   function rectToClientRect(rect) {
+    const {
+      x,
+      y,
+      width,
+      height
+    } = rect;
     return {
-      ...rect,
-      top: rect.y,
-      left: rect.x,
-      right: rect.x + rect.width,
-      bottom: rect.y + rect.height
+      width,
+      height,
+      top: y,
+      left: x,
+      right: x + width,
+      bottom: y + height,
+      x,
+      y
     };
   }
 
@@ -7181,9 +6907,10 @@
       strategy
     }));
     const rect = elementContext === 'floating' ? {
-      ...rects.floating,
       x,
-      y
+      y,
+      width: rects.floating.width,
+      height: rects.floating.height
     } : rects.reference;
     const offsetParent = await (platform.getOffsetParent == null ? void 0 : platform.getOffsetParent(elements.floating));
     const offsetScale = (await (platform.isElement == null ? void 0 : platform.isElement(offsetParent))) ? (await (platform.getScale == null ? void 0 : platform.getScale(offsetParent))) || {
@@ -7289,6 +7016,109 @@
     }
   });
 
+  function getPlacementList(alignment, autoAlignment, allowedPlacements) {
+    const allowedPlacementsSortedByAlignment = alignment ? [...allowedPlacements.filter(placement => getAlignment(placement) === alignment), ...allowedPlacements.filter(placement => getAlignment(placement) !== alignment)] : allowedPlacements.filter(placement => getSide(placement) === placement);
+    return allowedPlacementsSortedByAlignment.filter(placement => {
+      if (alignment) {
+        return getAlignment(placement) === alignment || (autoAlignment ? getOppositeAlignmentPlacement(placement) !== placement : false);
+      }
+      return true;
+    });
+  }
+  /**
+   * Optimizes the visibility of the floating element by choosing the placement
+   * that has the most space available automatically, without needing to specify a
+   * preferred placement. Alternative to `flip`.
+   * @see https://floating-ui.com/docs/autoPlacement
+   */
+  const autoPlacement = function (options) {
+    if (options === void 0) {
+      options = {};
+    }
+    return {
+      name: 'autoPlacement',
+      options,
+      async fn(state) {
+        var _middlewareData$autoP, _middlewareData$autoP2, _placementsThatFitOnE;
+        const {
+          rects,
+          middlewareData,
+          placement,
+          platform,
+          elements
+        } = state;
+        const {
+          crossAxis = false,
+          alignment,
+          allowedPlacements = placements,
+          autoAlignment = true,
+          ...detectOverflowOptions
+        } = evaluate(options, state);
+        const placements$1 = alignment !== undefined || allowedPlacements === placements ? getPlacementList(alignment || null, autoAlignment, allowedPlacements) : allowedPlacements;
+        const overflow = await detectOverflow(state, detectOverflowOptions);
+        const currentIndex = ((_middlewareData$autoP = middlewareData.autoPlacement) == null ? void 0 : _middlewareData$autoP.index) || 0;
+        const currentPlacement = placements$1[currentIndex];
+        if (currentPlacement == null) {
+          return {};
+        }
+        const alignmentSides = getAlignmentSides(currentPlacement, rects, await (platform.isRTL == null ? void 0 : platform.isRTL(elements.floating)));
+
+        // Make `computeCoords` start from the right place.
+        if (placement !== currentPlacement) {
+          return {
+            reset: {
+              placement: placements$1[0]
+            }
+          };
+        }
+        const currentOverflows = [overflow[getSide(currentPlacement)], overflow[alignmentSides[0]], overflow[alignmentSides[1]]];
+        const allOverflows = [...(((_middlewareData$autoP2 = middlewareData.autoPlacement) == null ? void 0 : _middlewareData$autoP2.overflows) || []), {
+          placement: currentPlacement,
+          overflows: currentOverflows
+        }];
+        const nextPlacement = placements$1[currentIndex + 1];
+
+        // There are more placements to check.
+        if (nextPlacement) {
+          return {
+            data: {
+              index: currentIndex + 1,
+              overflows: allOverflows
+            },
+            reset: {
+              placement: nextPlacement
+            }
+          };
+        }
+        const placementsSortedByMostSpace = allOverflows.map(d => {
+          const alignment = getAlignment(d.placement);
+          return [d.placement, alignment && crossAxis ?
+          // Check along the mainAxis and main crossAxis side.
+          d.overflows.slice(0, 2).reduce((acc, v) => acc + v, 0) :
+          // Check only the mainAxis.
+          d.overflows[0], d.overflows];
+        }).sort((a, b) => a[1] - b[1]);
+        const placementsThatFitOnEachSide = placementsSortedByMostSpace.filter(d => d[2].slice(0,
+        // Aligned placements should not check their opposite crossAxis
+        // side.
+        getAlignment(d[0]) ? 2 : 3).every(v => v <= 0));
+        const resetPlacement = ((_placementsThatFitOnE = placementsThatFitOnEachSide[0]) == null ? void 0 : _placementsThatFitOnE[0]) || placementsSortedByMostSpace[0][0];
+        if (resetPlacement !== placement) {
+          return {
+            data: {
+              index: currentIndex + 1,
+              overflows: allOverflows
+            },
+            reset: {
+              placement: resetPlacement
+            }
+          };
+        }
+        return {};
+      }
+    };
+  };
+
   /**
    * Optimizes the visibility of the floating element by flipping the `placement`
    * in order to keep it in view when the preferred placement(s) will overflow the
@@ -7330,10 +7160,12 @@
           return {};
         }
         const side = getSide(placement);
+        const initialSideAxis = getSideAxis(initialPlacement);
         const isBasePlacement = getSide(initialPlacement) === initialPlacement;
         const rtl = await (platform.isRTL == null ? void 0 : platform.isRTL(elements.floating));
         const fallbackPlacements = specifiedFallbackPlacements || (isBasePlacement || !flipAlignment ? [getOppositePlacement(initialPlacement)] : getExpandedPlacements(initialPlacement));
-        if (!specifiedFallbackPlacements && fallbackAxisSideDirection !== 'none') {
+        const hasFallbackAxisSideDirection = fallbackAxisSideDirection !== 'none';
+        if (!specifiedFallbackPlacements && hasFallbackAxisSideDirection) {
           fallbackPlacements.push(...getOppositeAxisPlacements(initialPlacement, flipAlignment, fallbackAxisSideDirection, rtl));
         }
         const placements = [initialPlacement, ...fallbackPlacements];
@@ -7358,16 +7190,22 @@
           const nextIndex = (((_middlewareData$flip2 = middlewareData.flip) == null ? void 0 : _middlewareData$flip2.index) || 0) + 1;
           const nextPlacement = placements[nextIndex];
           if (nextPlacement) {
-            // Try next placement and re-run the lifecycle.
-            return {
-              data: {
-                index: nextIndex,
-                overflows: overflowsData
-              },
-              reset: {
-                placement: nextPlacement
-              }
-            };
+            const ignoreCrossAxisOverflow = checkCrossAxis === 'alignment' ? initialSideAxis !== getSideAxis(nextPlacement) : false;
+            if (!ignoreCrossAxisOverflow ||
+            // We leave the current main axis only if every placement on that axis
+            // overflows the main axis.
+            overflowsData.every(d => getSideAxis(d.placement) === initialSideAxis ? d.overflows[0] > 0 : true)) {
+              // Try next placement and re-run the lifecycle.
+              return {
+                data: {
+                  index: nextIndex,
+                  overflows: overflowsData
+                },
+                reset: {
+                  placement: nextPlacement
+                }
+              };
+            }
           }
 
           // First, find the candidates that fit on the mainAxis side of overflow,
@@ -7379,8 +7217,17 @@
             switch (fallbackStrategy) {
               case 'bestFit':
                 {
-                  var _overflowsData$map$so;
-                  const placement = (_overflowsData$map$so = overflowsData.map(d => [d.placement, d.overflows.filter(overflow => overflow > 0).reduce((acc, overflow) => acc + overflow, 0)]).sort((a, b) => a[1] - b[1])[0]) == null ? void 0 : _overflowsData$map$so[0];
+                  var _overflowsData$filter2;
+                  const placement = (_overflowsData$filter2 = overflowsData.filter(d => {
+                    if (hasFallbackAxisSideDirection) {
+                      const currentSideAxis = getSideAxis(d.placement);
+                      return currentSideAxis === initialSideAxis ||
+                      // Create a bias to the `y` side axis due to horizontal
+                      // reading directions favoring greater width.
+                      currentSideAxis === 'y';
+                    }
+                    return true;
+                  }).map(d => [d.placement, d.overflows.filter(overflow => overflow > 0).reduce((acc, overflow) => acc + overflow, 0)]).sort((a, b) => a[1] - b[1])[0]) == null ? void 0 : _overflowsData$filter2[0];
                   if (placement) {
                     resetPlacement = placement;
                   }
@@ -7404,6 +7251,208 @@
     };
   };
 
+  function getSideOffsets(overflow, rect) {
+    return {
+      top: overflow.top - rect.height,
+      right: overflow.right - rect.width,
+      bottom: overflow.bottom - rect.height,
+      left: overflow.left - rect.width
+    };
+  }
+  function isAnySideFullyClipped(overflow) {
+    return sides.some(side => overflow[side] >= 0);
+  }
+  /**
+   * Provides data to hide the floating element in applicable situations, such as
+   * when it is not in the same clipping context as the reference element.
+   * @see https://floating-ui.com/docs/hide
+   */
+  const hide = function (options) {
+    if (options === void 0) {
+      options = {};
+    }
+    return {
+      name: 'hide',
+      options,
+      async fn(state) {
+        const {
+          rects
+        } = state;
+        const {
+          strategy = 'referenceHidden',
+          ...detectOverflowOptions
+        } = evaluate(options, state);
+        switch (strategy) {
+          case 'referenceHidden':
+            {
+              const overflow = await detectOverflow(state, {
+                ...detectOverflowOptions,
+                elementContext: 'reference'
+              });
+              const offsets = getSideOffsets(overflow, rects.reference);
+              return {
+                data: {
+                  referenceHiddenOffsets: offsets,
+                  referenceHidden: isAnySideFullyClipped(offsets)
+                }
+              };
+            }
+          case 'escaped':
+            {
+              const overflow = await detectOverflow(state, {
+                ...detectOverflowOptions,
+                altBoundary: true
+              });
+              const offsets = getSideOffsets(overflow, rects.floating);
+              return {
+                data: {
+                  escapedOffsets: offsets,
+                  escaped: isAnySideFullyClipped(offsets)
+                }
+              };
+            }
+          default:
+            {
+              return {};
+            }
+        }
+      }
+    };
+  };
+
+  function getBoundingRect(rects) {
+    const minX = min(...rects.map(rect => rect.left));
+    const minY = min(...rects.map(rect => rect.top));
+    const maxX = max(...rects.map(rect => rect.right));
+    const maxY = max(...rects.map(rect => rect.bottom));
+    return {
+      x: minX,
+      y: minY,
+      width: maxX - minX,
+      height: maxY - minY
+    };
+  }
+  function getRectsByLine(rects) {
+    const sortedRects = rects.slice().sort((a, b) => a.y - b.y);
+    const groups = [];
+    let prevRect = null;
+    for (let i = 0; i < sortedRects.length; i++) {
+      const rect = sortedRects[i];
+      if (!prevRect || rect.y - prevRect.y > prevRect.height / 2) {
+        groups.push([rect]);
+      } else {
+        groups[groups.length - 1].push(rect);
+      }
+      prevRect = rect;
+    }
+    return groups.map(rect => rectToClientRect(getBoundingRect(rect)));
+  }
+  /**
+   * Provides improved positioning for inline reference elements that can span
+   * over multiple lines, such as hyperlinks or range selections.
+   * @see https://floating-ui.com/docs/inline
+   */
+  const inline = function (options) {
+    if (options === void 0) {
+      options = {};
+    }
+    return {
+      name: 'inline',
+      options,
+      async fn(state) {
+        const {
+          placement,
+          elements,
+          rects,
+          platform,
+          strategy
+        } = state;
+        // A MouseEvent's client{X,Y} coords can be up to 2 pixels off a
+        // ClientRect's bounds, despite the event listener being triggered. A
+        // padding of 2 seems to handle this issue.
+        const {
+          padding = 2,
+          x,
+          y
+        } = evaluate(options, state);
+        const nativeClientRects = Array.from((await (platform.getClientRects == null ? void 0 : platform.getClientRects(elements.reference))) || []);
+        const clientRects = getRectsByLine(nativeClientRects);
+        const fallback = rectToClientRect(getBoundingRect(nativeClientRects));
+        const paddingObject = getPaddingObject(padding);
+        function getBoundingClientRect() {
+          // There are two rects and they are disjoined.
+          if (clientRects.length === 2 && clientRects[0].left > clientRects[1].right && x != null && y != null) {
+            // Find the first rect in which the point is fully inside.
+            return clientRects.find(rect => x > rect.left - paddingObject.left && x < rect.right + paddingObject.right && y > rect.top - paddingObject.top && y < rect.bottom + paddingObject.bottom) || fallback;
+          }
+
+          // There are 2 or more connected rects.
+          if (clientRects.length >= 2) {
+            if (getSideAxis(placement) === 'y') {
+              const firstRect = clientRects[0];
+              const lastRect = clientRects[clientRects.length - 1];
+              const isTop = getSide(placement) === 'top';
+              const top = firstRect.top;
+              const bottom = lastRect.bottom;
+              const left = isTop ? firstRect.left : lastRect.left;
+              const right = isTop ? firstRect.right : lastRect.right;
+              const width = right - left;
+              const height = bottom - top;
+              return {
+                top,
+                bottom,
+                left,
+                right,
+                width,
+                height,
+                x: left,
+                y: top
+              };
+            }
+            const isLeftSide = getSide(placement) === 'left';
+            const maxRight = max(...clientRects.map(rect => rect.right));
+            const minLeft = min(...clientRects.map(rect => rect.left));
+            const measureRects = clientRects.filter(rect => isLeftSide ? rect.left === minLeft : rect.right === maxRight);
+            const top = measureRects[0].top;
+            const bottom = measureRects[measureRects.length - 1].bottom;
+            const left = minLeft;
+            const right = maxRight;
+            const width = right - left;
+            const height = bottom - top;
+            return {
+              top,
+              bottom,
+              left,
+              right,
+              width,
+              height,
+              x: left,
+              y: top
+            };
+          }
+          return fallback;
+        }
+        const resetRects = await platform.getElementRects({
+          reference: {
+            getBoundingClientRect
+          },
+          floating: elements.floating,
+          strategy
+        });
+        if (rects.reference.x !== resetRects.reference.x || rects.reference.y !== resetRects.reference.y || rects.reference.width !== resetRects.reference.width || rects.reference.height !== resetRects.reference.height) {
+          return {
+            reset: {
+              rects: resetRects
+            }
+          };
+        }
+        return {};
+      }
+    };
+  };
+
+  const originSides = /*#__PURE__*/new Set(['left', 'top']);
+
   // For type backwards-compatibility, the `OffsetOptions` type was also
   // Derivable.
 
@@ -7417,9 +7466,11 @@
     const side = getSide(placement);
     const alignment = getAlignment(placement);
     const isVertical = getSideAxis(placement) === 'y';
-    const mainAxisMulti = ['left', 'top'].includes(side) ? -1 : 1;
+    const mainAxisMulti = originSides.has(side) ? -1 : 1;
     const crossAxisMulti = rtl && isVertical ? -1 : 1;
     const rawValue = evaluate(options, state);
+
+    // eslint-disable-next-line prefer-const
     let {
       mainAxis,
       crossAxis,
@@ -7429,10 +7480,9 @@
       crossAxis: 0,
       alignmentAxis: null
     } : {
-      mainAxis: 0,
-      crossAxis: 0,
-      alignmentAxis: null,
-      ...rawValue
+      mainAxis: rawValue.mainAxis || 0,
+      crossAxis: rawValue.crossAxis || 0,
+      alignmentAxis: rawValue.alignmentAxis
     };
     if (alignment && typeof alignmentAxis === 'number') {
       crossAxis = alignment === 'end' ? alignmentAxis * -1 : alignmentAxis;
@@ -7453,7 +7503,7 @@
    * object may be passed.
    * @see https://floating-ui.com/docs/offset
    */
-  const offset = function (options) {
+  const offset$1 = function (options) {
     if (options === void 0) {
       options = 0;
     }
@@ -7554,8 +7604,80 @@
           ...limitedCoords,
           data: {
             x: limitedCoords.x - x,
-            y: limitedCoords.y - y
+            y: limitedCoords.y - y,
+            enabled: {
+              [mainAxis]: checkMainAxis,
+              [crossAxis]: checkCrossAxis
+            }
           }
+        };
+      }
+    };
+  };
+  /**
+   * Built-in `limiter` that will stop `shift()` at a certain point.
+   */
+  const limitShift = function (options) {
+    if (options === void 0) {
+      options = {};
+    }
+    return {
+      options,
+      fn(state) {
+        const {
+          x,
+          y,
+          placement,
+          rects,
+          middlewareData
+        } = state;
+        const {
+          offset = 0,
+          mainAxis: checkMainAxis = true,
+          crossAxis: checkCrossAxis = true
+        } = evaluate(options, state);
+        const coords = {
+          x,
+          y
+        };
+        const crossAxis = getSideAxis(placement);
+        const mainAxis = getOppositeAxis(crossAxis);
+        let mainAxisCoord = coords[mainAxis];
+        let crossAxisCoord = coords[crossAxis];
+        const rawOffset = evaluate(offset, state);
+        const computedOffset = typeof rawOffset === 'number' ? {
+          mainAxis: rawOffset,
+          crossAxis: 0
+        } : {
+          mainAxis: 0,
+          crossAxis: 0,
+          ...rawOffset
+        };
+        if (checkMainAxis) {
+          const len = mainAxis === 'y' ? 'height' : 'width';
+          const limitMin = rects.reference[mainAxis] - rects.floating[len] + computedOffset.mainAxis;
+          const limitMax = rects.reference[mainAxis] + rects.reference[len] - computedOffset.mainAxis;
+          if (mainAxisCoord < limitMin) {
+            mainAxisCoord = limitMin;
+          } else if (mainAxisCoord > limitMax) {
+            mainAxisCoord = limitMax;
+          }
+        }
+        if (checkCrossAxis) {
+          var _middlewareData$offse, _middlewareData$offse2;
+          const len = mainAxis === 'y' ? 'width' : 'height';
+          const isOriginSide = originSides.has(getSide(placement));
+          const limitMin = rects.reference[crossAxis] - rects.floating[len] + (isOriginSide ? ((_middlewareData$offse = middlewareData.offset) == null ? void 0 : _middlewareData$offse[crossAxis]) || 0 : 0) + (isOriginSide ? 0 : computedOffset.crossAxis);
+          const limitMax = rects.reference[crossAxis] + rects.reference[len] + (isOriginSide ? 0 : ((_middlewareData$offse2 = middlewareData.offset) == null ? void 0 : _middlewareData$offse2[crossAxis]) || 0) - (isOriginSide ? computedOffset.crossAxis : 0);
+          if (crossAxisCoord < limitMin) {
+            crossAxisCoord = limitMin;
+          } else if (crossAxisCoord > limitMax) {
+            crossAxisCoord = limitMax;
+          }
+        }
+        return {
+          [mainAxis]: mainAxisCoord,
+          [crossAxis]: crossAxisCoord
         };
       }
     };
@@ -7575,6 +7697,7 @@
       name: 'size',
       options,
       async fn(state) {
+        var _state$middlewareData, _state$middlewareData2;
         const {
           placement,
           rects,
@@ -7602,17 +7725,18 @@
           widthSide = side;
           heightSide = alignment === 'end' ? 'top' : 'bottom';
         }
-        const overflowAvailableHeight = height - overflow[heightSide];
-        const overflowAvailableWidth = width - overflow[widthSide];
+        const maximumClippingHeight = height - overflow.top - overflow.bottom;
+        const maximumClippingWidth = width - overflow.left - overflow.right;
+        const overflowAvailableHeight = min(height - overflow[heightSide], maximumClippingHeight);
+        const overflowAvailableWidth = min(width - overflow[widthSide], maximumClippingWidth);
         const noShift = !state.middlewareData.shift;
         let availableHeight = overflowAvailableHeight;
         let availableWidth = overflowAvailableWidth;
-        if (isYAxis) {
-          const maximumClippingWidth = width - overflow.left - overflow.right;
-          availableWidth = alignment || noShift ? min(overflowAvailableWidth, maximumClippingWidth) : maximumClippingWidth;
-        } else {
-          const maximumClippingHeight = height - overflow.top - overflow.bottom;
-          availableHeight = alignment || noShift ? min(overflowAvailableHeight, maximumClippingHeight) : maximumClippingHeight;
+        if ((_state$middlewareData = state.middlewareData.shift) != null && _state$middlewareData.enabled.x) {
+          availableWidth = maximumClippingWidth;
+        }
+        if ((_state$middlewareData2 = state.middlewareData.shift) != null && _state$middlewareData2.enabled.y) {
+          availableHeight = maximumClippingHeight;
         }
         if (noShift && !alignment) {
           const xMin = max(overflow.left, 0);
@@ -7643,6 +7767,9 @@
     };
   };
 
+  function hasWindow() {
+    return typeof window !== 'undefined';
+  }
   function getNodeName(node) {
     if (isNode$1(node)) {
       return (node.nodeName || '').toLowerCase();
@@ -7661,21 +7788,30 @@
     return (_ref = (isNode$1(node) ? node.ownerDocument : node.document) || window.document) == null ? void 0 : _ref.documentElement;
   }
   function isNode$1(value) {
+    if (!hasWindow()) {
+      return false;
+    }
     return value instanceof Node || value instanceof getWindow(value).Node;
   }
   function isElement(value) {
+    if (!hasWindow()) {
+      return false;
+    }
     return value instanceof Element || value instanceof getWindow(value).Element;
   }
   function isHTMLElement(value) {
+    if (!hasWindow()) {
+      return false;
+    }
     return value instanceof HTMLElement || value instanceof getWindow(value).HTMLElement;
   }
   function isShadowRoot(value) {
-    // Browsers without `ShadowRoot` support.
-    if (typeof ShadowRoot === 'undefined') {
+    if (!hasWindow() || typeof ShadowRoot === 'undefined') {
       return false;
     }
     return value instanceof ShadowRoot || value instanceof getWindow(value).ShadowRoot;
   }
+  const invalidOverflowDisplayValues = /*#__PURE__*/new Set(['inline', 'contents']);
   function isOverflowElement(element) {
     const {
       overflow,
@@ -7683,26 +7819,42 @@
       overflowY,
       display
     } = getComputedStyle$1(element);
-    return /auto|scroll|overlay|hidden|clip/.test(overflow + overflowY + overflowX) && !['inline', 'contents'].includes(display);
+    return /auto|scroll|overlay|hidden|clip/.test(overflow + overflowY + overflowX) && !invalidOverflowDisplayValues.has(display);
   }
+  const tableElements = /*#__PURE__*/new Set(['table', 'td', 'th']);
   function isTableElement(element) {
-    return ['table', 'td', 'th'].includes(getNodeName(element));
+    return tableElements.has(getNodeName(element));
   }
-  function isContainingBlock(element) {
+  const topLayerSelectors = [':popover-open', ':modal'];
+  function isTopLayer(element) {
+    return topLayerSelectors.some(selector => {
+      try {
+        return element.matches(selector);
+      } catch (_e) {
+        return false;
+      }
+    });
+  }
+  const transformProperties = ['transform', 'translate', 'scale', 'rotate', 'perspective'];
+  const willChangeValues = ['transform', 'translate', 'scale', 'rotate', 'perspective', 'filter'];
+  const containValues = ['paint', 'layout', 'strict', 'content'];
+  function isContainingBlock(elementOrCss) {
     const webkit = isWebKit();
-    const css = getComputedStyle$1(element);
+    const css = isElement(elementOrCss) ? getComputedStyle$1(elementOrCss) : elementOrCss;
 
     // https://developer.mozilla.org/en-US/docs/Web/CSS/Containing_block#identifying_the_containing_block
-    return css.transform !== 'none' || css.perspective !== 'none' || (css.containerType ? css.containerType !== 'normal' : false) || !webkit && (css.backdropFilter ? css.backdropFilter !== 'none' : false) || !webkit && (css.filter ? css.filter !== 'none' : false) || ['transform', 'perspective', 'filter'].some(value => (css.willChange || '').includes(value)) || ['paint', 'layout', 'strict', 'content'].some(value => (css.contain || '').includes(value));
+    // https://drafts.csswg.org/css-transforms-2/#individual-transforms
+    return transformProperties.some(value => css[value] ? css[value] !== 'none' : false) || (css.containerType ? css.containerType !== 'normal' : false) || !webkit && (css.backdropFilter ? css.backdropFilter !== 'none' : false) || !webkit && (css.filter ? css.filter !== 'none' : false) || willChangeValues.some(value => (css.willChange || '').includes(value)) || containValues.some(value => (css.contain || '').includes(value));
   }
   function getContainingBlock(element) {
     let currentNode = getParentNode(element);
     while (isHTMLElement(currentNode) && !isLastTraversableNode(currentNode)) {
       if (isContainingBlock(currentNode)) {
         return currentNode;
-      } else {
-        currentNode = getParentNode(currentNode);
+      } else if (isTopLayer(currentNode)) {
+        return null;
       }
+      currentNode = getParentNode(currentNode);
     }
     return null;
   }
@@ -7710,8 +7862,9 @@
     if (typeof CSS === 'undefined' || !CSS.supports) return false;
     return CSS.supports('-webkit-backdrop-filter', 'none');
   }
+  const lastTraversableNodeNames = /*#__PURE__*/new Set(['html', 'body', '#document']);
   function isLastTraversableNode(node) {
-    return ['html', 'body', '#document'].includes(getNodeName(node));
+    return lastTraversableNodeNames.has(getNodeName(node));
   }
   function getComputedStyle$1(element) {
     return getWindow(element).getComputedStyle(element);
@@ -7724,8 +7877,8 @@
       };
     }
     return {
-      scrollLeft: element.pageXOffset,
-      scrollTop: element.pageYOffset
+      scrollLeft: element.scrollX,
+      scrollTop: element.scrollY
     };
   }
   function getParentNode(node) {
@@ -7765,9 +7918,13 @@
     const isBody = scrollableAncestor === ((_node$ownerDocument2 = node.ownerDocument) == null ? void 0 : _node$ownerDocument2.body);
     const win = getWindow(scrollableAncestor);
     if (isBody) {
-      return list.concat(win, win.visualViewport || [], isOverflowElement(scrollableAncestor) ? scrollableAncestor : [], win.frameElement && traverseIframes ? getOverflowAncestors(win.frameElement) : []);
+      const frameElement = getFrameElement(win);
+      return list.concat(win, win.visualViewport || [], isOverflowElement(scrollableAncestor) ? scrollableAncestor : [], frameElement && traverseIframes ? getOverflowAncestors(frameElement) : []);
     }
     return list.concat(scrollableAncestor, getOverflowAncestors(scrollableAncestor, [], traverseIframes));
+  }
+  function getFrameElement(win) {
+    return win.parent && Object.getPrototypeOf(win.parent) ? win.frameElement : null;
   }
 
   function getCssDimensions(element) {
@@ -7872,7 +8029,7 @@
       const win = getWindow(domElement);
       const offsetWin = offsetParent && isElement(offsetParent) ? getWindow(offsetParent) : offsetParent;
       let currentWin = win;
-      let currentIFrame = currentWin.frameElement;
+      let currentIFrame = getFrameElement(currentWin);
       while (currentIFrame && offsetParent && offsetWin !== currentWin) {
         const iframeScale = getScale(currentIFrame);
         const iframeRect = currentIFrame.getBoundingClientRect();
@@ -7886,7 +8043,7 @@
         x += left;
         y += top;
         currentWin = getWindow(currentIFrame);
-        currentIFrame = currentWin.frameElement;
+        currentIFrame = getFrameElement(currentWin);
       }
     }
     return rectToClientRect({
@@ -7897,15 +8054,24 @@
     });
   }
 
-  const topLayerSelectors = [':popover-open', ':modal'];
-  function isTopLayer(floating) {
-    return topLayerSelectors.some(selector => {
-      try {
-        return floating.matches(selector);
-      } catch (e) {
-        return false;
-      }
-    });
+  // If <html> has a CSS width greater than the viewport, then this will be
+  // incorrect for RTL.
+  function getWindowScrollBarX(element, rect) {
+    const leftScroll = getNodeScroll(element).scrollLeft;
+    if (!rect) {
+      return getBoundingClientRect(getDocumentElement(element)).left + leftScroll;
+    }
+    return rect.left + leftScroll;
+  }
+
+  function getHTMLOffset(documentElement, scroll) {
+    const htmlRect = documentElement.getBoundingClientRect();
+    const x = htmlRect.left + scroll.scrollLeft - getWindowScrollBarX(documentElement, htmlRect);
+    const y = htmlRect.top + scroll.scrollTop;
+    return {
+      x,
+      y
+    };
   }
 
   function convertOffsetParentRelativeRectToViewportRelativeRect(_ref) {
@@ -7939,22 +8105,17 @@
         offsets.y = offsetRect.y + offsetParent.clientTop;
       }
     }
+    const htmlOffset = documentElement && !isOffsetParentAnElement && !isFixed ? getHTMLOffset(documentElement, scroll) : createCoords(0);
     return {
       width: rect.width * scale.x,
       height: rect.height * scale.y,
-      x: rect.x * scale.x - scroll.scrollLeft * scale.x + offsets.x,
-      y: rect.y * scale.y - scroll.scrollTop * scale.y + offsets.y
+      x: rect.x * scale.x - scroll.scrollLeft * scale.x + offsets.x + htmlOffset.x,
+      y: rect.y * scale.y - scroll.scrollTop * scale.y + offsets.y + htmlOffset.y
     };
   }
 
   function getClientRects(element) {
     return Array.from(element.getClientRects());
-  }
-
-  function getWindowScrollBarX(element) {
-    // If <html> has a CSS width greater than the viewport, then this will be
-    // incorrect for RTL.
-    return getBoundingClientRect(getDocumentElement(element)).left + getNodeScroll(element).scrollLeft;
   }
 
   // Gets the entire size of the scrollable document area, even extending outside
@@ -7978,6 +8139,10 @@
     };
   }
 
+  // Safety check: ensure the scrollbar space is reasonable in case this
+  // calculation is affected by unusual styles.
+  // Most scrollbars leave 15-18px of space.
+  const SCROLLBAR_MAX = 25;
   function getViewportRect(element, strategy) {
     const win = getWindow(element);
     const html = getDocumentElement(element);
@@ -7995,6 +8160,24 @@
         y = visualViewport.offsetTop;
       }
     }
+    const windowScrollbarX = getWindowScrollBarX(html);
+    // <html> `overflow: hidden` + `scrollbar-gutter: stable` reduces the
+    // visual width of the <html> but this is not considered in the size
+    // of `html.clientWidth`.
+    if (windowScrollbarX <= 0) {
+      const doc = html.ownerDocument;
+      const body = doc.body;
+      const bodyStyles = getComputedStyle(body);
+      const bodyMarginInline = doc.compatMode === 'CSS1Compat' ? parseFloat(bodyStyles.marginLeft) + parseFloat(bodyStyles.marginRight) || 0 : 0;
+      const clippingStableScrollbarWidth = Math.abs(html.clientWidth - body.clientWidth - bodyMarginInline);
+      if (clippingStableScrollbarWidth <= SCROLLBAR_MAX) {
+        width -= clippingStableScrollbarWidth;
+      }
+    } else if (windowScrollbarX <= SCROLLBAR_MAX) {
+      // If the <body> scrollbar is on the left, the width needs to be extended
+      // by the scrollbar amount so there isn't extra space on the right.
+      width += windowScrollbarX;
+    }
     return {
       width,
       height,
@@ -8003,6 +8186,7 @@
     };
   }
 
+  const absoluteOrFixed = /*#__PURE__*/new Set(['absolute', 'fixed']);
   // Returns the inner client rect, subtracting scrollbars if present.
   function getInnerBoundingClientRect(element, strategy) {
     const clientRect = getBoundingClientRect(element, true, strategy === 'fixed');
@@ -8031,9 +8215,10 @@
     } else {
       const visualOffsets = getVisualOffsets(element);
       rect = {
-        ...clippingAncestor,
         x: clippingAncestor.x - visualOffsets.x,
-        y: clippingAncestor.y - visualOffsets.y
+        y: clippingAncestor.y - visualOffsets.y,
+        width: clippingAncestor.width,
+        height: clippingAncestor.height
       };
     }
     return rectToClientRect(rect);
@@ -8066,7 +8251,7 @@
       if (!currentNodeIsContaining && computedStyle.position === 'fixed') {
         currentContainingBlockComputedStyle = null;
       }
-      const shouldDropCurrentNode = elementIsFixed ? !currentNodeIsContaining && !currentContainingBlockComputedStyle : !currentNodeIsContaining && computedStyle.position === 'static' && !!currentContainingBlockComputedStyle && ['absolute', 'fixed'].includes(currentContainingBlockComputedStyle.position) || isOverflowElement(currentNode) && !currentNodeIsContaining && hasFixedPositionAncestor(element, currentNode);
+      const shouldDropCurrentNode = elementIsFixed ? !currentNodeIsContaining && !currentContainingBlockComputedStyle : !currentNodeIsContaining && computedStyle.position === 'static' && !!currentContainingBlockComputedStyle && absoluteOrFixed.has(currentContainingBlockComputedStyle.position) || isOverflowElement(currentNode) && !currentNodeIsContaining && hasFixedPositionAncestor(element, currentNode);
       if (shouldDropCurrentNode) {
         // Drop non-containing blocks.
         result = result.filter(ancestor => ancestor !== currentNode);
@@ -8089,7 +8274,7 @@
       rootBoundary,
       strategy
     } = _ref;
-    const elementClippingAncestors = boundary === 'clippingAncestors' ? getClippingElementAncestors(element, this._c) : [].concat(boundary);
+    const elementClippingAncestors = boundary === 'clippingAncestors' ? isTopLayer(element) ? [] : getClippingElementAncestors(element, this._c) : [].concat(boundary);
     const clippingAncestors = [...elementClippingAncestors, rootBoundary];
     const firstClippingAncestor = clippingAncestors[0];
     const clippingRect = clippingAncestors.reduce((accRect, clippingAncestor) => {
@@ -8129,6 +8314,12 @@
       scrollTop: 0
     };
     const offsets = createCoords(0);
+
+    // If the <body> scrollbar appears on the left (e.g. RTL systems). Use
+    // Firefox with layout.scrollbar.side = 3 in about:config to test this.
+    function setLeftRTLScrollbarOffset() {
+      offsets.x = getWindowScrollBarX(documentElement);
+    }
     if (isOffsetParentAnElement || !isOffsetParentAnElement && !isFixed) {
       if (getNodeName(offsetParent) !== 'body' || isOverflowElement(documentElement)) {
         scroll = getNodeScroll(offsetParent);
@@ -8138,17 +8329,25 @@
         offsets.x = offsetRect.x + offsetParent.clientLeft;
         offsets.y = offsetRect.y + offsetParent.clientTop;
       } else if (documentElement) {
-        offsets.x = getWindowScrollBarX(documentElement);
+        setLeftRTLScrollbarOffset();
       }
     }
-    const x = rect.left + scroll.scrollLeft - offsets.x;
-    const y = rect.top + scroll.scrollTop - offsets.y;
+    if (isFixed && !isOffsetParentAnElement && documentElement) {
+      setLeftRTLScrollbarOffset();
+    }
+    const htmlOffset = documentElement && !isOffsetParentAnElement && !isFixed ? getHTMLOffset(documentElement, scroll) : createCoords(0);
+    const x = rect.left + scroll.scrollLeft - offsets.x - htmlOffset.x;
+    const y = rect.top + scroll.scrollTop - offsets.y - htmlOffset.y;
     return {
       x,
       y,
       width: rect.width,
       height: rect.height
     };
+  }
+
+  function isStaticPositioned(element) {
+    return getComputedStyle$1(element).position === 'static';
   }
 
   function getTrueOffsetParent(element, polyfill) {
@@ -8158,35 +8357,56 @@
     if (polyfill) {
       return polyfill(element);
     }
-    return element.offsetParent;
+    let rawOffsetParent = element.offsetParent;
+
+    // Firefox returns the <html> element as the offsetParent if it's non-static,
+    // while Chrome and Safari return the <body> element. The <body> element must
+    // be used to perform the correct calculations even if the <html> element is
+    // non-static.
+    if (getDocumentElement(element) === rawOffsetParent) {
+      rawOffsetParent = rawOffsetParent.ownerDocument.body;
+    }
+    return rawOffsetParent;
   }
 
   // Gets the closest ancestor positioned element. Handles some edge cases,
   // such as table ancestors and cross browser bugs.
   function getOffsetParent(element, polyfill) {
-    const window = getWindow(element);
-    if (!isHTMLElement(element) || isTopLayer(element)) {
-      return window;
+    const win = getWindow(element);
+    if (isTopLayer(element)) {
+      return win;
+    }
+    if (!isHTMLElement(element)) {
+      let svgOffsetParent = getParentNode(element);
+      while (svgOffsetParent && !isLastTraversableNode(svgOffsetParent)) {
+        if (isElement(svgOffsetParent) && !isStaticPositioned(svgOffsetParent)) {
+          return svgOffsetParent;
+        }
+        svgOffsetParent = getParentNode(svgOffsetParent);
+      }
+      return win;
     }
     let offsetParent = getTrueOffsetParent(element, polyfill);
-    while (offsetParent && isTableElement(offsetParent) && getComputedStyle$1(offsetParent).position === 'static') {
+    while (offsetParent && isTableElement(offsetParent) && isStaticPositioned(offsetParent)) {
       offsetParent = getTrueOffsetParent(offsetParent, polyfill);
     }
-    if (offsetParent && (getNodeName(offsetParent) === 'html' || getNodeName(offsetParent) === 'body' && getComputedStyle$1(offsetParent).position === 'static' && !isContainingBlock(offsetParent))) {
-      return window;
+    if (offsetParent && isLastTraversableNode(offsetParent) && isStaticPositioned(offsetParent) && !isContainingBlock(offsetParent)) {
+      return win;
     }
-    return offsetParent || getContainingBlock(element) || window;
+    return offsetParent || getContainingBlock(element) || win;
   }
 
   const getElementRects = async function (data) {
     const getOffsetParentFn = this.getOffsetParent || getOffsetParent;
     const getDimensionsFn = this.getDimensions;
+    const floatingDimensions = await getDimensionsFn(data.floating);
     return {
       reference: getRectRelativeToOffsetParent(data.reference, await getOffsetParentFn(data.floating), data.strategy),
       floating: {
         x: 0,
         y: 0,
-        ...(await getDimensionsFn(data.floating))
+        width: floatingDimensions.width,
+        height: floatingDimensions.height
       }
     };
   };
@@ -8208,6 +8428,10 @@
     isRTL
   };
 
+  function rectsAreEqual(a, b) {
+    return a.x === b.x && a.y === b.y && a.width === b.width && a.height === b.height;
+  }
+
   // https://samthor.au/2021/observing-dom/
   function observeMove(element, onMove) {
     let io = null;
@@ -8227,12 +8451,13 @@
         threshold = 1;
       }
       cleanup();
+      const elementRectForRootMargin = element.getBoundingClientRect();
       const {
         left,
         top,
         width,
         height
-      } = element.getBoundingClientRect();
+      } = elementRectForRootMargin;
       if (!skip) {
         onMove();
       }
@@ -8256,12 +8481,24 @@
             return refresh();
           }
           if (!ratio) {
+            // If the reference is clipped, the ratio is 0. Throttle the refresh
+            // to prevent an infinite loop of updates.
             timeoutId = setTimeout(() => {
               refresh(false, 1e-7);
-            }, 100);
+            }, 1000);
           } else {
             refresh(false, ratio);
           }
+        }
+        if (ratio === 1 && !rectsAreEqual(elementRectForRootMargin, element.getBoundingClientRect())) {
+          // It's possible that even though the ratio is reported as 1, the
+          // element is not actually fully within the IntersectionObserver's root
+          // area anymore. This can happen under performance constraints. This may
+          // be a bug in the browser's IntersectionObserver implementation. To
+          // work around this, we compare the element's bounding rect now with
+          // what it was at the time we created the IntersectionObserver. If they
+          // are not equal then the element moved, so we refresh.
+          refresh();
         }
         isFirstUpdate = false;
       }
@@ -8274,7 +8511,7 @@
           // Handle <iframe>s
           root: root.ownerDocument
         });
-      } catch (e) {
+      } catch (_e) {
         io = new IntersectionObserver(handleObserve, options);
       }
       io.observe(element);
@@ -8340,7 +8577,7 @@
     }
     function frameLoop() {
       const nextRefRect = getBoundingClientRect(reference);
-      if (prevRefRect && (nextRefRect.x !== prevRefRect.x || nextRefRect.y !== prevRefRect.y || nextRefRect.width !== prevRefRect.width || nextRefRect.height !== prevRefRect.height)) {
+      if (prevRefRect && !rectsAreEqual(prevRefRect, nextRefRect)) {
         update();
       }
       prevRefRect = nextRefRect;
@@ -8361,6 +8598,23 @@
       }
     };
   }
+
+  /**
+   * Modifies the placement by translating the floating element along the
+   * specified axes.
+   * A number (shorthand for `mainAxis` or distance), or an axes configuration
+   * object may be passed.
+   * @see https://floating-ui.com/docs/offset
+   */
+  const offset = offset$1;
+
+  /**
+   * Optimizes the visibility of the floating element by choosing the placement
+   * that has the most space available automatically, without needing to specify a
+   * preferred placement. Alternative to `flip`.
+   * @see https://floating-ui.com/docs/autoPlacement
+   */
+  autoPlacement;
 
   /**
    * Optimizes the visibility of the floating element by shifting it in order to
@@ -8386,11 +8640,30 @@
   const size = size$1;
 
   /**
+   * Provides data to hide the floating element in applicable situations, such as
+   * when it is not in the same clipping context as the reference element.
+   * @see https://floating-ui.com/docs/hide
+   */
+  hide;
+
+  /**
    * Provides data to position an inner element of the floating element so that it
    * appears centered to the reference element.
    * @see https://floating-ui.com/docs/arrow
    */
   const arrow = arrow$1;
+
+  /**
+   * Provides improved positioning for inline reference elements that can span
+   * over multiple lines, such as hyperlinks or range selections.
+   * @see https://floating-ui.com/docs/inline
+   */
+  inline;
+
+  /**
+   * Built-in `limiter` that will stop `shift()` at a certain point.
+   */
+  limitShift;
 
   /**
    * Computes the `x` and `y` coordinates that will place the floating element
@@ -8415,7 +8688,6 @@
     });
   };
 
-  /* eslint-disable @typescript-eslint/ban-types */
   function offsetParent(element) {
       return offsetParentPolyfill(element);
   }
@@ -8443,11 +8715,11 @@
               continue;
           }
           const style = getComputedStyle(ancestor);
-          // Display:contents nodes aren't in the layout tree so they should be skipped.
+          // Display:contents nodes aren't in the layout tree, so they should be skipped.
           if (style.display === 'contents') {
               continue;
           }
-          if (style.position !== 'static' || style.filter !== 'none') {
+          if (style.position !== 'static' || isContainingBlock(style)) {
               return ancestor;
           }
           if (ancestor.tagName === 'BODY') {
@@ -8458,11 +8730,12 @@
   }
 
   function isVirtualElement(e) {
-    return e !== null && typeof e === "object" && "getBoundingClientRect" in e && ("contextElement" in e ? e instanceof Element : true);
+    return e !== null && typeof e === "object" && "getBoundingClientRect" in e && ("contextElement" in e ? e.contextElement instanceof Element : true);
   }
   var SlPopup = class extends ShoelaceElement {
     constructor() {
       super(...arguments);
+      this.localize = new LocalizeController(this);
       this.active = false;
       this.placement = "top";
       this.strategy = "absolute";
@@ -8583,12 +8856,12 @@
       if (this.anchorEl instanceof HTMLSlotElement) {
         this.anchorEl = this.anchorEl.assignedElements({ flatten: true })[0];
       }
-      if (this.anchorEl) {
+      if (this.anchorEl && this.active) {
         this.start();
       }
     }
     start() {
-      if (!this.anchorEl) {
+      if (!this.anchorEl || !this.active) {
         return;
       }
       this.cleanup = autoUpdate(this.anchorEl, this.popup, () => {
@@ -8692,7 +8965,7 @@
           getOffsetParent
         })
       }).then(({ x, y, middlewareData, placement }) => {
-        const isRtl = getComputedStyle(this).direction === "rtl";
+        const isRtl = this.localize.dir() === "rtl";
         const staticSide = { top: "bottom", right: "left", bottom: "top", left: "right" }[placement.split("-")[0]];
         this.setAttribute("data-current-placement", placement);
         Object.assign(this.popup.style, {
@@ -8741,7 +9014,7 @@
 
       <span
         part="hover-bridge"
-        class=${e$3({
+        class=${e$2({
       "popup-hover-bridge": true,
       "popup-hover-bridge--visible": this.hoverBridge && this.active
     })}
@@ -8749,7 +9022,7 @@
 
       <div
         part="popup"
-        class=${e$3({
+        class=${e$2({
       popup: true,
       "popup--active": this.active,
       "popup--fixed": this.strategy === "fixed",
@@ -8764,10 +9037,10 @@
   };
   SlPopup.styles = [component_styles_default, popup_styles_default];
   __decorateClass([
-    e$5(".popup")
+    e$4(".popup")
   ], SlPopup.prototype, "popup", 2);
   __decorateClass([
-    e$5(".popup__arrow")
+    e$4(".popup__arrow")
   ], SlPopup.prototype, "arrowEl", 2);
   __decorateClass([
     n$2()
@@ -8994,6 +9267,7 @@
     }
     disconnectedCallback() {
       var _a;
+      super.disconnectedCallback();
       (_a = this.closeWatcher) == null ? void 0 : _a.destroy();
       document.removeEventListener("keydown", this.handleDocumentKeyDown);
     }
@@ -9084,7 +9358,7 @@
           popup:base__popup,
           arrow:base__arrow
         "
-        class=${e$3({
+        class=${e$2({
       tooltip: true,
       "tooltip--open": this.open
     })}
@@ -9111,13 +9385,13 @@
   SlTooltip.styles = [component_styles_default, tooltip_styles_default];
   SlTooltip.dependencies = { "sl-popup": SlPopup };
   __decorateClass([
-    e$5("slot:not([name])")
+    e$4("slot:not([name])")
   ], SlTooltip.prototype, "defaultSlot", 2);
   __decorateClass([
-    e$5(".tooltip__body")
+    e$4(".tooltip__body")
   ], SlTooltip.prototype, "body", 2);
   __decorateClass([
-    e$5("sl-popup")
+    e$4("sl-popup")
   ], SlTooltip.prototype, "popup", 2);
   __decorateClass([
     n$2()
@@ -9169,8 +9443,17 @@
 
   SlTooltip.define("sl-tooltip");
 
+  // src/internal/closeActiveElement.ts
+  var blurActiveElement = (elm) => {
+    var _a;
+    const { activeElement } = document;
+    if (activeElement && elm.contains(activeElement)) {
+      (_a = document.activeElement) == null ? void 0 : _a.blur();
+    }
+  };
+
   // src/components/icon-button/icon-button.styles.ts
-  var icon_button_styles_default = i$4`
+  var icon_button_styles_default = i$6`
   :host {
     display: inline-block;
     color: var(--sl-color-neutral-600);
@@ -9254,11 +9537,11 @@
     }
     render() {
       const isLink = this.href ? true : false;
-      const tag = isLink ? s`a` : s`button`;
-      return n$1`
+      const tag = isLink ? i$1`a` : i$1`button`;
+      return u`
       <${tag}
         part="base"
-        class=${e$3({
+        class=${e$2({
       "icon-button": true,
       "icon-button--disabled": !isLink && this.disabled,
       "icon-button--focused": this.hasFocus
@@ -9291,7 +9574,7 @@
   SlIconButton.styles = [component_styles_default, icon_button_styles_default];
   SlIconButton.dependencies = { "sl-icon": SlIcon };
   __decorateClass([
-    e$5(".icon-button")
+    e$4(".icon-button")
   ], SlIconButton.prototype, "button", 2);
   __decorateClass([
     r()
@@ -9322,7 +9605,7 @@
   ], SlIconButton.prototype, "disabled", 2);
 
   // src/components/alert/alert.styles.ts
-  var alert_styles_default = i$4`
+  var alert_styles_default = i$6`
   :host {
     display: contents;
 
@@ -9344,6 +9627,7 @@
     line-height: 1.6;
     color: var(--sl-color-neutral-700);
     margin: inherit;
+    overflow: hidden;
   }
 
   .alert:not(.alert--has-icon) .alert__icon,
@@ -9357,6 +9641,10 @@
     align-items: center;
     font-size: var(--sl-font-size-large);
     padding-inline-start: var(--sl-spacing-large);
+  }
+
+  .alert--has-countdown {
+    border-bottom: none;
   }
 
   .alert--primary {
@@ -9411,12 +9699,55 @@
     display: flex;
     align-items: center;
     font-size: var(--sl-font-size-medium);
-    padding-inline-end: var(--sl-spacing-medium);
+    margin-inline-end: var(--sl-spacing-medium);
+    align-self: center;
+  }
+
+  .alert__countdown {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: calc(var(--sl-panel-border-width) * 3);
+    background-color: var(--sl-panel-border-color);
+    display: flex;
+  }
+
+  .alert__countdown--ltr {
+    justify-content: flex-end;
+  }
+
+  .alert__countdown .alert__countdown-elapsed {
+    height: 100%;
+    width: 0;
+  }
+
+  .alert--primary .alert__countdown-elapsed {
+    background-color: var(--sl-color-primary-600);
+  }
+
+  .alert--success .alert__countdown-elapsed {
+    background-color: var(--sl-color-success-600);
+  }
+
+  .alert--neutral .alert__countdown-elapsed {
+    background-color: var(--sl-color-neutral-600);
+  }
+
+  .alert--warning .alert__countdown-elapsed {
+    background-color: var(--sl-color-warning-600);
+  }
+
+  .alert--danger .alert__countdown-elapsed {
+    background-color: var(--sl-color-danger-600);
+  }
+
+  .alert__timer {
+    display: none;
   }
 `;
 
-  var toastStack = Object.assign(document.createElement("div"), { className: "sl-toast-stack" });
-  var SlAlert = class extends ShoelaceElement {
+  var _SlAlert = class _SlAlert extends ShoelaceElement {
     constructor() {
       super(...arguments);
       this.hasSlotController = new HasSlotController(this, "icon", "suffix");
@@ -9425,21 +9756,60 @@
       this.closable = false;
       this.variant = "primary";
       this.duration = Infinity;
+      this.remainingTime = this.duration;
+    }
+    static get toastStack() {
+      if (!this.currentToastStack) {
+        this.currentToastStack = Object.assign(document.createElement("div"), {
+          className: "sl-toast-stack"
+        });
+      }
+      return this.currentToastStack;
     }
     firstUpdated() {
       this.base.hidden = !this.open;
     }
     restartAutoHide() {
+      this.handleCountdownChange();
       clearTimeout(this.autoHideTimeout);
+      clearInterval(this.remainingTimeInterval);
       if (this.open && this.duration < Infinity) {
         this.autoHideTimeout = window.setTimeout(() => this.hide(), this.duration);
+        this.remainingTime = this.duration;
+        this.remainingTimeInterval = window.setInterval(() => {
+          this.remainingTime -= 100;
+        }, 100);
+      }
+    }
+    pauseAutoHide() {
+      var _a;
+      (_a = this.countdownAnimation) == null ? void 0 : _a.pause();
+      clearTimeout(this.autoHideTimeout);
+      clearInterval(this.remainingTimeInterval);
+    }
+    resumeAutoHide() {
+      var _a;
+      if (this.duration < Infinity) {
+        this.autoHideTimeout = window.setTimeout(() => this.hide(), this.remainingTime);
+        this.remainingTimeInterval = window.setInterval(() => {
+          this.remainingTime -= 100;
+        }, 100);
+        (_a = this.countdownAnimation) == null ? void 0 : _a.play();
+      }
+    }
+    handleCountdownChange() {
+      if (this.open && this.duration < Infinity && this.countdown) {
+        const { countdownElement } = this;
+        const start = "100%";
+        const end = "0";
+        this.countdownAnimation = countdownElement.animate([{ width: start }, { width: end }], {
+          duration: this.duration,
+          easing: "linear"
+        });
       }
     }
     handleCloseClick() {
       this.hide();
-    }
-    handleMouseMove() {
-      this.restartAutoHide();
     }
     async handleOpenChange() {
       if (this.open) {
@@ -9453,8 +9823,10 @@
         await animateTo(this.base, keyframes, options);
         this.emit("sl-after-show");
       } else {
+        blurActiveElement(this);
         this.emit("sl-hide");
         clearTimeout(this.autoHideTimeout);
+        clearInterval(this.remainingTimeInterval);
         await stopAnimations(this.base);
         const { keyframes, options } = getAnimation(this, "alert.hide", { dir: this.localize.dir() });
         await animateTo(this.base, keyframes, options);
@@ -9488,10 +9860,11 @@
      */
     async toast() {
       return new Promise((resolve) => {
-        if (toastStack.parentElement === null) {
-          document.body.append(toastStack);
+        this.handleCountdownChange();
+        if (_SlAlert.toastStack.parentElement === null) {
+          document.body.append(_SlAlert.toastStack);
         }
-        toastStack.appendChild(this);
+        _SlAlert.toastStack.appendChild(this);
         requestAnimationFrame(() => {
           this.clientWidth;
           this.show();
@@ -9499,10 +9872,10 @@
         this.addEventListener(
           "sl-after-hide",
           () => {
-            toastStack.removeChild(this);
+            _SlAlert.toastStack.removeChild(this);
             resolve();
-            if (toastStack.querySelector("sl-alert") === null) {
-              toastStack.remove();
+            if (_SlAlert.toastStack.querySelector("sl-alert") === null) {
+              _SlAlert.toastStack.remove();
             }
           },
           { once: true }
@@ -9513,10 +9886,11 @@
       return x`
       <div
         part="base"
-        class=${e$3({
+        class=${e$2({
       alert: true,
       "alert--open": this.open,
       "alert--closable": this.closable,
+      "alert--has-countdown": !!this.countdown,
       "alert--has-icon": this.hasSlotController.test("icon"),
       "alert--primary": this.variant === "primary",
       "alert--success": this.variant === "success",
@@ -9526,7 +9900,8 @@
     })}
         role="alert"
         aria-hidden=${this.open ? "false" : "true"}
-        @mousemove=${this.handleMouseMove}
+        @mouseenter=${this.pauseAutoHide}
+        @mouseleave=${this.resumeAutoHide}
       >
         <div part="icon" class="alert__icon">
           <slot name="icon"></slot>
@@ -9547,33 +9922,56 @@
                 @click=${this.handleCloseClick}
               ></sl-icon-button>
             ` : ""}
+
+        <div role="timer" class="alert__timer">${this.remainingTime}</div>
+
+        ${this.countdown ? x`
+              <div
+                class=${e$2({
+      alert__countdown: true,
+      "alert__countdown--ltr": this.countdown === "ltr"
+    })}
+              >
+                <div class="alert__countdown-elapsed"></div>
+              </div>
+            ` : ""}
       </div>
     `;
     }
   };
-  SlAlert.styles = [component_styles_default, alert_styles_default];
-  SlAlert.dependencies = { "sl-icon-button": SlIconButton };
+  _SlAlert.styles = [component_styles_default, alert_styles_default];
+  _SlAlert.dependencies = { "sl-icon-button": SlIconButton };
   __decorateClass([
-    e$5('[part~="base"]')
-  ], SlAlert.prototype, "base", 2);
+    e$4('[part~="base"]')
+  ], _SlAlert.prototype, "base", 2);
+  __decorateClass([
+    e$4(".alert__countdown-elapsed")
+  ], _SlAlert.prototype, "countdownElement", 2);
   __decorateClass([
     n$2({ type: Boolean, reflect: true })
-  ], SlAlert.prototype, "open", 2);
+  ], _SlAlert.prototype, "open", 2);
   __decorateClass([
     n$2({ type: Boolean, reflect: true })
-  ], SlAlert.prototype, "closable", 2);
+  ], _SlAlert.prototype, "closable", 2);
   __decorateClass([
     n$2({ reflect: true })
-  ], SlAlert.prototype, "variant", 2);
+  ], _SlAlert.prototype, "variant", 2);
   __decorateClass([
     n$2({ type: Number })
-  ], SlAlert.prototype, "duration", 2);
+  ], _SlAlert.prototype, "duration", 2);
+  __decorateClass([
+    n$2({ type: String, reflect: true })
+  ], _SlAlert.prototype, "countdown", 2);
+  __decorateClass([
+    r()
+  ], _SlAlert.prototype, "remainingTime", 2);
   __decorateClass([
     watch("open", { waitUntilFirstUpdate: true })
-  ], SlAlert.prototype, "handleOpenChange", 1);
+  ], _SlAlert.prototype, "handleOpenChange", 1);
   __decorateClass([
     watch("duration")
-  ], SlAlert.prototype, "handleDurationChange", 1);
+  ], _SlAlert.prototype, "handleDurationChange", 1);
+  var SlAlert = _SlAlert;
   setDefaultAnimation("alert.show", {
     keyframes: [
       { opacity: 0, scale: 0.8 },
@@ -9649,48 +10047,45 @@
     return _getContactName.apply(this, arguments);
   }
   function _getContactName() {
-    _getContactName = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee(contactId) {
+    _getContactName = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee(contactId) {
       var _data$value, _data$value2;
       var _yield$getContactData, data, _data$value$, fullname;
-      return _regeneratorRuntime().wrap(function _callee$(_context) {
-        while (1) switch (_context.prev = _context.next) {
+      return _regenerator().w(function (_context) {
+        while (1) switch (_context.n) {
           case 0:
-            _context.next = 2;
+            _context.n = 1;
             return getContactData({
               contactId: contactId
             });
-          case 2:
-            _yield$getContactData = _context.sent;
+          case 1:
+            _yield$getContactData = _context.v;
             data = _yield$getContactData.data;
             if (!(!data || !((_data$value = data.value) !== null && _data$value !== void 0 && _data$value.length))) {
-              _context.next = 7;
+              _context.n = 2;
               break;
             }
             logger$F.error({
               fn: getContactName,
               message: 'Failed to get contact'
             });
-            return _context.abrupt("return");
-          case 7:
+            return _context.a(2);
+          case 2:
             _data$value$ = (_data$value2 = data.value) === null || _data$value2 === void 0 ? void 0 : _data$value2[0], fullname = _data$value$.fullname;
             if (!(!fullname || !fullname.length)) {
-              _context.next = 11;
+              _context.n = 3;
               break;
             }
             logger$F.error({
               fn: getContactName,
               message: 'Failed to get contact name'
             });
-            return _context.abrupt("return");
-          case 11:
+            return _context.a(2);
+          case 3:
             logger$F.info({
               fn: getContactName,
               message: "Successfully retrieved fullname: ".concat(fullname)
             });
-            return _context.abrupt("return", fullname);
-          case 13:
-          case "end":
-            return _context.stop();
+            return _context.a(2, fullname);
         }
       }, _callee);
     }));
@@ -10151,7 +10546,7 @@
   }
 
   const logger$D = Logger('components/fileUpload');
-  let FileUpload = class FileUpload extends s$1 {
+  let FileUpload = class FileUpload extends i$3 {
       constructor() {
           super(...arguments);
           this.id = crypto.randomUUID();
@@ -10710,7 +11105,7 @@
     `;
       }
   };
-  FileUpload.styles = i$4 `
+  FileUpload.styles = i$6 `
     .file-upload-card {
       width: 100%;
     }
@@ -10778,19 +11173,19 @@
     sl-alert::part(icon) {
       font-size: 2rem;
     }
-    ${r$5(shoelace)}
+    ${r$4(shoelace)}
   `;
   __decorate([
-      e$5('#fileUploadElement')
+      e$4('#fileUploadElement')
   ], FileUpload.prototype, "fileUploadElement", void 0);
   __decorate([
       n$2({ type: String, reflect: true })
   ], FileUpload.prototype, "id", void 0);
   __decorate([
-      e$5('#inputElement')
+      e$4('#inputElement')
   ], FileUpload.prototype, "inputElement", void 0);
   __decorate([
-      e$5('#dropElement')
+      e$4('#dropElement')
   ], FileUpload.prototype, "dropElement", void 0);
   __decorate([
       n$2({ type: String })
@@ -10820,10 +11215,10 @@
       n$2()
   ], FileUpload.prototype, "unhighlightHandler", void 0);
   FileUpload = __decorate([
-      t$1('file-upload')
+      t$2('file-upload')
   ], FileUpload);
 
-  let Checkbox = class Checkbox extends s$1 {
+  let Checkbox = class Checkbox extends i$3 {
       constructor() {
           super(...arguments);
           this.inputValue = 'false';
@@ -10880,7 +11275,7 @@
       ${this.inputValue === 'true'
             ? x `<input
             class="quartech-checkbox"
-            style=${r$5(this.customStyle)}
+            style=${r$4(this.customStyle)}
             id="inputElement"
             type="checkbox"
             @click=${this.handleEmitEvent}
@@ -10888,7 +11283,7 @@
           />`
             : x `<input
             class="quartech-checkbox"
-            style=${r$5(this.customStyle)}
+            style=${r$4(this.customStyle)}
             id="inputElement"
             type="checkbox"
             @click=${this.handleEmitEvent}
@@ -10897,7 +11292,7 @@
       }
   };
   __decorate([
-      e$5('#inputElement')
+      e$4('#inputElement')
   ], Checkbox.prototype, "inputElement", void 0);
   __decorate([
       n$2({ type: String })
@@ -10909,10 +11304,10 @@
       n$2({ type: Boolean })
   ], Checkbox.prototype, "readOnly", void 0);
   Checkbox = __decorate([
-      t$1('quartech-checkbox')
+      t$2('quartech-checkbox')
   ], Checkbox);
 
-  let PercentageInput = class PercentageInput extends s$1 {
+  let PercentageInput = class PercentageInput extends i$3 {
       constructor() {
           super(...arguments);
           this.id = crypto.randomUUID();
@@ -10988,8 +11383,8 @@
           align-items: stretch;
           width: 100%;
           ${!this.readOnly
-            ? i$4 ``
-            : i$4 `
+            ? i$6 ``
+            : i$6 `
               cursor: not-allowed;
             `}
         }
@@ -11023,8 +11418,8 @@
           color: #000;
           font-size: 15px;
           ${!this.readOnly
-            ? i$4 ``
-            : i$4 `
+            ? i$6 ``
+            : i$6 `
               pointer-events: none;
               background-color: #f0f0f0;
             `}
@@ -11046,7 +11441,7 @@
       }
   };
   __decorate([
-      e$5('#inputElement')
+      e$4('#inputElement')
   ], PercentageInput.prototype, "inputElement", void 0);
   __decorate([
       n$2({ type: String, reflect: true })
@@ -11067,7 +11462,7 @@
       n$2({ type: String })
   ], PercentageInput.prototype, "mappedFieldId", void 0);
   PercentageInput = __decorate([
-      t$1('percentage-input')
+      t$2('percentage-input')
   ], PercentageInput);
 
   POWERPOD.onChangeHandlers = {
@@ -11293,18 +11688,18 @@
     setFieldVisibility('quartech_pleaseexplainotherifapplicable');
   }
   function checkAndSetTFCCRFEligbilityNotice() {
-    var _document$getElementB8, _document$getElementB9, _document$getElementB10, _document$getElementB11, _document$getElementB12, _document$getElementB13, _document$getElementB14;
+    var _document$getElementB8, _document$getElementB9, _document$getElementB0, _document$getElementB1, _document$getElementB10, _document$getElementB11, _document$getElementB12;
     logger$C.info({
       fn: checkAndSetTFCCRFEligbilityNotice,
       message: "checkAndSetTFCCRFEligbilityNotice called, start calculating..."
     });
     var existingTreeFruit = (_document$getElementB8 = document.getElementById('quartech_areyouanexistingtreefruit')) === null || _document$getElementB8 === void 0 ? void 0 : _document$getElementB8.value;
     var treeFruitDensityEligibility = (_document$getElementB9 = document.getElementById('quartech_treefruitdensityeligibility')) === null || _document$getElementB9 === void 0 ? void 0 : _document$getElementB9.value;
-    var taxableEntity = (_document$getElementB10 = document.getElementById('quartech_areyouataxableentity')) === null || _document$getElementB10 === void 0 ? void 0 : _document$getElementB10.value;
-    var fileFarmIncomeTaxUnderTaxActInBC = (_document$getElementB11 = document.getElementById('quartech_doyoufilefarmincometaxundertaxactinbc')) === null || _document$getElementB11 === void 0 ? void 0 : _document$getElementB11.value;
-    var taxReturnNotRequired = (_document$getElementB12 = document.getElementById('quartech_taxreturnnotrequired')) === null || _document$getElementB12 === void 0 ? void 0 : _document$getElementB12.value;
-    var ownerOrLesseeOfTheLand = (_document$getElementB13 = document.getElementById('quartech_areyouanownerorlesseeoftheland')) === null || _document$getElementB13 === void 0 ? void 0 : _document$getElementB13.value;
-    var notResearchStationOrGovernmentFundedAgency = (_document$getElementB14 = document.getElementById('quartech_notresearchstationorgovernmentfundedagency')) === null || _document$getElementB14 === void 0 ? void 0 : _document$getElementB14.value;
+    var taxableEntity = (_document$getElementB0 = document.getElementById('quartech_areyouataxableentity')) === null || _document$getElementB0 === void 0 ? void 0 : _document$getElementB0.value;
+    var fileFarmIncomeTaxUnderTaxActInBC = (_document$getElementB1 = document.getElementById('quartech_doyoufilefarmincometaxundertaxactinbc')) === null || _document$getElementB1 === void 0 ? void 0 : _document$getElementB1.value;
+    var taxReturnNotRequired = (_document$getElementB10 = document.getElementById('quartech_taxreturnnotrequired')) === null || _document$getElementB10 === void 0 ? void 0 : _document$getElementB10.value;
+    var ownerOrLesseeOfTheLand = (_document$getElementB11 = document.getElementById('quartech_areyouanownerorlesseeoftheland')) === null || _document$getElementB11 === void 0 ? void 0 : _document$getElementB11.value;
+    var notResearchStationOrGovernmentFundedAgency = (_document$getElementB12 = document.getElementById('quartech_notresearchstationorgovernmentfundedagency')) === null || _document$getElementB12 === void 0 ? void 0 : _document$getElementB12.value;
     logger$C.info({
       fn: checkAndSetTFCCRFEligbilityNotice,
       message: "founds the following values...",
@@ -11372,16 +11767,16 @@
     }
   }
   function checkAndSetTFCREligbilityNotice() {
-    var _document$getElementB15, _document$getElementB16, _document$getElementB17, _document$getElementB18, _document$getElementB19;
+    var _document$getElementB13, _document$getElementB14, _document$getElementB15, _document$getElementB16, _document$getElementB17;
     logger$C.info({
       fn: checkAndSetTFCREligbilityNotice,
       message: "checkAndSetTFCREligbilityNotice called, start calculating..."
     });
-    var existingTreeFruit = (_document$getElementB15 = document.getElementById('quartech_areyouanexistingtreefruit')) === null || _document$getElementB15 === void 0 ? void 0 : _document$getElementB15.value;
-    var ownerOrLesseeOfTheLand = (_document$getElementB16 = document.getElementById('quartech_areyouanownerorlesseeoftheland')) === null || _document$getElementB16 === void 0 ? void 0 : _document$getElementB16.value;
-    var taxableEntity = (_document$getElementB17 = document.getElementById('quartech_areyouataxableentity')) === null || _document$getElementB17 === void 0 ? void 0 : _document$getElementB17.value;
-    var fileFarmIncomeTaxUnderTaxActInBC = (_document$getElementB18 = document.getElementById('quartech_doyoufilefarmincometaxundertaxactinbc')) === null || _document$getElementB18 === void 0 ? void 0 : _document$getElementB18.value;
-    var commitToMaintainingTheProperty = (_document$getElementB19 = document.getElementById('quartech_doyoucommittomaintainingtheproperty')) === null || _document$getElementB19 === void 0 ? void 0 : _document$getElementB19.value;
+    var existingTreeFruit = (_document$getElementB13 = document.getElementById('quartech_areyouanexistingtreefruit')) === null || _document$getElementB13 === void 0 ? void 0 : _document$getElementB13.value;
+    var ownerOrLesseeOfTheLand = (_document$getElementB14 = document.getElementById('quartech_areyouanownerorlesseeoftheland')) === null || _document$getElementB14 === void 0 ? void 0 : _document$getElementB14.value;
+    var taxableEntity = (_document$getElementB15 = document.getElementById('quartech_areyouataxableentity')) === null || _document$getElementB15 === void 0 ? void 0 : _document$getElementB15.value;
+    var fileFarmIncomeTaxUnderTaxActInBC = (_document$getElementB16 = document.getElementById('quartech_doyoufilefarmincometaxundertaxactinbc')) === null || _document$getElementB16 === void 0 ? void 0 : _document$getElementB16.value;
+    var commitToMaintainingTheProperty = (_document$getElementB17 = document.getElementById('quartech_doyoucommittomaintainingtheproperty')) === null || _document$getElementB17 === void 0 ? void 0 : _document$getElementB17.value;
     logger$C.info({
       fn: checkAndSetTFCREligbilityNotice,
       message: "founds the following values...",
@@ -11441,16 +11836,16 @@
     }
   }
   function calculateAndPopulateRequestedClaimAmountForVLB() {
-    var _document$getElementB20, _document$getElementB21, _document$getElementB22, _document$getElementB23;
+    var _document$getElementB18, _document$getElementB19, _document$getElementB20, _document$getElementB21;
     logger$C.info({
       fn: calculateAndPopulateRequestedClaimAmountForVLB,
       message: "calculateAndPopulateRequestedClaimAmountForVLB called, start calculating..."
     });
     // Get input values from the elements
-    var totalDaysAsAVet = ((_document$getElementB20 = document.getElementById('quartech_numberoffulldaysworkedasaveterinarian')) === null || _document$getElementB20 === void 0 ? void 0 : _document$getElementB20.value) || 0;
-    var totalDaysAsAnRVT = ((_document$getElementB21 = document.getElementById('quartech_numberoffulldaysworkedasanrvt')) === null || _document$getElementB21 === void 0 ? void 0 : _document$getElementB21.value) || 0;
-    var totalDaysAsTelemedicineSupport = ((_document$getElementB22 = document.getElementById('quartech_numberofdaysprovidingtelemedicinesupport')) === null || _document$getElementB22 === void 0 ? void 0 : _document$getElementB22.value) || 0;
-    var totalExpensesForCVBCAndBCVTA = ((_document$getElementB23 = document.getElementById('quartech_totalsumofreportedexpenses')) === null || _document$getElementB23 === void 0 ? void 0 : _document$getElementB23.value) || 0;
+    var totalDaysAsAVet = ((_document$getElementB18 = document.getElementById('quartech_numberoffulldaysworkedasaveterinarian')) === null || _document$getElementB18 === void 0 ? void 0 : _document$getElementB18.value) || 0;
+    var totalDaysAsAnRVT = ((_document$getElementB19 = document.getElementById('quartech_numberoffulldaysworkedasanrvt')) === null || _document$getElementB19 === void 0 ? void 0 : _document$getElementB19.value) || 0;
+    var totalDaysAsTelemedicineSupport = ((_document$getElementB20 = document.getElementById('quartech_numberofdaysprovidingtelemedicinesupport')) === null || _document$getElementB20 === void 0 ? void 0 : _document$getElementB20.value) || 0;
+    var totalExpensesForCVBCAndBCVTA = ((_document$getElementB21 = document.getElementById('quartech_totalsumofreportedexpenses')) === null || _document$getElementB21 === void 0 ? void 0 : _document$getElementB21.value) || 0;
     logger$C.info({
       fn: calculateAndPopulateRequestedClaimAmountForVLB,
       message: "calculateAndPopulateRequestedClaimAmountForVLB returned ".concat(totalExpensesForCVBCAndBCVTA, " for totalExpensesForCVBCAndBCVTA")
@@ -11482,14 +11877,14 @@
     });
   }
   function calculateAndPopulateRequestedClaimAmountForTFCR() {
-    var _document$getElementB24, _document$getElementB25;
+    var _document$getElementB22, _document$getElementB23;
     logger$C.info({
       fn: calculateAndPopulateRequestedClaimAmountForTFCR,
       message: "calculateAndPopulateRequestedClaimAmountForTFCR called, start calculating..."
     });
     // Get input values from the elements
-    var approvedAmountForTFCR = ((_document$getElementB24 = document.getElementById('quartech_authorizedclaimedamount')) === null || _document$getElementB24 === void 0 ? void 0 : _document$getElementB24.value) || 0;
-    var sumOfTotalExpensesForTFCR = ((_document$getElementB25 = document.getElementById('quartech_totalsumofreportedexpenses')) === null || _document$getElementB25 === void 0 ? void 0 : _document$getElementB25.value) || 0;
+    var approvedAmountForTFCR = ((_document$getElementB22 = document.getElementById('quartech_authorizedclaimedamount')) === null || _document$getElementB22 === void 0 ? void 0 : _document$getElementB22.value) || 0;
+    var sumOfTotalExpensesForTFCR = ((_document$getElementB23 = document.getElementById('quartech_totalsumofreportedexpenses')) === null || _document$getElementB23 === void 0 ? void 0 : _document$getElementB23.value) || 0;
     logger$C.info({
       fn: calculateAndPopulateRequestedClaimAmountForTFCR,
       message: "calculateAndPopulateRequestedClaimAmountForTFCR returned ".concat(sumOfTotalExpensesForTFCR, " for totalExpensesForCVBCAndBCVTA")
@@ -11679,7 +12074,7 @@
     });
   }
   function populateTotalPercent() {
-    var _document$getElementB26;
+    var _document$getElementB24;
     var fieldsToSum = ['quartech_animalspeciestypesserved_beefcattle', 'quartech_animalspeciestypesserved_dairycattle', 'quartech_animalspeciestypesserved_farmedfish', 'quartech_animalspeciestypesservedpoultrycommercial', 'quartech_animalspeciestypesserved_poultrysmalllot', 'quartech_animalspeciestypesserved_sheepandgoats', 'quartech_animalspeciestypesserved_swinecommercial', 'quartech_animalspeciestypesserved_swinesmalllot', 'quartech_animalspeciestypesserved_companionanimals', 'quartech_animalspeciestypesserved_horses', 'quartech_animalspeciestypesserved_other'];
     var total = 0;
     fieldsToSum.forEach(function (field) {
@@ -11710,11 +12105,11 @@
       }
     });
     if (fieldConfig !== null && fieldConfig !== void 0 && fieldConfig.id && document.getElementById(fieldConfig.id) && // @ts-ignore
-    (_document$getElementB26 = document.getElementById(fieldConfig.id)) !== null && _document$getElementB26 !== void 0 && _document$getElementB26.getAttribute('inputvalue')) {
-      var _document$getElementB27, _document$getElementB28;
+    (_document$getElementB24 = document.getElementById(fieldConfig.id)) !== null && _document$getElementB24 !== void 0 && _document$getElementB24.getAttribute('inputvalue')) {
+      var _document$getElementB25, _document$getElementB26;
       // @ts-ignore
-      (_document$getElementB27 = document.getElementById(fieldConfig.id)) === null || _document$getElementB27 === void 0 || _document$getElementB27.setAttribute('inputvalue', "".concat(total));
-      (_document$getElementB28 = document.getElementById(fieldConfig.id)) === null || _document$getElementB28 === void 0 || _document$getElementB28.dispatchEvent(new Event('change'));
+      (_document$getElementB25 = document.getElementById(fieldConfig.id)) === null || _document$getElementB25 === void 0 || _document$getElementB25.setAttribute('inputvalue', "".concat(total));
+      (_document$getElementB26 = document.getElementById(fieldConfig.id)) === null || _document$getElementB26 === void 0 || _document$getElementB26.dispatchEvent(new Event('change'));
     }
   }
   function populateBusinessNameOnChangeFirstOrLastNameVLB() {
@@ -11743,8 +12138,8 @@
     var fieldsToCombine = ['quartech_legalnamefirst', 'quartech_legalnamelast'];
     var fieldValues = [];
     fieldsToCombine.forEach(function (fName) {
-      var _document$getElementB29;
-      var inputValue = (_document$getElementB29 = document.getElementById(fName)) === null || _document$getElementB29 === void 0 ? void 0 : _document$getElementB29.value;
+      var _document$getElementB27;
+      var inputValue = (_document$getElementB27 = document.getElementById(fName)) === null || _document$getElementB27 === void 0 ? void 0 : _document$getElementB27.value;
       fieldValues.push(inputValue);
     });
     var newValue = fieldValues.join(' ');
@@ -11760,15 +12155,15 @@
     });
   }
   function displayOrHideAdministrationCostsNoticeForKTTP() {
-    var _document$getElementB30, _document$getElementB31;
+    var _document$getElementB28, _document$getElementB29;
     logger$C.info({
       fn: displayOrHideAdministrationCostsNoticeForKTTP,
       message: "displayOrHideAdministrationCostsNoticeForKTTP called, start calculating..."
     });
 
     // Get input values from the elements
-    var administration = ((_document$getElementB30 = document.getElementById('quartech_administrationcosts')) === null || _document$getElementB30 === void 0 ? void 0 : _document$getElementB30.value) || 0;
-    var totalFundingRequested = ((_document$getElementB31 = document.getElementById('quartech_totalfundingrequiredfromtheprogram')) === null || _document$getElementB31 === void 0 ? void 0 : _document$getElementB31.value) || 0;
+    var administration = ((_document$getElementB28 = document.getElementById('quartech_administrationcosts')) === null || _document$getElementB28 === void 0 ? void 0 : _document$getElementB28.value) || 0;
+    var totalFundingRequested = ((_document$getElementB29 = document.getElementById('quartech_totalfundingrequiredfromtheprogram')) === null || _document$getElementB29 === void 0 ? void 0 : _document$getElementB29.value) || 0;
     logger$C.info({
       fn: displayOrHideAdministrationCostsNoticeForKTTP,
       message: "displayOrHideAdministrationCostsNoticeForKTTP returned the following values",
@@ -11960,10 +12355,10 @@
   }
   function handleIsBusinessContactInfoDropdownChangeHandler(name) {
     return /*#__PURE__*/function () {
-      var _ref = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee(event, customElement) {
+      var _ref = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee(event, customElement) {
         var value, _applicationDataRes$d, _applicationDataRes$d3, formId, applicationDataRes, _applicationDataRes$d2, quartech_businesssuitenumberoptional, quartech_businessstreetnumber, quartech_businessstreet, quartech_businesscity, quartech_businessprovinceterritory, quartech_businesspostalcode, quartech_email, fieldMapping, values;
-        return _regeneratorRuntime().wrap(function _callee$(_context) {
-          while (1) switch (_context.prev = _context.next) {
+        return _regenerator().w(function (_context) {
+          while (1) switch (_context.n) {
             case 0:
               logger$B.info({
                 fn: handleIsBusinessContactInfoDropdownChangeHandler,
@@ -11989,16 +12384,16 @@
                 value: value
               });
               if (!(value === 'Yes')) {
-                _context.next = 17;
+                _context.n = 2;
                 break;
               }
               formId = getFormId();
-              _context.next = 8;
+              _context.n = 1;
               return getApplicationData({
                 id: formId
               });
-            case 8:
-              applicationDataRes = _context.sent;
+            case 1:
+              applicationDataRes = _context.v;
               if (!(applicationDataRes !== null && applicationDataRes !== void 0 && (_applicationDataRes$d = applicationDataRes.data) !== null && _applicationDataRes$d !== void 0 && (_applicationDataRes$d = _applicationDataRes$d.value) !== null && _applicationDataRes$d !== void 0 && _applicationDataRes$d[0])) {
                 logger$B.error({
                   fn: handleIsBusinessContactInfoDropdownChangeHandler,
@@ -12051,12 +12446,11 @@
                   value: value
                 });
               });
-              _context.next = 18;
+              _context.n = 3;
               break;
-            case 17:
-            case 18:
-            case "end":
-              return _context.stop();
+            case 2:
+            case 3:
+              return _context.a(2);
           }
         }, _callee);
       }));
@@ -14147,7 +14541,7 @@
     return _augmentFormDataForBUG.apply(this, arguments);
   }
   function _augmentFormDataForBUG() {
-    _augmentFormDataForBUG = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee() {
+    _augmentFormDataForBUG = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee() {
       var payload,
         patchData,
         formId,
@@ -14160,9 +14554,11 @@
         applicationDataRes,
         _applicationDataRes$d2,
         quartech_originalsource,
-        _args = arguments;
-      return _regeneratorRuntime().wrap(function _callee$(_context) {
-        while (1) switch (_context.prev = _context.next) {
+        _args = arguments,
+        _t,
+        _t2;
+      return _regenerator().w(function (_context) {
+        while (1) switch (_context.p = _context.n) {
           case 0:
             payload = _args.length > 0 && _args[0] !== undefined ? _args[0] : {};
             patchData = _args.length > 1 && _args[1] !== undefined ? _args[1] : false;
@@ -14180,13 +14576,13 @@
               }
             });
             if (!(currentStep === FormStep.ApplicantInfo)) {
-              _context.next = 31;
+              _context.n = 8;
               break;
             }
-            _context.next = 9;
+            _context.n = 1;
             return getProgramId();
-          case 9:
-            _yield$getProgramId = _context.sent;
+          case 1:
+            _yield$getProgramId = _context.v;
             programId = _yield$getProgramId.programId;
             logger$w.info({
               fn: augmentFormDataForBUG6998,
@@ -14203,7 +14599,7 @@
             // if quartech_originalsource = import (255550001) and msgov_programid=357a7a04-a309-f011-bae3-002248ae7f3c DO NOTHING
             // else update quartech_originalsource = portal (255550002)
             if (!(programId === '357a7a04-a309-f011-bae3-002248ae7f3c')) {
-              _context.next = 29;
+              _context.n = 6;
               break;
             }
             logger$w.info({
@@ -14217,13 +14613,13 @@
                 programId: programId
               }
             });
-            _context.prev = 14;
-            _context.next = 17;
+            _context.p = 2;
+            _context.n = 3;
             return getApplicationData({
               id: formId
             });
-          case 17:
-            applicationDataRes = _context.sent;
+          case 3:
+            applicationDataRes = _context.v;
             if (!(applicationDataRes !== null && applicationDataRes !== void 0 && (_applicationDataRes$d = applicationDataRes.data) !== null && _applicationDataRes$d !== void 0 && (_applicationDataRes$d = _applicationDataRes$d.value) !== null && _applicationDataRes$d !== void 0 && _applicationDataRes$d[0])) {
               logger$w.error({
                 fn: augmentFormDataForBUG6998,
@@ -14253,16 +14649,16 @@
                 }
               });
             }
-            _context.next = 27;
+            _context.n = 5;
             break;
-          case 24:
-            _context.prev = 24;
-            _context.t0 = _context["catch"](14);
+          case 4:
+            _context.p = 4;
+            _t = _context.v;
             logger$w.error({
               fn: augmentFormDataForBUG6998,
               message: "failed to getApplicationData: ".concat(formType),
               data: {
-                e: _context.t0,
+                e: _t,
                 formId: formId,
                 formType: formType,
                 payload: payload,
@@ -14270,12 +14666,12 @@
                 programId: programId
               }
             });
-          case 27:
-            _context.next = 30;
+          case 5:
+            _context.n = 7;
             break;
-          case 29:
+          case 6:
             payload.quartech_originalsource = 255550002;
-          case 30:
+          case 7:
             logger$w.info({
               fn: augmentFormDataForBUG6998,
               message: "payload.quartech_originalsource: ".concat(payload.quartech_originalsource),
@@ -14286,38 +14682,38 @@
                 formId: formId
               }
             });
-          case 31:
+          case 8:
             if (!patchData) {
-              _context.next = 49;
+              _context.n = 15;
               break;
             }
-            _context.prev = 32;
+            _context.p = 9;
             if (!(formType === Form.Application)) {
-              _context.next = 39;
+              _context.n = 11;
               break;
             }
-            _context.next = 36;
+            _context.n = 10;
             return patchApplicationData({
               id: formId,
               fieldData: payload
             });
-          case 36:
-            _context.sent;
-            _context.next = 43;
+          case 10:
+            _context.v;
+            _context.n = 13;
             break;
-          case 39:
+          case 11:
             if (!(formType === Form.Claim)) {
-              _context.next = 43;
+              _context.n = 13;
               break;
             }
-            _context.next = 42;
+            _context.n = 12;
             return patchClaimData({
               id: formId,
               fieldData: payload
             });
-          case 42:
-            _context.sent;
-          case 43:
+          case 12:
+            _context.v;
+          case 13:
             logger$w.info({
               fn: augmentFormDataForBUG6998,
               message: 'successfully patched form data with payload',
@@ -14327,28 +14723,25 @@
                 payload: payload
               }
             });
-            _context.next = 49;
+            _context.n = 15;
             break;
-          case 46:
-            _context.prev = 46;
-            _context.t1 = _context["catch"](32);
+          case 14:
+            _context.p = 14;
+            _t2 = _context.v;
             logger$w.error({
               fn: augmentFormDataForBUG6998,
               message: "failed to patch form data for formType: ".concat(formType),
               data: {
-                e: _context.t1,
+                e: _t2,
                 formId: formId,
                 formType: formType,
                 payload: payload
               }
             });
-          case 49:
-            return _context.abrupt("return", payload);
-          case 50:
-          case "end":
-            return _context.stop();
+          case 15:
+            return _context.a(2, payload);
         }
-      }, _callee, null, [[14, 24], [32, 46]]);
+      }, _callee, null, [[9, 14], [2, 4]]);
     }));
     return _augmentFormDataForBUG.apply(this, arguments);
   }
@@ -14419,33 +14812,33 @@
     return _getExistingDraftApplicationId.apply(this, arguments);
   }
   function _getExistingDraftApplicationId() {
-    _getExistingDraftApplicationId = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee() {
-      var formId, programId, _res$data, _res$data2, _res$data3, _res$data4, res, _response$jqXHR, uuid, _getCurrentUser, contactId, quartech_nocragstnumber, payload, response, _res$data5, existingDraftApplications, existingDraft, id;
-      return _regeneratorRuntime().wrap(function _callee$(_context) {
-        while (1) switch (_context.prev = _context.next) {
+    _getExistingDraftApplicationId = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee() {
+      var formId, programId, _res$data, _res$data2, _res$data3, _res$data4, res, _response$jqXHR, uuid, _getCurrentUser, contactId, quartech_nocragstnumber, payload, response, _res$data5, existingDraftApplications, existingDraft, id, _t;
+      return _regenerator().w(function (_context) {
+        while (1) switch (_context.p = _context.n) {
           case 0:
             formId = getFormIdFromURLParams();
             if (!formId) {
-              _context.next = 4;
+              _context.n = 1;
               break;
             }
             logger$v.info({
               fn: getExistingDraftApplicationId,
               message: 'No need to load drafts if specific form id passed by params'
             });
-            return _context.abrupt("return");
-          case 4:
+            return _context.a(2);
+          case 1:
             programId = getProgramIdFromUrlParams();
             if (programId) {
-              _context.next = 8;
+              _context.n = 2;
               break;
             }
             logger$v.info({
               fn: getExistingDraftApplicationId,
               message: 'No programId found in URL params, no need to load existing drafts'
             });
-            return _context.abrupt("return");
-          case 8:
+            return _context.a(2);
+          case 2:
             logger$v.info({
               fn: getExistingDraftApplicationId,
               message: "Querying for any existing draft applications for programId: ".concat(programId)
@@ -14453,20 +14846,20 @@
 
             // check if drafts cached already, if so, return
             if (!(POWERPOD.applicationUtils.existingDraftApplications && POWERPOD.applicationUtils.existingDraftApplications.length > 0)) {
-              _context.next = 11;
+              _context.n = 3;
               break;
             }
-            return _context.abrupt("return", POWERPOD.applicationUtils.existingDraftApplications[0]);
-          case 11:
-            _context.prev = 11;
-            _context.next = 14;
+            return _context.a(2, POWERPOD.applicationUtils.existingDraftApplications[0]);
+          case 3:
+            _context.p = 3;
+            _context.n = 4;
             return getDraftApplicationsForProgramIdData({
               programid: programId
             });
-          case 14:
-            res = _context.sent;
+          case 4:
+            res = _context.v;
             if (!(res && res.data && (_res$data = res.data) !== null && _res$data !== void 0 && _res$data.value && ((_res$data2 = res.data) === null || _res$data2 === void 0 || (_res$data2 = _res$data2.value) === null || _res$data2 === void 0 ? void 0 : _res$data2.length) === 0)) {
-              _context.next = 30;
+              _context.n = 7;
               break;
             }
             logger$v.info({
@@ -14493,12 +14886,12 @@
             }, quartech_nocragstnumber != null && {
               quartech_nocragstnumber: quartech_nocragstnumber
             });
-            _context.next = 24;
+            _context.n = 5;
             return postApplicationData(payload);
-          case 24:
-            response = _context.sent;
+          case 5:
+            response = _context.v;
             if (!(!response || ((_response$jqXHR = response.jqXHR) === null || _response$jqXHR === void 0 ? void 0 : _response$jqXHR.status) !== 204)) {
-              _context.next = 28;
+              _context.n = 6;
               break;
             }
             logger$v.error({
@@ -14509,8 +14902,8 @@
                 response: response
               }
             });
-            return _context.abrupt("return");
-          case 28:
+            return _context.a(2);
+          case 6:
             logger$v.info({
               fn: getExistingDraftApplicationId,
               message: "Successfully created new draft application found for programid: ".concat(programId, ", with id: ").concat(uuid),
@@ -14519,10 +14912,10 @@
                 response: response
               }
             });
-            return _context.abrupt("return", uuid);
-          case 30:
+            return _context.a(2, uuid);
+          case 7:
             if (!(res && res.data && (_res$data3 = res.data) !== null && _res$data3 !== void 0 && _res$data3.value && ((_res$data4 = res.data) === null || _res$data4 === void 0 || (_res$data4 = _res$data4.value) === null || _res$data4 === void 0 ? void 0 : _res$data4.length) > 0)) {
-              _context.next = 38;
+              _context.n = 8;
               break;
             }
             if (((_res$data5 = res.data) === null || _res$data5 === void 0 || (_res$data5 = _res$data5.value) === null || _res$data5 === void 0 ? void 0 : _res$data5.length) > 1) {
@@ -14542,32 +14935,29 @@
               message: "Found existing draft application for programid: ".concat(programId, " with id: ").concat(id)
             });
             POWERPOD.applicationUtils.existingDraftApplications = existingDraftApplications;
-            return _context.abrupt("return", id);
-          case 38:
-            _context.next = 44;
+            return _context.a(2, id);
+          case 8:
+            _context.n = 10;
             break;
-          case 40:
-            _context.prev = 40;
-            _context.t0 = _context["catch"](11);
+          case 9:
+            _context.p = 9;
+            _t = _context.v;
             logger$v.error({
               fn: getExistingDraftApplicationId,
               message: "Error getting draft applications for programid: ".concat(programId),
               data: {
-                e: _context.t0
+                e: _t
               }
             });
-            return _context.abrupt("return");
-          case 44:
+            return _context.a(2);
+          case 10:
             logger$v.error({
               fn: getExistingDraftApplicationId,
               message: "Some issue occured trying to get existing draft applications for programid: ".concat(programId)
             });
-            return _context.abrupt("return", '');
-          case 46:
-          case "end":
-            return _context.stop();
+            return _context.a(2, '');
         }
-      }, _callee, null, [[11, 40]]);
+      }, _callee, null, [[3, 9]]);
     }));
     return _getExistingDraftApplicationId.apply(this, arguments);
   }
@@ -18195,7 +18585,7 @@
     return _saveBrowserInfo.apply(this, arguments);
   }
   function _saveBrowserInfo() {
-    _saveBrowserInfo = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee() {
+    _saveBrowserInfo = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee() {
       var action,
         data,
         payload,
@@ -18203,32 +18593,33 @@
         formType,
         _getCurrentUser,
         contactId,
-        _args = arguments;
-      return _regeneratorRuntime().wrap(function _callee$(_context) {
-        while (1) switch (_context.prev = _context.next) {
+        _args = arguments,
+        _t;
+      return _regenerator().w(function (_context) {
+        while (1) switch (_context.p = _context.n) {
           case 0:
             action = _args.length > 0 && _args[0] !== undefined ? _args[0] : BrowserInformationAction.Load;
             data = getBrowserInfo();
             if (data) {
-              _context.next = 5;
+              _context.n = 1;
               break;
             }
             logger$q.error({
               fn: saveBrowserInfo,
               message: 'Failed to get browser info'
             });
-            return _context.abrupt("return");
-          case 5:
+            return _context.a(2);
+          case 1:
             // const payload = {
             //   quartech_applicantbrowserinformation: data,
             // };
             payload = {};
             formId = getFormId();
             formType = getFormType();
-            _context.prev = 8;
+            _context.p = 2;
             _getCurrentUser = getCurrentUser(), contactId = _getCurrentUser.contactId;
             if (!(formType === Form.Application)) {
-              _context.next = 17;
+              _context.n = 4;
               break;
             }
             payload = {
@@ -18239,15 +18630,15 @@
               contactId: contactId
             };
             // res = await patchApplicationData({ id: formId, fieldData: payload });
-            _context.next = 14;
+            _context.n = 3;
             return postBrowserInformationData(payload);
-          case 14:
-            _context.sent;
-            _context.next = 22;
+          case 3:
+            _context.v;
+            _context.n = 6;
             break;
-          case 17:
+          case 4:
             if (!(formType === Form.Claim)) {
-              _context.next = 22;
+              _context.n = 6;
               break;
             }
             payload = {
@@ -18258,11 +18649,11 @@
               contactId: contactId
             };
             // res = await patchClaimData({ id: formId, fieldData: payload });
-            _context.next = 21;
+            _context.n = 5;
             return postBrowserInformationData(payload);
-          case 21:
-            _context.sent;
-          case 22:
+          case 5:
+            _context.v;
+          case 6:
             logger$q.info({
               fn: saveBrowserInfo,
               message: "successfully patched form data with browser information payload: ".concat(JSON.stringify(payload)),
@@ -18272,26 +18663,25 @@
                 payload: payload
               }
             });
-            _context.next = 28;
+            _context.n = 8;
             break;
-          case 25:
-            _context.prev = 25;
-            _context.t0 = _context["catch"](8);
+          case 7:
+            _context.p = 7;
+            _t = _context.v;
             logger$q.error({
               fn: saveBrowserInfo,
               message: "failed to patch form data with browser info for formType: ".concat(formType, ", payload: ").concat(JSON.stringify(payload)),
               data: {
-                e: _context.t0,
+                e: _t,
                 formId: formId,
                 formType: formType,
                 payload: payload
               }
             });
-          case 28:
-          case "end":
-            return _context.stop();
+          case 8:
+            return _context.a(2);
         }
-      }, _callee, null, [[8, 25]]);
+      }, _callee, null, [[2, 7]]);
     }));
     return _saveBrowserInfo.apply(this, arguments);
   }
@@ -19781,14 +20171,11 @@
       });
       return;
     }
-    saveButton.onclick = /*#__PURE__*/_asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee() {
-      return _regeneratorRuntime().wrap(function _callee$(_context) {
-        while (1) switch (_context.prev = _context.next) {
+    saveButton.onclick = /*#__PURE__*/_asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee() {
+      return _regenerator().w(function (_context) {
+        while (1) switch (_context.n) {
           case 0:
-            return _context.abrupt("return", saveFormData({}));
-          case 1:
-          case "end":
-            return _context.stop();
+            return _context.a(2, saveFormData({}));
         }
       }, _callee);
     }));
@@ -19797,24 +20184,24 @@
     return _saveFormData.apply(this, arguments);
   }
   function _saveFormData() {
-    _saveFormData = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee2(_ref2) {
+    _saveFormData = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee2(_ref2) {
       var _store$state$fields, _store$state, _store$state2;
-      var _ref2$customPayload, customPayload, saveButton, formJsonRes, fieldsStore, payload, fields, formId, formType;
-      return _regeneratorRuntime().wrap(function _callee2$(_context2) {
-        while (1) switch (_context2.prev = _context2.next) {
+      var _ref2$customPayload, customPayload, saveButton, formJsonRes, fieldsStore, payload, fields, formId, formType, _t;
+      return _regenerator().w(function (_context2) {
+        while (1) switch (_context2.p = _context2.n) {
           case 0:
             _ref2$customPayload = _ref2.customPayload, customPayload = _ref2$customPayload === void 0 ? {} : _ref2$customPayload;
             saveButton = document.getElementById('quartechSaveBtn');
             if (saveButton) {
-              _context2.next = 5;
+              _context2.n = 1;
               break;
             }
             logger$k.error({
               fn: saveFormData,
               message: 'Could not get saveButton after adding it to the DOM'
             });
-            return _context2.abrupt("return");
-          case 5:
+            return _context2.a(2);
+          case 1:
             logger$k.info({
               fn: saveFormData,
               message: 'Start saving form data...',
@@ -19832,7 +20219,7 @@
               });
             }
             if (!isObjectEmpty((store === null || store === void 0 || (_store$state2 = store.state) === null || _store$state2 === void 0 ? void 0 : _store$state2.fields) || {})) {
-              _context2.next = 13;
+              _context2.n = 2;
               break;
             }
             logger$k.warn({
@@ -19840,8 +20227,8 @@
               message: 'No field data to save'
             });
             saveButton.value = 'Save';
-            return _context2.abrupt("return");
-          case 13:
+            return _context2.a(2);
+          case 2:
             fieldsStore = store.state.fields;
             payload = {};
             fields = Object.keys(fieldsStore);
@@ -19906,7 +20293,7 @@
               }
             });
             if (!isObjectEmpty(payload)) {
-              _context2.next = 21;
+              _context2.n = 3;
               break;
             }
             logger$k.warn({
@@ -19914,41 +20301,41 @@
               message: 'no payload data to save'
             });
             saveButton.value = 'Save';
-            return _context2.abrupt("return");
-          case 21:
+            return _context2.a(2);
+          case 3:
             formId = getFormId();
             formType = getFormType();
-            _context2.next = 25;
+            _context2.n = 4;
             return augmentFormDataForBUG6998(payload);
-          case 25:
-            payload = _context2.sent;
-            _context2.prev = 26;
+          case 4:
+            payload = _context2.v;
+            _context2.p = 5;
             if (!(formType === Form.Application)) {
-              _context2.next = 33;
+              _context2.n = 7;
               break;
             }
-            _context2.next = 30;
+            _context2.n = 6;
             return patchApplicationData({
               id: formId,
               fieldData: payload
             });
-          case 30:
-            _context2.sent;
-            _context2.next = 37;
+          case 6:
+            _context2.v;
+            _context2.n = 9;
             break;
-          case 33:
+          case 7:
             if (!(formType === Form.Claim)) {
-              _context2.next = 37;
+              _context2.n = 9;
               break;
             }
-            _context2.next = 36;
+            _context2.n = 8;
             return patchClaimData({
               id: formId,
               fieldData: payload
             });
-          case 36:
-            _context2.sent;
-          case 37:
+          case 8:
+            _context2.v;
+          case 9:
             logger$k.info({
               fn: saveFormData,
               message: 'successfully patched form data with payload',
@@ -19958,31 +20345,30 @@
                 payload: payload
               }
             });
-            _context2.next = 43;
+            _context2.n = 11;
             break;
-          case 40:
-            _context2.prev = 40;
-            _context2.t0 = _context2["catch"](26);
+          case 10:
+            _context2.p = 10;
+            _t = _context2.v;
             logger$k.error({
               fn: saveFormData,
               message: "failed to patch form data for formType: ".concat(formType),
               data: {
-                e: _context2.t0,
+                e: _t,
                 formId: formId,
                 formType: formType,
                 payload: payload
               }
             });
-          case 43:
-            _context2.prev = 43;
+          case 11:
+            _context2.p = 11;
             // @ts-ignore
             saveButton.value = 'Save';
-            return _context2.finish(43);
-          case 46:
-          case "end":
-            return _context2.stop();
+            return _context2.f(11);
+          case 12:
+            return _context2.a(2);
         }
-      }, _callee2, null, [[26, 40, 43, 46]]);
+      }, _callee2, null, [[5, 10, 11, 12]]);
     }));
     return _saveFormData.apply(this, arguments);
   }
@@ -20035,11 +20421,11 @@
     return _addDemographicInfoChefsIframe.apply(this, arguments);
   }
   function _addDemographicInfoChefsIframe() {
-    _addDemographicInfoChefsIframe = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee() {
+    _addDemographicInfoChefsIframe = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee() {
       var _$, _$2, _$3;
       var chefsIdElement, chefsSubmissionGuid, chefsSubmissionId, chefsUrl, _applicationDataRes$d, _applicationDataRes$d3, chefsDemographicDataFormId, chefsDemographicDataIndividualsFormId, _yield$getEnvVars, quartech_ChefsDemographicDataFormId, quartech_ChefsDemographicDataIndividualsFormId, programAbbreviation, env, formId, applicationDataRes, _applicationDataRes$d2, quartech_nocragstnumber, html;
-      return _regeneratorRuntime().wrap(function _callee$(_context) {
-        while (1) switch (_context.prev = _context.next) {
+      return _regenerator().w(function (_context) {
+        while (1) switch (_context.n) {
           case 0:
             logger$j.info({
               fn: addDemographicInfoChefsIframe,
@@ -20056,7 +20442,7 @@
             chefsSubmissionGuid = (_$2 = $('#quartech_chefssubmissionid')) === null || _$2 === void 0 ? void 0 : _$2.val(); // Shorthand ID result for Staff
             chefsSubmissionId = (_$3 = $('#quartech_chefsid')) === null || _$3 === void 0 ? void 0 : _$3.val();
             if (!(chefsSubmissionGuid || chefsSubmissionId)) {
-              _context.next = 9;
+              _context.n = 1;
               break;
             }
             // Logic has since changed, if there's an ID present, we don't need to do anything.
@@ -20066,21 +20452,21 @@
               fn: addDemographicInfoChefsIframe,
               message: "Demographic info survey has already been completed, chefsSubmissionGuid: ".concat(chefsSubmissionGuid, ", chefsSubmissionId: ").concat(chefsSubmissionId)
             });
-            return _context.abrupt("return");
-          case 9:
+            return _context.a(2);
+          case 1:
             chefsUrl = '';
             if (!chefsSubmissionGuid) {
-              _context.next = 14;
+              _context.n = 2;
               break;
             }
             chefsUrl = "https://submit.digital.gov.bc.ca/app/form/success?s=".concat(chefsSubmissionGuid);
-            _context.next = 30;
+            _context.n = 5;
             break;
-          case 14:
-            _context.next = 16;
+          case 2:
+            _context.n = 3;
             return getEnvVars();
-          case 16:
-            _yield$getEnvVars = _context.sent;
+          case 3:
+            _yield$getEnvVars = _context.v;
             quartech_ChefsDemographicDataFormId = _yield$getEnvVars.quartech_ChefsDemographicDataFormId;
             quartech_ChefsDemographicDataIndividualsFormId = _yield$getEnvVars.quartech_ChefsDemographicDataIndividualsFormId;
             programAbbreviation = getProgramAbbreviation();
@@ -20102,12 +20488,12 @@
               message: "Retrieved params for iframe, chefsDemographicDataFormId: ".concat(chefsDemographicDataFormId, ", chefsDemographicDataIndividualsFormId: ").concat(chefsDemographicDataIndividualsFormId)
             });
             formId = getFormId();
-            _context.next = 25;
+            _context.n = 4;
             return getApplicationData({
               id: formId
             });
-          case 25:
-            applicationDataRes = _context.sent;
+          case 4:
+            applicationDataRes = _context.v;
             if (!(applicationDataRes !== null && applicationDataRes !== void 0 && (_applicationDataRes$d = applicationDataRes.data) !== null && _applicationDataRes$d !== void 0 && (_applicationDataRes$d = _applicationDataRes$d.value) !== null && _applicationDataRes$d !== void 0 && _applicationDataRes$d[0])) {
               logger$j.error({
                 fn: addDemographicInfoChefsIframe,
@@ -20170,12 +20556,11 @@
                 });
               }
             });
-          case 30:
+          case 5:
             html = "<iframe id='chefsDemographicInfoIframe' src=\"".concat(chefsUrl, "\" height=\"800\" width=\"100%\" title=\"Demographic Info in CHEFS\">\n      </iframe><br/>");
             addTextAboveField('quartech_chefsid', html);
-          case 32:
-          case "end":
-            return _context.stop();
+          case 6:
+            return _context.a(2);
         }
       }, _callee);
     }));
@@ -20201,23 +20586,23 @@
     return _customizeDocumentsStepForTFCCRF.apply(this, arguments);
   }
   function _customizeDocumentsStepForTFCCRF() {
-    _customizeDocumentsStepForTFCCRF = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee() {
+    _customizeDocumentsStepForTFCCRF = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee() {
       var _applicationDataRes$d, _applicationDataRes$d3;
       var formId, applicationDataRes, _applicationDataRes$d2, quartech_ownorleaseland, quartech_originalsource, quartech_reportnewtreefruitinventory;
-      return _regeneratorRuntime().wrap(function _callee$(_context) {
-        while (1) switch (_context.prev = _context.next) {
+      return _regenerator().w(function (_context) {
+        while (1) switch (_context.n) {
           case 0:
             logger$i.info({
               fn: customizeDocumentsStepForTFCCRF,
               message: "Start customizing documents step for TFCCRF"
             });
             formId = getFormId();
-            _context.next = 4;
+            _context.n = 1;
             return getApplicationData({
               id: formId
             });
-          case 4:
-            applicationDataRes = _context.sent;
+          case 1:
+            applicationDataRes = _context.v;
             if (!(applicationDataRes !== null && applicationDataRes !== void 0 && (_applicationDataRes$d = applicationDataRes.data) !== null && _applicationDataRes$d !== void 0 && (_applicationDataRes$d = _applicationDataRes$d.value) !== null && _applicationDataRes$d !== void 0 && _applicationDataRes$d[0])) {
               logger$i.error({
                 fn: customizeDocumentsStepForTFCCRF,
@@ -20297,9 +20682,8 @@
               validateStepField('quartech_uploadasitemap');
               validateStepFields();
             }
-          case 14:
-          case "end":
-            return _context.stop();
+          case 2:
+            return _context.a(2);
         }
       }, _callee);
     }));
@@ -20360,7 +20744,7 @@
     return _updatePageForSelectedProgram$1.apply(this, arguments);
   }
   function _updatePageForSelectedProgram$1() {
-    _updatePageForSelectedProgram$1 = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee() {
+    _updatePageForSelectedProgram$1 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee() {
       var programId,
         formId,
         redirect,
@@ -20370,31 +20754,31 @@
         fetchedRedirect,
         currentStep,
         _args = arguments;
-      return _regeneratorRuntime().wrap(function _callee$(_context) {
-        while (1) switch (_context.prev = _context.next) {
+      return _regenerator().w(function (_context) {
+        while (1) switch (_context.n) {
           case 0:
             programId = _args.length > 0 && _args[0] !== undefined ? _args[0] : undefined;
             if (programId) {
-              _context.next = 11;
+              _context.n = 2;
               break;
             }
-            _context.next = 4;
+            _context.n = 1;
             return getProgramId();
-          case 4:
-            _yield$getProgramId = _context.sent;
+          case 1:
+            _yield$getProgramId = _context.v;
             fetchedProgramId = _yield$getProgramId.programId;
             fetchedFormId = _yield$getProgramId.formId;
             fetchedRedirect = _yield$getProgramId.redirect;
             programId = fetchedProgramId;
             formId = fetchedFormId;
             redirect = fetchedRedirect || false;
-          case 11:
+          case 2:
             logger$g.info({
               fn: updatePageForSelectedProgram$1,
               message: "Determining redirect for programId: ".concat(programId, ", found formId: ").concat(formId, ", found redirect: ").concat(redirect)
             });
             if (!((POWERPOD.redirectToNewId || redirect) && formId)) {
-              _context.next = 16;
+              _context.n = 3;
               break;
             }
             logger$g.info({
@@ -20406,10 +20790,10 @@
               }
             });
             redirectToFormId(formId);
-            return _context.abrupt("return");
-          case 16:
+            return _context.a(2);
+          case 3:
             if (!(!programId && doc.readyState !== 'complete')) {
-              _context.next = 20;
+              _context.n = 4;
               break;
             }
             logger$g.info({
@@ -20422,12 +20806,12 @@
             onDocumentReadyState(function () {
               updatePageForSelectedProgram$1();
             });
-            return _context.abrupt("return");
-          case 20:
+            return _context.a(2);
+          case 4:
             currentStep = getCurrentStep(); // Only add Save Btn to non-success steps
             if (currentStep !== FormStep.Success) addSaveButton();
             if (!(!programId || currentStep === 'UnknownStep')) {
-              _context.next = 26;
+              _context.n = 5;
               break;
             }
             hideLoadingAnimation();
@@ -20439,8 +20823,8 @@
                 currentStep: currentStep
               }
             });
-            return _context.abrupt("return");
-          case 26:
+            return _context.a(2);
+          case 5:
             logger$g.info({
               fn: updatePageForSelectedProgram$1,
               message: "Retrieving Program data for the selected programid querystring: ".concat(programId)
@@ -20480,9 +20864,8 @@
                 }
               }
             });
-          case 28:
-          case "end":
-            return _context.stop();
+          case 6:
+            return _context.a(2);
         }
       }, _callee);
     }));
@@ -20634,9 +21017,9 @@
     }
   }
 
-  var bootstrap = "/*!\n * Bootstrap v3.3.6 (http://getbootstrap.com)\n * Copyright 2011-2015 Twitter, Inc.\n * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)\n */\n/*! normalize.css v3.0.3 | MIT License | github.com/necolas/normalize.css */\nhtml {\n  font-family: sans-serif;\n  -webkit-text-size-adjust: 100%;\n      -ms-text-size-adjust: 100%;\n}\nbody {\n  margin: 0;\n}\narticle,\naside,\ndetails,\nfigcaption,\nfigure,\nfooter,\nheader,\nhgroup,\nmain,\nmenu,\nnav,\nsection,\nsummary {\n  display: block;\n}\naudio,\ncanvas,\nprogress,\nvideo {\n  display: inline-block;\n  vertical-align: baseline;\n}\naudio:not([controls]) {\n  display: none;\n  height: 0;\n}\n[hidden],\ntemplate {\n  display: none;\n}\na {\n  background-color: transparent;\n}\na:active,\na:hover {\n  outline: 0;\n}\nabbr[title] {\n  border-bottom: 1px dotted;\n}\nb,\nstrong {\n  font-weight: bold;\n}\ndfn {\n  font-style: italic;\n}\nh1 {\n  margin: .67em 0;\n  font-size: 2em;\n}\nmark {\n  color: #000;\n  background: #ff0;\n}\nsmall {\n  font-size: 80%;\n}\nsub,\nsup {\n  position: relative;\n  font-size: 75%;\n  line-height: 0;\n  vertical-align: baseline;\n}\nsup {\n  top: -.5em;\n}\nsub {\n  bottom: -.25em;\n}\nimg {\n  border: 0;\n}\nsvg:not(:root) {\n  overflow: hidden;\n}\nfigure {\n  margin: 1em 40px;\n}\nhr {\n  height: 0;\n  -webkit-box-sizing: content-box;\n     -moz-box-sizing: content-box;\n          box-sizing: content-box;\n}\npre {\n  overflow: auto;\n}\ncode,\nkbd,\npre,\nsamp {\n  font-family: monospace, monospace;\n  font-size: 1em;\n}\nbutton,\ninput,\noptgroup,\nselect,\ntextarea {\n  margin: 0;\n  font: inherit;\n  color: inherit;\n}\nbutton {\n  overflow: visible;\n}\nbutton,\nselect {\n  text-transform: none;\n}\nbutton,\nhtml input[type=\"button\"],\ninput[type=\"reset\"],\ninput[type=\"submit\"] {\n  -webkit-appearance: button;\n  cursor: pointer;\n}\nbutton[disabled],\nhtml input[disabled] {\n  cursor: default;\n}\nbutton::-moz-focus-inner,\ninput::-moz-focus-inner {\n  padding: 0;\n  border: 0;\n}\ninput {\n  line-height: normal;\n}\ninput[type=\"checkbox\"],\ninput[type=\"radio\"] {\n  -webkit-box-sizing: border-box;\n     -moz-box-sizing: border-box;\n          box-sizing: border-box;\n  padding: 0;\n}\ninput[type=\"number\"]::-webkit-inner-spin-button,\ninput[type=\"number\"]::-webkit-outer-spin-button {\n  height: auto;\n}\ninput[type=\"search\"] {\n  -webkit-box-sizing: content-box;\n     -moz-box-sizing: content-box;\n          box-sizing: content-box;\n  -webkit-appearance: textfield;\n}\ninput[type=\"search\"]::-webkit-search-cancel-button,\ninput[type=\"search\"]::-webkit-search-decoration {\n  -webkit-appearance: none;\n}\nfieldset {\n  padding: .35em .625em .75em;\n  margin: 0 2px;\n  border: 1px solid #c0c0c0;\n}\nlegend {\n  padding: 0;\n  border: 0;\n}\ntextarea {\n  overflow: auto;\n}\noptgroup {\n  font-weight: bold;\n}\ntable {\n  border-spacing: 0;\n  border-collapse: collapse;\n}\ntd,\nth {\n  padding: 0;\n}\n/*! Source: https://github.com/h5bp/html5-boilerplate/blob/master/src/css/main.css */\n@media print {\n  *,\n  *:before,\n  *:after {\n    color: #000 !important;\n    text-shadow: none !important;\n    background: transparent !important;\n    -webkit-box-shadow: none !important;\n            box-shadow: none !important;\n  }\n  a,\n  a:visited {\n    text-decoration: underline;\n  }\n  a[href]:after {\n    content: \" (\" attr(href) \")\";\n  }\n  abbr[title]:after {\n    content: \" (\" attr(title) \")\";\n  }\n  a[href^=\"#\"]:after,\n  a[href^=\"javascript:\"]:after {\n    content: \"\";\n  }\n  pre,\n  blockquote {\n    border: 1px solid #999;\n\n    page-break-inside: avoid;\n  }\n  thead {\n    display: table-header-group;\n  }\n  tr,\n  img {\n    page-break-inside: avoid;\n  }\n  img {\n    max-width: 100% !important;\n  }\n  p,\n  h2,\n  h3 {\n    orphans: 3;\n    widows: 3;\n  }\n  h2,\n  h3 {\n    page-break-after: avoid;\n  }\n  .navbar {\n    display: none;\n  }\n  .btn > .caret,\n  .dropup > .btn > .caret {\n    border-top-color: #000 !important;\n  }\n  .label {\n    border: 1px solid #000;\n  }\n  .table {\n    border-collapse: collapse !important;\n  }\n  .table td,\n  .table th {\n    background-color: #fff !important;\n  }\n  .table-bordered th,\n  .table-bordered td {\n    border: 1px solid #ddd !important;\n  }\n}\n@font-face {\n  font-family: 'Glyphicons Halflings';\n\n  src: url('../fonts/glyphicons-halflings-regular.eot');\n  src: url('../fonts/glyphicons-halflings-regular.eot?#iefix') format('embedded-opentype'), url('../fonts/glyphicons-halflings-regular.woff2') format('woff2'), url('../fonts/glyphicons-halflings-regular.woff') format('woff'), url('../fonts/glyphicons-halflings-regular.ttf') format('truetype'), url('../fonts/glyphicons-halflings-regular.svg#glyphicons_halflingsregular') format('svg');\n}\n.glyphicon {\n  position: relative;\n  top: 1px;\n  display: inline-block;\n  font-family: 'Glyphicons Halflings';\n  font-style: normal;\n  font-weight: normal;\n  line-height: 1;\n\n  -webkit-font-smoothing: antialiased;\n  -moz-osx-font-smoothing: grayscale;\n}\n.glyphicon-asterisk:before {\n  content: \"\\002a\";\n}\n.glyphicon-plus:before {\n  content: \"\\002b\";\n}\n.glyphicon-euro:before,\n.glyphicon-eur:before {\n  content: \"\\20ac\";\n}\n.glyphicon-minus:before {\n  content: \"\\2212\";\n}\n.glyphicon-cloud:before {\n  content: \"\\2601\";\n}\n.glyphicon-envelope:before {\n  content: \"\\2709\";\n}\n.glyphicon-pencil:before {\n  content: \"\\270f\";\n}\n.glyphicon-glass:before {\n  content: \"\\e001\";\n}\n.glyphicon-music:before {\n  content: \"\\e002\";\n}\n.glyphicon-search:before {\n  content: \"\\e003\";\n}\n.glyphicon-heart:before {\n  content: \"\\e005\";\n}\n.glyphicon-star:before {\n  content: \"\\e006\";\n}\n.glyphicon-star-empty:before {\n  content: \"\\e007\";\n}\n.glyphicon-user:before {\n  content: \"\\e008\";\n}\n.glyphicon-film:before {\n  content: \"\\e009\";\n}\n.glyphicon-th-large:before {\n  content: \"\\e010\";\n}\n.glyphicon-th:before {\n  content: \"\\e011\";\n}\n.glyphicon-th-list:before {\n  content: \"\\e012\";\n}\n.glyphicon-ok:before {\n  content: \"\\e013\";\n}\n.glyphicon-remove:before {\n  content: \"\\e014\";\n}\n.glyphicon-zoom-in:before {\n  content: \"\\e015\";\n}\n.glyphicon-zoom-out:before {\n  content: \"\\e016\";\n}\n.glyphicon-off:before {\n  content: \"\\e017\";\n}\n.glyphicon-signal:before {\n  content: \"\\e018\";\n}\n.glyphicon-cog:before {\n  content: \"\\e019\";\n}\n.glyphicon-trash:before {\n  content: \"\\e020\";\n}\n.glyphicon-home:before {\n  content: \"\\e021\";\n}\n.glyphicon-file:before {\n  content: \"\\e022\";\n}\n.glyphicon-time:before {\n  content: \"\\e023\";\n}\n.glyphicon-road:before {\n  content: \"\\e024\";\n}\n.glyphicon-download-alt:before {\n  content: \"\\e025\";\n}\n.glyphicon-download:before {\n  content: \"\\e026\";\n}\n.glyphicon-upload:before {\n  content: \"\\e027\";\n}\n.glyphicon-inbox:before {\n  content: \"\\e028\";\n}\n.glyphicon-play-circle:before {\n  content: \"\\e029\";\n}\n.glyphicon-repeat:before {\n  content: \"\\e030\";\n}\n.glyphicon-refresh:before {\n  content: \"\\e031\";\n}\n.glyphicon-list-alt:before {\n  content: \"\\e032\";\n}\n.glyphicon-lock:before {\n  content: \"\\e033\";\n}\n.glyphicon-flag:before {\n  content: \"\\e034\";\n}\n.glyphicon-headphones:before {\n  content: \"\\e035\";\n}\n.glyphicon-volume-off:before {\n  content: \"\\e036\";\n}\n.glyphicon-volume-down:before {\n  content: \"\\e037\";\n}\n.glyphicon-volume-up:before {\n  content: \"\\e038\";\n}\n.glyphicon-qrcode:before {\n  content: \"\\e039\";\n}\n.glyphicon-barcode:before {\n  content: \"\\e040\";\n}\n.glyphicon-tag:before {\n  content: \"\\e041\";\n}\n.glyphicon-tags:before {\n  content: \"\\e042\";\n}\n.glyphicon-book:before {\n  content: \"\\e043\";\n}\n.glyphicon-bookmark:before {\n  content: \"\\e044\";\n}\n.glyphicon-print:before {\n  content: \"\\e045\";\n}\n.glyphicon-camera:before {\n  content: \"\\e046\";\n}\n.glyphicon-font:before {\n  content: \"\\e047\";\n}\n.glyphicon-bold:before {\n  content: \"\\e048\";\n}\n.glyphicon-italic:before {\n  content: \"\\e049\";\n}\n.glyphicon-text-height:before {\n  content: \"\\e050\";\n}\n.glyphicon-text-width:before {\n  content: \"\\e051\";\n}\n.glyphicon-align-left:before {\n  content: \"\\e052\";\n}\n.glyphicon-align-center:before {\n  content: \"\\e053\";\n}\n.glyphicon-align-right:before {\n  content: \"\\e054\";\n}\n.glyphicon-align-justify:before {\n  content: \"\\e055\";\n}\n.glyphicon-list:before {\n  content: \"\\e056\";\n}\n.glyphicon-indent-left:before {\n  content: \"\\e057\";\n}\n.glyphicon-indent-right:before {\n  content: \"\\e058\";\n}\n.glyphicon-facetime-video:before {\n  content: \"\\e059\";\n}\n.glyphicon-picture:before {\n  content: \"\\e060\";\n}\n.glyphicon-map-marker:before {\n  content: \"\\e062\";\n}\n.glyphicon-adjust:before {\n  content: \"\\e063\";\n}\n.glyphicon-tint:before {\n  content: \"\\e064\";\n}\n.glyphicon-edit:before {\n  content: \"\\e065\";\n}\n.glyphicon-share:before {\n  content: \"\\e066\";\n}\n.glyphicon-check:before {\n  content: \"\\e067\";\n}\n.glyphicon-move:before {\n  content: \"\\e068\";\n}\n.glyphicon-step-backward:before {\n  content: \"\\e069\";\n}\n.glyphicon-fast-backward:before {\n  content: \"\\e070\";\n}\n.glyphicon-backward:before {\n  content: \"\\e071\";\n}\n.glyphicon-play:before {\n  content: \"\\e072\";\n}\n.glyphicon-pause:before {\n  content: \"\\e073\";\n}\n.glyphicon-stop:before {\n  content: \"\\e074\";\n}\n.glyphicon-forward:before {\n  content: \"\\e075\";\n}\n.glyphicon-fast-forward:before {\n  content: \"\\e076\";\n}\n.glyphicon-step-forward:before {\n  content: \"\\e077\";\n}\n.glyphicon-eject:before {\n  content: \"\\e078\";\n}\n.glyphicon-chevron-left:before {\n  content: \"\\e079\";\n}\n.glyphicon-chevron-right:before {\n  content: \"\\e080\";\n}\n.glyphicon-plus-sign:before {\n  content: \"\\e081\";\n}\n.glyphicon-minus-sign:before {\n  content: \"\\e082\";\n}\n.glyphicon-remove-sign:before {\n  content: \"\\e083\";\n}\n.glyphicon-ok-sign:before {\n  content: \"\\e084\";\n}\n.glyphicon-question-sign:before {\n  content: \"\\e085\";\n}\n.glyphicon-info-sign:before {\n  content: \"\\e086\";\n}\n.glyphicon-screenshot:before {\n  content: \"\\e087\";\n}\n.glyphicon-remove-circle:before {\n  content: \"\\e088\";\n}\n.glyphicon-ok-circle:before {\n  content: \"\\e089\";\n}\n.glyphicon-ban-circle:before {\n  content: \"\\e090\";\n}\n.glyphicon-arrow-left:before {\n  content: \"\\e091\";\n}\n.glyphicon-arrow-right:before {\n  content: \"\\e092\";\n}\n.glyphicon-arrow-up:before {\n  content: \"\\e093\";\n}\n.glyphicon-arrow-down:before {\n  content: \"\\e094\";\n}\n.glyphicon-share-alt:before {\n  content: \"\\e095\";\n}\n.glyphicon-resize-full:before {\n  content: \"\\e096\";\n}\n.glyphicon-resize-small:before {\n  content: \"\\e097\";\n}\n.glyphicon-exclamation-sign:before {\n  content: \"\\e101\";\n}\n.glyphicon-gift:before {\n  content: \"\\e102\";\n}\n.glyphicon-leaf:before {\n  content: \"\\e103\";\n}\n.glyphicon-fire:before {\n  content: \"\\e104\";\n}\n.glyphicon-eye-open:before {\n  content: \"\\e105\";\n}\n.glyphicon-eye-close:before {\n  content: \"\\e106\";\n}\n.glyphicon-warning-sign:before {\n  content: \"\\e107\";\n}\n.glyphicon-plane:before {\n  content: \"\\e108\";\n}\n.glyphicon-calendar:before {\n  content: \"\\e109\";\n}\n.glyphicon-random:before {\n  content: \"\\e110\";\n}\n.glyphicon-comment:before {\n  content: \"\\e111\";\n}\n.glyphicon-magnet:before {\n  content: \"\\e112\";\n}\n.glyphicon-chevron-up:before {\n  content: \"\\e113\";\n}\n.glyphicon-chevron-down:before {\n  content: \"\\e114\";\n}\n.glyphicon-retweet:before {\n  content: \"\\e115\";\n}\n.glyphicon-shopping-cart:before {\n  content: \"\\e116\";\n}\n.glyphicon-folder-close:before {\n  content: \"\\e117\";\n}\n.glyphicon-folder-open:before {\n  content: \"\\e118\";\n}\n.glyphicon-resize-vertical:before {\n  content: \"\\e119\";\n}\n.glyphicon-resize-horizontal:before {\n  content: \"\\e120\";\n}\n.glyphicon-hdd:before {\n  content: \"\\e121\";\n}\n.glyphicon-bullhorn:before {\n  content: \"\\e122\";\n}\n.glyphicon-bell:before {\n  content: \"\\e123\";\n}\n.glyphicon-certificate:before {\n  content: \"\\e124\";\n}\n.glyphicon-thumbs-up:before {\n  content: \"\\e125\";\n}\n.glyphicon-thumbs-down:before {\n  content: \"\\e126\";\n}\n.glyphicon-hand-right:before {\n  content: \"\\e127\";\n}\n.glyphicon-hand-left:before {\n  content: \"\\e128\";\n}\n.glyphicon-hand-up:before {\n  content: \"\\e129\";\n}\n.glyphicon-hand-down:before {\n  content: \"\\e130\";\n}\n.glyphicon-circle-arrow-right:before {\n  content: \"\\e131\";\n}\n.glyphicon-circle-arrow-left:before {\n  content: \"\\e132\";\n}\n.glyphicon-circle-arrow-up:before {\n  content: \"\\e133\";\n}\n.glyphicon-circle-arrow-down:before {\n  content: \"\\e134\";\n}\n.glyphicon-globe:before {\n  content: \"\\e135\";\n}\n.glyphicon-wrench:before {\n  content: \"\\e136\";\n}\n.glyphicon-tasks:before {\n  content: \"\\e137\";\n}\n.glyphicon-filter:before {\n  content: \"\\e138\";\n}\n.glyphicon-briefcase:before {\n  content: \"\\e139\";\n}\n.glyphicon-fullscreen:before {\n  content: \"\\e140\";\n}\n.glyphicon-dashboard:before {\n  content: \"\\e141\";\n}\n.glyphicon-paperclip:before {\n  content: \"\\e142\";\n}\n.glyphicon-heart-empty:before {\n  content: \"\\e143\";\n}\n.glyphicon-link:before {\n  content: \"\\e144\";\n}\n.glyphicon-phone:before {\n  content: \"\\e145\";\n}\n.glyphicon-pushpin:before {\n  content: \"\\e146\";\n}\n.glyphicon-usd:before {\n  content: \"\\e148\";\n}\n.glyphicon-gbp:before {\n  content: \"\\e149\";\n}\n.glyphicon-sort:before {\n  content: \"\\e150\";\n}\n.glyphicon-sort-by-alphabet:before {\n  content: \"\\e151\";\n}\n.glyphicon-sort-by-alphabet-alt:before {\n  content: \"\\e152\";\n}\n.glyphicon-sort-by-order:before {\n  content: \"\\e153\";\n}\n.glyphicon-sort-by-order-alt:before {\n  content: \"\\e154\";\n}\n.glyphicon-sort-by-attributes:before {\n  content: \"\\e155\";\n}\n.glyphicon-sort-by-attributes-alt:before {\n  content: \"\\e156\";\n}\n.glyphicon-unchecked:before {\n  content: \"\\e157\";\n}\n.glyphicon-expand:before {\n  content: \"\\e158\";\n}\n.glyphicon-collapse-down:before {\n  content: \"\\e159\";\n}\n.glyphicon-collapse-up:before {\n  content: \"\\e160\";\n}\n.glyphicon-log-in:before {\n  content: \"\\e161\";\n}\n.glyphicon-flash:before {\n  content: \"\\e162\";\n}\n.glyphicon-log-out:before {\n  content: \"\\e163\";\n}\n.glyphicon-new-window:before {\n  content: \"\\e164\";\n}\n.glyphicon-record:before {\n  content: \"\\e165\";\n}\n.glyphicon-save:before {\n  content: \"\\e166\";\n}\n.glyphicon-open:before {\n  content: \"\\e167\";\n}\n.glyphicon-saved:before {\n  content: \"\\e168\";\n}\n.glyphicon-import:before {\n  content: \"\\e169\";\n}\n.glyphicon-export:before {\n  content: \"\\e170\";\n}\n.glyphicon-send:before {\n  content: \"\\e171\";\n}\n.glyphicon-floppy-disk:before {\n  content: \"\\e172\";\n}\n.glyphicon-floppy-saved:before {\n  content: \"\\e173\";\n}\n.glyphicon-floppy-remove:before {\n  content: \"\\e174\";\n}\n.glyphicon-floppy-save:before {\n  content: \"\\e175\";\n}\n.glyphicon-floppy-open:before {\n  content: \"\\e176\";\n}\n.glyphicon-credit-card:before {\n  content: \"\\e177\";\n}\n.glyphicon-transfer:before {\n  content: \"\\e178\";\n}\n.glyphicon-cutlery:before {\n  content: \"\\e179\";\n}\n.glyphicon-header:before {\n  content: \"\\e180\";\n}\n.glyphicon-compressed:before {\n  content: \"\\e181\";\n}\n.glyphicon-earphone:before {\n  content: \"\\e182\";\n}\n.glyphicon-phone-alt:before {\n  content: \"\\e183\";\n}\n.glyphicon-tower:before {\n  content: \"\\e184\";\n}\n.glyphicon-stats:before {\n  content: \"\\e185\";\n}\n.glyphicon-sd-video:before {\n  content: \"\\e186\";\n}\n.glyphicon-hd-video:before {\n  content: \"\\e187\";\n}\n.glyphicon-subtitles:before {\n  content: \"\\e188\";\n}\n.glyphicon-sound-stereo:before {\n  content: \"\\e189\";\n}\n.glyphicon-sound-dolby:before {\n  content: \"\\e190\";\n}\n.glyphicon-sound-5-1:before {\n  content: \"\\e191\";\n}\n.glyphicon-sound-6-1:before {\n  content: \"\\e192\";\n}\n.glyphicon-sound-7-1:before {\n  content: \"\\e193\";\n}\n.glyphicon-copyright-mark:before {\n  content: \"\\e194\";\n}\n.glyphicon-registration-mark:before {\n  content: \"\\e195\";\n}\n.glyphicon-cloud-download:before {\n  content: \"\\e197\";\n}\n.glyphicon-cloud-upload:before {\n  content: \"\\e198\";\n}\n.glyphicon-tree-conifer:before {\n  content: \"\\e199\";\n}\n.glyphicon-tree-deciduous:before {\n  content: \"\\e200\";\n}\n.glyphicon-cd:before {\n  content: \"\\e201\";\n}\n.glyphicon-save-file:before {\n  content: \"\\e202\";\n}\n.glyphicon-open-file:before {\n  content: \"\\e203\";\n}\n.glyphicon-level-up:before {\n  content: \"\\e204\";\n}\n.glyphicon-copy:before {\n  content: \"\\e205\";\n}\n.glyphicon-paste:before {\n  content: \"\\e206\";\n}\n.glyphicon-alert:before {\n  content: \"\\e209\";\n}\n.glyphicon-equalizer:before {\n  content: \"\\e210\";\n}\n.glyphicon-king:before {\n  content: \"\\e211\";\n}\n.glyphicon-queen:before {\n  content: \"\\e212\";\n}\n.glyphicon-pawn:before {\n  content: \"\\e213\";\n}\n.glyphicon-bishop:before {\n  content: \"\\e214\";\n}\n.glyphicon-knight:before {\n  content: \"\\e215\";\n}\n.glyphicon-baby-formula:before {\n  content: \"\\e216\";\n}\n.glyphicon-tent:before {\n  content: \"\\26fa\";\n}\n.glyphicon-blackboard:before {\n  content: \"\\e218\";\n}\n.glyphicon-bed:before {\n  content: \"\\e219\";\n}\n.glyphicon-apple:before {\n  content: \"\\f8ff\";\n}\n.glyphicon-erase:before {\n  content: \"\\e221\";\n}\n.glyphicon-hourglass:before {\n  content: \"\\231b\";\n}\n.glyphicon-lamp:before {\n  content: \"\\e223\";\n}\n.glyphicon-duplicate:before {\n  content: \"\\e224\";\n}\n.glyphicon-piggy-bank:before {\n  content: \"\\e225\";\n}\n.glyphicon-scissors:before {\n  content: \"\\e226\";\n}\n.glyphicon-bitcoin:before {\n  content: \"\\e227\";\n}\n.glyphicon-btc:before {\n  content: \"\\e227\";\n}\n.glyphicon-xbt:before {\n  content: \"\\e227\";\n}\n.glyphicon-yen:before {\n  content: \"\\00a5\";\n}\n.glyphicon-jpy:before {\n  content: \"\\00a5\";\n}\n.glyphicon-ruble:before {\n  content: \"\\20bd\";\n}\n.glyphicon-rub:before {\n  content: \"\\20bd\";\n}\n.glyphicon-scale:before {\n  content: \"\\e230\";\n}\n.glyphicon-ice-lolly:before {\n  content: \"\\e231\";\n}\n.glyphicon-ice-lolly-tasted:before {\n  content: \"\\e232\";\n}\n.glyphicon-education:before {\n  content: \"\\e233\";\n}\n.glyphicon-option-horizontal:before {\n  content: \"\\e234\";\n}\n.glyphicon-option-vertical:before {\n  content: \"\\e235\";\n}\n.glyphicon-menu-hamburger:before {\n  content: \"\\e236\";\n}\n.glyphicon-modal-window:before {\n  content: \"\\e237\";\n}\n.glyphicon-oil:before {\n  content: \"\\e238\";\n}\n.glyphicon-grain:before {\n  content: \"\\e239\";\n}\n.glyphicon-sunglasses:before {\n  content: \"\\e240\";\n}\n.glyphicon-text-size:before {\n  content: \"\\e241\";\n}\n.glyphicon-text-color:before {\n  content: \"\\e242\";\n}\n.glyphicon-text-background:before {\n  content: \"\\e243\";\n}\n.glyphicon-object-align-top:before {\n  content: \"\\e244\";\n}\n.glyphicon-object-align-bottom:before {\n  content: \"\\e245\";\n}\n.glyphicon-object-align-horizontal:before {\n  content: \"\\e246\";\n}\n.glyphicon-object-align-left:before {\n  content: \"\\e247\";\n}\n.glyphicon-object-align-vertical:before {\n  content: \"\\e248\";\n}\n.glyphicon-object-align-right:before {\n  content: \"\\e249\";\n}\n.glyphicon-triangle-right:before {\n  content: \"\\e250\";\n}\n.glyphicon-triangle-left:before {\n  content: \"\\e251\";\n}\n.glyphicon-triangle-bottom:before {\n  content: \"\\e252\";\n}\n.glyphicon-triangle-top:before {\n  content: \"\\e253\";\n}\n.glyphicon-console:before {\n  content: \"\\e254\";\n}\n.glyphicon-superscript:before {\n  content: \"\\e255\";\n}\n.glyphicon-subscript:before {\n  content: \"\\e256\";\n}\n.glyphicon-menu-left:before {\n  content: \"\\e257\";\n}\n.glyphicon-menu-right:before {\n  content: \"\\e258\";\n}\n.glyphicon-menu-down:before {\n  content: \"\\e259\";\n}\n.glyphicon-menu-up:before {\n  content: \"\\e260\";\n}\n* {\n  -webkit-box-sizing: border-box;\n     -moz-box-sizing: border-box;\n          box-sizing: border-box;\n}\n*:before,\n*:after {\n  -webkit-box-sizing: border-box;\n     -moz-box-sizing: border-box;\n          box-sizing: border-box;\n}\nhtml {\n  font-size: 10px;\n\n  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);\n}\nbody {\n  font-family: \"Helvetica Neue\", Helvetica, Arial, sans-serif;\n  font-size: 14px;\n  line-height: 1.42857143;\n  color: #333;\n  background-color: #fff;\n}\ninput,\nbutton,\nselect,\ntextarea {\n  font-family: inherit;\n  font-size: inherit;\n  line-height: inherit;\n}\na {\n  color: #337ab7;\n  text-decoration: none;\n}\na:hover,\na:focus {\n  color: #23527c;\n  text-decoration: underline;\n}\na:focus {\n  outline: thin dotted;\n  outline: 5px auto -webkit-focus-ring-color;\n  outline-offset: -2px;\n}\nfigure {\n  margin: 0;\n}\nimg {\n  vertical-align: middle;\n}\n.img-responsive,\n.thumbnail > img,\n.thumbnail a > img,\n.carousel-inner > .item > img,\n.carousel-inner > .item > a > img {\n  display: block;\n  max-width: 100%;\n  height: auto;\n}\n.img-rounded {\n  border-radius: 6px;\n}\n.img-thumbnail {\n  display: inline-block;\n  max-width: 100%;\n  height: auto;\n  padding: 4px;\n  line-height: 1.42857143;\n  background-color: #fff;\n  border: 1px solid #ddd;\n  border-radius: 4px;\n  -webkit-transition: all .2s ease-in-out;\n       -o-transition: all .2s ease-in-out;\n          transition: all .2s ease-in-out;\n}\n.img-circle {\n  border-radius: 50%;\n}\nhr {\n  margin-top: 20px;\n  margin-bottom: 20px;\n  border: 0;\n  border-top: 1px solid #eee;\n}\n.sr-only {\n  position: absolute;\n  width: 1px;\n  height: 1px;\n  padding: 0;\n  margin: -1px;\n  overflow: hidden;\n  clip: rect(0, 0, 0, 0);\n  border: 0;\n}\n.sr-only-focusable:active,\n.sr-only-focusable:focus {\n  position: static;\n  width: auto;\n  height: auto;\n  margin: 0;\n  overflow: visible;\n  clip: auto;\n}\n[role=\"button\"] {\n  cursor: pointer;\n}\nh1,\nh2,\nh3,\nh4,\nh5,\nh6,\n.h1,\n.h2,\n.h3,\n.h4,\n.h5,\n.h6 {\n  font-family: inherit;\n  font-weight: 500;\n  line-height: 1.1;\n  color: inherit;\n}\nh1 small,\nh2 small,\nh3 small,\nh4 small,\nh5 small,\nh6 small,\n.h1 small,\n.h2 small,\n.h3 small,\n.h4 small,\n.h5 small,\n.h6 small,\nh1 .small,\nh2 .small,\nh3 .small,\nh4 .small,\nh5 .small,\nh6 .small,\n.h1 .small,\n.h2 .small,\n.h3 .small,\n.h4 .small,\n.h5 .small,\n.h6 .small {\n  font-weight: normal;\n  line-height: 1;\n  color: #777;\n}\nh1,\n.h1,\nh2,\n.h2,\nh3,\n.h3 {\n  margin-top: 20px;\n  margin-bottom: 10px;\n}\nh1 small,\n.h1 small,\nh2 small,\n.h2 small,\nh3 small,\n.h3 small,\nh1 .small,\n.h1 .small,\nh2 .small,\n.h2 .small,\nh3 .small,\n.h3 .small {\n  font-size: 65%;\n}\nh4,\n.h4,\nh5,\n.h5,\nh6,\n.h6 {\n  margin-top: 10px;\n  margin-bottom: 10px;\n}\nh4 small,\n.h4 small,\nh5 small,\n.h5 small,\nh6 small,\n.h6 small,\nh4 .small,\n.h4 .small,\nh5 .small,\n.h5 .small,\nh6 .small,\n.h6 .small {\n  font-size: 75%;\n}\nh1,\n.h1 {\n  font-size: 36px;\n}\nh2,\n.h2 {\n  font-size: 30px;\n}\nh3,\n.h3 {\n  font-size: 24px;\n}\nh4,\n.h4 {\n  font-size: 18px;\n}\nh5,\n.h5 {\n  font-size: 14px;\n}\nh6,\n.h6 {\n  font-size: 12px;\n}\np {\n  margin: 0 0 10px;\n}\n.lead {\n  margin-bottom: 20px;\n  font-size: 16px;\n  font-weight: 300;\n  line-height: 1.4;\n}\n@media (min-width: 768px) {\n  .lead {\n    font-size: 21px;\n  }\n}\nsmall,\n.small {\n  font-size: 85%;\n}\nmark,\n.mark {\n  padding: .2em;\n  background-color: #fcf8e3;\n}\n.text-left {\n  text-align: left;\n}\n.text-right {\n  text-align: right;\n}\n.text-center {\n  text-align: center;\n}\n.text-justify {\n  text-align: justify;\n}\n.text-nowrap {\n  white-space: nowrap;\n}\n.text-lowercase {\n  text-transform: lowercase;\n}\n.text-uppercase {\n  text-transform: uppercase;\n}\n.text-capitalize {\n  text-transform: capitalize;\n}\n.text-muted {\n  color: #777;\n}\n.text-primary {\n  color: #337ab7;\n}\na.text-primary:hover,\na.text-primary:focus {\n  color: #286090;\n}\n.text-success {\n  color: #3c763d;\n}\na.text-success:hover,\na.text-success:focus {\n  color: #2b542c;\n}\n.text-info {\n  color: #31708f;\n}\na.text-info:hover,\na.text-info:focus {\n  color: #245269;\n}\n.text-warning {\n  color: #8a6d3b;\n}\na.text-warning:hover,\na.text-warning:focus {\n  color: #66512c;\n}\n.text-danger {\n  color: #a94442;\n}\na.text-danger:hover,\na.text-danger:focus {\n  color: #843534;\n}\n.bg-primary {\n  color: #fff;\n  background-color: #337ab7;\n}\na.bg-primary:hover,\na.bg-primary:focus {\n  background-color: #286090;\n}\n.bg-success {\n  background-color: #dff0d8;\n}\na.bg-success:hover,\na.bg-success:focus {\n  background-color: #c1e2b3;\n}\n.bg-info {\n  background-color: #d9edf7;\n}\na.bg-info:hover,\na.bg-info:focus {\n  background-color: #afd9ee;\n}\n.bg-warning {\n  background-color: #fcf8e3;\n}\na.bg-warning:hover,\na.bg-warning:focus {\n  background-color: #f7ecb5;\n}\n.bg-danger {\n  background-color: #f2dede;\n}\na.bg-danger:hover,\na.bg-danger:focus {\n  background-color: #e4b9b9;\n}\n.page-header {\n  padding-bottom: 9px;\n  margin: 40px 0 20px;\n  border-bottom: 1px solid #eee;\n}\nul,\nol {\n  margin-top: 0;\n  margin-bottom: 10px;\n}\nul ul,\nol ul,\nul ol,\nol ol {\n  margin-bottom: 0;\n}\n.list-unstyled {\n  padding-left: 0;\n  list-style: none;\n}\n.list-inline {\n  padding-left: 0;\n  margin-left: -5px;\n  list-style: none;\n}\n.list-inline > li {\n  display: inline-block;\n  padding-right: 5px;\n  padding-left: 5px;\n}\ndl {\n  margin-top: 0;\n  margin-bottom: 20px;\n}\ndt,\ndd {\n  line-height: 1.42857143;\n}\ndt {\n  font-weight: bold;\n}\ndd {\n  margin-left: 0;\n}\n@media (min-width: 768px) {\n  .dl-horizontal dt {\n    float: left;\n    width: 160px;\n    overflow: hidden;\n    clear: left;\n    text-align: right;\n    text-overflow: ellipsis;\n    white-space: nowrap;\n  }\n  .dl-horizontal dd {\n    margin-left: 180px;\n  }\n}\nabbr[title],\nabbr[data-original-title] {\n  cursor: help;\n  border-bottom: 1px dotted #777;\n}\n.initialism {\n  font-size: 90%;\n  text-transform: uppercase;\n}\nblockquote {\n  padding: 10px 20px;\n  margin: 0 0 20px;\n  font-size: 17.5px;\n  border-left: 5px solid #eee;\n}\nblockquote p:last-child,\nblockquote ul:last-child,\nblockquote ol:last-child {\n  margin-bottom: 0;\n}\nblockquote footer,\nblockquote small,\nblockquote .small {\n  display: block;\n  font-size: 80%;\n  line-height: 1.42857143;\n  color: #777;\n}\nblockquote footer:before,\nblockquote small:before,\nblockquote .small:before {\n  content: '\\2014 \\00A0';\n}\n.blockquote-reverse,\nblockquote.pull-right {\n  padding-right: 15px;\n  padding-left: 0;\n  text-align: right;\n  border-right: 5px solid #eee;\n  border-left: 0;\n}\n.blockquote-reverse footer:before,\nblockquote.pull-right footer:before,\n.blockquote-reverse small:before,\nblockquote.pull-right small:before,\n.blockquote-reverse .small:before,\nblockquote.pull-right .small:before {\n  content: '';\n}\n.blockquote-reverse footer:after,\nblockquote.pull-right footer:after,\n.blockquote-reverse small:after,\nblockquote.pull-right small:after,\n.blockquote-reverse .small:after,\nblockquote.pull-right .small:after {\n  content: '\\00A0 \\2014';\n}\naddress {\n  margin-bottom: 20px;\n  font-style: normal;\n  line-height: 1.42857143;\n}\ncode,\nkbd,\npre,\nsamp {\n  font-family: Menlo, Monaco, Consolas, \"Courier New\", monospace;\n}\ncode {\n  padding: 2px 4px;\n  font-size: 90%;\n  color: #c7254e;\n  background-color: #f9f2f4;\n  border-radius: 4px;\n}\nkbd {\n  padding: 2px 4px;\n  font-size: 90%;\n  color: #fff;\n  background-color: #333;\n  border-radius: 3px;\n  -webkit-box-shadow: inset 0 -1px 0 rgba(0, 0, 0, .25);\n          box-shadow: inset 0 -1px 0 rgba(0, 0, 0, .25);\n}\nkbd kbd {\n  padding: 0;\n  font-size: 100%;\n  font-weight: bold;\n  -webkit-box-shadow: none;\n          box-shadow: none;\n}\npre {\n  display: block;\n  padding: 9.5px;\n  margin: 0 0 10px;\n  font-size: 13px;\n  line-height: 1.42857143;\n  color: #333;\n  word-break: break-all;\n  word-wrap: break-word;\n  background-color: #f5f5f5;\n  border: 1px solid #ccc;\n  border-radius: 4px;\n}\npre code {\n  padding: 0;\n  font-size: inherit;\n  color: inherit;\n  white-space: pre-wrap;\n  background-color: transparent;\n  border-radius: 0;\n}\n.pre-scrollable {\n  max-height: 340px;\n  overflow-y: scroll;\n}\n.container {\n  padding-right: 15px;\n  padding-left: 15px;\n  margin-right: auto;\n  margin-left: auto;\n}\n@media (min-width: 768px) {\n  .container {\n    width: 750px;\n  }\n}\n@media (min-width: 992px) {\n  .container {\n    width: 970px;\n  }\n}\n@media (min-width: 1200px) {\n  .container {\n    width: 1170px;\n  }\n}\n.container-fluid {\n  padding-right: 15px;\n  padding-left: 15px;\n  margin-right: auto;\n  margin-left: auto;\n}\n.row {\n  margin-right: -15px;\n  margin-left: -15px;\n}\n.col-xs-1, .col-sm-1, .col-md-1, .col-lg-1, .col-xs-2, .col-sm-2, .col-md-2, .col-lg-2, .col-xs-3, .col-sm-3, .col-md-3, .col-lg-3, .col-xs-4, .col-sm-4, .col-md-4, .col-lg-4, .col-xs-5, .col-sm-5, .col-md-5, .col-lg-5, .col-xs-6, .col-sm-6, .col-md-6, .col-lg-6, .col-xs-7, .col-sm-7, .col-md-7, .col-lg-7, .col-xs-8, .col-sm-8, .col-md-8, .col-lg-8, .col-xs-9, .col-sm-9, .col-md-9, .col-lg-9, .col-xs-10, .col-sm-10, .col-md-10, .col-lg-10, .col-xs-11, .col-sm-11, .col-md-11, .col-lg-11, .col-xs-12, .col-sm-12, .col-md-12, .col-lg-12 {\n  position: relative;\n  min-height: 1px;\n  padding-right: 15px;\n  padding-left: 15px;\n}\n.col-xs-1, .col-xs-2, .col-xs-3, .col-xs-4, .col-xs-5, .col-xs-6, .col-xs-7, .col-xs-8, .col-xs-9, .col-xs-10, .col-xs-11, .col-xs-12 {\n  float: left;\n}\n.col-xs-12 {\n  width: 100%;\n}\n.col-xs-11 {\n  width: 91.66666667%;\n}\n.col-xs-10 {\n  width: 83.33333333%;\n}\n.col-xs-9 {\n  width: 75%;\n}\n.col-xs-8 {\n  width: 66.66666667%;\n}\n.col-xs-7 {\n  width: 58.33333333%;\n}\n.col-xs-6 {\n  width: 50%;\n}\n.col-xs-5 {\n  width: 41.66666667%;\n}\n.col-xs-4 {\n  width: 33.33333333%;\n}\n.col-xs-3 {\n  width: 25%;\n}\n.col-xs-2 {\n  width: 16.66666667%;\n}\n.col-xs-1 {\n  width: 8.33333333%;\n}\n.col-xs-pull-12 {\n  right: 100%;\n}\n.col-xs-pull-11 {\n  right: 91.66666667%;\n}\n.col-xs-pull-10 {\n  right: 83.33333333%;\n}\n.col-xs-pull-9 {\n  right: 75%;\n}\n.col-xs-pull-8 {\n  right: 66.66666667%;\n}\n.col-xs-pull-7 {\n  right: 58.33333333%;\n}\n.col-xs-pull-6 {\n  right: 50%;\n}\n.col-xs-pull-5 {\n  right: 41.66666667%;\n}\n.col-xs-pull-4 {\n  right: 33.33333333%;\n}\n.col-xs-pull-3 {\n  right: 25%;\n}\n.col-xs-pull-2 {\n  right: 16.66666667%;\n}\n.col-xs-pull-1 {\n  right: 8.33333333%;\n}\n.col-xs-pull-0 {\n  right: auto;\n}\n.col-xs-push-12 {\n  left: 100%;\n}\n.col-xs-push-11 {\n  left: 91.66666667%;\n}\n.col-xs-push-10 {\n  left: 83.33333333%;\n}\n.col-xs-push-9 {\n  left: 75%;\n}\n.col-xs-push-8 {\n  left: 66.66666667%;\n}\n.col-xs-push-7 {\n  left: 58.33333333%;\n}\n.col-xs-push-6 {\n  left: 50%;\n}\n.col-xs-push-5 {\n  left: 41.66666667%;\n}\n.col-xs-push-4 {\n  left: 33.33333333%;\n}\n.col-xs-push-3 {\n  left: 25%;\n}\n.col-xs-push-2 {\n  left: 16.66666667%;\n}\n.col-xs-push-1 {\n  left: 8.33333333%;\n}\n.col-xs-push-0 {\n  left: auto;\n}\n.col-xs-offset-12 {\n  margin-left: 100%;\n}\n.col-xs-offset-11 {\n  margin-left: 91.66666667%;\n}\n.col-xs-offset-10 {\n  margin-left: 83.33333333%;\n}\n.col-xs-offset-9 {\n  margin-left: 75%;\n}\n.col-xs-offset-8 {\n  margin-left: 66.66666667%;\n}\n.col-xs-offset-7 {\n  margin-left: 58.33333333%;\n}\n.col-xs-offset-6 {\n  margin-left: 50%;\n}\n.col-xs-offset-5 {\n  margin-left: 41.66666667%;\n}\n.col-xs-offset-4 {\n  margin-left: 33.33333333%;\n}\n.col-xs-offset-3 {\n  margin-left: 25%;\n}\n.col-xs-offset-2 {\n  margin-left: 16.66666667%;\n}\n.col-xs-offset-1 {\n  margin-left: 8.33333333%;\n}\n.col-xs-offset-0 {\n  margin-left: 0;\n}\n@media (min-width: 768px) {\n  .col-sm-1, .col-sm-2, .col-sm-3, .col-sm-4, .col-sm-5, .col-sm-6, .col-sm-7, .col-sm-8, .col-sm-9, .col-sm-10, .col-sm-11, .col-sm-12 {\n    float: left;\n  }\n  .col-sm-12 {\n    width: 100%;\n  }\n  .col-sm-11 {\n    width: 91.66666667%;\n  }\n  .col-sm-10 {\n    width: 83.33333333%;\n  }\n  .col-sm-9 {\n    width: 75%;\n  }\n  .col-sm-8 {\n    width: 66.66666667%;\n  }\n  .col-sm-7 {\n    width: 58.33333333%;\n  }\n  .col-sm-6 {\n    width: 50%;\n  }\n  .col-sm-5 {\n    width: 41.66666667%;\n  }\n  .col-sm-4 {\n    width: 33.33333333%;\n  }\n  .col-sm-3 {\n    width: 25%;\n  }\n  .col-sm-2 {\n    width: 16.66666667%;\n  }\n  .col-sm-1 {\n    width: 8.33333333%;\n  }\n  .col-sm-pull-12 {\n    right: 100%;\n  }\n  .col-sm-pull-11 {\n    right: 91.66666667%;\n  }\n  .col-sm-pull-10 {\n    right: 83.33333333%;\n  }\n  .col-sm-pull-9 {\n    right: 75%;\n  }\n  .col-sm-pull-8 {\n    right: 66.66666667%;\n  }\n  .col-sm-pull-7 {\n    right: 58.33333333%;\n  }\n  .col-sm-pull-6 {\n    right: 50%;\n  }\n  .col-sm-pull-5 {\n    right: 41.66666667%;\n  }\n  .col-sm-pull-4 {\n    right: 33.33333333%;\n  }\n  .col-sm-pull-3 {\n    right: 25%;\n  }\n  .col-sm-pull-2 {\n    right: 16.66666667%;\n  }\n  .col-sm-pull-1 {\n    right: 8.33333333%;\n  }\n  .col-sm-pull-0 {\n    right: auto;\n  }\n  .col-sm-push-12 {\n    left: 100%;\n  }\n  .col-sm-push-11 {\n    left: 91.66666667%;\n  }\n  .col-sm-push-10 {\n    left: 83.33333333%;\n  }\n  .col-sm-push-9 {\n    left: 75%;\n  }\n  .col-sm-push-8 {\n    left: 66.66666667%;\n  }\n  .col-sm-push-7 {\n    left: 58.33333333%;\n  }\n  .col-sm-push-6 {\n    left: 50%;\n  }\n  .col-sm-push-5 {\n    left: 41.66666667%;\n  }\n  .col-sm-push-4 {\n    left: 33.33333333%;\n  }\n  .col-sm-push-3 {\n    left: 25%;\n  }\n  .col-sm-push-2 {\n    left: 16.66666667%;\n  }\n  .col-sm-push-1 {\n    left: 8.33333333%;\n  }\n  .col-sm-push-0 {\n    left: auto;\n  }\n  .col-sm-offset-12 {\n    margin-left: 100%;\n  }\n  .col-sm-offset-11 {\n    margin-left: 91.66666667%;\n  }\n  .col-sm-offset-10 {\n    margin-left: 83.33333333%;\n  }\n  .col-sm-offset-9 {\n    margin-left: 75%;\n  }\n  .col-sm-offset-8 {\n    margin-left: 66.66666667%;\n  }\n  .col-sm-offset-7 {\n    margin-left: 58.33333333%;\n  }\n  .col-sm-offset-6 {\n    margin-left: 50%;\n  }\n  .col-sm-offset-5 {\n    margin-left: 41.66666667%;\n  }\n  .col-sm-offset-4 {\n    margin-left: 33.33333333%;\n  }\n  .col-sm-offset-3 {\n    margin-left: 25%;\n  }\n  .col-sm-offset-2 {\n    margin-left: 16.66666667%;\n  }\n  .col-sm-offset-1 {\n    margin-left: 8.33333333%;\n  }\n  .col-sm-offset-0 {\n    margin-left: 0;\n  }\n}\n@media (min-width: 992px) {\n  .col-md-1, .col-md-2, .col-md-3, .col-md-4, .col-md-5, .col-md-6, .col-md-7, .col-md-8, .col-md-9, .col-md-10, .col-md-11, .col-md-12 {\n    float: left;\n  }\n  .col-md-12 {\n    width: 100%;\n  }\n  .col-md-11 {\n    width: 91.66666667%;\n  }\n  .col-md-10 {\n    width: 83.33333333%;\n  }\n  .col-md-9 {\n    width: 75%;\n  }\n  .col-md-8 {\n    width: 66.66666667%;\n  }\n  .col-md-7 {\n    width: 58.33333333%;\n  }\n  .col-md-6 {\n    width: 50%;\n  }\n  .col-md-5 {\n    width: 41.66666667%;\n  }\n  .col-md-4 {\n    width: 33.33333333%;\n  }\n  .col-md-3 {\n    width: 25%;\n  }\n  .col-md-2 {\n    width: 16.66666667%;\n  }\n  .col-md-1 {\n    width: 8.33333333%;\n  }\n  .col-md-pull-12 {\n    right: 100%;\n  }\n  .col-md-pull-11 {\n    right: 91.66666667%;\n  }\n  .col-md-pull-10 {\n    right: 83.33333333%;\n  }\n  .col-md-pull-9 {\n    right: 75%;\n  }\n  .col-md-pull-8 {\n    right: 66.66666667%;\n  }\n  .col-md-pull-7 {\n    right: 58.33333333%;\n  }\n  .col-md-pull-6 {\n    right: 50%;\n  }\n  .col-md-pull-5 {\n    right: 41.66666667%;\n  }\n  .col-md-pull-4 {\n    right: 33.33333333%;\n  }\n  .col-md-pull-3 {\n    right: 25%;\n  }\n  .col-md-pull-2 {\n    right: 16.66666667%;\n  }\n  .col-md-pull-1 {\n    right: 8.33333333%;\n  }\n  .col-md-pull-0 {\n    right: auto;\n  }\n  .col-md-push-12 {\n    left: 100%;\n  }\n  .col-md-push-11 {\n    left: 91.66666667%;\n  }\n  .col-md-push-10 {\n    left: 83.33333333%;\n  }\n  .col-md-push-9 {\n    left: 75%;\n  }\n  .col-md-push-8 {\n    left: 66.66666667%;\n  }\n  .col-md-push-7 {\n    left: 58.33333333%;\n  }\n  .col-md-push-6 {\n    left: 50%;\n  }\n  .col-md-push-5 {\n    left: 41.66666667%;\n  }\n  .col-md-push-4 {\n    left: 33.33333333%;\n  }\n  .col-md-push-3 {\n    left: 25%;\n  }\n  .col-md-push-2 {\n    left: 16.66666667%;\n  }\n  .col-md-push-1 {\n    left: 8.33333333%;\n  }\n  .col-md-push-0 {\n    left: auto;\n  }\n  .col-md-offset-12 {\n    margin-left: 100%;\n  }\n  .col-md-offset-11 {\n    margin-left: 91.66666667%;\n  }\n  .col-md-offset-10 {\n    margin-left: 83.33333333%;\n  }\n  .col-md-offset-9 {\n    margin-left: 75%;\n  }\n  .col-md-offset-8 {\n    margin-left: 66.66666667%;\n  }\n  .col-md-offset-7 {\n    margin-left: 58.33333333%;\n  }\n  .col-md-offset-6 {\n    margin-left: 50%;\n  }\n  .col-md-offset-5 {\n    margin-left: 41.66666667%;\n  }\n  .col-md-offset-4 {\n    margin-left: 33.33333333%;\n  }\n  .col-md-offset-3 {\n    margin-left: 25%;\n  }\n  .col-md-offset-2 {\n    margin-left: 16.66666667%;\n  }\n  .col-md-offset-1 {\n    margin-left: 8.33333333%;\n  }\n  .col-md-offset-0 {\n    margin-left: 0;\n  }\n}\n@media (min-width: 1200px) {\n  .col-lg-1, .col-lg-2, .col-lg-3, .col-lg-4, .col-lg-5, .col-lg-6, .col-lg-7, .col-lg-8, .col-lg-9, .col-lg-10, .col-lg-11, .col-lg-12 {\n    float: left;\n  }\n  .col-lg-12 {\n    width: 100%;\n  }\n  .col-lg-11 {\n    width: 91.66666667%;\n  }\n  .col-lg-10 {\n    width: 83.33333333%;\n  }\n  .col-lg-9 {\n    width: 75%;\n  }\n  .col-lg-8 {\n    width: 66.66666667%;\n  }\n  .col-lg-7 {\n    width: 58.33333333%;\n  }\n  .col-lg-6 {\n    width: 50%;\n  }\n  .col-lg-5 {\n    width: 41.66666667%;\n  }\n  .col-lg-4 {\n    width: 33.33333333%;\n  }\n  .col-lg-3 {\n    width: 25%;\n  }\n  .col-lg-2 {\n    width: 16.66666667%;\n  }\n  .col-lg-1 {\n    width: 8.33333333%;\n  }\n  .col-lg-pull-12 {\n    right: 100%;\n  }\n  .col-lg-pull-11 {\n    right: 91.66666667%;\n  }\n  .col-lg-pull-10 {\n    right: 83.33333333%;\n  }\n  .col-lg-pull-9 {\n    right: 75%;\n  }\n  .col-lg-pull-8 {\n    right: 66.66666667%;\n  }\n  .col-lg-pull-7 {\n    right: 58.33333333%;\n  }\n  .col-lg-pull-6 {\n    right: 50%;\n  }\n  .col-lg-pull-5 {\n    right: 41.66666667%;\n  }\n  .col-lg-pull-4 {\n    right: 33.33333333%;\n  }\n  .col-lg-pull-3 {\n    right: 25%;\n  }\n  .col-lg-pull-2 {\n    right: 16.66666667%;\n  }\n  .col-lg-pull-1 {\n    right: 8.33333333%;\n  }\n  .col-lg-pull-0 {\n    right: auto;\n  }\n  .col-lg-push-12 {\n    left: 100%;\n  }\n  .col-lg-push-11 {\n    left: 91.66666667%;\n  }\n  .col-lg-push-10 {\n    left: 83.33333333%;\n  }\n  .col-lg-push-9 {\n    left: 75%;\n  }\n  .col-lg-push-8 {\n    left: 66.66666667%;\n  }\n  .col-lg-push-7 {\n    left: 58.33333333%;\n  }\n  .col-lg-push-6 {\n    left: 50%;\n  }\n  .col-lg-push-5 {\n    left: 41.66666667%;\n  }\n  .col-lg-push-4 {\n    left: 33.33333333%;\n  }\n  .col-lg-push-3 {\n    left: 25%;\n  }\n  .col-lg-push-2 {\n    left: 16.66666667%;\n  }\n  .col-lg-push-1 {\n    left: 8.33333333%;\n  }\n  .col-lg-push-0 {\n    left: auto;\n  }\n  .col-lg-offset-12 {\n    margin-left: 100%;\n  }\n  .col-lg-offset-11 {\n    margin-left: 91.66666667%;\n  }\n  .col-lg-offset-10 {\n    margin-left: 83.33333333%;\n  }\n  .col-lg-offset-9 {\n    margin-left: 75%;\n  }\n  .col-lg-offset-8 {\n    margin-left: 66.66666667%;\n  }\n  .col-lg-offset-7 {\n    margin-left: 58.33333333%;\n  }\n  .col-lg-offset-6 {\n    margin-left: 50%;\n  }\n  .col-lg-offset-5 {\n    margin-left: 41.66666667%;\n  }\n  .col-lg-offset-4 {\n    margin-left: 33.33333333%;\n  }\n  .col-lg-offset-3 {\n    margin-left: 25%;\n  }\n  .col-lg-offset-2 {\n    margin-left: 16.66666667%;\n  }\n  .col-lg-offset-1 {\n    margin-left: 8.33333333%;\n  }\n  .col-lg-offset-0 {\n    margin-left: 0;\n  }\n}\ntable {\n  background-color: transparent;\n}\ncaption {\n  padding-top: 8px;\n  padding-bottom: 8px;\n  color: #777;\n  text-align: left;\n}\nth {\n  text-align: left;\n}\n.table {\n  width: 100%;\n  max-width: 100%;\n  margin-bottom: 20px;\n}\n.table > thead > tr > th,\n.table > tbody > tr > th,\n.table > tfoot > tr > th,\n.table > thead > tr > td,\n.table > tbody > tr > td,\n.table > tfoot > tr > td {\n  padding: 8px;\n  line-height: 1.42857143;\n  vertical-align: top;\n  border-top: 1px solid #ddd;\n}\n.table > thead > tr > th {\n  vertical-align: bottom;\n  border-bottom: 2px solid #ddd;\n}\n.table > caption + thead > tr:first-child > th,\n.table > colgroup + thead > tr:first-child > th,\n.table > thead:first-child > tr:first-child > th,\n.table > caption + thead > tr:first-child > td,\n.table > colgroup + thead > tr:first-child > td,\n.table > thead:first-child > tr:first-child > td {\n  border-top: 0;\n}\n.table > tbody + tbody {\n  border-top: 2px solid #ddd;\n}\n.table .table {\n  background-color: #fff;\n}\n.table-condensed > thead > tr > th,\n.table-condensed > tbody > tr > th,\n.table-condensed > tfoot > tr > th,\n.table-condensed > thead > tr > td,\n.table-condensed > tbody > tr > td,\n.table-condensed > tfoot > tr > td {\n  padding: 5px;\n}\n.table-bordered {\n  border: 1px solid #ddd;\n}\n.table-bordered > thead > tr > th,\n.table-bordered > tbody > tr > th,\n.table-bordered > tfoot > tr > th,\n.table-bordered > thead > tr > td,\n.table-bordered > tbody > tr > td,\n.table-bordered > tfoot > tr > td {\n  border: 1px solid #ddd;\n}\n.table-bordered > thead > tr > th,\n.table-bordered > thead > tr > td {\n  border-bottom-width: 2px;\n}\n.table-striped > tbody > tr:nth-of-type(odd) {\n  background-color: #f9f9f9;\n}\n.table-hover > tbody > tr:hover {\n  background-color: #f5f5f5;\n}\ntable col[class*=\"col-\"] {\n  position: static;\n  display: table-column;\n  float: none;\n}\ntable td[class*=\"col-\"],\ntable th[class*=\"col-\"] {\n  position: static;\n  display: table-cell;\n  float: none;\n}\n.table > thead > tr > td.active,\n.table > tbody > tr > td.active,\n.table > tfoot > tr > td.active,\n.table > thead > tr > th.active,\n.table > tbody > tr > th.active,\n.table > tfoot > tr > th.active,\n.table > thead > tr.active > td,\n.table > tbody > tr.active > td,\n.table > tfoot > tr.active > td,\n.table > thead > tr.active > th,\n.table > tbody > tr.active > th,\n.table > tfoot > tr.active > th {\n  background-color: #f5f5f5;\n}\n.table-hover > tbody > tr > td.active:hover,\n.table-hover > tbody > tr > th.active:hover,\n.table-hover > tbody > tr.active:hover > td,\n.table-hover > tbody > tr:hover > .active,\n.table-hover > tbody > tr.active:hover > th {\n  background-color: #e8e8e8;\n}\n.table > thead > tr > td.success,\n.table > tbody > tr > td.success,\n.table > tfoot > tr > td.success,\n.table > thead > tr > th.success,\n.table > tbody > tr > th.success,\n.table > tfoot > tr > th.success,\n.table > thead > tr.success > td,\n.table > tbody > tr.success > td,\n.table > tfoot > tr.success > td,\n.table > thead > tr.success > th,\n.table > tbody > tr.success > th,\n.table > tfoot > tr.success > th {\n  background-color: #dff0d8;\n}\n.table-hover > tbody > tr > td.success:hover,\n.table-hover > tbody > tr > th.success:hover,\n.table-hover > tbody > tr.success:hover > td,\n.table-hover > tbody > tr:hover > .success,\n.table-hover > tbody > tr.success:hover > th {\n  background-color: #d0e9c6;\n}\n.table > thead > tr > td.info,\n.table > tbody > tr > td.info,\n.table > tfoot > tr > td.info,\n.table > thead > tr > th.info,\n.table > tbody > tr > th.info,\n.table > tfoot > tr > th.info,\n.table > thead > tr.info > td,\n.table > tbody > tr.info > td,\n.table > tfoot > tr.info > td,\n.table > thead > tr.info > th,\n.table > tbody > tr.info > th,\n.table > tfoot > tr.info > th {\n  background-color: #d9edf7;\n}\n.table-hover > tbody > tr > td.info:hover,\n.table-hover > tbody > tr > th.info:hover,\n.table-hover > tbody > tr.info:hover > td,\n.table-hover > tbody > tr:hover > .info,\n.table-hover > tbody > tr.info:hover > th {\n  background-color: #c4e3f3;\n}\n.table > thead > tr > td.warning,\n.table > tbody > tr > td.warning,\n.table > tfoot > tr > td.warning,\n.table > thead > tr > th.warning,\n.table > tbody > tr > th.warning,\n.table > tfoot > tr > th.warning,\n.table > thead > tr.warning > td,\n.table > tbody > tr.warning > td,\n.table > tfoot > tr.warning > td,\n.table > thead > tr.warning > th,\n.table > tbody > tr.warning > th,\n.table > tfoot > tr.warning > th {\n  background-color: #fcf8e3;\n}\n.table-hover > tbody > tr > td.warning:hover,\n.table-hover > tbody > tr > th.warning:hover,\n.table-hover > tbody > tr.warning:hover > td,\n.table-hover > tbody > tr:hover > .warning,\n.table-hover > tbody > tr.warning:hover > th {\n  background-color: #faf2cc;\n}\n.table > thead > tr > td.danger,\n.table > tbody > tr > td.danger,\n.table > tfoot > tr > td.danger,\n.table > thead > tr > th.danger,\n.table > tbody > tr > th.danger,\n.table > tfoot > tr > th.danger,\n.table > thead > tr.danger > td,\n.table > tbody > tr.danger > td,\n.table > tfoot > tr.danger > td,\n.table > thead > tr.danger > th,\n.table > tbody > tr.danger > th,\n.table > tfoot > tr.danger > th {\n  background-color: #f2dede;\n}\n.table-hover > tbody > tr > td.danger:hover,\n.table-hover > tbody > tr > th.danger:hover,\n.table-hover > tbody > tr.danger:hover > td,\n.table-hover > tbody > tr:hover > .danger,\n.table-hover > tbody > tr.danger:hover > th {\n  background-color: #ebcccc;\n}\n.table-responsive {\n  min-height: .01%;\n  overflow-x: auto;\n}\n@media screen and (max-width: 767px) {\n  .table-responsive {\n    width: 100%;\n    margin-bottom: 15px;\n    overflow-y: hidden;\n    -ms-overflow-style: -ms-autohiding-scrollbar;\n    border: 1px solid #ddd;\n  }\n  .table-responsive > .table {\n    margin-bottom: 0;\n  }\n  .table-responsive > .table > thead > tr > th,\n  .table-responsive > .table > tbody > tr > th,\n  .table-responsive > .table > tfoot > tr > th,\n  .table-responsive > .table > thead > tr > td,\n  .table-responsive > .table > tbody > tr > td,\n  .table-responsive > .table > tfoot > tr > td {\n    white-space: nowrap;\n  }\n  .table-responsive > .table-bordered {\n    border: 0;\n  }\n  .table-responsive > .table-bordered > thead > tr > th:first-child,\n  .table-responsive > .table-bordered > tbody > tr > th:first-child,\n  .table-responsive > .table-bordered > tfoot > tr > th:first-child,\n  .table-responsive > .table-bordered > thead > tr > td:first-child,\n  .table-responsive > .table-bordered > tbody > tr > td:first-child,\n  .table-responsive > .table-bordered > tfoot > tr > td:first-child {\n    border-left: 0;\n  }\n  .table-responsive > .table-bordered > thead > tr > th:last-child,\n  .table-responsive > .table-bordered > tbody > tr > th:last-child,\n  .table-responsive > .table-bordered > tfoot > tr > th:last-child,\n  .table-responsive > .table-bordered > thead > tr > td:last-child,\n  .table-responsive > .table-bordered > tbody > tr > td:last-child,\n  .table-responsive > .table-bordered > tfoot > tr > td:last-child {\n    border-right: 0;\n  }\n  .table-responsive > .table-bordered > tbody > tr:last-child > th,\n  .table-responsive > .table-bordered > tfoot > tr:last-child > th,\n  .table-responsive > .table-bordered > tbody > tr:last-child > td,\n  .table-responsive > .table-bordered > tfoot > tr:last-child > td {\n    border-bottom: 0;\n  }\n}\nfieldset {\n  min-width: 0;\n  padding: 0;\n  margin: 0;\n  border: 0;\n}\nlegend {\n  display: block;\n  width: 100%;\n  padding: 0;\n  margin-bottom: 20px;\n  font-size: 21px;\n  line-height: inherit;\n  color: #333;\n  border: 0;\n  border-bottom: 1px solid #e5e5e5;\n}\nlabel {\n  display: inline-block;\n  max-width: 100%;\n  margin-bottom: 5px;\n  font-weight: bold;\n}\ninput[type=\"search\"] {\n  -webkit-box-sizing: border-box;\n     -moz-box-sizing: border-box;\n          box-sizing: border-box;\n}\ninput[type=\"radio\"],\ninput[type=\"checkbox\"] {\n  margin: 4px 0 0;\n  margin-top: 1px \\9;\n  line-height: normal;\n}\ninput[type=\"file\"] {\n  display: block;\n}\ninput[type=\"range\"] {\n  display: block;\n  width: 100%;\n}\nselect[multiple],\nselect[size] {\n  height: auto;\n}\ninput[type=\"file\"]:focus,\ninput[type=\"radio\"]:focus,\ninput[type=\"checkbox\"]:focus {\n  outline: thin dotted;\n  outline: 5px auto -webkit-focus-ring-color;\n  outline-offset: -2px;\n}\noutput {\n  display: block;\n  padding-top: 7px;\n  font-size: 14px;\n  line-height: 1.42857143;\n  color: #555;\n}\n.form-control {\n  display: block;\n  width: 100%;\n  height: 34px;\n  padding: 6px 12px;\n  font-size: 14px;\n  line-height: 1.42857143;\n  color: #555;\n  background-color: #fff;\n  background-image: none;\n  border: 1px solid #ccc;\n  border-radius: 4px;\n  -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);\n          box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);\n  -webkit-transition: border-color ease-in-out .15s, -webkit-box-shadow ease-in-out .15s;\n       -o-transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;\n          transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;\n}\n.form-control:focus {\n  border-color: #66afe9;\n  outline: 0;\n  -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102, 175, 233, .6);\n          box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102, 175, 233, .6);\n}\n.form-control::-moz-placeholder {\n  color: #999;\n  opacity: 1;\n}\n.form-control:-ms-input-placeholder {\n  color: #999;\n}\n.form-control::-webkit-input-placeholder {\n  color: #999;\n}\n.form-control::-ms-expand {\n  background-color: transparent;\n  border: 0;\n}\n.form-control[disabled],\n.form-control[readonly],\nfieldset[disabled] .form-control {\n  background-color: #eee;\n  opacity: 1;\n}\n.form-control[disabled],\nfieldset[disabled] .form-control {\n  cursor: not-allowed;\n}\ntextarea.form-control {\n  height: auto;\n}\ninput[type=\"search\"] {\n  -webkit-appearance: none;\n}\n@media screen and (-webkit-min-device-pixel-ratio: 0) {\n  input[type=\"date\"].form-control,\n  input[type=\"time\"].form-control,\n  input[type=\"datetime-local\"].form-control,\n  input[type=\"month\"].form-control {\n    line-height: 34px;\n  }\n  input[type=\"date\"].input-sm,\n  input[type=\"time\"].input-sm,\n  input[type=\"datetime-local\"].input-sm,\n  input[type=\"month\"].input-sm,\n  .input-group-sm input[type=\"date\"],\n  .input-group-sm input[type=\"time\"],\n  .input-group-sm input[type=\"datetime-local\"],\n  .input-group-sm input[type=\"month\"] {\n    line-height: 30px;\n  }\n  input[type=\"date\"].input-lg,\n  input[type=\"time\"].input-lg,\n  input[type=\"datetime-local\"].input-lg,\n  input[type=\"month\"].input-lg,\n  .input-group-lg input[type=\"date\"],\n  .input-group-lg input[type=\"time\"],\n  .input-group-lg input[type=\"datetime-local\"],\n  .input-group-lg input[type=\"month\"] {\n    line-height: 46px;\n  }\n}\n.form-group {\n  margin-bottom: 15px;\n}\n.radio,\n.checkbox {\n  position: relative;\n  display: block;\n  margin-top: 10px;\n  margin-bottom: 10px;\n}\n.radio label,\n.checkbox label {\n  min-height: 20px;\n  padding-left: 20px;\n  margin-bottom: 0;\n  font-weight: normal;\n  cursor: pointer;\n}\n.radio input[type=\"radio\"],\n.radio-inline input[type=\"radio\"],\n.checkbox input[type=\"checkbox\"],\n.checkbox-inline input[type=\"checkbox\"] {\n  position: absolute;\n  margin-top: 4px \\9;\n  margin-left: -20px;\n}\n.radio + .radio,\n.checkbox + .checkbox {\n  margin-top: -5px;\n}\n.radio-inline,\n.checkbox-inline {\n  position: relative;\n  display: inline-block;\n  padding-left: 20px;\n  margin-bottom: 0;\n  font-weight: normal;\n  vertical-align: middle;\n  cursor: pointer;\n}\n.radio-inline + .radio-inline,\n.checkbox-inline + .checkbox-inline {\n  margin-top: 0;\n  margin-left: 10px;\n}\ninput[type=\"radio\"][disabled],\ninput[type=\"checkbox\"][disabled],\ninput[type=\"radio\"].disabled,\ninput[type=\"checkbox\"].disabled,\nfieldset[disabled] input[type=\"radio\"],\nfieldset[disabled] input[type=\"checkbox\"] {\n  cursor: not-allowed;\n}\n.radio-inline.disabled,\n.checkbox-inline.disabled,\nfieldset[disabled] .radio-inline,\nfieldset[disabled] .checkbox-inline {\n  cursor: not-allowed;\n}\n.radio.disabled label,\n.checkbox.disabled label,\nfieldset[disabled] .radio label,\nfieldset[disabled] .checkbox label {\n  cursor: not-allowed;\n}\n.form-control-static {\n  min-height: 34px;\n  padding-top: 7px;\n  padding-bottom: 7px;\n  margin-bottom: 0;\n}\n.form-control-static.input-lg,\n.form-control-static.input-sm {\n  padding-right: 0;\n  padding-left: 0;\n}\n.input-sm {\n  height: 30px;\n  padding: 5px 10px;\n  font-size: 12px;\n  line-height: 1.5;\n  border-radius: 3px;\n}\nselect.input-sm {\n  height: 30px;\n  line-height: 30px;\n}\ntextarea.input-sm,\nselect[multiple].input-sm {\n  height: auto;\n}\n.form-group-sm .form-control {\n  height: 30px;\n  padding: 5px 10px;\n  font-size: 12px;\n  line-height: 1.5;\n  border-radius: 3px;\n}\n.form-group-sm select.form-control {\n  height: 30px;\n  line-height: 30px;\n}\n.form-group-sm textarea.form-control,\n.form-group-sm select[multiple].form-control {\n  height: auto;\n}\n.form-group-sm .form-control-static {\n  height: 30px;\n  min-height: 32px;\n  padding: 6px 10px;\n  font-size: 12px;\n  line-height: 1.5;\n}\n.input-lg {\n  height: 46px;\n  padding: 10px 16px;\n  font-size: 18px;\n  line-height: 1.3333333;\n  border-radius: 6px;\n}\nselect.input-lg {\n  height: 46px;\n  line-height: 46px;\n}\ntextarea.input-lg,\nselect[multiple].input-lg {\n  height: auto;\n}\n.form-group-lg .form-control {\n  height: 46px;\n  padding: 10px 16px;\n  font-size: 18px;\n  line-height: 1.3333333;\n  border-radius: 6px;\n}\n.form-group-lg select.form-control {\n  height: 46px;\n  line-height: 46px;\n}\n.form-group-lg textarea.form-control,\n.form-group-lg select[multiple].form-control {\n  height: auto;\n}\n.form-group-lg .form-control-static {\n  height: 46px;\n  min-height: 38px;\n  padding: 11px 16px;\n  font-size: 18px;\n  line-height: 1.3333333;\n}\n.has-feedback {\n  position: relative;\n}\n.has-feedback .form-control {\n  padding-right: 42.5px;\n}\n.form-control-feedback {\n  position: absolute;\n  top: 0;\n  right: 0;\n  z-index: 2;\n  display: block;\n  width: 34px;\n  height: 34px;\n  line-height: 34px;\n  text-align: center;\n  pointer-events: none;\n}\n.input-lg + .form-control-feedback,\n.input-group-lg + .form-control-feedback,\n.form-group-lg .form-control + .form-control-feedback {\n  width: 46px;\n  height: 46px;\n  line-height: 46px;\n}\n.input-sm + .form-control-feedback,\n.input-group-sm + .form-control-feedback,\n.form-group-sm .form-control + .form-control-feedback {\n  width: 30px;\n  height: 30px;\n  line-height: 30px;\n}\n.has-success .help-block,\n.has-success .control-label,\n.has-success .radio,\n.has-success .checkbox,\n.has-success .radio-inline,\n.has-success .checkbox-inline,\n.has-success.radio label,\n.has-success.checkbox label,\n.has-success.radio-inline label,\n.has-success.checkbox-inline label {\n  color: #3c763d;\n}\n.has-success .form-control {\n  border-color: #3c763d;\n  -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);\n          box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);\n}\n.has-success .form-control:focus {\n  border-color: #2b542c;\n  -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 6px #67b168;\n          box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 6px #67b168;\n}\n.has-success .input-group-addon {\n  color: #3c763d;\n  background-color: #dff0d8;\n  border-color: #3c763d;\n}\n.has-success .form-control-feedback {\n  color: #3c763d;\n}\n.has-warning .help-block,\n.has-warning .control-label,\n.has-warning .radio,\n.has-warning .checkbox,\n.has-warning .radio-inline,\n.has-warning .checkbox-inline,\n.has-warning.radio label,\n.has-warning.checkbox label,\n.has-warning.radio-inline label,\n.has-warning.checkbox-inline label {\n  color: #8a6d3b;\n}\n.has-warning .form-control {\n  border-color: #8a6d3b;\n  -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);\n          box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);\n}\n.has-warning .form-control:focus {\n  border-color: #66512c;\n  -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 6px #c0a16b;\n          box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 6px #c0a16b;\n}\n.has-warning .input-group-addon {\n  color: #8a6d3b;\n  background-color: #fcf8e3;\n  border-color: #8a6d3b;\n}\n.has-warning .form-control-feedback {\n  color: #8a6d3b;\n}\n.has-error .help-block,\n.has-error .control-label,\n.has-error .radio,\n.has-error .checkbox,\n.has-error .radio-inline,\n.has-error .checkbox-inline,\n.has-error.radio label,\n.has-error.checkbox label,\n.has-error.radio-inline label,\n.has-error.checkbox-inline label {\n  color: #a94442;\n}\n.has-error .form-control {\n  border-color: #a94442;\n  -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);\n          box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);\n}\n.has-error .form-control:focus {\n  border-color: #843534;\n  -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 6px #ce8483;\n          box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 6px #ce8483;\n}\n.has-error .input-group-addon {\n  color: #a94442;\n  background-color: #f2dede;\n  border-color: #a94442;\n}\n.has-error .form-control-feedback {\n  color: #a94442;\n}\n.has-feedback label ~ .form-control-feedback {\n  top: 25px;\n}\n.has-feedback label.sr-only ~ .form-control-feedback {\n  top: 0;\n}\n.help-block {\n  display: block;\n  margin-top: 5px;\n  margin-bottom: 10px;\n  color: #737373;\n}\n@media (min-width: 768px) {\n  .form-inline .form-group {\n    display: inline-block;\n    margin-bottom: 0;\n    vertical-align: middle;\n  }\n  .form-inline .form-control {\n    display: inline-block;\n    width: auto;\n    vertical-align: middle;\n  }\n  .form-inline .form-control-static {\n    display: inline-block;\n  }\n  .form-inline .input-group {\n    display: inline-table;\n    vertical-align: middle;\n  }\n  .form-inline .input-group .input-group-addon,\n  .form-inline .input-group .input-group-btn,\n  .form-inline .input-group .form-control {\n    width: auto;\n  }\n  .form-inline .input-group > .form-control {\n    width: 100%;\n  }\n  .form-inline .control-label {\n    margin-bottom: 0;\n    vertical-align: middle;\n  }\n  .form-inline .radio,\n  .form-inline .checkbox {\n    display: inline-block;\n    margin-top: 0;\n    margin-bottom: 0;\n    vertical-align: middle;\n  }\n  .form-inline .radio label,\n  .form-inline .checkbox label {\n    padding-left: 0;\n  }\n  .form-inline .radio input[type=\"radio\"],\n  .form-inline .checkbox input[type=\"checkbox\"] {\n    position: relative;\n    margin-left: 0;\n  }\n  .form-inline .has-feedback .form-control-feedback {\n    top: 0;\n  }\n}\n.form-horizontal .radio,\n.form-horizontal .checkbox,\n.form-horizontal .radio-inline,\n.form-horizontal .checkbox-inline {\n  padding-top: 7px;\n  margin-top: 0;\n  margin-bottom: 0;\n}\n.form-horizontal .radio,\n.form-horizontal .checkbox {\n  min-height: 27px;\n}\n.form-horizontal .form-group {\n  margin-right: -15px;\n  margin-left: -15px;\n}\n@media (min-width: 768px) {\n  .form-horizontal .control-label {\n    padding-top: 7px;\n    margin-bottom: 0;\n    text-align: right;\n  }\n}\n.form-horizontal .has-feedback .form-control-feedback {\n  right: 15px;\n}\n@media (min-width: 768px) {\n  .form-horizontal .form-group-lg .control-label {\n    padding-top: 11px;\n    font-size: 18px;\n  }\n}\n@media (min-width: 768px) {\n  .form-horizontal .form-group-sm .control-label {\n    padding-top: 6px;\n    font-size: 12px;\n  }\n}\n.btn {\n  display: inline-block;\n  padding: 6px 12px;\n  margin-bottom: 0;\n  font-size: 14px;\n  font-weight: normal;\n  line-height: 1.42857143;\n  text-align: center;\n  white-space: nowrap;\n  vertical-align: middle;\n  -ms-touch-action: manipulation;\n      touch-action: manipulation;\n  cursor: pointer;\n  -webkit-user-select: none;\n     -moz-user-select: none;\n      -ms-user-select: none;\n          user-select: none;\n  background-image: none;\n  border: 1px solid transparent;\n  border-radius: 4px;\n}\n.btn:focus,\n.btn:active:focus,\n.btn.active:focus,\n.btn.focus,\n.btn:active.focus,\n.btn.active.focus {\n  outline: thin dotted;\n  outline: 5px auto -webkit-focus-ring-color;\n  outline-offset: -2px;\n}\n.btn:hover,\n.btn:focus,\n.btn.focus {\n  color: #333;\n  text-decoration: none;\n}\n.btn:active,\n.btn.active {\n  background-image: none;\n  outline: 0;\n  -webkit-box-shadow: inset 0 3px 5px rgba(0, 0, 0, .125);\n          box-shadow: inset 0 3px 5px rgba(0, 0, 0, .125);\n}\n.btn.disabled,\n.btn[disabled],\nfieldset[disabled] .btn {\n  cursor: not-allowed;\n  filter: alpha(opacity=65);\n  -webkit-box-shadow: none;\n          box-shadow: none;\n  opacity: .65;\n}\na.btn.disabled,\nfieldset[disabled] a.btn {\n  pointer-events: none;\n}\n.btn-default {\n  color: #333;\n  background-color: #fff;\n  border-color: #ccc;\n}\n.btn-default:focus,\n.btn-default.focus {\n  color: #333;\n  background-color: #e6e6e6;\n  border-color: #8c8c8c;\n}\n.btn-default:hover {\n  color: #333;\n  background-color: #e6e6e6;\n  border-color: #adadad;\n}\n.btn-default:active,\n.btn-default.active,\n.open > .dropdown-toggle.btn-default {\n  color: #333;\n  background-color: #e6e6e6;\n  border-color: #adadad;\n}\n.btn-default:active:hover,\n.btn-default.active:hover,\n.open > .dropdown-toggle.btn-default:hover,\n.btn-default:active:focus,\n.btn-default.active:focus,\n.open > .dropdown-toggle.btn-default:focus,\n.btn-default:active.focus,\n.btn-default.active.focus,\n.open > .dropdown-toggle.btn-default.focus {\n  color: #333;\n  background-color: #d4d4d4;\n  border-color: #8c8c8c;\n}\n.btn-default:active,\n.btn-default.active,\n.open > .dropdown-toggle.btn-default {\n  background-image: none;\n}\n.btn-default.disabled:hover,\n.btn-default[disabled]:hover,\nfieldset[disabled] .btn-default:hover,\n.btn-default.disabled:focus,\n.btn-default[disabled]:focus,\nfieldset[disabled] .btn-default:focus,\n.btn-default.disabled.focus,\n.btn-default[disabled].focus,\nfieldset[disabled] .btn-default.focus {\n  background-color: #fff;\n  border-color: #ccc;\n}\n.btn-default .badge {\n  color: #fff;\n  background-color: #333;\n}\n.btn-primary {\n  color: #fff;\n  background-color: #337ab7;\n  border-color: #2e6da4;\n}\n.btn-primary:focus,\n.btn-primary.focus {\n  color: #fff;\n  background-color: #286090;\n  border-color: #122b40;\n}\n.btn-primary:hover {\n  color: #fff;\n  background-color: #286090;\n  border-color: #204d74;\n}\n.btn-primary:active,\n.btn-primary.active,\n.open > .dropdown-toggle.btn-primary {\n  color: #fff;\n  background-color: #286090;\n  border-color: #204d74;\n}\n.btn-primary:active:hover,\n.btn-primary.active:hover,\n.open > .dropdown-toggle.btn-primary:hover,\n.btn-primary:active:focus,\n.btn-primary.active:focus,\n.open > .dropdown-toggle.btn-primary:focus,\n.btn-primary:active.focus,\n.btn-primary.active.focus,\n.open > .dropdown-toggle.btn-primary.focus {\n  color: #fff;\n  background-color: #204d74;\n  border-color: #122b40;\n}\n.btn-primary:active,\n.btn-primary.active,\n.open > .dropdown-toggle.btn-primary {\n  background-image: none;\n}\n.btn-primary.disabled:hover,\n.btn-primary[disabled]:hover,\nfieldset[disabled] .btn-primary:hover,\n.btn-primary.disabled:focus,\n.btn-primary[disabled]:focus,\nfieldset[disabled] .btn-primary:focus,\n.btn-primary.disabled.focus,\n.btn-primary[disabled].focus,\nfieldset[disabled] .btn-primary.focus {\n  background-color: #337ab7;\n  border-color: #2e6da4;\n}\n.btn-primary .badge {\n  color: #337ab7;\n  background-color: #fff;\n}\n.btn-success {\n  color: #fff;\n  background-color: #5cb85c;\n  border-color: #4cae4c;\n}\n.btn-success:focus,\n.btn-success.focus {\n  color: #fff;\n  background-color: #449d44;\n  border-color: #255625;\n}\n.btn-success:hover {\n  color: #fff;\n  background-color: #449d44;\n  border-color: #398439;\n}\n.btn-success:active,\n.btn-success.active,\n.open > .dropdown-toggle.btn-success {\n  color: #fff;\n  background-color: #449d44;\n  border-color: #398439;\n}\n.btn-success:active:hover,\n.btn-success.active:hover,\n.open > .dropdown-toggle.btn-success:hover,\n.btn-success:active:focus,\n.btn-success.active:focus,\n.open > .dropdown-toggle.btn-success:focus,\n.btn-success:active.focus,\n.btn-success.active.focus,\n.open > .dropdown-toggle.btn-success.focus {\n  color: #fff;\n  background-color: #398439;\n  border-color: #255625;\n}\n.btn-success:active,\n.btn-success.active,\n.open > .dropdown-toggle.btn-success {\n  background-image: none;\n}\n.btn-success.disabled:hover,\n.btn-success[disabled]:hover,\nfieldset[disabled] .btn-success:hover,\n.btn-success.disabled:focus,\n.btn-success[disabled]:focus,\nfieldset[disabled] .btn-success:focus,\n.btn-success.disabled.focus,\n.btn-success[disabled].focus,\nfieldset[disabled] .btn-success.focus {\n  background-color: #5cb85c;\n  border-color: #4cae4c;\n}\n.btn-success .badge {\n  color: #5cb85c;\n  background-color: #fff;\n}\n.btn-info {\n  color: #fff;\n  background-color: #5bc0de;\n  border-color: #46b8da;\n}\n.btn-info:focus,\n.btn-info.focus {\n  color: #fff;\n  background-color: #31b0d5;\n  border-color: #1b6d85;\n}\n.btn-info:hover {\n  color: #fff;\n  background-color: #31b0d5;\n  border-color: #269abc;\n}\n.btn-info:active,\n.btn-info.active,\n.open > .dropdown-toggle.btn-info {\n  color: #fff;\n  background-color: #31b0d5;\n  border-color: #269abc;\n}\n.btn-info:active:hover,\n.btn-info.active:hover,\n.open > .dropdown-toggle.btn-info:hover,\n.btn-info:active:focus,\n.btn-info.active:focus,\n.open > .dropdown-toggle.btn-info:focus,\n.btn-info:active.focus,\n.btn-info.active.focus,\n.open > .dropdown-toggle.btn-info.focus {\n  color: #fff;\n  background-color: #269abc;\n  border-color: #1b6d85;\n}\n.btn-info:active,\n.btn-info.active,\n.open > .dropdown-toggle.btn-info {\n  background-image: none;\n}\n.btn-info.disabled:hover,\n.btn-info[disabled]:hover,\nfieldset[disabled] .btn-info:hover,\n.btn-info.disabled:focus,\n.btn-info[disabled]:focus,\nfieldset[disabled] .btn-info:focus,\n.btn-info.disabled.focus,\n.btn-info[disabled].focus,\nfieldset[disabled] .btn-info.focus {\n  background-color: #5bc0de;\n  border-color: #46b8da;\n}\n.btn-info .badge {\n  color: #5bc0de;\n  background-color: #fff;\n}\n.btn-warning {\n  color: #fff;\n  background-color: #f0ad4e;\n  border-color: #eea236;\n}\n.btn-warning:focus,\n.btn-warning.focus {\n  color: #fff;\n  background-color: #ec971f;\n  border-color: #985f0d;\n}\n.btn-warning:hover {\n  color: #fff;\n  background-color: #ec971f;\n  border-color: #d58512;\n}\n.btn-warning:active,\n.btn-warning.active,\n.open > .dropdown-toggle.btn-warning {\n  color: #fff;\n  background-color: #ec971f;\n  border-color: #d58512;\n}\n.btn-warning:active:hover,\n.btn-warning.active:hover,\n.open > .dropdown-toggle.btn-warning:hover,\n.btn-warning:active:focus,\n.btn-warning.active:focus,\n.open > .dropdown-toggle.btn-warning:focus,\n.btn-warning:active.focus,\n.btn-warning.active.focus,\n.open > .dropdown-toggle.btn-warning.focus {\n  color: #fff;\n  background-color: #d58512;\n  border-color: #985f0d;\n}\n.btn-warning:active,\n.btn-warning.active,\n.open > .dropdown-toggle.btn-warning {\n  background-image: none;\n}\n.btn-warning.disabled:hover,\n.btn-warning[disabled]:hover,\nfieldset[disabled] .btn-warning:hover,\n.btn-warning.disabled:focus,\n.btn-warning[disabled]:focus,\nfieldset[disabled] .btn-warning:focus,\n.btn-warning.disabled.focus,\n.btn-warning[disabled].focus,\nfieldset[disabled] .btn-warning.focus {\n  background-color: #f0ad4e;\n  border-color: #eea236;\n}\n.btn-warning .badge {\n  color: #f0ad4e;\n  background-color: #fff;\n}\n.btn-danger {\n  color: #fff;\n  background-color: #d9534f;\n  border-color: #d43f3a;\n}\n.btn-danger:focus,\n.btn-danger.focus {\n  color: #fff;\n  background-color: #c9302c;\n  border-color: #761c19;\n}\n.btn-danger:hover {\n  color: #fff;\n  background-color: #c9302c;\n  border-color: #ac2925;\n}\n.btn-danger:active,\n.btn-danger.active,\n.open > .dropdown-toggle.btn-danger {\n  color: #fff;\n  background-color: #c9302c;\n  border-color: #ac2925;\n}\n.btn-danger:active:hover,\n.btn-danger.active:hover,\n.open > .dropdown-toggle.btn-danger:hover,\n.btn-danger:active:focus,\n.btn-danger.active:focus,\n.open > .dropdown-toggle.btn-danger:focus,\n.btn-danger:active.focus,\n.btn-danger.active.focus,\n.open > .dropdown-toggle.btn-danger.focus {\n  color: #fff;\n  background-color: #ac2925;\n  border-color: #761c19;\n}\n.btn-danger:active,\n.btn-danger.active,\n.open > .dropdown-toggle.btn-danger {\n  background-image: none;\n}\n.btn-danger.disabled:hover,\n.btn-danger[disabled]:hover,\nfieldset[disabled] .btn-danger:hover,\n.btn-danger.disabled:focus,\n.btn-danger[disabled]:focus,\nfieldset[disabled] .btn-danger:focus,\n.btn-danger.disabled.focus,\n.btn-danger[disabled].focus,\nfieldset[disabled] .btn-danger.focus {\n  background-color: #d9534f;\n  border-color: #d43f3a;\n}\n.btn-danger .badge {\n  color: #d9534f;\n  background-color: #fff;\n}\n.btn-link {\n  font-weight: normal;\n  color: #337ab7;\n  border-radius: 0;\n}\n.btn-link,\n.btn-link:active,\n.btn-link.active,\n.btn-link[disabled],\nfieldset[disabled] .btn-link {\n  background-color: transparent;\n  -webkit-box-shadow: none;\n          box-shadow: none;\n}\n.btn-link,\n.btn-link:hover,\n.btn-link:focus,\n.btn-link:active {\n  border-color: transparent;\n}\n.btn-link:hover,\n.btn-link:focus {\n  color: #23527c;\n  text-decoration: underline;\n  background-color: transparent;\n}\n.btn-link[disabled]:hover,\nfieldset[disabled] .btn-link:hover,\n.btn-link[disabled]:focus,\nfieldset[disabled] .btn-link:focus {\n  color: #777;\n  text-decoration: none;\n}\n.btn-lg,\n.btn-group-lg > .btn {\n  padding: 10px 16px;\n  font-size: 18px;\n  line-height: 1.3333333;\n  border-radius: 6px;\n}\n.btn-sm,\n.btn-group-sm > .btn {\n  padding: 5px 10px;\n  font-size: 12px;\n  line-height: 1.5;\n  border-radius: 3px;\n}\n.btn-xs,\n.btn-group-xs > .btn {\n  padding: 1px 5px;\n  font-size: 12px;\n  line-height: 1.5;\n  border-radius: 3px;\n}\n.btn-block {\n  display: block;\n  width: 100%;\n}\n.btn-block + .btn-block {\n  margin-top: 5px;\n}\ninput[type=\"submit\"].btn-block,\ninput[type=\"reset\"].btn-block,\ninput[type=\"button\"].btn-block {\n  width: 100%;\n}\n.fade {\n  opacity: 0;\n  -webkit-transition: opacity .15s linear;\n       -o-transition: opacity .15s linear;\n          transition: opacity .15s linear;\n}\n.fade.in {\n  opacity: 1;\n}\n.collapse {\n  display: none;\n}\n.collapse.in {\n  display: block;\n}\ntr.collapse.in {\n  display: table-row;\n}\ntbody.collapse.in {\n  display: table-row-group;\n}\n.collapsing {\n  position: relative;\n  height: 0;\n  overflow: hidden;\n  -webkit-transition-timing-function: ease;\n       -o-transition-timing-function: ease;\n          transition-timing-function: ease;\n  -webkit-transition-duration: .35s;\n       -o-transition-duration: .35s;\n          transition-duration: .35s;\n  -webkit-transition-property: height, visibility;\n       -o-transition-property: height, visibility;\n          transition-property: height, visibility;\n}\n.caret {\n  display: inline-block;\n  width: 0;\n  height: 0;\n  margin-left: 2px;\n  vertical-align: middle;\n  border-top: 4px dashed;\n  border-top: 4px solid \\9;\n  border-right: 4px solid transparent;\n  border-left: 4px solid transparent;\n}\n.dropup,\n.dropdown {\n  position: relative;\n}\n.dropdown-toggle:focus {\n  outline: 0;\n}\n.dropdown-menu {\n  position: absolute;\n  top: 100%;\n  left: 0;\n  z-index: 1000;\n  display: none;\n  float: left;\n  min-width: 160px;\n  padding: 5px 0;\n  margin: 2px 0 0;\n  font-size: 14px;\n  text-align: left;\n  list-style: none;\n  background-color: #fff;\n  -webkit-background-clip: padding-box;\n          background-clip: padding-box;\n  border: 1px solid #ccc;\n  border: 1px solid rgba(0, 0, 0, .15);\n  border-radius: 4px;\n  -webkit-box-shadow: 0 6px 12px rgba(0, 0, 0, .175);\n          box-shadow: 0 6px 12px rgba(0, 0, 0, .175);\n}\n.dropdown-menu.pull-right {\n  right: 0;\n  left: auto;\n}\n.dropdown-menu .divider {\n  height: 1px;\n  margin: 9px 0;\n  overflow: hidden;\n  background-color: #e5e5e5;\n}\n.dropdown-menu > li > a {\n  display: block;\n  padding: 3px 20px;\n  clear: both;\n  font-weight: normal;\n  line-height: 1.42857143;\n  color: #333;\n  white-space: nowrap;\n}\n.dropdown-menu > li > a:hover,\n.dropdown-menu > li > a:focus {\n  color: #262626;\n  text-decoration: none;\n  background-color: #f5f5f5;\n}\n.dropdown-menu > .active > a,\n.dropdown-menu > .active > a:hover,\n.dropdown-menu > .active > a:focus {\n  color: #fff;\n  text-decoration: none;\n  background-color: #337ab7;\n  outline: 0;\n}\n.dropdown-menu > .disabled > a,\n.dropdown-menu > .disabled > a:hover,\n.dropdown-menu > .disabled > a:focus {\n  color: #777;\n}\n.dropdown-menu > .disabled > a:hover,\n.dropdown-menu > .disabled > a:focus {\n  text-decoration: none;\n  cursor: not-allowed;\n  background-color: transparent;\n  background-image: none;\n  filter: progid:DXImageTransform.Microsoft.gradient(enabled = false);\n}\n.open > .dropdown-menu {\n  display: block;\n}\n.open > a {\n  outline: 0;\n}\n.dropdown-menu-right {\n  right: 0;\n  left: auto;\n}\n.dropdown-menu-left {\n  right: auto;\n  left: 0;\n}\n.dropdown-header {\n  display: block;\n  padding: 3px 20px;\n  font-size: 12px;\n  line-height: 1.42857143;\n  color: #777;\n  white-space: nowrap;\n}\n.dropdown-backdrop {\n  position: fixed;\n  top: 0;\n  right: 0;\n  bottom: 0;\n  left: 0;\n  z-index: 990;\n}\n.pull-right > .dropdown-menu {\n  right: 0;\n  left: auto;\n}\n.dropup .caret,\n.navbar-fixed-bottom .dropdown .caret {\n  content: \"\";\n  border-top: 0;\n  border-bottom: 4px dashed;\n  border-bottom: 4px solid \\9;\n}\n.dropup .dropdown-menu,\n.navbar-fixed-bottom .dropdown .dropdown-menu {\n  top: auto;\n  bottom: 100%;\n  margin-bottom: 2px;\n}\n@media (min-width: 768px) {\n  .navbar-right .dropdown-menu {\n    right: 0;\n    left: auto;\n  }\n  .navbar-right .dropdown-menu-left {\n    right: auto;\n    left: 0;\n  }\n}\n.btn-group,\n.btn-group-vertical {\n  position: relative;\n  display: inline-block;\n  vertical-align: middle;\n}\n.btn-group > .btn,\n.btn-group-vertical > .btn {\n  position: relative;\n  float: left;\n}\n.btn-group > .btn:hover,\n.btn-group-vertical > .btn:hover,\n.btn-group > .btn:focus,\n.btn-group-vertical > .btn:focus,\n.btn-group > .btn:active,\n.btn-group-vertical > .btn:active,\n.btn-group > .btn.active,\n.btn-group-vertical > .btn.active {\n  z-index: 2;\n}\n.btn-group .btn + .btn,\n.btn-group .btn + .btn-group,\n.btn-group .btn-group + .btn,\n.btn-group .btn-group + .btn-group {\n  margin-left: -1px;\n}\n.btn-toolbar {\n  margin-left: -5px;\n}\n.btn-toolbar .btn,\n.btn-toolbar .btn-group,\n.btn-toolbar .input-group {\n  float: left;\n}\n.btn-toolbar > .btn,\n.btn-toolbar > .btn-group,\n.btn-toolbar > .input-group {\n  margin-left: 5px;\n}\n.btn-group > .btn:not(:first-child):not(:last-child):not(.dropdown-toggle) {\n  border-radius: 0;\n}\n.btn-group > .btn:first-child {\n  margin-left: 0;\n}\n.btn-group > .btn:first-child:not(:last-child):not(.dropdown-toggle) {\n  border-top-right-radius: 0;\n  border-bottom-right-radius: 0;\n}\n.btn-group > .btn:last-child:not(:first-child),\n.btn-group > .dropdown-toggle:not(:first-child) {\n  border-top-left-radius: 0;\n  border-bottom-left-radius: 0;\n}\n.btn-group > .btn-group {\n  float: left;\n}\n.btn-group > .btn-group:not(:first-child):not(:last-child) > .btn {\n  border-radius: 0;\n}\n.btn-group > .btn-group:first-child:not(:last-child) > .btn:last-child,\n.btn-group > .btn-group:first-child:not(:last-child) > .dropdown-toggle {\n  border-top-right-radius: 0;\n  border-bottom-right-radius: 0;\n}\n.btn-group > .btn-group:last-child:not(:first-child) > .btn:first-child {\n  border-top-left-radius: 0;\n  border-bottom-left-radius: 0;\n}\n.btn-group .dropdown-toggle:active,\n.btn-group.open .dropdown-toggle {\n  outline: 0;\n}\n.btn-group > .btn + .dropdown-toggle {\n  padding-right: 8px;\n  padding-left: 8px;\n}\n.btn-group > .btn-lg + .dropdown-toggle {\n  padding-right: 12px;\n  padding-left: 12px;\n}\n.btn-group.open .dropdown-toggle {\n  -webkit-box-shadow: inset 0 3px 5px rgba(0, 0, 0, .125);\n          box-shadow: inset 0 3px 5px rgba(0, 0, 0, .125);\n}\n.btn-group.open .dropdown-toggle.btn-link {\n  -webkit-box-shadow: none;\n          box-shadow: none;\n}\n.btn .caret {\n  margin-left: 0;\n}\n.btn-lg .caret {\n  border-width: 5px 5px 0;\n  border-bottom-width: 0;\n}\n.dropup .btn-lg .caret {\n  border-width: 0 5px 5px;\n}\n.btn-group-vertical > .btn,\n.btn-group-vertical > .btn-group,\n.btn-group-vertical > .btn-group > .btn {\n  display: block;\n  float: none;\n  width: 100%;\n  max-width: 100%;\n}\n.btn-group-vertical > .btn-group > .btn {\n  float: none;\n}\n.btn-group-vertical > .btn + .btn,\n.btn-group-vertical > .btn + .btn-group,\n.btn-group-vertical > .btn-group + .btn,\n.btn-group-vertical > .btn-group + .btn-group {\n  margin-top: -1px;\n  margin-left: 0;\n}\n.btn-group-vertical > .btn:not(:first-child):not(:last-child) {\n  border-radius: 0;\n}\n.btn-group-vertical > .btn:first-child:not(:last-child) {\n  border-top-left-radius: 4px;\n  border-top-right-radius: 4px;\n  border-bottom-right-radius: 0;\n  border-bottom-left-radius: 0;\n}\n.btn-group-vertical > .btn:last-child:not(:first-child) {\n  border-top-left-radius: 0;\n  border-top-right-radius: 0;\n  border-bottom-right-radius: 4px;\n  border-bottom-left-radius: 4px;\n}\n.btn-group-vertical > .btn-group:not(:first-child):not(:last-child) > .btn {\n  border-radius: 0;\n}\n.btn-group-vertical > .btn-group:first-child:not(:last-child) > .btn:last-child,\n.btn-group-vertical > .btn-group:first-child:not(:last-child) > .dropdown-toggle {\n  border-bottom-right-radius: 0;\n  border-bottom-left-radius: 0;\n}\n.btn-group-vertical > .btn-group:last-child:not(:first-child) > .btn:first-child {\n  border-top-left-radius: 0;\n  border-top-right-radius: 0;\n}\n.btn-group-justified {\n  display: table;\n  width: 100%;\n  table-layout: fixed;\n  border-collapse: separate;\n}\n.btn-group-justified > .btn,\n.btn-group-justified > .btn-group {\n  display: table-cell;\n  float: none;\n  width: 1%;\n}\n.btn-group-justified > .btn-group .btn {\n  width: 100%;\n}\n.btn-group-justified > .btn-group .dropdown-menu {\n  left: auto;\n}\n[data-toggle=\"buttons\"] > .btn input[type=\"radio\"],\n[data-toggle=\"buttons\"] > .btn-group > .btn input[type=\"radio\"],\n[data-toggle=\"buttons\"] > .btn input[type=\"checkbox\"],\n[data-toggle=\"buttons\"] > .btn-group > .btn input[type=\"checkbox\"] {\n  position: absolute;\n  clip: rect(0, 0, 0, 0);\n  pointer-events: none;\n}\n.input-group {\n  position: relative;\n  display: table;\n  border-collapse: separate;\n}\n.input-group[class*=\"col-\"] {\n  float: none;\n  padding-right: 0;\n  padding-left: 0;\n}\n.input-group .form-control {\n  position: relative;\n  z-index: 2;\n  float: left;\n  width: 100%;\n  margin-bottom: 0;\n}\n.input-group .form-control:focus {\n  z-index: 3;\n}\n.input-group-lg > .form-control,\n.input-group-lg > .input-group-addon,\n.input-group-lg > .input-group-btn > .btn {\n  height: 46px;\n  padding: 10px 16px;\n  font-size: 18px;\n  line-height: 1.3333333;\n  border-radius: 6px;\n}\nselect.input-group-lg > .form-control,\nselect.input-group-lg > .input-group-addon,\nselect.input-group-lg > .input-group-btn > .btn {\n  height: 46px;\n  line-height: 46px;\n}\ntextarea.input-group-lg > .form-control,\ntextarea.input-group-lg > .input-group-addon,\ntextarea.input-group-lg > .input-group-btn > .btn,\nselect[multiple].input-group-lg > .form-control,\nselect[multiple].input-group-lg > .input-group-addon,\nselect[multiple].input-group-lg > .input-group-btn > .btn {\n  height: auto;\n}\n.input-group-sm > .form-control,\n.input-group-sm > .input-group-addon,\n.input-group-sm > .input-group-btn > .btn {\n  height: 30px;\n  padding: 5px 10px;\n  font-size: 12px;\n  line-height: 1.5;\n  border-radius: 3px;\n}\nselect.input-group-sm > .form-control,\nselect.input-group-sm > .input-group-addon,\nselect.input-group-sm > .input-group-btn > .btn {\n  height: 30px;\n  line-height: 30px;\n}\ntextarea.input-group-sm > .form-control,\ntextarea.input-group-sm > .input-group-addon,\ntextarea.input-group-sm > .input-group-btn > .btn,\nselect[multiple].input-group-sm > .form-control,\nselect[multiple].input-group-sm > .input-group-addon,\nselect[multiple].input-group-sm > .input-group-btn > .btn {\n  height: auto;\n}\n.input-group-addon,\n.input-group-btn,\n.input-group .form-control {\n  display: table-cell;\n}\n.input-group-addon:not(:first-child):not(:last-child),\n.input-group-btn:not(:first-child):not(:last-child),\n.input-group .form-control:not(:first-child):not(:last-child) {\n  border-radius: 0;\n}\n.input-group-addon,\n.input-group-btn {\n  width: 1%;\n  white-space: nowrap;\n  vertical-align: middle;\n}\n.input-group-addon {\n  padding: 6px 12px;\n  font-size: 14px;\n  font-weight: normal;\n  line-height: 1;\n  color: #555;\n  text-align: center;\n  background-color: #eee;\n  border: 1px solid #ccc;\n  border-radius: 4px;\n}\n.input-group-addon.input-sm {\n  padding: 5px 10px;\n  font-size: 12px;\n  border-radius: 3px;\n}\n.input-group-addon.input-lg {\n  padding: 10px 16px;\n  font-size: 18px;\n  border-radius: 6px;\n}\n.input-group-addon input[type=\"radio\"],\n.input-group-addon input[type=\"checkbox\"] {\n  margin-top: 0;\n}\n.input-group .form-control:first-child,\n.input-group-addon:first-child,\n.input-group-btn:first-child > .btn,\n.input-group-btn:first-child > .btn-group > .btn,\n.input-group-btn:first-child > .dropdown-toggle,\n.input-group-btn:last-child > .btn:not(:last-child):not(.dropdown-toggle),\n.input-group-btn:last-child > .btn-group:not(:last-child) > .btn {\n  border-top-right-radius: 0;\n  border-bottom-right-radius: 0;\n}\n.input-group-addon:first-child {\n  border-right: 0;\n}\n.input-group .form-control:last-child,\n.input-group-addon:last-child,\n.input-group-btn:last-child > .btn,\n.input-group-btn:last-child > .btn-group > .btn,\n.input-group-btn:last-child > .dropdown-toggle,\n.input-group-btn:first-child > .btn:not(:first-child),\n.input-group-btn:first-child > .btn-group:not(:first-child) > .btn {\n  border-top-left-radius: 0;\n  border-bottom-left-radius: 0;\n}\n.input-group-addon:last-child {\n  border-left: 0;\n}\n.input-group-btn {\n  position: relative;\n  font-size: 0;\n  white-space: nowrap;\n}\n.input-group-btn > .btn {\n  position: relative;\n}\n.input-group-btn > .btn + .btn {\n  margin-left: -1px;\n}\n.input-group-btn > .btn:hover,\n.input-group-btn > .btn:focus,\n.input-group-btn > .btn:active {\n  z-index: 2;\n}\n.input-group-btn:first-child > .btn,\n.input-group-btn:first-child > .btn-group {\n  margin-right: -1px;\n}\n.input-group-btn:last-child > .btn,\n.input-group-btn:last-child > .btn-group {\n  z-index: 2;\n  margin-left: -1px;\n}\n.nav {\n  padding-left: 0;\n  margin-bottom: 0;\n  list-style: none;\n}\n.nav > li {\n  position: relative;\n  display: block;\n}\n.nav > li > a {\n  position: relative;\n  display: block;\n  padding: 10px 15px;\n}\n.nav > li > a:hover,\n.nav > li > a:focus {\n  text-decoration: none;\n  background-color: #eee;\n}\n.nav > li.disabled > a {\n  color: #777;\n}\n.nav > li.disabled > a:hover,\n.nav > li.disabled > a:focus {\n  color: #777;\n  text-decoration: none;\n  cursor: not-allowed;\n  background-color: transparent;\n}\n.nav .open > a,\n.nav .open > a:hover,\n.nav .open > a:focus {\n  background-color: #eee;\n  border-color: #337ab7;\n}\n.nav .nav-divider {\n  height: 1px;\n  margin: 9px 0;\n  overflow: hidden;\n  background-color: #e5e5e5;\n}\n.nav > li > a > img {\n  max-width: none;\n}\n.nav-tabs {\n  border-bottom: 1px solid #ddd;\n}\n.nav-tabs > li {\n  float: left;\n  margin-bottom: -1px;\n}\n.nav-tabs > li > a {\n  margin-right: 2px;\n  line-height: 1.42857143;\n  border: 1px solid transparent;\n  border-radius: 4px 4px 0 0;\n}\n.nav-tabs > li > a:hover {\n  border-color: #eee #eee #ddd;\n}\n.nav-tabs > li.active > a,\n.nav-tabs > li.active > a:hover,\n.nav-tabs > li.active > a:focus {\n  color: #555;\n  cursor: default;\n  background-color: #fff;\n  border: 1px solid #ddd;\n  border-bottom-color: transparent;\n}\n.nav-tabs.nav-justified {\n  width: 100%;\n  border-bottom: 0;\n}\n.nav-tabs.nav-justified > li {\n  float: none;\n}\n.nav-tabs.nav-justified > li > a {\n  margin-bottom: 5px;\n  text-align: center;\n}\n.nav-tabs.nav-justified > .dropdown .dropdown-menu {\n  top: auto;\n  left: auto;\n}\n@media (min-width: 768px) {\n  .nav-tabs.nav-justified > li {\n    display: table-cell;\n    width: 1%;\n  }\n  .nav-tabs.nav-justified > li > a {\n    margin-bottom: 0;\n  }\n}\n.nav-tabs.nav-justified > li > a {\n  margin-right: 0;\n  border-radius: 4px;\n}\n.nav-tabs.nav-justified > .active > a,\n.nav-tabs.nav-justified > .active > a:hover,\n.nav-tabs.nav-justified > .active > a:focus {\n  border: 1px solid #ddd;\n}\n@media (min-width: 768px) {\n  .nav-tabs.nav-justified > li > a {\n    border-bottom: 1px solid #ddd;\n    border-radius: 4px 4px 0 0;\n  }\n  .nav-tabs.nav-justified > .active > a,\n  .nav-tabs.nav-justified > .active > a:hover,\n  .nav-tabs.nav-justified > .active > a:focus {\n    border-bottom-color: #fff;\n  }\n}\n.nav-pills > li {\n  float: left;\n}\n.nav-pills > li > a {\n  border-radius: 4px;\n}\n.nav-pills > li + li {\n  margin-left: 2px;\n}\n.nav-pills > li.active > a,\n.nav-pills > li.active > a:hover,\n.nav-pills > li.active > a:focus {\n  color: #fff;\n  background-color: #337ab7;\n}\n.nav-stacked > li {\n  float: none;\n}\n.nav-stacked > li + li {\n  margin-top: 2px;\n  margin-left: 0;\n}\n.nav-justified {\n  width: 100%;\n}\n.nav-justified > li {\n  float: none;\n}\n.nav-justified > li > a {\n  margin-bottom: 5px;\n  text-align: center;\n}\n.nav-justified > .dropdown .dropdown-menu {\n  top: auto;\n  left: auto;\n}\n@media (min-width: 768px) {\n  .nav-justified > li {\n    display: table-cell;\n    width: 1%;\n  }\n  .nav-justified > li > a {\n    margin-bottom: 0;\n  }\n}\n.nav-tabs-justified {\n  border-bottom: 0;\n}\n.nav-tabs-justified > li > a {\n  margin-right: 0;\n  border-radius: 4px;\n}\n.nav-tabs-justified > .active > a,\n.nav-tabs-justified > .active > a:hover,\n.nav-tabs-justified > .active > a:focus {\n  border: 1px solid #ddd;\n}\n@media (min-width: 768px) {\n  .nav-tabs-justified > li > a {\n    border-bottom: 1px solid #ddd;\n    border-radius: 4px 4px 0 0;\n  }\n  .nav-tabs-justified > .active > a,\n  .nav-tabs-justified > .active > a:hover,\n  .nav-tabs-justified > .active > a:focus {\n    border-bottom-color: #fff;\n  }\n}\n.tab-content > .tab-pane {\n  display: none;\n}\n.tab-content > .active {\n  display: block;\n}\n.nav-tabs .dropdown-menu {\n  margin-top: -1px;\n  border-top-left-radius: 0;\n  border-top-right-radius: 0;\n}\n.navbar {\n  position: relative;\n  min-height: 50px;\n  margin-bottom: 20px;\n  border: 1px solid transparent;\n}\n@media (min-width: 768px) {\n  .navbar {\n    border-radius: 4px;\n  }\n}\n@media (min-width: 768px) {\n  .navbar-header {\n    float: left;\n  }\n}\n.navbar-collapse {\n  padding-right: 15px;\n  padding-left: 15px;\n  overflow-x: visible;\n  -webkit-overflow-scrolling: touch;\n  border-top: 1px solid transparent;\n  -webkit-box-shadow: inset 0 1px 0 rgba(255, 255, 255, .1);\n          box-shadow: inset 0 1px 0 rgba(255, 255, 255, .1);\n}\n.navbar-collapse.in {\n  overflow-y: auto;\n}\n@media (min-width: 768px) {\n  .navbar-collapse {\n    width: auto;\n    border-top: 0;\n    -webkit-box-shadow: none;\n            box-shadow: none;\n  }\n  .navbar-collapse.collapse {\n    display: block !important;\n    height: auto !important;\n    padding-bottom: 0;\n    overflow: visible !important;\n  }\n  .navbar-collapse.in {\n    overflow-y: visible;\n  }\n  .navbar-fixed-top .navbar-collapse,\n  .navbar-static-top .navbar-collapse,\n  .navbar-fixed-bottom .navbar-collapse {\n    padding-right: 0;\n    padding-left: 0;\n  }\n}\n.navbar-fixed-top .navbar-collapse,\n.navbar-fixed-bottom .navbar-collapse {\n  max-height: 340px;\n}\n@media (max-device-width: 480px) and (orientation: landscape) {\n  .navbar-fixed-top .navbar-collapse,\n  .navbar-fixed-bottom .navbar-collapse {\n    max-height: 200px;\n  }\n}\n.container > .navbar-header,\n.container-fluid > .navbar-header,\n.container > .navbar-collapse,\n.container-fluid > .navbar-collapse {\n  margin-right: -15px;\n  margin-left: -15px;\n}\n@media (min-width: 768px) {\n  .container > .navbar-header,\n  .container-fluid > .navbar-header,\n  .container > .navbar-collapse,\n  .container-fluid > .navbar-collapse {\n    margin-right: 0;\n    margin-left: 0;\n  }\n}\n.navbar-static-top {\n  z-index: 1000;\n  border-width: 0 0 1px;\n}\n@media (min-width: 768px) {\n  .navbar-static-top {\n    border-radius: 0;\n  }\n}\n.navbar-fixed-top,\n.navbar-fixed-bottom {\n  position: fixed;\n  right: 0;\n  left: 0;\n  z-index: 1030;\n}\n@media (min-width: 768px) {\n  .navbar-fixed-top,\n  .navbar-fixed-bottom {\n    border-radius: 0;\n  }\n}\n.navbar-fixed-top {\n  top: 0;\n  border-width: 0 0 1px;\n}\n.navbar-fixed-bottom {\n  bottom: 0;\n  margin-bottom: 0;\n  border-width: 1px 0 0;\n}\n.navbar-brand {\n  float: left;\n  height: 50px;\n  padding: 15px 15px;\n  font-size: 18px;\n  line-height: 20px;\n}\n.navbar-brand:hover,\n.navbar-brand:focus {\n  text-decoration: none;\n}\n.navbar-brand > img {\n  display: block;\n}\n@media (min-width: 768px) {\n  .navbar > .container .navbar-brand,\n  .navbar > .container-fluid .navbar-brand {\n    margin-left: -15px;\n  }\n}\n.navbar-toggle {\n  position: relative;\n  float: right;\n  padding: 9px 10px;\n  margin-top: 8px;\n  margin-right: 15px;\n  margin-bottom: 8px;\n  background-color: transparent;\n  background-image: none;\n  border: 1px solid transparent;\n  border-radius: 4px;\n}\n.navbar-toggle:focus {\n  outline: 0;\n}\n.navbar-toggle .icon-bar {\n  display: block;\n  width: 22px;\n  height: 2px;\n  border-radius: 1px;\n}\n.navbar-toggle .icon-bar + .icon-bar {\n  margin-top: 4px;\n}\n@media (min-width: 768px) {\n  .navbar-toggle {\n    display: none;\n  }\n}\n.navbar-nav {\n  margin: 7.5px -15px;\n}\n.navbar-nav > li > a {\n  padding-top: 10px;\n  padding-bottom: 10px;\n  line-height: 20px;\n}\n@media (max-width: 767px) {\n  .navbar-nav .open .dropdown-menu {\n    position: static;\n    float: none;\n    width: auto;\n    margin-top: 0;\n    background-color: transparent;\n    border: 0;\n    -webkit-box-shadow: none;\n            box-shadow: none;\n  }\n  .navbar-nav .open .dropdown-menu > li > a,\n  .navbar-nav .open .dropdown-menu .dropdown-header {\n    padding: 5px 15px 5px 25px;\n  }\n  .navbar-nav .open .dropdown-menu > li > a {\n    line-height: 20px;\n  }\n  .navbar-nav .open .dropdown-menu > li > a:hover,\n  .navbar-nav .open .dropdown-menu > li > a:focus {\n    background-image: none;\n  }\n}\n@media (min-width: 768px) {\n  .navbar-nav {\n    float: left;\n    margin: 0;\n  }\n  .navbar-nav > li {\n    float: left;\n  }\n  .navbar-nav > li > a {\n    padding-top: 15px;\n    padding-bottom: 15px;\n  }\n}\n.navbar-form {\n  padding: 10px 15px;\n  margin-top: 8px;\n  margin-right: -15px;\n  margin-bottom: 8px;\n  margin-left: -15px;\n  border-top: 1px solid transparent;\n  border-bottom: 1px solid transparent;\n  -webkit-box-shadow: inset 0 1px 0 rgba(255, 255, 255, .1), 0 1px 0 rgba(255, 255, 255, .1);\n          box-shadow: inset 0 1px 0 rgba(255, 255, 255, .1), 0 1px 0 rgba(255, 255, 255, .1);\n}\n@media (min-width: 768px) {\n  .navbar-form .form-group {\n    display: inline-block;\n    margin-bottom: 0;\n    vertical-align: middle;\n  }\n  .navbar-form .form-control {\n    display: inline-block;\n    width: auto;\n    vertical-align: middle;\n  }\n  .navbar-form .form-control-static {\n    display: inline-block;\n  }\n  .navbar-form .input-group {\n    display: inline-table;\n    vertical-align: middle;\n  }\n  .navbar-form .input-group .input-group-addon,\n  .navbar-form .input-group .input-group-btn,\n  .navbar-form .input-group .form-control {\n    width: auto;\n  }\n  .navbar-form .input-group > .form-control {\n    width: 100%;\n  }\n  .navbar-form .control-label {\n    margin-bottom: 0;\n    vertical-align: middle;\n  }\n  .navbar-form .radio,\n  .navbar-form .checkbox {\n    display: inline-block;\n    margin-top: 0;\n    margin-bottom: 0;\n    vertical-align: middle;\n  }\n  .navbar-form .radio label,\n  .navbar-form .checkbox label {\n    padding-left: 0;\n  }\n  .navbar-form .radio input[type=\"radio\"],\n  .navbar-form .checkbox input[type=\"checkbox\"] {\n    position: relative;\n    margin-left: 0;\n  }\n  .navbar-form .has-feedback .form-control-feedback {\n    top: 0;\n  }\n}\n@media (max-width: 767px) {\n  .navbar-form .form-group {\n    margin-bottom: 5px;\n  }\n  .navbar-form .form-group:last-child {\n    margin-bottom: 0;\n  }\n}\n@media (min-width: 768px) {\n  .navbar-form {\n    width: auto;\n    padding-top: 0;\n    padding-bottom: 0;\n    margin-right: 0;\n    margin-left: 0;\n    border: 0;\n    -webkit-box-shadow: none;\n            box-shadow: none;\n  }\n}\n.navbar-nav > li > .dropdown-menu {\n  margin-top: 0;\n  border-top-left-radius: 0;\n  border-top-right-radius: 0;\n}\n.navbar-fixed-bottom .navbar-nav > li > .dropdown-menu {\n  margin-bottom: 0;\n  border-top-left-radius: 4px;\n  border-top-right-radius: 4px;\n  border-bottom-right-radius: 0;\n  border-bottom-left-radius: 0;\n}\n.navbar-btn {\n  margin-top: 8px;\n  margin-bottom: 8px;\n}\n.navbar-btn.btn-sm {\n  margin-top: 10px;\n  margin-bottom: 10px;\n}\n.navbar-btn.btn-xs {\n  margin-top: 14px;\n  margin-bottom: 14px;\n}\n.navbar-text {\n  margin-top: 15px;\n  margin-bottom: 15px;\n}\n@media (min-width: 768px) {\n  .navbar-text {\n    float: left;\n    margin-right: 15px;\n    margin-left: 15px;\n  }\n}\n@media (min-width: 768px) {\n  .navbar-left {\n    float: left !important;\n  }\n  .navbar-right {\n    float: right !important;\n    margin-right: -15px;\n  }\n  .navbar-right ~ .navbar-right {\n    margin-right: 0;\n  }\n}\n.navbar-default {\n  background-color: #f8f8f8;\n  border-color: #e7e7e7;\n}\n.navbar-default .navbar-brand {\n  color: #777;\n}\n.navbar-default .navbar-brand:hover,\n.navbar-default .navbar-brand:focus {\n  color: #5e5e5e;\n  background-color: transparent;\n}\n.navbar-default .navbar-text {\n  color: #777;\n}\n.navbar-default .navbar-nav > li > a {\n  color: #777;\n}\n.navbar-default .navbar-nav > li > a:hover,\n.navbar-default .navbar-nav > li > a:focus {\n  color: #333;\n  background-color: transparent;\n}\n.navbar-default .navbar-nav > .active > a,\n.navbar-default .navbar-nav > .active > a:hover,\n.navbar-default .navbar-nav > .active > a:focus {\n  color: #555;\n  background-color: #e7e7e7;\n}\n.navbar-default .navbar-nav > .disabled > a,\n.navbar-default .navbar-nav > .disabled > a:hover,\n.navbar-default .navbar-nav > .disabled > a:focus {\n  color: #ccc;\n  background-color: transparent;\n}\n.navbar-default .navbar-toggle {\n  border-color: #ddd;\n}\n.navbar-default .navbar-toggle:hover,\n.navbar-default .navbar-toggle:focus {\n  background-color: #ddd;\n}\n.navbar-default .navbar-toggle .icon-bar {\n  background-color: #888;\n}\n.navbar-default .navbar-collapse,\n.navbar-default .navbar-form {\n  border-color: #e7e7e7;\n}\n.navbar-default .navbar-nav > .open > a,\n.navbar-default .navbar-nav > .open > a:hover,\n.navbar-default .navbar-nav > .open > a:focus {\n  color: #555;\n  background-color: #e7e7e7;\n}\n@media (max-width: 767px) {\n  .navbar-default .navbar-nav .open .dropdown-menu > li > a {\n    color: #777;\n  }\n  .navbar-default .navbar-nav .open .dropdown-menu > li > a:hover,\n  .navbar-default .navbar-nav .open .dropdown-menu > li > a:focus {\n    color: #333;\n    background-color: transparent;\n  }\n  .navbar-default .navbar-nav .open .dropdown-menu > .active > a,\n  .navbar-default .navbar-nav .open .dropdown-menu > .active > a:hover,\n  .navbar-default .navbar-nav .open .dropdown-menu > .active > a:focus {\n    color: #555;\n    background-color: #e7e7e7;\n  }\n  .navbar-default .navbar-nav .open .dropdown-menu > .disabled > a,\n  .navbar-default .navbar-nav .open .dropdown-menu > .disabled > a:hover,\n  .navbar-default .navbar-nav .open .dropdown-menu > .disabled > a:focus {\n    color: #ccc;\n    background-color: transparent;\n  }\n}\n.navbar-default .navbar-link {\n  color: #777;\n}\n.navbar-default .navbar-link:hover {\n  color: #333;\n}\n.navbar-default .btn-link {\n  color: #777;\n}\n.navbar-default .btn-link:hover,\n.navbar-default .btn-link:focus {\n  color: #333;\n}\n.navbar-default .btn-link[disabled]:hover,\nfieldset[disabled] .navbar-default .btn-link:hover,\n.navbar-default .btn-link[disabled]:focus,\nfieldset[disabled] .navbar-default .btn-link:focus {\n  color: #ccc;\n}\n.navbar-inverse {\n  background-color: #222;\n  border-color: #080808;\n}\n.navbar-inverse .navbar-brand {\n  color: #9d9d9d;\n}\n.navbar-inverse .navbar-brand:hover,\n.navbar-inverse .navbar-brand:focus {\n  color: #fff;\n  background-color: transparent;\n}\n.navbar-inverse .navbar-text {\n  color: #9d9d9d;\n}\n.navbar-inverse .navbar-nav > li > a {\n  color: #9d9d9d;\n}\n.navbar-inverse .navbar-nav > li > a:hover,\n.navbar-inverse .navbar-nav > li > a:focus {\n  color: #fff;\n  background-color: transparent;\n}\n.navbar-inverse .navbar-nav > .active > a,\n.navbar-inverse .navbar-nav > .active > a:hover,\n.navbar-inverse .navbar-nav > .active > a:focus {\n  color: #fff;\n  background-color: #080808;\n}\n.navbar-inverse .navbar-nav > .disabled > a,\n.navbar-inverse .navbar-nav > .disabled > a:hover,\n.navbar-inverse .navbar-nav > .disabled > a:focus {\n  color: #444;\n  background-color: transparent;\n}\n.navbar-inverse .navbar-toggle {\n  border-color: #333;\n}\n.navbar-inverse .navbar-toggle:hover,\n.navbar-inverse .navbar-toggle:focus {\n  background-color: #333;\n}\n.navbar-inverse .navbar-toggle .icon-bar {\n  background-color: #fff;\n}\n.navbar-inverse .navbar-collapse,\n.navbar-inverse .navbar-form {\n  border-color: #101010;\n}\n.navbar-inverse .navbar-nav > .open > a,\n.navbar-inverse .navbar-nav > .open > a:hover,\n.navbar-inverse .navbar-nav > .open > a:focus {\n  color: #fff;\n  background-color: #080808;\n}\n@media (max-width: 767px) {\n  .navbar-inverse .navbar-nav .open .dropdown-menu > .dropdown-header {\n    border-color: #080808;\n  }\n  .navbar-inverse .navbar-nav .open .dropdown-menu .divider {\n    background-color: #080808;\n  }\n  .navbar-inverse .navbar-nav .open .dropdown-menu > li > a {\n    color: #9d9d9d;\n  }\n  .navbar-inverse .navbar-nav .open .dropdown-menu > li > a:hover,\n  .navbar-inverse .navbar-nav .open .dropdown-menu > li > a:focus {\n    color: #fff;\n    background-color: transparent;\n  }\n  .navbar-inverse .navbar-nav .open .dropdown-menu > .active > a,\n  .navbar-inverse .navbar-nav .open .dropdown-menu > .active > a:hover,\n  .navbar-inverse .navbar-nav .open .dropdown-menu > .active > a:focus {\n    color: #fff;\n    background-color: #080808;\n  }\n  .navbar-inverse .navbar-nav .open .dropdown-menu > .disabled > a,\n  .navbar-inverse .navbar-nav .open .dropdown-menu > .disabled > a:hover,\n  .navbar-inverse .navbar-nav .open .dropdown-menu > .disabled > a:focus {\n    color: #444;\n    background-color: transparent;\n  }\n}\n.navbar-inverse .navbar-link {\n  color: #9d9d9d;\n}\n.navbar-inverse .navbar-link:hover {\n  color: #fff;\n}\n.navbar-inverse .btn-link {\n  color: #9d9d9d;\n}\n.navbar-inverse .btn-link:hover,\n.navbar-inverse .btn-link:focus {\n  color: #fff;\n}\n.navbar-inverse .btn-link[disabled]:hover,\nfieldset[disabled] .navbar-inverse .btn-link:hover,\n.navbar-inverse .btn-link[disabled]:focus,\nfieldset[disabled] .navbar-inverse .btn-link:focus {\n  color: #444;\n}\n.breadcrumb {\n  padding: 8px 15px;\n  margin-bottom: 20px;\n  list-style: none;\n  background-color: #f5f5f5;\n  border-radius: 4px;\n}\n.breadcrumb > li {\n  display: inline-block;\n}\n.breadcrumb > li + li:before {\n  padding: 0 5px;\n  color: #ccc;\n  content: \"/\\00a0\";\n}\n.breadcrumb > .active {\n  color: #777;\n}\n.pagination {\n  display: inline-block;\n  padding-left: 0;\n  margin: 20px 0;\n  border-radius: 4px;\n}\n.pagination > li {\n  display: inline;\n}\n.pagination > li > a,\n.pagination > li > span {\n  position: relative;\n  float: left;\n  padding: 6px 12px;\n  margin-left: -1px;\n  line-height: 1.42857143;\n  color: #337ab7;\n  text-decoration: none;\n  background-color: #fff;\n  border: 1px solid #ddd;\n}\n.pagination > li:first-child > a,\n.pagination > li:first-child > span {\n  margin-left: 0;\n  border-top-left-radius: 4px;\n  border-bottom-left-radius: 4px;\n}\n.pagination > li:last-child > a,\n.pagination > li:last-child > span {\n  border-top-right-radius: 4px;\n  border-bottom-right-radius: 4px;\n}\n.pagination > li > a:hover,\n.pagination > li > span:hover,\n.pagination > li > a:focus,\n.pagination > li > span:focus {\n  z-index: 2;\n  color: #23527c;\n  background-color: #eee;\n  border-color: #ddd;\n}\n.pagination > .active > a,\n.pagination > .active > span,\n.pagination > .active > a:hover,\n.pagination > .active > span:hover,\n.pagination > .active > a:focus,\n.pagination > .active > span:focus {\n  z-index: 3;\n  color: #fff;\n  cursor: default;\n  background-color: #337ab7;\n  border-color: #337ab7;\n}\n.pagination > .disabled > span,\n.pagination > .disabled > span:hover,\n.pagination > .disabled > span:focus,\n.pagination > .disabled > a,\n.pagination > .disabled > a:hover,\n.pagination > .disabled > a:focus {\n  color: #777;\n  cursor: not-allowed;\n  background-color: #fff;\n  border-color: #ddd;\n}\n.pagination-lg > li > a,\n.pagination-lg > li > span {\n  padding: 10px 16px;\n  font-size: 18px;\n  line-height: 1.3333333;\n}\n.pagination-lg > li:first-child > a,\n.pagination-lg > li:first-child > span {\n  border-top-left-radius: 6px;\n  border-bottom-left-radius: 6px;\n}\n.pagination-lg > li:last-child > a,\n.pagination-lg > li:last-child > span {\n  border-top-right-radius: 6px;\n  border-bottom-right-radius: 6px;\n}\n.pagination-sm > li > a,\n.pagination-sm > li > span {\n  padding: 5px 10px;\n  font-size: 12px;\n  line-height: 1.5;\n}\n.pagination-sm > li:first-child > a,\n.pagination-sm > li:first-child > span {\n  border-top-left-radius: 3px;\n  border-bottom-left-radius: 3px;\n}\n.pagination-sm > li:last-child > a,\n.pagination-sm > li:last-child > span {\n  border-top-right-radius: 3px;\n  border-bottom-right-radius: 3px;\n}\n.pager {\n  padding-left: 0;\n  margin: 20px 0;\n  text-align: center;\n  list-style: none;\n}\n.pager li {\n  display: inline;\n}\n.pager li > a,\n.pager li > span {\n  display: inline-block;\n  padding: 5px 14px;\n  background-color: #fff;\n  border: 1px solid #ddd;\n  border-radius: 15px;\n}\n.pager li > a:hover,\n.pager li > a:focus {\n  text-decoration: none;\n  background-color: #eee;\n}\n.pager .next > a,\n.pager .next > span {\n  float: right;\n}\n.pager .previous > a,\n.pager .previous > span {\n  float: left;\n}\n.pager .disabled > a,\n.pager .disabled > a:hover,\n.pager .disabled > a:focus,\n.pager .disabled > span {\n  color: #777;\n  cursor: not-allowed;\n  background-color: #fff;\n}\n.label {\n  display: inline;\n  padding: .2em .6em .3em;\n  font-size: 75%;\n  font-weight: bold;\n  line-height: 1;\n  color: #fff;\n  text-align: center;\n  white-space: nowrap;\n  vertical-align: baseline;\n  border-radius: .25em;\n}\na.label:hover,\na.label:focus {\n  color: #fff;\n  text-decoration: none;\n  cursor: pointer;\n}\n.label:empty {\n  display: none;\n}\n.btn .label {\n  position: relative;\n  top: -1px;\n}\n.label-default {\n  background-color: #777;\n}\n.label-default[href]:hover,\n.label-default[href]:focus {\n  background-color: #5e5e5e;\n}\n.label-primary {\n  background-color: #337ab7;\n}\n.label-primary[href]:hover,\n.label-primary[href]:focus {\n  background-color: #286090;\n}\n.label-success {\n  background-color: #5cb85c;\n}\n.label-success[href]:hover,\n.label-success[href]:focus {\n  background-color: #449d44;\n}\n.label-info {\n  background-color: #5bc0de;\n}\n.label-info[href]:hover,\n.label-info[href]:focus {\n  background-color: #31b0d5;\n}\n.label-warning {\n  background-color: #f0ad4e;\n}\n.label-warning[href]:hover,\n.label-warning[href]:focus {\n  background-color: #ec971f;\n}\n.label-danger {\n  background-color: #d9534f;\n}\n.label-danger[href]:hover,\n.label-danger[href]:focus {\n  background-color: #c9302c;\n}\n.badge {\n  display: inline-block;\n  min-width: 10px;\n  padding: 3px 7px;\n  font-size: 12px;\n  font-weight: bold;\n  line-height: 1;\n  color: #fff;\n  text-align: center;\n  white-space: nowrap;\n  vertical-align: middle;\n  background-color: #777;\n  border-radius: 10px;\n}\n.badge:empty {\n  display: none;\n}\n.btn .badge {\n  position: relative;\n  top: -1px;\n}\n.btn-xs .badge,\n.btn-group-xs > .btn .badge {\n  top: 0;\n  padding: 1px 5px;\n}\na.badge:hover,\na.badge:focus {\n  color: #fff;\n  text-decoration: none;\n  cursor: pointer;\n}\n.list-group-item.active > .badge,\n.nav-pills > .active > a > .badge {\n  color: #337ab7;\n  background-color: #fff;\n}\n.list-group-item > .badge {\n  float: right;\n}\n.list-group-item > .badge + .badge {\n  margin-right: 5px;\n}\n.nav-pills > li > a > .badge {\n  margin-left: 3px;\n}\n.jumbotron {\n  padding-top: 30px;\n  padding-bottom: 30px;\n  margin-bottom: 30px;\n  color: inherit;\n  background-color: #eee;\n}\n.jumbotron h1,\n.jumbotron .h1 {\n  color: inherit;\n}\n.jumbotron p {\n  margin-bottom: 15px;\n  font-size: 21px;\n  font-weight: 200;\n}\n.jumbotron > hr {\n  border-top-color: #d5d5d5;\n}\n.container .jumbotron,\n.container-fluid .jumbotron {\n  padding-right: 15px;\n  padding-left: 15px;\n  border-radius: 6px;\n}\n.jumbotron .container {\n  max-width: 100%;\n}\n@media screen and (min-width: 768px) {\n  .jumbotron {\n    padding-top: 48px;\n    padding-bottom: 48px;\n  }\n  .container .jumbotron,\n  .container-fluid .jumbotron {\n    padding-right: 60px;\n    padding-left: 60px;\n  }\n  .jumbotron h1,\n  .jumbotron .h1 {\n    font-size: 63px;\n  }\n}\n.thumbnail {\n  display: block;\n  padding: 4px;\n  margin-bottom: 20px;\n  line-height: 1.42857143;\n  background-color: #fff;\n  border: 1px solid #ddd;\n  border-radius: 4px;\n  -webkit-transition: border .2s ease-in-out;\n       -o-transition: border .2s ease-in-out;\n          transition: border .2s ease-in-out;\n}\n.thumbnail > img,\n.thumbnail a > img {\n  margin-right: auto;\n  margin-left: auto;\n}\na.thumbnail:hover,\na.thumbnail:focus,\na.thumbnail.active {\n  border-color: #337ab7;\n}\n.thumbnail .caption {\n  padding: 9px;\n  color: #333;\n}\n.alert {\n  padding: 15px;\n  margin-bottom: 20px;\n  border: 1px solid transparent;\n  border-radius: 4px;\n}\n.alert h4 {\n  margin-top: 0;\n  color: inherit;\n}\n.alert .alert-link {\n  font-weight: bold;\n}\n.alert > p,\n.alert > ul {\n  margin-bottom: 0;\n}\n.alert > p + p {\n  margin-top: 5px;\n}\n.alert-dismissable,\n.alert-dismissible {\n  padding-right: 35px;\n}\n.alert-dismissable .close,\n.alert-dismissible .close {\n  position: relative;\n  top: -2px;\n  right: -21px;\n  color: inherit;\n}\n.alert-success {\n  color: #3c763d;\n  background-color: #dff0d8;\n  border-color: #d6e9c6;\n}\n.alert-success hr {\n  border-top-color: #c9e2b3;\n}\n.alert-success .alert-link {\n  color: #2b542c;\n}\n.alert-info {\n  color: #31708f;\n  background-color: #d9edf7;\n  border-color: #bce8f1;\n}\n.alert-info hr {\n  border-top-color: #a6e1ec;\n}\n.alert-info .alert-link {\n  color: #245269;\n}\n.alert-warning {\n  color: #8a6d3b;\n  background-color: #fcf8e3;\n  border-color: #faebcc;\n}\n.alert-warning hr {\n  border-top-color: #f7e1b5;\n}\n.alert-warning .alert-link {\n  color: #66512c;\n}\n.alert-danger {\n  color: #a94442;\n  background-color: #f2dede;\n  border-color: #ebccd1;\n}\n.alert-danger hr {\n  border-top-color: #e4b9c0;\n}\n.alert-danger .alert-link {\n  color: #843534;\n}\n@-webkit-keyframes progress-bar-stripes {\n  from {\n    background-position: 40px 0;\n  }\n  to {\n    background-position: 0 0;\n  }\n}\n@-o-keyframes progress-bar-stripes {\n  from {\n    background-position: 40px 0;\n  }\n  to {\n    background-position: 0 0;\n  }\n}\n@keyframes progress-bar-stripes {\n  from {\n    background-position: 40px 0;\n  }\n  to {\n    background-position: 0 0;\n  }\n}\n.progress {\n  height: 20px;\n  margin-bottom: 20px;\n  overflow: hidden;\n  background-color: #f5f5f5;\n  border-radius: 4px;\n  -webkit-box-shadow: inset 0 1px 2px rgba(0, 0, 0, .1);\n          box-shadow: inset 0 1px 2px rgba(0, 0, 0, .1);\n}\n.progress-bar {\n  float: left;\n  width: 0;\n  height: 100%;\n  font-size: 12px;\n  line-height: 20px;\n  color: #fff;\n  text-align: center;\n  background-color: #337ab7;\n  -webkit-box-shadow: inset 0 -1px 0 rgba(0, 0, 0, .15);\n          box-shadow: inset 0 -1px 0 rgba(0, 0, 0, .15);\n  -webkit-transition: width .6s ease;\n       -o-transition: width .6s ease;\n          transition: width .6s ease;\n}\n.progress-striped .progress-bar,\n.progress-bar-striped {\n  background-image: -webkit-linear-gradient(45deg, rgba(255, 255, 255, .15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .15) 50%, rgba(255, 255, 255, .15) 75%, transparent 75%, transparent);\n  background-image:      -o-linear-gradient(45deg, rgba(255, 255, 255, .15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .15) 50%, rgba(255, 255, 255, .15) 75%, transparent 75%, transparent);\n  background-image:         linear-gradient(45deg, rgba(255, 255, 255, .15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .15) 50%, rgba(255, 255, 255, .15) 75%, transparent 75%, transparent);\n  -webkit-background-size: 40px 40px;\n          background-size: 40px 40px;\n}\n.progress.active .progress-bar,\n.progress-bar.active {\n  -webkit-animation: progress-bar-stripes 2s linear infinite;\n       -o-animation: progress-bar-stripes 2s linear infinite;\n          animation: progress-bar-stripes 2s linear infinite;\n}\n.progress-bar-success {\n  background-color: #5cb85c;\n}\n.progress-striped .progress-bar-success {\n  background-image: -webkit-linear-gradient(45deg, rgba(255, 255, 255, .15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .15) 50%, rgba(255, 255, 255, .15) 75%, transparent 75%, transparent);\n  background-image:      -o-linear-gradient(45deg, rgba(255, 255, 255, .15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .15) 50%, rgba(255, 255, 255, .15) 75%, transparent 75%, transparent);\n  background-image:         linear-gradient(45deg, rgba(255, 255, 255, .15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .15) 50%, rgba(255, 255, 255, .15) 75%, transparent 75%, transparent);\n}\n.progress-bar-info {\n  background-color: #5bc0de;\n}\n.progress-striped .progress-bar-info {\n  background-image: -webkit-linear-gradient(45deg, rgba(255, 255, 255, .15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .15) 50%, rgba(255, 255, 255, .15) 75%, transparent 75%, transparent);\n  background-image:      -o-linear-gradient(45deg, rgba(255, 255, 255, .15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .15) 50%, rgba(255, 255, 255, .15) 75%, transparent 75%, transparent);\n  background-image:         linear-gradient(45deg, rgba(255, 255, 255, .15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .15) 50%, rgba(255, 255, 255, .15) 75%, transparent 75%, transparent);\n}\n.progress-bar-warning {\n  background-color: #f0ad4e;\n}\n.progress-striped .progress-bar-warning {\n  background-image: -webkit-linear-gradient(45deg, rgba(255, 255, 255, .15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .15) 50%, rgba(255, 255, 255, .15) 75%, transparent 75%, transparent);\n  background-image:      -o-linear-gradient(45deg, rgba(255, 255, 255, .15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .15) 50%, rgba(255, 255, 255, .15) 75%, transparent 75%, transparent);\n  background-image:         linear-gradient(45deg, rgba(255, 255, 255, .15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .15) 50%, rgba(255, 255, 255, .15) 75%, transparent 75%, transparent);\n}\n.progress-bar-danger {\n  background-color: #d9534f;\n}\n.progress-striped .progress-bar-danger {\n  background-image: -webkit-linear-gradient(45deg, rgba(255, 255, 255, .15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .15) 50%, rgba(255, 255, 255, .15) 75%, transparent 75%, transparent);\n  background-image:      -o-linear-gradient(45deg, rgba(255, 255, 255, .15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .15) 50%, rgba(255, 255, 255, .15) 75%, transparent 75%, transparent);\n  background-image:         linear-gradient(45deg, rgba(255, 255, 255, .15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .15) 50%, rgba(255, 255, 255, .15) 75%, transparent 75%, transparent);\n}\n.media {\n  margin-top: 15px;\n}\n.media:first-child {\n  margin-top: 0;\n}\n.media,\n.media-body {\n  overflow: hidden;\n  zoom: 1;\n}\n.media-body {\n  width: 10000px;\n}\n.media-object {\n  display: block;\n}\n.media-object.img-thumbnail {\n  max-width: none;\n}\n.media-right,\n.media > .pull-right {\n  padding-left: 10px;\n}\n.media-left,\n.media > .pull-left {\n  padding-right: 10px;\n}\n.media-left,\n.media-right,\n.media-body {\n  display: table-cell;\n  vertical-align: top;\n}\n.media-middle {\n  vertical-align: middle;\n}\n.media-bottom {\n  vertical-align: bottom;\n}\n.media-heading {\n  margin-top: 0;\n  margin-bottom: 5px;\n}\n.media-list {\n  padding-left: 0;\n  list-style: none;\n}\n.list-group {\n  padding-left: 0;\n  margin-bottom: 20px;\n}\n.list-group-item {\n  position: relative;\n  display: block;\n  padding: 10px 15px;\n  margin-bottom: -1px;\n  background-color: #fff;\n  border: 1px solid #ddd;\n}\n.list-group-item:first-child {\n  border-top-left-radius: 4px;\n  border-top-right-radius: 4px;\n}\n.list-group-item:last-child {\n  margin-bottom: 0;\n  border-bottom-right-radius: 4px;\n  border-bottom-left-radius: 4px;\n}\na.list-group-item,\nbutton.list-group-item {\n  color: #555;\n}\na.list-group-item .list-group-item-heading,\nbutton.list-group-item .list-group-item-heading {\n  color: #333;\n}\na.list-group-item:hover,\nbutton.list-group-item:hover,\na.list-group-item:focus,\nbutton.list-group-item:focus {\n  color: #555;\n  text-decoration: none;\n  background-color: #f5f5f5;\n}\nbutton.list-group-item {\n  width: 100%;\n  text-align: left;\n}\n.list-group-item.disabled,\n.list-group-item.disabled:hover,\n.list-group-item.disabled:focus {\n  color: #777;\n  cursor: not-allowed;\n  background-color: #eee;\n}\n.list-group-item.disabled .list-group-item-heading,\n.list-group-item.disabled:hover .list-group-item-heading,\n.list-group-item.disabled:focus .list-group-item-heading {\n  color: inherit;\n}\n.list-group-item.disabled .list-group-item-text,\n.list-group-item.disabled:hover .list-group-item-text,\n.list-group-item.disabled:focus .list-group-item-text {\n  color: #777;\n}\n.list-group-item.active,\n.list-group-item.active:hover,\n.list-group-item.active:focus {\n  z-index: 2;\n  color: #fff;\n  background-color: #337ab7;\n  border-color: #337ab7;\n}\n.list-group-item.active .list-group-item-heading,\n.list-group-item.active:hover .list-group-item-heading,\n.list-group-item.active:focus .list-group-item-heading,\n.list-group-item.active .list-group-item-heading > small,\n.list-group-item.active:hover .list-group-item-heading > small,\n.list-group-item.active:focus .list-group-item-heading > small,\n.list-group-item.active .list-group-item-heading > .small,\n.list-group-item.active:hover .list-group-item-heading > .small,\n.list-group-item.active:focus .list-group-item-heading > .small {\n  color: inherit;\n}\n.list-group-item.active .list-group-item-text,\n.list-group-item.active:hover .list-group-item-text,\n.list-group-item.active:focus .list-group-item-text {\n  color: #c7ddef;\n}\n.list-group-item-success {\n  color: #3c763d;\n  background-color: #dff0d8;\n}\na.list-group-item-success,\nbutton.list-group-item-success {\n  color: #3c763d;\n}\na.list-group-item-success .list-group-item-heading,\nbutton.list-group-item-success .list-group-item-heading {\n  color: inherit;\n}\na.list-group-item-success:hover,\nbutton.list-group-item-success:hover,\na.list-group-item-success:focus,\nbutton.list-group-item-success:focus {\n  color: #3c763d;\n  background-color: #d0e9c6;\n}\na.list-group-item-success.active,\nbutton.list-group-item-success.active,\na.list-group-item-success.active:hover,\nbutton.list-group-item-success.active:hover,\na.list-group-item-success.active:focus,\nbutton.list-group-item-success.active:focus {\n  color: #fff;\n  background-color: #3c763d;\n  border-color: #3c763d;\n}\n.list-group-item-info {\n  color: #31708f;\n  background-color: #d9edf7;\n}\na.list-group-item-info,\nbutton.list-group-item-info {\n  color: #31708f;\n}\na.list-group-item-info .list-group-item-heading,\nbutton.list-group-item-info .list-group-item-heading {\n  color: inherit;\n}\na.list-group-item-info:hover,\nbutton.list-group-item-info:hover,\na.list-group-item-info:focus,\nbutton.list-group-item-info:focus {\n  color: #31708f;\n  background-color: #c4e3f3;\n}\na.list-group-item-info.active,\nbutton.list-group-item-info.active,\na.list-group-item-info.active:hover,\nbutton.list-group-item-info.active:hover,\na.list-group-item-info.active:focus,\nbutton.list-group-item-info.active:focus {\n  color: #fff;\n  background-color: #31708f;\n  border-color: #31708f;\n}\n.list-group-item-warning {\n  color: #8a6d3b;\n  background-color: #fcf8e3;\n}\na.list-group-item-warning,\nbutton.list-group-item-warning {\n  color: #8a6d3b;\n}\na.list-group-item-warning .list-group-item-heading,\nbutton.list-group-item-warning .list-group-item-heading {\n  color: inherit;\n}\na.list-group-item-warning:hover,\nbutton.list-group-item-warning:hover,\na.list-group-item-warning:focus,\nbutton.list-group-item-warning:focus {\n  color: #8a6d3b;\n  background-color: #faf2cc;\n}\na.list-group-item-warning.active,\nbutton.list-group-item-warning.active,\na.list-group-item-warning.active:hover,\nbutton.list-group-item-warning.active:hover,\na.list-group-item-warning.active:focus,\nbutton.list-group-item-warning.active:focus {\n  color: #fff;\n  background-color: #8a6d3b;\n  border-color: #8a6d3b;\n}\n.list-group-item-danger {\n  color: #a94442;\n  background-color: #f2dede;\n}\na.list-group-item-danger,\nbutton.list-group-item-danger {\n  color: #a94442;\n}\na.list-group-item-danger .list-group-item-heading,\nbutton.list-group-item-danger .list-group-item-heading {\n  color: inherit;\n}\na.list-group-item-danger:hover,\nbutton.list-group-item-danger:hover,\na.list-group-item-danger:focus,\nbutton.list-group-item-danger:focus {\n  color: #a94442;\n  background-color: #ebcccc;\n}\na.list-group-item-danger.active,\nbutton.list-group-item-danger.active,\na.list-group-item-danger.active:hover,\nbutton.list-group-item-danger.active:hover,\na.list-group-item-danger.active:focus,\nbutton.list-group-item-danger.active:focus {\n  color: #fff;\n  background-color: #a94442;\n  border-color: #a94442;\n}\n.list-group-item-heading {\n  margin-top: 0;\n  margin-bottom: 5px;\n}\n.list-group-item-text {\n  margin-bottom: 0;\n  line-height: 1.3;\n}\n.panel {\n  margin-bottom: 20px;\n  background-color: #fff;\n  border: 1px solid transparent;\n  border-radius: 4px;\n  -webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, .05);\n          box-shadow: 0 1px 1px rgba(0, 0, 0, .05);\n}\n.panel-body {\n  padding: 15px;\n}\n.panel-heading {\n  padding: 10px 15px;\n  border-bottom: 1px solid transparent;\n  border-top-left-radius: 3px;\n  border-top-right-radius: 3px;\n}\n.panel-heading > .dropdown .dropdown-toggle {\n  color: inherit;\n}\n.panel-title {\n  margin-top: 0;\n  margin-bottom: 0;\n  font-size: 16px;\n  color: inherit;\n}\n.panel-title > a,\n.panel-title > small,\n.panel-title > .small,\n.panel-title > small > a,\n.panel-title > .small > a {\n  color: inherit;\n}\n.panel-footer {\n  padding: 10px 15px;\n  background-color: #f5f5f5;\n  border-top: 1px solid #ddd;\n  border-bottom-right-radius: 3px;\n  border-bottom-left-radius: 3px;\n}\n.panel > .list-group,\n.panel > .panel-collapse > .list-group {\n  margin-bottom: 0;\n}\n.panel > .list-group .list-group-item,\n.panel > .panel-collapse > .list-group .list-group-item {\n  border-width: 1px 0;\n  border-radius: 0;\n}\n.panel > .list-group:first-child .list-group-item:first-child,\n.panel > .panel-collapse > .list-group:first-child .list-group-item:first-child {\n  border-top: 0;\n  border-top-left-radius: 3px;\n  border-top-right-radius: 3px;\n}\n.panel > .list-group:last-child .list-group-item:last-child,\n.panel > .panel-collapse > .list-group:last-child .list-group-item:last-child {\n  border-bottom: 0;\n  border-bottom-right-radius: 3px;\n  border-bottom-left-radius: 3px;\n}\n.panel > .panel-heading + .panel-collapse > .list-group .list-group-item:first-child {\n  border-top-left-radius: 0;\n  border-top-right-radius: 0;\n}\n.panel-heading + .list-group .list-group-item:first-child {\n  border-top-width: 0;\n}\n.list-group + .panel-footer {\n  border-top-width: 0;\n}\n.panel > .table,\n.panel > .table-responsive > .table,\n.panel > .panel-collapse > .table {\n  margin-bottom: 0;\n}\n.panel > .table caption,\n.panel > .table-responsive > .table caption,\n.panel > .panel-collapse > .table caption {\n  padding-right: 15px;\n  padding-left: 15px;\n}\n.panel > .table:first-child,\n.panel > .table-responsive:first-child > .table:first-child {\n  border-top-left-radius: 3px;\n  border-top-right-radius: 3px;\n}\n.panel > .table:first-child > thead:first-child > tr:first-child,\n.panel > .table-responsive:first-child > .table:first-child > thead:first-child > tr:first-child,\n.panel > .table:first-child > tbody:first-child > tr:first-child,\n.panel > .table-responsive:first-child > .table:first-child > tbody:first-child > tr:first-child {\n  border-top-left-radius: 3px;\n  border-top-right-radius: 3px;\n}\n.panel > .table:first-child > thead:first-child > tr:first-child td:first-child,\n.panel > .table-responsive:first-child > .table:first-child > thead:first-child > tr:first-child td:first-child,\n.panel > .table:first-child > tbody:first-child > tr:first-child td:first-child,\n.panel > .table-responsive:first-child > .table:first-child > tbody:first-child > tr:first-child td:first-child,\n.panel > .table:first-child > thead:first-child > tr:first-child th:first-child,\n.panel > .table-responsive:first-child > .table:first-child > thead:first-child > tr:first-child th:first-child,\n.panel > .table:first-child > tbody:first-child > tr:first-child th:first-child,\n.panel > .table-responsive:first-child > .table:first-child > tbody:first-child > tr:first-child th:first-child {\n  border-top-left-radius: 3px;\n}\n.panel > .table:first-child > thead:first-child > tr:first-child td:last-child,\n.panel > .table-responsive:first-child > .table:first-child > thead:first-child > tr:first-child td:last-child,\n.panel > .table:first-child > tbody:first-child > tr:first-child td:last-child,\n.panel > .table-responsive:first-child > .table:first-child > tbody:first-child > tr:first-child td:last-child,\n.panel > .table:first-child > thead:first-child > tr:first-child th:last-child,\n.panel > .table-responsive:first-child > .table:first-child > thead:first-child > tr:first-child th:last-child,\n.panel > .table:first-child > tbody:first-child > tr:first-child th:last-child,\n.panel > .table-responsive:first-child > .table:first-child > tbody:first-child > tr:first-child th:last-child {\n  border-top-right-radius: 3px;\n}\n.panel > .table:last-child,\n.panel > .table-responsive:last-child > .table:last-child {\n  border-bottom-right-radius: 3px;\n  border-bottom-left-radius: 3px;\n}\n.panel > .table:last-child > tbody:last-child > tr:last-child,\n.panel > .table-responsive:last-child > .table:last-child > tbody:last-child > tr:last-child,\n.panel > .table:last-child > tfoot:last-child > tr:last-child,\n.panel > .table-responsive:last-child > .table:last-child > tfoot:last-child > tr:last-child {\n  border-bottom-right-radius: 3px;\n  border-bottom-left-radius: 3px;\n}\n.panel > .table:last-child > tbody:last-child > tr:last-child td:first-child,\n.panel > .table-responsive:last-child > .table:last-child > tbody:last-child > tr:last-child td:first-child,\n.panel > .table:last-child > tfoot:last-child > tr:last-child td:first-child,\n.panel > .table-responsive:last-child > .table:last-child > tfoot:last-child > tr:last-child td:first-child,\n.panel > .table:last-child > tbody:last-child > tr:last-child th:first-child,\n.panel > .table-responsive:last-child > .table:last-child > tbody:last-child > tr:last-child th:first-child,\n.panel > .table:last-child > tfoot:last-child > tr:last-child th:first-child,\n.panel > .table-responsive:last-child > .table:last-child > tfoot:last-child > tr:last-child th:first-child {\n  border-bottom-left-radius: 3px;\n}\n.panel > .table:last-child > tbody:last-child > tr:last-child td:last-child,\n.panel > .table-responsive:last-child > .table:last-child > tbody:last-child > tr:last-child td:last-child,\n.panel > .table:last-child > tfoot:last-child > tr:last-child td:last-child,\n.panel > .table-responsive:last-child > .table:last-child > tfoot:last-child > tr:last-child td:last-child,\n.panel > .table:last-child > tbody:last-child > tr:last-child th:last-child,\n.panel > .table-responsive:last-child > .table:last-child > tbody:last-child > tr:last-child th:last-child,\n.panel > .table:last-child > tfoot:last-child > tr:last-child th:last-child,\n.panel > .table-responsive:last-child > .table:last-child > tfoot:last-child > tr:last-child th:last-child {\n  border-bottom-right-radius: 3px;\n}\n.panel > .panel-body + .table,\n.panel > .panel-body + .table-responsive,\n.panel > .table + .panel-body,\n.panel > .table-responsive + .panel-body {\n  border-top: 1px solid #ddd;\n}\n.panel > .table > tbody:first-child > tr:first-child th,\n.panel > .table > tbody:first-child > tr:first-child td {\n  border-top: 0;\n}\n.panel > .table-bordered,\n.panel > .table-responsive > .table-bordered {\n  border: 0;\n}\n.panel > .table-bordered > thead > tr > th:first-child,\n.panel > .table-responsive > .table-bordered > thead > tr > th:first-child,\n.panel > .table-bordered > tbody > tr > th:first-child,\n.panel > .table-responsive > .table-bordered > tbody > tr > th:first-child,\n.panel > .table-bordered > tfoot > tr > th:first-child,\n.panel > .table-responsive > .table-bordered > tfoot > tr > th:first-child,\n.panel > .table-bordered > thead > tr > td:first-child,\n.panel > .table-responsive > .table-bordered > thead > tr > td:first-child,\n.panel > .table-bordered > tbody > tr > td:first-child,\n.panel > .table-responsive > .table-bordered > tbody > tr > td:first-child,\n.panel > .table-bordered > tfoot > tr > td:first-child,\n.panel > .table-responsive > .table-bordered > tfoot > tr > td:first-child {\n  border-left: 0;\n}\n.panel > .table-bordered > thead > tr > th:last-child,\n.panel > .table-responsive > .table-bordered > thead > tr > th:last-child,\n.panel > .table-bordered > tbody > tr > th:last-child,\n.panel > .table-responsive > .table-bordered > tbody > tr > th:last-child,\n.panel > .table-bordered > tfoot > tr > th:last-child,\n.panel > .table-responsive > .table-bordered > tfoot > tr > th:last-child,\n.panel > .table-bordered > thead > tr > td:last-child,\n.panel > .table-responsive > .table-bordered > thead > tr > td:last-child,\n.panel > .table-bordered > tbody > tr > td:last-child,\n.panel > .table-responsive > .table-bordered > tbody > tr > td:last-child,\n.panel > .table-bordered > tfoot > tr > td:last-child,\n.panel > .table-responsive > .table-bordered > tfoot > tr > td:last-child {\n  border-right: 0;\n}\n.panel > .table-bordered > thead > tr:first-child > td,\n.panel > .table-responsive > .table-bordered > thead > tr:first-child > td,\n.panel > .table-bordered > tbody > tr:first-child > td,\n.panel > .table-responsive > .table-bordered > tbody > tr:first-child > td,\n.panel > .table-bordered > thead > tr:first-child > th,\n.panel > .table-responsive > .table-bordered > thead > tr:first-child > th,\n.panel > .table-bordered > tbody > tr:first-child > th,\n.panel > .table-responsive > .table-bordered > tbody > tr:first-child > th {\n  border-bottom: 0;\n}\n.panel > .table-bordered > tbody > tr:last-child > td,\n.panel > .table-responsive > .table-bordered > tbody > tr:last-child > td,\n.panel > .table-bordered > tfoot > tr:last-child > td,\n.panel > .table-responsive > .table-bordered > tfoot > tr:last-child > td,\n.panel > .table-bordered > tbody > tr:last-child > th,\n.panel > .table-responsive > .table-bordered > tbody > tr:last-child > th,\n.panel > .table-bordered > tfoot > tr:last-child > th,\n.panel > .table-responsive > .table-bordered > tfoot > tr:last-child > th {\n  border-bottom: 0;\n}\n.panel > .table-responsive {\n  margin-bottom: 0;\n  border: 0;\n}\n.panel-group {\n  margin-bottom: 20px;\n}\n.panel-group .panel {\n  margin-bottom: 0;\n  border-radius: 4px;\n}\n.panel-group .panel + .panel {\n  margin-top: 5px;\n}\n.panel-group .panel-heading {\n  border-bottom: 0;\n}\n.panel-group .panel-heading + .panel-collapse > .panel-body,\n.panel-group .panel-heading + .panel-collapse > .list-group {\n  border-top: 1px solid #ddd;\n}\n.panel-group .panel-footer {\n  border-top: 0;\n}\n.panel-group .panel-footer + .panel-collapse .panel-body {\n  border-bottom: 1px solid #ddd;\n}\n.panel-default {\n  border-color: #ddd;\n}\n.panel-default > .panel-heading {\n  color: #333;\n  background-color: #f5f5f5;\n  border-color: #ddd;\n}\n.panel-default > .panel-heading + .panel-collapse > .panel-body {\n  border-top-color: #ddd;\n}\n.panel-default > .panel-heading .badge {\n  color: #f5f5f5;\n  background-color: #333;\n}\n.panel-default > .panel-footer + .panel-collapse > .panel-body {\n  border-bottom-color: #ddd;\n}\n.panel-primary {\n  border-color: #337ab7;\n}\n.panel-primary > .panel-heading {\n  color: #fff;\n  background-color: #337ab7;\n  border-color: #337ab7;\n}\n.panel-primary > .panel-heading + .panel-collapse > .panel-body {\n  border-top-color: #337ab7;\n}\n.panel-primary > .panel-heading .badge {\n  color: #337ab7;\n  background-color: #fff;\n}\n.panel-primary > .panel-footer + .panel-collapse > .panel-body {\n  border-bottom-color: #337ab7;\n}\n.panel-success {\n  border-color: #d6e9c6;\n}\n.panel-success > .panel-heading {\n  color: #3c763d;\n  background-color: #dff0d8;\n  border-color: #d6e9c6;\n}\n.panel-success > .panel-heading + .panel-collapse > .panel-body {\n  border-top-color: #d6e9c6;\n}\n.panel-success > .panel-heading .badge {\n  color: #dff0d8;\n  background-color: #3c763d;\n}\n.panel-success > .panel-footer + .panel-collapse > .panel-body {\n  border-bottom-color: #d6e9c6;\n}\n.panel-info {\n  border-color: #bce8f1;\n}\n.panel-info > .panel-heading {\n  color: #31708f;\n  background-color: #d9edf7;\n  border-color: #bce8f1;\n}\n.panel-info > .panel-heading + .panel-collapse > .panel-body {\n  border-top-color: #bce8f1;\n}\n.panel-info > .panel-heading .badge {\n  color: #d9edf7;\n  background-color: #31708f;\n}\n.panel-info > .panel-footer + .panel-collapse > .panel-body {\n  border-bottom-color: #bce8f1;\n}\n.panel-warning {\n  border-color: #faebcc;\n}\n.panel-warning > .panel-heading {\n  color: #8a6d3b;\n  background-color: #fcf8e3;\n  border-color: #faebcc;\n}\n.panel-warning > .panel-heading + .panel-collapse > .panel-body {\n  border-top-color: #faebcc;\n}\n.panel-warning > .panel-heading .badge {\n  color: #fcf8e3;\n  background-color: #8a6d3b;\n}\n.panel-warning > .panel-footer + .panel-collapse > .panel-body {\n  border-bottom-color: #faebcc;\n}\n.panel-danger {\n  border-color: #ebccd1;\n}\n.panel-danger > .panel-heading {\n  color: #a94442;\n  background-color: #f2dede;\n  border-color: #ebccd1;\n}\n.panel-danger > .panel-heading + .panel-collapse > .panel-body {\n  border-top-color: #ebccd1;\n}\n.panel-danger > .panel-heading .badge {\n  color: #f2dede;\n  background-color: #a94442;\n}\n.panel-danger > .panel-footer + .panel-collapse > .panel-body {\n  border-bottom-color: #ebccd1;\n}\n.embed-responsive {\n  position: relative;\n  display: block;\n  height: 0;\n  padding: 0;\n  overflow: hidden;\n}\n.embed-responsive .embed-responsive-item,\n.embed-responsive iframe,\n.embed-responsive embed,\n.embed-responsive object,\n.embed-responsive video {\n  position: absolute;\n  top: 0;\n  bottom: 0;\n  left: 0;\n  width: 100%;\n  height: 100%;\n  border: 0;\n}\n.embed-responsive-16by9 {\n  padding-bottom: 56.25%;\n}\n.embed-responsive-4by3 {\n  padding-bottom: 75%;\n}\n.well {\n  min-height: 20px;\n  padding: 19px;\n  margin-bottom: 20px;\n  background-color: #f5f5f5;\n  border: 1px solid #e3e3e3;\n  border-radius: 4px;\n  -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .05);\n          box-shadow: inset 0 1px 1px rgba(0, 0, 0, .05);\n}\n.well blockquote {\n  border-color: #ddd;\n  border-color: rgba(0, 0, 0, .15);\n}\n.well-lg {\n  padding: 24px;\n  border-radius: 6px;\n}\n.well-sm {\n  padding: 9px;\n  border-radius: 3px;\n}\n.close {\n  float: right;\n  font-size: 21px;\n  font-weight: bold;\n  line-height: 1;\n  color: #000;\n  text-shadow: 0 1px 0 #fff;\n  filter: alpha(opacity=20);\n  opacity: .2;\n}\n.close:hover,\n.close:focus {\n  color: #000;\n  text-decoration: none;\n  cursor: pointer;\n  filter: alpha(opacity=50);\n  opacity: .5;\n}\nbutton.close {\n  -webkit-appearance: none;\n  padding: 0;\n  cursor: pointer;\n  background: transparent;\n  border: 0;\n}\n.modal-open {\n  overflow: hidden;\n}\n.modal {\n  position: fixed;\n  top: 0;\n  right: 0;\n  bottom: 0;\n  left: 0;\n  z-index: 1050;\n  display: none;\n  overflow: hidden;\n  -webkit-overflow-scrolling: touch;\n  outline: 0;\n}\n.modal.fade .modal-dialog {\n  -webkit-transition: -webkit-transform .3s ease-out;\n       -o-transition:      -o-transform .3s ease-out;\n          transition:         transform .3s ease-out;\n  -webkit-transform: translate(0, -25%);\n      -ms-transform: translate(0, -25%);\n       -o-transform: translate(0, -25%);\n          transform: translate(0, -25%);\n}\n.modal.in .modal-dialog {\n  -webkit-transform: translate(0, 0);\n      -ms-transform: translate(0, 0);\n       -o-transform: translate(0, 0);\n          transform: translate(0, 0);\n}\n.modal-open .modal {\n  overflow-x: hidden;\n  overflow-y: auto;\n}\n.modal-dialog {\n  position: relative;\n  width: auto;\n  margin: 10px;\n}\n.modal-content {\n  position: relative;\n  background-color: #fff;\n  -webkit-background-clip: padding-box;\n          background-clip: padding-box;\n  border: 1px solid #999;\n  border: 1px solid rgba(0, 0, 0, .2);\n  border-radius: 6px;\n  outline: 0;\n  -webkit-box-shadow: 0 3px 9px rgba(0, 0, 0, .5);\n          box-shadow: 0 3px 9px rgba(0, 0, 0, .5);\n}\n.modal-backdrop {\n  position: fixed;\n  top: 0;\n  right: 0;\n  bottom: 0;\n  left: 0;\n  z-index: 1040;\n  background-color: #000;\n}\n.modal-backdrop.fade {\n  filter: alpha(opacity=0);\n  opacity: 0;\n}\n.modal-backdrop.in {\n  filter: alpha(opacity=50);\n  opacity: .5;\n}\n.modal-header {\n  padding: 15px;\n  border-bottom: 1px solid #e5e5e5;\n}\n.modal-header .close {\n  margin-top: -2px;\n}\n.modal-title {\n  margin: 0;\n  line-height: 1.42857143;\n}\n.modal-body {\n  position: relative;\n  padding: 15px;\n}\n.modal-footer {\n  padding: 15px;\n  text-align: right;\n  border-top: 1px solid #e5e5e5;\n}\n.modal-footer .btn + .btn {\n  margin-bottom: 0;\n  margin-left: 5px;\n}\n.modal-footer .btn-group .btn + .btn {\n  margin-left: -1px;\n}\n.modal-footer .btn-block + .btn-block {\n  margin-left: 0;\n}\n.modal-scrollbar-measure {\n  position: absolute;\n  top: -9999px;\n  width: 50px;\n  height: 50px;\n  overflow: scroll;\n}\n@media (min-width: 768px) {\n  .modal-dialog {\n    width: 600px;\n    margin: 30px auto;\n  }\n  .modal-content {\n    -webkit-box-shadow: 0 5px 15px rgba(0, 0, 0, .5);\n            box-shadow: 0 5px 15px rgba(0, 0, 0, .5);\n  }\n  .modal-sm {\n    width: 300px;\n  }\n}\n@media (min-width: 992px) {\n  .modal-lg {\n    width: 900px;\n  }\n}\n.tooltip {\n  position: absolute;\n  z-index: 1070;\n  display: block;\n  font-family: \"Helvetica Neue\", Helvetica, Arial, sans-serif;\n  font-size: 12px;\n  font-style: normal;\n  font-weight: normal;\n  line-height: 1.42857143;\n  text-align: left;\n  text-align: start;\n  text-decoration: none;\n  text-shadow: none;\n  text-transform: none;\n  letter-spacing: normal;\n  word-break: normal;\n  word-spacing: normal;\n  word-wrap: normal;\n  white-space: normal;\n  filter: alpha(opacity=0);\n  opacity: 0;\n\n  line-break: auto;\n}\n.tooltip.in {\n  filter: alpha(opacity=90);\n  opacity: .9;\n}\n.tooltip.top {\n  padding: 5px 0;\n  margin-top: -3px;\n}\n.tooltip.right {\n  padding: 0 5px;\n  margin-left: 3px;\n}\n.tooltip.bottom {\n  padding: 5px 0;\n  margin-top: 3px;\n}\n.tooltip.left {\n  padding: 0 5px;\n  margin-left: -3px;\n}\n.tooltip-inner {\n  max-width: 200px;\n  padding: 3px 8px;\n  color: #fff;\n  text-align: center;\n  background-color: #000;\n  border-radius: 4px;\n}\n.tooltip-arrow {\n  position: absolute;\n  width: 0;\n  height: 0;\n  border-color: transparent;\n  border-style: solid;\n}\n.tooltip.top .tooltip-arrow {\n  bottom: 0;\n  left: 50%;\n  margin-left: -5px;\n  border-width: 5px 5px 0;\n  border-top-color: #000;\n}\n.tooltip.top-left .tooltip-arrow {\n  right: 5px;\n  bottom: 0;\n  margin-bottom: -5px;\n  border-width: 5px 5px 0;\n  border-top-color: #000;\n}\n.tooltip.top-right .tooltip-arrow {\n  bottom: 0;\n  left: 5px;\n  margin-bottom: -5px;\n  border-width: 5px 5px 0;\n  border-top-color: #000;\n}\n.tooltip.right .tooltip-arrow {\n  top: 50%;\n  left: 0;\n  margin-top: -5px;\n  border-width: 5px 5px 5px 0;\n  border-right-color: #000;\n}\n.tooltip.left .tooltip-arrow {\n  top: 50%;\n  right: 0;\n  margin-top: -5px;\n  border-width: 5px 0 5px 5px;\n  border-left-color: #000;\n}\n.tooltip.bottom .tooltip-arrow {\n  top: 0;\n  left: 50%;\n  margin-left: -5px;\n  border-width: 0 5px 5px;\n  border-bottom-color: #000;\n}\n.tooltip.bottom-left .tooltip-arrow {\n  top: 0;\n  right: 5px;\n  margin-top: -5px;\n  border-width: 0 5px 5px;\n  border-bottom-color: #000;\n}\n.tooltip.bottom-right .tooltip-arrow {\n  top: 0;\n  left: 5px;\n  margin-top: -5px;\n  border-width: 0 5px 5px;\n  border-bottom-color: #000;\n}\n.popover {\n  position: absolute;\n  top: 0;\n  left: 0;\n  z-index: 1060;\n  display: none;\n  max-width: 276px;\n  padding: 1px;\n  font-family: \"Helvetica Neue\", Helvetica, Arial, sans-serif;\n  font-size: 14px;\n  font-style: normal;\n  font-weight: normal;\n  line-height: 1.42857143;\n  text-align: left;\n  text-align: start;\n  text-decoration: none;\n  text-shadow: none;\n  text-transform: none;\n  letter-spacing: normal;\n  word-break: normal;\n  word-spacing: normal;\n  word-wrap: normal;\n  white-space: normal;\n  background-color: #fff;\n  -webkit-background-clip: padding-box;\n          background-clip: padding-box;\n  border: 1px solid #ccc;\n  border: 1px solid rgba(0, 0, 0, .2);\n  border-radius: 6px;\n  -webkit-box-shadow: 0 5px 10px rgba(0, 0, 0, .2);\n          box-shadow: 0 5px 10px rgba(0, 0, 0, .2);\n\n  line-break: auto;\n}\n.popover.top {\n  margin-top: -10px;\n}\n.popover.right {\n  margin-left: 10px;\n}\n.popover.bottom {\n  margin-top: 10px;\n}\n.popover.left {\n  margin-left: -10px;\n}\n.popover-title {\n  padding: 8px 14px;\n  margin: 0;\n  font-size: 14px;\n  background-color: #f7f7f7;\n  border-bottom: 1px solid #ebebeb;\n  border-radius: 5px 5px 0 0;\n}\n.popover-content {\n  padding: 9px 14px;\n}\n.popover > .arrow,\n.popover > .arrow:after {\n  position: absolute;\n  display: block;\n  width: 0;\n  height: 0;\n  border-color: transparent;\n  border-style: solid;\n}\n.popover > .arrow {\n  border-width: 11px;\n}\n.popover > .arrow:after {\n  content: \"\";\n  border-width: 10px;\n}\n.popover.top > .arrow {\n  bottom: -11px;\n  left: 50%;\n  margin-left: -11px;\n  border-top-color: #999;\n  border-top-color: rgba(0, 0, 0, .25);\n  border-bottom-width: 0;\n}\n.popover.top > .arrow:after {\n  bottom: 1px;\n  margin-left: -10px;\n  content: \" \";\n  border-top-color: #fff;\n  border-bottom-width: 0;\n}\n.popover.right > .arrow {\n  top: 50%;\n  left: -11px;\n  margin-top: -11px;\n  border-right-color: #999;\n  border-right-color: rgba(0, 0, 0, .25);\n  border-left-width: 0;\n}\n.popover.right > .arrow:after {\n  bottom: -10px;\n  left: 1px;\n  content: \" \";\n  border-right-color: #fff;\n  border-left-width: 0;\n}\n.popover.bottom > .arrow {\n  top: -11px;\n  left: 50%;\n  margin-left: -11px;\n  border-top-width: 0;\n  border-bottom-color: #999;\n  border-bottom-color: rgba(0, 0, 0, .25);\n}\n.popover.bottom > .arrow:after {\n  top: 1px;\n  margin-left: -10px;\n  content: \" \";\n  border-top-width: 0;\n  border-bottom-color: #fff;\n}\n.popover.left > .arrow {\n  top: 50%;\n  right: -11px;\n  margin-top: -11px;\n  border-right-width: 0;\n  border-left-color: #999;\n  border-left-color: rgba(0, 0, 0, .25);\n}\n.popover.left > .arrow:after {\n  right: 1px;\n  bottom: -10px;\n  content: \" \";\n  border-right-width: 0;\n  border-left-color: #fff;\n}\n.carousel {\n  position: relative;\n}\n.carousel-inner {\n  position: relative;\n  width: 100%;\n  overflow: hidden;\n}\n.carousel-inner > .item {\n  position: relative;\n  display: none;\n  -webkit-transition: .6s ease-in-out left;\n       -o-transition: .6s ease-in-out left;\n          transition: .6s ease-in-out left;\n}\n.carousel-inner > .item > img,\n.carousel-inner > .item > a > img {\n  line-height: 1;\n}\n@media all and (transform-3d), (-webkit-transform-3d) {\n  .carousel-inner > .item {\n    -webkit-transition: -webkit-transform .6s ease-in-out;\n         -o-transition:      -o-transform .6s ease-in-out;\n            transition:         transform .6s ease-in-out;\n\n    -webkit-backface-visibility: hidden;\n            backface-visibility: hidden;\n    -webkit-perspective: 1000px;\n            perspective: 1000px;\n  }\n  .carousel-inner > .item.next,\n  .carousel-inner > .item.active.right {\n    left: 0;\n    -webkit-transform: translate3d(100%, 0, 0);\n            transform: translate3d(100%, 0, 0);\n  }\n  .carousel-inner > .item.prev,\n  .carousel-inner > .item.active.left {\n    left: 0;\n    -webkit-transform: translate3d(-100%, 0, 0);\n            transform: translate3d(-100%, 0, 0);\n  }\n  .carousel-inner > .item.next.left,\n  .carousel-inner > .item.prev.right,\n  .carousel-inner > .item.active {\n    left: 0;\n    -webkit-transform: translate3d(0, 0, 0);\n            transform: translate3d(0, 0, 0);\n  }\n}\n.carousel-inner > .active,\n.carousel-inner > .next,\n.carousel-inner > .prev {\n  display: block;\n}\n.carousel-inner > .active {\n  left: 0;\n}\n.carousel-inner > .next,\n.carousel-inner > .prev {\n  position: absolute;\n  top: 0;\n  width: 100%;\n}\n.carousel-inner > .next {\n  left: 100%;\n}\n.carousel-inner > .prev {\n  left: -100%;\n}\n.carousel-inner > .next.left,\n.carousel-inner > .prev.right {\n  left: 0;\n}\n.carousel-inner > .active.left {\n  left: -100%;\n}\n.carousel-inner > .active.right {\n  left: 100%;\n}\n.carousel-control {\n  position: absolute;\n  top: 0;\n  bottom: 0;\n  left: 0;\n  width: 15%;\n  font-size: 20px;\n  color: #fff;\n  text-align: center;\n  text-shadow: 0 1px 2px rgba(0, 0, 0, .6);\n  background-color: rgba(0, 0, 0, 0);\n  filter: alpha(opacity=50);\n  opacity: .5;\n}\n.carousel-control.left {\n  background-image: -webkit-linear-gradient(left, rgba(0, 0, 0, .5) 0%, rgba(0, 0, 0, .0001) 100%);\n  background-image:      -o-linear-gradient(left, rgba(0, 0, 0, .5) 0%, rgba(0, 0, 0, .0001) 100%);\n  background-image: -webkit-gradient(linear, left top, right top, from(rgba(0, 0, 0, .5)), to(rgba(0, 0, 0, .0001)));\n  background-image:         linear-gradient(to right, rgba(0, 0, 0, .5) 0%, rgba(0, 0, 0, .0001) 100%);\n  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#80000000', endColorstr='#00000000', GradientType=1);\n  background-repeat: repeat-x;\n}\n.carousel-control.right {\n  right: 0;\n  left: auto;\n  background-image: -webkit-linear-gradient(left, rgba(0, 0, 0, .0001) 0%, rgba(0, 0, 0, .5) 100%);\n  background-image:      -o-linear-gradient(left, rgba(0, 0, 0, .0001) 0%, rgba(0, 0, 0, .5) 100%);\n  background-image: -webkit-gradient(linear, left top, right top, from(rgba(0, 0, 0, .0001)), to(rgba(0, 0, 0, .5)));\n  background-image:         linear-gradient(to right, rgba(0, 0, 0, .0001) 0%, rgba(0, 0, 0, .5) 100%);\n  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#00000000', endColorstr='#80000000', GradientType=1);\n  background-repeat: repeat-x;\n}\n.carousel-control:hover,\n.carousel-control:focus {\n  color: #fff;\n  text-decoration: none;\n  filter: alpha(opacity=90);\n  outline: 0;\n  opacity: .9;\n}\n.carousel-control .icon-prev,\n.carousel-control .icon-next,\n.carousel-control .glyphicon-chevron-left,\n.carousel-control .glyphicon-chevron-right {\n  position: absolute;\n  top: 50%;\n  z-index: 5;\n  display: inline-block;\n  margin-top: -10px;\n}\n.carousel-control .icon-prev,\n.carousel-control .glyphicon-chevron-left {\n  left: 50%;\n  margin-left: -10px;\n}\n.carousel-control .icon-next,\n.carousel-control .glyphicon-chevron-right {\n  right: 50%;\n  margin-right: -10px;\n}\n.carousel-control .icon-prev,\n.carousel-control .icon-next {\n  width: 20px;\n  height: 20px;\n  font-family: serif;\n  line-height: 1;\n}\n.carousel-control .icon-prev:before {\n  content: '\\2039';\n}\n.carousel-control .icon-next:before {\n  content: '\\203a';\n}\n.carousel-indicators {\n  position: absolute;\n  bottom: 10px;\n  left: 50%;\n  z-index: 15;\n  width: 60%;\n  padding-left: 0;\n  margin-left: -30%;\n  text-align: center;\n  list-style: none;\n}\n.carousel-indicators li {\n  display: inline-block;\n  width: 10px;\n  height: 10px;\n  margin: 1px;\n  text-indent: -999px;\n  cursor: pointer;\n  background-color: #000 \\9;\n  background-color: rgba(0, 0, 0, 0);\n  border: 1px solid #fff;\n  border-radius: 10px;\n}\n.carousel-indicators .active {\n  width: 12px;\n  height: 12px;\n  margin: 0;\n  background-color: #fff;\n}\n.carousel-caption {\n  position: absolute;\n  right: 15%;\n  bottom: 20px;\n  left: 15%;\n  z-index: 10;\n  padding-top: 20px;\n  padding-bottom: 20px;\n  color: #fff;\n  text-align: center;\n  text-shadow: 0 1px 2px rgba(0, 0, 0, .6);\n}\n.carousel-caption .btn {\n  text-shadow: none;\n}\n@media screen and (min-width: 768px) {\n  .carousel-control .glyphicon-chevron-left,\n  .carousel-control .glyphicon-chevron-right,\n  .carousel-control .icon-prev,\n  .carousel-control .icon-next {\n    width: 30px;\n    height: 30px;\n    margin-top: -10px;\n    font-size: 30px;\n  }\n  .carousel-control .glyphicon-chevron-left,\n  .carousel-control .icon-prev {\n    margin-left: -10px;\n  }\n  .carousel-control .glyphicon-chevron-right,\n  .carousel-control .icon-next {\n    margin-right: -10px;\n  }\n  .carousel-caption {\n    right: 20%;\n    left: 20%;\n    padding-bottom: 30px;\n  }\n  .carousel-indicators {\n    bottom: 20px;\n  }\n}\n.clearfix:before,\n.clearfix:after,\n.dl-horizontal dd:before,\n.dl-horizontal dd:after,\n.container:before,\n.container:after,\n.container-fluid:before,\n.container-fluid:after,\n.row:before,\n.row:after,\n.form-horizontal .form-group:before,\n.form-horizontal .form-group:after,\n.btn-toolbar:before,\n.btn-toolbar:after,\n.btn-group-vertical > .btn-group:before,\n.btn-group-vertical > .btn-group:after,\n.nav:before,\n.nav:after,\n.navbar:before,\n.navbar:after,\n.navbar-header:before,\n.navbar-header:after,\n.navbar-collapse:before,\n.navbar-collapse:after,\n.pager:before,\n.pager:after,\n.panel-body:before,\n.panel-body:after,\n.modal-header:before,\n.modal-header:after,\n.modal-footer:before,\n.modal-footer:after {\n  display: table;\n  content: \" \";\n}\n.clearfix:after,\n.dl-horizontal dd:after,\n.container:after,\n.container-fluid:after,\n.row:after,\n.form-horizontal .form-group:after,\n.btn-toolbar:after,\n.btn-group-vertical > .btn-group:after,\n.nav:after,\n.navbar:after,\n.navbar-header:after,\n.navbar-collapse:after,\n.pager:after,\n.panel-body:after,\n.modal-header:after,\n.modal-footer:after {\n  clear: both;\n}\n.center-block {\n  display: block;\n  margin-right: auto;\n  margin-left: auto;\n}\n.pull-right {\n  float: right !important;\n}\n.pull-left {\n  float: left !important;\n}\n.hide {\n  display: none !important;\n}\n.show {\n  display: block !important;\n}\n.invisible {\n  visibility: hidden;\n}\n.text-hide {\n  font: 0/0 a;\n  color: transparent;\n  text-shadow: none;\n  background-color: transparent;\n  border: 0;\n}\n.hidden {\n  display: none !important;\n}\n.affix {\n  position: fixed;\n}\n@-ms-viewport {\n  width: device-width;\n}\n.visible-xs,\n.visible-sm,\n.visible-md,\n.visible-lg {\n  display: none !important;\n}\n.visible-xs-block,\n.visible-xs-inline,\n.visible-xs-inline-block,\n.visible-sm-block,\n.visible-sm-inline,\n.visible-sm-inline-block,\n.visible-md-block,\n.visible-md-inline,\n.visible-md-inline-block,\n.visible-lg-block,\n.visible-lg-inline,\n.visible-lg-inline-block {\n  display: none !important;\n}\n@media (max-width: 767px) {\n  .visible-xs {\n    display: block !important;\n  }\n  table.visible-xs {\n    display: table !important;\n  }\n  tr.visible-xs {\n    display: table-row !important;\n  }\n  th.visible-xs,\n  td.visible-xs {\n    display: table-cell !important;\n  }\n}\n@media (max-width: 767px) {\n  .visible-xs-block {\n    display: block !important;\n  }\n}\n@media (max-width: 767px) {\n  .visible-xs-inline {\n    display: inline !important;\n  }\n}\n@media (max-width: 767px) {\n  .visible-xs-inline-block {\n    display: inline-block !important;\n  }\n}\n@media (min-width: 768px) and (max-width: 991px) {\n  .visible-sm {\n    display: block !important;\n  }\n  table.visible-sm {\n    display: table !important;\n  }\n  tr.visible-sm {\n    display: table-row !important;\n  }\n  th.visible-sm,\n  td.visible-sm {\n    display: table-cell !important;\n  }\n}\n@media (min-width: 768px) and (max-width: 991px) {\n  .visible-sm-block {\n    display: block !important;\n  }\n}\n@media (min-width: 768px) and (max-width: 991px) {\n  .visible-sm-inline {\n    display: inline !important;\n  }\n}\n@media (min-width: 768px) and (max-width: 991px) {\n  .visible-sm-inline-block {\n    display: inline-block !important;\n  }\n}\n@media (min-width: 992px) and (max-width: 1199px) {\n  .visible-md {\n    display: block !important;\n  }\n  table.visible-md {\n    display: table !important;\n  }\n  tr.visible-md {\n    display: table-row !important;\n  }\n  th.visible-md,\n  td.visible-md {\n    display: table-cell !important;\n  }\n}\n@media (min-width: 992px) and (max-width: 1199px) {\n  .visible-md-block {\n    display: block !important;\n  }\n}\n@media (min-width: 992px) and (max-width: 1199px) {\n  .visible-md-inline {\n    display: inline !important;\n  }\n}\n@media (min-width: 992px) and (max-width: 1199px) {\n  .visible-md-inline-block {\n    display: inline-block !important;\n  }\n}\n@media (min-width: 1200px) {\n  .visible-lg {\n    display: block !important;\n  }\n  table.visible-lg {\n    display: table !important;\n  }\n  tr.visible-lg {\n    display: table-row !important;\n  }\n  th.visible-lg,\n  td.visible-lg {\n    display: table-cell !important;\n  }\n}\n@media (min-width: 1200px) {\n  .visible-lg-block {\n    display: block !important;\n  }\n}\n@media (min-width: 1200px) {\n  .visible-lg-inline {\n    display: inline !important;\n  }\n}\n@media (min-width: 1200px) {\n  .visible-lg-inline-block {\n    display: inline-block !important;\n  }\n}\n@media (max-width: 767px) {\n  .hidden-xs {\n    display: none !important;\n  }\n}\n@media (min-width: 768px) and (max-width: 991px) {\n  .hidden-sm {\n    display: none !important;\n  }\n}\n@media (min-width: 992px) and (max-width: 1199px) {\n  .hidden-md {\n    display: none !important;\n  }\n}\n@media (min-width: 1200px) {\n  .hidden-lg {\n    display: none !important;\n  }\n}\n.visible-print {\n  display: none !important;\n}\n@media print {\n  .visible-print {\n    display: block !important;\n  }\n  table.visible-print {\n    display: table !important;\n  }\n  tr.visible-print {\n    display: table-row !important;\n  }\n  th.visible-print,\n  td.visible-print {\n    display: table-cell !important;\n  }\n}\n.visible-print-block {\n  display: none !important;\n}\n@media print {\n  .visible-print-block {\n    display: block !important;\n  }\n}\n.visible-print-inline {\n  display: none !important;\n}\n@media print {\n  .visible-print-inline {\n    display: inline !important;\n  }\n}\n.visible-print-inline-block {\n  display: none !important;\n}\n@media print {\n  .visible-print-inline-block {\n    display: inline-block !important;\n  }\n}\n@media print {\n  .hidden-print {\n    display: none !important;\n  }\n}\n/*# sourceMappingURL=bootstrap.css.map */\n";
+  var bootstrap = "/*!\r\n * Bootstrap v3.3.6 (http://getbootstrap.com)\r\n * Copyright 2011-2015 Twitter, Inc.\r\n * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)\r\n */\r\n/*! normalize.css v3.0.3 | MIT License | github.com/necolas/normalize.css */\r\nhtml {\r\n  font-family: sans-serif;\r\n  -webkit-text-size-adjust: 100%;\r\n      -ms-text-size-adjust: 100%;\r\n}\r\nbody {\r\n  margin: 0;\r\n}\r\narticle,\r\naside,\r\ndetails,\r\nfigcaption,\r\nfigure,\r\nfooter,\r\nheader,\r\nhgroup,\r\nmain,\r\nmenu,\r\nnav,\r\nsection,\r\nsummary {\r\n  display: block;\r\n}\r\naudio,\r\ncanvas,\r\nprogress,\r\nvideo {\r\n  display: inline-block;\r\n  vertical-align: baseline;\r\n}\r\naudio:not([controls]) {\r\n  display: none;\r\n  height: 0;\r\n}\r\n[hidden],\r\ntemplate {\r\n  display: none;\r\n}\r\na {\r\n  background-color: transparent;\r\n}\r\na:active,\r\na:hover {\r\n  outline: 0;\r\n}\r\nabbr[title] {\r\n  border-bottom: 1px dotted;\r\n}\r\nb,\r\nstrong {\r\n  font-weight: bold;\r\n}\r\ndfn {\r\n  font-style: italic;\r\n}\r\nh1 {\r\n  margin: .67em 0;\r\n  font-size: 2em;\r\n}\r\nmark {\r\n  color: #000;\r\n  background: #ff0;\r\n}\r\nsmall {\r\n  font-size: 80%;\r\n}\r\nsub,\r\nsup {\r\n  position: relative;\r\n  font-size: 75%;\r\n  line-height: 0;\r\n  vertical-align: baseline;\r\n}\r\nsup {\r\n  top: -.5em;\r\n}\r\nsub {\r\n  bottom: -.25em;\r\n}\r\nimg {\r\n  border: 0;\r\n}\r\nsvg:not(:root) {\r\n  overflow: hidden;\r\n}\r\nfigure {\r\n  margin: 1em 40px;\r\n}\r\nhr {\r\n  height: 0;\r\n  -webkit-box-sizing: content-box;\r\n     -moz-box-sizing: content-box;\r\n          box-sizing: content-box;\r\n}\r\npre {\r\n  overflow: auto;\r\n}\r\ncode,\r\nkbd,\r\npre,\r\nsamp {\r\n  font-family: monospace, monospace;\r\n  font-size: 1em;\r\n}\r\nbutton,\r\ninput,\r\noptgroup,\r\nselect,\r\ntextarea {\r\n  margin: 0;\r\n  font: inherit;\r\n  color: inherit;\r\n}\r\nbutton {\r\n  overflow: visible;\r\n}\r\nbutton,\r\nselect {\r\n  text-transform: none;\r\n}\r\nbutton,\r\nhtml input[type=\"button\"],\r\ninput[type=\"reset\"],\r\ninput[type=\"submit\"] {\r\n  -webkit-appearance: button;\r\n  cursor: pointer;\r\n}\r\nbutton[disabled],\r\nhtml input[disabled] {\r\n  cursor: default;\r\n}\r\nbutton::-moz-focus-inner,\r\ninput::-moz-focus-inner {\r\n  padding: 0;\r\n  border: 0;\r\n}\r\ninput {\r\n  line-height: normal;\r\n}\r\ninput[type=\"checkbox\"],\r\ninput[type=\"radio\"] {\r\n  -webkit-box-sizing: border-box;\r\n     -moz-box-sizing: border-box;\r\n          box-sizing: border-box;\r\n  padding: 0;\r\n}\r\ninput[type=\"number\"]::-webkit-inner-spin-button,\r\ninput[type=\"number\"]::-webkit-outer-spin-button {\r\n  height: auto;\r\n}\r\ninput[type=\"search\"] {\r\n  -webkit-box-sizing: content-box;\r\n     -moz-box-sizing: content-box;\r\n          box-sizing: content-box;\r\n  -webkit-appearance: textfield;\r\n}\r\ninput[type=\"search\"]::-webkit-search-cancel-button,\r\ninput[type=\"search\"]::-webkit-search-decoration {\r\n  -webkit-appearance: none;\r\n}\r\nfieldset {\r\n  padding: .35em .625em .75em;\r\n  margin: 0 2px;\r\n  border: 1px solid #c0c0c0;\r\n}\r\nlegend {\r\n  padding: 0;\r\n  border: 0;\r\n}\r\ntextarea {\r\n  overflow: auto;\r\n}\r\noptgroup {\r\n  font-weight: bold;\r\n}\r\ntable {\r\n  border-spacing: 0;\r\n  border-collapse: collapse;\r\n}\r\ntd,\r\nth {\r\n  padding: 0;\r\n}\r\n/*! Source: https://github.com/h5bp/html5-boilerplate/blob/master/src/css/main.css */\r\n@media print {\r\n  *,\r\n  *:before,\r\n  *:after {\r\n    color: #000 !important;\r\n    text-shadow: none !important;\r\n    background: transparent !important;\r\n    -webkit-box-shadow: none !important;\r\n            box-shadow: none !important;\r\n  }\r\n  a,\r\n  a:visited {\r\n    text-decoration: underline;\r\n  }\r\n  a[href]:after {\r\n    content: \" (\" attr(href) \")\";\r\n  }\r\n  abbr[title]:after {\r\n    content: \" (\" attr(title) \")\";\r\n  }\r\n  a[href^=\"#\"]:after,\r\n  a[href^=\"javascript:\"]:after {\r\n    content: \"\";\r\n  }\r\n  pre,\r\n  blockquote {\r\n    border: 1px solid #999;\r\n\r\n    page-break-inside: avoid;\r\n  }\r\n  thead {\r\n    display: table-header-group;\r\n  }\r\n  tr,\r\n  img {\r\n    page-break-inside: avoid;\r\n  }\r\n  img {\r\n    max-width: 100% !important;\r\n  }\r\n  p,\r\n  h2,\r\n  h3 {\r\n    orphans: 3;\r\n    widows: 3;\r\n  }\r\n  h2,\r\n  h3 {\r\n    page-break-after: avoid;\r\n  }\r\n  .navbar {\r\n    display: none;\r\n  }\r\n  .btn > .caret,\r\n  .dropup > .btn > .caret {\r\n    border-top-color: #000 !important;\r\n  }\r\n  .label {\r\n    border: 1px solid #000;\r\n  }\r\n  .table {\r\n    border-collapse: collapse !important;\r\n  }\r\n  .table td,\r\n  .table th {\r\n    background-color: #fff !important;\r\n  }\r\n  .table-bordered th,\r\n  .table-bordered td {\r\n    border: 1px solid #ddd !important;\r\n  }\r\n}\r\n@font-face {\r\n  font-family: 'Glyphicons Halflings';\r\n\r\n  src: url('../fonts/glyphicons-halflings-regular.eot');\r\n  src: url('../fonts/glyphicons-halflings-regular.eot?#iefix') format('embedded-opentype'), url('../fonts/glyphicons-halflings-regular.woff2') format('woff2'), url('../fonts/glyphicons-halflings-regular.woff') format('woff'), url('../fonts/glyphicons-halflings-regular.ttf') format('truetype'), url('../fonts/glyphicons-halflings-regular.svg#glyphicons_halflingsregular') format('svg');\r\n}\r\n.glyphicon {\r\n  position: relative;\r\n  top: 1px;\r\n  display: inline-block;\r\n  font-family: 'Glyphicons Halflings';\r\n  font-style: normal;\r\n  font-weight: normal;\r\n  line-height: 1;\r\n\r\n  -webkit-font-smoothing: antialiased;\r\n  -moz-osx-font-smoothing: grayscale;\r\n}\r\n.glyphicon-asterisk:before {\r\n  content: \"\\002a\";\r\n}\r\n.glyphicon-plus:before {\r\n  content: \"\\002b\";\r\n}\r\n.glyphicon-euro:before,\r\n.glyphicon-eur:before {\r\n  content: \"\\20ac\";\r\n}\r\n.glyphicon-minus:before {\r\n  content: \"\\2212\";\r\n}\r\n.glyphicon-cloud:before {\r\n  content: \"\\2601\";\r\n}\r\n.glyphicon-envelope:before {\r\n  content: \"\\2709\";\r\n}\r\n.glyphicon-pencil:before {\r\n  content: \"\\270f\";\r\n}\r\n.glyphicon-glass:before {\r\n  content: \"\\e001\";\r\n}\r\n.glyphicon-music:before {\r\n  content: \"\\e002\";\r\n}\r\n.glyphicon-search:before {\r\n  content: \"\\e003\";\r\n}\r\n.glyphicon-heart:before {\r\n  content: \"\\e005\";\r\n}\r\n.glyphicon-star:before {\r\n  content: \"\\e006\";\r\n}\r\n.glyphicon-star-empty:before {\r\n  content: \"\\e007\";\r\n}\r\n.glyphicon-user:before {\r\n  content: \"\\e008\";\r\n}\r\n.glyphicon-film:before {\r\n  content: \"\\e009\";\r\n}\r\n.glyphicon-th-large:before {\r\n  content: \"\\e010\";\r\n}\r\n.glyphicon-th:before {\r\n  content: \"\\e011\";\r\n}\r\n.glyphicon-th-list:before {\r\n  content: \"\\e012\";\r\n}\r\n.glyphicon-ok:before {\r\n  content: \"\\e013\";\r\n}\r\n.glyphicon-remove:before {\r\n  content: \"\\e014\";\r\n}\r\n.glyphicon-zoom-in:before {\r\n  content: \"\\e015\";\r\n}\r\n.glyphicon-zoom-out:before {\r\n  content: \"\\e016\";\r\n}\r\n.glyphicon-off:before {\r\n  content: \"\\e017\";\r\n}\r\n.glyphicon-signal:before {\r\n  content: \"\\e018\";\r\n}\r\n.glyphicon-cog:before {\r\n  content: \"\\e019\";\r\n}\r\n.glyphicon-trash:before {\r\n  content: \"\\e020\";\r\n}\r\n.glyphicon-home:before {\r\n  content: \"\\e021\";\r\n}\r\n.glyphicon-file:before {\r\n  content: \"\\e022\";\r\n}\r\n.glyphicon-time:before {\r\n  content: \"\\e023\";\r\n}\r\n.glyphicon-road:before {\r\n  content: \"\\e024\";\r\n}\r\n.glyphicon-download-alt:before {\r\n  content: \"\\e025\";\r\n}\r\n.glyphicon-download:before {\r\n  content: \"\\e026\";\r\n}\r\n.glyphicon-upload:before {\r\n  content: \"\\e027\";\r\n}\r\n.glyphicon-inbox:before {\r\n  content: \"\\e028\";\r\n}\r\n.glyphicon-play-circle:before {\r\n  content: \"\\e029\";\r\n}\r\n.glyphicon-repeat:before {\r\n  content: \"\\e030\";\r\n}\r\n.glyphicon-refresh:before {\r\n  content: \"\\e031\";\r\n}\r\n.glyphicon-list-alt:before {\r\n  content: \"\\e032\";\r\n}\r\n.glyphicon-lock:before {\r\n  content: \"\\e033\";\r\n}\r\n.glyphicon-flag:before {\r\n  content: \"\\e034\";\r\n}\r\n.glyphicon-headphones:before {\r\n  content: \"\\e035\";\r\n}\r\n.glyphicon-volume-off:before {\r\n  content: \"\\e036\";\r\n}\r\n.glyphicon-volume-down:before {\r\n  content: \"\\e037\";\r\n}\r\n.glyphicon-volume-up:before {\r\n  content: \"\\e038\";\r\n}\r\n.glyphicon-qrcode:before {\r\n  content: \"\\e039\";\r\n}\r\n.glyphicon-barcode:before {\r\n  content: \"\\e040\";\r\n}\r\n.glyphicon-tag:before {\r\n  content: \"\\e041\";\r\n}\r\n.glyphicon-tags:before {\r\n  content: \"\\e042\";\r\n}\r\n.glyphicon-book:before {\r\n  content: \"\\e043\";\r\n}\r\n.glyphicon-bookmark:before {\r\n  content: \"\\e044\";\r\n}\r\n.glyphicon-print:before {\r\n  content: \"\\e045\";\r\n}\r\n.glyphicon-camera:before {\r\n  content: \"\\e046\";\r\n}\r\n.glyphicon-font:before {\r\n  content: \"\\e047\";\r\n}\r\n.glyphicon-bold:before {\r\n  content: \"\\e048\";\r\n}\r\n.glyphicon-italic:before {\r\n  content: \"\\e049\";\r\n}\r\n.glyphicon-text-height:before {\r\n  content: \"\\e050\";\r\n}\r\n.glyphicon-text-width:before {\r\n  content: \"\\e051\";\r\n}\r\n.glyphicon-align-left:before {\r\n  content: \"\\e052\";\r\n}\r\n.glyphicon-align-center:before {\r\n  content: \"\\e053\";\r\n}\r\n.glyphicon-align-right:before {\r\n  content: \"\\e054\";\r\n}\r\n.glyphicon-align-justify:before {\r\n  content: \"\\e055\";\r\n}\r\n.glyphicon-list:before {\r\n  content: \"\\e056\";\r\n}\r\n.glyphicon-indent-left:before {\r\n  content: \"\\e057\";\r\n}\r\n.glyphicon-indent-right:before {\r\n  content: \"\\e058\";\r\n}\r\n.glyphicon-facetime-video:before {\r\n  content: \"\\e059\";\r\n}\r\n.glyphicon-picture:before {\r\n  content: \"\\e060\";\r\n}\r\n.glyphicon-map-marker:before {\r\n  content: \"\\e062\";\r\n}\r\n.glyphicon-adjust:before {\r\n  content: \"\\e063\";\r\n}\r\n.glyphicon-tint:before {\r\n  content: \"\\e064\";\r\n}\r\n.glyphicon-edit:before {\r\n  content: \"\\e065\";\r\n}\r\n.glyphicon-share:before {\r\n  content: \"\\e066\";\r\n}\r\n.glyphicon-check:before {\r\n  content: \"\\e067\";\r\n}\r\n.glyphicon-move:before {\r\n  content: \"\\e068\";\r\n}\r\n.glyphicon-step-backward:before {\r\n  content: \"\\e069\";\r\n}\r\n.glyphicon-fast-backward:before {\r\n  content: \"\\e070\";\r\n}\r\n.glyphicon-backward:before {\r\n  content: \"\\e071\";\r\n}\r\n.glyphicon-play:before {\r\n  content: \"\\e072\";\r\n}\r\n.glyphicon-pause:before {\r\n  content: \"\\e073\";\r\n}\r\n.glyphicon-stop:before {\r\n  content: \"\\e074\";\r\n}\r\n.glyphicon-forward:before {\r\n  content: \"\\e075\";\r\n}\r\n.glyphicon-fast-forward:before {\r\n  content: \"\\e076\";\r\n}\r\n.glyphicon-step-forward:before {\r\n  content: \"\\e077\";\r\n}\r\n.glyphicon-eject:before {\r\n  content: \"\\e078\";\r\n}\r\n.glyphicon-chevron-left:before {\r\n  content: \"\\e079\";\r\n}\r\n.glyphicon-chevron-right:before {\r\n  content: \"\\e080\";\r\n}\r\n.glyphicon-plus-sign:before {\r\n  content: \"\\e081\";\r\n}\r\n.glyphicon-minus-sign:before {\r\n  content: \"\\e082\";\r\n}\r\n.glyphicon-remove-sign:before {\r\n  content: \"\\e083\";\r\n}\r\n.glyphicon-ok-sign:before {\r\n  content: \"\\e084\";\r\n}\r\n.glyphicon-question-sign:before {\r\n  content: \"\\e085\";\r\n}\r\n.glyphicon-info-sign:before {\r\n  content: \"\\e086\";\r\n}\r\n.glyphicon-screenshot:before {\r\n  content: \"\\e087\";\r\n}\r\n.glyphicon-remove-circle:before {\r\n  content: \"\\e088\";\r\n}\r\n.glyphicon-ok-circle:before {\r\n  content: \"\\e089\";\r\n}\r\n.glyphicon-ban-circle:before {\r\n  content: \"\\e090\";\r\n}\r\n.glyphicon-arrow-left:before {\r\n  content: \"\\e091\";\r\n}\r\n.glyphicon-arrow-right:before {\r\n  content: \"\\e092\";\r\n}\r\n.glyphicon-arrow-up:before {\r\n  content: \"\\e093\";\r\n}\r\n.glyphicon-arrow-down:before {\r\n  content: \"\\e094\";\r\n}\r\n.glyphicon-share-alt:before {\r\n  content: \"\\e095\";\r\n}\r\n.glyphicon-resize-full:before {\r\n  content: \"\\e096\";\r\n}\r\n.glyphicon-resize-small:before {\r\n  content: \"\\e097\";\r\n}\r\n.glyphicon-exclamation-sign:before {\r\n  content: \"\\e101\";\r\n}\r\n.glyphicon-gift:before {\r\n  content: \"\\e102\";\r\n}\r\n.glyphicon-leaf:before {\r\n  content: \"\\e103\";\r\n}\r\n.glyphicon-fire:before {\r\n  content: \"\\e104\";\r\n}\r\n.glyphicon-eye-open:before {\r\n  content: \"\\e105\";\r\n}\r\n.glyphicon-eye-close:before {\r\n  content: \"\\e106\";\r\n}\r\n.glyphicon-warning-sign:before {\r\n  content: \"\\e107\";\r\n}\r\n.glyphicon-plane:before {\r\n  content: \"\\e108\";\r\n}\r\n.glyphicon-calendar:before {\r\n  content: \"\\e109\";\r\n}\r\n.glyphicon-random:before {\r\n  content: \"\\e110\";\r\n}\r\n.glyphicon-comment:before {\r\n  content: \"\\e111\";\r\n}\r\n.glyphicon-magnet:before {\r\n  content: \"\\e112\";\r\n}\r\n.glyphicon-chevron-up:before {\r\n  content: \"\\e113\";\r\n}\r\n.glyphicon-chevron-down:before {\r\n  content: \"\\e114\";\r\n}\r\n.glyphicon-retweet:before {\r\n  content: \"\\e115\";\r\n}\r\n.glyphicon-shopping-cart:before {\r\n  content: \"\\e116\";\r\n}\r\n.glyphicon-folder-close:before {\r\n  content: \"\\e117\";\r\n}\r\n.glyphicon-folder-open:before {\r\n  content: \"\\e118\";\r\n}\r\n.glyphicon-resize-vertical:before {\r\n  content: \"\\e119\";\r\n}\r\n.glyphicon-resize-horizontal:before {\r\n  content: \"\\e120\";\r\n}\r\n.glyphicon-hdd:before {\r\n  content: \"\\e121\";\r\n}\r\n.glyphicon-bullhorn:before {\r\n  content: \"\\e122\";\r\n}\r\n.glyphicon-bell:before {\r\n  content: \"\\e123\";\r\n}\r\n.glyphicon-certificate:before {\r\n  content: \"\\e124\";\r\n}\r\n.glyphicon-thumbs-up:before {\r\n  content: \"\\e125\";\r\n}\r\n.glyphicon-thumbs-down:before {\r\n  content: \"\\e126\";\r\n}\r\n.glyphicon-hand-right:before {\r\n  content: \"\\e127\";\r\n}\r\n.glyphicon-hand-left:before {\r\n  content: \"\\e128\";\r\n}\r\n.glyphicon-hand-up:before {\r\n  content: \"\\e129\";\r\n}\r\n.glyphicon-hand-down:before {\r\n  content: \"\\e130\";\r\n}\r\n.glyphicon-circle-arrow-right:before {\r\n  content: \"\\e131\";\r\n}\r\n.glyphicon-circle-arrow-left:before {\r\n  content: \"\\e132\";\r\n}\r\n.glyphicon-circle-arrow-up:before {\r\n  content: \"\\e133\";\r\n}\r\n.glyphicon-circle-arrow-down:before {\r\n  content: \"\\e134\";\r\n}\r\n.glyphicon-globe:before {\r\n  content: \"\\e135\";\r\n}\r\n.glyphicon-wrench:before {\r\n  content: \"\\e136\";\r\n}\r\n.glyphicon-tasks:before {\r\n  content: \"\\e137\";\r\n}\r\n.glyphicon-filter:before {\r\n  content: \"\\e138\";\r\n}\r\n.glyphicon-briefcase:before {\r\n  content: \"\\e139\";\r\n}\r\n.glyphicon-fullscreen:before {\r\n  content: \"\\e140\";\r\n}\r\n.glyphicon-dashboard:before {\r\n  content: \"\\e141\";\r\n}\r\n.glyphicon-paperclip:before {\r\n  content: \"\\e142\";\r\n}\r\n.glyphicon-heart-empty:before {\r\n  content: \"\\e143\";\r\n}\r\n.glyphicon-link:before {\r\n  content: \"\\e144\";\r\n}\r\n.glyphicon-phone:before {\r\n  content: \"\\e145\";\r\n}\r\n.glyphicon-pushpin:before {\r\n  content: \"\\e146\";\r\n}\r\n.glyphicon-usd:before {\r\n  content: \"\\e148\";\r\n}\r\n.glyphicon-gbp:before {\r\n  content: \"\\e149\";\r\n}\r\n.glyphicon-sort:before {\r\n  content: \"\\e150\";\r\n}\r\n.glyphicon-sort-by-alphabet:before {\r\n  content: \"\\e151\";\r\n}\r\n.glyphicon-sort-by-alphabet-alt:before {\r\n  content: \"\\e152\";\r\n}\r\n.glyphicon-sort-by-order:before {\r\n  content: \"\\e153\";\r\n}\r\n.glyphicon-sort-by-order-alt:before {\r\n  content: \"\\e154\";\r\n}\r\n.glyphicon-sort-by-attributes:before {\r\n  content: \"\\e155\";\r\n}\r\n.glyphicon-sort-by-attributes-alt:before {\r\n  content: \"\\e156\";\r\n}\r\n.glyphicon-unchecked:before {\r\n  content: \"\\e157\";\r\n}\r\n.glyphicon-expand:before {\r\n  content: \"\\e158\";\r\n}\r\n.glyphicon-collapse-down:before {\r\n  content: \"\\e159\";\r\n}\r\n.glyphicon-collapse-up:before {\r\n  content: \"\\e160\";\r\n}\r\n.glyphicon-log-in:before {\r\n  content: \"\\e161\";\r\n}\r\n.glyphicon-flash:before {\r\n  content: \"\\e162\";\r\n}\r\n.glyphicon-log-out:before {\r\n  content: \"\\e163\";\r\n}\r\n.glyphicon-new-window:before {\r\n  content: \"\\e164\";\r\n}\r\n.glyphicon-record:before {\r\n  content: \"\\e165\";\r\n}\r\n.glyphicon-save:before {\r\n  content: \"\\e166\";\r\n}\r\n.glyphicon-open:before {\r\n  content: \"\\e167\";\r\n}\r\n.glyphicon-saved:before {\r\n  content: \"\\e168\";\r\n}\r\n.glyphicon-import:before {\r\n  content: \"\\e169\";\r\n}\r\n.glyphicon-export:before {\r\n  content: \"\\e170\";\r\n}\r\n.glyphicon-send:before {\r\n  content: \"\\e171\";\r\n}\r\n.glyphicon-floppy-disk:before {\r\n  content: \"\\e172\";\r\n}\r\n.glyphicon-floppy-saved:before {\r\n  content: \"\\e173\";\r\n}\r\n.glyphicon-floppy-remove:before {\r\n  content: \"\\e174\";\r\n}\r\n.glyphicon-floppy-save:before {\r\n  content: \"\\e175\";\r\n}\r\n.glyphicon-floppy-open:before {\r\n  content: \"\\e176\";\r\n}\r\n.glyphicon-credit-card:before {\r\n  content: \"\\e177\";\r\n}\r\n.glyphicon-transfer:before {\r\n  content: \"\\e178\";\r\n}\r\n.glyphicon-cutlery:before {\r\n  content: \"\\e179\";\r\n}\r\n.glyphicon-header:before {\r\n  content: \"\\e180\";\r\n}\r\n.glyphicon-compressed:before {\r\n  content: \"\\e181\";\r\n}\r\n.glyphicon-earphone:before {\r\n  content: \"\\e182\";\r\n}\r\n.glyphicon-phone-alt:before {\r\n  content: \"\\e183\";\r\n}\r\n.glyphicon-tower:before {\r\n  content: \"\\e184\";\r\n}\r\n.glyphicon-stats:before {\r\n  content: \"\\e185\";\r\n}\r\n.glyphicon-sd-video:before {\r\n  content: \"\\e186\";\r\n}\r\n.glyphicon-hd-video:before {\r\n  content: \"\\e187\";\r\n}\r\n.glyphicon-subtitles:before {\r\n  content: \"\\e188\";\r\n}\r\n.glyphicon-sound-stereo:before {\r\n  content: \"\\e189\";\r\n}\r\n.glyphicon-sound-dolby:before {\r\n  content: \"\\e190\";\r\n}\r\n.glyphicon-sound-5-1:before {\r\n  content: \"\\e191\";\r\n}\r\n.glyphicon-sound-6-1:before {\r\n  content: \"\\e192\";\r\n}\r\n.glyphicon-sound-7-1:before {\r\n  content: \"\\e193\";\r\n}\r\n.glyphicon-copyright-mark:before {\r\n  content: \"\\e194\";\r\n}\r\n.glyphicon-registration-mark:before {\r\n  content: \"\\e195\";\r\n}\r\n.glyphicon-cloud-download:before {\r\n  content: \"\\e197\";\r\n}\r\n.glyphicon-cloud-upload:before {\r\n  content: \"\\e198\";\r\n}\r\n.glyphicon-tree-conifer:before {\r\n  content: \"\\e199\";\r\n}\r\n.glyphicon-tree-deciduous:before {\r\n  content: \"\\e200\";\r\n}\r\n.glyphicon-cd:before {\r\n  content: \"\\e201\";\r\n}\r\n.glyphicon-save-file:before {\r\n  content: \"\\e202\";\r\n}\r\n.glyphicon-open-file:before {\r\n  content: \"\\e203\";\r\n}\r\n.glyphicon-level-up:before {\r\n  content: \"\\e204\";\r\n}\r\n.glyphicon-copy:before {\r\n  content: \"\\e205\";\r\n}\r\n.glyphicon-paste:before {\r\n  content: \"\\e206\";\r\n}\r\n.glyphicon-alert:before {\r\n  content: \"\\e209\";\r\n}\r\n.glyphicon-equalizer:before {\r\n  content: \"\\e210\";\r\n}\r\n.glyphicon-king:before {\r\n  content: \"\\e211\";\r\n}\r\n.glyphicon-queen:before {\r\n  content: \"\\e212\";\r\n}\r\n.glyphicon-pawn:before {\r\n  content: \"\\e213\";\r\n}\r\n.glyphicon-bishop:before {\r\n  content: \"\\e214\";\r\n}\r\n.glyphicon-knight:before {\r\n  content: \"\\e215\";\r\n}\r\n.glyphicon-baby-formula:before {\r\n  content: \"\\e216\";\r\n}\r\n.glyphicon-tent:before {\r\n  content: \"\\26fa\";\r\n}\r\n.glyphicon-blackboard:before {\r\n  content: \"\\e218\";\r\n}\r\n.glyphicon-bed:before {\r\n  content: \"\\e219\";\r\n}\r\n.glyphicon-apple:before {\r\n  content: \"\\f8ff\";\r\n}\r\n.glyphicon-erase:before {\r\n  content: \"\\e221\";\r\n}\r\n.glyphicon-hourglass:before {\r\n  content: \"\\231b\";\r\n}\r\n.glyphicon-lamp:before {\r\n  content: \"\\e223\";\r\n}\r\n.glyphicon-duplicate:before {\r\n  content: \"\\e224\";\r\n}\r\n.glyphicon-piggy-bank:before {\r\n  content: \"\\e225\";\r\n}\r\n.glyphicon-scissors:before {\r\n  content: \"\\e226\";\r\n}\r\n.glyphicon-bitcoin:before {\r\n  content: \"\\e227\";\r\n}\r\n.glyphicon-btc:before {\r\n  content: \"\\e227\";\r\n}\r\n.glyphicon-xbt:before {\r\n  content: \"\\e227\";\r\n}\r\n.glyphicon-yen:before {\r\n  content: \"\\00a5\";\r\n}\r\n.glyphicon-jpy:before {\r\n  content: \"\\00a5\";\r\n}\r\n.glyphicon-ruble:before {\r\n  content: \"\\20bd\";\r\n}\r\n.glyphicon-rub:before {\r\n  content: \"\\20bd\";\r\n}\r\n.glyphicon-scale:before {\r\n  content: \"\\e230\";\r\n}\r\n.glyphicon-ice-lolly:before {\r\n  content: \"\\e231\";\r\n}\r\n.glyphicon-ice-lolly-tasted:before {\r\n  content: \"\\e232\";\r\n}\r\n.glyphicon-education:before {\r\n  content: \"\\e233\";\r\n}\r\n.glyphicon-option-horizontal:before {\r\n  content: \"\\e234\";\r\n}\r\n.glyphicon-option-vertical:before {\r\n  content: \"\\e235\";\r\n}\r\n.glyphicon-menu-hamburger:before {\r\n  content: \"\\e236\";\r\n}\r\n.glyphicon-modal-window:before {\r\n  content: \"\\e237\";\r\n}\r\n.glyphicon-oil:before {\r\n  content: \"\\e238\";\r\n}\r\n.glyphicon-grain:before {\r\n  content: \"\\e239\";\r\n}\r\n.glyphicon-sunglasses:before {\r\n  content: \"\\e240\";\r\n}\r\n.glyphicon-text-size:before {\r\n  content: \"\\e241\";\r\n}\r\n.glyphicon-text-color:before {\r\n  content: \"\\e242\";\r\n}\r\n.glyphicon-text-background:before {\r\n  content: \"\\e243\";\r\n}\r\n.glyphicon-object-align-top:before {\r\n  content: \"\\e244\";\r\n}\r\n.glyphicon-object-align-bottom:before {\r\n  content: \"\\e245\";\r\n}\r\n.glyphicon-object-align-horizontal:before {\r\n  content: \"\\e246\";\r\n}\r\n.glyphicon-object-align-left:before {\r\n  content: \"\\e247\";\r\n}\r\n.glyphicon-object-align-vertical:before {\r\n  content: \"\\e248\";\r\n}\r\n.glyphicon-object-align-right:before {\r\n  content: \"\\e249\";\r\n}\r\n.glyphicon-triangle-right:before {\r\n  content: \"\\e250\";\r\n}\r\n.glyphicon-triangle-left:before {\r\n  content: \"\\e251\";\r\n}\r\n.glyphicon-triangle-bottom:before {\r\n  content: \"\\e252\";\r\n}\r\n.glyphicon-triangle-top:before {\r\n  content: \"\\e253\";\r\n}\r\n.glyphicon-console:before {\r\n  content: \"\\e254\";\r\n}\r\n.glyphicon-superscript:before {\r\n  content: \"\\e255\";\r\n}\r\n.glyphicon-subscript:before {\r\n  content: \"\\e256\";\r\n}\r\n.glyphicon-menu-left:before {\r\n  content: \"\\e257\";\r\n}\r\n.glyphicon-menu-right:before {\r\n  content: \"\\e258\";\r\n}\r\n.glyphicon-menu-down:before {\r\n  content: \"\\e259\";\r\n}\r\n.glyphicon-menu-up:before {\r\n  content: \"\\e260\";\r\n}\r\n* {\r\n  -webkit-box-sizing: border-box;\r\n     -moz-box-sizing: border-box;\r\n          box-sizing: border-box;\r\n}\r\n*:before,\r\n*:after {\r\n  -webkit-box-sizing: border-box;\r\n     -moz-box-sizing: border-box;\r\n          box-sizing: border-box;\r\n}\r\nhtml {\r\n  font-size: 10px;\r\n\r\n  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);\r\n}\r\nbody {\r\n  font-family: \"Helvetica Neue\", Helvetica, Arial, sans-serif;\r\n  font-size: 14px;\r\n  line-height: 1.42857143;\r\n  color: #333;\r\n  background-color: #fff;\r\n}\r\ninput,\r\nbutton,\r\nselect,\r\ntextarea {\r\n  font-family: inherit;\r\n  font-size: inherit;\r\n  line-height: inherit;\r\n}\r\na {\r\n  color: #337ab7;\r\n  text-decoration: none;\r\n}\r\na:hover,\r\na:focus {\r\n  color: #23527c;\r\n  text-decoration: underline;\r\n}\r\na:focus {\r\n  outline: thin dotted;\r\n  outline: 5px auto -webkit-focus-ring-color;\r\n  outline-offset: -2px;\r\n}\r\nfigure {\r\n  margin: 0;\r\n}\r\nimg {\r\n  vertical-align: middle;\r\n}\r\n.img-responsive,\r\n.thumbnail > img,\r\n.thumbnail a > img,\r\n.carousel-inner > .item > img,\r\n.carousel-inner > .item > a > img {\r\n  display: block;\r\n  max-width: 100%;\r\n  height: auto;\r\n}\r\n.img-rounded {\r\n  border-radius: 6px;\r\n}\r\n.img-thumbnail {\r\n  display: inline-block;\r\n  max-width: 100%;\r\n  height: auto;\r\n  padding: 4px;\r\n  line-height: 1.42857143;\r\n  background-color: #fff;\r\n  border: 1px solid #ddd;\r\n  border-radius: 4px;\r\n  -webkit-transition: all .2s ease-in-out;\r\n       -o-transition: all .2s ease-in-out;\r\n          transition: all .2s ease-in-out;\r\n}\r\n.img-circle {\r\n  border-radius: 50%;\r\n}\r\nhr {\r\n  margin-top: 20px;\r\n  margin-bottom: 20px;\r\n  border: 0;\r\n  border-top: 1px solid #eee;\r\n}\r\n.sr-only {\r\n  position: absolute;\r\n  width: 1px;\r\n  height: 1px;\r\n  padding: 0;\r\n  margin: -1px;\r\n  overflow: hidden;\r\n  clip: rect(0, 0, 0, 0);\r\n  border: 0;\r\n}\r\n.sr-only-focusable:active,\r\n.sr-only-focusable:focus {\r\n  position: static;\r\n  width: auto;\r\n  height: auto;\r\n  margin: 0;\r\n  overflow: visible;\r\n  clip: auto;\r\n}\r\n[role=\"button\"] {\r\n  cursor: pointer;\r\n}\r\nh1,\r\nh2,\r\nh3,\r\nh4,\r\nh5,\r\nh6,\r\n.h1,\r\n.h2,\r\n.h3,\r\n.h4,\r\n.h5,\r\n.h6 {\r\n  font-family: inherit;\r\n  font-weight: 500;\r\n  line-height: 1.1;\r\n  color: inherit;\r\n}\r\nh1 small,\r\nh2 small,\r\nh3 small,\r\nh4 small,\r\nh5 small,\r\nh6 small,\r\n.h1 small,\r\n.h2 small,\r\n.h3 small,\r\n.h4 small,\r\n.h5 small,\r\n.h6 small,\r\nh1 .small,\r\nh2 .small,\r\nh3 .small,\r\nh4 .small,\r\nh5 .small,\r\nh6 .small,\r\n.h1 .small,\r\n.h2 .small,\r\n.h3 .small,\r\n.h4 .small,\r\n.h5 .small,\r\n.h6 .small {\r\n  font-weight: normal;\r\n  line-height: 1;\r\n  color: #777;\r\n}\r\nh1,\r\n.h1,\r\nh2,\r\n.h2,\r\nh3,\r\n.h3 {\r\n  margin-top: 20px;\r\n  margin-bottom: 10px;\r\n}\r\nh1 small,\r\n.h1 small,\r\nh2 small,\r\n.h2 small,\r\nh3 small,\r\n.h3 small,\r\nh1 .small,\r\n.h1 .small,\r\nh2 .small,\r\n.h2 .small,\r\nh3 .small,\r\n.h3 .small {\r\n  font-size: 65%;\r\n}\r\nh4,\r\n.h4,\r\nh5,\r\n.h5,\r\nh6,\r\n.h6 {\r\n  margin-top: 10px;\r\n  margin-bottom: 10px;\r\n}\r\nh4 small,\r\n.h4 small,\r\nh5 small,\r\n.h5 small,\r\nh6 small,\r\n.h6 small,\r\nh4 .small,\r\n.h4 .small,\r\nh5 .small,\r\n.h5 .small,\r\nh6 .small,\r\n.h6 .small {\r\n  font-size: 75%;\r\n}\r\nh1,\r\n.h1 {\r\n  font-size: 36px;\r\n}\r\nh2,\r\n.h2 {\r\n  font-size: 30px;\r\n}\r\nh3,\r\n.h3 {\r\n  font-size: 24px;\r\n}\r\nh4,\r\n.h4 {\r\n  font-size: 18px;\r\n}\r\nh5,\r\n.h5 {\r\n  font-size: 14px;\r\n}\r\nh6,\r\n.h6 {\r\n  font-size: 12px;\r\n}\r\np {\r\n  margin: 0 0 10px;\r\n}\r\n.lead {\r\n  margin-bottom: 20px;\r\n  font-size: 16px;\r\n  font-weight: 300;\r\n  line-height: 1.4;\r\n}\r\n@media (min-width: 768px) {\r\n  .lead {\r\n    font-size: 21px;\r\n  }\r\n}\r\nsmall,\r\n.small {\r\n  font-size: 85%;\r\n}\r\nmark,\r\n.mark {\r\n  padding: .2em;\r\n  background-color: #fcf8e3;\r\n}\r\n.text-left {\r\n  text-align: left;\r\n}\r\n.text-right {\r\n  text-align: right;\r\n}\r\n.text-center {\r\n  text-align: center;\r\n}\r\n.text-justify {\r\n  text-align: justify;\r\n}\r\n.text-nowrap {\r\n  white-space: nowrap;\r\n}\r\n.text-lowercase {\r\n  text-transform: lowercase;\r\n}\r\n.text-uppercase {\r\n  text-transform: uppercase;\r\n}\r\n.text-capitalize {\r\n  text-transform: capitalize;\r\n}\r\n.text-muted {\r\n  color: #777;\r\n}\r\n.text-primary {\r\n  color: #337ab7;\r\n}\r\na.text-primary:hover,\r\na.text-primary:focus {\r\n  color: #286090;\r\n}\r\n.text-success {\r\n  color: #3c763d;\r\n}\r\na.text-success:hover,\r\na.text-success:focus {\r\n  color: #2b542c;\r\n}\r\n.text-info {\r\n  color: #31708f;\r\n}\r\na.text-info:hover,\r\na.text-info:focus {\r\n  color: #245269;\r\n}\r\n.text-warning {\r\n  color: #8a6d3b;\r\n}\r\na.text-warning:hover,\r\na.text-warning:focus {\r\n  color: #66512c;\r\n}\r\n.text-danger {\r\n  color: #a94442;\r\n}\r\na.text-danger:hover,\r\na.text-danger:focus {\r\n  color: #843534;\r\n}\r\n.bg-primary {\r\n  color: #fff;\r\n  background-color: #337ab7;\r\n}\r\na.bg-primary:hover,\r\na.bg-primary:focus {\r\n  background-color: #286090;\r\n}\r\n.bg-success {\r\n  background-color: #dff0d8;\r\n}\r\na.bg-success:hover,\r\na.bg-success:focus {\r\n  background-color: #c1e2b3;\r\n}\r\n.bg-info {\r\n  background-color: #d9edf7;\r\n}\r\na.bg-info:hover,\r\na.bg-info:focus {\r\n  background-color: #afd9ee;\r\n}\r\n.bg-warning {\r\n  background-color: #fcf8e3;\r\n}\r\na.bg-warning:hover,\r\na.bg-warning:focus {\r\n  background-color: #f7ecb5;\r\n}\r\n.bg-danger {\r\n  background-color: #f2dede;\r\n}\r\na.bg-danger:hover,\r\na.bg-danger:focus {\r\n  background-color: #e4b9b9;\r\n}\r\n.page-header {\r\n  padding-bottom: 9px;\r\n  margin: 40px 0 20px;\r\n  border-bottom: 1px solid #eee;\r\n}\r\nul,\r\nol {\r\n  margin-top: 0;\r\n  margin-bottom: 10px;\r\n}\r\nul ul,\r\nol ul,\r\nul ol,\r\nol ol {\r\n  margin-bottom: 0;\r\n}\r\n.list-unstyled {\r\n  padding-left: 0;\r\n  list-style: none;\r\n}\r\n.list-inline {\r\n  padding-left: 0;\r\n  margin-left: -5px;\r\n  list-style: none;\r\n}\r\n.list-inline > li {\r\n  display: inline-block;\r\n  padding-right: 5px;\r\n  padding-left: 5px;\r\n}\r\ndl {\r\n  margin-top: 0;\r\n  margin-bottom: 20px;\r\n}\r\ndt,\r\ndd {\r\n  line-height: 1.42857143;\r\n}\r\ndt {\r\n  font-weight: bold;\r\n}\r\ndd {\r\n  margin-left: 0;\r\n}\r\n@media (min-width: 768px) {\r\n  .dl-horizontal dt {\r\n    float: left;\r\n    width: 160px;\r\n    overflow: hidden;\r\n    clear: left;\r\n    text-align: right;\r\n    text-overflow: ellipsis;\r\n    white-space: nowrap;\r\n  }\r\n  .dl-horizontal dd {\r\n    margin-left: 180px;\r\n  }\r\n}\r\nabbr[title],\r\nabbr[data-original-title] {\r\n  cursor: help;\r\n  border-bottom: 1px dotted #777;\r\n}\r\n.initialism {\r\n  font-size: 90%;\r\n  text-transform: uppercase;\r\n}\r\nblockquote {\r\n  padding: 10px 20px;\r\n  margin: 0 0 20px;\r\n  font-size: 17.5px;\r\n  border-left: 5px solid #eee;\r\n}\r\nblockquote p:last-child,\r\nblockquote ul:last-child,\r\nblockquote ol:last-child {\r\n  margin-bottom: 0;\r\n}\r\nblockquote footer,\r\nblockquote small,\r\nblockquote .small {\r\n  display: block;\r\n  font-size: 80%;\r\n  line-height: 1.42857143;\r\n  color: #777;\r\n}\r\nblockquote footer:before,\r\nblockquote small:before,\r\nblockquote .small:before {\r\n  content: '\\2014 \\00A0';\r\n}\r\n.blockquote-reverse,\r\nblockquote.pull-right {\r\n  padding-right: 15px;\r\n  padding-left: 0;\r\n  text-align: right;\r\n  border-right: 5px solid #eee;\r\n  border-left: 0;\r\n}\r\n.blockquote-reverse footer:before,\r\nblockquote.pull-right footer:before,\r\n.blockquote-reverse small:before,\r\nblockquote.pull-right small:before,\r\n.blockquote-reverse .small:before,\r\nblockquote.pull-right .small:before {\r\n  content: '';\r\n}\r\n.blockquote-reverse footer:after,\r\nblockquote.pull-right footer:after,\r\n.blockquote-reverse small:after,\r\nblockquote.pull-right small:after,\r\n.blockquote-reverse .small:after,\r\nblockquote.pull-right .small:after {\r\n  content: '\\00A0 \\2014';\r\n}\r\naddress {\r\n  margin-bottom: 20px;\r\n  font-style: normal;\r\n  line-height: 1.42857143;\r\n}\r\ncode,\r\nkbd,\r\npre,\r\nsamp {\r\n  font-family: Menlo, Monaco, Consolas, \"Courier New\", monospace;\r\n}\r\ncode {\r\n  padding: 2px 4px;\r\n  font-size: 90%;\r\n  color: #c7254e;\r\n  background-color: #f9f2f4;\r\n  border-radius: 4px;\r\n}\r\nkbd {\r\n  padding: 2px 4px;\r\n  font-size: 90%;\r\n  color: #fff;\r\n  background-color: #333;\r\n  border-radius: 3px;\r\n  -webkit-box-shadow: inset 0 -1px 0 rgba(0, 0, 0, .25);\r\n          box-shadow: inset 0 -1px 0 rgba(0, 0, 0, .25);\r\n}\r\nkbd kbd {\r\n  padding: 0;\r\n  font-size: 100%;\r\n  font-weight: bold;\r\n  -webkit-box-shadow: none;\r\n          box-shadow: none;\r\n}\r\npre {\r\n  display: block;\r\n  padding: 9.5px;\r\n  margin: 0 0 10px;\r\n  font-size: 13px;\r\n  line-height: 1.42857143;\r\n  color: #333;\r\n  word-break: break-all;\r\n  word-wrap: break-word;\r\n  background-color: #f5f5f5;\r\n  border: 1px solid #ccc;\r\n  border-radius: 4px;\r\n}\r\npre code {\r\n  padding: 0;\r\n  font-size: inherit;\r\n  color: inherit;\r\n  white-space: pre-wrap;\r\n  background-color: transparent;\r\n  border-radius: 0;\r\n}\r\n.pre-scrollable {\r\n  max-height: 340px;\r\n  overflow-y: scroll;\r\n}\r\n.container {\r\n  padding-right: 15px;\r\n  padding-left: 15px;\r\n  margin-right: auto;\r\n  margin-left: auto;\r\n}\r\n@media (min-width: 768px) {\r\n  .container {\r\n    width: 750px;\r\n  }\r\n}\r\n@media (min-width: 992px) {\r\n  .container {\r\n    width: 970px;\r\n  }\r\n}\r\n@media (min-width: 1200px) {\r\n  .container {\r\n    width: 1170px;\r\n  }\r\n}\r\n.container-fluid {\r\n  padding-right: 15px;\r\n  padding-left: 15px;\r\n  margin-right: auto;\r\n  margin-left: auto;\r\n}\r\n.row {\r\n  margin-right: -15px;\r\n  margin-left: -15px;\r\n}\r\n.col-xs-1, .col-sm-1, .col-md-1, .col-lg-1, .col-xs-2, .col-sm-2, .col-md-2, .col-lg-2, .col-xs-3, .col-sm-3, .col-md-3, .col-lg-3, .col-xs-4, .col-sm-4, .col-md-4, .col-lg-4, .col-xs-5, .col-sm-5, .col-md-5, .col-lg-5, .col-xs-6, .col-sm-6, .col-md-6, .col-lg-6, .col-xs-7, .col-sm-7, .col-md-7, .col-lg-7, .col-xs-8, .col-sm-8, .col-md-8, .col-lg-8, .col-xs-9, .col-sm-9, .col-md-9, .col-lg-9, .col-xs-10, .col-sm-10, .col-md-10, .col-lg-10, .col-xs-11, .col-sm-11, .col-md-11, .col-lg-11, .col-xs-12, .col-sm-12, .col-md-12, .col-lg-12 {\r\n  position: relative;\r\n  min-height: 1px;\r\n  padding-right: 15px;\r\n  padding-left: 15px;\r\n}\r\n.col-xs-1, .col-xs-2, .col-xs-3, .col-xs-4, .col-xs-5, .col-xs-6, .col-xs-7, .col-xs-8, .col-xs-9, .col-xs-10, .col-xs-11, .col-xs-12 {\r\n  float: left;\r\n}\r\n.col-xs-12 {\r\n  width: 100%;\r\n}\r\n.col-xs-11 {\r\n  width: 91.66666667%;\r\n}\r\n.col-xs-10 {\r\n  width: 83.33333333%;\r\n}\r\n.col-xs-9 {\r\n  width: 75%;\r\n}\r\n.col-xs-8 {\r\n  width: 66.66666667%;\r\n}\r\n.col-xs-7 {\r\n  width: 58.33333333%;\r\n}\r\n.col-xs-6 {\r\n  width: 50%;\r\n}\r\n.col-xs-5 {\r\n  width: 41.66666667%;\r\n}\r\n.col-xs-4 {\r\n  width: 33.33333333%;\r\n}\r\n.col-xs-3 {\r\n  width: 25%;\r\n}\r\n.col-xs-2 {\r\n  width: 16.66666667%;\r\n}\r\n.col-xs-1 {\r\n  width: 8.33333333%;\r\n}\r\n.col-xs-pull-12 {\r\n  right: 100%;\r\n}\r\n.col-xs-pull-11 {\r\n  right: 91.66666667%;\r\n}\r\n.col-xs-pull-10 {\r\n  right: 83.33333333%;\r\n}\r\n.col-xs-pull-9 {\r\n  right: 75%;\r\n}\r\n.col-xs-pull-8 {\r\n  right: 66.66666667%;\r\n}\r\n.col-xs-pull-7 {\r\n  right: 58.33333333%;\r\n}\r\n.col-xs-pull-6 {\r\n  right: 50%;\r\n}\r\n.col-xs-pull-5 {\r\n  right: 41.66666667%;\r\n}\r\n.col-xs-pull-4 {\r\n  right: 33.33333333%;\r\n}\r\n.col-xs-pull-3 {\r\n  right: 25%;\r\n}\r\n.col-xs-pull-2 {\r\n  right: 16.66666667%;\r\n}\r\n.col-xs-pull-1 {\r\n  right: 8.33333333%;\r\n}\r\n.col-xs-pull-0 {\r\n  right: auto;\r\n}\r\n.col-xs-push-12 {\r\n  left: 100%;\r\n}\r\n.col-xs-push-11 {\r\n  left: 91.66666667%;\r\n}\r\n.col-xs-push-10 {\r\n  left: 83.33333333%;\r\n}\r\n.col-xs-push-9 {\r\n  left: 75%;\r\n}\r\n.col-xs-push-8 {\r\n  left: 66.66666667%;\r\n}\r\n.col-xs-push-7 {\r\n  left: 58.33333333%;\r\n}\r\n.col-xs-push-6 {\r\n  left: 50%;\r\n}\r\n.col-xs-push-5 {\r\n  left: 41.66666667%;\r\n}\r\n.col-xs-push-4 {\r\n  left: 33.33333333%;\r\n}\r\n.col-xs-push-3 {\r\n  left: 25%;\r\n}\r\n.col-xs-push-2 {\r\n  left: 16.66666667%;\r\n}\r\n.col-xs-push-1 {\r\n  left: 8.33333333%;\r\n}\r\n.col-xs-push-0 {\r\n  left: auto;\r\n}\r\n.col-xs-offset-12 {\r\n  margin-left: 100%;\r\n}\r\n.col-xs-offset-11 {\r\n  margin-left: 91.66666667%;\r\n}\r\n.col-xs-offset-10 {\r\n  margin-left: 83.33333333%;\r\n}\r\n.col-xs-offset-9 {\r\n  margin-left: 75%;\r\n}\r\n.col-xs-offset-8 {\r\n  margin-left: 66.66666667%;\r\n}\r\n.col-xs-offset-7 {\r\n  margin-left: 58.33333333%;\r\n}\r\n.col-xs-offset-6 {\r\n  margin-left: 50%;\r\n}\r\n.col-xs-offset-5 {\r\n  margin-left: 41.66666667%;\r\n}\r\n.col-xs-offset-4 {\r\n  margin-left: 33.33333333%;\r\n}\r\n.col-xs-offset-3 {\r\n  margin-left: 25%;\r\n}\r\n.col-xs-offset-2 {\r\n  margin-left: 16.66666667%;\r\n}\r\n.col-xs-offset-1 {\r\n  margin-left: 8.33333333%;\r\n}\r\n.col-xs-offset-0 {\r\n  margin-left: 0;\r\n}\r\n@media (min-width: 768px) {\r\n  .col-sm-1, .col-sm-2, .col-sm-3, .col-sm-4, .col-sm-5, .col-sm-6, .col-sm-7, .col-sm-8, .col-sm-9, .col-sm-10, .col-sm-11, .col-sm-12 {\r\n    float: left;\r\n  }\r\n  .col-sm-12 {\r\n    width: 100%;\r\n  }\r\n  .col-sm-11 {\r\n    width: 91.66666667%;\r\n  }\r\n  .col-sm-10 {\r\n    width: 83.33333333%;\r\n  }\r\n  .col-sm-9 {\r\n    width: 75%;\r\n  }\r\n  .col-sm-8 {\r\n    width: 66.66666667%;\r\n  }\r\n  .col-sm-7 {\r\n    width: 58.33333333%;\r\n  }\r\n  .col-sm-6 {\r\n    width: 50%;\r\n  }\r\n  .col-sm-5 {\r\n    width: 41.66666667%;\r\n  }\r\n  .col-sm-4 {\r\n    width: 33.33333333%;\r\n  }\r\n  .col-sm-3 {\r\n    width: 25%;\r\n  }\r\n  .col-sm-2 {\r\n    width: 16.66666667%;\r\n  }\r\n  .col-sm-1 {\r\n    width: 8.33333333%;\r\n  }\r\n  .col-sm-pull-12 {\r\n    right: 100%;\r\n  }\r\n  .col-sm-pull-11 {\r\n    right: 91.66666667%;\r\n  }\r\n  .col-sm-pull-10 {\r\n    right: 83.33333333%;\r\n  }\r\n  .col-sm-pull-9 {\r\n    right: 75%;\r\n  }\r\n  .col-sm-pull-8 {\r\n    right: 66.66666667%;\r\n  }\r\n  .col-sm-pull-7 {\r\n    right: 58.33333333%;\r\n  }\r\n  .col-sm-pull-6 {\r\n    right: 50%;\r\n  }\r\n  .col-sm-pull-5 {\r\n    right: 41.66666667%;\r\n  }\r\n  .col-sm-pull-4 {\r\n    right: 33.33333333%;\r\n  }\r\n  .col-sm-pull-3 {\r\n    right: 25%;\r\n  }\r\n  .col-sm-pull-2 {\r\n    right: 16.66666667%;\r\n  }\r\n  .col-sm-pull-1 {\r\n    right: 8.33333333%;\r\n  }\r\n  .col-sm-pull-0 {\r\n    right: auto;\r\n  }\r\n  .col-sm-push-12 {\r\n    left: 100%;\r\n  }\r\n  .col-sm-push-11 {\r\n    left: 91.66666667%;\r\n  }\r\n  .col-sm-push-10 {\r\n    left: 83.33333333%;\r\n  }\r\n  .col-sm-push-9 {\r\n    left: 75%;\r\n  }\r\n  .col-sm-push-8 {\r\n    left: 66.66666667%;\r\n  }\r\n  .col-sm-push-7 {\r\n    left: 58.33333333%;\r\n  }\r\n  .col-sm-push-6 {\r\n    left: 50%;\r\n  }\r\n  .col-sm-push-5 {\r\n    left: 41.66666667%;\r\n  }\r\n  .col-sm-push-4 {\r\n    left: 33.33333333%;\r\n  }\r\n  .col-sm-push-3 {\r\n    left: 25%;\r\n  }\r\n  .col-sm-push-2 {\r\n    left: 16.66666667%;\r\n  }\r\n  .col-sm-push-1 {\r\n    left: 8.33333333%;\r\n  }\r\n  .col-sm-push-0 {\r\n    left: auto;\r\n  }\r\n  .col-sm-offset-12 {\r\n    margin-left: 100%;\r\n  }\r\n  .col-sm-offset-11 {\r\n    margin-left: 91.66666667%;\r\n  }\r\n  .col-sm-offset-10 {\r\n    margin-left: 83.33333333%;\r\n  }\r\n  .col-sm-offset-9 {\r\n    margin-left: 75%;\r\n  }\r\n  .col-sm-offset-8 {\r\n    margin-left: 66.66666667%;\r\n  }\r\n  .col-sm-offset-7 {\r\n    margin-left: 58.33333333%;\r\n  }\r\n  .col-sm-offset-6 {\r\n    margin-left: 50%;\r\n  }\r\n  .col-sm-offset-5 {\r\n    margin-left: 41.66666667%;\r\n  }\r\n  .col-sm-offset-4 {\r\n    margin-left: 33.33333333%;\r\n  }\r\n  .col-sm-offset-3 {\r\n    margin-left: 25%;\r\n  }\r\n  .col-sm-offset-2 {\r\n    margin-left: 16.66666667%;\r\n  }\r\n  .col-sm-offset-1 {\r\n    margin-left: 8.33333333%;\r\n  }\r\n  .col-sm-offset-0 {\r\n    margin-left: 0;\r\n  }\r\n}\r\n@media (min-width: 992px) {\r\n  .col-md-1, .col-md-2, .col-md-3, .col-md-4, .col-md-5, .col-md-6, .col-md-7, .col-md-8, .col-md-9, .col-md-10, .col-md-11, .col-md-12 {\r\n    float: left;\r\n  }\r\n  .col-md-12 {\r\n    width: 100%;\r\n  }\r\n  .col-md-11 {\r\n    width: 91.66666667%;\r\n  }\r\n  .col-md-10 {\r\n    width: 83.33333333%;\r\n  }\r\n  .col-md-9 {\r\n    width: 75%;\r\n  }\r\n  .col-md-8 {\r\n    width: 66.66666667%;\r\n  }\r\n  .col-md-7 {\r\n    width: 58.33333333%;\r\n  }\r\n  .col-md-6 {\r\n    width: 50%;\r\n  }\r\n  .col-md-5 {\r\n    width: 41.66666667%;\r\n  }\r\n  .col-md-4 {\r\n    width: 33.33333333%;\r\n  }\r\n  .col-md-3 {\r\n    width: 25%;\r\n  }\r\n  .col-md-2 {\r\n    width: 16.66666667%;\r\n  }\r\n  .col-md-1 {\r\n    width: 8.33333333%;\r\n  }\r\n  .col-md-pull-12 {\r\n    right: 100%;\r\n  }\r\n  .col-md-pull-11 {\r\n    right: 91.66666667%;\r\n  }\r\n  .col-md-pull-10 {\r\n    right: 83.33333333%;\r\n  }\r\n  .col-md-pull-9 {\r\n    right: 75%;\r\n  }\r\n  .col-md-pull-8 {\r\n    right: 66.66666667%;\r\n  }\r\n  .col-md-pull-7 {\r\n    right: 58.33333333%;\r\n  }\r\n  .col-md-pull-6 {\r\n    right: 50%;\r\n  }\r\n  .col-md-pull-5 {\r\n    right: 41.66666667%;\r\n  }\r\n  .col-md-pull-4 {\r\n    right: 33.33333333%;\r\n  }\r\n  .col-md-pull-3 {\r\n    right: 25%;\r\n  }\r\n  .col-md-pull-2 {\r\n    right: 16.66666667%;\r\n  }\r\n  .col-md-pull-1 {\r\n    right: 8.33333333%;\r\n  }\r\n  .col-md-pull-0 {\r\n    right: auto;\r\n  }\r\n  .col-md-push-12 {\r\n    left: 100%;\r\n  }\r\n  .col-md-push-11 {\r\n    left: 91.66666667%;\r\n  }\r\n  .col-md-push-10 {\r\n    left: 83.33333333%;\r\n  }\r\n  .col-md-push-9 {\r\n    left: 75%;\r\n  }\r\n  .col-md-push-8 {\r\n    left: 66.66666667%;\r\n  }\r\n  .col-md-push-7 {\r\n    left: 58.33333333%;\r\n  }\r\n  .col-md-push-6 {\r\n    left: 50%;\r\n  }\r\n  .col-md-push-5 {\r\n    left: 41.66666667%;\r\n  }\r\n  .col-md-push-4 {\r\n    left: 33.33333333%;\r\n  }\r\n  .col-md-push-3 {\r\n    left: 25%;\r\n  }\r\n  .col-md-push-2 {\r\n    left: 16.66666667%;\r\n  }\r\n  .col-md-push-1 {\r\n    left: 8.33333333%;\r\n  }\r\n  .col-md-push-0 {\r\n    left: auto;\r\n  }\r\n  .col-md-offset-12 {\r\n    margin-left: 100%;\r\n  }\r\n  .col-md-offset-11 {\r\n    margin-left: 91.66666667%;\r\n  }\r\n  .col-md-offset-10 {\r\n    margin-left: 83.33333333%;\r\n  }\r\n  .col-md-offset-9 {\r\n    margin-left: 75%;\r\n  }\r\n  .col-md-offset-8 {\r\n    margin-left: 66.66666667%;\r\n  }\r\n  .col-md-offset-7 {\r\n    margin-left: 58.33333333%;\r\n  }\r\n  .col-md-offset-6 {\r\n    margin-left: 50%;\r\n  }\r\n  .col-md-offset-5 {\r\n    margin-left: 41.66666667%;\r\n  }\r\n  .col-md-offset-4 {\r\n    margin-left: 33.33333333%;\r\n  }\r\n  .col-md-offset-3 {\r\n    margin-left: 25%;\r\n  }\r\n  .col-md-offset-2 {\r\n    margin-left: 16.66666667%;\r\n  }\r\n  .col-md-offset-1 {\r\n    margin-left: 8.33333333%;\r\n  }\r\n  .col-md-offset-0 {\r\n    margin-left: 0;\r\n  }\r\n}\r\n@media (min-width: 1200px) {\r\n  .col-lg-1, .col-lg-2, .col-lg-3, .col-lg-4, .col-lg-5, .col-lg-6, .col-lg-7, .col-lg-8, .col-lg-9, .col-lg-10, .col-lg-11, .col-lg-12 {\r\n    float: left;\r\n  }\r\n  .col-lg-12 {\r\n    width: 100%;\r\n  }\r\n  .col-lg-11 {\r\n    width: 91.66666667%;\r\n  }\r\n  .col-lg-10 {\r\n    width: 83.33333333%;\r\n  }\r\n  .col-lg-9 {\r\n    width: 75%;\r\n  }\r\n  .col-lg-8 {\r\n    width: 66.66666667%;\r\n  }\r\n  .col-lg-7 {\r\n    width: 58.33333333%;\r\n  }\r\n  .col-lg-6 {\r\n    width: 50%;\r\n  }\r\n  .col-lg-5 {\r\n    width: 41.66666667%;\r\n  }\r\n  .col-lg-4 {\r\n    width: 33.33333333%;\r\n  }\r\n  .col-lg-3 {\r\n    width: 25%;\r\n  }\r\n  .col-lg-2 {\r\n    width: 16.66666667%;\r\n  }\r\n  .col-lg-1 {\r\n    width: 8.33333333%;\r\n  }\r\n  .col-lg-pull-12 {\r\n    right: 100%;\r\n  }\r\n  .col-lg-pull-11 {\r\n    right: 91.66666667%;\r\n  }\r\n  .col-lg-pull-10 {\r\n    right: 83.33333333%;\r\n  }\r\n  .col-lg-pull-9 {\r\n    right: 75%;\r\n  }\r\n  .col-lg-pull-8 {\r\n    right: 66.66666667%;\r\n  }\r\n  .col-lg-pull-7 {\r\n    right: 58.33333333%;\r\n  }\r\n  .col-lg-pull-6 {\r\n    right: 50%;\r\n  }\r\n  .col-lg-pull-5 {\r\n    right: 41.66666667%;\r\n  }\r\n  .col-lg-pull-4 {\r\n    right: 33.33333333%;\r\n  }\r\n  .col-lg-pull-3 {\r\n    right: 25%;\r\n  }\r\n  .col-lg-pull-2 {\r\n    right: 16.66666667%;\r\n  }\r\n  .col-lg-pull-1 {\r\n    right: 8.33333333%;\r\n  }\r\n  .col-lg-pull-0 {\r\n    right: auto;\r\n  }\r\n  .col-lg-push-12 {\r\n    left: 100%;\r\n  }\r\n  .col-lg-push-11 {\r\n    left: 91.66666667%;\r\n  }\r\n  .col-lg-push-10 {\r\n    left: 83.33333333%;\r\n  }\r\n  .col-lg-push-9 {\r\n    left: 75%;\r\n  }\r\n  .col-lg-push-8 {\r\n    left: 66.66666667%;\r\n  }\r\n  .col-lg-push-7 {\r\n    left: 58.33333333%;\r\n  }\r\n  .col-lg-push-6 {\r\n    left: 50%;\r\n  }\r\n  .col-lg-push-5 {\r\n    left: 41.66666667%;\r\n  }\r\n  .col-lg-push-4 {\r\n    left: 33.33333333%;\r\n  }\r\n  .col-lg-push-3 {\r\n    left: 25%;\r\n  }\r\n  .col-lg-push-2 {\r\n    left: 16.66666667%;\r\n  }\r\n  .col-lg-push-1 {\r\n    left: 8.33333333%;\r\n  }\r\n  .col-lg-push-0 {\r\n    left: auto;\r\n  }\r\n  .col-lg-offset-12 {\r\n    margin-left: 100%;\r\n  }\r\n  .col-lg-offset-11 {\r\n    margin-left: 91.66666667%;\r\n  }\r\n  .col-lg-offset-10 {\r\n    margin-left: 83.33333333%;\r\n  }\r\n  .col-lg-offset-9 {\r\n    margin-left: 75%;\r\n  }\r\n  .col-lg-offset-8 {\r\n    margin-left: 66.66666667%;\r\n  }\r\n  .col-lg-offset-7 {\r\n    margin-left: 58.33333333%;\r\n  }\r\n  .col-lg-offset-6 {\r\n    margin-left: 50%;\r\n  }\r\n  .col-lg-offset-5 {\r\n    margin-left: 41.66666667%;\r\n  }\r\n  .col-lg-offset-4 {\r\n    margin-left: 33.33333333%;\r\n  }\r\n  .col-lg-offset-3 {\r\n    margin-left: 25%;\r\n  }\r\n  .col-lg-offset-2 {\r\n    margin-left: 16.66666667%;\r\n  }\r\n  .col-lg-offset-1 {\r\n    margin-left: 8.33333333%;\r\n  }\r\n  .col-lg-offset-0 {\r\n    margin-left: 0;\r\n  }\r\n}\r\ntable {\r\n  background-color: transparent;\r\n}\r\ncaption {\r\n  padding-top: 8px;\r\n  padding-bottom: 8px;\r\n  color: #777;\r\n  text-align: left;\r\n}\r\nth {\r\n  text-align: left;\r\n}\r\n.table {\r\n  width: 100%;\r\n  max-width: 100%;\r\n  margin-bottom: 20px;\r\n}\r\n.table > thead > tr > th,\r\n.table > tbody > tr > th,\r\n.table > tfoot > tr > th,\r\n.table > thead > tr > td,\r\n.table > tbody > tr > td,\r\n.table > tfoot > tr > td {\r\n  padding: 8px;\r\n  line-height: 1.42857143;\r\n  vertical-align: top;\r\n  border-top: 1px solid #ddd;\r\n}\r\n.table > thead > tr > th {\r\n  vertical-align: bottom;\r\n  border-bottom: 2px solid #ddd;\r\n}\r\n.table > caption + thead > tr:first-child > th,\r\n.table > colgroup + thead > tr:first-child > th,\r\n.table > thead:first-child > tr:first-child > th,\r\n.table > caption + thead > tr:first-child > td,\r\n.table > colgroup + thead > tr:first-child > td,\r\n.table > thead:first-child > tr:first-child > td {\r\n  border-top: 0;\r\n}\r\n.table > tbody + tbody {\r\n  border-top: 2px solid #ddd;\r\n}\r\n.table .table {\r\n  background-color: #fff;\r\n}\r\n.table-condensed > thead > tr > th,\r\n.table-condensed > tbody > tr > th,\r\n.table-condensed > tfoot > tr > th,\r\n.table-condensed > thead > tr > td,\r\n.table-condensed > tbody > tr > td,\r\n.table-condensed > tfoot > tr > td {\r\n  padding: 5px;\r\n}\r\n.table-bordered {\r\n  border: 1px solid #ddd;\r\n}\r\n.table-bordered > thead > tr > th,\r\n.table-bordered > tbody > tr > th,\r\n.table-bordered > tfoot > tr > th,\r\n.table-bordered > thead > tr > td,\r\n.table-bordered > tbody > tr > td,\r\n.table-bordered > tfoot > tr > td {\r\n  border: 1px solid #ddd;\r\n}\r\n.table-bordered > thead > tr > th,\r\n.table-bordered > thead > tr > td {\r\n  border-bottom-width: 2px;\r\n}\r\n.table-striped > tbody > tr:nth-of-type(odd) {\r\n  background-color: #f9f9f9;\r\n}\r\n.table-hover > tbody > tr:hover {\r\n  background-color: #f5f5f5;\r\n}\r\ntable col[class*=\"col-\"] {\r\n  position: static;\r\n  display: table-column;\r\n  float: none;\r\n}\r\ntable td[class*=\"col-\"],\r\ntable th[class*=\"col-\"] {\r\n  position: static;\r\n  display: table-cell;\r\n  float: none;\r\n}\r\n.table > thead > tr > td.active,\r\n.table > tbody > tr > td.active,\r\n.table > tfoot > tr > td.active,\r\n.table > thead > tr > th.active,\r\n.table > tbody > tr > th.active,\r\n.table > tfoot > tr > th.active,\r\n.table > thead > tr.active > td,\r\n.table > tbody > tr.active > td,\r\n.table > tfoot > tr.active > td,\r\n.table > thead > tr.active > th,\r\n.table > tbody > tr.active > th,\r\n.table > tfoot > tr.active > th {\r\n  background-color: #f5f5f5;\r\n}\r\n.table-hover > tbody > tr > td.active:hover,\r\n.table-hover > tbody > tr > th.active:hover,\r\n.table-hover > tbody > tr.active:hover > td,\r\n.table-hover > tbody > tr:hover > .active,\r\n.table-hover > tbody > tr.active:hover > th {\r\n  background-color: #e8e8e8;\r\n}\r\n.table > thead > tr > td.success,\r\n.table > tbody > tr > td.success,\r\n.table > tfoot > tr > td.success,\r\n.table > thead > tr > th.success,\r\n.table > tbody > tr > th.success,\r\n.table > tfoot > tr > th.success,\r\n.table > thead > tr.success > td,\r\n.table > tbody > tr.success > td,\r\n.table > tfoot > tr.success > td,\r\n.table > thead > tr.success > th,\r\n.table > tbody > tr.success > th,\r\n.table > tfoot > tr.success > th {\r\n  background-color: #dff0d8;\r\n}\r\n.table-hover > tbody > tr > td.success:hover,\r\n.table-hover > tbody > tr > th.success:hover,\r\n.table-hover > tbody > tr.success:hover > td,\r\n.table-hover > tbody > tr:hover > .success,\r\n.table-hover > tbody > tr.success:hover > th {\r\n  background-color: #d0e9c6;\r\n}\r\n.table > thead > tr > td.info,\r\n.table > tbody > tr > td.info,\r\n.table > tfoot > tr > td.info,\r\n.table > thead > tr > th.info,\r\n.table > tbody > tr > th.info,\r\n.table > tfoot > tr > th.info,\r\n.table > thead > tr.info > td,\r\n.table > tbody > tr.info > td,\r\n.table > tfoot > tr.info > td,\r\n.table > thead > tr.info > th,\r\n.table > tbody > tr.info > th,\r\n.table > tfoot > tr.info > th {\r\n  background-color: #d9edf7;\r\n}\r\n.table-hover > tbody > tr > td.info:hover,\r\n.table-hover > tbody > tr > th.info:hover,\r\n.table-hover > tbody > tr.info:hover > td,\r\n.table-hover > tbody > tr:hover > .info,\r\n.table-hover > tbody > tr.info:hover > th {\r\n  background-color: #c4e3f3;\r\n}\r\n.table > thead > tr > td.warning,\r\n.table > tbody > tr > td.warning,\r\n.table > tfoot > tr > td.warning,\r\n.table > thead > tr > th.warning,\r\n.table > tbody > tr > th.warning,\r\n.table > tfoot > tr > th.warning,\r\n.table > thead > tr.warning > td,\r\n.table > tbody > tr.warning > td,\r\n.table > tfoot > tr.warning > td,\r\n.table > thead > tr.warning > th,\r\n.table > tbody > tr.warning > th,\r\n.table > tfoot > tr.warning > th {\r\n  background-color: #fcf8e3;\r\n}\r\n.table-hover > tbody > tr > td.warning:hover,\r\n.table-hover > tbody > tr > th.warning:hover,\r\n.table-hover > tbody > tr.warning:hover > td,\r\n.table-hover > tbody > tr:hover > .warning,\r\n.table-hover > tbody > tr.warning:hover > th {\r\n  background-color: #faf2cc;\r\n}\r\n.table > thead > tr > td.danger,\r\n.table > tbody > tr > td.danger,\r\n.table > tfoot > tr > td.danger,\r\n.table > thead > tr > th.danger,\r\n.table > tbody > tr > th.danger,\r\n.table > tfoot > tr > th.danger,\r\n.table > thead > tr.danger > td,\r\n.table > tbody > tr.danger > td,\r\n.table > tfoot > tr.danger > td,\r\n.table > thead > tr.danger > th,\r\n.table > tbody > tr.danger > th,\r\n.table > tfoot > tr.danger > th {\r\n  background-color: #f2dede;\r\n}\r\n.table-hover > tbody > tr > td.danger:hover,\r\n.table-hover > tbody > tr > th.danger:hover,\r\n.table-hover > tbody > tr.danger:hover > td,\r\n.table-hover > tbody > tr:hover > .danger,\r\n.table-hover > tbody > tr.danger:hover > th {\r\n  background-color: #ebcccc;\r\n}\r\n.table-responsive {\r\n  min-height: .01%;\r\n  overflow-x: auto;\r\n}\r\n@media screen and (max-width: 767px) {\r\n  .table-responsive {\r\n    width: 100%;\r\n    margin-bottom: 15px;\r\n    overflow-y: hidden;\r\n    -ms-overflow-style: -ms-autohiding-scrollbar;\r\n    border: 1px solid #ddd;\r\n  }\r\n  .table-responsive > .table {\r\n    margin-bottom: 0;\r\n  }\r\n  .table-responsive > .table > thead > tr > th,\r\n  .table-responsive > .table > tbody > tr > th,\r\n  .table-responsive > .table > tfoot > tr > th,\r\n  .table-responsive > .table > thead > tr > td,\r\n  .table-responsive > .table > tbody > tr > td,\r\n  .table-responsive > .table > tfoot > tr > td {\r\n    white-space: nowrap;\r\n  }\r\n  .table-responsive > .table-bordered {\r\n    border: 0;\r\n  }\r\n  .table-responsive > .table-bordered > thead > tr > th:first-child,\r\n  .table-responsive > .table-bordered > tbody > tr > th:first-child,\r\n  .table-responsive > .table-bordered > tfoot > tr > th:first-child,\r\n  .table-responsive > .table-bordered > thead > tr > td:first-child,\r\n  .table-responsive > .table-bordered > tbody > tr > td:first-child,\r\n  .table-responsive > .table-bordered > tfoot > tr > td:first-child {\r\n    border-left: 0;\r\n  }\r\n  .table-responsive > .table-bordered > thead > tr > th:last-child,\r\n  .table-responsive > .table-bordered > tbody > tr > th:last-child,\r\n  .table-responsive > .table-bordered > tfoot > tr > th:last-child,\r\n  .table-responsive > .table-bordered > thead > tr > td:last-child,\r\n  .table-responsive > .table-bordered > tbody > tr > td:last-child,\r\n  .table-responsive > .table-bordered > tfoot > tr > td:last-child {\r\n    border-right: 0;\r\n  }\r\n  .table-responsive > .table-bordered > tbody > tr:last-child > th,\r\n  .table-responsive > .table-bordered > tfoot > tr:last-child > th,\r\n  .table-responsive > .table-bordered > tbody > tr:last-child > td,\r\n  .table-responsive > .table-bordered > tfoot > tr:last-child > td {\r\n    border-bottom: 0;\r\n  }\r\n}\r\nfieldset {\r\n  min-width: 0;\r\n  padding: 0;\r\n  margin: 0;\r\n  border: 0;\r\n}\r\nlegend {\r\n  display: block;\r\n  width: 100%;\r\n  padding: 0;\r\n  margin-bottom: 20px;\r\n  font-size: 21px;\r\n  line-height: inherit;\r\n  color: #333;\r\n  border: 0;\r\n  border-bottom: 1px solid #e5e5e5;\r\n}\r\nlabel {\r\n  display: inline-block;\r\n  max-width: 100%;\r\n  margin-bottom: 5px;\r\n  font-weight: bold;\r\n}\r\ninput[type=\"search\"] {\r\n  -webkit-box-sizing: border-box;\r\n     -moz-box-sizing: border-box;\r\n          box-sizing: border-box;\r\n}\r\ninput[type=\"radio\"],\r\ninput[type=\"checkbox\"] {\r\n  margin: 4px 0 0;\r\n  margin-top: 1px \\9;\r\n  line-height: normal;\r\n}\r\ninput[type=\"file\"] {\r\n  display: block;\r\n}\r\ninput[type=\"range\"] {\r\n  display: block;\r\n  width: 100%;\r\n}\r\nselect[multiple],\r\nselect[size] {\r\n  height: auto;\r\n}\r\ninput[type=\"file\"]:focus,\r\ninput[type=\"radio\"]:focus,\r\ninput[type=\"checkbox\"]:focus {\r\n  outline: thin dotted;\r\n  outline: 5px auto -webkit-focus-ring-color;\r\n  outline-offset: -2px;\r\n}\r\noutput {\r\n  display: block;\r\n  padding-top: 7px;\r\n  font-size: 14px;\r\n  line-height: 1.42857143;\r\n  color: #555;\r\n}\r\n.form-control {\r\n  display: block;\r\n  width: 100%;\r\n  height: 34px;\r\n  padding: 6px 12px;\r\n  font-size: 14px;\r\n  line-height: 1.42857143;\r\n  color: #555;\r\n  background-color: #fff;\r\n  background-image: none;\r\n  border: 1px solid #ccc;\r\n  border-radius: 4px;\r\n  -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);\r\n          box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);\r\n  -webkit-transition: border-color ease-in-out .15s, -webkit-box-shadow ease-in-out .15s;\r\n       -o-transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;\r\n          transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;\r\n}\r\n.form-control:focus {\r\n  border-color: #66afe9;\r\n  outline: 0;\r\n  -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102, 175, 233, .6);\r\n          box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102, 175, 233, .6);\r\n}\r\n.form-control::-moz-placeholder {\r\n  color: #999;\r\n  opacity: 1;\r\n}\r\n.form-control:-ms-input-placeholder {\r\n  color: #999;\r\n}\r\n.form-control::-webkit-input-placeholder {\r\n  color: #999;\r\n}\r\n.form-control::-ms-expand {\r\n  background-color: transparent;\r\n  border: 0;\r\n}\r\n.form-control[disabled],\r\n.form-control[readonly],\r\nfieldset[disabled] .form-control {\r\n  background-color: #eee;\r\n  opacity: 1;\r\n}\r\n.form-control[disabled],\r\nfieldset[disabled] .form-control {\r\n  cursor: not-allowed;\r\n}\r\ntextarea.form-control {\r\n  height: auto;\r\n}\r\ninput[type=\"search\"] {\r\n  -webkit-appearance: none;\r\n}\r\n@media screen and (-webkit-min-device-pixel-ratio: 0) {\r\n  input[type=\"date\"].form-control,\r\n  input[type=\"time\"].form-control,\r\n  input[type=\"datetime-local\"].form-control,\r\n  input[type=\"month\"].form-control {\r\n    line-height: 34px;\r\n  }\r\n  input[type=\"date\"].input-sm,\r\n  input[type=\"time\"].input-sm,\r\n  input[type=\"datetime-local\"].input-sm,\r\n  input[type=\"month\"].input-sm,\r\n  .input-group-sm input[type=\"date\"],\r\n  .input-group-sm input[type=\"time\"],\r\n  .input-group-sm input[type=\"datetime-local\"],\r\n  .input-group-sm input[type=\"month\"] {\r\n    line-height: 30px;\r\n  }\r\n  input[type=\"date\"].input-lg,\r\n  input[type=\"time\"].input-lg,\r\n  input[type=\"datetime-local\"].input-lg,\r\n  input[type=\"month\"].input-lg,\r\n  .input-group-lg input[type=\"date\"],\r\n  .input-group-lg input[type=\"time\"],\r\n  .input-group-lg input[type=\"datetime-local\"],\r\n  .input-group-lg input[type=\"month\"] {\r\n    line-height: 46px;\r\n  }\r\n}\r\n.form-group {\r\n  margin-bottom: 15px;\r\n}\r\n.radio,\r\n.checkbox {\r\n  position: relative;\r\n  display: block;\r\n  margin-top: 10px;\r\n  margin-bottom: 10px;\r\n}\r\n.radio label,\r\n.checkbox label {\r\n  min-height: 20px;\r\n  padding-left: 20px;\r\n  margin-bottom: 0;\r\n  font-weight: normal;\r\n  cursor: pointer;\r\n}\r\n.radio input[type=\"radio\"],\r\n.radio-inline input[type=\"radio\"],\r\n.checkbox input[type=\"checkbox\"],\r\n.checkbox-inline input[type=\"checkbox\"] {\r\n  position: absolute;\r\n  margin-top: 4px \\9;\r\n  margin-left: -20px;\r\n}\r\n.radio + .radio,\r\n.checkbox + .checkbox {\r\n  margin-top: -5px;\r\n}\r\n.radio-inline,\r\n.checkbox-inline {\r\n  position: relative;\r\n  display: inline-block;\r\n  padding-left: 20px;\r\n  margin-bottom: 0;\r\n  font-weight: normal;\r\n  vertical-align: middle;\r\n  cursor: pointer;\r\n}\r\n.radio-inline + .radio-inline,\r\n.checkbox-inline + .checkbox-inline {\r\n  margin-top: 0;\r\n  margin-left: 10px;\r\n}\r\ninput[type=\"radio\"][disabled],\r\ninput[type=\"checkbox\"][disabled],\r\ninput[type=\"radio\"].disabled,\r\ninput[type=\"checkbox\"].disabled,\r\nfieldset[disabled] input[type=\"radio\"],\r\nfieldset[disabled] input[type=\"checkbox\"] {\r\n  cursor: not-allowed;\r\n}\r\n.radio-inline.disabled,\r\n.checkbox-inline.disabled,\r\nfieldset[disabled] .radio-inline,\r\nfieldset[disabled] .checkbox-inline {\r\n  cursor: not-allowed;\r\n}\r\n.radio.disabled label,\r\n.checkbox.disabled label,\r\nfieldset[disabled] .radio label,\r\nfieldset[disabled] .checkbox label {\r\n  cursor: not-allowed;\r\n}\r\n.form-control-static {\r\n  min-height: 34px;\r\n  padding-top: 7px;\r\n  padding-bottom: 7px;\r\n  margin-bottom: 0;\r\n}\r\n.form-control-static.input-lg,\r\n.form-control-static.input-sm {\r\n  padding-right: 0;\r\n  padding-left: 0;\r\n}\r\n.input-sm {\r\n  height: 30px;\r\n  padding: 5px 10px;\r\n  font-size: 12px;\r\n  line-height: 1.5;\r\n  border-radius: 3px;\r\n}\r\nselect.input-sm {\r\n  height: 30px;\r\n  line-height: 30px;\r\n}\r\ntextarea.input-sm,\r\nselect[multiple].input-sm {\r\n  height: auto;\r\n}\r\n.form-group-sm .form-control {\r\n  height: 30px;\r\n  padding: 5px 10px;\r\n  font-size: 12px;\r\n  line-height: 1.5;\r\n  border-radius: 3px;\r\n}\r\n.form-group-sm select.form-control {\r\n  height: 30px;\r\n  line-height: 30px;\r\n}\r\n.form-group-sm textarea.form-control,\r\n.form-group-sm select[multiple].form-control {\r\n  height: auto;\r\n}\r\n.form-group-sm .form-control-static {\r\n  height: 30px;\r\n  min-height: 32px;\r\n  padding: 6px 10px;\r\n  font-size: 12px;\r\n  line-height: 1.5;\r\n}\r\n.input-lg {\r\n  height: 46px;\r\n  padding: 10px 16px;\r\n  font-size: 18px;\r\n  line-height: 1.3333333;\r\n  border-radius: 6px;\r\n}\r\nselect.input-lg {\r\n  height: 46px;\r\n  line-height: 46px;\r\n}\r\ntextarea.input-lg,\r\nselect[multiple].input-lg {\r\n  height: auto;\r\n}\r\n.form-group-lg .form-control {\r\n  height: 46px;\r\n  padding: 10px 16px;\r\n  font-size: 18px;\r\n  line-height: 1.3333333;\r\n  border-radius: 6px;\r\n}\r\n.form-group-lg select.form-control {\r\n  height: 46px;\r\n  line-height: 46px;\r\n}\r\n.form-group-lg textarea.form-control,\r\n.form-group-lg select[multiple].form-control {\r\n  height: auto;\r\n}\r\n.form-group-lg .form-control-static {\r\n  height: 46px;\r\n  min-height: 38px;\r\n  padding: 11px 16px;\r\n  font-size: 18px;\r\n  line-height: 1.3333333;\r\n}\r\n.has-feedback {\r\n  position: relative;\r\n}\r\n.has-feedback .form-control {\r\n  padding-right: 42.5px;\r\n}\r\n.form-control-feedback {\r\n  position: absolute;\r\n  top: 0;\r\n  right: 0;\r\n  z-index: 2;\r\n  display: block;\r\n  width: 34px;\r\n  height: 34px;\r\n  line-height: 34px;\r\n  text-align: center;\r\n  pointer-events: none;\r\n}\r\n.input-lg + .form-control-feedback,\r\n.input-group-lg + .form-control-feedback,\r\n.form-group-lg .form-control + .form-control-feedback {\r\n  width: 46px;\r\n  height: 46px;\r\n  line-height: 46px;\r\n}\r\n.input-sm + .form-control-feedback,\r\n.input-group-sm + .form-control-feedback,\r\n.form-group-sm .form-control + .form-control-feedback {\r\n  width: 30px;\r\n  height: 30px;\r\n  line-height: 30px;\r\n}\r\n.has-success .help-block,\r\n.has-success .control-label,\r\n.has-success .radio,\r\n.has-success .checkbox,\r\n.has-success .radio-inline,\r\n.has-success .checkbox-inline,\r\n.has-success.radio label,\r\n.has-success.checkbox label,\r\n.has-success.radio-inline label,\r\n.has-success.checkbox-inline label {\r\n  color: #3c763d;\r\n}\r\n.has-success .form-control {\r\n  border-color: #3c763d;\r\n  -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);\r\n          box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);\r\n}\r\n.has-success .form-control:focus {\r\n  border-color: #2b542c;\r\n  -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 6px #67b168;\r\n          box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 6px #67b168;\r\n}\r\n.has-success .input-group-addon {\r\n  color: #3c763d;\r\n  background-color: #dff0d8;\r\n  border-color: #3c763d;\r\n}\r\n.has-success .form-control-feedback {\r\n  color: #3c763d;\r\n}\r\n.has-warning .help-block,\r\n.has-warning .control-label,\r\n.has-warning .radio,\r\n.has-warning .checkbox,\r\n.has-warning .radio-inline,\r\n.has-warning .checkbox-inline,\r\n.has-warning.radio label,\r\n.has-warning.checkbox label,\r\n.has-warning.radio-inline label,\r\n.has-warning.checkbox-inline label {\r\n  color: #8a6d3b;\r\n}\r\n.has-warning .form-control {\r\n  border-color: #8a6d3b;\r\n  -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);\r\n          box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);\r\n}\r\n.has-warning .form-control:focus {\r\n  border-color: #66512c;\r\n  -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 6px #c0a16b;\r\n          box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 6px #c0a16b;\r\n}\r\n.has-warning .input-group-addon {\r\n  color: #8a6d3b;\r\n  background-color: #fcf8e3;\r\n  border-color: #8a6d3b;\r\n}\r\n.has-warning .form-control-feedback {\r\n  color: #8a6d3b;\r\n}\r\n.has-error .help-block,\r\n.has-error .control-label,\r\n.has-error .radio,\r\n.has-error .checkbox,\r\n.has-error .radio-inline,\r\n.has-error .checkbox-inline,\r\n.has-error.radio label,\r\n.has-error.checkbox label,\r\n.has-error.radio-inline label,\r\n.has-error.checkbox-inline label {\r\n  color: #a94442;\r\n}\r\n.has-error .form-control {\r\n  border-color: #a94442;\r\n  -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);\r\n          box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);\r\n}\r\n.has-error .form-control:focus {\r\n  border-color: #843534;\r\n  -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 6px #ce8483;\r\n          box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 6px #ce8483;\r\n}\r\n.has-error .input-group-addon {\r\n  color: #a94442;\r\n  background-color: #f2dede;\r\n  border-color: #a94442;\r\n}\r\n.has-error .form-control-feedback {\r\n  color: #a94442;\r\n}\r\n.has-feedback label ~ .form-control-feedback {\r\n  top: 25px;\r\n}\r\n.has-feedback label.sr-only ~ .form-control-feedback {\r\n  top: 0;\r\n}\r\n.help-block {\r\n  display: block;\r\n  margin-top: 5px;\r\n  margin-bottom: 10px;\r\n  color: #737373;\r\n}\r\n@media (min-width: 768px) {\r\n  .form-inline .form-group {\r\n    display: inline-block;\r\n    margin-bottom: 0;\r\n    vertical-align: middle;\r\n  }\r\n  .form-inline .form-control {\r\n    display: inline-block;\r\n    width: auto;\r\n    vertical-align: middle;\r\n  }\r\n  .form-inline .form-control-static {\r\n    display: inline-block;\r\n  }\r\n  .form-inline .input-group {\r\n    display: inline-table;\r\n    vertical-align: middle;\r\n  }\r\n  .form-inline .input-group .input-group-addon,\r\n  .form-inline .input-group .input-group-btn,\r\n  .form-inline .input-group .form-control {\r\n    width: auto;\r\n  }\r\n  .form-inline .input-group > .form-control {\r\n    width: 100%;\r\n  }\r\n  .form-inline .control-label {\r\n    margin-bottom: 0;\r\n    vertical-align: middle;\r\n  }\r\n  .form-inline .radio,\r\n  .form-inline .checkbox {\r\n    display: inline-block;\r\n    margin-top: 0;\r\n    margin-bottom: 0;\r\n    vertical-align: middle;\r\n  }\r\n  .form-inline .radio label,\r\n  .form-inline .checkbox label {\r\n    padding-left: 0;\r\n  }\r\n  .form-inline .radio input[type=\"radio\"],\r\n  .form-inline .checkbox input[type=\"checkbox\"] {\r\n    position: relative;\r\n    margin-left: 0;\r\n  }\r\n  .form-inline .has-feedback .form-control-feedback {\r\n    top: 0;\r\n  }\r\n}\r\n.form-horizontal .radio,\r\n.form-horizontal .checkbox,\r\n.form-horizontal .radio-inline,\r\n.form-horizontal .checkbox-inline {\r\n  padding-top: 7px;\r\n  margin-top: 0;\r\n  margin-bottom: 0;\r\n}\r\n.form-horizontal .radio,\r\n.form-horizontal .checkbox {\r\n  min-height: 27px;\r\n}\r\n.form-horizontal .form-group {\r\n  margin-right: -15px;\r\n  margin-left: -15px;\r\n}\r\n@media (min-width: 768px) {\r\n  .form-horizontal .control-label {\r\n    padding-top: 7px;\r\n    margin-bottom: 0;\r\n    text-align: right;\r\n  }\r\n}\r\n.form-horizontal .has-feedback .form-control-feedback {\r\n  right: 15px;\r\n}\r\n@media (min-width: 768px) {\r\n  .form-horizontal .form-group-lg .control-label {\r\n    padding-top: 11px;\r\n    font-size: 18px;\r\n  }\r\n}\r\n@media (min-width: 768px) {\r\n  .form-horizontal .form-group-sm .control-label {\r\n    padding-top: 6px;\r\n    font-size: 12px;\r\n  }\r\n}\r\n.btn {\r\n  display: inline-block;\r\n  padding: 6px 12px;\r\n  margin-bottom: 0;\r\n  font-size: 14px;\r\n  font-weight: normal;\r\n  line-height: 1.42857143;\r\n  text-align: center;\r\n  white-space: nowrap;\r\n  vertical-align: middle;\r\n  -ms-touch-action: manipulation;\r\n      touch-action: manipulation;\r\n  cursor: pointer;\r\n  -webkit-user-select: none;\r\n     -moz-user-select: none;\r\n      -ms-user-select: none;\r\n          user-select: none;\r\n  background-image: none;\r\n  border: 1px solid transparent;\r\n  border-radius: 4px;\r\n}\r\n.btn:focus,\r\n.btn:active:focus,\r\n.btn.active:focus,\r\n.btn.focus,\r\n.btn:active.focus,\r\n.btn.active.focus {\r\n  outline: thin dotted;\r\n  outline: 5px auto -webkit-focus-ring-color;\r\n  outline-offset: -2px;\r\n}\r\n.btn:hover,\r\n.btn:focus,\r\n.btn.focus {\r\n  color: #333;\r\n  text-decoration: none;\r\n}\r\n.btn:active,\r\n.btn.active {\r\n  background-image: none;\r\n  outline: 0;\r\n  -webkit-box-shadow: inset 0 3px 5px rgba(0, 0, 0, .125);\r\n          box-shadow: inset 0 3px 5px rgba(0, 0, 0, .125);\r\n}\r\n.btn.disabled,\r\n.btn[disabled],\r\nfieldset[disabled] .btn {\r\n  cursor: not-allowed;\r\n  filter: alpha(opacity=65);\r\n  -webkit-box-shadow: none;\r\n          box-shadow: none;\r\n  opacity: .65;\r\n}\r\na.btn.disabled,\r\nfieldset[disabled] a.btn {\r\n  pointer-events: none;\r\n}\r\n.btn-default {\r\n  color: #333;\r\n  background-color: #fff;\r\n  border-color: #ccc;\r\n}\r\n.btn-default:focus,\r\n.btn-default.focus {\r\n  color: #333;\r\n  background-color: #e6e6e6;\r\n  border-color: #8c8c8c;\r\n}\r\n.btn-default:hover {\r\n  color: #333;\r\n  background-color: #e6e6e6;\r\n  border-color: #adadad;\r\n}\r\n.btn-default:active,\r\n.btn-default.active,\r\n.open > .dropdown-toggle.btn-default {\r\n  color: #333;\r\n  background-color: #e6e6e6;\r\n  border-color: #adadad;\r\n}\r\n.btn-default:active:hover,\r\n.btn-default.active:hover,\r\n.open > .dropdown-toggle.btn-default:hover,\r\n.btn-default:active:focus,\r\n.btn-default.active:focus,\r\n.open > .dropdown-toggle.btn-default:focus,\r\n.btn-default:active.focus,\r\n.btn-default.active.focus,\r\n.open > .dropdown-toggle.btn-default.focus {\r\n  color: #333;\r\n  background-color: #d4d4d4;\r\n  border-color: #8c8c8c;\r\n}\r\n.btn-default:active,\r\n.btn-default.active,\r\n.open > .dropdown-toggle.btn-default {\r\n  background-image: none;\r\n}\r\n.btn-default.disabled:hover,\r\n.btn-default[disabled]:hover,\r\nfieldset[disabled] .btn-default:hover,\r\n.btn-default.disabled:focus,\r\n.btn-default[disabled]:focus,\r\nfieldset[disabled] .btn-default:focus,\r\n.btn-default.disabled.focus,\r\n.btn-default[disabled].focus,\r\nfieldset[disabled] .btn-default.focus {\r\n  background-color: #fff;\r\n  border-color: #ccc;\r\n}\r\n.btn-default .badge {\r\n  color: #fff;\r\n  background-color: #333;\r\n}\r\n.btn-primary {\r\n  color: #fff;\r\n  background-color: #337ab7;\r\n  border-color: #2e6da4;\r\n}\r\n.btn-primary:focus,\r\n.btn-primary.focus {\r\n  color: #fff;\r\n  background-color: #286090;\r\n  border-color: #122b40;\r\n}\r\n.btn-primary:hover {\r\n  color: #fff;\r\n  background-color: #286090;\r\n  border-color: #204d74;\r\n}\r\n.btn-primary:active,\r\n.btn-primary.active,\r\n.open > .dropdown-toggle.btn-primary {\r\n  color: #fff;\r\n  background-color: #286090;\r\n  border-color: #204d74;\r\n}\r\n.btn-primary:active:hover,\r\n.btn-primary.active:hover,\r\n.open > .dropdown-toggle.btn-primary:hover,\r\n.btn-primary:active:focus,\r\n.btn-primary.active:focus,\r\n.open > .dropdown-toggle.btn-primary:focus,\r\n.btn-primary:active.focus,\r\n.btn-primary.active.focus,\r\n.open > .dropdown-toggle.btn-primary.focus {\r\n  color: #fff;\r\n  background-color: #204d74;\r\n  border-color: #122b40;\r\n}\r\n.btn-primary:active,\r\n.btn-primary.active,\r\n.open > .dropdown-toggle.btn-primary {\r\n  background-image: none;\r\n}\r\n.btn-primary.disabled:hover,\r\n.btn-primary[disabled]:hover,\r\nfieldset[disabled] .btn-primary:hover,\r\n.btn-primary.disabled:focus,\r\n.btn-primary[disabled]:focus,\r\nfieldset[disabled] .btn-primary:focus,\r\n.btn-primary.disabled.focus,\r\n.btn-primary[disabled].focus,\r\nfieldset[disabled] .btn-primary.focus {\r\n  background-color: #337ab7;\r\n  border-color: #2e6da4;\r\n}\r\n.btn-primary .badge {\r\n  color: #337ab7;\r\n  background-color: #fff;\r\n}\r\n.btn-success {\r\n  color: #fff;\r\n  background-color: #5cb85c;\r\n  border-color: #4cae4c;\r\n}\r\n.btn-success:focus,\r\n.btn-success.focus {\r\n  color: #fff;\r\n  background-color: #449d44;\r\n  border-color: #255625;\r\n}\r\n.btn-success:hover {\r\n  color: #fff;\r\n  background-color: #449d44;\r\n  border-color: #398439;\r\n}\r\n.btn-success:active,\r\n.btn-success.active,\r\n.open > .dropdown-toggle.btn-success {\r\n  color: #fff;\r\n  background-color: #449d44;\r\n  border-color: #398439;\r\n}\r\n.btn-success:active:hover,\r\n.btn-success.active:hover,\r\n.open > .dropdown-toggle.btn-success:hover,\r\n.btn-success:active:focus,\r\n.btn-success.active:focus,\r\n.open > .dropdown-toggle.btn-success:focus,\r\n.btn-success:active.focus,\r\n.btn-success.active.focus,\r\n.open > .dropdown-toggle.btn-success.focus {\r\n  color: #fff;\r\n  background-color: #398439;\r\n  border-color: #255625;\r\n}\r\n.btn-success:active,\r\n.btn-success.active,\r\n.open > .dropdown-toggle.btn-success {\r\n  background-image: none;\r\n}\r\n.btn-success.disabled:hover,\r\n.btn-success[disabled]:hover,\r\nfieldset[disabled] .btn-success:hover,\r\n.btn-success.disabled:focus,\r\n.btn-success[disabled]:focus,\r\nfieldset[disabled] .btn-success:focus,\r\n.btn-success.disabled.focus,\r\n.btn-success[disabled].focus,\r\nfieldset[disabled] .btn-success.focus {\r\n  background-color: #5cb85c;\r\n  border-color: #4cae4c;\r\n}\r\n.btn-success .badge {\r\n  color: #5cb85c;\r\n  background-color: #fff;\r\n}\r\n.btn-info {\r\n  color: #fff;\r\n  background-color: #5bc0de;\r\n  border-color: #46b8da;\r\n}\r\n.btn-info:focus,\r\n.btn-info.focus {\r\n  color: #fff;\r\n  background-color: #31b0d5;\r\n  border-color: #1b6d85;\r\n}\r\n.btn-info:hover {\r\n  color: #fff;\r\n  background-color: #31b0d5;\r\n  border-color: #269abc;\r\n}\r\n.btn-info:active,\r\n.btn-info.active,\r\n.open > .dropdown-toggle.btn-info {\r\n  color: #fff;\r\n  background-color: #31b0d5;\r\n  border-color: #269abc;\r\n}\r\n.btn-info:active:hover,\r\n.btn-info.active:hover,\r\n.open > .dropdown-toggle.btn-info:hover,\r\n.btn-info:active:focus,\r\n.btn-info.active:focus,\r\n.open > .dropdown-toggle.btn-info:focus,\r\n.btn-info:active.focus,\r\n.btn-info.active.focus,\r\n.open > .dropdown-toggle.btn-info.focus {\r\n  color: #fff;\r\n  background-color: #269abc;\r\n  border-color: #1b6d85;\r\n}\r\n.btn-info:active,\r\n.btn-info.active,\r\n.open > .dropdown-toggle.btn-info {\r\n  background-image: none;\r\n}\r\n.btn-info.disabled:hover,\r\n.btn-info[disabled]:hover,\r\nfieldset[disabled] .btn-info:hover,\r\n.btn-info.disabled:focus,\r\n.btn-info[disabled]:focus,\r\nfieldset[disabled] .btn-info:focus,\r\n.btn-info.disabled.focus,\r\n.btn-info[disabled].focus,\r\nfieldset[disabled] .btn-info.focus {\r\n  background-color: #5bc0de;\r\n  border-color: #46b8da;\r\n}\r\n.btn-info .badge {\r\n  color: #5bc0de;\r\n  background-color: #fff;\r\n}\r\n.btn-warning {\r\n  color: #fff;\r\n  background-color: #f0ad4e;\r\n  border-color: #eea236;\r\n}\r\n.btn-warning:focus,\r\n.btn-warning.focus {\r\n  color: #fff;\r\n  background-color: #ec971f;\r\n  border-color: #985f0d;\r\n}\r\n.btn-warning:hover {\r\n  color: #fff;\r\n  background-color: #ec971f;\r\n  border-color: #d58512;\r\n}\r\n.btn-warning:active,\r\n.btn-warning.active,\r\n.open > .dropdown-toggle.btn-warning {\r\n  color: #fff;\r\n  background-color: #ec971f;\r\n  border-color: #d58512;\r\n}\r\n.btn-warning:active:hover,\r\n.btn-warning.active:hover,\r\n.open > .dropdown-toggle.btn-warning:hover,\r\n.btn-warning:active:focus,\r\n.btn-warning.active:focus,\r\n.open > .dropdown-toggle.btn-warning:focus,\r\n.btn-warning:active.focus,\r\n.btn-warning.active.focus,\r\n.open > .dropdown-toggle.btn-warning.focus {\r\n  color: #fff;\r\n  background-color: #d58512;\r\n  border-color: #985f0d;\r\n}\r\n.btn-warning:active,\r\n.btn-warning.active,\r\n.open > .dropdown-toggle.btn-warning {\r\n  background-image: none;\r\n}\r\n.btn-warning.disabled:hover,\r\n.btn-warning[disabled]:hover,\r\nfieldset[disabled] .btn-warning:hover,\r\n.btn-warning.disabled:focus,\r\n.btn-warning[disabled]:focus,\r\nfieldset[disabled] .btn-warning:focus,\r\n.btn-warning.disabled.focus,\r\n.btn-warning[disabled].focus,\r\nfieldset[disabled] .btn-warning.focus {\r\n  background-color: #f0ad4e;\r\n  border-color: #eea236;\r\n}\r\n.btn-warning .badge {\r\n  color: #f0ad4e;\r\n  background-color: #fff;\r\n}\r\n.btn-danger {\r\n  color: #fff;\r\n  background-color: #d9534f;\r\n  border-color: #d43f3a;\r\n}\r\n.btn-danger:focus,\r\n.btn-danger.focus {\r\n  color: #fff;\r\n  background-color: #c9302c;\r\n  border-color: #761c19;\r\n}\r\n.btn-danger:hover {\r\n  color: #fff;\r\n  background-color: #c9302c;\r\n  border-color: #ac2925;\r\n}\r\n.btn-danger:active,\r\n.btn-danger.active,\r\n.open > .dropdown-toggle.btn-danger {\r\n  color: #fff;\r\n  background-color: #c9302c;\r\n  border-color: #ac2925;\r\n}\r\n.btn-danger:active:hover,\r\n.btn-danger.active:hover,\r\n.open > .dropdown-toggle.btn-danger:hover,\r\n.btn-danger:active:focus,\r\n.btn-danger.active:focus,\r\n.open > .dropdown-toggle.btn-danger:focus,\r\n.btn-danger:active.focus,\r\n.btn-danger.active.focus,\r\n.open > .dropdown-toggle.btn-danger.focus {\r\n  color: #fff;\r\n  background-color: #ac2925;\r\n  border-color: #761c19;\r\n}\r\n.btn-danger:active,\r\n.btn-danger.active,\r\n.open > .dropdown-toggle.btn-danger {\r\n  background-image: none;\r\n}\r\n.btn-danger.disabled:hover,\r\n.btn-danger[disabled]:hover,\r\nfieldset[disabled] .btn-danger:hover,\r\n.btn-danger.disabled:focus,\r\n.btn-danger[disabled]:focus,\r\nfieldset[disabled] .btn-danger:focus,\r\n.btn-danger.disabled.focus,\r\n.btn-danger[disabled].focus,\r\nfieldset[disabled] .btn-danger.focus {\r\n  background-color: #d9534f;\r\n  border-color: #d43f3a;\r\n}\r\n.btn-danger .badge {\r\n  color: #d9534f;\r\n  background-color: #fff;\r\n}\r\n.btn-link {\r\n  font-weight: normal;\r\n  color: #337ab7;\r\n  border-radius: 0;\r\n}\r\n.btn-link,\r\n.btn-link:active,\r\n.btn-link.active,\r\n.btn-link[disabled],\r\nfieldset[disabled] .btn-link {\r\n  background-color: transparent;\r\n  -webkit-box-shadow: none;\r\n          box-shadow: none;\r\n}\r\n.btn-link,\r\n.btn-link:hover,\r\n.btn-link:focus,\r\n.btn-link:active {\r\n  border-color: transparent;\r\n}\r\n.btn-link:hover,\r\n.btn-link:focus {\r\n  color: #23527c;\r\n  text-decoration: underline;\r\n  background-color: transparent;\r\n}\r\n.btn-link[disabled]:hover,\r\nfieldset[disabled] .btn-link:hover,\r\n.btn-link[disabled]:focus,\r\nfieldset[disabled] .btn-link:focus {\r\n  color: #777;\r\n  text-decoration: none;\r\n}\r\n.btn-lg,\r\n.btn-group-lg > .btn {\r\n  padding: 10px 16px;\r\n  font-size: 18px;\r\n  line-height: 1.3333333;\r\n  border-radius: 6px;\r\n}\r\n.btn-sm,\r\n.btn-group-sm > .btn {\r\n  padding: 5px 10px;\r\n  font-size: 12px;\r\n  line-height: 1.5;\r\n  border-radius: 3px;\r\n}\r\n.btn-xs,\r\n.btn-group-xs > .btn {\r\n  padding: 1px 5px;\r\n  font-size: 12px;\r\n  line-height: 1.5;\r\n  border-radius: 3px;\r\n}\r\n.btn-block {\r\n  display: block;\r\n  width: 100%;\r\n}\r\n.btn-block + .btn-block {\r\n  margin-top: 5px;\r\n}\r\ninput[type=\"submit\"].btn-block,\r\ninput[type=\"reset\"].btn-block,\r\ninput[type=\"button\"].btn-block {\r\n  width: 100%;\r\n}\r\n.fade {\r\n  opacity: 0;\r\n  -webkit-transition: opacity .15s linear;\r\n       -o-transition: opacity .15s linear;\r\n          transition: opacity .15s linear;\r\n}\r\n.fade.in {\r\n  opacity: 1;\r\n}\r\n.collapse {\r\n  display: none;\r\n}\r\n.collapse.in {\r\n  display: block;\r\n}\r\ntr.collapse.in {\r\n  display: table-row;\r\n}\r\ntbody.collapse.in {\r\n  display: table-row-group;\r\n}\r\n.collapsing {\r\n  position: relative;\r\n  height: 0;\r\n  overflow: hidden;\r\n  -webkit-transition-timing-function: ease;\r\n       -o-transition-timing-function: ease;\r\n          transition-timing-function: ease;\r\n  -webkit-transition-duration: .35s;\r\n       -o-transition-duration: .35s;\r\n          transition-duration: .35s;\r\n  -webkit-transition-property: height, visibility;\r\n       -o-transition-property: height, visibility;\r\n          transition-property: height, visibility;\r\n}\r\n.caret {\r\n  display: inline-block;\r\n  width: 0;\r\n  height: 0;\r\n  margin-left: 2px;\r\n  vertical-align: middle;\r\n  border-top: 4px dashed;\r\n  border-top: 4px solid \\9;\r\n  border-right: 4px solid transparent;\r\n  border-left: 4px solid transparent;\r\n}\r\n.dropup,\r\n.dropdown {\r\n  position: relative;\r\n}\r\n.dropdown-toggle:focus {\r\n  outline: 0;\r\n}\r\n.dropdown-menu {\r\n  position: absolute;\r\n  top: 100%;\r\n  left: 0;\r\n  z-index: 1000;\r\n  display: none;\r\n  float: left;\r\n  min-width: 160px;\r\n  padding: 5px 0;\r\n  margin: 2px 0 0;\r\n  font-size: 14px;\r\n  text-align: left;\r\n  list-style: none;\r\n  background-color: #fff;\r\n  -webkit-background-clip: padding-box;\r\n          background-clip: padding-box;\r\n  border: 1px solid #ccc;\r\n  border: 1px solid rgba(0, 0, 0, .15);\r\n  border-radius: 4px;\r\n  -webkit-box-shadow: 0 6px 12px rgba(0, 0, 0, .175);\r\n          box-shadow: 0 6px 12px rgba(0, 0, 0, .175);\r\n}\r\n.dropdown-menu.pull-right {\r\n  right: 0;\r\n  left: auto;\r\n}\r\n.dropdown-menu .divider {\r\n  height: 1px;\r\n  margin: 9px 0;\r\n  overflow: hidden;\r\n  background-color: #e5e5e5;\r\n}\r\n.dropdown-menu > li > a {\r\n  display: block;\r\n  padding: 3px 20px;\r\n  clear: both;\r\n  font-weight: normal;\r\n  line-height: 1.42857143;\r\n  color: #333;\r\n  white-space: nowrap;\r\n}\r\n.dropdown-menu > li > a:hover,\r\n.dropdown-menu > li > a:focus {\r\n  color: #262626;\r\n  text-decoration: none;\r\n  background-color: #f5f5f5;\r\n}\r\n.dropdown-menu > .active > a,\r\n.dropdown-menu > .active > a:hover,\r\n.dropdown-menu > .active > a:focus {\r\n  color: #fff;\r\n  text-decoration: none;\r\n  background-color: #337ab7;\r\n  outline: 0;\r\n}\r\n.dropdown-menu > .disabled > a,\r\n.dropdown-menu > .disabled > a:hover,\r\n.dropdown-menu > .disabled > a:focus {\r\n  color: #777;\r\n}\r\n.dropdown-menu > .disabled > a:hover,\r\n.dropdown-menu > .disabled > a:focus {\r\n  text-decoration: none;\r\n  cursor: not-allowed;\r\n  background-color: transparent;\r\n  background-image: none;\r\n  filter: progid:DXImageTransform.Microsoft.gradient(enabled = false);\r\n}\r\n.open > .dropdown-menu {\r\n  display: block;\r\n}\r\n.open > a {\r\n  outline: 0;\r\n}\r\n.dropdown-menu-right {\r\n  right: 0;\r\n  left: auto;\r\n}\r\n.dropdown-menu-left {\r\n  right: auto;\r\n  left: 0;\r\n}\r\n.dropdown-header {\r\n  display: block;\r\n  padding: 3px 20px;\r\n  font-size: 12px;\r\n  line-height: 1.42857143;\r\n  color: #777;\r\n  white-space: nowrap;\r\n}\r\n.dropdown-backdrop {\r\n  position: fixed;\r\n  top: 0;\r\n  right: 0;\r\n  bottom: 0;\r\n  left: 0;\r\n  z-index: 990;\r\n}\r\n.pull-right > .dropdown-menu {\r\n  right: 0;\r\n  left: auto;\r\n}\r\n.dropup .caret,\r\n.navbar-fixed-bottom .dropdown .caret {\r\n  content: \"\";\r\n  border-top: 0;\r\n  border-bottom: 4px dashed;\r\n  border-bottom: 4px solid \\9;\r\n}\r\n.dropup .dropdown-menu,\r\n.navbar-fixed-bottom .dropdown .dropdown-menu {\r\n  top: auto;\r\n  bottom: 100%;\r\n  margin-bottom: 2px;\r\n}\r\n@media (min-width: 768px) {\r\n  .navbar-right .dropdown-menu {\r\n    right: 0;\r\n    left: auto;\r\n  }\r\n  .navbar-right .dropdown-menu-left {\r\n    right: auto;\r\n    left: 0;\r\n  }\r\n}\r\n.btn-group,\r\n.btn-group-vertical {\r\n  position: relative;\r\n  display: inline-block;\r\n  vertical-align: middle;\r\n}\r\n.btn-group > .btn,\r\n.btn-group-vertical > .btn {\r\n  position: relative;\r\n  float: left;\r\n}\r\n.btn-group > .btn:hover,\r\n.btn-group-vertical > .btn:hover,\r\n.btn-group > .btn:focus,\r\n.btn-group-vertical > .btn:focus,\r\n.btn-group > .btn:active,\r\n.btn-group-vertical > .btn:active,\r\n.btn-group > .btn.active,\r\n.btn-group-vertical > .btn.active {\r\n  z-index: 2;\r\n}\r\n.btn-group .btn + .btn,\r\n.btn-group .btn + .btn-group,\r\n.btn-group .btn-group + .btn,\r\n.btn-group .btn-group + .btn-group {\r\n  margin-left: -1px;\r\n}\r\n.btn-toolbar {\r\n  margin-left: -5px;\r\n}\r\n.btn-toolbar .btn,\r\n.btn-toolbar .btn-group,\r\n.btn-toolbar .input-group {\r\n  float: left;\r\n}\r\n.btn-toolbar > .btn,\r\n.btn-toolbar > .btn-group,\r\n.btn-toolbar > .input-group {\r\n  margin-left: 5px;\r\n}\r\n.btn-group > .btn:not(:first-child):not(:last-child):not(.dropdown-toggle) {\r\n  border-radius: 0;\r\n}\r\n.btn-group > .btn:first-child {\r\n  margin-left: 0;\r\n}\r\n.btn-group > .btn:first-child:not(:last-child):not(.dropdown-toggle) {\r\n  border-top-right-radius: 0;\r\n  border-bottom-right-radius: 0;\r\n}\r\n.btn-group > .btn:last-child:not(:first-child),\r\n.btn-group > .dropdown-toggle:not(:first-child) {\r\n  border-top-left-radius: 0;\r\n  border-bottom-left-radius: 0;\r\n}\r\n.btn-group > .btn-group {\r\n  float: left;\r\n}\r\n.btn-group > .btn-group:not(:first-child):not(:last-child) > .btn {\r\n  border-radius: 0;\r\n}\r\n.btn-group > .btn-group:first-child:not(:last-child) > .btn:last-child,\r\n.btn-group > .btn-group:first-child:not(:last-child) > .dropdown-toggle {\r\n  border-top-right-radius: 0;\r\n  border-bottom-right-radius: 0;\r\n}\r\n.btn-group > .btn-group:last-child:not(:first-child) > .btn:first-child {\r\n  border-top-left-radius: 0;\r\n  border-bottom-left-radius: 0;\r\n}\r\n.btn-group .dropdown-toggle:active,\r\n.btn-group.open .dropdown-toggle {\r\n  outline: 0;\r\n}\r\n.btn-group > .btn + .dropdown-toggle {\r\n  padding-right: 8px;\r\n  padding-left: 8px;\r\n}\r\n.btn-group > .btn-lg + .dropdown-toggle {\r\n  padding-right: 12px;\r\n  padding-left: 12px;\r\n}\r\n.btn-group.open .dropdown-toggle {\r\n  -webkit-box-shadow: inset 0 3px 5px rgba(0, 0, 0, .125);\r\n          box-shadow: inset 0 3px 5px rgba(0, 0, 0, .125);\r\n}\r\n.btn-group.open .dropdown-toggle.btn-link {\r\n  -webkit-box-shadow: none;\r\n          box-shadow: none;\r\n}\r\n.btn .caret {\r\n  margin-left: 0;\r\n}\r\n.btn-lg .caret {\r\n  border-width: 5px 5px 0;\r\n  border-bottom-width: 0;\r\n}\r\n.dropup .btn-lg .caret {\r\n  border-width: 0 5px 5px;\r\n}\r\n.btn-group-vertical > .btn,\r\n.btn-group-vertical > .btn-group,\r\n.btn-group-vertical > .btn-group > .btn {\r\n  display: block;\r\n  float: none;\r\n  width: 100%;\r\n  max-width: 100%;\r\n}\r\n.btn-group-vertical > .btn-group > .btn {\r\n  float: none;\r\n}\r\n.btn-group-vertical > .btn + .btn,\r\n.btn-group-vertical > .btn + .btn-group,\r\n.btn-group-vertical > .btn-group + .btn,\r\n.btn-group-vertical > .btn-group + .btn-group {\r\n  margin-top: -1px;\r\n  margin-left: 0;\r\n}\r\n.btn-group-vertical > .btn:not(:first-child):not(:last-child) {\r\n  border-radius: 0;\r\n}\r\n.btn-group-vertical > .btn:first-child:not(:last-child) {\r\n  border-top-left-radius: 4px;\r\n  border-top-right-radius: 4px;\r\n  border-bottom-right-radius: 0;\r\n  border-bottom-left-radius: 0;\r\n}\r\n.btn-group-vertical > .btn:last-child:not(:first-child) {\r\n  border-top-left-radius: 0;\r\n  border-top-right-radius: 0;\r\n  border-bottom-right-radius: 4px;\r\n  border-bottom-left-radius: 4px;\r\n}\r\n.btn-group-vertical > .btn-group:not(:first-child):not(:last-child) > .btn {\r\n  border-radius: 0;\r\n}\r\n.btn-group-vertical > .btn-group:first-child:not(:last-child) > .btn:last-child,\r\n.btn-group-vertical > .btn-group:first-child:not(:last-child) > .dropdown-toggle {\r\n  border-bottom-right-radius: 0;\r\n  border-bottom-left-radius: 0;\r\n}\r\n.btn-group-vertical > .btn-group:last-child:not(:first-child) > .btn:first-child {\r\n  border-top-left-radius: 0;\r\n  border-top-right-radius: 0;\r\n}\r\n.btn-group-justified {\r\n  display: table;\r\n  width: 100%;\r\n  table-layout: fixed;\r\n  border-collapse: separate;\r\n}\r\n.btn-group-justified > .btn,\r\n.btn-group-justified > .btn-group {\r\n  display: table-cell;\r\n  float: none;\r\n  width: 1%;\r\n}\r\n.btn-group-justified > .btn-group .btn {\r\n  width: 100%;\r\n}\r\n.btn-group-justified > .btn-group .dropdown-menu {\r\n  left: auto;\r\n}\r\n[data-toggle=\"buttons\"] > .btn input[type=\"radio\"],\r\n[data-toggle=\"buttons\"] > .btn-group > .btn input[type=\"radio\"],\r\n[data-toggle=\"buttons\"] > .btn input[type=\"checkbox\"],\r\n[data-toggle=\"buttons\"] > .btn-group > .btn input[type=\"checkbox\"] {\r\n  position: absolute;\r\n  clip: rect(0, 0, 0, 0);\r\n  pointer-events: none;\r\n}\r\n.input-group {\r\n  position: relative;\r\n  display: table;\r\n  border-collapse: separate;\r\n}\r\n.input-group[class*=\"col-\"] {\r\n  float: none;\r\n  padding-right: 0;\r\n  padding-left: 0;\r\n}\r\n.input-group .form-control {\r\n  position: relative;\r\n  z-index: 2;\r\n  float: left;\r\n  width: 100%;\r\n  margin-bottom: 0;\r\n}\r\n.input-group .form-control:focus {\r\n  z-index: 3;\r\n}\r\n.input-group-lg > .form-control,\r\n.input-group-lg > .input-group-addon,\r\n.input-group-lg > .input-group-btn > .btn {\r\n  height: 46px;\r\n  padding: 10px 16px;\r\n  font-size: 18px;\r\n  line-height: 1.3333333;\r\n  border-radius: 6px;\r\n}\r\nselect.input-group-lg > .form-control,\r\nselect.input-group-lg > .input-group-addon,\r\nselect.input-group-lg > .input-group-btn > .btn {\r\n  height: 46px;\r\n  line-height: 46px;\r\n}\r\ntextarea.input-group-lg > .form-control,\r\ntextarea.input-group-lg > .input-group-addon,\r\ntextarea.input-group-lg > .input-group-btn > .btn,\r\nselect[multiple].input-group-lg > .form-control,\r\nselect[multiple].input-group-lg > .input-group-addon,\r\nselect[multiple].input-group-lg > .input-group-btn > .btn {\r\n  height: auto;\r\n}\r\n.input-group-sm > .form-control,\r\n.input-group-sm > .input-group-addon,\r\n.input-group-sm > .input-group-btn > .btn {\r\n  height: 30px;\r\n  padding: 5px 10px;\r\n  font-size: 12px;\r\n  line-height: 1.5;\r\n  border-radius: 3px;\r\n}\r\nselect.input-group-sm > .form-control,\r\nselect.input-group-sm > .input-group-addon,\r\nselect.input-group-sm > .input-group-btn > .btn {\r\n  height: 30px;\r\n  line-height: 30px;\r\n}\r\ntextarea.input-group-sm > .form-control,\r\ntextarea.input-group-sm > .input-group-addon,\r\ntextarea.input-group-sm > .input-group-btn > .btn,\r\nselect[multiple].input-group-sm > .form-control,\r\nselect[multiple].input-group-sm > .input-group-addon,\r\nselect[multiple].input-group-sm > .input-group-btn > .btn {\r\n  height: auto;\r\n}\r\n.input-group-addon,\r\n.input-group-btn,\r\n.input-group .form-control {\r\n  display: table-cell;\r\n}\r\n.input-group-addon:not(:first-child):not(:last-child),\r\n.input-group-btn:not(:first-child):not(:last-child),\r\n.input-group .form-control:not(:first-child):not(:last-child) {\r\n  border-radius: 0;\r\n}\r\n.input-group-addon,\r\n.input-group-btn {\r\n  width: 1%;\r\n  white-space: nowrap;\r\n  vertical-align: middle;\r\n}\r\n.input-group-addon {\r\n  padding: 6px 12px;\r\n  font-size: 14px;\r\n  font-weight: normal;\r\n  line-height: 1;\r\n  color: #555;\r\n  text-align: center;\r\n  background-color: #eee;\r\n  border: 1px solid #ccc;\r\n  border-radius: 4px;\r\n}\r\n.input-group-addon.input-sm {\r\n  padding: 5px 10px;\r\n  font-size: 12px;\r\n  border-radius: 3px;\r\n}\r\n.input-group-addon.input-lg {\r\n  padding: 10px 16px;\r\n  font-size: 18px;\r\n  border-radius: 6px;\r\n}\r\n.input-group-addon input[type=\"radio\"],\r\n.input-group-addon input[type=\"checkbox\"] {\r\n  margin-top: 0;\r\n}\r\n.input-group .form-control:first-child,\r\n.input-group-addon:first-child,\r\n.input-group-btn:first-child > .btn,\r\n.input-group-btn:first-child > .btn-group > .btn,\r\n.input-group-btn:first-child > .dropdown-toggle,\r\n.input-group-btn:last-child > .btn:not(:last-child):not(.dropdown-toggle),\r\n.input-group-btn:last-child > .btn-group:not(:last-child) > .btn {\r\n  border-top-right-radius: 0;\r\n  border-bottom-right-radius: 0;\r\n}\r\n.input-group-addon:first-child {\r\n  border-right: 0;\r\n}\r\n.input-group .form-control:last-child,\r\n.input-group-addon:last-child,\r\n.input-group-btn:last-child > .btn,\r\n.input-group-btn:last-child > .btn-group > .btn,\r\n.input-group-btn:last-child > .dropdown-toggle,\r\n.input-group-btn:first-child > .btn:not(:first-child),\r\n.input-group-btn:first-child > .btn-group:not(:first-child) > .btn {\r\n  border-top-left-radius: 0;\r\n  border-bottom-left-radius: 0;\r\n}\r\n.input-group-addon:last-child {\r\n  border-left: 0;\r\n}\r\n.input-group-btn {\r\n  position: relative;\r\n  font-size: 0;\r\n  white-space: nowrap;\r\n}\r\n.input-group-btn > .btn {\r\n  position: relative;\r\n}\r\n.input-group-btn > .btn + .btn {\r\n  margin-left: -1px;\r\n}\r\n.input-group-btn > .btn:hover,\r\n.input-group-btn > .btn:focus,\r\n.input-group-btn > .btn:active {\r\n  z-index: 2;\r\n}\r\n.input-group-btn:first-child > .btn,\r\n.input-group-btn:first-child > .btn-group {\r\n  margin-right: -1px;\r\n}\r\n.input-group-btn:last-child > .btn,\r\n.input-group-btn:last-child > .btn-group {\r\n  z-index: 2;\r\n  margin-left: -1px;\r\n}\r\n.nav {\r\n  padding-left: 0;\r\n  margin-bottom: 0;\r\n  list-style: none;\r\n}\r\n.nav > li {\r\n  position: relative;\r\n  display: block;\r\n}\r\n.nav > li > a {\r\n  position: relative;\r\n  display: block;\r\n  padding: 10px 15px;\r\n}\r\n.nav > li > a:hover,\r\n.nav > li > a:focus {\r\n  text-decoration: none;\r\n  background-color: #eee;\r\n}\r\n.nav > li.disabled > a {\r\n  color: #777;\r\n}\r\n.nav > li.disabled > a:hover,\r\n.nav > li.disabled > a:focus {\r\n  color: #777;\r\n  text-decoration: none;\r\n  cursor: not-allowed;\r\n  background-color: transparent;\r\n}\r\n.nav .open > a,\r\n.nav .open > a:hover,\r\n.nav .open > a:focus {\r\n  background-color: #eee;\r\n  border-color: #337ab7;\r\n}\r\n.nav .nav-divider {\r\n  height: 1px;\r\n  margin: 9px 0;\r\n  overflow: hidden;\r\n  background-color: #e5e5e5;\r\n}\r\n.nav > li > a > img {\r\n  max-width: none;\r\n}\r\n.nav-tabs {\r\n  border-bottom: 1px solid #ddd;\r\n}\r\n.nav-tabs > li {\r\n  float: left;\r\n  margin-bottom: -1px;\r\n}\r\n.nav-tabs > li > a {\r\n  margin-right: 2px;\r\n  line-height: 1.42857143;\r\n  border: 1px solid transparent;\r\n  border-radius: 4px 4px 0 0;\r\n}\r\n.nav-tabs > li > a:hover {\r\n  border-color: #eee #eee #ddd;\r\n}\r\n.nav-tabs > li.active > a,\r\n.nav-tabs > li.active > a:hover,\r\n.nav-tabs > li.active > a:focus {\r\n  color: #555;\r\n  cursor: default;\r\n  background-color: #fff;\r\n  border: 1px solid #ddd;\r\n  border-bottom-color: transparent;\r\n}\r\n.nav-tabs.nav-justified {\r\n  width: 100%;\r\n  border-bottom: 0;\r\n}\r\n.nav-tabs.nav-justified > li {\r\n  float: none;\r\n}\r\n.nav-tabs.nav-justified > li > a {\r\n  margin-bottom: 5px;\r\n  text-align: center;\r\n}\r\n.nav-tabs.nav-justified > .dropdown .dropdown-menu {\r\n  top: auto;\r\n  left: auto;\r\n}\r\n@media (min-width: 768px) {\r\n  .nav-tabs.nav-justified > li {\r\n    display: table-cell;\r\n    width: 1%;\r\n  }\r\n  .nav-tabs.nav-justified > li > a {\r\n    margin-bottom: 0;\r\n  }\r\n}\r\n.nav-tabs.nav-justified > li > a {\r\n  margin-right: 0;\r\n  border-radius: 4px;\r\n}\r\n.nav-tabs.nav-justified > .active > a,\r\n.nav-tabs.nav-justified > .active > a:hover,\r\n.nav-tabs.nav-justified > .active > a:focus {\r\n  border: 1px solid #ddd;\r\n}\r\n@media (min-width: 768px) {\r\n  .nav-tabs.nav-justified > li > a {\r\n    border-bottom: 1px solid #ddd;\r\n    border-radius: 4px 4px 0 0;\r\n  }\r\n  .nav-tabs.nav-justified > .active > a,\r\n  .nav-tabs.nav-justified > .active > a:hover,\r\n  .nav-tabs.nav-justified > .active > a:focus {\r\n    border-bottom-color: #fff;\r\n  }\r\n}\r\n.nav-pills > li {\r\n  float: left;\r\n}\r\n.nav-pills > li > a {\r\n  border-radius: 4px;\r\n}\r\n.nav-pills > li + li {\r\n  margin-left: 2px;\r\n}\r\n.nav-pills > li.active > a,\r\n.nav-pills > li.active > a:hover,\r\n.nav-pills > li.active > a:focus {\r\n  color: #fff;\r\n  background-color: #337ab7;\r\n}\r\n.nav-stacked > li {\r\n  float: none;\r\n}\r\n.nav-stacked > li + li {\r\n  margin-top: 2px;\r\n  margin-left: 0;\r\n}\r\n.nav-justified {\r\n  width: 100%;\r\n}\r\n.nav-justified > li {\r\n  float: none;\r\n}\r\n.nav-justified > li > a {\r\n  margin-bottom: 5px;\r\n  text-align: center;\r\n}\r\n.nav-justified > .dropdown .dropdown-menu {\r\n  top: auto;\r\n  left: auto;\r\n}\r\n@media (min-width: 768px) {\r\n  .nav-justified > li {\r\n    display: table-cell;\r\n    width: 1%;\r\n  }\r\n  .nav-justified > li > a {\r\n    margin-bottom: 0;\r\n  }\r\n}\r\n.nav-tabs-justified {\r\n  border-bottom: 0;\r\n}\r\n.nav-tabs-justified > li > a {\r\n  margin-right: 0;\r\n  border-radius: 4px;\r\n}\r\n.nav-tabs-justified > .active > a,\r\n.nav-tabs-justified > .active > a:hover,\r\n.nav-tabs-justified > .active > a:focus {\r\n  border: 1px solid #ddd;\r\n}\r\n@media (min-width: 768px) {\r\n  .nav-tabs-justified > li > a {\r\n    border-bottom: 1px solid #ddd;\r\n    border-radius: 4px 4px 0 0;\r\n  }\r\n  .nav-tabs-justified > .active > a,\r\n  .nav-tabs-justified > .active > a:hover,\r\n  .nav-tabs-justified > .active > a:focus {\r\n    border-bottom-color: #fff;\r\n  }\r\n}\r\n.tab-content > .tab-pane {\r\n  display: none;\r\n}\r\n.tab-content > .active {\r\n  display: block;\r\n}\r\n.nav-tabs .dropdown-menu {\r\n  margin-top: -1px;\r\n  border-top-left-radius: 0;\r\n  border-top-right-radius: 0;\r\n}\r\n.navbar {\r\n  position: relative;\r\n  min-height: 50px;\r\n  margin-bottom: 20px;\r\n  border: 1px solid transparent;\r\n}\r\n@media (min-width: 768px) {\r\n  .navbar {\r\n    border-radius: 4px;\r\n  }\r\n}\r\n@media (min-width: 768px) {\r\n  .navbar-header {\r\n    float: left;\r\n  }\r\n}\r\n.navbar-collapse {\r\n  padding-right: 15px;\r\n  padding-left: 15px;\r\n  overflow-x: visible;\r\n  -webkit-overflow-scrolling: touch;\r\n  border-top: 1px solid transparent;\r\n  -webkit-box-shadow: inset 0 1px 0 rgba(255, 255, 255, .1);\r\n          box-shadow: inset 0 1px 0 rgba(255, 255, 255, .1);\r\n}\r\n.navbar-collapse.in {\r\n  overflow-y: auto;\r\n}\r\n@media (min-width: 768px) {\r\n  .navbar-collapse {\r\n    width: auto;\r\n    border-top: 0;\r\n    -webkit-box-shadow: none;\r\n            box-shadow: none;\r\n  }\r\n  .navbar-collapse.collapse {\r\n    display: block !important;\r\n    height: auto !important;\r\n    padding-bottom: 0;\r\n    overflow: visible !important;\r\n  }\r\n  .navbar-collapse.in {\r\n    overflow-y: visible;\r\n  }\r\n  .navbar-fixed-top .navbar-collapse,\r\n  .navbar-static-top .navbar-collapse,\r\n  .navbar-fixed-bottom .navbar-collapse {\r\n    padding-right: 0;\r\n    padding-left: 0;\r\n  }\r\n}\r\n.navbar-fixed-top .navbar-collapse,\r\n.navbar-fixed-bottom .navbar-collapse {\r\n  max-height: 340px;\r\n}\r\n@media (max-device-width: 480px) and (orientation: landscape) {\r\n  .navbar-fixed-top .navbar-collapse,\r\n  .navbar-fixed-bottom .navbar-collapse {\r\n    max-height: 200px;\r\n  }\r\n}\r\n.container > .navbar-header,\r\n.container-fluid > .navbar-header,\r\n.container > .navbar-collapse,\r\n.container-fluid > .navbar-collapse {\r\n  margin-right: -15px;\r\n  margin-left: -15px;\r\n}\r\n@media (min-width: 768px) {\r\n  .container > .navbar-header,\r\n  .container-fluid > .navbar-header,\r\n  .container > .navbar-collapse,\r\n  .container-fluid > .navbar-collapse {\r\n    margin-right: 0;\r\n    margin-left: 0;\r\n  }\r\n}\r\n.navbar-static-top {\r\n  z-index: 1000;\r\n  border-width: 0 0 1px;\r\n}\r\n@media (min-width: 768px) {\r\n  .navbar-static-top {\r\n    border-radius: 0;\r\n  }\r\n}\r\n.navbar-fixed-top,\r\n.navbar-fixed-bottom {\r\n  position: fixed;\r\n  right: 0;\r\n  left: 0;\r\n  z-index: 1030;\r\n}\r\n@media (min-width: 768px) {\r\n  .navbar-fixed-top,\r\n  .navbar-fixed-bottom {\r\n    border-radius: 0;\r\n  }\r\n}\r\n.navbar-fixed-top {\r\n  top: 0;\r\n  border-width: 0 0 1px;\r\n}\r\n.navbar-fixed-bottom {\r\n  bottom: 0;\r\n  margin-bottom: 0;\r\n  border-width: 1px 0 0;\r\n}\r\n.navbar-brand {\r\n  float: left;\r\n  height: 50px;\r\n  padding: 15px 15px;\r\n  font-size: 18px;\r\n  line-height: 20px;\r\n}\r\n.navbar-brand:hover,\r\n.navbar-brand:focus {\r\n  text-decoration: none;\r\n}\r\n.navbar-brand > img {\r\n  display: block;\r\n}\r\n@media (min-width: 768px) {\r\n  .navbar > .container .navbar-brand,\r\n  .navbar > .container-fluid .navbar-brand {\r\n    margin-left: -15px;\r\n  }\r\n}\r\n.navbar-toggle {\r\n  position: relative;\r\n  float: right;\r\n  padding: 9px 10px;\r\n  margin-top: 8px;\r\n  margin-right: 15px;\r\n  margin-bottom: 8px;\r\n  background-color: transparent;\r\n  background-image: none;\r\n  border: 1px solid transparent;\r\n  border-radius: 4px;\r\n}\r\n.navbar-toggle:focus {\r\n  outline: 0;\r\n}\r\n.navbar-toggle .icon-bar {\r\n  display: block;\r\n  width: 22px;\r\n  height: 2px;\r\n  border-radius: 1px;\r\n}\r\n.navbar-toggle .icon-bar + .icon-bar {\r\n  margin-top: 4px;\r\n}\r\n@media (min-width: 768px) {\r\n  .navbar-toggle {\r\n    display: none;\r\n  }\r\n}\r\n.navbar-nav {\r\n  margin: 7.5px -15px;\r\n}\r\n.navbar-nav > li > a {\r\n  padding-top: 10px;\r\n  padding-bottom: 10px;\r\n  line-height: 20px;\r\n}\r\n@media (max-width: 767px) {\r\n  .navbar-nav .open .dropdown-menu {\r\n    position: static;\r\n    float: none;\r\n    width: auto;\r\n    margin-top: 0;\r\n    background-color: transparent;\r\n    border: 0;\r\n    -webkit-box-shadow: none;\r\n            box-shadow: none;\r\n  }\r\n  .navbar-nav .open .dropdown-menu > li > a,\r\n  .navbar-nav .open .dropdown-menu .dropdown-header {\r\n    padding: 5px 15px 5px 25px;\r\n  }\r\n  .navbar-nav .open .dropdown-menu > li > a {\r\n    line-height: 20px;\r\n  }\r\n  .navbar-nav .open .dropdown-menu > li > a:hover,\r\n  .navbar-nav .open .dropdown-menu > li > a:focus {\r\n    background-image: none;\r\n  }\r\n}\r\n@media (min-width: 768px) {\r\n  .navbar-nav {\r\n    float: left;\r\n    margin: 0;\r\n  }\r\n  .navbar-nav > li {\r\n    float: left;\r\n  }\r\n  .navbar-nav > li > a {\r\n    padding-top: 15px;\r\n    padding-bottom: 15px;\r\n  }\r\n}\r\n.navbar-form {\r\n  padding: 10px 15px;\r\n  margin-top: 8px;\r\n  margin-right: -15px;\r\n  margin-bottom: 8px;\r\n  margin-left: -15px;\r\n  border-top: 1px solid transparent;\r\n  border-bottom: 1px solid transparent;\r\n  -webkit-box-shadow: inset 0 1px 0 rgba(255, 255, 255, .1), 0 1px 0 rgba(255, 255, 255, .1);\r\n          box-shadow: inset 0 1px 0 rgba(255, 255, 255, .1), 0 1px 0 rgba(255, 255, 255, .1);\r\n}\r\n@media (min-width: 768px) {\r\n  .navbar-form .form-group {\r\n    display: inline-block;\r\n    margin-bottom: 0;\r\n    vertical-align: middle;\r\n  }\r\n  .navbar-form .form-control {\r\n    display: inline-block;\r\n    width: auto;\r\n    vertical-align: middle;\r\n  }\r\n  .navbar-form .form-control-static {\r\n    display: inline-block;\r\n  }\r\n  .navbar-form .input-group {\r\n    display: inline-table;\r\n    vertical-align: middle;\r\n  }\r\n  .navbar-form .input-group .input-group-addon,\r\n  .navbar-form .input-group .input-group-btn,\r\n  .navbar-form .input-group .form-control {\r\n    width: auto;\r\n  }\r\n  .navbar-form .input-group > .form-control {\r\n    width: 100%;\r\n  }\r\n  .navbar-form .control-label {\r\n    margin-bottom: 0;\r\n    vertical-align: middle;\r\n  }\r\n  .navbar-form .radio,\r\n  .navbar-form .checkbox {\r\n    display: inline-block;\r\n    margin-top: 0;\r\n    margin-bottom: 0;\r\n    vertical-align: middle;\r\n  }\r\n  .navbar-form .radio label,\r\n  .navbar-form .checkbox label {\r\n    padding-left: 0;\r\n  }\r\n  .navbar-form .radio input[type=\"radio\"],\r\n  .navbar-form .checkbox input[type=\"checkbox\"] {\r\n    position: relative;\r\n    margin-left: 0;\r\n  }\r\n  .navbar-form .has-feedback .form-control-feedback {\r\n    top: 0;\r\n  }\r\n}\r\n@media (max-width: 767px) {\r\n  .navbar-form .form-group {\r\n    margin-bottom: 5px;\r\n  }\r\n  .navbar-form .form-group:last-child {\r\n    margin-bottom: 0;\r\n  }\r\n}\r\n@media (min-width: 768px) {\r\n  .navbar-form {\r\n    width: auto;\r\n    padding-top: 0;\r\n    padding-bottom: 0;\r\n    margin-right: 0;\r\n    margin-left: 0;\r\n    border: 0;\r\n    -webkit-box-shadow: none;\r\n            box-shadow: none;\r\n  }\r\n}\r\n.navbar-nav > li > .dropdown-menu {\r\n  margin-top: 0;\r\n  border-top-left-radius: 0;\r\n  border-top-right-radius: 0;\r\n}\r\n.navbar-fixed-bottom .navbar-nav > li > .dropdown-menu {\r\n  margin-bottom: 0;\r\n  border-top-left-radius: 4px;\r\n  border-top-right-radius: 4px;\r\n  border-bottom-right-radius: 0;\r\n  border-bottom-left-radius: 0;\r\n}\r\n.navbar-btn {\r\n  margin-top: 8px;\r\n  margin-bottom: 8px;\r\n}\r\n.navbar-btn.btn-sm {\r\n  margin-top: 10px;\r\n  margin-bottom: 10px;\r\n}\r\n.navbar-btn.btn-xs {\r\n  margin-top: 14px;\r\n  margin-bottom: 14px;\r\n}\r\n.navbar-text {\r\n  margin-top: 15px;\r\n  margin-bottom: 15px;\r\n}\r\n@media (min-width: 768px) {\r\n  .navbar-text {\r\n    float: left;\r\n    margin-right: 15px;\r\n    margin-left: 15px;\r\n  }\r\n}\r\n@media (min-width: 768px) {\r\n  .navbar-left {\r\n    float: left !important;\r\n  }\r\n  .navbar-right {\r\n    float: right !important;\r\n    margin-right: -15px;\r\n  }\r\n  .navbar-right ~ .navbar-right {\r\n    margin-right: 0;\r\n  }\r\n}\r\n.navbar-default {\r\n  background-color: #f8f8f8;\r\n  border-color: #e7e7e7;\r\n}\r\n.navbar-default .navbar-brand {\r\n  color: #777;\r\n}\r\n.navbar-default .navbar-brand:hover,\r\n.navbar-default .navbar-brand:focus {\r\n  color: #5e5e5e;\r\n  background-color: transparent;\r\n}\r\n.navbar-default .navbar-text {\r\n  color: #777;\r\n}\r\n.navbar-default .navbar-nav > li > a {\r\n  color: #777;\r\n}\r\n.navbar-default .navbar-nav > li > a:hover,\r\n.navbar-default .navbar-nav > li > a:focus {\r\n  color: #333;\r\n  background-color: transparent;\r\n}\r\n.navbar-default .navbar-nav > .active > a,\r\n.navbar-default .navbar-nav > .active > a:hover,\r\n.navbar-default .navbar-nav > .active > a:focus {\r\n  color: #555;\r\n  background-color: #e7e7e7;\r\n}\r\n.navbar-default .navbar-nav > .disabled > a,\r\n.navbar-default .navbar-nav > .disabled > a:hover,\r\n.navbar-default .navbar-nav > .disabled > a:focus {\r\n  color: #ccc;\r\n  background-color: transparent;\r\n}\r\n.navbar-default .navbar-toggle {\r\n  border-color: #ddd;\r\n}\r\n.navbar-default .navbar-toggle:hover,\r\n.navbar-default .navbar-toggle:focus {\r\n  background-color: #ddd;\r\n}\r\n.navbar-default .navbar-toggle .icon-bar {\r\n  background-color: #888;\r\n}\r\n.navbar-default .navbar-collapse,\r\n.navbar-default .navbar-form {\r\n  border-color: #e7e7e7;\r\n}\r\n.navbar-default .navbar-nav > .open > a,\r\n.navbar-default .navbar-nav > .open > a:hover,\r\n.navbar-default .navbar-nav > .open > a:focus {\r\n  color: #555;\r\n  background-color: #e7e7e7;\r\n}\r\n@media (max-width: 767px) {\r\n  .navbar-default .navbar-nav .open .dropdown-menu > li > a {\r\n    color: #777;\r\n  }\r\n  .navbar-default .navbar-nav .open .dropdown-menu > li > a:hover,\r\n  .navbar-default .navbar-nav .open .dropdown-menu > li > a:focus {\r\n    color: #333;\r\n    background-color: transparent;\r\n  }\r\n  .navbar-default .navbar-nav .open .dropdown-menu > .active > a,\r\n  .navbar-default .navbar-nav .open .dropdown-menu > .active > a:hover,\r\n  .navbar-default .navbar-nav .open .dropdown-menu > .active > a:focus {\r\n    color: #555;\r\n    background-color: #e7e7e7;\r\n  }\r\n  .navbar-default .navbar-nav .open .dropdown-menu > .disabled > a,\r\n  .navbar-default .navbar-nav .open .dropdown-menu > .disabled > a:hover,\r\n  .navbar-default .navbar-nav .open .dropdown-menu > .disabled > a:focus {\r\n    color: #ccc;\r\n    background-color: transparent;\r\n  }\r\n}\r\n.navbar-default .navbar-link {\r\n  color: #777;\r\n}\r\n.navbar-default .navbar-link:hover {\r\n  color: #333;\r\n}\r\n.navbar-default .btn-link {\r\n  color: #777;\r\n}\r\n.navbar-default .btn-link:hover,\r\n.navbar-default .btn-link:focus {\r\n  color: #333;\r\n}\r\n.navbar-default .btn-link[disabled]:hover,\r\nfieldset[disabled] .navbar-default .btn-link:hover,\r\n.navbar-default .btn-link[disabled]:focus,\r\nfieldset[disabled] .navbar-default .btn-link:focus {\r\n  color: #ccc;\r\n}\r\n.navbar-inverse {\r\n  background-color: #222;\r\n  border-color: #080808;\r\n}\r\n.navbar-inverse .navbar-brand {\r\n  color: #9d9d9d;\r\n}\r\n.navbar-inverse .navbar-brand:hover,\r\n.navbar-inverse .navbar-brand:focus {\r\n  color: #fff;\r\n  background-color: transparent;\r\n}\r\n.navbar-inverse .navbar-text {\r\n  color: #9d9d9d;\r\n}\r\n.navbar-inverse .navbar-nav > li > a {\r\n  color: #9d9d9d;\r\n}\r\n.navbar-inverse .navbar-nav > li > a:hover,\r\n.navbar-inverse .navbar-nav > li > a:focus {\r\n  color: #fff;\r\n  background-color: transparent;\r\n}\r\n.navbar-inverse .navbar-nav > .active > a,\r\n.navbar-inverse .navbar-nav > .active > a:hover,\r\n.navbar-inverse .navbar-nav > .active > a:focus {\r\n  color: #fff;\r\n  background-color: #080808;\r\n}\r\n.navbar-inverse .navbar-nav > .disabled > a,\r\n.navbar-inverse .navbar-nav > .disabled > a:hover,\r\n.navbar-inverse .navbar-nav > .disabled > a:focus {\r\n  color: #444;\r\n  background-color: transparent;\r\n}\r\n.navbar-inverse .navbar-toggle {\r\n  border-color: #333;\r\n}\r\n.navbar-inverse .navbar-toggle:hover,\r\n.navbar-inverse .navbar-toggle:focus {\r\n  background-color: #333;\r\n}\r\n.navbar-inverse .navbar-toggle .icon-bar {\r\n  background-color: #fff;\r\n}\r\n.navbar-inverse .navbar-collapse,\r\n.navbar-inverse .navbar-form {\r\n  border-color: #101010;\r\n}\r\n.navbar-inverse .navbar-nav > .open > a,\r\n.navbar-inverse .navbar-nav > .open > a:hover,\r\n.navbar-inverse .navbar-nav > .open > a:focus {\r\n  color: #fff;\r\n  background-color: #080808;\r\n}\r\n@media (max-width: 767px) {\r\n  .navbar-inverse .navbar-nav .open .dropdown-menu > .dropdown-header {\r\n    border-color: #080808;\r\n  }\r\n  .navbar-inverse .navbar-nav .open .dropdown-menu .divider {\r\n    background-color: #080808;\r\n  }\r\n  .navbar-inverse .navbar-nav .open .dropdown-menu > li > a {\r\n    color: #9d9d9d;\r\n  }\r\n  .navbar-inverse .navbar-nav .open .dropdown-menu > li > a:hover,\r\n  .navbar-inverse .navbar-nav .open .dropdown-menu > li > a:focus {\r\n    color: #fff;\r\n    background-color: transparent;\r\n  }\r\n  .navbar-inverse .navbar-nav .open .dropdown-menu > .active > a,\r\n  .navbar-inverse .navbar-nav .open .dropdown-menu > .active > a:hover,\r\n  .navbar-inverse .navbar-nav .open .dropdown-menu > .active > a:focus {\r\n    color: #fff;\r\n    background-color: #080808;\r\n  }\r\n  .navbar-inverse .navbar-nav .open .dropdown-menu > .disabled > a,\r\n  .navbar-inverse .navbar-nav .open .dropdown-menu > .disabled > a:hover,\r\n  .navbar-inverse .navbar-nav .open .dropdown-menu > .disabled > a:focus {\r\n    color: #444;\r\n    background-color: transparent;\r\n  }\r\n}\r\n.navbar-inverse .navbar-link {\r\n  color: #9d9d9d;\r\n}\r\n.navbar-inverse .navbar-link:hover {\r\n  color: #fff;\r\n}\r\n.navbar-inverse .btn-link {\r\n  color: #9d9d9d;\r\n}\r\n.navbar-inverse .btn-link:hover,\r\n.navbar-inverse .btn-link:focus {\r\n  color: #fff;\r\n}\r\n.navbar-inverse .btn-link[disabled]:hover,\r\nfieldset[disabled] .navbar-inverse .btn-link:hover,\r\n.navbar-inverse .btn-link[disabled]:focus,\r\nfieldset[disabled] .navbar-inverse .btn-link:focus {\r\n  color: #444;\r\n}\r\n.breadcrumb {\r\n  padding: 8px 15px;\r\n  margin-bottom: 20px;\r\n  list-style: none;\r\n  background-color: #f5f5f5;\r\n  border-radius: 4px;\r\n}\r\n.breadcrumb > li {\r\n  display: inline-block;\r\n}\r\n.breadcrumb > li + li:before {\r\n  padding: 0 5px;\r\n  color: #ccc;\r\n  content: \"/\\00a0\";\r\n}\r\n.breadcrumb > .active {\r\n  color: #777;\r\n}\r\n.pagination {\r\n  display: inline-block;\r\n  padding-left: 0;\r\n  margin: 20px 0;\r\n  border-radius: 4px;\r\n}\r\n.pagination > li {\r\n  display: inline;\r\n}\r\n.pagination > li > a,\r\n.pagination > li > span {\r\n  position: relative;\r\n  float: left;\r\n  padding: 6px 12px;\r\n  margin-left: -1px;\r\n  line-height: 1.42857143;\r\n  color: #337ab7;\r\n  text-decoration: none;\r\n  background-color: #fff;\r\n  border: 1px solid #ddd;\r\n}\r\n.pagination > li:first-child > a,\r\n.pagination > li:first-child > span {\r\n  margin-left: 0;\r\n  border-top-left-radius: 4px;\r\n  border-bottom-left-radius: 4px;\r\n}\r\n.pagination > li:last-child > a,\r\n.pagination > li:last-child > span {\r\n  border-top-right-radius: 4px;\r\n  border-bottom-right-radius: 4px;\r\n}\r\n.pagination > li > a:hover,\r\n.pagination > li > span:hover,\r\n.pagination > li > a:focus,\r\n.pagination > li > span:focus {\r\n  z-index: 2;\r\n  color: #23527c;\r\n  background-color: #eee;\r\n  border-color: #ddd;\r\n}\r\n.pagination > .active > a,\r\n.pagination > .active > span,\r\n.pagination > .active > a:hover,\r\n.pagination > .active > span:hover,\r\n.pagination > .active > a:focus,\r\n.pagination > .active > span:focus {\r\n  z-index: 3;\r\n  color: #fff;\r\n  cursor: default;\r\n  background-color: #337ab7;\r\n  border-color: #337ab7;\r\n}\r\n.pagination > .disabled > span,\r\n.pagination > .disabled > span:hover,\r\n.pagination > .disabled > span:focus,\r\n.pagination > .disabled > a,\r\n.pagination > .disabled > a:hover,\r\n.pagination > .disabled > a:focus {\r\n  color: #777;\r\n  cursor: not-allowed;\r\n  background-color: #fff;\r\n  border-color: #ddd;\r\n}\r\n.pagination-lg > li > a,\r\n.pagination-lg > li > span {\r\n  padding: 10px 16px;\r\n  font-size: 18px;\r\n  line-height: 1.3333333;\r\n}\r\n.pagination-lg > li:first-child > a,\r\n.pagination-lg > li:first-child > span {\r\n  border-top-left-radius: 6px;\r\n  border-bottom-left-radius: 6px;\r\n}\r\n.pagination-lg > li:last-child > a,\r\n.pagination-lg > li:last-child > span {\r\n  border-top-right-radius: 6px;\r\n  border-bottom-right-radius: 6px;\r\n}\r\n.pagination-sm > li > a,\r\n.pagination-sm > li > span {\r\n  padding: 5px 10px;\r\n  font-size: 12px;\r\n  line-height: 1.5;\r\n}\r\n.pagination-sm > li:first-child > a,\r\n.pagination-sm > li:first-child > span {\r\n  border-top-left-radius: 3px;\r\n  border-bottom-left-radius: 3px;\r\n}\r\n.pagination-sm > li:last-child > a,\r\n.pagination-sm > li:last-child > span {\r\n  border-top-right-radius: 3px;\r\n  border-bottom-right-radius: 3px;\r\n}\r\n.pager {\r\n  padding-left: 0;\r\n  margin: 20px 0;\r\n  text-align: center;\r\n  list-style: none;\r\n}\r\n.pager li {\r\n  display: inline;\r\n}\r\n.pager li > a,\r\n.pager li > span {\r\n  display: inline-block;\r\n  padding: 5px 14px;\r\n  background-color: #fff;\r\n  border: 1px solid #ddd;\r\n  border-radius: 15px;\r\n}\r\n.pager li > a:hover,\r\n.pager li > a:focus {\r\n  text-decoration: none;\r\n  background-color: #eee;\r\n}\r\n.pager .next > a,\r\n.pager .next > span {\r\n  float: right;\r\n}\r\n.pager .previous > a,\r\n.pager .previous > span {\r\n  float: left;\r\n}\r\n.pager .disabled > a,\r\n.pager .disabled > a:hover,\r\n.pager .disabled > a:focus,\r\n.pager .disabled > span {\r\n  color: #777;\r\n  cursor: not-allowed;\r\n  background-color: #fff;\r\n}\r\n.label {\r\n  display: inline;\r\n  padding: .2em .6em .3em;\r\n  font-size: 75%;\r\n  font-weight: bold;\r\n  line-height: 1;\r\n  color: #fff;\r\n  text-align: center;\r\n  white-space: nowrap;\r\n  vertical-align: baseline;\r\n  border-radius: .25em;\r\n}\r\na.label:hover,\r\na.label:focus {\r\n  color: #fff;\r\n  text-decoration: none;\r\n  cursor: pointer;\r\n}\r\n.label:empty {\r\n  display: none;\r\n}\r\n.btn .label {\r\n  position: relative;\r\n  top: -1px;\r\n}\r\n.label-default {\r\n  background-color: #777;\r\n}\r\n.label-default[href]:hover,\r\n.label-default[href]:focus {\r\n  background-color: #5e5e5e;\r\n}\r\n.label-primary {\r\n  background-color: #337ab7;\r\n}\r\n.label-primary[href]:hover,\r\n.label-primary[href]:focus {\r\n  background-color: #286090;\r\n}\r\n.label-success {\r\n  background-color: #5cb85c;\r\n}\r\n.label-success[href]:hover,\r\n.label-success[href]:focus {\r\n  background-color: #449d44;\r\n}\r\n.label-info {\r\n  background-color: #5bc0de;\r\n}\r\n.label-info[href]:hover,\r\n.label-info[href]:focus {\r\n  background-color: #31b0d5;\r\n}\r\n.label-warning {\r\n  background-color: #f0ad4e;\r\n}\r\n.label-warning[href]:hover,\r\n.label-warning[href]:focus {\r\n  background-color: #ec971f;\r\n}\r\n.label-danger {\r\n  background-color: #d9534f;\r\n}\r\n.label-danger[href]:hover,\r\n.label-danger[href]:focus {\r\n  background-color: #c9302c;\r\n}\r\n.badge {\r\n  display: inline-block;\r\n  min-width: 10px;\r\n  padding: 3px 7px;\r\n  font-size: 12px;\r\n  font-weight: bold;\r\n  line-height: 1;\r\n  color: #fff;\r\n  text-align: center;\r\n  white-space: nowrap;\r\n  vertical-align: middle;\r\n  background-color: #777;\r\n  border-radius: 10px;\r\n}\r\n.badge:empty {\r\n  display: none;\r\n}\r\n.btn .badge {\r\n  position: relative;\r\n  top: -1px;\r\n}\r\n.btn-xs .badge,\r\n.btn-group-xs > .btn .badge {\r\n  top: 0;\r\n  padding: 1px 5px;\r\n}\r\na.badge:hover,\r\na.badge:focus {\r\n  color: #fff;\r\n  text-decoration: none;\r\n  cursor: pointer;\r\n}\r\n.list-group-item.active > .badge,\r\n.nav-pills > .active > a > .badge {\r\n  color: #337ab7;\r\n  background-color: #fff;\r\n}\r\n.list-group-item > .badge {\r\n  float: right;\r\n}\r\n.list-group-item > .badge + .badge {\r\n  margin-right: 5px;\r\n}\r\n.nav-pills > li > a > .badge {\r\n  margin-left: 3px;\r\n}\r\n.jumbotron {\r\n  padding-top: 30px;\r\n  padding-bottom: 30px;\r\n  margin-bottom: 30px;\r\n  color: inherit;\r\n  background-color: #eee;\r\n}\r\n.jumbotron h1,\r\n.jumbotron .h1 {\r\n  color: inherit;\r\n}\r\n.jumbotron p {\r\n  margin-bottom: 15px;\r\n  font-size: 21px;\r\n  font-weight: 200;\r\n}\r\n.jumbotron > hr {\r\n  border-top-color: #d5d5d5;\r\n}\r\n.container .jumbotron,\r\n.container-fluid .jumbotron {\r\n  padding-right: 15px;\r\n  padding-left: 15px;\r\n  border-radius: 6px;\r\n}\r\n.jumbotron .container {\r\n  max-width: 100%;\r\n}\r\n@media screen and (min-width: 768px) {\r\n  .jumbotron {\r\n    padding-top: 48px;\r\n    padding-bottom: 48px;\r\n  }\r\n  .container .jumbotron,\r\n  .container-fluid .jumbotron {\r\n    padding-right: 60px;\r\n    padding-left: 60px;\r\n  }\r\n  .jumbotron h1,\r\n  .jumbotron .h1 {\r\n    font-size: 63px;\r\n  }\r\n}\r\n.thumbnail {\r\n  display: block;\r\n  padding: 4px;\r\n  margin-bottom: 20px;\r\n  line-height: 1.42857143;\r\n  background-color: #fff;\r\n  border: 1px solid #ddd;\r\n  border-radius: 4px;\r\n  -webkit-transition: border .2s ease-in-out;\r\n       -o-transition: border .2s ease-in-out;\r\n          transition: border .2s ease-in-out;\r\n}\r\n.thumbnail > img,\r\n.thumbnail a > img {\r\n  margin-right: auto;\r\n  margin-left: auto;\r\n}\r\na.thumbnail:hover,\r\na.thumbnail:focus,\r\na.thumbnail.active {\r\n  border-color: #337ab7;\r\n}\r\n.thumbnail .caption {\r\n  padding: 9px;\r\n  color: #333;\r\n}\r\n.alert {\r\n  padding: 15px;\r\n  margin-bottom: 20px;\r\n  border: 1px solid transparent;\r\n  border-radius: 4px;\r\n}\r\n.alert h4 {\r\n  margin-top: 0;\r\n  color: inherit;\r\n}\r\n.alert .alert-link {\r\n  font-weight: bold;\r\n}\r\n.alert > p,\r\n.alert > ul {\r\n  margin-bottom: 0;\r\n}\r\n.alert > p + p {\r\n  margin-top: 5px;\r\n}\r\n.alert-dismissable,\r\n.alert-dismissible {\r\n  padding-right: 35px;\r\n}\r\n.alert-dismissable .close,\r\n.alert-dismissible .close {\r\n  position: relative;\r\n  top: -2px;\r\n  right: -21px;\r\n  color: inherit;\r\n}\r\n.alert-success {\r\n  color: #3c763d;\r\n  background-color: #dff0d8;\r\n  border-color: #d6e9c6;\r\n}\r\n.alert-success hr {\r\n  border-top-color: #c9e2b3;\r\n}\r\n.alert-success .alert-link {\r\n  color: #2b542c;\r\n}\r\n.alert-info {\r\n  color: #31708f;\r\n  background-color: #d9edf7;\r\n  border-color: #bce8f1;\r\n}\r\n.alert-info hr {\r\n  border-top-color: #a6e1ec;\r\n}\r\n.alert-info .alert-link {\r\n  color: #245269;\r\n}\r\n.alert-warning {\r\n  color: #8a6d3b;\r\n  background-color: #fcf8e3;\r\n  border-color: #faebcc;\r\n}\r\n.alert-warning hr {\r\n  border-top-color: #f7e1b5;\r\n}\r\n.alert-warning .alert-link {\r\n  color: #66512c;\r\n}\r\n.alert-danger {\r\n  color: #a94442;\r\n  background-color: #f2dede;\r\n  border-color: #ebccd1;\r\n}\r\n.alert-danger hr {\r\n  border-top-color: #e4b9c0;\r\n}\r\n.alert-danger .alert-link {\r\n  color: #843534;\r\n}\r\n@-webkit-keyframes progress-bar-stripes {\r\n  from {\r\n    background-position: 40px 0;\r\n  }\r\n  to {\r\n    background-position: 0 0;\r\n  }\r\n}\r\n@-o-keyframes progress-bar-stripes {\r\n  from {\r\n    background-position: 40px 0;\r\n  }\r\n  to {\r\n    background-position: 0 0;\r\n  }\r\n}\r\n@keyframes progress-bar-stripes {\r\n  from {\r\n    background-position: 40px 0;\r\n  }\r\n  to {\r\n    background-position: 0 0;\r\n  }\r\n}\r\n.progress {\r\n  height: 20px;\r\n  margin-bottom: 20px;\r\n  overflow: hidden;\r\n  background-color: #f5f5f5;\r\n  border-radius: 4px;\r\n  -webkit-box-shadow: inset 0 1px 2px rgba(0, 0, 0, .1);\r\n          box-shadow: inset 0 1px 2px rgba(0, 0, 0, .1);\r\n}\r\n.progress-bar {\r\n  float: left;\r\n  width: 0;\r\n  height: 100%;\r\n  font-size: 12px;\r\n  line-height: 20px;\r\n  color: #fff;\r\n  text-align: center;\r\n  background-color: #337ab7;\r\n  -webkit-box-shadow: inset 0 -1px 0 rgba(0, 0, 0, .15);\r\n          box-shadow: inset 0 -1px 0 rgba(0, 0, 0, .15);\r\n  -webkit-transition: width .6s ease;\r\n       -o-transition: width .6s ease;\r\n          transition: width .6s ease;\r\n}\r\n.progress-striped .progress-bar,\r\n.progress-bar-striped {\r\n  background-image: -webkit-linear-gradient(45deg, rgba(255, 255, 255, .15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .15) 50%, rgba(255, 255, 255, .15) 75%, transparent 75%, transparent);\r\n  background-image:      -o-linear-gradient(45deg, rgba(255, 255, 255, .15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .15) 50%, rgba(255, 255, 255, .15) 75%, transparent 75%, transparent);\r\n  background-image:         linear-gradient(45deg, rgba(255, 255, 255, .15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .15) 50%, rgba(255, 255, 255, .15) 75%, transparent 75%, transparent);\r\n  -webkit-background-size: 40px 40px;\r\n          background-size: 40px 40px;\r\n}\r\n.progress.active .progress-bar,\r\n.progress-bar.active {\r\n  -webkit-animation: progress-bar-stripes 2s linear infinite;\r\n       -o-animation: progress-bar-stripes 2s linear infinite;\r\n          animation: progress-bar-stripes 2s linear infinite;\r\n}\r\n.progress-bar-success {\r\n  background-color: #5cb85c;\r\n}\r\n.progress-striped .progress-bar-success {\r\n  background-image: -webkit-linear-gradient(45deg, rgba(255, 255, 255, .15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .15) 50%, rgba(255, 255, 255, .15) 75%, transparent 75%, transparent);\r\n  background-image:      -o-linear-gradient(45deg, rgba(255, 255, 255, .15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .15) 50%, rgba(255, 255, 255, .15) 75%, transparent 75%, transparent);\r\n  background-image:         linear-gradient(45deg, rgba(255, 255, 255, .15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .15) 50%, rgba(255, 255, 255, .15) 75%, transparent 75%, transparent);\r\n}\r\n.progress-bar-info {\r\n  background-color: #5bc0de;\r\n}\r\n.progress-striped .progress-bar-info {\r\n  background-image: -webkit-linear-gradient(45deg, rgba(255, 255, 255, .15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .15) 50%, rgba(255, 255, 255, .15) 75%, transparent 75%, transparent);\r\n  background-image:      -o-linear-gradient(45deg, rgba(255, 255, 255, .15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .15) 50%, rgba(255, 255, 255, .15) 75%, transparent 75%, transparent);\r\n  background-image:         linear-gradient(45deg, rgba(255, 255, 255, .15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .15) 50%, rgba(255, 255, 255, .15) 75%, transparent 75%, transparent);\r\n}\r\n.progress-bar-warning {\r\n  background-color: #f0ad4e;\r\n}\r\n.progress-striped .progress-bar-warning {\r\n  background-image: -webkit-linear-gradient(45deg, rgba(255, 255, 255, .15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .15) 50%, rgba(255, 255, 255, .15) 75%, transparent 75%, transparent);\r\n  background-image:      -o-linear-gradient(45deg, rgba(255, 255, 255, .15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .15) 50%, rgba(255, 255, 255, .15) 75%, transparent 75%, transparent);\r\n  background-image:         linear-gradient(45deg, rgba(255, 255, 255, .15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .15) 50%, rgba(255, 255, 255, .15) 75%, transparent 75%, transparent);\r\n}\r\n.progress-bar-danger {\r\n  background-color: #d9534f;\r\n}\r\n.progress-striped .progress-bar-danger {\r\n  background-image: -webkit-linear-gradient(45deg, rgba(255, 255, 255, .15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .15) 50%, rgba(255, 255, 255, .15) 75%, transparent 75%, transparent);\r\n  background-image:      -o-linear-gradient(45deg, rgba(255, 255, 255, .15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .15) 50%, rgba(255, 255, 255, .15) 75%, transparent 75%, transparent);\r\n  background-image:         linear-gradient(45deg, rgba(255, 255, 255, .15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .15) 50%, rgba(255, 255, 255, .15) 75%, transparent 75%, transparent);\r\n}\r\n.media {\r\n  margin-top: 15px;\r\n}\r\n.media:first-child {\r\n  margin-top: 0;\r\n}\r\n.media,\r\n.media-body {\r\n  overflow: hidden;\r\n  zoom: 1;\r\n}\r\n.media-body {\r\n  width: 10000px;\r\n}\r\n.media-object {\r\n  display: block;\r\n}\r\n.media-object.img-thumbnail {\r\n  max-width: none;\r\n}\r\n.media-right,\r\n.media > .pull-right {\r\n  padding-left: 10px;\r\n}\r\n.media-left,\r\n.media > .pull-left {\r\n  padding-right: 10px;\r\n}\r\n.media-left,\r\n.media-right,\r\n.media-body {\r\n  display: table-cell;\r\n  vertical-align: top;\r\n}\r\n.media-middle {\r\n  vertical-align: middle;\r\n}\r\n.media-bottom {\r\n  vertical-align: bottom;\r\n}\r\n.media-heading {\r\n  margin-top: 0;\r\n  margin-bottom: 5px;\r\n}\r\n.media-list {\r\n  padding-left: 0;\r\n  list-style: none;\r\n}\r\n.list-group {\r\n  padding-left: 0;\r\n  margin-bottom: 20px;\r\n}\r\n.list-group-item {\r\n  position: relative;\r\n  display: block;\r\n  padding: 10px 15px;\r\n  margin-bottom: -1px;\r\n  background-color: #fff;\r\n  border: 1px solid #ddd;\r\n}\r\n.list-group-item:first-child {\r\n  border-top-left-radius: 4px;\r\n  border-top-right-radius: 4px;\r\n}\r\n.list-group-item:last-child {\r\n  margin-bottom: 0;\r\n  border-bottom-right-radius: 4px;\r\n  border-bottom-left-radius: 4px;\r\n}\r\na.list-group-item,\r\nbutton.list-group-item {\r\n  color: #555;\r\n}\r\na.list-group-item .list-group-item-heading,\r\nbutton.list-group-item .list-group-item-heading {\r\n  color: #333;\r\n}\r\na.list-group-item:hover,\r\nbutton.list-group-item:hover,\r\na.list-group-item:focus,\r\nbutton.list-group-item:focus {\r\n  color: #555;\r\n  text-decoration: none;\r\n  background-color: #f5f5f5;\r\n}\r\nbutton.list-group-item {\r\n  width: 100%;\r\n  text-align: left;\r\n}\r\n.list-group-item.disabled,\r\n.list-group-item.disabled:hover,\r\n.list-group-item.disabled:focus {\r\n  color: #777;\r\n  cursor: not-allowed;\r\n  background-color: #eee;\r\n}\r\n.list-group-item.disabled .list-group-item-heading,\r\n.list-group-item.disabled:hover .list-group-item-heading,\r\n.list-group-item.disabled:focus .list-group-item-heading {\r\n  color: inherit;\r\n}\r\n.list-group-item.disabled .list-group-item-text,\r\n.list-group-item.disabled:hover .list-group-item-text,\r\n.list-group-item.disabled:focus .list-group-item-text {\r\n  color: #777;\r\n}\r\n.list-group-item.active,\r\n.list-group-item.active:hover,\r\n.list-group-item.active:focus {\r\n  z-index: 2;\r\n  color: #fff;\r\n  background-color: #337ab7;\r\n  border-color: #337ab7;\r\n}\r\n.list-group-item.active .list-group-item-heading,\r\n.list-group-item.active:hover .list-group-item-heading,\r\n.list-group-item.active:focus .list-group-item-heading,\r\n.list-group-item.active .list-group-item-heading > small,\r\n.list-group-item.active:hover .list-group-item-heading > small,\r\n.list-group-item.active:focus .list-group-item-heading > small,\r\n.list-group-item.active .list-group-item-heading > .small,\r\n.list-group-item.active:hover .list-group-item-heading > .small,\r\n.list-group-item.active:focus .list-group-item-heading > .small {\r\n  color: inherit;\r\n}\r\n.list-group-item.active .list-group-item-text,\r\n.list-group-item.active:hover .list-group-item-text,\r\n.list-group-item.active:focus .list-group-item-text {\r\n  color: #c7ddef;\r\n}\r\n.list-group-item-success {\r\n  color: #3c763d;\r\n  background-color: #dff0d8;\r\n}\r\na.list-group-item-success,\r\nbutton.list-group-item-success {\r\n  color: #3c763d;\r\n}\r\na.list-group-item-success .list-group-item-heading,\r\nbutton.list-group-item-success .list-group-item-heading {\r\n  color: inherit;\r\n}\r\na.list-group-item-success:hover,\r\nbutton.list-group-item-success:hover,\r\na.list-group-item-success:focus,\r\nbutton.list-group-item-success:focus {\r\n  color: #3c763d;\r\n  background-color: #d0e9c6;\r\n}\r\na.list-group-item-success.active,\r\nbutton.list-group-item-success.active,\r\na.list-group-item-success.active:hover,\r\nbutton.list-group-item-success.active:hover,\r\na.list-group-item-success.active:focus,\r\nbutton.list-group-item-success.active:focus {\r\n  color: #fff;\r\n  background-color: #3c763d;\r\n  border-color: #3c763d;\r\n}\r\n.list-group-item-info {\r\n  color: #31708f;\r\n  background-color: #d9edf7;\r\n}\r\na.list-group-item-info,\r\nbutton.list-group-item-info {\r\n  color: #31708f;\r\n}\r\na.list-group-item-info .list-group-item-heading,\r\nbutton.list-group-item-info .list-group-item-heading {\r\n  color: inherit;\r\n}\r\na.list-group-item-info:hover,\r\nbutton.list-group-item-info:hover,\r\na.list-group-item-info:focus,\r\nbutton.list-group-item-info:focus {\r\n  color: #31708f;\r\n  background-color: #c4e3f3;\r\n}\r\na.list-group-item-info.active,\r\nbutton.list-group-item-info.active,\r\na.list-group-item-info.active:hover,\r\nbutton.list-group-item-info.active:hover,\r\na.list-group-item-info.active:focus,\r\nbutton.list-group-item-info.active:focus {\r\n  color: #fff;\r\n  background-color: #31708f;\r\n  border-color: #31708f;\r\n}\r\n.list-group-item-warning {\r\n  color: #8a6d3b;\r\n  background-color: #fcf8e3;\r\n}\r\na.list-group-item-warning,\r\nbutton.list-group-item-warning {\r\n  color: #8a6d3b;\r\n}\r\na.list-group-item-warning .list-group-item-heading,\r\nbutton.list-group-item-warning .list-group-item-heading {\r\n  color: inherit;\r\n}\r\na.list-group-item-warning:hover,\r\nbutton.list-group-item-warning:hover,\r\na.list-group-item-warning:focus,\r\nbutton.list-group-item-warning:focus {\r\n  color: #8a6d3b;\r\n  background-color: #faf2cc;\r\n}\r\na.list-group-item-warning.active,\r\nbutton.list-group-item-warning.active,\r\na.list-group-item-warning.active:hover,\r\nbutton.list-group-item-warning.active:hover,\r\na.list-group-item-warning.active:focus,\r\nbutton.list-group-item-warning.active:focus {\r\n  color: #fff;\r\n  background-color: #8a6d3b;\r\n  border-color: #8a6d3b;\r\n}\r\n.list-group-item-danger {\r\n  color: #a94442;\r\n  background-color: #f2dede;\r\n}\r\na.list-group-item-danger,\r\nbutton.list-group-item-danger {\r\n  color: #a94442;\r\n}\r\na.list-group-item-danger .list-group-item-heading,\r\nbutton.list-group-item-danger .list-group-item-heading {\r\n  color: inherit;\r\n}\r\na.list-group-item-danger:hover,\r\nbutton.list-group-item-danger:hover,\r\na.list-group-item-danger:focus,\r\nbutton.list-group-item-danger:focus {\r\n  color: #a94442;\r\n  background-color: #ebcccc;\r\n}\r\na.list-group-item-danger.active,\r\nbutton.list-group-item-danger.active,\r\na.list-group-item-danger.active:hover,\r\nbutton.list-group-item-danger.active:hover,\r\na.list-group-item-danger.active:focus,\r\nbutton.list-group-item-danger.active:focus {\r\n  color: #fff;\r\n  background-color: #a94442;\r\n  border-color: #a94442;\r\n}\r\n.list-group-item-heading {\r\n  margin-top: 0;\r\n  margin-bottom: 5px;\r\n}\r\n.list-group-item-text {\r\n  margin-bottom: 0;\r\n  line-height: 1.3;\r\n}\r\n.panel {\r\n  margin-bottom: 20px;\r\n  background-color: #fff;\r\n  border: 1px solid transparent;\r\n  border-radius: 4px;\r\n  -webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, .05);\r\n          box-shadow: 0 1px 1px rgba(0, 0, 0, .05);\r\n}\r\n.panel-body {\r\n  padding: 15px;\r\n}\r\n.panel-heading {\r\n  padding: 10px 15px;\r\n  border-bottom: 1px solid transparent;\r\n  border-top-left-radius: 3px;\r\n  border-top-right-radius: 3px;\r\n}\r\n.panel-heading > .dropdown .dropdown-toggle {\r\n  color: inherit;\r\n}\r\n.panel-title {\r\n  margin-top: 0;\r\n  margin-bottom: 0;\r\n  font-size: 16px;\r\n  color: inherit;\r\n}\r\n.panel-title > a,\r\n.panel-title > small,\r\n.panel-title > .small,\r\n.panel-title > small > a,\r\n.panel-title > .small > a {\r\n  color: inherit;\r\n}\r\n.panel-footer {\r\n  padding: 10px 15px;\r\n  background-color: #f5f5f5;\r\n  border-top: 1px solid #ddd;\r\n  border-bottom-right-radius: 3px;\r\n  border-bottom-left-radius: 3px;\r\n}\r\n.panel > .list-group,\r\n.panel > .panel-collapse > .list-group {\r\n  margin-bottom: 0;\r\n}\r\n.panel > .list-group .list-group-item,\r\n.panel > .panel-collapse > .list-group .list-group-item {\r\n  border-width: 1px 0;\r\n  border-radius: 0;\r\n}\r\n.panel > .list-group:first-child .list-group-item:first-child,\r\n.panel > .panel-collapse > .list-group:first-child .list-group-item:first-child {\r\n  border-top: 0;\r\n  border-top-left-radius: 3px;\r\n  border-top-right-radius: 3px;\r\n}\r\n.panel > .list-group:last-child .list-group-item:last-child,\r\n.panel > .panel-collapse > .list-group:last-child .list-group-item:last-child {\r\n  border-bottom: 0;\r\n  border-bottom-right-radius: 3px;\r\n  border-bottom-left-radius: 3px;\r\n}\r\n.panel > .panel-heading + .panel-collapse > .list-group .list-group-item:first-child {\r\n  border-top-left-radius: 0;\r\n  border-top-right-radius: 0;\r\n}\r\n.panel-heading + .list-group .list-group-item:first-child {\r\n  border-top-width: 0;\r\n}\r\n.list-group + .panel-footer {\r\n  border-top-width: 0;\r\n}\r\n.panel > .table,\r\n.panel > .table-responsive > .table,\r\n.panel > .panel-collapse > .table {\r\n  margin-bottom: 0;\r\n}\r\n.panel > .table caption,\r\n.panel > .table-responsive > .table caption,\r\n.panel > .panel-collapse > .table caption {\r\n  padding-right: 15px;\r\n  padding-left: 15px;\r\n}\r\n.panel > .table:first-child,\r\n.panel > .table-responsive:first-child > .table:first-child {\r\n  border-top-left-radius: 3px;\r\n  border-top-right-radius: 3px;\r\n}\r\n.panel > .table:first-child > thead:first-child > tr:first-child,\r\n.panel > .table-responsive:first-child > .table:first-child > thead:first-child > tr:first-child,\r\n.panel > .table:first-child > tbody:first-child > tr:first-child,\r\n.panel > .table-responsive:first-child > .table:first-child > tbody:first-child > tr:first-child {\r\n  border-top-left-radius: 3px;\r\n  border-top-right-radius: 3px;\r\n}\r\n.panel > .table:first-child > thead:first-child > tr:first-child td:first-child,\r\n.panel > .table-responsive:first-child > .table:first-child > thead:first-child > tr:first-child td:first-child,\r\n.panel > .table:first-child > tbody:first-child > tr:first-child td:first-child,\r\n.panel > .table-responsive:first-child > .table:first-child > tbody:first-child > tr:first-child td:first-child,\r\n.panel > .table:first-child > thead:first-child > tr:first-child th:first-child,\r\n.panel > .table-responsive:first-child > .table:first-child > thead:first-child > tr:first-child th:first-child,\r\n.panel > .table:first-child > tbody:first-child > tr:first-child th:first-child,\r\n.panel > .table-responsive:first-child > .table:first-child > tbody:first-child > tr:first-child th:first-child {\r\n  border-top-left-radius: 3px;\r\n}\r\n.panel > .table:first-child > thead:first-child > tr:first-child td:last-child,\r\n.panel > .table-responsive:first-child > .table:first-child > thead:first-child > tr:first-child td:last-child,\r\n.panel > .table:first-child > tbody:first-child > tr:first-child td:last-child,\r\n.panel > .table-responsive:first-child > .table:first-child > tbody:first-child > tr:first-child td:last-child,\r\n.panel > .table:first-child > thead:first-child > tr:first-child th:last-child,\r\n.panel > .table-responsive:first-child > .table:first-child > thead:first-child > tr:first-child th:last-child,\r\n.panel > .table:first-child > tbody:first-child > tr:first-child th:last-child,\r\n.panel > .table-responsive:first-child > .table:first-child > tbody:first-child > tr:first-child th:last-child {\r\n  border-top-right-radius: 3px;\r\n}\r\n.panel > .table:last-child,\r\n.panel > .table-responsive:last-child > .table:last-child {\r\n  border-bottom-right-radius: 3px;\r\n  border-bottom-left-radius: 3px;\r\n}\r\n.panel > .table:last-child > tbody:last-child > tr:last-child,\r\n.panel > .table-responsive:last-child > .table:last-child > tbody:last-child > tr:last-child,\r\n.panel > .table:last-child > tfoot:last-child > tr:last-child,\r\n.panel > .table-responsive:last-child > .table:last-child > tfoot:last-child > tr:last-child {\r\n  border-bottom-right-radius: 3px;\r\n  border-bottom-left-radius: 3px;\r\n}\r\n.panel > .table:last-child > tbody:last-child > tr:last-child td:first-child,\r\n.panel > .table-responsive:last-child > .table:last-child > tbody:last-child > tr:last-child td:first-child,\r\n.panel > .table:last-child > tfoot:last-child > tr:last-child td:first-child,\r\n.panel > .table-responsive:last-child > .table:last-child > tfoot:last-child > tr:last-child td:first-child,\r\n.panel > .table:last-child > tbody:last-child > tr:last-child th:first-child,\r\n.panel > .table-responsive:last-child > .table:last-child > tbody:last-child > tr:last-child th:first-child,\r\n.panel > .table:last-child > tfoot:last-child > tr:last-child th:first-child,\r\n.panel > .table-responsive:last-child > .table:last-child > tfoot:last-child > tr:last-child th:first-child {\r\n  border-bottom-left-radius: 3px;\r\n}\r\n.panel > .table:last-child > tbody:last-child > tr:last-child td:last-child,\r\n.panel > .table-responsive:last-child > .table:last-child > tbody:last-child > tr:last-child td:last-child,\r\n.panel > .table:last-child > tfoot:last-child > tr:last-child td:last-child,\r\n.panel > .table-responsive:last-child > .table:last-child > tfoot:last-child > tr:last-child td:last-child,\r\n.panel > .table:last-child > tbody:last-child > tr:last-child th:last-child,\r\n.panel > .table-responsive:last-child > .table:last-child > tbody:last-child > tr:last-child th:last-child,\r\n.panel > .table:last-child > tfoot:last-child > tr:last-child th:last-child,\r\n.panel > .table-responsive:last-child > .table:last-child > tfoot:last-child > tr:last-child th:last-child {\r\n  border-bottom-right-radius: 3px;\r\n}\r\n.panel > .panel-body + .table,\r\n.panel > .panel-body + .table-responsive,\r\n.panel > .table + .panel-body,\r\n.panel > .table-responsive + .panel-body {\r\n  border-top: 1px solid #ddd;\r\n}\r\n.panel > .table > tbody:first-child > tr:first-child th,\r\n.panel > .table > tbody:first-child > tr:first-child td {\r\n  border-top: 0;\r\n}\r\n.panel > .table-bordered,\r\n.panel > .table-responsive > .table-bordered {\r\n  border: 0;\r\n}\r\n.panel > .table-bordered > thead > tr > th:first-child,\r\n.panel > .table-responsive > .table-bordered > thead > tr > th:first-child,\r\n.panel > .table-bordered > tbody > tr > th:first-child,\r\n.panel > .table-responsive > .table-bordered > tbody > tr > th:first-child,\r\n.panel > .table-bordered > tfoot > tr > th:first-child,\r\n.panel > .table-responsive > .table-bordered > tfoot > tr > th:first-child,\r\n.panel > .table-bordered > thead > tr > td:first-child,\r\n.panel > .table-responsive > .table-bordered > thead > tr > td:first-child,\r\n.panel > .table-bordered > tbody > tr > td:first-child,\r\n.panel > .table-responsive > .table-bordered > tbody > tr > td:first-child,\r\n.panel > .table-bordered > tfoot > tr > td:first-child,\r\n.panel > .table-responsive > .table-bordered > tfoot > tr > td:first-child {\r\n  border-left: 0;\r\n}\r\n.panel > .table-bordered > thead > tr > th:last-child,\r\n.panel > .table-responsive > .table-bordered > thead > tr > th:last-child,\r\n.panel > .table-bordered > tbody > tr > th:last-child,\r\n.panel > .table-responsive > .table-bordered > tbody > tr > th:last-child,\r\n.panel > .table-bordered > tfoot > tr > th:last-child,\r\n.panel > .table-responsive > .table-bordered > tfoot > tr > th:last-child,\r\n.panel > .table-bordered > thead > tr > td:last-child,\r\n.panel > .table-responsive > .table-bordered > thead > tr > td:last-child,\r\n.panel > .table-bordered > tbody > tr > td:last-child,\r\n.panel > .table-responsive > .table-bordered > tbody > tr > td:last-child,\r\n.panel > .table-bordered > tfoot > tr > td:last-child,\r\n.panel > .table-responsive > .table-bordered > tfoot > tr > td:last-child {\r\n  border-right: 0;\r\n}\r\n.panel > .table-bordered > thead > tr:first-child > td,\r\n.panel > .table-responsive > .table-bordered > thead > tr:first-child > td,\r\n.panel > .table-bordered > tbody > tr:first-child > td,\r\n.panel > .table-responsive > .table-bordered > tbody > tr:first-child > td,\r\n.panel > .table-bordered > thead > tr:first-child > th,\r\n.panel > .table-responsive > .table-bordered > thead > tr:first-child > th,\r\n.panel > .table-bordered > tbody > tr:first-child > th,\r\n.panel > .table-responsive > .table-bordered > tbody > tr:first-child > th {\r\n  border-bottom: 0;\r\n}\r\n.panel > .table-bordered > tbody > tr:last-child > td,\r\n.panel > .table-responsive > .table-bordered > tbody > tr:last-child > td,\r\n.panel > .table-bordered > tfoot > tr:last-child > td,\r\n.panel > .table-responsive > .table-bordered > tfoot > tr:last-child > td,\r\n.panel > .table-bordered > tbody > tr:last-child > th,\r\n.panel > .table-responsive > .table-bordered > tbody > tr:last-child > th,\r\n.panel > .table-bordered > tfoot > tr:last-child > th,\r\n.panel > .table-responsive > .table-bordered > tfoot > tr:last-child > th {\r\n  border-bottom: 0;\r\n}\r\n.panel > .table-responsive {\r\n  margin-bottom: 0;\r\n  border: 0;\r\n}\r\n.panel-group {\r\n  margin-bottom: 20px;\r\n}\r\n.panel-group .panel {\r\n  margin-bottom: 0;\r\n  border-radius: 4px;\r\n}\r\n.panel-group .panel + .panel {\r\n  margin-top: 5px;\r\n}\r\n.panel-group .panel-heading {\r\n  border-bottom: 0;\r\n}\r\n.panel-group .panel-heading + .panel-collapse > .panel-body,\r\n.panel-group .panel-heading + .panel-collapse > .list-group {\r\n  border-top: 1px solid #ddd;\r\n}\r\n.panel-group .panel-footer {\r\n  border-top: 0;\r\n}\r\n.panel-group .panel-footer + .panel-collapse .panel-body {\r\n  border-bottom: 1px solid #ddd;\r\n}\r\n.panel-default {\r\n  border-color: #ddd;\r\n}\r\n.panel-default > .panel-heading {\r\n  color: #333;\r\n  background-color: #f5f5f5;\r\n  border-color: #ddd;\r\n}\r\n.panel-default > .panel-heading + .panel-collapse > .panel-body {\r\n  border-top-color: #ddd;\r\n}\r\n.panel-default > .panel-heading .badge {\r\n  color: #f5f5f5;\r\n  background-color: #333;\r\n}\r\n.panel-default > .panel-footer + .panel-collapse > .panel-body {\r\n  border-bottom-color: #ddd;\r\n}\r\n.panel-primary {\r\n  border-color: #337ab7;\r\n}\r\n.panel-primary > .panel-heading {\r\n  color: #fff;\r\n  background-color: #337ab7;\r\n  border-color: #337ab7;\r\n}\r\n.panel-primary > .panel-heading + .panel-collapse > .panel-body {\r\n  border-top-color: #337ab7;\r\n}\r\n.panel-primary > .panel-heading .badge {\r\n  color: #337ab7;\r\n  background-color: #fff;\r\n}\r\n.panel-primary > .panel-footer + .panel-collapse > .panel-body {\r\n  border-bottom-color: #337ab7;\r\n}\r\n.panel-success {\r\n  border-color: #d6e9c6;\r\n}\r\n.panel-success > .panel-heading {\r\n  color: #3c763d;\r\n  background-color: #dff0d8;\r\n  border-color: #d6e9c6;\r\n}\r\n.panel-success > .panel-heading + .panel-collapse > .panel-body {\r\n  border-top-color: #d6e9c6;\r\n}\r\n.panel-success > .panel-heading .badge {\r\n  color: #dff0d8;\r\n  background-color: #3c763d;\r\n}\r\n.panel-success > .panel-footer + .panel-collapse > .panel-body {\r\n  border-bottom-color: #d6e9c6;\r\n}\r\n.panel-info {\r\n  border-color: #bce8f1;\r\n}\r\n.panel-info > .panel-heading {\r\n  color: #31708f;\r\n  background-color: #d9edf7;\r\n  border-color: #bce8f1;\r\n}\r\n.panel-info > .panel-heading + .panel-collapse > .panel-body {\r\n  border-top-color: #bce8f1;\r\n}\r\n.panel-info > .panel-heading .badge {\r\n  color: #d9edf7;\r\n  background-color: #31708f;\r\n}\r\n.panel-info > .panel-footer + .panel-collapse > .panel-body {\r\n  border-bottom-color: #bce8f1;\r\n}\r\n.panel-warning {\r\n  border-color: #faebcc;\r\n}\r\n.panel-warning > .panel-heading {\r\n  color: #8a6d3b;\r\n  background-color: #fcf8e3;\r\n  border-color: #faebcc;\r\n}\r\n.panel-warning > .panel-heading + .panel-collapse > .panel-body {\r\n  border-top-color: #faebcc;\r\n}\r\n.panel-warning > .panel-heading .badge {\r\n  color: #fcf8e3;\r\n  background-color: #8a6d3b;\r\n}\r\n.panel-warning > .panel-footer + .panel-collapse > .panel-body {\r\n  border-bottom-color: #faebcc;\r\n}\r\n.panel-danger {\r\n  border-color: #ebccd1;\r\n}\r\n.panel-danger > .panel-heading {\r\n  color: #a94442;\r\n  background-color: #f2dede;\r\n  border-color: #ebccd1;\r\n}\r\n.panel-danger > .panel-heading + .panel-collapse > .panel-body {\r\n  border-top-color: #ebccd1;\r\n}\r\n.panel-danger > .panel-heading .badge {\r\n  color: #f2dede;\r\n  background-color: #a94442;\r\n}\r\n.panel-danger > .panel-footer + .panel-collapse > .panel-body {\r\n  border-bottom-color: #ebccd1;\r\n}\r\n.embed-responsive {\r\n  position: relative;\r\n  display: block;\r\n  height: 0;\r\n  padding: 0;\r\n  overflow: hidden;\r\n}\r\n.embed-responsive .embed-responsive-item,\r\n.embed-responsive iframe,\r\n.embed-responsive embed,\r\n.embed-responsive object,\r\n.embed-responsive video {\r\n  position: absolute;\r\n  top: 0;\r\n  bottom: 0;\r\n  left: 0;\r\n  width: 100%;\r\n  height: 100%;\r\n  border: 0;\r\n}\r\n.embed-responsive-16by9 {\r\n  padding-bottom: 56.25%;\r\n}\r\n.embed-responsive-4by3 {\r\n  padding-bottom: 75%;\r\n}\r\n.well {\r\n  min-height: 20px;\r\n  padding: 19px;\r\n  margin-bottom: 20px;\r\n  background-color: #f5f5f5;\r\n  border: 1px solid #e3e3e3;\r\n  border-radius: 4px;\r\n  -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .05);\r\n          box-shadow: inset 0 1px 1px rgba(0, 0, 0, .05);\r\n}\r\n.well blockquote {\r\n  border-color: #ddd;\r\n  border-color: rgba(0, 0, 0, .15);\r\n}\r\n.well-lg {\r\n  padding: 24px;\r\n  border-radius: 6px;\r\n}\r\n.well-sm {\r\n  padding: 9px;\r\n  border-radius: 3px;\r\n}\r\n.close {\r\n  float: right;\r\n  font-size: 21px;\r\n  font-weight: bold;\r\n  line-height: 1;\r\n  color: #000;\r\n  text-shadow: 0 1px 0 #fff;\r\n  filter: alpha(opacity=20);\r\n  opacity: .2;\r\n}\r\n.close:hover,\r\n.close:focus {\r\n  color: #000;\r\n  text-decoration: none;\r\n  cursor: pointer;\r\n  filter: alpha(opacity=50);\r\n  opacity: .5;\r\n}\r\nbutton.close {\r\n  -webkit-appearance: none;\r\n  padding: 0;\r\n  cursor: pointer;\r\n  background: transparent;\r\n  border: 0;\r\n}\r\n.modal-open {\r\n  overflow: hidden;\r\n}\r\n.modal {\r\n  position: fixed;\r\n  top: 0;\r\n  right: 0;\r\n  bottom: 0;\r\n  left: 0;\r\n  z-index: 1050;\r\n  display: none;\r\n  overflow: hidden;\r\n  -webkit-overflow-scrolling: touch;\r\n  outline: 0;\r\n}\r\n.modal.fade .modal-dialog {\r\n  -webkit-transition: -webkit-transform .3s ease-out;\r\n       -o-transition:      -o-transform .3s ease-out;\r\n          transition:         transform .3s ease-out;\r\n  -webkit-transform: translate(0, -25%);\r\n      -ms-transform: translate(0, -25%);\r\n       -o-transform: translate(0, -25%);\r\n          transform: translate(0, -25%);\r\n}\r\n.modal.in .modal-dialog {\r\n  -webkit-transform: translate(0, 0);\r\n      -ms-transform: translate(0, 0);\r\n       -o-transform: translate(0, 0);\r\n          transform: translate(0, 0);\r\n}\r\n.modal-open .modal {\r\n  overflow-x: hidden;\r\n  overflow-y: auto;\r\n}\r\n.modal-dialog {\r\n  position: relative;\r\n  width: auto;\r\n  margin: 10px;\r\n}\r\n.modal-content {\r\n  position: relative;\r\n  background-color: #fff;\r\n  -webkit-background-clip: padding-box;\r\n          background-clip: padding-box;\r\n  border: 1px solid #999;\r\n  border: 1px solid rgba(0, 0, 0, .2);\r\n  border-radius: 6px;\r\n  outline: 0;\r\n  -webkit-box-shadow: 0 3px 9px rgba(0, 0, 0, .5);\r\n          box-shadow: 0 3px 9px rgba(0, 0, 0, .5);\r\n}\r\n.modal-backdrop {\r\n  position: fixed;\r\n  top: 0;\r\n  right: 0;\r\n  bottom: 0;\r\n  left: 0;\r\n  z-index: 1040;\r\n  background-color: #000;\r\n}\r\n.modal-backdrop.fade {\r\n  filter: alpha(opacity=0);\r\n  opacity: 0;\r\n}\r\n.modal-backdrop.in {\r\n  filter: alpha(opacity=50);\r\n  opacity: .5;\r\n}\r\n.modal-header {\r\n  padding: 15px;\r\n  border-bottom: 1px solid #e5e5e5;\r\n}\r\n.modal-header .close {\r\n  margin-top: -2px;\r\n}\r\n.modal-title {\r\n  margin: 0;\r\n  line-height: 1.42857143;\r\n}\r\n.modal-body {\r\n  position: relative;\r\n  padding: 15px;\r\n}\r\n.modal-footer {\r\n  padding: 15px;\r\n  text-align: right;\r\n  border-top: 1px solid #e5e5e5;\r\n}\r\n.modal-footer .btn + .btn {\r\n  margin-bottom: 0;\r\n  margin-left: 5px;\r\n}\r\n.modal-footer .btn-group .btn + .btn {\r\n  margin-left: -1px;\r\n}\r\n.modal-footer .btn-block + .btn-block {\r\n  margin-left: 0;\r\n}\r\n.modal-scrollbar-measure {\r\n  position: absolute;\r\n  top: -9999px;\r\n  width: 50px;\r\n  height: 50px;\r\n  overflow: scroll;\r\n}\r\n@media (min-width: 768px) {\r\n  .modal-dialog {\r\n    width: 600px;\r\n    margin: 30px auto;\r\n  }\r\n  .modal-content {\r\n    -webkit-box-shadow: 0 5px 15px rgba(0, 0, 0, .5);\r\n            box-shadow: 0 5px 15px rgba(0, 0, 0, .5);\r\n  }\r\n  .modal-sm {\r\n    width: 300px;\r\n  }\r\n}\r\n@media (min-width: 992px) {\r\n  .modal-lg {\r\n    width: 900px;\r\n  }\r\n}\r\n.tooltip {\r\n  position: absolute;\r\n  z-index: 1070;\r\n  display: block;\r\n  font-family: \"Helvetica Neue\", Helvetica, Arial, sans-serif;\r\n  font-size: 12px;\r\n  font-style: normal;\r\n  font-weight: normal;\r\n  line-height: 1.42857143;\r\n  text-align: left;\r\n  text-align: start;\r\n  text-decoration: none;\r\n  text-shadow: none;\r\n  text-transform: none;\r\n  letter-spacing: normal;\r\n  word-break: normal;\r\n  word-spacing: normal;\r\n  word-wrap: normal;\r\n  white-space: normal;\r\n  filter: alpha(opacity=0);\r\n  opacity: 0;\r\n\r\n  line-break: auto;\r\n}\r\n.tooltip.in {\r\n  filter: alpha(opacity=90);\r\n  opacity: .9;\r\n}\r\n.tooltip.top {\r\n  padding: 5px 0;\r\n  margin-top: -3px;\r\n}\r\n.tooltip.right {\r\n  padding: 0 5px;\r\n  margin-left: 3px;\r\n}\r\n.tooltip.bottom {\r\n  padding: 5px 0;\r\n  margin-top: 3px;\r\n}\r\n.tooltip.left {\r\n  padding: 0 5px;\r\n  margin-left: -3px;\r\n}\r\n.tooltip-inner {\r\n  max-width: 200px;\r\n  padding: 3px 8px;\r\n  color: #fff;\r\n  text-align: center;\r\n  background-color: #000;\r\n  border-radius: 4px;\r\n}\r\n.tooltip-arrow {\r\n  position: absolute;\r\n  width: 0;\r\n  height: 0;\r\n  border-color: transparent;\r\n  border-style: solid;\r\n}\r\n.tooltip.top .tooltip-arrow {\r\n  bottom: 0;\r\n  left: 50%;\r\n  margin-left: -5px;\r\n  border-width: 5px 5px 0;\r\n  border-top-color: #000;\r\n}\r\n.tooltip.top-left .tooltip-arrow {\r\n  right: 5px;\r\n  bottom: 0;\r\n  margin-bottom: -5px;\r\n  border-width: 5px 5px 0;\r\n  border-top-color: #000;\r\n}\r\n.tooltip.top-right .tooltip-arrow {\r\n  bottom: 0;\r\n  left: 5px;\r\n  margin-bottom: -5px;\r\n  border-width: 5px 5px 0;\r\n  border-top-color: #000;\r\n}\r\n.tooltip.right .tooltip-arrow {\r\n  top: 50%;\r\n  left: 0;\r\n  margin-top: -5px;\r\n  border-width: 5px 5px 5px 0;\r\n  border-right-color: #000;\r\n}\r\n.tooltip.left .tooltip-arrow {\r\n  top: 50%;\r\n  right: 0;\r\n  margin-top: -5px;\r\n  border-width: 5px 0 5px 5px;\r\n  border-left-color: #000;\r\n}\r\n.tooltip.bottom .tooltip-arrow {\r\n  top: 0;\r\n  left: 50%;\r\n  margin-left: -5px;\r\n  border-width: 0 5px 5px;\r\n  border-bottom-color: #000;\r\n}\r\n.tooltip.bottom-left .tooltip-arrow {\r\n  top: 0;\r\n  right: 5px;\r\n  margin-top: -5px;\r\n  border-width: 0 5px 5px;\r\n  border-bottom-color: #000;\r\n}\r\n.tooltip.bottom-right .tooltip-arrow {\r\n  top: 0;\r\n  left: 5px;\r\n  margin-top: -5px;\r\n  border-width: 0 5px 5px;\r\n  border-bottom-color: #000;\r\n}\r\n.popover {\r\n  position: absolute;\r\n  top: 0;\r\n  left: 0;\r\n  z-index: 1060;\r\n  display: none;\r\n  max-width: 276px;\r\n  padding: 1px;\r\n  font-family: \"Helvetica Neue\", Helvetica, Arial, sans-serif;\r\n  font-size: 14px;\r\n  font-style: normal;\r\n  font-weight: normal;\r\n  line-height: 1.42857143;\r\n  text-align: left;\r\n  text-align: start;\r\n  text-decoration: none;\r\n  text-shadow: none;\r\n  text-transform: none;\r\n  letter-spacing: normal;\r\n  word-break: normal;\r\n  word-spacing: normal;\r\n  word-wrap: normal;\r\n  white-space: normal;\r\n  background-color: #fff;\r\n  -webkit-background-clip: padding-box;\r\n          background-clip: padding-box;\r\n  border: 1px solid #ccc;\r\n  border: 1px solid rgba(0, 0, 0, .2);\r\n  border-radius: 6px;\r\n  -webkit-box-shadow: 0 5px 10px rgba(0, 0, 0, .2);\r\n          box-shadow: 0 5px 10px rgba(0, 0, 0, .2);\r\n\r\n  line-break: auto;\r\n}\r\n.popover.top {\r\n  margin-top: -10px;\r\n}\r\n.popover.right {\r\n  margin-left: 10px;\r\n}\r\n.popover.bottom {\r\n  margin-top: 10px;\r\n}\r\n.popover.left {\r\n  margin-left: -10px;\r\n}\r\n.popover-title {\r\n  padding: 8px 14px;\r\n  margin: 0;\r\n  font-size: 14px;\r\n  background-color: #f7f7f7;\r\n  border-bottom: 1px solid #ebebeb;\r\n  border-radius: 5px 5px 0 0;\r\n}\r\n.popover-content {\r\n  padding: 9px 14px;\r\n}\r\n.popover > .arrow,\r\n.popover > .arrow:after {\r\n  position: absolute;\r\n  display: block;\r\n  width: 0;\r\n  height: 0;\r\n  border-color: transparent;\r\n  border-style: solid;\r\n}\r\n.popover > .arrow {\r\n  border-width: 11px;\r\n}\r\n.popover > .arrow:after {\r\n  content: \"\";\r\n  border-width: 10px;\r\n}\r\n.popover.top > .arrow {\r\n  bottom: -11px;\r\n  left: 50%;\r\n  margin-left: -11px;\r\n  border-top-color: #999;\r\n  border-top-color: rgba(0, 0, 0, .25);\r\n  border-bottom-width: 0;\r\n}\r\n.popover.top > .arrow:after {\r\n  bottom: 1px;\r\n  margin-left: -10px;\r\n  content: \" \";\r\n  border-top-color: #fff;\r\n  border-bottom-width: 0;\r\n}\r\n.popover.right > .arrow {\r\n  top: 50%;\r\n  left: -11px;\r\n  margin-top: -11px;\r\n  border-right-color: #999;\r\n  border-right-color: rgba(0, 0, 0, .25);\r\n  border-left-width: 0;\r\n}\r\n.popover.right > .arrow:after {\r\n  bottom: -10px;\r\n  left: 1px;\r\n  content: \" \";\r\n  border-right-color: #fff;\r\n  border-left-width: 0;\r\n}\r\n.popover.bottom > .arrow {\r\n  top: -11px;\r\n  left: 50%;\r\n  margin-left: -11px;\r\n  border-top-width: 0;\r\n  border-bottom-color: #999;\r\n  border-bottom-color: rgba(0, 0, 0, .25);\r\n}\r\n.popover.bottom > .arrow:after {\r\n  top: 1px;\r\n  margin-left: -10px;\r\n  content: \" \";\r\n  border-top-width: 0;\r\n  border-bottom-color: #fff;\r\n}\r\n.popover.left > .arrow {\r\n  top: 50%;\r\n  right: -11px;\r\n  margin-top: -11px;\r\n  border-right-width: 0;\r\n  border-left-color: #999;\r\n  border-left-color: rgba(0, 0, 0, .25);\r\n}\r\n.popover.left > .arrow:after {\r\n  right: 1px;\r\n  bottom: -10px;\r\n  content: \" \";\r\n  border-right-width: 0;\r\n  border-left-color: #fff;\r\n}\r\n.carousel {\r\n  position: relative;\r\n}\r\n.carousel-inner {\r\n  position: relative;\r\n  width: 100%;\r\n  overflow: hidden;\r\n}\r\n.carousel-inner > .item {\r\n  position: relative;\r\n  display: none;\r\n  -webkit-transition: .6s ease-in-out left;\r\n       -o-transition: .6s ease-in-out left;\r\n          transition: .6s ease-in-out left;\r\n}\r\n.carousel-inner > .item > img,\r\n.carousel-inner > .item > a > img {\r\n  line-height: 1;\r\n}\r\n@media all and (transform-3d), (-webkit-transform-3d) {\r\n  .carousel-inner > .item {\r\n    -webkit-transition: -webkit-transform .6s ease-in-out;\r\n         -o-transition:      -o-transform .6s ease-in-out;\r\n            transition:         transform .6s ease-in-out;\r\n\r\n    -webkit-backface-visibility: hidden;\r\n            backface-visibility: hidden;\r\n    -webkit-perspective: 1000px;\r\n            perspective: 1000px;\r\n  }\r\n  .carousel-inner > .item.next,\r\n  .carousel-inner > .item.active.right {\r\n    left: 0;\r\n    -webkit-transform: translate3d(100%, 0, 0);\r\n            transform: translate3d(100%, 0, 0);\r\n  }\r\n  .carousel-inner > .item.prev,\r\n  .carousel-inner > .item.active.left {\r\n    left: 0;\r\n    -webkit-transform: translate3d(-100%, 0, 0);\r\n            transform: translate3d(-100%, 0, 0);\r\n  }\r\n  .carousel-inner > .item.next.left,\r\n  .carousel-inner > .item.prev.right,\r\n  .carousel-inner > .item.active {\r\n    left: 0;\r\n    -webkit-transform: translate3d(0, 0, 0);\r\n            transform: translate3d(0, 0, 0);\r\n  }\r\n}\r\n.carousel-inner > .active,\r\n.carousel-inner > .next,\r\n.carousel-inner > .prev {\r\n  display: block;\r\n}\r\n.carousel-inner > .active {\r\n  left: 0;\r\n}\r\n.carousel-inner > .next,\r\n.carousel-inner > .prev {\r\n  position: absolute;\r\n  top: 0;\r\n  width: 100%;\r\n}\r\n.carousel-inner > .next {\r\n  left: 100%;\r\n}\r\n.carousel-inner > .prev {\r\n  left: -100%;\r\n}\r\n.carousel-inner > .next.left,\r\n.carousel-inner > .prev.right {\r\n  left: 0;\r\n}\r\n.carousel-inner > .active.left {\r\n  left: -100%;\r\n}\r\n.carousel-inner > .active.right {\r\n  left: 100%;\r\n}\r\n.carousel-control {\r\n  position: absolute;\r\n  top: 0;\r\n  bottom: 0;\r\n  left: 0;\r\n  width: 15%;\r\n  font-size: 20px;\r\n  color: #fff;\r\n  text-align: center;\r\n  text-shadow: 0 1px 2px rgba(0, 0, 0, .6);\r\n  background-color: rgba(0, 0, 0, 0);\r\n  filter: alpha(opacity=50);\r\n  opacity: .5;\r\n}\r\n.carousel-control.left {\r\n  background-image: -webkit-linear-gradient(left, rgba(0, 0, 0, .5) 0%, rgba(0, 0, 0, .0001) 100%);\r\n  background-image:      -o-linear-gradient(left, rgba(0, 0, 0, .5) 0%, rgba(0, 0, 0, .0001) 100%);\r\n  background-image: -webkit-gradient(linear, left top, right top, from(rgba(0, 0, 0, .5)), to(rgba(0, 0, 0, .0001)));\r\n  background-image:         linear-gradient(to right, rgba(0, 0, 0, .5) 0%, rgba(0, 0, 0, .0001) 100%);\r\n  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#80000000', endColorstr='#00000000', GradientType=1);\r\n  background-repeat: repeat-x;\r\n}\r\n.carousel-control.right {\r\n  right: 0;\r\n  left: auto;\r\n  background-image: -webkit-linear-gradient(left, rgba(0, 0, 0, .0001) 0%, rgba(0, 0, 0, .5) 100%);\r\n  background-image:      -o-linear-gradient(left, rgba(0, 0, 0, .0001) 0%, rgba(0, 0, 0, .5) 100%);\r\n  background-image: -webkit-gradient(linear, left top, right top, from(rgba(0, 0, 0, .0001)), to(rgba(0, 0, 0, .5)));\r\n  background-image:         linear-gradient(to right, rgba(0, 0, 0, .0001) 0%, rgba(0, 0, 0, .5) 100%);\r\n  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#00000000', endColorstr='#80000000', GradientType=1);\r\n  background-repeat: repeat-x;\r\n}\r\n.carousel-control:hover,\r\n.carousel-control:focus {\r\n  color: #fff;\r\n  text-decoration: none;\r\n  filter: alpha(opacity=90);\r\n  outline: 0;\r\n  opacity: .9;\r\n}\r\n.carousel-control .icon-prev,\r\n.carousel-control .icon-next,\r\n.carousel-control .glyphicon-chevron-left,\r\n.carousel-control .glyphicon-chevron-right {\r\n  position: absolute;\r\n  top: 50%;\r\n  z-index: 5;\r\n  display: inline-block;\r\n  margin-top: -10px;\r\n}\r\n.carousel-control .icon-prev,\r\n.carousel-control .glyphicon-chevron-left {\r\n  left: 50%;\r\n  margin-left: -10px;\r\n}\r\n.carousel-control .icon-next,\r\n.carousel-control .glyphicon-chevron-right {\r\n  right: 50%;\r\n  margin-right: -10px;\r\n}\r\n.carousel-control .icon-prev,\r\n.carousel-control .icon-next {\r\n  width: 20px;\r\n  height: 20px;\r\n  font-family: serif;\r\n  line-height: 1;\r\n}\r\n.carousel-control .icon-prev:before {\r\n  content: '\\2039';\r\n}\r\n.carousel-control .icon-next:before {\r\n  content: '\\203a';\r\n}\r\n.carousel-indicators {\r\n  position: absolute;\r\n  bottom: 10px;\r\n  left: 50%;\r\n  z-index: 15;\r\n  width: 60%;\r\n  padding-left: 0;\r\n  margin-left: -30%;\r\n  text-align: center;\r\n  list-style: none;\r\n}\r\n.carousel-indicators li {\r\n  display: inline-block;\r\n  width: 10px;\r\n  height: 10px;\r\n  margin: 1px;\r\n  text-indent: -999px;\r\n  cursor: pointer;\r\n  background-color: #000 \\9;\r\n  background-color: rgba(0, 0, 0, 0);\r\n  border: 1px solid #fff;\r\n  border-radius: 10px;\r\n}\r\n.carousel-indicators .active {\r\n  width: 12px;\r\n  height: 12px;\r\n  margin: 0;\r\n  background-color: #fff;\r\n}\r\n.carousel-caption {\r\n  position: absolute;\r\n  right: 15%;\r\n  bottom: 20px;\r\n  left: 15%;\r\n  z-index: 10;\r\n  padding-top: 20px;\r\n  padding-bottom: 20px;\r\n  color: #fff;\r\n  text-align: center;\r\n  text-shadow: 0 1px 2px rgba(0, 0, 0, .6);\r\n}\r\n.carousel-caption .btn {\r\n  text-shadow: none;\r\n}\r\n@media screen and (min-width: 768px) {\r\n  .carousel-control .glyphicon-chevron-left,\r\n  .carousel-control .glyphicon-chevron-right,\r\n  .carousel-control .icon-prev,\r\n  .carousel-control .icon-next {\r\n    width: 30px;\r\n    height: 30px;\r\n    margin-top: -10px;\r\n    font-size: 30px;\r\n  }\r\n  .carousel-control .glyphicon-chevron-left,\r\n  .carousel-control .icon-prev {\r\n    margin-left: -10px;\r\n  }\r\n  .carousel-control .glyphicon-chevron-right,\r\n  .carousel-control .icon-next {\r\n    margin-right: -10px;\r\n  }\r\n  .carousel-caption {\r\n    right: 20%;\r\n    left: 20%;\r\n    padding-bottom: 30px;\r\n  }\r\n  .carousel-indicators {\r\n    bottom: 20px;\r\n  }\r\n}\r\n.clearfix:before,\r\n.clearfix:after,\r\n.dl-horizontal dd:before,\r\n.dl-horizontal dd:after,\r\n.container:before,\r\n.container:after,\r\n.container-fluid:before,\r\n.container-fluid:after,\r\n.row:before,\r\n.row:after,\r\n.form-horizontal .form-group:before,\r\n.form-horizontal .form-group:after,\r\n.btn-toolbar:before,\r\n.btn-toolbar:after,\r\n.btn-group-vertical > .btn-group:before,\r\n.btn-group-vertical > .btn-group:after,\r\n.nav:before,\r\n.nav:after,\r\n.navbar:before,\r\n.navbar:after,\r\n.navbar-header:before,\r\n.navbar-header:after,\r\n.navbar-collapse:before,\r\n.navbar-collapse:after,\r\n.pager:before,\r\n.pager:after,\r\n.panel-body:before,\r\n.panel-body:after,\r\n.modal-header:before,\r\n.modal-header:after,\r\n.modal-footer:before,\r\n.modal-footer:after {\r\n  display: table;\r\n  content: \" \";\r\n}\r\n.clearfix:after,\r\n.dl-horizontal dd:after,\r\n.container:after,\r\n.container-fluid:after,\r\n.row:after,\r\n.form-horizontal .form-group:after,\r\n.btn-toolbar:after,\r\n.btn-group-vertical > .btn-group:after,\r\n.nav:after,\r\n.navbar:after,\r\n.navbar-header:after,\r\n.navbar-collapse:after,\r\n.pager:after,\r\n.panel-body:after,\r\n.modal-header:after,\r\n.modal-footer:after {\r\n  clear: both;\r\n}\r\n.center-block {\r\n  display: block;\r\n  margin-right: auto;\r\n  margin-left: auto;\r\n}\r\n.pull-right {\r\n  float: right !important;\r\n}\r\n.pull-left {\r\n  float: left !important;\r\n}\r\n.hide {\r\n  display: none !important;\r\n}\r\n.show {\r\n  display: block !important;\r\n}\r\n.invisible {\r\n  visibility: hidden;\r\n}\r\n.text-hide {\r\n  font: 0/0 a;\r\n  color: transparent;\r\n  text-shadow: none;\r\n  background-color: transparent;\r\n  border: 0;\r\n}\r\n.hidden {\r\n  display: none !important;\r\n}\r\n.affix {\r\n  position: fixed;\r\n}\r\n@-ms-viewport {\r\n  width: device-width;\r\n}\r\n.visible-xs,\r\n.visible-sm,\r\n.visible-md,\r\n.visible-lg {\r\n  display: none !important;\r\n}\r\n.visible-xs-block,\r\n.visible-xs-inline,\r\n.visible-xs-inline-block,\r\n.visible-sm-block,\r\n.visible-sm-inline,\r\n.visible-sm-inline-block,\r\n.visible-md-block,\r\n.visible-md-inline,\r\n.visible-md-inline-block,\r\n.visible-lg-block,\r\n.visible-lg-inline,\r\n.visible-lg-inline-block {\r\n  display: none !important;\r\n}\r\n@media (max-width: 767px) {\r\n  .visible-xs {\r\n    display: block !important;\r\n  }\r\n  table.visible-xs {\r\n    display: table !important;\r\n  }\r\n  tr.visible-xs {\r\n    display: table-row !important;\r\n  }\r\n  th.visible-xs,\r\n  td.visible-xs {\r\n    display: table-cell !important;\r\n  }\r\n}\r\n@media (max-width: 767px) {\r\n  .visible-xs-block {\r\n    display: block !important;\r\n  }\r\n}\r\n@media (max-width: 767px) {\r\n  .visible-xs-inline {\r\n    display: inline !important;\r\n  }\r\n}\r\n@media (max-width: 767px) {\r\n  .visible-xs-inline-block {\r\n    display: inline-block !important;\r\n  }\r\n}\r\n@media (min-width: 768px) and (max-width: 991px) {\r\n  .visible-sm {\r\n    display: block !important;\r\n  }\r\n  table.visible-sm {\r\n    display: table !important;\r\n  }\r\n  tr.visible-sm {\r\n    display: table-row !important;\r\n  }\r\n  th.visible-sm,\r\n  td.visible-sm {\r\n    display: table-cell !important;\r\n  }\r\n}\r\n@media (min-width: 768px) and (max-width: 991px) {\r\n  .visible-sm-block {\r\n    display: block !important;\r\n  }\r\n}\r\n@media (min-width: 768px) and (max-width: 991px) {\r\n  .visible-sm-inline {\r\n    display: inline !important;\r\n  }\r\n}\r\n@media (min-width: 768px) and (max-width: 991px) {\r\n  .visible-sm-inline-block {\r\n    display: inline-block !important;\r\n  }\r\n}\r\n@media (min-width: 992px) and (max-width: 1199px) {\r\n  .visible-md {\r\n    display: block !important;\r\n  }\r\n  table.visible-md {\r\n    display: table !important;\r\n  }\r\n  tr.visible-md {\r\n    display: table-row !important;\r\n  }\r\n  th.visible-md,\r\n  td.visible-md {\r\n    display: table-cell !important;\r\n  }\r\n}\r\n@media (min-width: 992px) and (max-width: 1199px) {\r\n  .visible-md-block {\r\n    display: block !important;\r\n  }\r\n}\r\n@media (min-width: 992px) and (max-width: 1199px) {\r\n  .visible-md-inline {\r\n    display: inline !important;\r\n  }\r\n}\r\n@media (min-width: 992px) and (max-width: 1199px) {\r\n  .visible-md-inline-block {\r\n    display: inline-block !important;\r\n  }\r\n}\r\n@media (min-width: 1200px) {\r\n  .visible-lg {\r\n    display: block !important;\r\n  }\r\n  table.visible-lg {\r\n    display: table !important;\r\n  }\r\n  tr.visible-lg {\r\n    display: table-row !important;\r\n  }\r\n  th.visible-lg,\r\n  td.visible-lg {\r\n    display: table-cell !important;\r\n  }\r\n}\r\n@media (min-width: 1200px) {\r\n  .visible-lg-block {\r\n    display: block !important;\r\n  }\r\n}\r\n@media (min-width: 1200px) {\r\n  .visible-lg-inline {\r\n    display: inline !important;\r\n  }\r\n}\r\n@media (min-width: 1200px) {\r\n  .visible-lg-inline-block {\r\n    display: inline-block !important;\r\n  }\r\n}\r\n@media (max-width: 767px) {\r\n  .hidden-xs {\r\n    display: none !important;\r\n  }\r\n}\r\n@media (min-width: 768px) and (max-width: 991px) {\r\n  .hidden-sm {\r\n    display: none !important;\r\n  }\r\n}\r\n@media (min-width: 992px) and (max-width: 1199px) {\r\n  .hidden-md {\r\n    display: none !important;\r\n  }\r\n}\r\n@media (min-width: 1200px) {\r\n  .hidden-lg {\r\n    display: none !important;\r\n  }\r\n}\r\n.visible-print {\r\n  display: none !important;\r\n}\r\n@media print {\r\n  .visible-print {\r\n    display: block !important;\r\n  }\r\n  table.visible-print {\r\n    display: table !important;\r\n  }\r\n  tr.visible-print {\r\n    display: table-row !important;\r\n  }\r\n  th.visible-print,\r\n  td.visible-print {\r\n    display: table-cell !important;\r\n  }\r\n}\r\n.visible-print-block {\r\n  display: none !important;\r\n}\r\n@media print {\r\n  .visible-print-block {\r\n    display: block !important;\r\n  }\r\n}\r\n.visible-print-inline {\r\n  display: none !important;\r\n}\r\n@media print {\r\n  .visible-print-inline {\r\n    display: inline !important;\r\n  }\r\n}\r\n.visible-print-inline-block {\r\n  display: none !important;\r\n}\r\n@media print {\r\n  .visible-print-inline-block {\r\n    display: inline-block !important;\r\n  }\r\n}\r\n@media print {\r\n  .hidden-print {\r\n    display: none !important;\r\n  }\r\n}\r\n/*# sourceMappingURL=bootstrap.css.map */\r\n";
 
-  let CurrencyInput = class CurrencyInput extends s$1 {
+  let CurrencyInput = class CurrencyInput extends i$3 {
       constructor() {
           super(...arguments);
           this.inputValue = '0.00';
@@ -20826,10 +21209,10 @@
           padding: 0px;
           position: absolute;
           ${!this.errorMessage && !this.errorMessage.length
-            ? i$4 `
+            ? i$6 `
               display: none;
             `
-            : i$4 `
+            : i$6 `
               display: block;
             `}
         }
@@ -20847,10 +21230,10 @@
           text-align: center;
           font-style: normal;
           ${!this.readOnly
-            ? i$4 `
+            ? i$6 `
               font-size: 15px;
             `
-            : i$4 ``}
+            : i$6 ``}
         }
 
         .input-icon > input {
@@ -20875,10 +21258,10 @@
           border-radius: 0.25rem;
           color: #000;
           ${!this.readOnly
-            ? i$4 `
+            ? i$6 `
               font-size: 15px;
             `
-            : i$4 `
+            : i$6 `
               pointer-events: none;
             `}
         }
@@ -20893,7 +21276,7 @@
       }
   };
   __decorate([
-      e$5('#inputElement')
+      e$4('#inputElement')
   ], CurrencyInput.prototype, "inputElement", void 0);
   __decorate([
       n$2({ type: String })
@@ -20914,10 +21297,10 @@
       n$2({ type: String })
   ], CurrencyInput.prototype, "tooltip", void 0);
   CurrencyInput = __decorate([
-      t$1('currency-input')
+      t$2('currency-input')
   ], CurrencyInput);
 
-  let DropdownSearch = class DropdownSearch extends s$1 {
+  let DropdownSearch = class DropdownSearch extends i$3 {
       constructor() {
           super(...arguments);
           this.id = crypto.randomUUID();
@@ -20962,10 +21345,10 @@
           padding: 0px;
           position: absolute;
           ${!this.errorMessage && !this.errorMessage.length
-            ? i$4 `
+            ? i$6 `
               display: none;
             `
-            : i$4 `
+            : i$6 `
               display: block;
             `}
         }
@@ -21022,7 +21405,7 @@
     `;
       }
   };
-  DropdownSearch.styles = i$4 `
+  DropdownSearch.styles = i$6 `
     .dropdown-search {
       position: relative;
       margin-top: 18px;
@@ -21080,7 +21463,7 @@
     }
   `;
   __decorate([
-      e$5('#selectElement')
+      e$4('#selectElement')
   ], DropdownSearch.prototype, "selectElement", void 0);
   __decorate([
       n$2({ type: String, reflect: true })
@@ -21107,10 +21490,10 @@
       n$2({ type: Boolean })
   ], DropdownSearch.prototype, "disabled", void 0);
   DropdownSearch = __decorate([
-      t$1('dropdown-search')
+      t$2('dropdown-search')
   ], DropdownSearch);
 
-  let TextField = class TextField extends s$1 {
+  let TextField = class TextField extends i$3 {
       constructor() {
           super(...arguments);
           this.required = false;
@@ -21156,7 +21539,7 @@
           let inputHtml = x `
       <input
         class="text-field"
-        style=${r$5(this.customStyle)}
+        style=${r$4(this.customStyle)}
         id="inputElement"
         type="text"
         .value=${this.inputValue || ''}
@@ -21177,10 +21560,10 @@
           border-radius: 0.25rem;
           color: #000;
           ${!this.readOnly
-            ? i$4 `
+            ? i$6 `
               font-size: 15px;
             `
-            : i$4 `
+            : i$6 `
               pointer-events: none;
             `}
         }
@@ -21191,10 +21574,10 @@
           padding: 0px;
           position: absolute;
           ${!this.errorMessage && !this.errorMessage.length
-            ? i$4 `
+            ? i$6 `
               display: none;
             `
-            : i$4 `
+            : i$6 `
               display: block;
             `}
         }
@@ -21222,7 +21605,7 @@
       }
   };
   __decorate([
-      e$5('#inputElement')
+      e$4('#inputElement')
   ], TextField.prototype, "inputElement", void 0);
   __decorate([
       n$2({ type: Boolean })
@@ -21252,7 +21635,7 @@
       n$2({ type: String })
   ], TextField.prototype, "tooltip", void 0);
   TextField = __decorate([
-      t$1('text-field')
+      t$2('text-field')
   ], TextField);
 
   POWERPOD.expenseTypes = {
@@ -21307,7 +21690,7 @@
       return formattedValue;
   }
 
-  let ExpenseReportTable = class ExpenseReportTable extends s$1 {
+  let ExpenseReportTable = class ExpenseReportTable extends i$3 {
       constructor() {
           super(...arguments);
           this.id = crypto.randomUUID();
@@ -21405,10 +21788,10 @@
           border-collapse: collapse;
           margin: 25px 0;
           ${!this.readOnly
-            ? i$4 `
+            ? i$6 `
                   font-size: 0.9em;
                 `
-            : i$4 ``}
+            : i$6 ``}
           font-family: sans-serif;
           min-width: 400px;
           box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
@@ -21421,10 +21804,10 @@
         .styled-table th {
           padding: 12px 15px;
           ${!this.readOnly
-            ? i$4 `
+            ? i$6 `
                   font-size: 15px;
                 `
-            : i$4 ``}
+            : i$6 ``}
         }
         .styled-table td {
           padding: 12px 15px 24px;
@@ -21458,10 +21841,10 @@
         .add-another-btn {
           line-height: 1.5;
           ${!this.readOnly
-            ? i$4 `
+            ? i$6 `
                   font-size: 13px;
                 `
-            : i$4 ``}
+            : i$6 ``}
         }
         .add-another-btn span {
           padding-bottom: 2px;
@@ -21600,10 +21983,10 @@
       n$2({ type: Boolean })
   ], ExpenseReportTable.prototype, "readOnly", void 0);
   ExpenseReportTable = __decorate([
-      t$1('expense-report-table')
+      t$2('expense-report-table')
   ], ExpenseReportTable);
 
-  let ExpenseReportTableKTTP = class ExpenseReportTableKTTP extends s$1 {
+  let ExpenseReportTableKTTP = class ExpenseReportTableKTTP extends i$3 {
       constructor() {
           super(...arguments);
           this.id = crypto.randomUUID();
@@ -21773,10 +22156,10 @@
           padding: 0px;
           position: absolute;
           ${!this.errorMessage && !((_a = this.errorMessage) === null || _a === void 0 ? void 0 : _a.length)
-            ? i$4 `
+            ? i$6 `
                   display: none;
                 `
-            : i$4 `
+            : i$6 `
                   display: block;
                 `}
         }
@@ -21785,10 +22168,10 @@
           border-collapse: collapse;
           margin: 25px 0;
           ${!this.readOnly
-            ? i$4 `
+            ? i$6 `
                   font-size: 0.9em;
                 `
-            : i$4 ``}
+            : i$6 ``}
           font-family: sans-serif;
           min-width: 400px;
           box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
@@ -21801,10 +22184,10 @@
         .styled-table th {
           padding: 12px 15px;
           ${!this.readOnly
-            ? i$4 `
+            ? i$6 `
                   font-size: 15px;
                 `
-            : i$4 ``}
+            : i$6 ``}
         }
         .styled-table td {
           padding: 5px 15px 20px;
@@ -21838,10 +22221,10 @@
         .add-another-btn {
           line-height: 1.5;
           ${!this.readOnly
-            ? i$4 `
+            ? i$6 `
                   font-size: 13px;
                 `
-            : i$4 ``}
+            : i$6 ``}
         }
         .add-another-btn span {
           padding-bottom: 2px;
@@ -22013,7 +22396,7 @@
       n$2({ type: String })
   ], ExpenseReportTableKTTP.prototype, "errorMessage", void 0);
   ExpenseReportTableKTTP = __decorate([
-      t$1('expense-report-table-kttp')
+      t$2('expense-report-table-kttp')
   ], ExpenseReportTableKTTP);
 
   var HOOKS = [
@@ -22177,7 +22560,7 @@
       return ("000" + number).slice(length * -1);
   };
   var int = function (bool) { return (bool === true ? 1 : 0); };
-  function debounce(fn, wait) {
+  function debounce$1(fn, wait) {
       var t;
       return function () {
           var _this = this;
@@ -22797,8 +23180,8 @@
               setupMobile();
               return;
           }
-          var debouncedResize = debounce(onResize, 50);
-          self._debouncedChange = debounce(triggerChange, DEBOUNCED_CHANGE_MS);
+          var debouncedResize = debounce$1(onResize, 50);
+          self._debouncedChange = debounce$1(triggerChange, DEBOUNCED_CHANGE_MS);
           if (self.daysContainer && !/iPhone|iPad|iPod/i.test(navigator.userAgent))
               bind(self.daysContainer, "mouseover", function (e) {
                   if (self.config.mode === "range")
@@ -24571,7 +24954,7 @@
       window.flatpickr = flatpickr;
   }
 
-  let DateField = class DateField extends s$1 {
+  let DateField = class DateField extends i$3 {
       constructor() {
           super(...arguments);
           this.required = false;
@@ -24636,7 +25019,7 @@
       </div>
       <input
         class="date-field"
-        style=${r$5(this.customStyle)}
+        style=${r$4(this.customStyle)}
         id="inputElement"
         type="text"
         placeholder="Select date"
@@ -24647,7 +25030,7 @@
       }
   };
   __decorate([
-      e$5('#inputElement')
+      e$4('#inputElement')
   ], DateField.prototype, "inputElement", void 0);
   __decorate([
       n$2({ type: Boolean })
@@ -24662,10 +25045,10 @@
       n$2({ type: String })
   ], DateField.prototype, "fieldLabel", void 0);
   DateField = __decorate([
-      t$1('date-field')
+      t$2('date-field')
   ], DateField);
 
-  let ExpenseInvoicesTable = class ExpenseInvoicesTable extends s$1 {
+  let ExpenseInvoicesTable = class ExpenseInvoicesTable extends i$3 {
       constructor() {
           super(...arguments);
           this.id = crypto.randomUUID();
@@ -24786,10 +25169,10 @@
           border-collapse: collapse;
           margin: 25px 0;
           ${!this.readOnly
-            ? i$4 `
+            ? i$6 `
                   font-size: 0.9em;
                 `
-            : i$4 ``}
+            : i$6 ``}
           font-family: sans-serif;
           min-width: 400px;
           box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
@@ -24802,10 +25185,10 @@
         .styled-table th {
           padding: 12px 15px;
           ${!this.readOnly
-            ? i$4 `
+            ? i$6 `
                   font-size: 15px;
                 `
-            : i$4 ``}
+            : i$6 ``}
         }
         .styled-table td {
           padding: 12px 15px 24px;
@@ -24839,10 +25222,10 @@
         .add-another-btn {
           line-height: 1.5;
           ${!this.readOnly
-            ? i$4 `
+            ? i$6 `
                   font-size: 13px;
                 `
-            : i$4 ``}
+            : i$6 ``}
         }
         .add-another-btn span {
           padding-bottom: 2px;
@@ -24969,8 +25352,8 @@
     `;
       }
   };
-  ExpenseInvoicesTable.styles = i$4 `
-    ${r$5(shoelace)}
+  ExpenseInvoicesTable.styles = i$6 `
+    ${r$4(shoelace)}
   `;
   __decorate([
       n$2({ type: String, reflect: true })
@@ -24988,7 +25371,7 @@
       n$2({ type: Boolean })
   ], ExpenseInvoicesTable.prototype, "readOnly", void 0);
   ExpenseInvoicesTable = __decorate([
-      t$1('expense-invoices-table')
+      t$2('expense-invoices-table')
   ], ExpenseInvoicesTable);
 
   /**
@@ -28262,10 +28645,10 @@
     return _customizeDocumentsStep.apply(this, arguments);
   }
   function _customizeDocumentsStep() {
-    _customizeDocumentsStep = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee() {
+    _customizeDocumentsStep = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee() {
       var programAbbreviation, _$;
-      return _regeneratorRuntime().wrap(function _callee$(_context) {
-        while (1) switch (_context.prev = _context.next) {
+      return _regenerator().w(function (_context) {
+        while (1) switch (_context.n) {
           case 0:
             programAbbreviation = getProgramAbbreviation();
             configureFields();
@@ -28292,9 +28675,8 @@
             if (programAbbreviation.includes('ABPP')) {
               addSatisfactionSurveyChefsIframeForABPP();
             }
-          case 8:
-          case "end":
-            return _context.stop();
+          case 1:
+            return _context.a(2);
         }
       }, _callee);
     }));
@@ -28304,27 +28686,27 @@
     return _customizeDocumentsStepForKTTP.apply(this, arguments);
   }
   function _customizeDocumentsStepForKTTP() {
-    _customizeDocumentsStepForKTTP = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee2() {
+    _customizeDocumentsStepForKTTP = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee2() {
       var _yield$getProgramId, formId, claimDataRes, _claimDataRes$data, quartech_admissionfeerequired;
-      return _regeneratorRuntime().wrap(function _callee2$(_context2) {
-        while (1) switch (_context2.prev = _context2.next) {
+      return _regenerator().w(function (_context2) {
+        while (1) switch (_context2.n) {
           case 0:
             logger$e.info({
               fn: customizeDocumentsStepForKTTP,
               message: "Start customizing documents step for KTTP"
             });
-            _context2.next = 3;
+            _context2.n = 1;
             return getProgramId();
-          case 3:
-            _yield$getProgramId = _context2.sent;
+          case 1:
+            _yield$getProgramId = _context2.v;
             _yield$getProgramId.programId;
             formId = getFormId(); // @ts-ignore
-            _context2.next = 8;
+            _context2.n = 2;
             return getClaimData({
               id: formId
             });
-          case 8:
-            claimDataRes = _context2.sent;
+          case 2:
+            claimDataRes = _context2.v;
             if (!(claimDataRes !== null && claimDataRes !== void 0 && claimDataRes.data)) {
               logger$e.error({
                 fn: customizeDocumentsStepForKTTP,
@@ -28345,9 +28727,8 @@
                 fieldName: 'quartech_incomestatementdocument'
               });
             }
-          case 13:
-          case "end":
-            return _context2.stop();
+          case 3:
+            return _context2.a(2);
         }
       }, _callee2);
     }));
@@ -28357,11 +28738,11 @@
     return _addChefsVVTSIframe.apply(this, arguments);
   }
   function _addChefsVVTSIframe() {
-    _addChefsVVTSIframe = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee3() {
+    _addChefsVVTSIframe = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee3() {
       var _$2, _$3, _$4;
       var chefsSubmissionGuid, chefsSubmissionId, _yield$getEnvVars, chefsVVTSFormId, chefsUrl, trElement, fieldLabelDivContainer;
-      return _regeneratorRuntime().wrap(function _callee3$(_context3) {
-        while (1) switch (_context3.prev = _context3.next) {
+      return _regenerator().w(function (_context3) {
+        while (1) switch (_context3.n) {
           case 0:
             (_$2 = $('#quartech_vvts_veterinaryclinicchefssubmissionid')) === null || _$2 === void 0 || (_$2 = _$2.closest('tr')) === null || _$2 === void 0 || _$2.css({
               display: 'none'
@@ -28372,7 +28753,7 @@
             chefsSubmissionGuid = (_$3 = $('#quartech_vvts_veterinaryclinicchefssubmissionid')) === null || _$3 === void 0 ? void 0 : _$3.val(); // Shorthand ID result for Staff
             chefsSubmissionId = (_$4 = $('#quartech_vvts_programevaluationid')) === null || _$4 === void 0 ? void 0 : _$4.val();
             if (!(chefsSubmissionGuid || chefsSubmissionId)) {
-              _context3.next = 7;
+              _context3.n = 1;
               break;
             }
             // Logic has since changed, if there's an ID present, we don't need to do anything.
@@ -28382,12 +28763,12 @@
               fn: addChefsVVTSIframe,
               message: "VVTS Chefs already been completed, chefsSubmissionGuid: ".concat(chefsSubmissionGuid, ", chefsSubmissionId: ").concat(chefsSubmissionId)
             });
-            return _context3.abrupt("return");
-          case 7:
-            _context3.next = 9;
+            return _context3.a(2);
+          case 1:
+            _context3.n = 2;
             return getEnvVars();
-          case 9:
-            _yield$getEnvVars = _context3.sent;
+          case 2:
+            _yield$getEnvVars = _context3.v;
             chefsVVTSFormId = _yield$getEnvVars.quartech_ChefsVVTSFormId;
             if (!chefsVVTSFormId) {
               logger$e.error({
@@ -28434,9 +28815,8 @@
             trElement.innerHTML = "\n    <td colspan=\"2\" rowspan=\"1\" class=\"clearfix cell textarea form-control-cell\">\n      <iframe id='chefsVVTSIframe' src=\"".concat(chefsUrl, "\" height=\"800\" width=\"100%\" title=\"VVTS End of Program Survey in CHEFS\">\n      </iframe><br/>\n    </td>\n    <td class=\"cell zero-cell\"></td>\n  ");
             fieldLabelDivContainer = $("#quartech_vvts_programevaluationid_label").parent().parent().parent().parent();
             fieldLabelDivContainer.prepend(trElement);
-          case 18:
-          case "end":
-            return _context3.stop();
+          case 3:
+            return _context3.a(2);
         }
       }, _callee3);
     }));
@@ -28446,11 +28826,11 @@
     return _addSatisfactionSurveyChefsIframeForABPP.apply(this, arguments);
   }
   function _addSatisfactionSurveyChefsIframeForABPP() {
-    _addSatisfactionSurveyChefsIframeForABPP = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee4() {
+    _addSatisfactionSurveyChefsIframeForABPP = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee4() {
       var _$5, _$6, _$7;
       var chefsSubmissionGuid, chefsSubmissionId, chefsABPPSatisfactionSurveyFormId, env, chefsUrl, div, fieldLabelDivContainer;
-      return _regeneratorRuntime().wrap(function _callee4$(_context4) {
-        while (1) switch (_context4.prev = _context4.next) {
+      return _regenerator().w(function (_context4) {
+        while (1) switch (_context4.n) {
           case 0:
             (_$5 = $('#quartech_satisfactionsurveychefssubmissionid')) === null || _$5 === void 0 || (_$5 = _$5.closest('tr')) === null || _$5 === void 0 || _$5.css({
               display: 'none'
@@ -28461,7 +28841,7 @@
             chefsSubmissionGuid = (_$6 = $('#quartech_satisfactionsurveychefssubmissionid')) === null || _$6 === void 0 ? void 0 : _$6.val(); // Shorthand ID result for Staff
             chefsSubmissionId = (_$7 = $('#quartech_satisfactionsurveyid')) === null || _$7 === void 0 ? void 0 : _$7.val();
             if (!(chefsSubmissionGuid || chefsSubmissionId)) {
-              _context4.next = 7;
+              _context4.n = 1;
               break;
             }
             // Logic has since changed, if there's an ID present, we don't need to do anything.
@@ -28471,8 +28851,8 @@
               fn: addSatisfactionSurveyChefsIframeForABPP,
               message: "Satisfaction survey has already been completed, chefsSubmissionGuid: ".concat(chefsSubmissionGuid, ", chefsSubmissionId: ").concat(chefsSubmissionId)
             });
-            return _context4.abrupt("return");
-          case 7:
+            return _context4.a(2);
+          case 1:
             // default for non-prod env:
             chefsABPPSatisfactionSurveyFormId = '15fbfe19-e720-4160-88bd-5840630361aa';
             env = getEnv();
@@ -28524,9 +28904,8 @@
             div.innerHTML = "<iframe id='chefsSatisfactionSurveyIframe' src=\"".concat(chefsUrl, "\" height=\"800\" width=\"100%\" title=\"Satisfaction Survey in CHEFS\">\n        </iframe><br/>");
             fieldLabelDivContainer = $("#quartech_satisfactionsurveyid_label").parent().parent();
             fieldLabelDivContainer.prepend(div);
-          case 17:
-          case "end":
-            return _context4.stop();
+          case 2:
+            return _context4.a(2);
         }
       }, _callee4);
     }));
@@ -28536,11 +28915,11 @@
     return _addSatisfactionSurveyChefsIframe.apply(this, arguments);
   }
   function _addSatisfactionSurveyChefsIframe() {
-    _addSatisfactionSurveyChefsIframe = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee5() {
-      var _$8, _$9, _$10;
+    _addSatisfactionSurveyChefsIframe = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee5() {
+      var _$8, _$9, _$0;
       var chefsSubmissionGuid, chefsSubmissionId, _yield$getEnvVars2, chefsNefbaSatisfactionSurveyFormId, chefsUrl, div, fieldLabelDivContainer;
-      return _regeneratorRuntime().wrap(function _callee5$(_context5) {
-        while (1) switch (_context5.prev = _context5.next) {
+      return _regenerator().w(function (_context5) {
+        while (1) switch (_context5.n) {
           case 0:
             (_$8 = $('#quartech_satisfactionsurveychefssubmissionid')) === null || _$8 === void 0 || (_$8 = _$8.closest('tr')) === null || _$8 === void 0 || _$8.css({
               display: 'none'
@@ -28549,9 +28928,9 @@
 
             // Full length GUID for viewing results
             chefsSubmissionGuid = (_$9 = $('#quartech_satisfactionsurveychefssubmissionid')) === null || _$9 === void 0 ? void 0 : _$9.val(); // Shorthand ID result for Staff
-            chefsSubmissionId = (_$10 = $('#quartech_satisfactionsurveyid')) === null || _$10 === void 0 ? void 0 : _$10.val();
+            chefsSubmissionId = (_$0 = $('#quartech_satisfactionsurveyid')) === null || _$0 === void 0 ? void 0 : _$0.val();
             if (!(chefsSubmissionGuid || chefsSubmissionId)) {
-              _context5.next = 7;
+              _context5.n = 1;
               break;
             }
             // Logic has since changed, if there's an ID present, we don't need to do anything.
@@ -28561,12 +28940,12 @@
               fn: addSatisfactionSurveyChefsIframe,
               message: "Satisfaction survey has already been completed, chefsSubmissionGuid: ".concat(chefsSubmissionGuid, ", chefsSubmissionId: ").concat(chefsSubmissionId)
             });
-            return _context5.abrupt("return");
-          case 7:
-            _context5.next = 9;
+            return _context5.a(2);
+          case 1:
+            _context5.n = 2;
             return getEnvVars();
-          case 9:
-            _yield$getEnvVars2 = _context5.sent;
+          case 2:
+            _yield$getEnvVars2 = _context5.v;
             chefsNefbaSatisfactionSurveyFormId = _yield$getEnvVars2.quartech_ChefsNefbaSatisfactionSurveyFormId;
             if (!chefsNefbaSatisfactionSurveyFormId) {
               logger$e.error({
@@ -28613,9 +28992,8 @@
             div.innerHTML = "<iframe id='chefsSatisfactionSurveyIframe' src=\"".concat(chefsUrl, "\" height=\"800\" width=\"100%\" title=\"Satisfaction Survey in CHEFS\">\n        </iframe><br/>");
             fieldLabelDivContainer = $("#quartech_satisfactionsurveyid_label").parent().parent();
             fieldLabelDivContainer.prepend(div);
-          case 18:
-          case "end":
-            return _context5.stop();
+          case 3:
+            return _context5.a(2);
         }
       }, _callee5);
     }));
@@ -28664,18 +29042,18 @@
     return _updatePageForSelectedProgram.apply(this, arguments);
   }
   function _updatePageForSelectedProgram() {
-    _updatePageForSelectedProgram = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee() {
+    _updatePageForSelectedProgram = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee() {
       var _yield$getProgramId, programId, currentStep;
-      return _regeneratorRuntime().wrap(function _callee$(_context) {
-        while (1) switch (_context.prev = _context.next) {
+      return _regenerator().w(function (_context) {
+        while (1) switch (_context.n) {
           case 0:
-            _context.next = 2;
+            _context.n = 1;
             return getProgramId();
-          case 2:
-            _yield$getProgramId = _context.sent;
+          case 1:
+            _yield$getProgramId = _context.v;
             programId = _yield$getProgramId.programId;
             if (!(!programId && doc.readyState !== 'complete')) {
-              _context.next = 8;
+              _context.n = 2;
               break;
             }
             logger$d.info({
@@ -28688,12 +29066,12 @@
             onDocumentReadyState(function () {
               updatePageForSelectedProgram();
             });
-            return _context.abrupt("return");
-          case 8:
+            return _context.a(2);
+          case 2:
             currentStep = getCurrentStep();
             addSaveButton();
             if (!(!programId || currentStep === 'UnknownStep')) {
-              _context.next = 14;
+              _context.n = 3;
               break;
             }
             hideLoadingAnimation();
@@ -28705,8 +29083,8 @@
                 currentStep: currentStep
               }
             });
-            return _context.abrupt("return");
-          case 14:
+            return _context.a(2);
+          case 3:
             logger$d.info({
               fn: updatePageForSelectedProgram,
               message: "Retrieving Program data for the selected programid querystring: ".concat(programId)
@@ -28741,9 +29119,8 @@
                 }
               }
             });
-          case 16:
-          case "end":
-            return _context.stop();
+          case 4:
+            return _context.a(2);
         }
       }, _callee);
     }));
@@ -28784,7 +29161,7 @@
   }
 
   // src/components/tag/tag.styles.ts
-  var tag_styles_default = i$4`
+  var tag_styles_default = i$6`
   :host {
     display: inline-block;
   }
@@ -28915,7 +29292,7 @@
       return x`
       <span
         part="base"
-        class=${e$3({
+        class=${e$2({
       tag: true,
       // Types
       "tag--primary": this.variant === "primary",
@@ -28967,7 +29344,7 @@
   ], SlTag.prototype, "removable", 2);
 
   // src/components/select/select.styles.ts
-  var select_styles_default = i$4`
+  var select_styles_default = i$6`
   :host {
     display: block;
   }
@@ -29143,6 +29520,10 @@
     margin-inline-end: var(--sl-input-spacing-small);
   }
 
+  .select--small.select--multiple:not(.select--placeholder-visible) .select__prefix::slotted(*) {
+    margin-inline-start: var(--sl-input-spacing-small);
+  }
+
   .select--small.select--multiple:not(.select--placeholder-visible) .select__combobox {
     padding-block: 2px;
     padding-inline-start: 0;
@@ -29166,6 +29547,10 @@
 
   .select--medium .select__prefix::slotted(*) {
     margin-inline-end: var(--sl-input-spacing-medium);
+  }
+
+  .select--medium.select--multiple:not(.select--placeholder-visible) .select__prefix::slotted(*) {
+    margin-inline-start: var(--sl-input-spacing-medium);
   }
 
   .select--medium.select--multiple:not(.select--placeholder-visible) .select__combobox {
@@ -29193,6 +29578,10 @@
     margin-inline-end: var(--sl-input-spacing-large);
   }
 
+  .select--large.select--multiple:not(.select--placeholder-visible) .select__prefix::slotted(*) {
+    margin-inline-start: var(--sl-input-spacing-large);
+  }
+
   .select--large.select--multiple:not(.select--placeholder-visible) .select__combobox {
     padding-inline-start: 0;
     padding-block: 4px;
@@ -29215,12 +29604,17 @@
     border-radius: var(--sl-input-height-large);
   }
 
-  /* Prefix */
-  .select__prefix {
+  /* Prefix and Suffix */
+  .select__prefix,
+  .select__suffix {
     flex: 0;
     display: inline-flex;
     align-items: center;
     color: var(--sl-input-placeholder-color);
+  }
+
+  .select__suffix::slotted(*) {
+    margin-inline-start: var(--sl-spacing-small);
   }
 
   /* Clear button */
@@ -29285,10 +29679,11 @@
   }
 
   .select__listbox ::slotted(small) {
+    display: block;
     font-size: var(--sl-font-size-small);
     font-weight: var(--sl-font-weight-semibold);
     color: var(--sl-color-neutral-500);
-    padding-block: var(--sl-spacing-x-small);
+    padding-block: var(--sl-spacing-2x-small);
     padding-inline: var(--sl-spacing-x-large);
   }
 `;
@@ -29324,28 +29719,8 @@
     }
   }
 
-  // src/internal/default-value.ts
-  var defaultValue = (propertyName = "value") => (proto, key) => {
-    const ctor = proto.constructor;
-    const attributeChangedCallback = ctor.prototype.attributeChangedCallback;
-    ctor.prototype.attributeChangedCallback = function(name, old, value) {
-      var _a;
-      const options = ctor.getPropertyOptions(propertyName);
-      const attributeName = typeof options.attribute === "string" ? options.attribute : propertyName;
-      if (name === attributeName) {
-        const converter = options.converter || u$2;
-        const fromAttribute = typeof converter === "function" ? converter : (_a = converter == null ? void 0 : converter.fromAttribute) != null ? _a : u$2.fromAttribute;
-        const newValue = fromAttribute(value, options.type);
-        if (this[propertyName] !== newValue) {
-          this[key] = newValue;
-        }
-      }
-      attributeChangedCallback.call(this, name, old, value);
-    };
-  };
-
   // src/styles/form-control.styles.ts
-  var form_control_styles_default = i$4`
+  var form_control_styles_default = i$6`
   .form-control .form-control__label {
     display: none;
   }
@@ -29407,7 +29782,7 @@
    * @license
    * Copyright 2017 Google LLC
    * SPDX-License-Identifier: BSD-3-Clause
-   */class e extends i$1{constructor(i){if(super(i),this.it=T,i.type!==t.CHILD)throw Error(this.constructor.directiveName+"() can only be used in child bindings")}render(r){if(r===T||null==r)return this._t=void 0,this.it=r;if(r===w)return r;if("string"!=typeof r)throw Error(this.constructor.directiveName+"() called with a non-string value");if(r===this.it)return this._t;this.it=r;const s=[r];return s.raw=s,this._t={_$litType$:this.constructor.resultType,strings:s,values:[]}}}e.directiveName="unsafeHTML",e.resultType=1;const o$1=e$4(e);
+   */class e extends i$2{constructor(i){if(super(i),this.it=E,i.type!==t.CHILD)throw Error(this.constructor.directiveName+"() can only be used in child bindings")}render(r){if(r===E||null==r)return this._t=void 0,this.it=r;if(r===T)return r;if("string"!=typeof r)throw Error(this.constructor.directiveName+"() called with a non-string value");if(r===this.it)return this._t;this.it=r;const s=[r];return s.raw=s,this._t={_$litType$:this.constructor.resultType,strings:s,values:[]}}}e.directiveName="unsafeHTML",e.resultType=1;const o$1=e$3(e);
 
   var SlSelect = class extends ShoelaceElement {
     constructor() {
@@ -29421,8 +29796,9 @@
       this.hasFocus = false;
       this.displayLabel = "";
       this.selectedOptions = [];
+      this.valueHasChanged = false;
       this.name = "";
-      this.value = "";
+      this._value = "";
       this.defaultValue = "";
       this.size = "medium";
       this.placeholder = "";
@@ -29485,6 +29861,7 @@
             return;
           }
           if (this.currentOption && !this.currentOption.disabled) {
+            this.valueHasChanged = true;
             if (this.multiple) {
               this.toggleOptionSelection(this.currentOption);
             } else {
@@ -29514,12 +29891,10 @@
           }
           if (event.key === "ArrowDown") {
             newIndex = currentIndex + 1;
-            if (newIndex > allOptions.length - 1)
-              newIndex = 0;
+            if (newIndex > allOptions.length - 1) newIndex = 0;
           } else if (event.key === "ArrowUp") {
             newIndex = currentIndex - 1;
-            if (newIndex < 0)
-              newIndex = allOptions.length - 1;
+            if (newIndex < 0) newIndex = allOptions.length - 1;
           } else if (event.key === "Home") {
             newIndex = 0;
           } else if (event.key === "End") {
@@ -29527,7 +29902,7 @@
           }
           this.setCurrentOption(allOptions[newIndex]);
         }
-        if (event.key.length === 1 || event.key === "Backspace") {
+        if (event.key && event.key.length === 1 || event.key === "Backspace") {
           const allOptions = this.getAllOptions();
           if (event.metaKey || event.ctrlKey || event.altKey) {
             return;
@@ -29563,6 +29938,21 @@
         }
       };
     }
+    get value() {
+      return this._value;
+    }
+    set value(val) {
+      if (this.multiple) {
+        val = Array.isArray(val) ? val : val.split(" ");
+      } else {
+        val = Array.isArray(val) ? val.join(" ") : val;
+      }
+      if (this._value === val) {
+        return;
+      }
+      this.valueHasChanged = true;
+      this._value = val;
+    }
     /** Gets the validity state object */
     get validity() {
       return this.valueInput.validity;
@@ -29573,6 +29963,9 @@
     }
     connectedCallback() {
       super.connectedCallback();
+      setTimeout(() => {
+        this.handleDefaultSlotChange();
+      });
       this.open = false;
     }
     addOpenListeners() {
@@ -29635,6 +30028,7 @@
     }
     handleClearClick(event) {
       event.stopPropagation();
+      this.valueHasChanged = true;
       if (this.value !== "") {
         this.setSelectedOptions([]);
         this.displayInput.focus({ preventScroll: true });
@@ -29654,6 +30048,7 @@
       const option = target.closest("sl-option");
       const oldValue = this.value;
       if (option && !option.disabled) {
+        this.valueHasChanged = true;
         if (this.multiple) {
           this.toggleOptionSelection(option);
         } else {
@@ -29672,19 +30067,21 @@
         }
       }
     }
+    /* @internal - used by options to update labels */
     handleDefaultSlotChange() {
-      const allOptions = this.getAllOptions();
-      const value = Array.isArray(this.value) ? this.value : [this.value];
-      const values = [];
-      if (customElements.get("sl-option")) {
-        allOptions.forEach((option) => values.push(option.value));
-        this.setSelectedOptions(allOptions.filter((el) => value.includes(el.value)));
-      } else {
+      if (!customElements.get("sl-option")) {
         customElements.whenDefined("sl-option").then(() => this.handleDefaultSlotChange());
       }
+      const allOptions = this.getAllOptions();
+      const val = this.valueHasChanged ? this.value : this.defaultValue;
+      const value = Array.isArray(val) ? val : [val];
+      const values = [];
+      allOptions.forEach((option) => values.push(option.value));
+      this.setSelectedOptions(allOptions.filter((el) => value.includes(el.value)));
     }
     handleTagRemove(event, option) {
       event.stopPropagation();
+      this.valueHasChanged = true;
       if (!this.disabled) {
         this.toggleOptionSelection(option, false);
         this.updateComplete.then(() => {
@@ -29738,8 +30135,10 @@
     // This method must be called whenever the selection changes. It will update the selected options cache, the current
     // value, and the display value
     selectionChanged() {
-      var _a, _b, _c, _d;
-      this.selectedOptions = this.getAllOptions().filter((el) => el.selected);
+      var _a, _b, _c;
+      const options = this.getAllOptions();
+      this.selectedOptions = options.filter((el) => el.selected);
+      const cachedValueHasChanged = this.valueHasChanged;
       if (this.multiple) {
         this.value = this.selectedOptions.map((el) => el.value);
         if (this.placeholder && this.value.length === 0) {
@@ -29748,9 +30147,11 @@
           this.displayLabel = this.localize.term("numOptionsSelected", this.selectedOptions.length);
         }
       } else {
-        this.value = (_b = (_a = this.selectedOptions[0]) == null ? void 0 : _a.value) != null ? _b : "";
-        this.displayLabel = (_d = (_c = this.selectedOptions[0]) == null ? void 0 : _c.getTextLabel()) != null ? _d : "";
+        const selectedOption = this.selectedOptions[0];
+        this.value = (_a = selectedOption == null ? void 0 : selectedOption.value) != null ? _a : "";
+        this.displayLabel = (_c = (_b = selectedOption == null ? void 0 : selectedOption.getTextLabel) == null ? void 0 : _b.call(selectedOption)) != null ? _c : "";
       }
+      this.valueHasChanged = cachedValueHasChanged;
       this.updateComplete.then(() => {
         this.formControlController.updateValidity();
       });
@@ -29778,7 +30179,20 @@
         this.handleOpenChange();
       }
     }
+    attributeChangedCallback(name, oldVal, newVal) {
+      super.attributeChangedCallback(name, oldVal, newVal);
+      if (name === "value") {
+        const cachedValueHasChanged = this.valueHasChanged;
+        this.value = this.defaultValue;
+        this.valueHasChanged = cachedValueHasChanged;
+      }
+    }
     handleValueChange() {
+      if (!this.valueHasChanged) {
+        const cachedValueHasChanged = this.valueHasChanged;
+        this.value = this.defaultValue;
+        this.valueHasChanged = cachedValueHasChanged;
+      }
       const allOptions = this.getAllOptions();
       const value = Array.isArray(this.value) ? this.value : [this.value];
       this.setSelectedOptions(allOptions.filter((el) => value.includes(el.value)));
@@ -29860,11 +30274,11 @@
       const hasLabel = this.label ? true : !!hasLabelSlot;
       const hasHelpText = this.helpText ? true : !!hasHelpTextSlot;
       const hasClearIcon = this.clearable && !this.disabled && this.value.length > 0;
-      const isPlaceholderVisible = this.placeholder && this.value.length === 0;
+      const isPlaceholderVisible = this.placeholder && this.value && this.value.length <= 0;
       return x`
       <div
         part="form-control"
-        class=${e$3({
+        class=${e$2({
       "form-control": true,
       "form-control--small": this.size === "small",
       "form-control--medium": this.size === "medium",
@@ -29885,7 +30299,7 @@
 
         <div part="form-control-input" class="form-control-input">
           <sl-popup
-            class=${e$3({
+            class=${e$2({
       select: true,
       "select--standard": true,
       "select--filled": this.filled,
@@ -29971,6 +30385,8 @@
                     </button>
                   ` : ""}
 
+              <slot name="suffix" part="suffix" class="select__suffix"></slot>
+
               <slot name="expand-icon" part="expand-icon" class="select__expand-icon">
                 <sl-icon library="system" name="chevron-down"></sl-icon>
               </slot>
@@ -30012,19 +30428,19 @@
     "sl-tag": SlTag
   };
   __decorateClass([
-    e$5(".select")
+    e$4(".select")
   ], SlSelect.prototype, "popup", 2);
   __decorateClass([
-    e$5(".select__combobox")
+    e$4(".select__combobox")
   ], SlSelect.prototype, "combobox", 2);
   __decorateClass([
-    e$5(".select__display-input")
+    e$4(".select__display-input")
   ], SlSelect.prototype, "displayInput", 2);
   __decorateClass([
-    e$5(".select__value-input")
+    e$4(".select__value-input")
   ], SlSelect.prototype, "valueInput", 2);
   __decorateClass([
-    e$5(".select__listbox")
+    e$4(".select__listbox")
   ], SlSelect.prototype, "listbox", 2);
   __decorateClass([
     r()
@@ -30039,18 +30455,16 @@
     r()
   ], SlSelect.prototype, "selectedOptions", 2);
   __decorateClass([
+    r()
+  ], SlSelect.prototype, "valueHasChanged", 2);
+  __decorateClass([
     n$2()
   ], SlSelect.prototype, "name", 2);
   __decorateClass([
-    n$2({
-      converter: {
-        fromAttribute: (value) => value.split(" "),
-        toAttribute: (value) => value.join(" ")
-      }
-    })
-  ], SlSelect.prototype, "value", 2);
+    r()
+  ], SlSelect.prototype, "value", 1);
   __decorateClass([
-    defaultValue()
+    n$2({ attribute: "value" })
   ], SlSelect.prototype, "defaultValue", 2);
   __decorateClass([
     n$2({ reflect: true })
@@ -30104,7 +30518,7 @@
     watch("disabled", { waitUntilFirstUpdate: true })
   ], SlSelect.prototype, "handleDisabledChange", 1);
   __decorateClass([
-    watch("value", { waitUntilFirstUpdate: true })
+    watch(["defaultValue", "value"], { waitUntilFirstUpdate: true })
   ], SlSelect.prototype, "handleValueChange", 1);
   __decorateClass([
     watch("open", { waitUntilFirstUpdate: true })
@@ -30127,7 +30541,7 @@
   SlSelect.define("sl-select");
 
   // src/components/option/option.styles.ts
-  var option_styles_default = i$4`
+  var option_styles_default = i$6`
   :host {
     display: block;
     user-select: none;
@@ -30218,6 +30632,7 @@
       super(...arguments);
       // @ts-expect-error - Controller is currently unused
       this.localize = new LocalizeController(this);
+      this.isInitialized = false;
       this.current = false;
       this.selected = false;
       this.hasHover = false;
@@ -30230,14 +30645,15 @@
       this.setAttribute("aria-selected", "false");
     }
     handleDefaultSlotChange() {
-      const textLabel = this.getTextLabel();
-      if (typeof this.cachedTextLabel === "undefined") {
-        this.cachedTextLabel = textLabel;
-        return;
-      }
-      if (textLabel !== this.cachedTextLabel) {
-        this.cachedTextLabel = textLabel;
-        this.emit("slotchange", { bubbles: true, composed: false, cancelable: false });
+      if (this.isInitialized) {
+        customElements.whenDefined("sl-select").then(() => {
+          const controller = this.closest("sl-select");
+          if (controller) {
+            controller.handleDefaultSlotChange();
+          }
+        });
+      } else {
+        this.isInitialized = true;
       }
     }
     handleMouseEnter() {
@@ -30281,7 +30697,7 @@
       return x`
       <div
         part="base"
-        class=${e$3({
+        class=${e$2({
       option: true,
       "option--current": this.current,
       "option--disabled": this.disabled,
@@ -30302,7 +30718,7 @@
   SlOption.styles = [component_styles_default, option_styles_default];
   SlOption.dependencies = { "sl-icon": SlIcon };
   __decorateClass([
-    e$5(".option__label")
+    e$4(".option__label")
   ], SlOption.prototype, "defaultSlot", 2);
   __decorateClass([
     r()
@@ -30331,7 +30747,7 @@
 
   SlOption.define("sl-option");
 
-  let DropdownMultiselect = class DropdownMultiselect extends s$1 {
+  let DropdownMultiselect = class DropdownMultiselect extends i$3 {
       constructor() {
           super(...arguments);
           this.id = crypto.randomUUID();
@@ -30408,10 +30824,10 @@
           color: #e23636;
           padding: 0px;
           ${!this.errorMessage && !this.errorMessage.length
-            ? i$4 `
+            ? i$6 `
               display: none;
             `
-            : i$4 `
+            : i$6 `
               display: block;
             `}
         }
@@ -30493,17 +30909,17 @@
     `;
       }
   };
-  DropdownMultiselect.styles = i$4 `
+  DropdownMultiselect.styles = i$6 `
     sl-select::part(tag__base) {
       font-size: 15px;
     }
     sl-option::part(base) {
       font-size: 15px;
     }
-    ${r$5(shoelace)}
+    ${r$4(shoelace)}
   `;
   __decorate([
-      e$5('#selectElement')
+      e$4('#selectElement')
   ], DropdownMultiselect.prototype, "selectElement", void 0);
   __decorate([
       n$2({ type: String, reflect: true })
@@ -30539,10 +30955,10 @@
       n$2({ type: Boolean })
   ], DropdownMultiselect.prototype, "readOnly", void 0);
   DropdownMultiselect = __decorate([
-      t$1('dropdown-multiselect')
+      t$2('dropdown-multiselect')
   ], DropdownMultiselect);
 
-  let DateMultiSelect = class DateMultiSelect extends s$1 {
+  let DateMultiSelect = class DateMultiSelect extends i$3 {
       constructor() {
           super(...arguments);
           this.id = crypto.randomUUID();
@@ -30669,10 +31085,10 @@
           padding: 0px;
           position: absolute;
           ${!this.errorMessage && !((_a = this.errorMessage) === null || _a === void 0 ? void 0 : _a.length)
-            ? i$4 `
+            ? i$6 `
               display: none;
             `
-            : i$4 `
+            : i$6 `
               display: block;
             `}
         }
@@ -30725,7 +31141,7 @@
     `;
       }
   };
-  DateMultiSelect.styles = i$4 `
+  DateMultiSelect.styles = i$6 `
     sl-select::part(tag__base) {
       font-size: 15px;
     }
@@ -30741,10 +31157,10 @@
     sl-select::part(expand-icon) {
       display: none !important;
     }
-    ${r$5(shoelace)}
+    ${r$4(shoelace)}
   `;
   __decorate([
-      e$5('#selectElement')
+      e$4('#selectElement')
   ], DateMultiSelect.prototype, "selectElement", void 0);
   __decorate([
       n$2({ type: String, reflect: true })
@@ -30780,7 +31196,7 @@
       n$2({ type: Function })
   ], DateMultiSelect.prototype, "validation", void 0);
   DateMultiSelect = __decorate([
-      t$1('date-multiselect')
+      t$2('date-multiselect')
   ], DateMultiSelect);
 
   const logger$c = Logger('common/typesOfFood');
@@ -30825,7 +31241,7 @@
 
   var ClaimInfoGridVLB_1;
   const logger$b = Logger('components/ClaimInfoGridVLB');
-  let ClaimInfoGridVLB = ClaimInfoGridVLB_1 = class ClaimInfoGridVLB extends s$1 {
+  let ClaimInfoGridVLB = ClaimInfoGridVLB_1 = class ClaimInfoGridVLB extends i$3 {
       constructor() {
           super(...arguments);
           this.id = crypto.randomUUID();
@@ -31115,10 +31531,10 @@
           padding: 0px;
           position: absolute;
           ${!this.errorMessage && !((_a = this.errorMessage) === null || _a === void 0 ? void 0 : _a.length)
-            ? i$4 `
+            ? i$6 `
                   display: none;
                 `
-            : i$4 `
+            : i$6 `
                   display: block;
                 `}
         }
@@ -31127,10 +31543,10 @@
           border-collapse: collapse;
           margin: 25px 0;
           ${!this.readOnly
-            ? i$4 `
+            ? i$6 `
                   font-size: 0.9em;
                 `
-            : i$4 ``}
+            : i$6 ``}
           font-family: sans-serif;
           min-width: 400px;
           box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
@@ -31143,10 +31559,10 @@
         .styled-table th {
           padding: 12px 15px;
           ${!this.readOnly
-            ? i$4 `
+            ? i$6 `
                   font-size: 15px;
                 `
-            : i$4 ``}
+            : i$6 ``}
         }
         .styled-table td {
           padding: 12px 15px 24px;
@@ -31191,10 +31607,10 @@
         .add-another-btn {
           line-height: 1.5;
           ${!this.readOnly
-            ? i$4 `
+            ? i$6 `
                   font-size: 13px;
                 `
-            : i$4 ``}
+            : i$6 ``}
         }
         .add-another-btn span {
           padding-bottom: 2px;
@@ -31292,10 +31708,10 @@
       n$2({ type: String })
   ], ClaimInfoGridVLB.prototype, "errorMessage", void 0);
   ClaimInfoGridVLB = ClaimInfoGridVLB_1 = __decorate([
-      t$1('claim-info-grid-vlb')
+      t$2('claim-info-grid-vlb')
   ], ClaimInfoGridVLB);
 
-  let CommoditiesMultiSelect = class CommoditiesMultiSelect extends s$1 {
+  let CommoditiesMultiSelect = class CommoditiesMultiSelect extends i$3 {
       constructor() {
           super(...arguments);
           // unique identifier so no 2 components have the same id in the DOM
@@ -31401,7 +31817,7 @@
       n$2({ type: Boolean })
   ], CommoditiesMultiSelect.prototype, "loaded", void 0);
   CommoditiesMultiSelect = __decorate([
-      t$1('commodities-multiselect')
+      t$2('commodities-multiselect')
   ], CommoditiesMultiSelect);
 
   // Utility class for text operations
@@ -31423,7 +31839,7 @@
           return [];
       }
   }
-  let EFPBreadcrumbs = class EFPBreadcrumbs extends s$1 {
+  let EFPBreadcrumbs = class EFPBreadcrumbs extends i$3 {
       constructor() {
           super(...arguments);
           this.currentStep = null;
@@ -31620,7 +32036,7 @@
     `;
       }
   };
-  EFPBreadcrumbs.styles = i$4 `
+  EFPBreadcrumbs.styles = i$6 `
     /* Breadcrumbs styling */
     .breadcrumbs {
       margin-bottom: 1rem;
@@ -31723,7 +32139,7 @@
       n$2({ type: Array })
   ], EFPBreadcrumbs.prototype, "sections", void 0);
   EFPBreadcrumbs = __decorate([
-      t$1('efp-breadcrumbs')
+      t$2('efp-breadcrumbs')
   ], EFPBreadcrumbs);
 
   var logger$a = Logger('common/workbook');
@@ -31787,32 +32203,32 @@
    * @returns {boolean} True if workbook is initialized
    */
   function _loadWorkbookData() {
-    _loadWorkbookData = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee(workbookId) {
-      var response, workbookData;
-      return _regeneratorRuntime().wrap(function _callee$(_context) {
-        while (1) switch (_context.prev = _context.next) {
+    _loadWorkbookData = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee(workbookId) {
+      var response, workbookData, _t;
+      return _regenerator().w(function (_context) {
+        while (1) switch (_context.p = _context.n) {
           case 0:
             if (workbookId) {
-              _context.next = 3;
+              _context.n = 1;
               break;
             }
             logger$a.warn({
               fn: loadWorkbookData,
               message: 'No workbook ID provided'
             });
-            return _context.abrupt("return", null);
-          case 3:
-            _context.prev = 3;
+            return _context.a(2, null);
+          case 1:
+            _context.p = 1;
             logger$a.info({
               fn: loadWorkbookData,
               message: "Fetching workbook data for ID: ".concat(workbookId)
             });
-            _context.next = 7;
+            _context.n = 2;
             return getWorkbookDataById({
               id: workbookId
             });
-          case 7:
-            response = _context.sent;
+          case 2:
+            response = _context.v;
             workbookData = response.data;
             logger$a.info({
               fn: loadWorkbookData,
@@ -31827,24 +32243,21 @@
               data: workbookData,
               initialized: true
             };
-            return _context.abrupt("return", workbookData);
-          case 14:
-            _context.prev = 14;
-            _context.t0 = _context["catch"](3);
+            return _context.a(2, workbookData);
+          case 3:
+            _context.p = 3;
+            _t = _context.v;
             logger$a.error({
               fn: loadWorkbookData,
               message: 'Failed to fetch workbook data',
               data: {
                 workbookId: workbookId,
-                error: _context.t0
+                error: _t
               }
             });
-            return _context.abrupt("return", null);
-          case 18:
-          case "end":
-            return _context.stop();
+            return _context.a(2, null);
         }
-      }, _callee, null, [[3, 14]]);
+      }, _callee, null, [[1, 3]]);
     }));
     return _loadWorkbookData.apply(this, arguments);
   }
@@ -31907,22 +32320,22 @@
    * @returns {Array|null} The chapters data or null if not loaded
    */
   function _loadChaptersAndQuestions() {
-    _loadChaptersAndQuestions = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee() {
-      var _chaptersData$value, _questionsData$value, _yield$Promise$all, _yield$Promise$all2, chaptersResponse, questionsResponse, chaptersData, questionsData;
-      return _regeneratorRuntime().wrap(function _callee$(_context) {
-        while (1) switch (_context.prev = _context.next) {
+    _loadChaptersAndQuestions = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee() {
+      var _chaptersData$value, _questionsData$value, _yield$Promise$all, _yield$Promise$all2, chaptersResponse, questionsResponse, chaptersData, questionsData, _t;
+      return _regenerator().w(function (_context) {
+        while (1) switch (_context.p = _context.n) {
           case 0:
-            _context.prev = 0;
+            _context.p = 0;
             logger$9.info({
               fn: loadChaptersAndQuestions,
               message: 'Loading chapters and workbook questions data...'
             });
 
             // Load chapters and workbook questions in parallel
-            _context.next = 4;
+            _context.n = 1;
             return Promise.all([getChaptersData(), getWorkbookQuestionsData()]);
-          case 4:
-            _yield$Promise$all = _context.sent;
+          case 1:
+            _yield$Promise$all = _context.v;
             _yield$Promise$all2 = _slicedToArray(_yield$Promise$all, 2);
             chaptersResponse = _yield$Promise$all2[0];
             questionsResponse = _yield$Promise$all2[1];
@@ -31946,26 +32359,23 @@
             POWERPOD.workbook.questions = questionsData;
             // @ts-ignore
             POWERPOD.workbook.chaptersAndQuestionsLoaded = true;
-            return _context.abrupt("return", {
+            return _context.a(2, {
               chaptersData: chaptersData,
               questionsData: questionsData
             });
-          case 18:
-            _context.prev = 18;
-            _context.t0 = _context["catch"](0);
+          case 2:
+            _context.p = 2;
+            _t = _context.v;
             logger$9.error({
               fn: loadChaptersAndQuestions,
               message: 'Failed to load chapters and workbook questions data',
               data: {
-                error: _context.t0
+                error: _t
               }
             });
-            return _context.abrupt("return", null);
-          case 22:
-          case "end":
-            return _context.stop();
+            return _context.a(2, null);
         }
-      }, _callee, null, [[0, 18]]);
+      }, _callee, null, [[0, 2]]);
     }));
     return _loadChaptersAndQuestions.apply(this, arguments);
   }
@@ -32749,7 +33159,7 @@
    * @returns {Promise<boolean>} True if refresh was successful
    */
   function _loadQuestionnaireWithResponses() {
-    _loadQuestionnaireWithResponses = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee(nestedChapterStructure, workbookId) {
+    _loadQuestionnaireWithResponses = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee(nestedChapterStructure, workbookId) {
       var forceRefresh,
         _responseData4,
         responseData,
@@ -32759,9 +33169,10 @@
         _yield$import,
         loadQuestionsAndResponses,
         questionnaireData,
-        _args = arguments;
-      return _regeneratorRuntime().wrap(function _callee$(_context) {
-        while (1) switch (_context.prev = _context.next) {
+        _args = arguments,
+        _t;
+      return _regenerator().w(function (_context) {
+        while (1) switch (_context.p = _context.n) {
           case 0:
             forceRefresh = _args.length > 2 && _args[2] !== undefined ? _args[2] : false;
             logger$8.info({
@@ -32773,11 +33184,11 @@
                 forceRefresh: forceRefresh
               }
             });
-            _context.prev = 2;
+            _context.p = 1;
             // Always load fresh response data to ensure we have all responses
             responseData = null;
             if (!workbookId) {
-              _context.next = 14;
+              _context.n = 4;
               break;
             }
             logger$8.info({
@@ -32786,15 +33197,15 @@
             });
 
             // Import the response helper dynamically to avoid circular imports
-            _context.next = 8;
+            _context.n = 2;
             return Promise.resolve().then(function () { return workbookResponseHelper; });
-          case 8:
-            _yield$import = _context.sent;
+          case 2:
+            _yield$import = _context.v;
             loadQuestionsAndResponses = _yield$import.loadQuestionsAndResponses;
-            _context.next = 12;
+            _context.n = 3;
             return loadQuestionsAndResponses(workbookId);
-          case 12:
-            responseData = _context.sent;
+          case 3:
+            responseData = _context.v;
             logger$8.info({
               fn: loadQuestionnaireWithResponses,
               message: 'Successfully loaded response data',
@@ -32804,7 +33215,7 @@
                 completionPercentage: ((_responseData3 = responseData) === null || _responseData3 === void 0 || (_responseData3 = _responseData3.stats) === null || _responseData3 === void 0 ? void 0 : _responseData3.completionPercentage) || 0
               }
             });
-          case 14:
+          case 4:
             // Load questionnaire with response data merged in
             questionnaireData = loadQuestionnaireIntoStore(nestedChapterStructure, forceRefresh, responseData);
             logger$8.info({
@@ -32816,15 +33227,15 @@
                 responseStats: (_responseData4 = responseData) === null || _responseData4 === void 0 ? void 0 : _responseData4.stats
               }
             });
-            return _context.abrupt("return", questionnaireData);
-          case 19:
-            _context.prev = 19;
-            _context.t0 = _context["catch"](2);
+            return _context.a(2, questionnaireData);
+          case 5:
+            _context.p = 5;
+            _t = _context.v;
             logger$8.error({
               fn: loadQuestionnaireWithResponses,
               message: 'Failed to load questionnaire with responses',
               data: {
-                error: _context.t0.message,
+                error: _t.message,
                 workbookId: workbookId
               }
             });
@@ -32834,12 +33245,9 @@
               fn: loadQuestionnaireWithResponses,
               message: 'Falling back to loading questionnaire without responses'
             });
-            return _context.abrupt("return", loadQuestionnaireIntoStore(nestedChapterStructure, forceRefresh));
-          case 24:
-          case "end":
-            return _context.stop();
+            return _context.a(2, loadQuestionnaireIntoStore(nestedChapterStructure, forceRefresh));
         }
-      }, _callee, null, [[2, 19]]);
+      }, _callee, null, [[1, 5]]);
     }));
     return _loadQuestionnaireWithResponses.apply(this, arguments);
   }
@@ -32853,10 +33261,10 @@
    * @returns {boolean} True if the chapter should be marked complete
    */
   function _refreshQuestionnaireResponses() {
-    _refreshQuestionnaireResponses = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee2(workbookId) {
-      var _questionnaire$chapte2, questionnaire, originalStructure, _yield$import2, loadQuestionsAndResponses, responseData;
-      return _regeneratorRuntime().wrap(function _callee2$(_context2) {
-        while (1) switch (_context2.prev = _context2.next) {
+    _refreshQuestionnaireResponses = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee2(workbookId) {
+      var _questionnaire$chapte2, questionnaire, originalStructure, _yield$import2, loadQuestionsAndResponses, responseData, _t2;
+      return _regenerator().w(function (_context2) {
+        while (1) switch (_context2.p = _context2.n) {
           case 0:
             logger$8.info({
               fn: refreshQuestionnaireResponses,
@@ -32865,53 +33273,50 @@
                 workbookId: workbookId
               }
             });
-            _context2.prev = 1;
+            _context2.p = 1;
             questionnaire = getQuestionnaireFromStore();
             if (questionnaire !== null && questionnaire !== void 0 && (_questionnaire$chapte2 = questionnaire.chapters) !== null && _questionnaire$chapte2 !== void 0 && _questionnaire$chapte2.length) {
-              _context2.next = 6;
+              _context2.n = 2;
               break;
             }
             logger$8.warn({
               fn: refreshQuestionnaireResponses,
               message: 'No questionnaire data loaded, cannot refresh responses'
             });
-            return _context2.abrupt("return", false);
-          case 6:
+            return _context2.a(2, false);
+          case 2:
             // Get the original nested structure (without responses)
             originalStructure = questionnaire.chapters[0]; // Load fresh response data
-            _context2.next = 9;
+            _context2.n = 3;
             return Promise.resolve().then(function () { return workbookResponseHelper; });
-          case 9:
-            _yield$import2 = _context2.sent;
+          case 3:
+            _yield$import2 = _context2.v;
             loadQuestionsAndResponses = _yield$import2.loadQuestionsAndResponses;
-            _context2.next = 13;
+            _context2.n = 4;
             return loadQuestionsAndResponses(workbookId);
-          case 13:
-            responseData = _context2.sent;
+          case 4:
+            responseData = _context2.v;
             // Reload questionnaire with fresh responses
             loadQuestionnaireIntoStore(originalStructure, true, responseData);
             logger$8.info({
               fn: refreshQuestionnaireResponses,
               message: 'Successfully refreshed questionnaire responses'
             });
-            return _context2.abrupt("return", true);
-          case 19:
-            _context2.prev = 19;
-            _context2.t0 = _context2["catch"](1);
+            return _context2.a(2, true);
+          case 5:
+            _context2.p = 5;
+            _t2 = _context2.v;
             logger$8.error({
               fn: refreshQuestionnaireResponses,
               message: 'Failed to refresh questionnaire responses',
               data: {
-                error: _context2.t0.message,
+                error: _t2.message,
                 workbookId: workbookId
               }
             });
-            return _context2.abrupt("return", false);
-          case 23:
-          case "end":
-            return _context2.stop();
+            return _context2.a(2, false);
         }
-      }, _callee2, null, [[1, 19]]);
+      }, _callee2, null, [[1, 5]]);
     }));
     return _refreshQuestionnaireResponses.apply(this, arguments);
   }
@@ -33158,7 +33563,7 @@
    * @returns {Promise<Object>} Response data with metadata
    */
   function _getResponsesForWorkbook() {
-    _getResponsesForWorkbook = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee(workbookId) {
+    _getResponsesForWorkbook = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee(workbookId) {
       var options,
         _result$data,
         _result$data2,
@@ -33166,12 +33571,13 @@
         _result$data4,
         result,
         responses,
-        _args = arguments;
-      return _regeneratorRuntime().wrap(function _callee$(_context) {
-        while (1) switch (_context.prev = _context.next) {
+        _args = arguments,
+        _t;
+      return _regenerator().w(function (_context) {
+        while (1) switch (_context.p = _context.n) {
           case 0:
             options = _args.length > 1 && _args[1] !== undefined ? _args[1] : {};
-            _context.prev = 1;
+            _context.p = 1;
             logger$7.info({
               fn: 'getResponsesForWorkbook',
               message: "Fetching responses for workbook: ".concat(workbookId),
@@ -33180,12 +33586,12 @@
                 options: options
               }
             });
-            _context.next = 5;
+            _context.n = 2;
             return POWERPOD.fetch.getWorkbookResponsesByWorkbook(_objectSpread2({
               workbookId: workbookId
             }, options));
-          case 5:
-            result = _context.sent;
+          case 2:
+            result = _context.v;
             responses = (result === null || result === void 0 || (_result$data = result.data) === null || _result$data === void 0 ? void 0 : _result$data.value) || [];
             logger$7.info({
               fn: 'getResponsesForWorkbook',
@@ -33195,7 +33601,7 @@
                 responseCount: responses.length
               }
             });
-            return _context.abrupt("return", {
+            return _context.a(2, {
               responses: responses,
               totalCount: (result === null || result === void 0 || (_result$data2 = result.data) === null || _result$data2 === void 0 ? void 0 : _result$data2['@odata.count']) || responses.length,
               metadata: {
@@ -33204,23 +33610,22 @@
               },
               workbookId: workbookId
             });
-          case 11:
-            _context.prev = 11;
-            _context.t0 = _context["catch"](1);
+          case 3:
+            _context.p = 3;
+            _t = _context.v;
             logger$7.error({
               fn: 'getResponsesForWorkbook',
               message: "Failed to fetch responses for workbook ".concat(workbookId),
               data: {
                 workbookId: workbookId,
-                error: _context.t0.message
+                error: _t.message
               }
             });
-            throw new Error("Failed to fetch workbook responses: ".concat(_context.t0.message));
-          case 15:
-          case "end":
-            return _context.stop();
+            throw new Error("Failed to fetch workbook responses: ".concat(_t.message));
+          case 4:
+            return _context.a(2);
         }
-      }, _callee, null, [[1, 11]]);
+      }, _callee, null, [[1, 3]]);
     }));
     return _getResponsesForWorkbook.apply(this, arguments);
   }
@@ -33236,7 +33641,7 @@
    * @returns {Promise<Object>} Created response data
    */
   function _getResponsesForWorkbookAndQuestion() {
-    _getResponsesForWorkbookAndQuestion = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee2(workbookId, questionId) {
+    _getResponsesForWorkbookAndQuestion = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee2(workbookId, questionId) {
       var options,
         _result$data5,
         _result$data6,
@@ -33244,12 +33649,13 @@
         _result$data8,
         result,
         responses,
-        _args2 = arguments;
-      return _regeneratorRuntime().wrap(function _callee2$(_context2) {
-        while (1) switch (_context2.prev = _context2.next) {
+        _args2 = arguments,
+        _t2;
+      return _regenerator().w(function (_context2) {
+        while (1) switch (_context2.p = _context2.n) {
           case 0:
             options = _args2.length > 2 && _args2[2] !== undefined ? _args2[2] : {};
-            _context2.prev = 1;
+            _context2.p = 1;
             logger$7.info({
               fn: 'getResponsesForWorkbookAndQuestion',
               message: "Fetching responses for workbook: ".concat(workbookId, ", question: ").concat(questionId),
@@ -33259,13 +33665,13 @@
                 options: options
               }
             });
-            _context2.next = 5;
+            _context2.n = 2;
             return POWERPOD.fetch.getWorkbookResponsesByWorkbookAndQuestion(_objectSpread2({
               workbookId: workbookId,
               questionId: questionId
             }, options));
-          case 5:
-            result = _context2.sent;
+          case 2:
+            result = _context2.v;
             responses = (result === null || result === void 0 || (_result$data5 = result.data) === null || _result$data5 === void 0 ? void 0 : _result$data5.value) || [];
             logger$7.info({
               fn: 'getResponsesForWorkbookAndQuestion',
@@ -33276,7 +33682,7 @@
                 responseCount: responses.length
               }
             });
-            return _context2.abrupt("return", {
+            return _context2.a(2, {
               responses: responses,
               totalCount: (result === null || result === void 0 || (_result$data6 = result.data) === null || _result$data6 === void 0 ? void 0 : _result$data6['@odata.count']) || responses.length,
               metadata: {
@@ -33286,24 +33692,23 @@
               workbookId: workbookId,
               questionId: questionId
             });
-          case 11:
-            _context2.prev = 11;
-            _context2.t0 = _context2["catch"](1);
+          case 3:
+            _context2.p = 3;
+            _t2 = _context2.v;
             logger$7.error({
               fn: 'getResponsesForWorkbookAndQuestion',
               message: "Failed to fetch responses for workbook ".concat(workbookId, ", question ").concat(questionId),
               data: {
                 workbookId: workbookId,
                 questionId: questionId,
-                error: _context2.t0.message
+                error: _t2.message
               }
             });
-            throw new Error("Failed to fetch workbook responses: ".concat(_context2.t0.message));
-          case 15:
-          case "end":
-            return _context2.stop();
+            throw new Error("Failed to fetch workbook responses: ".concat(_t2.message));
+          case 4:
+            return _context2.a(2);
         }
-      }, _callee2, null, [[1, 11]]);
+      }, _callee2, null, [[1, 3]]);
     }));
     return _getResponsesForWorkbookAndQuestion.apply(this, arguments);
   }
@@ -33319,25 +33724,26 @@
    * @returns {Promise<Object>} Update result
    */
   function _createResponse() {
-    _createResponse = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee3(questionId, response) {
+    _createResponse = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee3(questionId, response) {
       var options,
         workbookId,
         _result$data9,
         chapterId,
         result,
-        _args3 = arguments;
-      return _regeneratorRuntime().wrap(function _callee3$(_context3) {
-        while (1) switch (_context3.prev = _context3.next) {
+        _args3 = arguments,
+        _t3;
+      return _regenerator().w(function (_context3) {
+        while (1) switch (_context3.p = _context3.n) {
           case 0:
             options = _args3.length > 2 && _args3[2] !== undefined ? _args3[2] : {};
             workbookId = getCurrentWorkbookId();
             if (workbookId) {
-              _context3.next = 4;
+              _context3.n = 1;
               break;
             }
             throw new Error('No workbook ID available');
-          case 4:
-            _context3.prev = 4;
+          case 1:
+            _context3.p = 1;
             // Get chapterId for the question
             chapterId = getChapterIdForQuestion(questionId);
             logger$7.info({
@@ -33350,15 +33756,15 @@
                 response: (response === null || response === void 0 ? void 0 : response.substring(0, 100)) + '...'
               }
             });
-            _context3.next = 9;
+            _context3.n = 2;
             return POWERPOD.fetch.postWorkbookResponseData(_objectSpread2({
               workbookId: workbookId,
               questionId: questionId,
               chapterId: chapterId,
               response: response
             }, options));
-          case 9:
-            result = _context3.sent;
+          case 2:
+            result = _context3.v;
             logger$7.info({
               fn: 'createResponse',
               message: "Successfully created response",
@@ -33387,30 +33793,29 @@
                 });
               }
             }
-            return _context3.abrupt("return", {
+            return _context3.a(2, {
               response: result === null || result === void 0 ? void 0 : result.data,
               success: true,
               workbookId: workbookId,
               questionId: questionId
             });
-          case 15:
-            _context3.prev = 15;
-            _context3.t0 = _context3["catch"](4);
+          case 3:
+            _context3.p = 3;
+            _t3 = _context3.v;
             logger$7.error({
               fn: 'createResponse',
               message: "Failed to create response for workbook ".concat(workbookId, ", question ").concat(questionId),
               data: {
                 workbookId: workbookId,
                 questionId: questionId,
-                error: _context3.t0.message
+                error: _t3.message
               }
             });
-            throw new Error("Failed to create workbook response: ".concat(_context3.t0.message));
-          case 19:
-          case "end":
-            return _context3.stop();
+            throw new Error("Failed to create workbook response: ".concat(_t3.message));
+          case 4:
+            return _context3.a(2);
         }
-      }, _callee3, null, [[4, 15]]);
+      }, _callee3, null, [[1, 3]]);
     }));
     return _createResponse.apply(this, arguments);
   }
@@ -33425,7 +33830,7 @@
    * @returns {Promise<Object>} Delete result
    */
   function _updateResponse() {
-    _updateResponse = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee4(responseId) {
+    _updateResponse = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee4(responseId) {
       var response,
         options,
         chapterId,
@@ -33436,49 +33841,51 @@
         entry,
         result,
         questionId,
-        _args4 = arguments;
-      return _regeneratorRuntime().wrap(function _callee4$(_context4) {
-        while (1) switch (_context4.prev = _context4.next) {
+        _args4 = arguments,
+        _t4,
+        _t5;
+      return _regenerator().w(function (_context4) {
+        while (1) switch (_context4.p = _context4.n) {
           case 0:
             response = _args4.length > 1 && _args4[1] !== undefined ? _args4[1] : null;
             options = _args4.length > 2 && _args4[2] !== undefined ? _args4[2] : {};
-            _context4.prev = 2;
+            _context4.p = 1;
             // Try to get chapterId if we can determine the questionId
             chapterId = null; // First try to get questionId from existing response data in memory
             if (!POWERPOD.workbookQuestionsAndResponses.isLoaded) {
-              _context4.next = 23;
+              _context4.n = 8;
               break;
             }
             _iterator3 = _createForOfIteratorHelper(POWERPOD.workbookQuestionsAndResponses.questionsWithResponses);
-            _context4.prev = 6;
+            _context4.p = 2;
             _iterator3.s();
-          case 8:
+          case 3:
             if ((_step3 = _iterator3.n()).done) {
-              _context4.next = 15;
+              _context4.n = 5;
               break;
             }
             _step3$value = _slicedToArray(_step3.value, 2), qId = _step3$value[0], entry = _step3$value[1];
             if (!(entry.response && entry.response.quartech_workbookresponseid === responseId)) {
-              _context4.next = 13;
+              _context4.n = 4;
               break;
             }
             chapterId = getChapterIdForQuestion(qId);
-            return _context4.abrupt("break", 15);
-          case 13:
-            _context4.next = 8;
+            return _context4.a(3, 5);
+          case 4:
+            _context4.n = 3;
             break;
-          case 15:
-            _context4.next = 20;
+          case 5:
+            _context4.n = 7;
             break;
-          case 17:
-            _context4.prev = 17;
-            _context4.t0 = _context4["catch"](6);
-            _iterator3.e(_context4.t0);
-          case 20:
-            _context4.prev = 20;
+          case 6:
+            _context4.p = 6;
+            _t4 = _context4.v;
+            _iterator3.e(_t4);
+          case 7:
+            _context4.p = 7;
             _iterator3.f();
-            return _context4.finish(20);
-          case 23:
+            return _context4.f(7);
+          case 8:
             logger$7.info({
               fn: 'updateResponse',
               message: "Updating response: ".concat(responseId),
@@ -33488,14 +33895,14 @@
                 chapterId: chapterId
               }
             });
-            _context4.next = 26;
+            _context4.n = 9;
             return POWERPOD.fetch.patchWorkbookResponseData(_objectSpread2({
               id: responseId,
               response: response,
               chapterId: chapterId
             }, options));
-          case 26:
-            result = _context4.sent;
+          case 9:
+            result = _context4.v;
             logger$7.info({
               fn: 'updateResponse',
               message: "Successfully updated response ".concat(responseId),
@@ -33525,28 +33932,27 @@
                 }
               }
             }
-            return _context4.abrupt("return", {
+            return _context4.a(2, {
               success: true,
               responseId: responseId,
               updated: result === null || result === void 0 ? void 0 : result.data
             });
-          case 32:
-            _context4.prev = 32;
-            _context4.t1 = _context4["catch"](2);
+          case 10:
+            _context4.p = 10;
+            _t5 = _context4.v;
             logger$7.error({
               fn: 'updateResponse',
               message: "Failed to update response ".concat(responseId),
               data: {
                 responseId: responseId,
-                error: _context4.t1.message
+                error: _t5.message
               }
             });
-            throw new Error("Failed to update workbook response: ".concat(_context4.t1.message));
-          case 36:
-          case "end":
-            return _context4.stop();
+            throw new Error("Failed to update workbook response: ".concat(_t5.message));
+          case 11:
+            return _context4.a(2);
         }
-      }, _callee4, null, [[2, 32], [6, 17, 20, 23]]);
+      }, _callee4, null, [[2, 6, 7, 8], [1, 10]]);
     }));
     return _updateResponse.apply(this, arguments);
   }
@@ -33562,7 +33968,7 @@
    * @returns {Promise<Object|null>} Most recent response or null if none found
    */
   function _deleteResponse() {
-    _deleteResponse = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee5(responseId) {
+    _deleteResponse = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee5(responseId) {
       var options,
         questionId,
         _iterator4,
@@ -33570,12 +33976,15 @@
         _step4$value,
         qId,
         entry,
-        _args5 = arguments;
-      return _regeneratorRuntime().wrap(function _callee5$(_context5) {
-        while (1) switch (_context5.prev = _context5.next) {
+        _args5 = arguments,
+        _t6,
+        _t7,
+        _t8;
+      return _regenerator().w(function (_context5) {
+        while (1) switch (_context5.p = _context5.n) {
           case 0:
             options = _args5.length > 1 && _args5[1] !== undefined ? _args5[1] : {};
-            _context5.prev = 1;
+            _context5.p = 1;
             logger$7.info({
               fn: 'deleteResponse',
               message: "Deleting response: ".concat(responseId),
@@ -33587,41 +33996,41 @@
             // Get question ID from existing POWERPOD response data before deleting
             questionId = null;
             if (!(isQuestionnaireLoaded() && POWERPOD.workbookQuestionsAndResponses.isLoaded)) {
-              _context5.next = 30;
+              _context5.n = 11;
               break;
             }
-            _context5.prev = 5;
+            _context5.p = 2;
             // Find the response in the existing data
             _iterator4 = _createForOfIteratorHelper(POWERPOD.workbookQuestionsAndResponses.questionsWithResponses);
-            _context5.prev = 7;
+            _context5.p = 3;
             _iterator4.s();
-          case 9:
+          case 4:
             if ((_step4 = _iterator4.n()).done) {
-              _context5.next = 16;
+              _context5.n = 6;
               break;
             }
             _step4$value = _slicedToArray(_step4.value, 2), qId = _step4$value[0], entry = _step4$value[1];
             if (!(entry.response && entry.response.quartech_workbookresponseid === responseId)) {
-              _context5.next = 14;
+              _context5.n = 5;
               break;
             }
             questionId = qId;
-            return _context5.abrupt("break", 16);
-          case 14:
-            _context5.next = 9;
+            return _context5.a(3, 6);
+          case 5:
+            _context5.n = 4;
             break;
-          case 16:
-            _context5.next = 21;
+          case 6:
+            _context5.n = 8;
             break;
-          case 18:
-            _context5.prev = 18;
-            _context5.t0 = _context5["catch"](7);
-            _iterator4.e(_context5.t0);
-          case 21:
-            _context5.prev = 21;
+          case 7:
+            _context5.p = 7;
+            _t6 = _context5.v;
+            _iterator4.e(_t6);
+          case 8:
+            _context5.p = 8;
             _iterator4.f();
-            return _context5.finish(21);
-          case 24:
+            return _context5.f(8);
+          case 9:
             if (questionId) {
               logger$7.info({
                 fn: 'deleteResponse',
@@ -33633,25 +34042,25 @@
                 message: "Could not find question ID for response ".concat(responseId, " in existing data")
               });
             }
-            _context5.next = 30;
+            _context5.n = 11;
             break;
-          case 27:
-            _context5.prev = 27;
-            _context5.t1 = _context5["catch"](5);
+          case 10:
+            _context5.p = 10;
+            _t7 = _context5.v;
             logger$7.warn({
               fn: 'deleteResponse',
               message: "Error finding question ID for response deletion",
               data: {
                 responseId: responseId,
-                error: _context5.t1.message
+                error: _t7.message
               }
             });
-          case 30:
-            _context5.next = 32;
+          case 11:
+            _context5.n = 12;
             return POWERPOD.fetch.deleteWorkbookResponseData(_objectSpread2({
               id: responseId
             }, options));
-          case 32:
+          case 12:
             logger$7.info({
               fn: 'deleteResponse',
               message: "Successfully deleted response ".concat(responseId),
@@ -33678,28 +34087,27 @@
                 });
               }
             }
-            return _context5.abrupt("return", {
+            return _context5.a(2, {
               success: true,
               responseId: responseId,
               deleted: true
             });
-          case 37:
-            _context5.prev = 37;
-            _context5.t2 = _context5["catch"](1);
+          case 13:
+            _context5.p = 13;
+            _t8 = _context5.v;
             logger$7.error({
               fn: 'deleteResponse',
               message: "Failed to delete response ".concat(responseId),
               data: {
                 responseId: responseId,
-                error: _context5.t2.message
+                error: _t8.message
               }
             });
-            throw new Error("Failed to delete workbook response: ".concat(_context5.t2.message));
-          case 41:
-          case "end":
-            return _context5.stop();
+            throw new Error("Failed to delete workbook response: ".concat(_t8.message));
+          case 14:
+            return _context5.a(2);
         }
-      }, _callee5, null, [[1, 37], [5, 27], [7, 18, 21, 24]]);
+      }, _callee5, null, [[3, 7, 8, 9], [2, 10], [1, 13]]);
     }));
     return _deleteResponse.apply(this, arguments);
   }
@@ -33715,22 +34123,23 @@
    * @returns {Promise<boolean>} True if response exists, false otherwise
    */
   function _getLatestResponse() {
-    _getLatestResponse = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee6(workbookId, questionId) {
+    _getLatestResponse = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee6(workbookId, questionId) {
       var options,
         result,
         latestResponse,
-        _args6 = arguments;
-      return _regeneratorRuntime().wrap(function _callee6$(_context6) {
-        while (1) switch (_context6.prev = _context6.next) {
+        _args6 = arguments,
+        _t9;
+      return _regenerator().w(function (_context6) {
+        while (1) switch (_context6.p = _context6.n) {
           case 0:
             options = _args6.length > 2 && _args6[2] !== undefined ? _args6[2] : {};
-            _context6.prev = 1;
-            _context6.next = 4;
+            _context6.p = 1;
+            _context6.n = 2;
             return getResponsesForWorkbookAndQuestion(workbookId, questionId, options);
-          case 4:
-            result = _context6.sent;
+          case 2:
+            result = _context6.v;
             if (!(result.responses && result.responses.length > 0)) {
-              _context6.next = 9;
+              _context6.n = 3;
               break;
             }
             latestResponse = result.responses[0];
@@ -33744,8 +34153,8 @@
                 createdOn: latestResponse.createdon
               }
             });
-            return _context6.abrupt("return", latestResponse);
-          case 9:
+            return _context6.a(2, latestResponse);
+          case 3:
             logger$7.info({
               fn: 'getLatestResponse',
               message: "No responses found for workbook ".concat(workbookId, ", question ").concat(questionId),
@@ -33754,29 +34163,28 @@
                 questionId: questionId
               }
             });
-            return _context6.abrupt("return", null);
-          case 13:
-            _context6.prev = 13;
-            _context6.t0 = _context6["catch"](1);
+            return _context6.a(2, null);
+          case 4:
+            _context6.p = 4;
+            _t9 = _context6.v;
             logger$7.error({
               fn: 'getLatestResponse',
               message: "Failed to get latest response for workbook ".concat(workbookId, ", question ").concat(questionId),
               data: {
                 workbookId: workbookId,
                 questionId: questionId,
-                error: _context6.t0.message
+                error: _t9.message
               }
             });
-            throw _context6.t0;
-          case 17:
-          case "end":
-            return _context6.stop();
+            throw _t9;
+          case 5:
+            return _context6.a(2);
         }
-      }, _callee6, null, [[1, 13]]);
+      }, _callee6, null, [[1, 4]]);
     }));
     return _getLatestResponse.apply(this, arguments);
   }
-  function hasResponse(_x10, _x11) {
+  function hasResponse(_x0, _x1) {
     return _hasResponse.apply(this, arguments);
   }
 
@@ -33787,42 +34195,40 @@
    * @returns {Promise<Object>} Response statistics
    */
   function _hasResponse() {
-    _hasResponse = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee7(workbookId, questionId) {
+    _hasResponse = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee7(workbookId, questionId) {
       var options,
         latestResponse,
-        _args7 = arguments;
-      return _regeneratorRuntime().wrap(function _callee7$(_context7) {
-        while (1) switch (_context7.prev = _context7.next) {
+        _args7 = arguments,
+        _t0;
+      return _regenerator().w(function (_context7) {
+        while (1) switch (_context7.p = _context7.n) {
           case 0:
             options = _args7.length > 2 && _args7[2] !== undefined ? _args7[2] : {};
-            _context7.prev = 1;
-            _context7.next = 4;
+            _context7.p = 1;
+            _context7.n = 2;
             return getLatestResponse(workbookId, questionId, options);
-          case 4:
-            latestResponse = _context7.sent;
-            return _context7.abrupt("return", latestResponse !== null);
-          case 8:
-            _context7.prev = 8;
-            _context7.t0 = _context7["catch"](1);
+          case 2:
+            latestResponse = _context7.v;
+            return _context7.a(2, latestResponse !== null);
+          case 3:
+            _context7.p = 3;
+            _t0 = _context7.v;
             logger$7.error({
               fn: 'hasResponse',
               message: "Failed to check if response exists for workbook ".concat(workbookId, ", question ").concat(questionId),
               data: {
                 workbookId: workbookId,
                 questionId: questionId,
-                error: _context7.t0.message
+                error: _t0.message
               }
             });
-            return _context7.abrupt("return", false);
-          case 12:
-          case "end":
-            return _context7.stop();
+            return _context7.a(2, false);
         }
-      }, _callee7, null, [[1, 8]]);
+      }, _callee7, null, [[1, 3]]);
     }));
     return _hasResponse.apply(this, arguments);
   }
-  function getResponseStats(_x12) {
+  function getResponseStats(_x10) {
     return _getResponseStats.apply(this, arguments);
   }
 
@@ -33831,22 +34237,23 @@
    * @returns {Object} Workbook responses data from memory
    */
   function _getResponseStats() {
-    _getResponseStats = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee8(workbookId) {
+    _getResponseStats = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee8(workbookId) {
       var options,
         result,
         responses,
         responsesByQuestion,
         stats,
-        _args8 = arguments;
-      return _regeneratorRuntime().wrap(function _callee8$(_context8) {
-        while (1) switch (_context8.prev = _context8.next) {
+        _args8 = arguments,
+        _t1;
+      return _regenerator().w(function (_context8) {
+        while (1) switch (_context8.p = _context8.n) {
           case 0:
             options = _args8.length > 1 && _args8[1] !== undefined ? _args8[1] : {};
-            _context8.prev = 1;
-            _context8.next = 4;
+            _context8.p = 1;
+            _context8.n = 2;
             return getResponsesForWorkbook(workbookId, options);
-          case 4:
-            result = _context8.sent;
+          case 2:
+            result = _context8.v;
             responses = result.responses || [];
             responsesByQuestion = new Map();
             responses.forEach(function (response) {
@@ -33880,24 +34287,23 @@
                 stats: stats
               }
             });
-            return _context8.abrupt("return", stats);
-          case 15:
-            _context8.prev = 15;
-            _context8.t0 = _context8["catch"](1);
+            return _context8.a(2, stats);
+          case 3:
+            _context8.p = 3;
+            _t1 = _context8.v;
             logger$7.error({
               fn: 'getResponseStats',
               message: "Failed to get response statistics for workbook ".concat(workbookId),
               data: {
                 workbookId: workbookId,
-                error: _context8.t0.message
+                error: _t1.message
               }
             });
-            throw new Error("Failed to get response statistics: ".concat(_context8.t0.message));
-          case 19:
-          case "end":
-            return _context8.stop();
+            throw new Error("Failed to get response statistics: ".concat(_t1.message));
+          case 4:
+            return _context8.a(2);
         }
-      }, _callee8, null, [[1, 15]]);
+      }, _callee8, null, [[1, 3]]);
     }));
     return _getResponseStats.apply(this, arguments);
   }
@@ -33983,7 +34389,7 @@
    * @param {Object} options - Additional options
    * @returns {Promise<Object>} Organized questions and responses data
    */
-  function loadQuestionsAndResponses(_x13) {
+  function loadQuestionsAndResponses(_x11) {
     return _loadQuestionsAndResponses.apply(this, arguments);
   }
 
@@ -33992,7 +34398,7 @@
    * @returns {Object} Questions and responses data from memory
    */
   function _loadQuestionsAndResponses() {
-    _loadQuestionsAndResponses = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee9(workbookId) {
+    _loadQuestionsAndResponses = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee9(workbookId) {
       var options,
         questions,
         questionsData,
@@ -34005,12 +34411,14 @@
         answeredQuestions,
         unansweredQuestions,
         completionPercentage,
-        _args9 = arguments;
-      return _regeneratorRuntime().wrap(function _callee9$(_context9) {
-        while (1) switch (_context9.prev = _context9.next) {
+        _args9 = arguments,
+        _t10,
+        _t11;
+      return _regenerator().w(function (_context9) {
+        while (1) switch (_context9.p = _context9.n) {
           case 0:
             options = _args9.length > 1 && _args9[1] !== undefined ? _args9[1] : {};
-            _context9.prev = 1;
+            _context9.p = 1;
             logger$7.info({
               fn: 'loadQuestionsAndResponses',
               message: "Loading questions and responses for workbook: ".concat(workbookId),
@@ -34023,7 +34431,7 @@
 
             // Check if already loaded for this workbook
             if (!(POWERPOD.workbookQuestionsAndResponses.isLoaded && POWERPOD.workbookQuestionsAndResponses.workbookId === workbookId)) {
-              _context9.next = 8;
+              _context9.n = 2;
               break;
             }
             logger$7.info({
@@ -34033,51 +34441,51 @@
                 workbookId: workbookId
               }
             });
-            return _context9.abrupt("return", getQuestionsAndResponsesFromMemory());
-          case 8:
+            return _context9.a(2, getQuestionsAndResponsesFromMemory());
+          case 2:
             // Load questions using existing chaptersAndQuestionsUtils
             questions = [];
-            _context9.prev = 9;
+            _context9.p = 3;
             if (!isChaptersAndQuestionsLoaded()) {
-              _context9.next = 16;
+              _context9.n = 4;
               break;
             }
             console.log('Questions already loaded, using cached data');
             questionsData = getStoredQuestionsData();
             questions = (questionsData === null || questionsData === void 0 ? void 0 : questionsData.value) || [];
-            _context9.next = 21;
+            _context9.n = 6;
             break;
-          case 16:
+          case 4:
             console.log('Loading questions using loadChaptersAndQuestions');
-            _context9.next = 19;
+            _context9.n = 5;
             return loadChaptersAndQuestions();
-          case 19:
-            result = _context9.sent;
+          case 5:
+            result = _context9.v;
             if (result && result.questionsData) {
               questions = result.questionsData.value || [];
             } else {
               console.warn('Failed to load questions data');
             }
-          case 21:
+          case 6:
             console.log("Loaded ".concat(questions.length, " questions from API"));
-            _context9.next = 27;
+            _context9.n = 8;
             break;
-          case 24:
-            _context9.prev = 24;
-            _context9.t0 = _context9["catch"](9);
+          case 7:
+            _context9.p = 7;
+            _t10 = _context9.v;
             logger$7.warn({
               fn: 'loadQuestionsAndResponses',
               message: 'Failed to load questions, continuing with responses only',
               data: {
                 workbookId: workbookId,
-                error: _context9.t0.message
+                error: _t10.message
               }
             });
-          case 27:
-            _context9.next = 29;
+          case 8:
+            _context9.n = 9;
             return getResponsesForWorkbook(workbookId, options);
-          case 29:
-            responsesResult = _context9.sent;
+          case 9:
+            responsesResult = _context9.v;
             responses = responsesResult.responses || []; // Clear existing data
             POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.clear();
             POWERPOD.workbookQuestionsAndResponses.questionsByChapter.clear();
@@ -34209,29 +34617,28 @@
                 });
               }
             }
-            return _context9.abrupt("return", getQuestionsAndResponsesFromMemory());
-          case 56:
-            _context9.prev = 56;
-            _context9.t1 = _context9["catch"](1);
+            return _context9.a(2, getQuestionsAndResponsesFromMemory());
+          case 10:
+            _context9.p = 10;
+            _t11 = _context9.v;
             logger$7.error({
               fn: 'loadQuestionsAndResponses',
               message: "Failed to load questions and responses for workbook ".concat(workbookId),
               data: {
                 workbookId: workbookId,
-                error: _context9.t1.message
+                error: _t11.message
               }
             });
-            POWERPOD.workbookQuestionsAndResponses.error = _context9.t1.message || 'Failed to load questions and responses';
-            throw _context9.t1;
-          case 61:
-            _context9.prev = 61;
+            POWERPOD.workbookQuestionsAndResponses.error = _t11.message || 'Failed to load questions and responses';
+            throw _t11;
+          case 11:
+            _context9.p = 11;
             POWERPOD.workbookQuestionsAndResponses.isLoading = false;
-            return _context9.finish(61);
-          case 64:
-          case "end":
-            return _context9.stop();
+            return _context9.f(11);
+          case 12:
+            return _context9.a(2);
         }
-      }, _callee9, null, [[1, 56, 61, 64], [9, 24]]);
+      }, _callee9, null, [[3, 7], [1, 10, 11, 12]]);
     }));
     return _loadQuestionsAndResponses.apply(this, arguments);
   }
@@ -34521,7 +34928,7 @@
   });
 
   // src/components/details/details.styles.ts
-  var details_styles_default = i$4`
+  var details_styles_default = i$6`
   :host {
     display: block;
   }
@@ -34631,8 +35038,9 @@
       this.detailsObserver.observe(this.details, { attributes: true });
     }
     disconnectedCallback() {
+      var _a;
       super.disconnectedCallback();
-      this.detailsObserver.disconnect();
+      (_a = this.detailsObserver) == null ? void 0 : _a.disconnect();
     }
     handleSummaryClick(event) {
       event.preventDefault();
@@ -34713,7 +35121,7 @@
       return x`
       <details
         part="base"
-        class=${e$3({
+        class=${e$2({
       details: true,
       "details--open": this.open,
       "details--disabled": this.disabled,
@@ -34756,16 +35164,16 @@
     "sl-icon": SlIcon
   };
   __decorateClass([
-    e$5(".details")
+    e$4(".details")
   ], SlDetails.prototype, "details", 2);
   __decorateClass([
-    e$5(".details__header")
+    e$4(".details__header")
   ], SlDetails.prototype, "header", 2);
   __decorateClass([
-    e$5(".details__body")
+    e$4(".details__body")
   ], SlDetails.prototype, "body", 2);
   __decorateClass([
-    e$5(".details__expand-icon-slot")
+    e$4(".details__expand-icon-slot")
   ], SlDetails.prototype, "expandIconSlot", 2);
   __decorateClass([
     n$2({ type: Boolean, reflect: true })
@@ -34797,7 +35205,7 @@
   SlDetails.define("sl-details");
 
   // src/components/progress-bar/progress-bar.styles.ts
-  var progress_bar_styles_default = i$4`
+  var progress_bar_styles_default = i$6`
   :host {
     --height: 1rem;
     --track-color: var(--sl-color-neutral-200);
@@ -34885,7 +35293,7 @@
    * @license
    * Copyright 2018 Google LLC
    * SPDX-License-Identifier: BSD-3-Clause
-   */const n="important",i=" !"+n,o=e$4(class extends i$1{constructor(t$1){if(super(t$1),t$1.type!==t.ATTRIBUTE||"style"!==t$1.name||t$1.strings?.length>2)throw Error("The `styleMap` directive must be used in the `style` attribute and must be the only part in the attribute.")}render(t){return Object.keys(t).reduce(((e,r)=>{const s=t[r];return null==s?e:e+`${r=r.includes("-")?r:r.replace(/(?:^(webkit|moz|ms|o)|)(?=[A-Z])/g,"-$&").toLowerCase()}:${s};`}),"")}update(e,[r]){const{style:s}=e.element;if(void 0===this.ft)return this.ft=new Set(Object.keys(r)),this.render(r);for(const t of this.ft)null==r[t]&&(this.ft.delete(t),t.includes("-")?s.removeProperty(t):s[t]=null);for(const t in r){const e=r[t];if(null!=e){this.ft.add(t);const r="string"==typeof e&&e.endsWith(i);t.includes("-")||r?s.setProperty(t,r?e.slice(0,-11):e,r?n:""):s[t]=e;}}return w}});
+   */const n="important",i=" !"+n,o=e$3(class extends i$2{constructor(t$1){if(super(t$1),t$1.type!==t.ATTRIBUTE||"style"!==t$1.name||t$1.strings?.length>2)throw Error("The `styleMap` directive must be used in the `style` attribute and must be the only part in the attribute.")}render(t){return Object.keys(t).reduce(((e,r)=>{const s=t[r];return null==s?e:e+`${r=r.includes("-")?r:r.replace(/(?:^(webkit|moz|ms|o)|)(?=[A-Z])/g,"-$&").toLowerCase()}:${s};`}),"")}update(e,[r]){const{style:s}=e.element;if(void 0===this.ft)return this.ft=new Set(Object.keys(r)),this.render(r);for(const t of this.ft)null==r[t]&&(this.ft.delete(t),t.includes("-")?s.removeProperty(t):s[t]=null);for(const t in r){const e=r[t];if(null!=e){this.ft.add(t);const r="string"==typeof e&&e.endsWith(i);t.includes("-")||r?s.setProperty(t,r?e.slice(0,-11):e,r?n:""):s[t]=e;}}return T}});
 
   var SlProgressBar = class extends ShoelaceElement {
     constructor() {
@@ -34899,7 +35307,7 @@
       return x`
       <div
         part="base"
-        class=${e$3({
+        class=${e$2({
       "progress-bar": true,
       "progress-bar--indeterminate": this.indeterminate,
       "progress-bar--rtl": this.localize.dir() === "rtl"
@@ -34932,7 +35340,7 @@
   SlProgressBar.define("sl-progress-bar");
 
   // src/components/tab-group/tab-group.styles.ts
-  var tab_group_styles_default = i$4`
+  var tab_group_styles_default = i$6`
   :host {
     --indicator-color: var(--sl-color-primary-600);
     --track-color: var(--sl-color-neutral-200);
@@ -34961,6 +35369,11 @@
   .tab-group--has-scroll-controls .tab-group__nav-container {
     position: relative;
     padding: 0 var(--sl-spacing-x-large);
+  }
+
+  .tab-group--has-scroll-controls .tab-group__scroll-button--start--hidden,
+  .tab-group--has-scroll-controls .tab-group__scroll-button--end--hidden {
+    visibility: hidden;
   }
 
   .tab-group__body {
@@ -35163,16 +35576,90 @@
   }
 `;
 
+  // src/components/resize-observer/resize-observer.styles.ts
+  var resize_observer_styles_default = i$6`
+  :host {
+    display: contents;
+  }
+`;
+
+  var SlResizeObserver = class extends ShoelaceElement {
+    constructor() {
+      super(...arguments);
+      this.observedElements = [];
+      this.disabled = false;
+    }
+    connectedCallback() {
+      super.connectedCallback();
+      this.resizeObserver = new ResizeObserver((entries) => {
+        this.emit("sl-resize", { detail: { entries } });
+      });
+      if (!this.disabled) {
+        this.startObserver();
+      }
+    }
+    disconnectedCallback() {
+      super.disconnectedCallback();
+      this.stopObserver();
+    }
+    handleSlotChange() {
+      if (!this.disabled) {
+        this.startObserver();
+      }
+    }
+    startObserver() {
+      const slot = this.shadowRoot.querySelector("slot");
+      if (slot !== null) {
+        const elements = slot.assignedElements({ flatten: true });
+        this.observedElements.forEach((el) => this.resizeObserver.unobserve(el));
+        this.observedElements = [];
+        elements.forEach((el) => {
+          this.resizeObserver.observe(el);
+          this.observedElements.push(el);
+        });
+      }
+    }
+    stopObserver() {
+      this.resizeObserver.disconnect();
+    }
+    handleDisabledChange() {
+      if (this.disabled) {
+        this.stopObserver();
+      } else {
+        this.startObserver();
+      }
+    }
+    render() {
+      return x` <slot @slotchange=${this.handleSlotChange}></slot> `;
+    }
+  };
+  SlResizeObserver.styles = [component_styles_default, resize_observer_styles_default];
+  __decorateClass([
+    n$2({ type: Boolean, reflect: true })
+  ], SlResizeObserver.prototype, "disabled", 2);
+  __decorateClass([
+    watch("disabled", { waitUntilFirstUpdate: true })
+  ], SlResizeObserver.prototype, "handleDisabledChange", 1);
+
   var SlTabGroup = class extends ShoelaceElement {
     constructor() {
       super(...arguments);
-      this.localize = new LocalizeController(this);
       this.tabs = [];
+      this.focusableTabs = [];
       this.panels = [];
+      this.localize = new LocalizeController(this);
       this.hasScrollControls = false;
+      this.shouldHideScrollStartButton = false;
+      this.shouldHideScrollEndButton = false;
       this.placement = "top";
       this.activation = "auto";
       this.noScrollControls = false;
+      this.fixedScrollControls = false;
+      /**
+       * The reality of the browser means that we can't expect the scroll position to be exactly what we want it to be, so
+       * we add one pixel of wiggle room to our calculations.
+       */
+      this.scrollOffset = 1;
     }
     connectedCallback() {
       const whenAllDefined = Promise.all([
@@ -35185,16 +35672,36 @@
         this.updateScrollControls();
       });
       this.mutationObserver = new MutationObserver((mutations) => {
-        if (mutations.some((m) => !["aria-labelledby", "aria-controls"].includes(m.attributeName))) {
+        const instanceMutations = mutations.filter(({ target }) => {
+          if (target === this) return true;
+          if (target.closest("sl-tab-group") !== this) return false;
+          const tagName = target.tagName.toLowerCase();
+          return tagName === "sl-tab" || tagName === "sl-tab-panel";
+        });
+        if (instanceMutations.length === 0) {
+          return;
+        }
+        if (instanceMutations.some((m) => !["aria-labelledby", "aria-controls"].includes(m.attributeName))) {
           setTimeout(() => this.setAriaLabels());
         }
-        if (mutations.some((m) => m.attributeName === "disabled")) {
+        if (instanceMutations.some((m) => m.attributeName === "disabled")) {
           this.syncTabsAndPanels();
+        } else if (instanceMutations.some((m) => m.attributeName === "active")) {
+          const tabs = instanceMutations.filter((m) => m.attributeName === "active" && m.target.tagName.toLowerCase() === "sl-tab").map((m) => m.target);
+          const newActiveTab = tabs.find((tab) => tab.active);
+          if (newActiveTab) {
+            this.setActiveTab(newActiveTab);
+          }
         }
       });
       this.updateComplete.then(() => {
         this.syncTabsAndPanels();
-        this.mutationObserver.observe(this, { attributes: true, childList: true, subtree: true });
+        this.mutationObserver.observe(this, {
+          attributes: true,
+          attributeFilter: ["active", "disabled", "name", "panel"],
+          childList: true,
+          subtree: true
+        });
         this.resizeObserver.observe(this.nav);
         whenAllDefined.then(() => {
           const intersectionObserver = new IntersectionObserver((entries, observer) => {
@@ -35210,15 +35717,16 @@
       });
     }
     disconnectedCallback() {
+      var _a, _b;
       super.disconnectedCallback();
-      this.mutationObserver.disconnect();
-      this.resizeObserver.unobserve(this.nav);
+      (_a = this.mutationObserver) == null ? void 0 : _a.disconnect();
+      if (this.nav) {
+        (_b = this.resizeObserver) == null ? void 0 : _b.unobserve(this.nav);
+      }
     }
-    getAllTabs(options = { includeDisabled: true }) {
+    getAllTabs() {
       const slot = this.shadowRoot.querySelector('slot[name="nav"]');
-      return [...slot.assignedElements()].filter((el) => {
-        return options.includeDisabled ? el.tagName.toLowerCase() === "sl-tab" : el.tagName.toLowerCase() === "sl-tab" && !el.disabled;
-      });
+      return slot.assignedElements();
     }
     getAllPanels() {
       return [...this.body.assignedElements()].filter((el) => el.tagName.toLowerCase() === "sl-tab-panel");
@@ -35253,29 +35761,33 @@
       if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Home", "End"].includes(event.key)) {
         const activeEl = this.tabs.find((t) => t.matches(":focus"));
         const isRtl = this.localize.dir() === "rtl";
+        let nextTab = null;
         if ((activeEl == null ? void 0 : activeEl.tagName.toLowerCase()) === "sl-tab") {
-          let index = this.tabs.indexOf(activeEl);
           if (event.key === "Home") {
-            index = 0;
+            nextTab = this.focusableTabs[0];
           } else if (event.key === "End") {
-            index = this.tabs.length - 1;
+            nextTab = this.focusableTabs[this.focusableTabs.length - 1];
           } else if (["top", "bottom"].includes(this.placement) && event.key === (isRtl ? "ArrowRight" : "ArrowLeft") || ["start", "end"].includes(this.placement) && event.key === "ArrowUp") {
-            index--;
+            const currentIndex = this.tabs.findIndex((el) => el === activeEl);
+            nextTab = this.findNextFocusableTab(currentIndex, "backward");
           } else if (["top", "bottom"].includes(this.placement) && event.key === (isRtl ? "ArrowLeft" : "ArrowRight") || ["start", "end"].includes(this.placement) && event.key === "ArrowDown") {
-            index++;
+            const currentIndex = this.tabs.findIndex((el) => el === activeEl);
+            nextTab = this.findNextFocusableTab(currentIndex, "forward");
           }
-          if (index < 0) {
-            index = this.tabs.length - 1;
+          if (!nextTab) {
+            return;
           }
-          if (index > this.tabs.length - 1) {
-            index = 0;
-          }
-          this.tabs[index].focus({ preventScroll: true });
+          nextTab.tabIndex = 0;
+          nextTab.focus({ preventScroll: true });
           if (this.activation === "auto") {
-            this.setActiveTab(this.tabs[index], { scrollBehavior: "smooth" });
+            this.setActiveTab(nextTab, { scrollBehavior: "smooth" });
+          } else {
+            this.tabs.forEach((tabEl) => {
+              tabEl.tabIndex = tabEl === nextTab ? 0 : -1;
+            });
           }
           if (["top", "bottom"].includes(this.placement)) {
-            scrollIntoView(this.tabs[index], this.nav, "horizontal");
+            scrollIntoView(nextTab, this.nav, "horizontal");
           }
           event.preventDefault();
         }
@@ -35301,7 +35813,10 @@
       if (tab !== this.activeTab && !tab.disabled) {
         const previousTab = this.activeTab;
         this.activeTab = tab;
-        this.tabs.forEach((el) => el.active = el === this.activeTab);
+        this.tabs.forEach((el) => {
+          el.active = el === this.activeTab;
+          el.tabIndex = el === this.activeTab ? 0 : -1;
+        });
         this.panels.forEach((el) => {
           var _a;
           return el.active = el.name === ((_a = this.activeTab) == null ? void 0 : _a.panel);
@@ -35361,10 +35876,44 @@
     }
     // This stores tabs and panels so we can refer to a cache instead of calling querySelectorAll() multiple times.
     syncTabsAndPanels() {
-      this.tabs = this.getAllTabs({ includeDisabled: false });
+      this.tabs = this.getAllTabs();
+      this.focusableTabs = this.tabs.filter((el) => !el.disabled);
       this.panels = this.getAllPanels();
       this.syncIndicator();
       this.updateComplete.then(() => this.updateScrollControls());
+    }
+    findNextFocusableTab(currentIndex, direction) {
+      let nextTab = null;
+      const iterator = direction === "forward" ? 1 : -1;
+      let nextIndex = currentIndex + iterator;
+      while (currentIndex < this.tabs.length) {
+        nextTab = this.tabs[nextIndex] || null;
+        if (nextTab === null) {
+          if (direction === "forward") {
+            nextTab = this.focusableTabs[0];
+          } else {
+            nextTab = this.focusableTabs[this.focusableTabs.length - 1];
+          }
+          break;
+        }
+        if (!nextTab.disabled) {
+          break;
+        }
+        nextIndex += iterator;
+      }
+      return nextTab;
+    }
+    updateScrollButtons() {
+      if (this.hasScrollControls && !this.fixedScrollControls) {
+        this.shouldHideScrollStartButton = this.scrollFromStart() <= this.scrollOffset;
+        this.shouldHideScrollEndButton = this.isScrolledToEnd();
+      }
+    }
+    isScrolledToEnd() {
+      return this.scrollFromStart() + this.nav.clientWidth >= this.nav.scrollWidth - this.scrollOffset;
+    }
+    scrollFromStart() {
+      return this.localize.dir() === "rtl" ? -this.nav.scrollLeft : this.nav.scrollLeft;
     }
     updateScrollControls() {
       if (this.noScrollControls) {
@@ -35372,6 +35921,7 @@
       } else {
         this.hasScrollControls = ["top", "bottom"].includes(this.placement) && this.nav.scrollWidth > this.nav.clientWidth + 1;
       }
+      this.updateScrollButtons();
     }
     syncIndicator() {
       const tab = this.getActiveTab();
@@ -35394,7 +35944,7 @@
       return x`
       <div
         part="base"
-        class=${e$3({
+        class=${e$2({
       "tab-group": true,
       "tab-group--top": this.placement === "top",
       "tab-group--bottom": this.placement === "bottom",
@@ -35411,18 +35961,26 @@
                 <sl-icon-button
                   part="scroll-button scroll-button--start"
                   exportparts="base:scroll-button__base"
-                  class="tab-group__scroll-button tab-group__scroll-button--start"
+                  class=${e$2({
+      "tab-group__scroll-button": true,
+      "tab-group__scroll-button--start": true,
+      "tab-group__scroll-button--start--hidden": this.shouldHideScrollStartButton
+    })}
                   name=${isRtl ? "chevron-right" : "chevron-left"}
                   library="system"
+                  tabindex="-1"
+                  aria-hidden="true"
                   label=${this.localize.term("scrollToStart")}
                   @click=${this.handleScrollToStart}
                 ></sl-icon-button>
               ` : ""}
 
-          <div class="tab-group__nav">
+          <div class="tab-group__nav" @scrollend=${this.updateScrollButtons}>
             <div part="tabs" class="tab-group__tabs" role="tablist">
               <div part="active-tab-indicator" class="tab-group__indicator"></div>
-              <slot name="nav" @slotchange=${this.syncTabsAndPanels}></slot>
+              <sl-resize-observer @sl-resize=${this.syncIndicator}>
+                <slot name="nav" @slotchange=${this.syncTabsAndPanels}></slot>
+              </sl-resize-observer>
             </div>
           </div>
 
@@ -35430,9 +35988,15 @@
                 <sl-icon-button
                   part="scroll-button scroll-button--end"
                   exportparts="base:scroll-button__base"
-                  class="tab-group__scroll-button tab-group__scroll-button--end"
+                  class=${e$2({
+      "tab-group__scroll-button": true,
+      "tab-group__scroll-button--end": true,
+      "tab-group__scroll-button--end--hidden": this.shouldHideScrollEndButton
+    })}
                   name=${isRtl ? "chevron-left" : "chevron-right"}
                   library="system"
+                  tabindex="-1"
+                  aria-hidden="true"
                   label=${this.localize.term("scrollToEnd")}
                   @click=${this.handleScrollToEnd}
                 ></sl-icon-button>
@@ -35445,22 +36009,28 @@
     }
   };
   SlTabGroup.styles = [component_styles_default, tab_group_styles_default];
-  SlTabGroup.dependencies = { "sl-icon-button": SlIconButton };
+  SlTabGroup.dependencies = { "sl-icon-button": SlIconButton, "sl-resize-observer": SlResizeObserver };
   __decorateClass([
-    e$5(".tab-group")
+    e$4(".tab-group")
   ], SlTabGroup.prototype, "tabGroup", 2);
   __decorateClass([
-    e$5(".tab-group__body")
+    e$4(".tab-group__body")
   ], SlTabGroup.prototype, "body", 2);
   __decorateClass([
-    e$5(".tab-group__nav")
+    e$4(".tab-group__nav")
   ], SlTabGroup.prototype, "nav", 2);
   __decorateClass([
-    e$5(".tab-group__indicator")
+    e$4(".tab-group__indicator")
   ], SlTabGroup.prototype, "indicator", 2);
   __decorateClass([
     r()
   ], SlTabGroup.prototype, "hasScrollControls", 2);
+  __decorateClass([
+    r()
+  ], SlTabGroup.prototype, "shouldHideScrollStartButton", 2);
+  __decorateClass([
+    r()
+  ], SlTabGroup.prototype, "shouldHideScrollEndButton", 2);
   __decorateClass([
     n$2()
   ], SlTabGroup.prototype, "placement", 2);
@@ -35471,6 +36041,12 @@
     n$2({ attribute: "no-scroll-controls", type: Boolean })
   ], SlTabGroup.prototype, "noScrollControls", 2);
   __decorateClass([
+    n$2({ attribute: "fixed-scroll-controls", type: Boolean })
+  ], SlTabGroup.prototype, "fixedScrollControls", 2);
+  __decorateClass([
+    t$1({ passive: true })
+  ], SlTabGroup.prototype, "updateScrollButtons", 1);
+  __decorateClass([
     watch("noScrollControls", { waitUntilFirstUpdate: true })
   ], SlTabGroup.prototype, "updateScrollControls", 1);
   __decorateClass([
@@ -35479,8 +36055,68 @@
 
   SlTabGroup.define("sl-tab-group");
 
+  // src/internal/scrollend-polyfill.ts
+  var debounce = (fn, delay) => {
+    let timerId = 0;
+    return function(...args) {
+      window.clearTimeout(timerId);
+      timerId = window.setTimeout(() => {
+        fn.call(this, ...args);
+      }, delay);
+    };
+  };
+  var decorate = (proto, method, decorateFn) => {
+    const superFn = proto[method];
+    proto[method] = function(...args) {
+      superFn.call(this, ...args);
+      decorateFn.call(this, superFn, ...args);
+    };
+  };
+  (() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+    const isSupported = "onscrollend" in window;
+    if (!isSupported) {
+      const pointers = /* @__PURE__ */ new Set();
+      const scrollHandlers = /* @__PURE__ */ new WeakMap();
+      const handlePointerDown = (event) => {
+        for (const touch of event.changedTouches) {
+          pointers.add(touch.identifier);
+        }
+      };
+      const handlePointerUp = (event) => {
+        for (const touch of event.changedTouches) {
+          pointers.delete(touch.identifier);
+        }
+      };
+      document.addEventListener("touchstart", handlePointerDown, true);
+      document.addEventListener("touchend", handlePointerUp, true);
+      document.addEventListener("touchcancel", handlePointerUp, true);
+      decorate(EventTarget.prototype, "addEventListener", function(addEventListener, type) {
+        if (type !== "scrollend") return;
+        const handleScrollEnd = debounce(() => {
+          if (!pointers.size) {
+            this.dispatchEvent(new Event("scrollend"));
+          } else {
+            handleScrollEnd();
+          }
+        }, 100);
+        addEventListener.call(this, "scroll", handleScrollEnd, { passive: true });
+        scrollHandlers.set(this, handleScrollEnd);
+      });
+      decorate(EventTarget.prototype, "removeEventListener", function(removeEventListener, type) {
+        if (type !== "scrollend") return;
+        const scrollHandler = scrollHandlers.get(this);
+        if (scrollHandler) {
+          removeEventListener.call(this, "scroll", scrollHandler, { passive: true });
+        }
+      });
+    }
+  })();
+
   // src/components/tab/tab.styles.ts
-  var tab_styles_default = i$4`
+  var tab_styles_default = i$6`
   :host {
     display: inline-block;
   }
@@ -35507,15 +36143,12 @@
     color: var(--sl-color-primary-600);
   }
 
-  .tab:focus {
-    outline: none;
+  :host(:focus) {
+    outline: transparent;
   }
 
-  .tab:focus-visible:not(.tab--disabled) {
+  :host(:focus-visible) {
     color: var(--sl-color-primary-600);
-  }
-
-  .tab:focus-visible {
     outline: var(--sl-focus-ring);
     outline-offset: calc(-1 * var(--sl-focus-ring-width) - var(--sl-focus-ring-offset));
   }
@@ -35561,6 +36194,7 @@
       this.active = false;
       this.closable = false;
       this.disabled = false;
+      this.tabIndex = 0;
     }
     connectedCallback() {
       super.connectedCallback();
@@ -35575,27 +36209,23 @@
     }
     handleDisabledChange() {
       this.setAttribute("aria-disabled", this.disabled ? "true" : "false");
-    }
-    /** Sets focus to the tab. */
-    focus(options) {
-      this.tab.focus(options);
-    }
-    /** Removes focus from the tab. */
-    blur() {
-      this.tab.blur();
+      if (this.disabled && !this.active) {
+        this.tabIndex = -1;
+      } else {
+        this.tabIndex = 0;
+      }
     }
     render() {
       this.id = this.id.length > 0 ? this.id : this.componentId;
       return x`
       <div
         part="base"
-        class=${e$3({
+        class=${e$2({
       tab: true,
       "tab--active": this.active,
       "tab--closable": this.closable,
       "tab--disabled": this.disabled
     })}
-        tabindex=${this.disabled ? "-1" : "0"}
       >
         <slot></slot>
         ${this.closable ? x`
@@ -35617,7 +36247,7 @@
   SlTab.styles = [component_styles_default, tab_styles_default];
   SlTab.dependencies = { "sl-icon-button": SlIconButton };
   __decorateClass([
-    e$5(".tab")
+    e$4(".tab")
   ], SlTab.prototype, "tab", 2);
   __decorateClass([
     n$2({ reflect: true })
@@ -35626,11 +36256,14 @@
     n$2({ type: Boolean, reflect: true })
   ], SlTab.prototype, "active", 2);
   __decorateClass([
-    n$2({ type: Boolean })
+    n$2({ type: Boolean, reflect: true })
   ], SlTab.prototype, "closable", 2);
   __decorateClass([
     n$2({ type: Boolean, reflect: true })
   ], SlTab.prototype, "disabled", 2);
+  __decorateClass([
+    n$2({ type: Number, reflect: true })
+  ], SlTab.prototype, "tabIndex", 2);
   __decorateClass([
     watch("active")
   ], SlTab.prototype, "handleActiveChange", 1);
@@ -35641,7 +36274,7 @@
   SlTab.define("sl-tab");
 
   // src/components/tab-panel/tab-panel.styles.ts
-  var tab_panel_styles_default = i$4`
+  var tab_panel_styles_default = i$6`
   :host {
     --padding: 0;
 
@@ -35679,7 +36312,7 @@
       return x`
       <slot
         part="base"
-        class=${e$3({
+        class=${e$2({
       "tab-panel": true,
       "tab-panel--active": this.active
     })}
@@ -35701,13 +36334,13 @@
   SlTabPanel.define("sl-tab-panel");
 
   // src/components/textarea/textarea.styles.ts
-  var textarea_styles_default = i$4`
+  var textarea_styles_default = i$6`
   :host {
     display: block;
   }
 
   .textarea {
-    display: flex;
+    display: grid;
     align-items: center;
     position: relative;
     width: 100%;
@@ -35756,6 +36389,17 @@
     cursor: not-allowed;
   }
 
+  .textarea__control,
+  .textarea__size-adjuster {
+    grid-area: 1 / 1 / 2 / 2;
+  }
+
+  .textarea__size-adjuster {
+    visibility: hidden;
+    pointer-events: none;
+    opacity: 0;
+  }
+
   .textarea--standard.textarea--disabled .textarea__control {
     color: var(--sl-input-color-disabled);
   }
@@ -35788,7 +36432,6 @@
   }
 
   .textarea__control {
-    flex: 1 1 auto;
     font-family: inherit;
     font-size: inherit;
     font-weight: inherit;
@@ -35868,11 +36511,31 @@
   }
 `;
 
+  // src/internal/default-value.ts
+  var defaultValue = (propertyName = "value") => (proto, key) => {
+    const ctor = proto.constructor;
+    const attributeChangedCallback = ctor.prototype.attributeChangedCallback;
+    ctor.prototype.attributeChangedCallback = function(name, old, value) {
+      var _a;
+      const options = ctor.getPropertyOptions(propertyName);
+      const attributeName = typeof options.attribute === "string" ? options.attribute : propertyName;
+      if (name === attributeName) {
+        const converter = options.converter || u$3;
+        const fromAttribute = typeof converter === "function" ? converter : (_a = converter == null ? void 0 : converter.fromAttribute) != null ? _a : u$3.fromAttribute;
+        const newValue = fromAttribute(value, options.type);
+        if (this[propertyName] !== newValue) {
+          this[key] = newValue;
+        }
+      }
+      attributeChangedCallback.call(this, name, old, value);
+    };
+  };
+
   /**
    * @license
    * Copyright 2020 Google LLC
    * SPDX-License-Identifier: BSD-3-Clause
-   */const l=e$4(class extends i$1{constructor(r){if(super(r),r.type!==t.PROPERTY&&r.type!==t.ATTRIBUTE&&r.type!==t.BOOLEAN_ATTRIBUTE)throw Error("The `live` directive is not allowed on child or event bindings");if(!f(r))throw Error("`live` bindings can only contain a single expression")}render(r){return r}update(i,[t$1]){if(t$1===w||t$1===T)return t$1;const o=i.element,l=i.name;if(i.type===t.PROPERTY){if(t$1===o[l])return w}else if(i.type===t.BOOLEAN_ATTRIBUTE){if(!!t$1===o.hasAttribute(l))return w}else if(i.type===t.ATTRIBUTE&&o.getAttribute(l)===t$1+"")return w;return m(i),t$1}});
+   */const l=e$3(class extends i$2{constructor(r){if(super(r),r.type!==t.PROPERTY&&r.type!==t.ATTRIBUTE&&r.type!==t.BOOLEAN_ATTRIBUTE)throw Error("The `live` directive is not allowed on child or event bindings");if(!f(r))throw Error("`live` bindings can only contain a single expression")}render(r){return r}update(i,[t$1]){if(t$1===T||t$1===E)return t$1;const o=i.element,l=i.name;if(i.type===t.PROPERTY){if(t$1===o[l])return T}else if(i.type===t.BOOLEAN_ATTRIBUTE){if(!!t$1===o.hasAttribute(l))return T}else if(i.type===t.ATTRIBUTE&&o.getAttribute(l)===t$1+"")return T;return m(i),t$1}});
 
   var SlTextarea = class extends ShoelaceElement {
     constructor() {
@@ -35919,8 +36582,11 @@
       this.formControlController.updateValidity();
     }
     disconnectedCallback() {
+      var _a;
       super.disconnectedCallback();
-      this.resizeObserver.unobserve(this.input);
+      if (this.input) {
+        (_a = this.resizeObserver) == null ? void 0 : _a.unobserve(this.input);
+      }
     }
     handleBlur() {
       this.hasFocus = false;
@@ -35945,10 +36611,11 @@
     }
     setTextareaHeight() {
       if (this.resize === "auto") {
+        this.sizeAdjuster.style.height = `${this.input.clientHeight}px`;
         this.input.style.height = "auto";
         this.input.style.height = `${this.input.scrollHeight}px`;
       } else {
-        this.input.style.height = void 0;
+        this.input.style.height = "";
       }
     }
     handleDisabledChange() {
@@ -35977,10 +36644,8 @@
     /** Gets or sets the textarea's scroll position. */
     scrollPosition(position) {
       if (position) {
-        if (typeof position.top === "number")
-          this.input.scrollTop = position.top;
-        if (typeof position.left === "number")
-          this.input.scrollLeft = position.left;
+        if (typeof position.top === "number") this.input.scrollTop = position.top;
+        if (typeof position.left === "number") this.input.scrollLeft = position.left;
         return void 0;
       }
       return {
@@ -36027,7 +36692,7 @@
       return x`
       <div
         part="form-control"
-        class=${e$3({
+        class=${e$2({
       "form-control": true,
       "form-control--small": this.size === "small",
       "form-control--medium": this.size === "medium",
@@ -36048,7 +36713,7 @@
         <div part="form-control-input" class="form-control-input">
           <div
             part="base"
-            class=${e$3({
+            class=${e$2({
       textarea: true,
       "textarea--small": this.size === "small",
       "textarea--medium": this.size === "medium",
@@ -36090,6 +36755,8 @@
               @focus=${this.handleFocus}
               @blur=${this.handleBlur}
             ></textarea>
+            <!-- This "adjuster" exists to prevent layout shifting. https://github.com/shoelace-style/shoelace/issues/2180 -->
+            <div part="textarea-adjuster" class="textarea__size-adjuster" ?hidden=${this.resize !== "auto"}></div>
           </div>
         </div>
 
@@ -36107,8 +36774,11 @@
   };
   SlTextarea.styles = [component_styles_default, form_control_styles_default, textarea_styles_default];
   __decorateClass([
-    e$5(".textarea__control")
+    e$4(".textarea__control")
   ], SlTextarea.prototype, "input", 2);
+  __decorateClass([
+    e$4(".textarea__size-adjuster")
+  ], SlTextarea.prototype, "sizeAdjuster", 2);
   __decorateClass([
     r()
   ], SlTextarea.prototype, "hasFocus", 2);
@@ -36203,7 +36873,7 @@
 
   SlTextarea.define("sl-textarea");
 
-  let NavigationButtons = class NavigationButtons extends s$1 {
+  let NavigationButtons = class NavigationButtons extends i$3 {
       constructor() {
           super(...arguments);
           this.isPreviousDisabled = false;
@@ -36261,7 +36931,7 @@
     `;
       }
   };
-  NavigationButtons.styles = i$4 `
+  NavigationButtons.styles = i$6 `
     .navigation-card {
       display: flex;
       gap: 1rem;
@@ -36295,10 +36965,10 @@
       n$2({ type: Number })
   ], NavigationButtons.prototype, "sectionsLength", void 0);
   NavigationButtons = __decorate([
-      t$1('navigation-buttons')
+      t$2('navigation-buttons')
   ], NavigationButtons);
 
-  let RatingQuestion = class RatingQuestion extends s$1 {
+  let RatingQuestion = class RatingQuestion extends i$3 {
       constructor() {
           super(...arguments);
           this.questionId = '';
@@ -36376,7 +37046,7 @@
     `;
       }
   };
-  RatingQuestion.styles = i$4 `
+  RatingQuestion.styles = i$6 `
     .rating-container {
       display: flex;
       flex-direction: column;
@@ -36504,7 +37174,7 @@
       r()
   ], RatingQuestion.prototype, "hoveredValue", void 0);
   RatingQuestion = __decorate([
-      t$1('rating-question')
+      t$2('rating-question')
   ], RatingQuestion);
 
   // Create logger instance for EFP event utilities
@@ -36638,8 +37308,8 @@
               }
           }
           else {
-              // Subchapter: prepend order number
-              return `${order} ${titleCase}`;
+              // Task 8138: We no longer want to add the order number to the title for subchapters.
+              return `${titleCase}`;
           }
       }
       static truncateText(text, maxLength) {
@@ -36800,12 +37470,12 @@
       static getFlatStepsFromSections(sections) {
           const result = [];
           const collect = (items, sectionIndex) => {
-              var _a, _b;
+              var _a, _b, _c;
               for (const item of items) {
                   if ('items' in item && Array.isArray(item.items)) {
                       result.push({
                           label: item.title || item.label,
-                          content: '',
+                          content: (_a = item.content) !== null && _a !== void 0 ? _a : '',
                           sectionIndex,
                           isContainer: true,
                       });
@@ -36814,8 +37484,8 @@
                   else {
                       const stepItem = {
                           label: item.label,
-                          content: (_a = item.content) !== null && _a !== void 0 ? _a : '',
-                          complete: (_b = item.complete) !== null && _b !== void 0 ? _b : false,
+                          content: (_b = item.content) !== null && _b !== void 0 ? _b : '',
+                          complete: (_c = item.complete) !== null && _c !== void 0 ? _c : false,
                           sectionIndex,
                       };
                       if (item.chapterData) {
@@ -36920,19 +37590,18 @@
 
   class EFPSectionGenerator {
       static renderSubchapterContent(subchapter) {
-          var _a, _b;
-          const subSubchaptersCount = ((_a = subchapter.subchapters) === null || _a === void 0 ? void 0 : _a.length) || 0;
-          const subSubchaptersInfo = subSubchaptersCount > 0
-              ? `<p style="font-family: var(--body-font); font-weight: 500; color: var(--sl-color-neutral-600); margin: 0;"><strong>Sub-sections:</strong> ${subSubchaptersCount}</p>`
-              : '';
+          var _a;
+          ((_a = subchapter.subchapters) === null || _a === void 0 ? void 0 : _a.length) || 0;
           return `
       <div class="subchapter-content">
-        <h3 style="font-family: var(--chapter-font); font-weight: 600; font-size: 1.5rem; color: var(--sl-color-neutral-800); margin-bottom: 1rem;">${subchapter.name || subchapter.label}</h3>
         <div style="font-family: var(--body-font); line-height: 1.6; color: var(--sl-color-neutral-700); margin-bottom: 1rem;">${subchapter.description || ''}</div>
-        <div style="display: flex; gap: 2rem; margin-bottom: 1rem;">
-          <p style="font-family: var(--body-font); font-weight: 500; color: var(--sl-color-neutral-600); margin: 0;"><strong>Questions:</strong> ${((_b = subchapter.questions) === null || _b === void 0 ? void 0 : _b.length) || 0}</p>
-          ${subSubchaptersInfo}
-        </div>
+      </div>
+    `;
+      }
+      static renderSubchapterContainerContent(subchapter) {
+          return `
+      <div class="subchapter-content">
+        <div style="font-family: var(--body-font); line-height: 1.6; color: var(--sl-color-neutral-700); margin-bottom: 1rem;">${subchapter.description || ''}</div>
       </div>
     `;
       }
@@ -36950,22 +37619,36 @@
       </div>
     `;
       }
+      static renderChapterContainerContent(chapter) {
+          return `
+      <div class="chapter-content">
+        <div style="font-family: var(--body-font); line-height: 1.6; color: var(--sl-color-neutral-700); margin-bottom: 1.5rem; font-size: 1.05rem;">${chapter.description || ''}</div>
+      </div>
+    `;
+      }
   }
 
   class EFPRenderUtils {
-      static renderMainContent(currentSectionIndex, flatSteps, currentStepIndex, activeContent, html, unsafeHTML, renderSubchapter, renderChapter) {
+      static renderMainContent(currentSectionIndex, flatSteps, currentStepIndex, activeContent, html, unsafeHTML, renderSubchapter, renderChapter, renderContainerSubchapter, renderContainerChapter) {
           // Check if we're in Section B and have a chapter to render
           if (currentSectionIndex === 1) {
               // Section B is index 1
               const currentStep = flatSteps[currentStepIndex];
               // Check if it's a container item (should not be selectable)
               if (currentStep && 'isContainer' in currentStep && currentStep.isContainer) {
-                  return html `
-          <div class="container-message">
-            <h3>Please select a specific chapter section from the navigation</h3>
-            <p>This is a chapter container. Click on one of the specific sections in the navigation to view its content.</p>
-          </div>
-        `;
+                  /*         return html`
+                            <div class="container-message">
+                              <h3>Please select a specific chapter section from the navigation</h3>
+                              <p>This is a chapter container. Click on one of the specific sections in the navigation to view its content.</p>
+                            </div>
+                          `; */
+                  if (currentStep && 'subchapterData' in currentStep) {
+                      return renderContainerSubchapter(currentStep.subchapterData);
+                  }
+                  // Check if it's a main chapter
+                  else if (currentStep && 'chapterData' in currentStep) {
+                      return renderContainerChapter(currentStep.chapterData);
+                  }
               }
               // Check if it's a subchapter
               else if (currentStep && 'subchapterData' in currentStep) {
@@ -37049,7 +37732,7 @@
       }
   }
 
-  const efpEntryFormStyles = i$4 `
+  const efpEntryFormStyles = i$6 `
   @import url('https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@400;500;600;700&display=swap');
   @import url('https://cdn.jsdelivr.net/npm/@bcgov/bc-sans@2.0.0/css/BCSans.css');
 
@@ -37368,7 +38051,7 @@
 
   // Create logger instance for EFP components
   const logger$4 = Logger('components/EFPEntryForm');
-  let EFPEntryForm = class EFPEntryForm extends s$1 {
+  let EFPEntryForm = class EFPEntryForm extends i$3 {
       constructor() {
           super(...arguments);
           this.currentSectionIndex = 0;
@@ -37657,6 +38340,15 @@
       ${subchapter.subchapters ? subchapter.subchapters.map((subSubchapter) => this.renderSubSubchapter(subSubchapter)) : ''}
     `;
       }
+      renderContainerSubchapter(subchapter) {
+          return x `
+      ${subchapter.description ? x `
+        <div class="subchapter-header">
+          <div>${o$1(subchapter.description)}</div>
+        </div>
+      ` : ''}
+    `;
+      }
       renderSubSubchapter(subSubchapter) {
           return x `
       ${subSubchapter.description ? x `
@@ -37681,8 +38373,17 @@
       ${(chapter === null || chapter === void 0 ? void 0 : chapter.subchapters) ? chapter.subchapters.map((subchapter) => this.renderSubchapter(subchapter)) : ''}
     `;
       }
+      renderContainerChapter(chapter) {
+          return x `
+      ${(chapter === null || chapter === void 0 ? void 0 : chapter.description) ? x `
+        <div class="chapter-header">
+          <div>${o$1(chapter.description)}</div>
+        </div>
+      ` : ''}
+    `;
+      }
       renderMainContent() {
-          return EFPRenderUtils.renderMainContent(this.currentSectionIndex, this.flatSteps, this.currentStepIndex, this.activeContent, x, o$1, (subchapterData) => this.renderSubchapter(subchapterData), (chapterData) => this.renderChapter(chapterData));
+          return EFPRenderUtils.renderMainContent(this.currentSectionIndex, this.flatSteps, this.currentStepIndex, this.activeContent, x, o$1, (subchapterData) => this.renderSubchapter(subchapterData), (chapterData) => this.renderChapter(chapterData), (subchapterData) => this.renderContainerSubchapter(subchapterData), (chapterData) => this.renderContainerChapter(chapterData));
       }
       // Generate Section B items directly from questionnaire store
       getSectionBItemsFromStore() {
@@ -37710,7 +38411,7 @@
               const chapterItem = {
                   label: EFPTextUtils.formatChapterTitle(chapter),
                   title: EFPTextUtils.formatChapterTitle(chapter),
-                  content: '', // No content for the parent container
+                  content: EFPSectionGenerator.renderChapterContainerContent(chapter), // We now want to display the description for containers
                   complete: chapter.complete || false, // Use completion from store
                   isContainer: true,
                   chapterId: chapter.id, // Store chapter ID for completion lookup
@@ -38685,10 +39386,10 @@
       n$2({ type: Object })
   ], EFPEntryForm.prototype, "activeContent", void 0);
   __decorate([
-      e$5('sl-tab-group')
+      e$4('sl-tab-group')
   ], EFPEntryForm.prototype, "tabGroupEl", void 0);
   EFPEntryForm = __decorate([
-      t$1('efp-entry-form')
+      t$2('efp-entry-form')
   ], EFPEntryForm);
 
   var logger$3 = Logger('workbook/workbook');
@@ -38755,30 +39456,30 @@
 
   // Function to insert the element
   function _initWorkbook() {
-    _initWorkbook = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee() {
+    _initWorkbook = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee() {
       var existingToken, workbookId, nestedStructure, _workbookId;
-      return _regeneratorRuntime().wrap(function _callee$(_context) {
-        while (1) switch (_context.prev = _context.next) {
+      return _regenerator().w(function (_context) {
+        while (1) switch (_context.n) {
           case 0:
             if (!isWorkbookInitialized()) {
-              _context.next = 3;
+              _context.n = 1;
               break;
             }
             logger$3.info({
               fn: initWorkbook,
               message: 'Workbook already initialized, skipping...'
             });
-            return _context.abrupt("return");
-          case 3:
+            return _context.a(2);
+          case 1:
             // Check if token already exists to avoid redundant calls
             existingToken = document.querySelector('input[name=__RequestVerificationToken]');
             if (existingToken) {
-              _context.next = 7;
+              _context.n = 2;
               break;
             }
-            _context.next = 7;
+            _context.n = 2;
             return preloadRequestVerificationToken();
-          case 7:
+          case 2:
             logger$3.info({
               fn: initWorkbook,
               message: "workbook initialized!"
@@ -38787,28 +39488,28 @@
             // Get workbook ID and load data
             workbookId = getWorkbookId();
             if (!workbookId) {
-              _context.next = 14;
+              _context.n = 4;
               break;
             }
-            _context.next = 12;
+            _context.n = 3;
             return loadWorkbookData(workbookId);
-          case 12:
-            _context.next = 15;
+          case 3:
+            _context.n = 5;
             break;
-          case 14:
+          case 4:
             // Mark as initialized even if no workbook ID was found
             // @ts-ignore
             POWERPOD.workbook = {
               initialized: true
             };
-          case 15:
+          case 5:
             // Insert the LitElement first
             insertLitElement();
 
             // Load chapters and workbook questions data
-            _context.next = 18;
+            _context.n = 6;
             return loadChaptersAndQuestions();
-          case 18:
+          case 6:
             // Build and store the nested chapter structure
             try {
               logger$3.info({
@@ -38885,9 +39586,8 @@
               });
             }
             hideLoadingAnimation();
-          case 20:
-          case "end":
-            return _context.stop();
+          case 7:
+            return _context.a(2);
         }
       }, _callee);
     }));
@@ -39005,7 +39705,7 @@
       };
     };
     // @ts-ignore
-    POWERPOD.version = '4.2.8';
+    POWERPOD.version = '4.2.9';
     // @ts-ignore
     window.powerpod = POWERPOD;
   }
@@ -39019,10 +39719,10 @@
     return _initJQueryAdapter.apply(this, arguments);
   }
   function _initJQueryAdapter() {
-    _initJQueryAdapter = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee() {
+    _initJQueryAdapter = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee() {
       var successMsg, errorMsg;
-      return _regeneratorRuntime().wrap(function _callee$(_context) {
-        while (1) switch (_context.prev = _context.next) {
+      return _regenerator().w(function (_context) {
+        while (1) switch (_context.n) {
           case 0:
             logger$1.info({
               fn: initJQueryAdapter,
@@ -39030,7 +39730,7 @@
             });
             // @ts-ignore
             if (!window.jQuery) {
-              _context.next = 5;
+              _context.n = 1;
               break;
             }
             (function ($, powerpod) {
@@ -39071,20 +39771,17 @@
               return;
               // @ts-ignore
             })(window.jQuery, powerpod$1);
-            _context.next = 8;
+            _context.n = 2;
             break;
-          case 5:
+          case 1:
             errorMsg = 'jQuery is required to use the jQuery powerpod!';
             logger$1.error({
               fn: initJQueryAdapter,
               message: errorMsg
             });
-            return _context.abrupt("return", Promise.reject(errorMsg));
-          case 8:
-            return _context.abrupt("return", Promise.resolve(successMsg));
-          case 9:
-          case "end":
-            return _context.stop();
+            return _context.a(2, Promise.reject(errorMsg));
+          case 2:
+            return _context.a(2, Promise.resolve(successMsg));
         }
       }, _callee);
     }));
@@ -39155,51 +39852,50 @@
     return _start.apply(this, arguments);
   }
   function _start() {
-    _start = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee() {
-      var successMsg;
-      return _regeneratorRuntime().wrap(function _callee$(_context) {
-        while (1) switch (_context.prev = _context.next) {
+    _start = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee() {
+      var successMsg, _t;
+      return _regenerator().w(function (_context) {
+        while (1) switch (_context.p = _context.n) {
           case 0:
-            _context.prev = 0;
+            _context.p = 0;
             logger.info({
               fn: start,
               message: 'initializing jQuery adapter...'
             });
-            _context.next = 4;
+            _context.n = 1;
             return initJQueryAdapter();
-          case 4:
-            successMsg = _context.sent;
+          case 1:
+            successMsg = _context.v;
             logger.info({
               fn: start,
               message: successMsg
             });
-            _context.next = 12;
+            _context.n = 3;
             break;
-          case 8:
-            _context.prev = 8;
-            _context.t0 = _context["catch"](0);
+          case 2:
+            _context.p = 2;
+            _t = _context.v;
             logger.error({
               fn: start,
-              message: _context.t0
+              message: _t
             });
-            throw new Error(_context.t0);
-          case 12:
+            throw new Error(_t);
+          case 3:
             if (getOptions$1().autoinit) {
-              _context.next = 15;
+              _context.n = 4;
               break;
             }
             logger.info({
               fn: start,
               message: 'skipping autoinit, not configured in options'
             });
-            return _context.abrupt("return");
-          case 15:
+            return _context.a(2);
+          case 4:
             autoinit();
-          case 16:
-          case "end":
-            return _context.stop();
+          case 5:
+            return _context.a(2);
         }
-      }, _callee, null, [[0, 8]]);
+      }, _callee, null, [[0, 2]]);
     }));
     return _start.apply(this, arguments);
   }

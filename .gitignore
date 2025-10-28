@@ -13,3 +13,5 @@ build/**
 local/**
 dist/**
 rollup.ext.config.js
+/.vs
+/powerpod/.vs

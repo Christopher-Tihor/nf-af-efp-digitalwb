@@ -35,8 +35,10 @@ export declare class EFPEntryForm extends LitElement {
     private renderQuestion;
     private renderQuestionInput;
     private renderSubchapter;
+    private renderContainerSubchapter;
     private renderSubSubchapter;
     private renderChapter;
+    private renderContainerChapter;
     private renderMainContent;
     private getSectionBItemsFromStore;
     private getCompletionFromStore;
