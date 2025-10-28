@@ -1,9 +1,10 @@
 {
   "name": "powerpod",
   "type": "module",
-  "version": "4.2.8",
+  "version": "4.2.9",
   "description": "Powerpod is a jQuery plugin that enhances functionality of Power Pages components.",
-  "main": "dist/powerpod",
+  "main": "dist/powerpod.js",
+  "module": "dist/powerpod.js",
   "scripts": {
     "build": "gulp getDistFiles && gulp update-version && gulp css && rollup -c",
     "extensions": "rollup --config rollup.ext.config.js && gulp update-version &&  gulp css && gulp moveExtensions & wait",
@@ -12,7 +13,9 @@
     "test-verbose": "jest --config=./jest.config.cjs --verbose",
     "devtest": "jest --config=./jest.config.dev.cjs  --verbose --watchAll",
     "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build"
+    "build-storybook": "storybook build",
+    "serve": "wds --root-dir ./dist --port 80 --node-resolve --watch",
+    "start": "npm run server"
   },
   "repository": {
     "type": "git",
@@ -20,7 +23,7 @@
   },
   "keywords": [
     "jquery",
-    "javacript"
+    "javascript"
   ],
   "files": [
     "dist/powerpod.min.js",
@@ -56,6 +59,7 @@
     "@storybook/web-components": "^7.6.13",
     "@storybook/web-components-vite": "^7.6.13",
     "@types/jquery": "^3.5.29",
+    "@web/dev-server": "^0.1.31",
     "babel-cli": "^6.26.0",
     "babel-plugin-external-helpers": "^6.22.0",
     "babel-preset-latest": "^6.24.1",
@@ -67,6 +71,7 @@
     "gulp-sourcemaps": "^3.0.0",
     "gulp-terser": "^2.1.0",
     "gulp-uglify": "^3.0.2",
+    "http-server": "14.1.1",
     "identity-obj-proxy": "^3.0.0",
     "jest": "^29.7.0",
     "jest-environment-jsdom": "^29.7.0",

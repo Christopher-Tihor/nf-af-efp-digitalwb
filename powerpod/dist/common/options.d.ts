@@ -3,5 +3,8 @@ export function setOptions(options: any): any;
 export function setOption(name: any, value: any): void;
 export function getOriginals(): any;
 export const ENV_LOG_LEVEL: {
-    [x: string]: number;
+    [Environment.DEV]: number;
+    [Environment.TEST]: number;
+    [Environment.PROD]: number;
 };
+import { Environment } from './constants.js';

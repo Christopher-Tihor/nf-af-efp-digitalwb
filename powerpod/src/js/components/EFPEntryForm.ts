@@ -372,6 +372,16 @@ export class EFPEntryForm extends LitElement {
     `;
   }
 
+    private renderContainerSubchapter(subchapter: any) {
+    return html`
+      ${subchapter.description ? html`
+        <div class="subchapter-header">
+          <div>${unsafeHTML(subchapter.description)}</div>
+        </div>
+      ` : ''}
+    `;
+  }
+
   private renderSubSubchapter(subSubchapter: any) {
     return html`
       ${subSubchapter.description ? html`
@@ -398,7 +408,15 @@ export class EFPEntryForm extends LitElement {
     `;
   }
 
-
+  private renderContainerChapter(chapter: any) {
+    return html`
+      ${chapter?.description ? html`
+        <div class="chapter-header">
+          <div>${unsafeHTML(chapter.description)}</div>
+        </div>
+      ` : ''}
+    `;
+  }
 
 
 
@@ -411,7 +429,9 @@ export class EFPEntryForm extends LitElement {
       html,
       unsafeHTML,
       (subchapterData: any) => this.renderSubchapter(subchapterData),
-      (chapterData: any) => this.renderChapter(chapterData)
+      (chapterData: any) => this.renderChapter(chapterData),
+      (subchapterData: any) => this.renderContainerSubchapter(subchapterData),
+      (chapterData: any) => this.renderContainerChapter(chapterData)
     );
   }
 
@@ -449,7 +469,7 @@ export class EFPEntryForm extends LitElement {
       const chapterItem: EFPSectionItem = {
         label: EFPTextUtils.formatChapterTitle(chapter),
         title: EFPTextUtils.formatChapterTitle(chapter),
-        content: '', // No content for the parent container
+        content: EFPSectionGenerator.renderChapterContainerContent(chapter), // We now want to display the description for containers
         complete: chapter.complete || false, // Use completion from store
         isContainer: true,
         chapterId: chapter.id, // Store chapter ID for completion lookup

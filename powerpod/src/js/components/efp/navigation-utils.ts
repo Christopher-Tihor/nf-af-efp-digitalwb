@@ -157,7 +157,7 @@ export class EFPNavigationUtils {
         if ('items' in item && Array.isArray(item.items)) {
           result.push({
             label: item.title || item.label,
-            content: '',
+            content: item.content ?? '',
             sectionIndex,
             isContainer: true,
           });

@@ -31,7 +31,9 @@ export class EFPRenderUtils {
     html: any,
     unsafeHTML: any,
     renderSubchapter: (subchapterData: any) => any,
-    renderChapter: (chapterData: any) => any
+    renderChapter: (chapterData: any) => any,
+    renderContainerSubchapter: (subchapterData: any) => any,
+    renderContainerChapter: (chapterData: any) => any
   ): any {
     // Check if we're in Section B and have a chapter to render
     if (currentSectionIndex === 1) {
@@ -40,12 +42,19 @@ export class EFPRenderUtils {
 
       // Check if it's a container item (should not be selectable)
       if (currentStep && 'isContainer' in currentStep && currentStep.isContainer) {
-        return html`
+/*         return html`
           <div class="container-message">
             <h3>Please select a specific chapter section from the navigation</h3>
             <p>This is a chapter container. Click on one of the specific sections in the navigation to view its content.</p>
           </div>
-        `;
+        `; */
+        if (currentStep && 'subchapterData' in currentStep) {
+          return renderContainerSubchapter(currentStep.subchapterData);
+        }
+        // Check if it's a main chapter
+        else if (currentStep && 'chapterData' in currentStep) {
+          return renderContainerChapter(currentStep.chapterData);
+        }
       }
       // Check if it's a subchapter
       else if (currentStep && 'subchapterData' in currentStep) {

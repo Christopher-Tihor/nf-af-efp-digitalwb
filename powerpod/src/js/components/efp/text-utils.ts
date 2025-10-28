@@ -51,8 +51,8 @@ export class EFPTextUtils {
         return `Chapter ${chapterNumber}: ${titleCase}`;
       }
     } else {
-      // Subchapter: prepend order number
-      return `${order} ${titleCase}`;
+      // Task 8138: We no longer want to add the order number to the title for subchapters.
+      return `${titleCase}`;
     }
   }
 
