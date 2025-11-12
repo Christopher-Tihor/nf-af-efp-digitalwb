@@ -1,0 +1,291 @@
+{% comment %}
+Capture roles safely and determine auth
+{% endcomment %}
+{% capture rolesRaw %}{{ user.roles }}{% endcapture %}
+{% assign rolesString = rolesRaw | downcase | strip %}
+
+{% assign efpProducer = false %}
+{% assign efpAdvisor = false %}
+{% assign isAuthenticated = false %}
+
+{% if rolesString contains "efp producer" %}
+  {% assign efpProducer = true %}
+  {% assign isAuthenticated = true %}
+{% endif %}
+{% if rolesString contains "efp planning advisor" %}
+  {% assign efpAdvisor = true %}
+  {% assign isAuthenticated = true %}
+{% endif %}
+{% if rolesString contains "administrators" %}
+  {% assign isAuthenticated = true %}
+{% endif %}
+{% if rolesString contains "authenticated users" %}
+  {% assign isAuthenticated = true %}
+{% endif %}
+
+{% if isAuthenticated %}
+  {% assign internalName = "HomePageAuthenticated" %}
+{% else %}
+  {% assign internalName = "HomePageAnonymous" %}
+{% endif %}
+
+{% comment %}
+Fetch the portal page content for the chosen internalName
+{% endcomment %}
+{% fetchxml home_content %}
+<fetch top="1">
+  <entity name="quartech_portalpage">
+    <attribute name="quartech_section1" />
+    <attribute name="quartech_section2" />
+    <attribute name="quartech_section3" />
+    <attribute name="quartech_section4" />
+    <attribute name="quartech_section5" />
+    <attribute name="quartech_section6" />
+    <filter type="and">
+      <condition attribute="quartech_internalname" operator="eq" value="{{ internalName }}" />
+    </filter>
+  </entity>
+</fetch>
+{% endfetchxml %}
+{% assign content = home_content.results.entities[0] %}
+
+<style>
+/* --- BC Gov theme tokens --- */
+:root{
+  --bcgov-blue:#003366;
+  --bcgov-blue-70:#1a5a96;
+  --bcgov-gold:#fcba19;
+  --bcgov-text:#313132;
+  --bcgov-muted:#666;
+  --bcgov-link:#1a5a96;
+  --bcgov-bg:#fafafa;
+  --bcgov-info-bg:#e6f4f9;
+  --bcgov-info-border:#1a5a96;
+}
+
+/* Base page styles */
+.bcgov-page{
+  font-family: "BCSans","Noto Sans",Arial,Helvetica,sans-serif;
+  color:var(--bcgov-text);
+  background:var(--bcgov-bg);
+  line-height:1.6;
+}
+.bcgov-page .container{
+  max-width:1040px;
+  margin:0 auto;
+  padding:0 16px;
+}
+
+/* Headings */
+.bcgov-page h2{
+  color:var(--bcgov-blue);
+  font-weight:700;
+  margin:16px 0 8px;
+  font-size:1.8rem;
+  position:relative;
+  padding-top:8px;
+}
+.bcgov-page h2::after{
+  content:"";
+  display:block;
+  width:56px;
+  height:4px;
+  background:var(--bcgov-gold);
+  margin-top:12px;
+}
+.bcgov-page h3{
+  font-size:1.2rem;
+  margin:16px 0 8px;
+  font-weight:700;
+}
+
+/* Links */
+.bcgov-page a{
+  color:var(--bcgov-link);
+  text-decoration:underline;
+}
+.bcgov-page a:hover{
+  text-decoration:none;
+}
+
+/* ✅ BUTTONS — FIXED */
+.bcgov-page .button1,
+.bcgov-btn--primary {
+  background: var(--bcgov-blue-70) !important;
+  color: #ffffff !important;
+  border: 1px solid var(--bcgov-blue-70) !important;
+  padding: 10px 16px;
+  border-radius: 4px;
+  text-decoration: none !important;
+  display: inline-block;
+  font-weight: 600;
+}
+.bcgov-page .button1:hover,
+.bcgov-btn--primary:hover {
+  background: var(--bcgov-blue) !important;
+  border-color: var(--bcgov-blue) !important;
+}
+
+.bcgov-page .button2,
+.bcgov-btn--secondary {
+  background: #ffffff !important;
+  color: var(--bcgov-blue-70) !important;
+  border: 1px solid var(--bcgov-blue-70) !important;
+  padding: 10px 16px;
+  border-radius: 4px;
+  text-decoration: none !important;
+  display: inline-block;
+  font-weight: 600;
+}
+.bcgov-page .button2:hover,
+.bcgov-btn--secondary:hover {
+  background: #f4f7fb !important;
+}
+
+/* Banner */
+.bcgov-banner{
+  background: var(--bcgov-info-bg);
+  border-left: 4px solid var(--bcgov-info-border);
+  padding: 14px 16px;
+  border-radius: 4px;
+  margin: 12px 0 20px;
+}
+.bcgov-banner .title{
+  font-weight:700;
+  margin-bottom:6px;
+}
+
+/* Tables (entity lists included) */
+.bcgov-page table{
+  width:100%;
+  border-collapse:collapse;
+  margin:12px 0 20px;
+  background:#fff;
+  border:1px solid #e0e0e0;
+}
+.bcgov-page thead th{
+  background:var(--bcgov-blue);
+  color:#fff;
+  text-align:left;
+  padding:10px 12px;
+  font-weight:700;
+}
+.bcgov-page tbody td{
+  padding:10px 12px;
+  border-top:1px solid #eee;
+}
+.bcgov-page tbody tr:nth-child(odd){
+  background:#fafbfd;
+}
+
+/* Section spacing */
+.bcgov-page section{ margin-bottom: 12px; }
+
+/* Status debug (optional) */
+.bcgov-status{
+  font-size:13px;
+  margin:6px 0 8px;
+  color:var(--bcgov-muted);
+}
+/* Make the entire page background match the BC Gov surface */
+html, body,
+.wrapper-body,
+#mainContent,
+.page-copy {
+  background: var(--bcgov-bg) !important; /* #fafafa */
+}
+
+/* Ensure inner DIVs don’t re-introduce a white panel */
+.xrm-editable-html,
+.xrm-attribute,
+.xrm-attribute-value {
+  background: transparent !important;
+}
+/* --- BC Gov Header Navigation Fix --- */
+
+/* Ensure navbar uses BC Gov brand colours */
+.navbar.navbar-dark,
+.navbar.navbar-dark .navbar-brand,
+.navbar.navbar-dark .navbar-header {
+  background-color: var(--bcgov-blue) !important;
+  color: #ffffff !important;
+}
+
+/* Top-level nav links */
+.navbar-dark .nav-link,
+.navbar-dark .username,
+.navbar-dark .navbar-brand,
+.navbar-dark .siteTitle,
+.navbar-dark .custom-sitetitle {
+  color: #ffffff !important;
+}
+
+/* Hover state */
+.navbar-dark .nav-link:hover,
+.navbar-dark .username:hover,
+.navbar-dark .navbar-brand:hover,
+.navbar-dark .siteTitle:hover {
+  color: var(--bcgov-gold) !important;
+  text-decoration: underline !important;
+}
+
+/* Vertical nav dividers */
+.navbar-dark .divider-vertical {
+  border-left: 1px solid rgba(255,255,255,0.4) !important;
+  margin: 0 12px;
+}
+
+/* Dropdown menu styling */
+.navbar-dark .dropdown-menu {
+  background: #ffffff !important;
+  border: 1px solid #dcdcdc !important;
+}
+.navbar-dark .dropdown-menu .dropdown-item {
+  color: var(--bcgov-blue-70) !important;
+}
+.navbar-dark .dropdown-menu .dropdown-item:hover {
+  background: #f4f7fb !important;
+  color: var(--bcgov-blue) !important;
+}
+
+</style>
+
+<div class="row sectionBlockLayout text-start bcgov-page" style="display:flex;flex-wrap:wrap;margin:0;min-height:auto;padding:8px;">
+  <div class="container">
+
+    <div class="bcgov-status">
+      Status: {% if isAuthenticated %}Logged in{% else %}Anonymous{% endif %}
+      {% if efpProducer %} | Role: EFP Producer{% endif %}
+      {% if efpAdvisor %} | Role: EFP Planning Advisor{% endif %}
+    </div>
+
+    {% if content %}
+      {% if content.quartech_section1 %}
+        <section>{{ content.quartech_section1 }}</section>
+      {% endif %}
+
+      {% if content.quartech_section2 %}
+        <section>{{ content.quartech_section2 }}</section>
+      {% endif %}
+
+      {% if content.quartech_section3 %}
+        <section>{{ content.quartech_section3 }}</section>
+      {% endif %}
+
+      {% if content.quartech_section4 %}
+        <section>{{ content.quartech_section4 }}</section>
+      {% endif %}
+
+      {% if content.quartech_section5 %}
+        <section>{{ content.quartech_section5 }}</section>
+      {% endif %}
+
+      {% if content.quartech_section6 %}
+        <section>{{ content.quartech_section6 }}</section>
+      {% endif %}
+    {% else %}
+      <section>No content found for {{ internalName }}.</section>
+    {% endif %}
+
+  </div>
+</div>

@@ -1,0 +1,70 @@
+/* Content block typography (use inside CMS sections) */
+.bcgov-content {
+  font-family: "BCSans","Noto Sans",Arial,Helvetica,sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--bcgov-text, #313132);
+}
+
+/* Headings within content blocks */
+.bcgov-content h2 {
+  color: var(--bcgov-blue, #003366);
+  font-weight: 700;
+  margin: 16px 0 8px;
+  font-size: 1.8rem;
+}
+.bcgov-content h3 {
+  font-weight: 700;
+  margin: 16px 0 8px;
+  font-size: 1.2rem;
+}
+
+/* Lists match paragraph sizing */
+.bcgov-content ul,
+.bcgov-content ol {
+  margin: 8px 0 16px 22px;
+  font-size: inherit;
+  line-height: inherit;
+}
+.bcgov-content li {
+  font-size: inherit;
+  line-height: inherit;
+}
+
+/* Links inside content */
+.bcgov-content a {
+  color: var(--bcgov-link, #1a5a96);
+  text-decoration: underline;
+}
+.bcgov-content a:hover {
+  text-decoration: none;
+}
+
+/* Buttons already themed globally; ensure readability here too */
+.bcgov-content .button1 {
+  background: var(--bcgov-blue-70, #1a5a96) !important;
+  color: #fff !important;
+  border: 1px solid var(--bcgov-blue-70, #1a5a96) !important;
+  padding: 10px 16px;
+  border-radius: 4px;
+  text-decoration: none !important;
+  display: inline-block;
+  font-weight: 600;
+}
+.bcgov-content .button1:hover {
+  background: var(--bcgov-blue, #003366) !important;
+  border-color: var(--bcgov-blue, #003366) !important;
+}
+.bcgov-content .button2 {
+  background: #fff !important;
+  color: var(--bcgov-blue-70, #1a5a96) !important;
+  border: 1px solid var(--bcgov-blue-70, #1a5a96) !important;
+  padding: 10px 16px;
+  border-radius: 4px;
+  text-decoration: none !important;
+  display: inline-block;
+  font-weight: 600;
+}
+.bcgov-content .button2:hover {
+  background: #f4f7fb !important;
+}

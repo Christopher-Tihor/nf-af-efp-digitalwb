@@ -329,14 +329,13 @@ export class EFPEntryForm extends LitElement {
 
   private renderQuestionInput(question: any, questionType: string) {
     switch (questionType) {
+      case 'Multi-select List':
+        
       case 'Yes/No/NA':
       case 'Point Rating':
         // Get existing response value for this question
         const existingResponse = this.getResponseForQuestion(question.id);
         const selectedValue = existingResponse?.quartech_response || '';
-
-
-
 
         return html`
           <rating-question
