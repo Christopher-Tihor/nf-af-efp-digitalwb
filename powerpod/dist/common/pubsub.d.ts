@@ -19,5 +19,5 @@ export default class PubSub {
      * @returns {array} The callbacks for this event, or an empty array if no event exits
      * @memberof PubSub
      */
-    publish(event: string, data?: object): array;
+    publish(event: string, data?: object | undefined): array;
 }

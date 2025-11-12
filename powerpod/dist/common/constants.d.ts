@@ -6,9 +6,7 @@ export namespace Environment {
     let PROD: string;
 }
 export const Hosts: {
-    [Environment.DEV]: string[];
-    [Environment.TEST]: string[];
-    [Environment.PROD]: string[];
+    [x: string]: string[];
 };
 export const ClaimPaths: string[];
 export const ApplicationPaths: string[];
@@ -63,25 +61,10 @@ export namespace FormStep {
     export let Success: string;
 }
 export const TabDisplayNames: {
-    [FormStep.Documents]: string;
-    [FormStep.DeclarationAndConsent]: string[];
-    [FormStep.ApplicantInfo]: string;
-    [FormStep.Eligibility]: string[];
-    [FormStep.Project]: string[];
-    [FormStep.DeliverablesBudget]: string[];
-    [FormStep.DemographicInfo]: string;
-    [FormStep.ClaimInfo]: string;
-    [FormStep.ProjectResults]: string;
+    [x: string]: string | string[];
 };
 export const TabNames: {
-    [FormStep.Documents]: string;
-    [FormStep.DeclarationAndConsent]: string[];
-    [FormStep.ApplicantInfo]: string[];
-    [FormStep.Eligibility]: string;
-    [FormStep.Project]: string;
-    [FormStep.DeliverablesBudget]: string;
-    [FormStep.ClaimInfo]: string;
-    [FormStep.ProjectResults]: string;
+    [x: string]: string | string[];
 };
 export namespace ProgramIds {
     let VLB: string;

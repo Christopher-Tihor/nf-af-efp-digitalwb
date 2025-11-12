@@ -287,6 +287,7 @@ export class EFPEntryForm extends LitElement {
     const questionTypeMap: { [key: number]: string } = {
       100000000: 'Yes/No/NA',
       100000001: 'Point Rating',
+      100000002: 'Multi-select List',
       // Add more question types as needed
     };
 
@@ -330,12 +331,41 @@ export class EFPEntryForm extends LitElement {
   private renderQuestionInput(question: any, questionType: string) {
     switch (questionType) {
       case 'Multi-select List':
-        
+        // Parse the semicolon-separated options from the question
+        const optionsString = question.multiselectOptions || '';
+        const options = optionsString.split(';').map((opt: string) => opt.trim()).filter((opt: string) => opt.length > 0);
+
+        // Get existing response value for this question
+        const existingResponse = this.getResponseForQuestion(question.id);
+        const selectedOptionsString = existingResponse?.quartech_response || '';
+        const selectedOptions = selectedOptionsString.split(';').map((opt: string) => opt.trim()).filter((opt: string) => opt.length > 0);
+
+        return html`
+          <div class="multiselect-list-container">
+            ${options.map((option: string) => {
+              const isChecked = selectedOptions.includes(option);
+              return html`
+                <div class="multiselect-option">
+                  <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; padding: 0.5rem 0;">
+                    <input
+                      type="checkbox"
+                      .checked=${isChecked}
+                      @change=${(e: Event) => this.handleMultiselectChange(question.id, option, (e.target as HTMLInputElement).checked)}
+                      style="transform: scale(1.2);"
+                    />
+                    <span>${option}</span>
+                  </label>
+                </div>
+              `;
+            })}
+          </div>
+        `;
+
       case 'Yes/No/NA':
       case 'Point Rating':
         // Get existing response value for this question
-        const existingResponse = this.getResponseForQuestion(question.id);
-        const selectedValue = existingResponse?.quartech_response || '';
+        const existingResponse2 = this.getResponseForQuestion(question.id);
+        const selectedValue = existingResponse2?.quartech_response || '';
 
         return html`
           <rating-question
@@ -784,6 +814,45 @@ export class EFPEntryForm extends LitElement {
           logger.info({ message: `Rating stored locally for question ${questionId}: ${value} (save failed)` });
         }
       );
+    }
+  }
+
+  // Multi-select list interaction event handler
+  private async handleMultiselectChange(questionId: string, option: string, isChecked: boolean) {
+    try {
+      logger.info({ message: `Multi-select option changed for question ${questionId}: ${option} = ${isChecked}` });
+
+      // Get current response
+      const existingResponse = this.getResponseForQuestion(questionId);
+      const currentSelectedString = existingResponse?.quartech_response || '';
+      let selectedOptions = currentSelectedString.split(';').map((opt: string) => opt.trim()).filter((opt: string) => opt.length > 0);
+
+      // Update the selected options based on checkbox state
+      if (isChecked) {
+        // Add option if not already present
+        if (!selectedOptions.includes(option)) {
+          selectedOptions.push(option);
+        }
+      } else {
+        // Remove option
+        selectedOptions = selectedOptions.filter((opt: string) => opt !== option);
+      }
+
+      // Create semicolon-delimited string
+      const newValue = selectedOptions.join(';');
+
+      logger.info({ message: `New multi-select value for question ${questionId}: ${newValue}` });
+
+      // Save the response
+      const responseData = await this.saveRatingResponse(questionId, newValue);
+
+      // Update the questionnaire store with the full response data
+      updateQuestionResponse(questionId, newValue, true, responseData);
+
+      logger.info({ message: `Successfully saved multi-select response for question ${questionId}` });
+
+    } catch (error) {
+      logger.error({ message: `Failed to save multi-select response: ${(error as Error).message}` });
     }
   }
 

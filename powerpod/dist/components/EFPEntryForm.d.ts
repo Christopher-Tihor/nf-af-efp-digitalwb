@@ -51,6 +51,7 @@ export declare class EFPEntryForm extends LitElement {
     private handleNavigationContinue;
     private handleSectionChange;
     private handleRatingChanged;
+    private handleMultiselectChange;
     private saveRatingResponse;
     private updateMemoryStructuresForRating;
     private handleItemClick;
