@@ -145,6 +145,8 @@ export function deleteWorkbookResponseData({ id, ...options }: {
     [x: string]: any;
     id: any;
 }): Promise<any>;
+export function getWorkbookTermsAndConditionsData({ ...options }?: {}): Promise<any>;
+export function getWorkbookSignOffData({ id, ...options }?: {}): Promise<any>;
 export namespace ENDPOINT_URL {
     let get_env_vars_data: string;
     function get_application_form_data(programId: any): string;
@@ -181,4 +183,6 @@ export namespace ENDPOINT_URL {
     let post_workbookresponse_data: string;
     function patch_workbookresponse_data(id: any): string;
     function delete_workbookresponse_data(id: any): string;
+    function get_workbooktermsconditions_data(internalName: any): string;
+    function get_workbook_signoff_data_by_id(id: any): string;
 }

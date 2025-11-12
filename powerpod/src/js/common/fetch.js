@@ -21,7 +21,7 @@ export const ENDPOINT_URL = {
   post_document_data: `/_api/annotations`,
   delete_document_data: (annotationId) => `/_api/annotations(${annotationId})`,
   get_contact_data: (contactId) =>
-    `/_api/contacts?$filter=contactid%20eq%20${contactId}&$select=fullname`,
+    `/_api/contacts?$filter=contactid%20eq%20${contactId}?$expand=userRoles`,
   get_orgbook_autocomplete_data:
     'https://orgbook.gov.bc.ca/api/v3/search/autocomplete',
   get_orgbook_topic_data: 'https://orgbook.gov.bc.ca/api/v4/search/topic',
@@ -56,6 +56,8 @@ export const ENDPOINT_URL = {
   post_workbookresponse_data: `/_api/quartech_workbookresponses`,
   patch_workbookresponse_data: (id) => `/_api/quartech_workbookresponses(${id})`,
   delete_workbookresponse_data: (id) => `/_api/quartech_workbookresponses(${id})`,
+  get_workbooktermsconditions_data: (internalName) => `/_api/quartech_portalpages?$filter=quartech_internalname%20eq%20'${internalName}'%20and%20statecode%20eq%200`,
+  get_workbook_signoff_data_by_id: (id) => `/_api/quartech_workbooks(${id})?$select=quartech_producersigned,quartech_pasigned`,
 };
 
 POWERPOD.fetch = {
@@ -96,6 +98,7 @@ POWERPOD.fetch = {
   postWorkbookResponseData,
   patchWorkbookResponseData,
   deleteWorkbookResponseData,
+  getWorkbookTermsAndConditionsData,
 };
 
 const CONTENT_TYPE = {
@@ -923,3 +926,59 @@ export async function deleteWorkbookResponseData({ id, ...options }) {
     ...options,
   });
 }
+
+export async function getWorkbookTermsAndConditionsData({ ...options } = {}) {
+  const internalName = "WorkbookTermsConditionsSignOff";
+  const result = await fetch({
+    url: ENDPOINT_URL.get_workbooktermsconditions_data(internalName),
+    contentType: CONTENT_TYPE.json,
+    datatype: DATATYPE.json,
+    includeODataHeaders: true,
+    async: false,
+    returnData: true,
+    ...options,
+  });
+
+  // Transform the response structure to match the expected format
+  // The API returns an array of power pages, but we want just the terms and conditions page
+  if (result && result.data) {
+    const termsAndConditions = result.data.value[0];
+    return {
+      ...result,
+      data: {
+        value: termsAndConditions,
+        '@odata.count': 1,
+        '@odata.context': result.data['@odata.context']
+      }
+    };
+  }
+}
+
+export async function getWorkbookSignOffData({ id, ...options } = {}) {
+  const result = await fetch({
+    url: ENDPOINT_URL.get_workbook_signoff_data_by_id(id),
+    contentType: CONTENT_TYPE.json,
+    datatype: DATATYPE.json,
+    includeODataHeaders: true,
+    async: false,
+    returnData: true,
+    ...options,
+  });
+
+  // Transform the response structure to match the expected format
+  // The API returns an array of power pages, but we want just the terms and conditions page
+  if (result && result.data) {
+    const signOffData = result.data.value[0];
+    return {
+      ...result,
+      data: {
+        value: signOffData,
+        '@odata.count': 1,
+        '@odata.context': result.data['@odata.context']
+      }
+    };
+  }
+}
+
+
+

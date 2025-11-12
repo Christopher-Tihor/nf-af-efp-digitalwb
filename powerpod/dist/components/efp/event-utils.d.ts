@@ -8,4 +8,6 @@ export declare class EFPEventUtils {
     static handleNavigationContinue(goToNext: () => void): void;
     static createTabShowHandler(onSectionChange: (newSectionIndex: number) => void): (e: CustomEvent) => void;
     static createItemClickHandler(flatSteps: EFPStep[], onStepChange: (stepIndex: number, sectionIndex: number) => void, onNavigationUpdate: (label: string) => void): (item: EFPSectionItem) => void;
+    static handleSignOffClicked(isProducerSignedOff: boolean, setProducerSignedOff: (value: boolean) => void): void;
+    static handlePASignOffClicked(isPASignedOff: boolean, setPASignedOff: (value: boolean) => void): void;
 }

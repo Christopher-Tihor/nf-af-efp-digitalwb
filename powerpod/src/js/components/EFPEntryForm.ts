@@ -12,10 +12,11 @@ import '@shoelace-style/shoelace/dist/components/tooltip/tooltip.js';
 import { LitElement, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import './NavigationButtons';
+import './SignOffButtons';
 import './RatingQuestion';
 import './EFPBreadcrumbs';
 import WorkbookResponseHelper from '../common/workbookResponseHelper.js';
-import { getWorkbookId } from '../common/workbookUtils.js';
+import { getWorkbookId, isPASignedOff, isProducerSignedOff, setProducerSignedOff, setPASignedOff } from '../common/workbookUtils.js';
 import { POWERPOD } from '../common/constants.js';
 import { Logger } from '../common/logger.js';
 import {
@@ -25,6 +26,7 @@ import {
   updateQuestionResponse,
   isQuestionnaireLoaded
 } from '../common/questionnaire.js';
+import { getStoredTermsAndConditionsData } from '../common/declarationAndConsentUtils.js';
 import { EFPEventUtils } from './efp/event-utils.js';
 import { EFPTextUtils } from './efp/text-utils.js';
 import { EFPCompletionUtils } from './efp/completion-utils.js';
@@ -32,12 +34,6 @@ import { EFPNavigationUtils } from './efp/navigation-utils.js';
 import { EFPLifecycleUtils } from './efp/lifecycle-utils.js';
 import { EFPSectionGenerator } from './efp/section-generator.js';
 import { EFPRenderUtils } from './efp/render-utils.js';
-
-
-
-
-
-
 
 import { efpEntryFormStyles } from './EFPEntryForm.styles';
 
@@ -51,15 +47,6 @@ interface EFPActiveContent {
 
 // Create logger instance for EFP components
 const logger = Logger('components/EFPEntryForm');
-
-
-
-
-
-
-
-
-
 
 @customElement('efp-entry-form')
 export class EFPEntryForm extends LitElement {
@@ -75,6 +62,7 @@ export class EFPEntryForm extends LitElement {
     content:
       'The purpose of the EFP is to assess the features and management of your farm to identify environmental risks and develop an action plan.',
   };
+
   @query('sl-tab-group') tabGroupEl!: HTMLElement & {
     show: (tabName: string) => void;
   };
@@ -189,98 +177,10 @@ export class EFPEntryForm extends LitElement {
     {
       tab: 'Section C',
       title: 'Declaration & Consent',
-      items: [
-        {
-          label: 'Terms & Conditions',
-          content: `
-          <h3>Environmental Farm Plan Terms & Conditions</h3>
-          <p>Please read the following terms and conditions carefully before proceeding with your Environmental Farm Plan submission.</p>
-
-          <h4>1. Purpose and Scope</h4>
-          <p>The Environmental Farm Plan (EFP) is a voluntary assessment tool designed to help farmers identify environmental risks and opportunities on their farm operations. By participating in this program, you acknowledge that:</p>
-          <ul>
-            <li>The EFP is intended for educational and planning purposes</li>
-            <li>Participation is voluntary and confidential</li>
-            <li>The information provided will be used to develop customized environmental recommendations</li>
-          </ul>
-
-          <h4>2. Data Collection and Privacy</h4>
-          <p>Your privacy is important to us. We collect and use your information in accordance with applicable privacy laws:</p>
-          <ul>
-            <li>Personal and farm operation information will be kept confidential</li>
-            <li>Data may be used in aggregate form for program evaluation and improvement</li>
-            <li>Individual farm information will not be shared without your explicit consent</li>
-            <li>You have the right to access and correct your personal information</li>
-          </ul>
-
-          <h4>3. Accuracy of Information</h4>
-          <p>By submitting this Environmental Farm Plan, you certify that:</p>
-          <ul>
-            <li>All information provided is accurate and complete to the best of your knowledge</li>
-            <li>You are authorized to provide information about the farm operation</li>
-            <li>You will notify us of any significant changes to the information provided</li>
-          </ul>
-
-          <h4>4. Recommendations and Implementation</h4>
-          <p>Please understand that:</p>
-          <ul>
-            <li>Environmental recommendations are suggestions based on the information provided</li>
-            <li>Implementation of recommendations is at your discretion</li>
-            <li>You are responsible for ensuring compliance with all applicable laws and regulations</li>
-            <li>The EFP does not guarantee regulatory compliance or environmental outcomes</li>
-          </ul>
-
-          <h4>5. Limitation of Liability</h4>
-          <p>The Environmental Farm Plan program and its administrators:</p>
-          <ul>
-            <li>Provide information and recommendations in good faith</li>
-            <li>Are not liable for any damages resulting from the use or implementation of recommendations</li>
-            <li>Do not warrant the accuracy or completeness of third-party information</li>
-          </ul>
-        `,
-          complete: false,
-        },
-        {
-          label: 'Agreement & Consent',
-          content: `
-          <h3>Declaration of Agreement</h3>
-          <p>By checking the box below, you acknowledge that you have read, understood, and agree to the terms and conditions outlined in this Environmental Farm Plan program.</p>
-
-          <div style="background-color: var(--sl-color-neutral-50); padding: 1.5rem; border-radius: var(--sl-border-radius-medium); border: 1px solid var(--sl-color-neutral-200); margin: 1.5rem 0;">
-            <label style="display: flex; align-items: flex-start; gap: 0.75rem; cursor: pointer; font-family: var(--body-font); font-size: 1rem; line-height: 1.5;">
-              <input
-                type="checkbox"
-                id="terms-agreement"
-                name="terms-agreement"
-                style="margin-top: 0.25rem; transform: scale(1.2);"
-                required
-              />
-              <span>
-                <strong>I agree to the terms and conditions</strong> of the Environmental Farm Plan program as outlined above.
-                I understand that my participation is voluntary and that the information I provide will be used to develop
-                environmental recommendations for my farm operation. I certify that the information I have provided is
-                accurate and complete to the best of my knowledge.
-              </span>
-            </label>
-          </div>
-
-          <p style="font-size: 0.9rem; color: var(--sl-color-neutral-600); font-style: italic;">
-            <strong>Note:</strong> You must agree to these terms and conditions to proceed with your Environmental Farm Plan submission.
-            If you have any questions about these terms, please contact the program administrator before proceeding.
-          </p>
-
-          <div style="margin-top: 2rem; padding: 1rem; background-color: var(--sl-color-primary-50); border-radius: var(--sl-border-radius-small); border-left: 4px solid var(--sl-color-primary-600);">
-            <p style="margin: 0; font-size: 0.95rem; color: var(--sl-color-primary-800);">
-              <strong>Ready to submit?</strong> Once you've agreed to the terms and conditions, you can proceed to submit your Environmental Farm Plan for review and receive your customized environmental recommendations.
-            </p>
-          </div>
-        `,
-          complete: false,
-        },
-      ],
+      items: this.getSectionCItems(),
     },
   ];
-  }
+  }     
 
   // Rendering methods
   private renderQuestion(question: any) {
@@ -530,6 +430,81 @@ export class EFPEntryForm extends LitElement {
     return items;
   }
 
+  private getSectionCItems(): EFPSectionItem[] {
+    const items: EFPSectionItem[] = [];
+
+    var termsAndConditionsSection = this.getTermsAndConditionsFromStore();
+    var agreementAndConsentSection = this.getAgreementAndConsent();
+
+    items.push(termsAndConditionsSection);
+    items.push(agreementAndConsentSection);
+
+    return items;
+  }
+
+
+  // Generate items directly from termsAndConditions store
+  private getTermsAndConditionsFromStore(): EFPSectionItem {
+    const termsAndConditions: any = getStoredTermsAndConditionsData();
+
+    // If termsAndConditions store is not loaded, show loading state
+    if (!termsAndConditions) {
+      logger.info({ message: '📋 Terms And Conditions store not loaded, showing loading state' });
+
+      const sectionItem: EFPSectionItem = {
+        label: "Terms and Conditions",
+        content: `
+            <h3>Loading Terms And Conditions</h3>
+            <p>Please wait while we load the Terms And Conditions from the store...</p>
+            <p><em>The Terms And Conditions store is being initialized...</em></p>
+          `,
+        complete: false,
+      };
+      return sectionItem;
+    }
+
+    const sections = [termsAndConditions.value.quartech_section1, 
+                      termsAndConditions.value.quartech_section2,
+                      termsAndConditions.value.quartech_section3,
+                      termsAndConditions.value.quartech_section4,
+                      termsAndConditions.value.quartech_section5,
+                      termsAndConditions.value.quartech_section6];
+    var termsAndConditionsSection = "";
+
+    sections.forEach((section: any) => {
+      if (section != null){
+        termsAndConditionsSection += section;
+      }
+    });
+
+    // Create the main chapter container (collapsible parent)
+    const sectionItem: EFPSectionItem = {
+      label: "Terms and Conditions",
+      title: "Environmental Farm Plan Terms & Conditions",
+      content: EFPSectionGenerator.renderTermsAndConditionsContent(termsAndConditionsSection),
+      complete: false,
+      isContainer: false,
+      items: []
+    };
+
+    return sectionItem;
+  }
+
+  private getAgreementAndConsent(): EFPSectionItem {
+
+    // Create the agreement and consent section item
+    const sectionItem: EFPSectionItem = {
+      label: 'Agreement & Consent',
+      title: "",
+      content: this.renderAgreementAndConsentContent(),
+      complete: false,
+      isContainer: false,
+      items: []
+    };
+
+    return sectionItem;
+  }
+
   // Get completion status from questionnaire store for navigation items
   private getCompletionFromStore(item: any): boolean {
 
@@ -747,6 +722,23 @@ export class EFPEntryForm extends LitElement {
       (label: string) => this.updateNavigationState(label)
     );
   }
+
+  // Sign off event handlers
+  private handleSignOffClicked() {
+    if(isProducerSignedOff()){
+      setProducerSignedOff(true);
+    }else{
+      setProducerSignedOff(false);
+    }
+  }
+
+/*   private handlePASignOffClicked() {
+    if(isPASignedOff()){
+      setPASignedOff(true);
+    }else{
+      setPASignedOff(true);
+    }
+  } */
 
   // Question interaction event handler
   private async handleRatingChanged(event: CustomEvent) {
@@ -1386,6 +1378,60 @@ export class EFPEntryForm extends LitElement {
       question: null,
       response: this.getResponseForQuestion(questionId)
     };
+  }
+
+  // Helper method to render the sign off section
+  renderSignOffSection(signOffData: any): string {
+    return `
+      <div>
+        <sign-off-buttons
+          @workbook-sign-off=${this.handleSignOffClicked}
+        ></sign-off-buttons>
+      </div>
+    `;
+  }
+
+  renderAgreementAndConsentContent(): string {
+    return `
+      <div class="chapter-content">
+        <h3>Declaration of Agreement</h3>
+        <p>By checking the box below, you acknowledge that you have read, understood, and agree to the terms and conditions outlined in this Environmental Farm Plan program.</p>
+
+        <div style="background-color: var(--sl-color-neutral-50); padding: 1.5rem; border-radius: var(--sl-border-radius-medium); border: 1px solid var(--sl-color-neutral-200); margin: 1.5rem 0;">
+          <label style="display: flex; align-items: flex-start; gap: 0.75rem; cursor: pointer; font-family: var(--body-font); font-size: 1rem; line-height: 1.5;">
+            <input
+              type="checkbox"
+              id="terms-agreement"
+              name="terms-agreement"
+              style="margin-top: 0.25rem; transform: scale(1.2);"
+              required
+            />
+            <span>
+              <strong>I agree to the terms and conditions</strong> of the Environmental Farm Plan program as outlined above.
+              I understand that my participation is voluntary and that the information I provide will be used to develop
+              environmental recommendations for my farm operation. I certify that the information I have provided is
+              accurate and complete to the best of my knowledge.
+            </span>
+          </label>
+        </div>
+
+        <p style="font-size: 0.9rem; color: var(--sl-color-neutral-600); font-style: italic;">
+          <strong>Note:</strong> You must agree to these terms and conditions to proceed with your Environmental Farm Plan submission.
+          If you have any questions about these terms, please contact the program administrator before proceeding.
+        </p>
+
+        <div style="margin-top: 2rem; padding: 1rem; background-color: var(--sl-color-primary-50); border-radius: var(--sl-border-radius-small); border-left: 4px solid var(--sl-color-primary-600);">
+          <p style="margin: 0; font-size: 0.95rem; color: var(--sl-color-primary-800);">
+            <strong>Ready to submit?</strong> Once you've agreed to the terms and conditions, you can proceed to submit your Environmental Farm Plan for review and receive your customized environmental recommendations.
+          </p>
+        </div>
+        <div>
+          <sign-off-buttons
+            @workbook-sign-off=${this.handleSignOffClicked}
+          ></sign-off-buttons>
+        </div>
+      </div>
+    `;    
   }
 
   // Helper method to render response information for a question

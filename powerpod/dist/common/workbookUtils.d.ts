@@ -29,3 +29,13 @@ export function getCurrentWorkbookId(): string | null;
  * @returns {Array|null} The nested chapter structure or null if not loaded
  */
 export function getNestedChapterStructure(): any[] | null;
+export function isPASignedOff(): boolean;
+export function isProducerSignedOff(): boolean;
+/**
+ * @param {boolean} signedOff
+ */
+export function setPASignedOff(signedOff: boolean): void;
+/**
+ * @param {boolean} signedOff
+ */
+export function setProducerSignedOff(signedOff: boolean): void;

@@ -1,5 +1,5 @@
 import { Logger } from '../common/logger.js';
-import { preloadRequestVerificationToken } from '../common/dynamics.ts';
+import { getCurrentUser, preloadRequestVerificationToken } from '../common/dynamics.ts';
 import { hideLoadingAnimation } from '../common/loading.js';
 import {
   getWorkbookId,
@@ -14,6 +14,8 @@ import { loadQuestionnaireWithResponses } from '../common/questionnaire.js';
 import { POWERPOD } from '../common/constants.js';
 import '../common/workbookResponseHelper.js';
 import '../components/EFPEntryForm.ts';
+import { loadTermsAndConditions } from '../common/declarationAndConsentUtils.js';
+import { getContactName } from '../common/contacts.js';
 
 const logger = Logger('workbook/workbook');
 
@@ -112,8 +114,16 @@ export async function initWorkbook() {
   // Insert the LitElement first
   insertLitElement();
 
+  // Load terms and conditions data
+  await loadTermsAndConditions();
+
   // Load chapters and workbook questions data
   await loadChaptersAndQuestions();
+
+  const { contactId } = getCurrentUser();
+  if(contactId != null){
+    const fullname = await getContactName(contactId);
+  }
 
   // Build and store the nested chapter structure
   try {

@@ -9,6 +9,7 @@ import '@shoelace-style/shoelace/dist/components/textarea/textarea.js';
 import '@shoelace-style/shoelace/dist/components/tooltip/tooltip.js';
 import { LitElement } from 'lit';
 import './NavigationButtons';
+import './SignOffButtons';
 import './RatingQuestion';
 import './EFPBreadcrumbs';
 interface EFPActiveContent {
@@ -41,6 +42,9 @@ export declare class EFPEntryForm extends LitElement {
     private renderContainerChapter;
     private renderMainContent;
     private getSectionBItemsFromStore;
+    private getSectionCItems;
+    private getTermsAndConditionsFromStore;
+    private getAgreementAndConsent;
     private getCompletionFromStore;
     private getSectionCompletionFromStore;
     updateNestedChapterStructure(nestedStructure: any[]): void;
@@ -50,6 +54,7 @@ export declare class EFPEntryForm extends LitElement {
     private handleNavigationSkip;
     private handleNavigationContinue;
     private handleSectionChange;
+    private handleSignOffClicked;
     private handleRatingChanged;
     private saveRatingResponse;
     private updateMemoryStructuresForRating;
@@ -80,6 +85,8 @@ export declare class EFPEntryForm extends LitElement {
         question: any | null;
         response: any | null;
     };
+    renderSignOffSection(signOffData: any): string;
+    renderAgreementAndConsentContent(): string;
     renderResponseInfo(questionId: string): string;
     renderResponsesSummary(): string;
     render(): import("lit-html").TemplateResult<1>;

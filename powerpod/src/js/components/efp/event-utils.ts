@@ -121,4 +121,27 @@ export class EFPEventUtils {
       EFPEventUtils.handleItemClick(item, flatSteps, onStepChange, onNavigationUpdate);
     };
   }
+  
+  // Sign off event handlers
+  static handleSignOffClicked(
+    isProducerSignedOff: boolean,
+    setProducerSignedOff: (value: boolean) => void
+  ) {
+    if(isProducerSignedOff){
+      setProducerSignedOff(true);
+    }else{
+      setProducerSignedOff(false);
+    }
+  }
+
+  static handlePASignOffClicked(
+    isPASignedOff: boolean,
+    setPASignedOff: (value: boolean) => void
+  ) {
+    if(isPASignedOff){
+      setPASignedOff(true);
+    }else{
+      setPASignedOff(true);
+    }
+  }
 }

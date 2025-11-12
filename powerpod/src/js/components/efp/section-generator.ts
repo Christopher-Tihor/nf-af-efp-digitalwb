@@ -36,12 +36,29 @@ export class EFPSectionGenerator {
     `;
   }
 
-    static renderChapterContainerContent(chapter: any): string {
+  static renderChapterContainerContent(chapter: any): string {
     return `
       <div class="chapter-content">
         <div style="font-family: var(--body-font); line-height: 1.6; color: var(--sl-color-neutral-700); margin-bottom: 1.5rem; font-size: 1.05rem;">${chapter.description || ''}</div>
       </div>
     `;
   }
+
+  static renderTermsAndConditionsContent(termsAndConditions: any): string {
+    return `
+      <div class="chapter-content">
+        ${termsAndConditions}
+      </div>
+    `;
+  }
+
+  static renderAgreementAndConsentContent(agreementAndConsent: any): string {
+    return `
+      <div class="chapter-content">
+        ${agreementAndConsent.content}
+      </div>
+    `;    
+  }
+
 }
 

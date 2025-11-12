@@ -11,6 +11,8 @@ POWERPOD.workbookUtils = {
   getWorkbookData,
   getCurrentWorkbookId,
   getNestedChapterStructure,
+  isPASignedOff,
+  isProducerSignedOff
 };
 
 /**
@@ -135,4 +137,54 @@ export function getCurrentWorkbookId() {
 export function getNestedChapterStructure() {
   // @ts-ignore
   return POWERPOD.workbook?.nestedStructure || null;
+}
+
+export function isPASignedOff() {
+  var paSignedOff = false;
+    // @ts-ignore
+  if(POWERPOD.workbook?.quartech_pasigned === 100000000 || POWERPOD.workbook?.quartech_pasigned === '100000000')
+  {
+    paSignedOff = true;
+  }
+  return paSignedOff
+}
+
+export function isProducerSignedOff() {
+  var producerSignedOff = false;
+  // @ts-ignore
+  if(POWERPOD.workbook?.quartech_producersigned === 100000000 || POWERPOD.workbook?.quartech_producersigned === '100000000')
+  {
+    producerSignedOff = true;
+  }
+  return producerSignedOff;
+}
+
+/**
+ * @param {boolean} signedOff
+ */
+export function setPASignedOff(signedOff) {
+  if(signedOff === true){
+    // @ts-ignore
+    POWERPOD.workbook.quartech_pasigned = 100000000;
+  }
+  else
+  {
+    // @ts-ignore
+    POWERPOD.workbook.quartech_pasigned = 100000001;
+  }
+}
+
+/**
+ * @param {boolean} signedOff
+ */
+export function setProducerSignedOff(signedOff) {
+  if(signedOff === true){
+    // @ts-ignore
+    POWERPOD.workbook.quartech_producersigned = 100000000;
+  }
+  else
+  {
+    // @ts-ignore
+    POWERPOD.workbook.quartech_producersigned = 100000001;
+  }
 }
