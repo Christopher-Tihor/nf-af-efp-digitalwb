@@ -253,11 +253,12 @@ html, body,
 <div class="row sectionBlockLayout text-start bcgov-page" style="display:flex;flex-wrap:wrap;margin:0;min-height:auto;padding:8px;">
   <div class="container">
 
-    <div class="bcgov-status">
+    <!-- Status debug (optional) -->
+    <!-- <div class="bcgov-status">
       Status: {% if isAuthenticated %}Logged in{% else %}Anonymous{% endif %}
       {% if efpProducer %} | Role: EFP Producer{% endif %}
       {% if efpAdvisor %} | Role: EFP Planning Advisor{% endif %}
-    </div>
+    </div> -->
 
     {% if content %}
       {% if content.quartech_section1 %}

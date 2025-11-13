@@ -79,6 +79,11 @@ export class EFPEntryForm extends LitElement {
     show: (tabName: string) => void;
   };
 
+  // Debounce timers for multi-select responses (questionId -> timer)
+  private multiselectDebounceTimers: Map<string, number> = new Map();
+  // Pending multi-select values (questionId -> selected options array)
+  private pendingMultiselectValues: Map<string, string[]> = new Map();
+
   connectedCallback() {
     super.connectedCallback();
     logger.info({ message: 'EFPEntryForm connected' });
@@ -88,6 +93,19 @@ export class EFPEntryForm extends LitElement {
 
     // Set up periodic check for questionnaire store loading
     this.setupQuestionnaireStoreWatcher();
+  }
+
+  disconnectedCallback() {
+    super.disconnectedCallback();
+
+    // Clear all pending debounce timers
+    this.multiselectDebounceTimers.forEach((timer) => {
+      clearTimeout(timer);
+    });
+    this.multiselectDebounceTimers.clear();
+    this.pendingMultiselectValues.clear();
+
+    logger.info({ message: 'EFPEntryForm disconnected, cleared pending timers' });
   }
 
   // Update the reactive property based on store status
@@ -335,10 +353,17 @@ export class EFPEntryForm extends LitElement {
         const optionsString = question.multiselectOptions || '';
         const options = optionsString.split(';').map((opt: string) => opt.trim()).filter((opt: string) => opt.length > 0);
 
-        // Get existing response value for this question
-        const existingResponse = this.getResponseForQuestion(question.id);
-        const selectedOptionsString = existingResponse?.quartech_response || '';
-        const selectedOptions = selectedOptionsString.split(';').map((opt: string) => opt.trim()).filter((opt: string) => opt.length > 0);
+        // Get selected options - prefer pending value over saved response
+        let selectedOptions: string[];
+        if (this.pendingMultiselectValues.has(question.id)) {
+          // Use pending value if user is actively selecting
+          selectedOptions = this.pendingMultiselectValues.get(question.id)!;
+        } else {
+          // Otherwise get from existing response
+          const existingResponse = this.getResponseForQuestion(question.id);
+          const selectedOptionsString = existingResponse?.quartech_response || '';
+          selectedOptions = selectedOptionsString.split(';').map((opt: string) => opt.trim()).filter((opt: string) => opt.length > 0);
+        }
 
         return html`
           <div class="multiselect-list-container">
@@ -818,14 +843,21 @@ export class EFPEntryForm extends LitElement {
   }
 
   // Multi-select list interaction event handler
-  private async handleMultiselectChange(questionId: string, option: string, isChecked: boolean) {
+  private handleMultiselectChange(questionId: string, option: string, isChecked: boolean) {
     try {
       logger.info({ message: `Multi-select option changed for question ${questionId}: ${option} = ${isChecked}` });
 
-      // Get current response
-      const existingResponse = this.getResponseForQuestion(questionId);
-      const currentSelectedString = existingResponse?.quartech_response || '';
-      let selectedOptions = currentSelectedString.split(';').map((opt: string) => opt.trim()).filter((opt: string) => opt.length > 0);
+      // Get current pending value or existing response
+      let selectedOptions: string[];
+      if (this.pendingMultiselectValues.has(questionId)) {
+        // Use pending value if it exists
+        selectedOptions = this.pendingMultiselectValues.get(questionId)!;
+      } else {
+        // Otherwise get from existing response
+        const existingResponse = this.getResponseForQuestion(questionId);
+        const currentSelectedString = existingResponse?.quartech_response || '';
+        selectedOptions = currentSelectedString.split(';').map((opt: string) => opt.trim()).filter((opt: string) => opt.length > 0);
+      }
 
       // Update the selected options based on checkbox state
       if (isChecked) {
@@ -838,10 +870,40 @@ export class EFPEntryForm extends LitElement {
         selectedOptions = selectedOptions.filter((opt: string) => opt !== option);
       }
 
+      // Store the pending value
+      this.pendingMultiselectValues.set(questionId, selectedOptions);
+
+      // Clear any existing debounce timer for this question
+      const existingTimer = this.multiselectDebounceTimers.get(questionId);
+      if (existingTimer) {
+        clearTimeout(existingTimer);
+      }
+
+      // Set a new debounce timer (2000ms delay)
+      const timer = window.setTimeout(() => {
+        this.saveMultiselectResponse(questionId);
+      }, 2000);
+
+      this.multiselectDebounceTimers.set(questionId, timer);
+
+    } catch (error) {
+      logger.error({ message: `Failed to handle multi-select change: ${(error as Error).message}` });
+    }
+  }
+
+  // Save the debounced multi-select response
+  private async saveMultiselectResponse(questionId: string) {
+    try {
+      const selectedOptions = this.pendingMultiselectValues.get(questionId);
+      if (!selectedOptions) {
+        logger.warn({ message: `No pending value found for question ${questionId}` });
+        return;
+      }
+
       // Create semicolon-delimited string
       const newValue = selectedOptions.join(';');
 
-      logger.info({ message: `New multi-select value for question ${questionId}: ${newValue}` });
+      logger.info({ message: `Saving multi-select value for question ${questionId}: ${newValue}` });
 
       // Save the response
       const responseData = await this.saveRatingResponse(questionId, newValue);
@@ -851,8 +913,13 @@ export class EFPEntryForm extends LitElement {
 
       logger.info({ message: `Successfully saved multi-select response for question ${questionId}` });
 
+      // Clean up
+      this.pendingMultiselectValues.delete(questionId);
+      this.multiselectDebounceTimers.delete(questionId);
+
     } catch (error) {
       logger.error({ message: `Failed to save multi-select response: ${(error as Error).message}` });
+      // Don't delete pending value on error, so user can retry
     }
   }
 

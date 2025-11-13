@@ -37398,6 +37398,10 @@
               title: 'Introduction to the Environmental Farm Plan (EFP)',
               content: 'The purpose of the EFP is to assess the features and management of your farm to identify environmental risks and develop an action plan.',
           };
+          // Debounce timers for multi-select responses (questionId -> timer)
+          this.multiselectDebounceTimers = new Map();
+          // Pending multi-select values (questionId -> selected options array)
+          this.pendingMultiselectValues = new Map();
       }
       connectedCallback() {
           super.connectedCallback();
@@ -37406,6 +37410,16 @@
           this.updateQuestionnaireStoreStatus();
           // Set up periodic check for questionnaire store loading
           this.setupQuestionnaireStoreWatcher();
+      }
+      disconnectedCallback() {
+          super.disconnectedCallback();
+          // Clear all pending debounce timers
+          this.multiselectDebounceTimers.forEach((timer) => {
+              clearTimeout(timer);
+          });
+          this.multiselectDebounceTimers.clear();
+          this.pendingMultiselectValues.clear();
+          logger$4.info({ message: 'EFPEntryForm disconnected, cleared pending timers' });
       }
       // Update the reactive property based on store status
       updateQuestionnaireStoreStatus() {
@@ -37642,10 +37656,18 @@
                   // Parse the semicolon-separated options from the question
                   const optionsString = question.multiselectOptions || '';
                   const options = optionsString.split(';').map((opt) => opt.trim()).filter((opt) => opt.length > 0);
-                  // Get existing response value for this question
-                  const existingResponse = this.getResponseForQuestion(question.id);
-                  const selectedOptionsString = (existingResponse === null || existingResponse === void 0 ? void 0 : existingResponse.quartech_response) || '';
-                  const selectedOptions = selectedOptionsString.split(';').map((opt) => opt.trim()).filter((opt) => opt.length > 0);
+                  // Get selected options - prefer pending value over saved response
+                  let selectedOptions;
+                  if (this.pendingMultiselectValues.has(question.id)) {
+                      // Use pending value if user is actively selecting
+                      selectedOptions = this.pendingMultiselectValues.get(question.id);
+                  }
+                  else {
+                      // Otherwise get from existing response
+                      const existingResponse = this.getResponseForQuestion(question.id);
+                      const selectedOptionsString = (existingResponse === null || existingResponse === void 0 ? void 0 : existingResponse.quartech_response) || '';
+                      selectedOptions = selectedOptionsString.split(';').map((opt) => opt.trim()).filter((opt) => opt.length > 0);
+                  }
                   return x `
           <div class="multiselect-list-container">
             ${options.map((option) => {
@@ -38029,13 +38051,21 @@
           }
       }
       // Multi-select list interaction event handler
-      async handleMultiselectChange(questionId, option, isChecked) {
+      handleMultiselectChange(questionId, option, isChecked) {
           try {
               logger$4.info({ message: `Multi-select option changed for question ${questionId}: ${option} = ${isChecked}` });
-              // Get current response
-              const existingResponse = this.getResponseForQuestion(questionId);
-              const currentSelectedString = (existingResponse === null || existingResponse === void 0 ? void 0 : existingResponse.quartech_response) || '';
-              let selectedOptions = currentSelectedString.split(';').map((opt) => opt.trim()).filter((opt) => opt.length > 0);
+              // Get current pending value or existing response
+              let selectedOptions;
+              if (this.pendingMultiselectValues.has(questionId)) {
+                  // Use pending value if it exists
+                  selectedOptions = this.pendingMultiselectValues.get(questionId);
+              }
+              else {
+                  // Otherwise get from existing response
+                  const existingResponse = this.getResponseForQuestion(questionId);
+                  const currentSelectedString = (existingResponse === null || existingResponse === void 0 ? void 0 : existingResponse.quartech_response) || '';
+                  selectedOptions = currentSelectedString.split(';').map((opt) => opt.trim()).filter((opt) => opt.length > 0);
+              }
               // Update the selected options based on checkbox state
               if (isChecked) {
                   // Add option if not already present
@@ -38047,17 +38077,46 @@
                   // Remove option
                   selectedOptions = selectedOptions.filter((opt) => opt !== option);
               }
+              // Store the pending value
+              this.pendingMultiselectValues.set(questionId, selectedOptions);
+              // Clear any existing debounce timer for this question
+              const existingTimer = this.multiselectDebounceTimers.get(questionId);
+              if (existingTimer) {
+                  clearTimeout(existingTimer);
+              }
+              // Set a new debounce timer (2000ms delay)
+              const timer = window.setTimeout(() => {
+                  this.saveMultiselectResponse(questionId);
+              }, 2000);
+              this.multiselectDebounceTimers.set(questionId, timer);
+          }
+          catch (error) {
+              logger$4.error({ message: `Failed to handle multi-select change: ${error.message}` });
+          }
+      }
+      // Save the debounced multi-select response
+      async saveMultiselectResponse(questionId) {
+          try {
+              const selectedOptions = this.pendingMultiselectValues.get(questionId);
+              if (!selectedOptions) {
+                  logger$4.warn({ message: `No pending value found for question ${questionId}` });
+                  return;
+              }
               // Create semicolon-delimited string
               const newValue = selectedOptions.join(';');
-              logger$4.info({ message: `New multi-select value for question ${questionId}: ${newValue}` });
+              logger$4.info({ message: `Saving multi-select value for question ${questionId}: ${newValue}` });
               // Save the response
               const responseData = await this.saveRatingResponse(questionId, newValue);
               // Update the questionnaire store with the full response data
               updateQuestionResponse(questionId, newValue, true, responseData);
               logger$4.info({ message: `Successfully saved multi-select response for question ${questionId}` });
+              // Clean up
+              this.pendingMultiselectValues.delete(questionId);
+              this.multiselectDebounceTimers.delete(questionId);
           }
           catch (error) {
               logger$4.error({ message: `Failed to save multi-select response: ${error.message}` });
+              // Don't delete pending value on error, so user can retry
           }
       }
       // Helper method to save rating responses
