@@ -37398,8 +37398,10 @@
               title: 'Introduction to the Environmental Farm Plan (EFP)',
               content: 'The purpose of the EFP is to assess the features and management of your farm to identify environmental risks and develop an action plan.',
           };
-          // Debounce timers for multi-select responses (questionId -> timer)
-          this.multiselectDebounceTimers = new Map();
+          // Debounce timers for all response saves (questionId -> timer)
+          this.responseSaveDebounceTimers = new Map();
+          // Pending response values (questionId -> response value)
+          this.pendingResponseValues = new Map();
           // Pending multi-select values (questionId -> selected options array)
           this.pendingMultiselectValues = new Map();
       }
@@ -37414,10 +37416,11 @@
       disconnectedCallback() {
           super.disconnectedCallback();
           // Clear all pending debounce timers
-          this.multiselectDebounceTimers.forEach((timer) => {
+          this.responseSaveDebounceTimers.forEach((timer) => {
               clearTimeout(timer);
           });
-          this.multiselectDebounceTimers.clear();
+          this.responseSaveDebounceTimers.clear();
+          this.pendingResponseValues.clear();
           this.pendingMultiselectValues.clear();
           logger$4.info({ message: 'EFPEntryForm disconnected, cleared pending timers' });
       }
@@ -38028,15 +38031,22 @@
           }, (label) => this.updateNavigationState(label));
       }
       // Question interaction event handler
-      async handleRatingChanged(event) {
+      handleRatingChanged(event) {
           const { questionId, value } = event.detail;
           try {
               logger$4.info({ message: `Rating changed for question ${questionId}: ${value}` });
-              // Save the rating as a workbook response and get the response data
-              const responseData = await this.saveRatingResponse(questionId, value);
-              // Update the questionnaire store with the full response data
-              updateQuestionResponse(questionId, value, true, responseData);
-              logger$4.info({ message: `Successfully saved rating response for question ${questionId}` });
+              // Store the pending value
+              this.pendingResponseValues.set(questionId, String(value));
+              // Clear any existing debounce timer for this question
+              const existingTimer = this.responseSaveDebounceTimers.get(questionId);
+              if (existingTimer) {
+                  clearTimeout(existingTimer);
+              }
+              // Set a new debounce timer (1500ms delay)
+              const timer = window.setTimeout(() => {
+                  this.saveDebouncedResponse(questionId);
+              }, 1500);
+              this.responseSaveDebounceTimers.set(questionId, timer);
               // Also call the original handler for any additional processing
               EFPEventUtils.handleRatingChanged(event, (questionId, value) => {
                   logger$4.info({ message: `Rating stored in memory for question ${questionId}: ${value}` });
@@ -38080,7 +38090,7 @@
               // Store the pending value
               this.pendingMultiselectValues.set(questionId, selectedOptions);
               // Clear any existing debounce timer for this question
-              const existingTimer = this.multiselectDebounceTimers.get(questionId);
+              const existingTimer = this.responseSaveDebounceTimers.get(questionId);
               if (existingTimer) {
                   clearTimeout(existingTimer);
               }
@@ -38088,10 +38098,33 @@
               const timer = window.setTimeout(() => {
                   this.saveMultiselectResponse(questionId);
               }, 2000);
-              this.multiselectDebounceTimers.set(questionId, timer);
+              this.responseSaveDebounceTimers.set(questionId, timer);
           }
           catch (error) {
               logger$4.error({ message: `Failed to handle multi-select change: ${error.message}` });
+          }
+      }
+      // Save the debounced response (for rating questions and other text-based responses)
+      async saveDebouncedResponse(questionId) {
+          try {
+              const responseValue = this.pendingResponseValues.get(questionId);
+              if (responseValue === undefined) {
+                  logger$4.warn({ message: `No pending value found for question ${questionId}` });
+                  return;
+              }
+              logger$4.info({ message: `Saving debounced response for question ${questionId}: ${responseValue}` });
+              // Save the response
+              const responseData = await this.saveRatingResponse(questionId, responseValue);
+              // Update the questionnaire store with the full response data
+              updateQuestionResponse(questionId, responseValue, true, responseData);
+              logger$4.info({ message: `Successfully saved debounced response for question ${questionId}` });
+              // Clean up
+              this.pendingResponseValues.delete(questionId);
+              this.responseSaveDebounceTimers.delete(questionId);
+          }
+          catch (error) {
+              logger$4.error({ message: `Failed to save debounced response: ${error.message}` });
+              // Don't delete pending value on error, so user can retry
           }
       }
       // Save the debounced multi-select response
@@ -38112,7 +38145,7 @@
               logger$4.info({ message: `Successfully saved multi-select response for question ${questionId}` });
               // Clean up
               this.pendingMultiselectValues.delete(questionId);
-              this.multiselectDebounceTimers.delete(questionId);
+              this.responseSaveDebounceTimers.delete(questionId);
           }
           catch (error) {
               logger$4.error({ message: `Failed to save multi-select response: ${error.message}` });

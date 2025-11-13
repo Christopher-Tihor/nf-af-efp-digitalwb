@@ -27,7 +27,8 @@ export declare class EFPEntryForm extends LitElement {
     tabGroupEl: HTMLElement & {
         show: (tabName: string) => void;
     };
-    private multiselectDebounceTimers;
+    private responseSaveDebounceTimers;
+    private pendingResponseValues;
     private pendingMultiselectValues;
     connectedCallback(): void;
     disconnectedCallback(): void;
@@ -55,6 +56,7 @@ export declare class EFPEntryForm extends LitElement {
     private handleSectionChange;
     private handleRatingChanged;
     private handleMultiselectChange;
+    private saveDebouncedResponse;
     private saveMultiselectResponse;
     private saveRatingResponse;
     private updateMemoryStructuresForRating;

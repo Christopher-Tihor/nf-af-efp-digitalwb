@@ -79,8 +79,10 @@ export class EFPEntryForm extends LitElement {
     show: (tabName: string) => void;
   };
 
-  // Debounce timers for multi-select responses (questionId -> timer)
-  private multiselectDebounceTimers: Map<string, number> = new Map();
+  // Debounce timers for all response saves (questionId -> timer)
+  private responseSaveDebounceTimers: Map<string, number> = new Map();
+  // Pending response values (questionId -> response value)
+  private pendingResponseValues: Map<string, string> = new Map();
   // Pending multi-select values (questionId -> selected options array)
   private pendingMultiselectValues: Map<string, string[]> = new Map();
 
@@ -99,10 +101,11 @@ export class EFPEntryForm extends LitElement {
     super.disconnectedCallback();
 
     // Clear all pending debounce timers
-    this.multiselectDebounceTimers.forEach((timer) => {
+    this.responseSaveDebounceTimers.forEach((timer) => {
       clearTimeout(timer);
     });
-    this.multiselectDebounceTimers.clear();
+    this.responseSaveDebounceTimers.clear();
+    this.pendingResponseValues.clear();
     this.pendingMultiselectValues.clear();
 
     logger.info({ message: 'EFPEntryForm disconnected, cleared pending timers' });
@@ -803,7 +806,7 @@ export class EFPEntryForm extends LitElement {
   }
 
   // Question interaction event handler
-  private async handleRatingChanged(event: CustomEvent) {
+  private handleRatingChanged(event: CustomEvent) {
 
     const { questionId, value } = event.detail;
 
@@ -811,14 +814,21 @@ export class EFPEntryForm extends LitElement {
 
       logger.info({ message: `Rating changed for question ${questionId}: ${value}` });
 
-      // Save the rating as a workbook response and get the response data
-      const responseData = await this.saveRatingResponse(questionId, value);
+      // Store the pending value
+      this.pendingResponseValues.set(questionId, String(value));
 
-      // Update the questionnaire store with the full response data
-      updateQuestionResponse(questionId, value, true, responseData);
+      // Clear any existing debounce timer for this question
+      const existingTimer = this.responseSaveDebounceTimers.get(questionId);
+      if (existingTimer) {
+        clearTimeout(existingTimer);
+      }
 
+      // Set a new debounce timer (1500ms delay)
+      const timer = window.setTimeout(() => {
+        this.saveDebouncedResponse(questionId);
+      }, 1500);
 
-      logger.info({ message: `Successfully saved rating response for question ${questionId}` });
+      this.responseSaveDebounceTimers.set(questionId, timer);
 
       // Also call the original handler for any additional processing
       EFPEventUtils.handleRatingChanged(
@@ -874,7 +884,7 @@ export class EFPEntryForm extends LitElement {
       this.pendingMultiselectValues.set(questionId, selectedOptions);
 
       // Clear any existing debounce timer for this question
-      const existingTimer = this.multiselectDebounceTimers.get(questionId);
+      const existingTimer = this.responseSaveDebounceTimers.get(questionId);
       if (existingTimer) {
         clearTimeout(existingTimer);
       }
@@ -884,10 +894,39 @@ export class EFPEntryForm extends LitElement {
         this.saveMultiselectResponse(questionId);
       }, 2000);
 
-      this.multiselectDebounceTimers.set(questionId, timer);
+      this.responseSaveDebounceTimers.set(questionId, timer);
 
     } catch (error) {
       logger.error({ message: `Failed to handle multi-select change: ${(error as Error).message}` });
+    }
+  }
+
+  // Save the debounced response (for rating questions and other text-based responses)
+  private async saveDebouncedResponse(questionId: string) {
+    try {
+      const responseValue = this.pendingResponseValues.get(questionId);
+      if (responseValue === undefined) {
+        logger.warn({ message: `No pending value found for question ${questionId}` });
+        return;
+      }
+
+      logger.info({ message: `Saving debounced response for question ${questionId}: ${responseValue}` });
+
+      // Save the response
+      const responseData = await this.saveRatingResponse(questionId, responseValue);
+
+      // Update the questionnaire store with the full response data
+      updateQuestionResponse(questionId, responseValue, true, responseData);
+
+      logger.info({ message: `Successfully saved debounced response for question ${questionId}` });
+
+      // Clean up
+      this.pendingResponseValues.delete(questionId);
+      this.responseSaveDebounceTimers.delete(questionId);
+
+    } catch (error) {
+      logger.error({ message: `Failed to save debounced response: ${(error as Error).message}` });
+      // Don't delete pending value on error, so user can retry
     }
   }
 
@@ -915,7 +954,7 @@ export class EFPEntryForm extends LitElement {
 
       // Clean up
       this.pendingMultiselectValues.delete(questionId);
-      this.multiselectDebounceTimers.delete(questionId);
+      this.responseSaveDebounceTimers.delete(questionId);
 
     } catch (error) {
       logger.error({ message: `Failed to save multi-select response: ${(error as Error).message}` });
