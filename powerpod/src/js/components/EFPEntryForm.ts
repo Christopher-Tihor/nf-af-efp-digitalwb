@@ -366,7 +366,11 @@ export class EFPEntryForm extends LitElement {
           // Otherwise get from existing response
           const existingResponse = this.getResponseForQuestion(question.id);
           const selectedOptionsString = existingResponse?.quartech_response || '';
-          selectedOptions = selectedOptionsString.split(';').map((opt: string) => opt.trim()).filter((opt: string) => opt.length > 0);
+          const existingSelectedOptions = selectedOptionsString.split(';').map((opt: string) => opt.trim()).filter((opt: string) => opt.length > 0);
+
+          // Filter to only include options that are valid for the current question
+          // This prevents old/invalid options from being displayed as checked
+          selectedOptions = existingSelectedOptions.filter((opt: string) => options.includes(opt));
         }
 
         return html`
@@ -858,16 +862,33 @@ export class EFPEntryForm extends LitElement {
     try {
       logger.info({ message: `Multi-select option changed for question ${questionId}: ${option} = ${isChecked}` });
 
+      // Get the valid options for this question
+      const question = getQuestionFromStore(questionId);
+      const optionsString = question?.multiselectOptions || '';
+      const validOptions = optionsString.split(';').map((opt: string) => opt.trim()).filter((opt: string) => opt.length > 0);
+
       // Get current pending value or existing response
       let selectedOptions: string[];
       if (this.pendingMultiselectValues.has(questionId)) {
         // Use pending value if it exists
         selectedOptions = this.pendingMultiselectValues.get(questionId)!;
       } else {
-        // Otherwise get from existing response
+        // Start with an empty array and only add valid options from existing response
         const existingResponse = this.getResponseForQuestion(questionId);
         const currentSelectedString = existingResponse?.quartech_response || '';
-        selectedOptions = currentSelectedString.split(';').map((opt: string) => opt.trim()).filter((opt: string) => opt.length > 0);
+        const existingSelectedOptions = currentSelectedString.split(';').map((opt: string) => opt.trim()).filter((opt: string) => opt.length > 0);
+
+        // Filter to only include options that are valid for the current question
+        selectedOptions = existingSelectedOptions.filter((opt: string) => validOptions.includes(opt));
+
+        logger.info({
+          message: `Filtered existing response for question ${questionId}`,
+          data: {
+            existingOptions: existingSelectedOptions,
+            validOptions: validOptions,
+            filteredOptions: selectedOptions
+          }
+        });
       }
 
       // Update the selected options based on checkbox state

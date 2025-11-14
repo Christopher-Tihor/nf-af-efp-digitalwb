@@ -37670,7 +37670,10 @@
                       // Otherwise get from existing response
                       const existingResponse = this.getResponseForQuestion(question.id);
                       const selectedOptionsString = (existingResponse === null || existingResponse === void 0 ? void 0 : existingResponse.quartech_response) || '';
-                      selectedOptions = selectedOptionsString.split(';').map((opt) => opt.trim()).filter((opt) => opt.length > 0);
+                      const existingSelectedOptions = selectedOptionsString.split(';').map((opt) => opt.trim()).filter((opt) => opt.length > 0);
+                      // Filter to only include options that are valid for the current question
+                      // This prevents old/invalid options from being displayed as checked
+                      selectedOptions = existingSelectedOptions.filter((opt) => options.includes(opt));
                   }
                   return x `
           <div class="multiselect-list-container">
@@ -38065,6 +38068,10 @@
       handleMultiselectChange(questionId, option, isChecked) {
           try {
               logger$4.info({ message: `Multi-select option changed for question ${questionId}: ${option} = ${isChecked}` });
+              // Get the valid options for this question
+              const question = getQuestionFromStore(questionId);
+              const optionsString = (question === null || question === void 0 ? void 0 : question.multiselectOptions) || '';
+              const validOptions = optionsString.split(';').map((opt) => opt.trim()).filter((opt) => opt.length > 0);
               // Get current pending value or existing response
               let selectedOptions;
               if (this.pendingMultiselectValues.has(questionId)) {
@@ -38072,10 +38079,20 @@
                   selectedOptions = this.pendingMultiselectValues.get(questionId);
               }
               else {
-                  // Otherwise get from existing response
+                  // Start with an empty array and only add valid options from existing response
                   const existingResponse = this.getResponseForQuestion(questionId);
                   const currentSelectedString = (existingResponse === null || existingResponse === void 0 ? void 0 : existingResponse.quartech_response) || '';
-                  selectedOptions = currentSelectedString.split(';').map((opt) => opt.trim()).filter((opt) => opt.length > 0);
+                  const existingSelectedOptions = currentSelectedString.split(';').map((opt) => opt.trim()).filter((opt) => opt.length > 0);
+                  // Filter to only include options that are valid for the current question
+                  selectedOptions = existingSelectedOptions.filter((opt) => validOptions.includes(opt));
+                  logger$4.info({
+                      message: `Filtered existing response for question ${questionId}`,
+                      data: {
+                          existingOptions: existingSelectedOptions,
+                          validOptions: validOptions,
+                          filteredOptions: selectedOptions
+                      }
+                  });
               }
               // Update the selected options based on checkbox state
               if (isChecked) {
