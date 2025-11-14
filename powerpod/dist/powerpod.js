@@ -1,5 +1,5 @@
 /*!
-* powerpod 4.3.0
+* powerpod 4.3.1
 * https://github.com/bcgov/nr-af-pods/powerpod
 *
 * @license GPLv3 for open source use only
@@ -1557,14 +1557,14 @@
     get_workbook_data_by_id: function get_workbook_data_by_id(id) {
       return "/_api/quartech_workbooks(".concat(id, ")");
     },
-    get_chapters_data: "/_api/quartech_chapters",
-    get_workbookquestions_data: "/_api/quartech_workbookquestions",
-    get_workbookresponses_data: "/_api/quartech_workbookresponses",
+    get_chapters_data: "/_api/quartech_chapters?$filter=statecode eq 0",
+    get_workbookquestions_data: "/_api/quartech_workbookquestions?$filter=statecode eq 0",
+    get_workbookresponses_data: "/_api/quartech_workbookresponses?$filter=statecode eq 0",
     get_workbookresponses_by_workbook: function get_workbookresponses_by_workbook(workbookId) {
-      return "/_api/quartech_workbooks(".concat(workbookId, ")?$expand=quartech_workbookresponse_Workbook_quartech_workbook");
+      return "/_api/quartech_workbooks(".concat(workbookId, ")?$expand=quartech_workbookresponse_Workbook_quartech_workbook($filter=statecode eq 0)");
     },
     get_workbookresponses_by_workbook_and_question: function get_workbookresponses_by_workbook_and_question(workbookId, questionId) {
-      return "/_api/quartech_workbooks(".concat(workbookId, ")?$expand=quartech_workbookresponse_Workbook_quartech_workbook($filter=_quartech_question_value eq ").concat(questionId, ";$select=quartech_workbookresponseid,quartech_response,createdon,modifiedon,_quartech_question_value;$expand=quartech_Question($select=quartech_questiontext,quartech_questiontype);$orderby=createdon desc)");
+      return "/_api/quartech_workbooks(".concat(workbookId, ")?$expand=quartech_workbookresponse_Workbook_quartech_workbook($filter=_quartech_question_value eq ").concat(questionId, " and statecode eq 0;$select=quartech_workbookresponseid,quartech_response,createdon,modifiedon,_quartech_question_value;$expand=quartech_Question($select=quartech_questiontext,quartech_questiontype);$orderby=createdon desc)");
     },
     post_workbookresponse_data: "/_api/quartech_workbookresponses",
     patch_workbookresponse_data: function patch_workbookresponse_data(id) {
@@ -39081,12 +39081,12 @@
     return _initWorkbook.apply(this, arguments);
   }
   function insertLitElement() {
-    var container = document.querySelector('.page-copy');
+    var container = document.querySelector('.efpEntryFormContainer');
     if (container) {
       var element = document.createElement('efp-entry-form');
       container.appendChild(element);
     } else {
-      console.warn('No element with class "page-copy" found.');
+      console.warn('No element with class "efpEntryFormContainer" found.');
     }
   }
 
@@ -39192,7 +39192,7 @@
       };
     };
     // @ts-ignore
-    POWERPOD.version = '4.3.0';
+    POWERPOD.version = '4.3.1';
     // @ts-ignore
     window.powerpod = POWERPOD;
   }

@@ -46,13 +46,13 @@ export const ENDPOINT_URL = {
   get_program_intake_data: `/_api/quartech_programintakes?$select=quartech_intakeenddate,quartech_intakestartdate,quartech_openintakedescription,quartech_closedintakedescription`,
   get_program_home_page_content_data: `/_api/quartech_programhomepagecontents`,
   get_workbook_data_by_id: (id) => `/_api/quartech_workbooks(${id})`,
-  get_chapters_data: `/_api/quartech_chapters`,
-  get_workbookquestions_data: `/_api/quartech_workbookquestions`,
-  get_workbookresponses_data: `/_api/quartech_workbookresponses`,
+  get_chapters_data: `/_api/quartech_chapters?$filter=statecode eq 0`,
+  get_workbookquestions_data: `/_api/quartech_workbookquestions?$filter=statecode eq 0`,
+  get_workbookresponses_data: `/_api/quartech_workbookresponses?$filter=statecode eq 0`,
   get_workbookresponses_by_workbook: (workbookId) =>
-    `/_api/quartech_workbooks(${workbookId})?$expand=quartech_workbookresponse_Workbook_quartech_workbook`,
+    `/_api/quartech_workbooks(${workbookId})?$expand=quartech_workbookresponse_Workbook_quartech_workbook($filter=statecode eq 0)`,
   get_workbookresponses_by_workbook_and_question: (workbookId, questionId) =>
-    `/_api/quartech_workbooks(${workbookId})?$expand=quartech_workbookresponse_Workbook_quartech_workbook($filter=_quartech_question_value eq ${questionId};$select=quartech_workbookresponseid,quartech_response,createdon,modifiedon,_quartech_question_value;$expand=quartech_Question($select=quartech_questiontext,quartech_questiontype);$orderby=createdon desc)`,
+    `/_api/quartech_workbooks(${workbookId})?$expand=quartech_workbookresponse_Workbook_quartech_workbook($filter=_quartech_question_value eq ${questionId} and statecode eq 0;$select=quartech_workbookresponseid,quartech_response,createdon,modifiedon,_quartech_question_value;$expand=quartech_Question($select=quartech_questiontext,quartech_questiontype);$orderby=createdon desc)`,
   post_workbookresponse_data: `/_api/quartech_workbookresponses`,
   patch_workbookresponse_data: (id) => `/_api/quartech_workbookresponses(${id})`,
   delete_workbookresponse_data: (id) => `/_api/quartech_workbookresponses(${id})`,

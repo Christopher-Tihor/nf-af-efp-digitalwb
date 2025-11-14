@@ -199,11 +199,11 @@ export async function initWorkbook() {
 
 // Function to insert the element
 function insertLitElement() {
-  const container = document.querySelector('.page-copy');
+  const container = document.querySelector('.efpEntryFormContainer');
   if (container) {
     const element = document.createElement('efp-entry-form');
     container.appendChild(element);
   } else {
-    console.warn('No element with class "page-copy" found.');
+    console.warn('No element with class "efpEntryFormContainer" found.');
   }
 }
