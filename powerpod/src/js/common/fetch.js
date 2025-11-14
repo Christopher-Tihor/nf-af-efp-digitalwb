@@ -53,15 +53,28 @@ export const ENDPOINT_URL = {
     `/_api/quartech_workbooks(${workbookId})?$expand=quartech_workbookresponse_Workbook_quartech_workbook($filter=statecode eq 0)`,
   get_workbookresponses_by_workbook_and_question: (workbookId, questionId) =>
     `/_api/quartech_workbooks(${workbookId})?$expand=quartech_workbookresponse_Workbook_quartech_workbook($filter=_quartech_question_value eq ${questionId} and statecode eq 0;$select=quartech_workbookresponseid,quartech_response,createdon,modifiedon,_quartech_question_value;$expand=quartech_Question($select=quartech_questiontext,quartech_questiontype);$orderby=createdon desc)`,
+  // Direct query to workbook responses collection - simpler and more reliable
+  get_workbookresponses_direct: (workbookId, questionId) =>
+    `/_api/quartech_workbookresponses?$filter=_quartech_workbook_value eq ${workbookId} and _quartech_question_value eq ${questionId} and statecode eq 0&$orderby=createdon desc&$top=1`,
   post_workbookresponse_data: `/_api/quartech_workbookresponses`,
   patch_workbookresponse_data: (id) => `/_api/quartech_workbookresponses(${id})`,
   delete_workbookresponse_data: (id) => `/_api/quartech_workbookresponses(${id})`,
+};
+
+const CONTENT_TYPE = {
+  json: 'application/json; charset=utf-8',
+};
+
+const DATATYPE = {
+  json: 'json',
 };
 
 POWERPOD.fetch = {
   fetch,
   CACHED_RESULTS: {},
   ENDPOINT_URL,
+  CONTENT_TYPE,
+  DATATYPE,
   getEnvVarsData,
   getApplicationFormData,
   getClaimFormData,
@@ -96,14 +109,6 @@ POWERPOD.fetch = {
   postWorkbookResponseData,
   patchWorkbookResponseData,
   deleteWorkbookResponseData,
-};
-
-const CONTENT_TYPE = {
-  json: 'application/json; charset=utf-8',
-};
-
-const DATATYPE = {
-  json: 'json',
 };
 
 const setODataHeaders = (XMLHttpRequest) => {
@@ -207,7 +212,7 @@ export async function fetch(params) {
         setReqVerificationHeaderToken(XMLHttpRequest);
       }
       if (includeODataHeaders) setODataHeaders(XMLHttpRequest);
-      if (beforeSend && typeof beforeSend === 'function') beforeSend();
+      if (beforeSend && typeof beforeSend === 'function') beforeSend(XMLHttpRequest);
     },
     success: function (data, textStatus, jqXHR) {
       logger.info({

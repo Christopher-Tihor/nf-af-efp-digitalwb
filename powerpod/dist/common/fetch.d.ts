@@ -178,6 +178,7 @@ export namespace ENDPOINT_URL {
     let get_workbookresponses_data: string;
     function get_workbookresponses_by_workbook(workbookId: any): string;
     function get_workbookresponses_by_workbook_and_question(workbookId: any, questionId: any): string;
+    function get_workbookresponses_direct(workbookId: any, questionId: any): string;
     let post_workbookresponse_data: string;
     function patch_workbookresponse_data(id: any): string;
     function delete_workbookresponse_data(id: any): string;

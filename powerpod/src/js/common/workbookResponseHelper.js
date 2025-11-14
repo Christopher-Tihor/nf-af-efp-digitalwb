@@ -198,7 +198,8 @@ export async function createResponse(questionId, response, options = {}) {
       },
     });
 
-    const result = await POWERPOD.fetch.postWorkbookResponseData({
+    // Create the response (returns 204 No Content)
+    await POWERPOD.fetch.postWorkbookResponseData({
       workbookId,
       questionId,
       chapterId,
@@ -208,18 +209,49 @@ export async function createResponse(questionId, response, options = {}) {
 
     logger.info({
       fn: 'createResponse',
-      message: `Successfully created response`,
+      message: `POST request completed (204 No Content), fetching created response...`,
+      data: { workbookId, questionId },
+    });
+
+    // Since POST returns 204 with no body, we need to fetch the newly created response
+    // to get its ID and full data. Use direct query to workbook responses collection.
+    const fetchResult = await POWERPOD.fetch.fetch({
+      url: POWERPOD.fetch.ENDPOINT_URL.get_workbookresponses_direct(workbookId, questionId),
+      contentType: POWERPOD.fetch.CONTENT_TYPE.json,
+      datatype: POWERPOD.fetch.DATATYPE.json,
+      includeODataHeaders: true,
+      returnData: true,
+      skipCache: true, // Always get fresh data
+    });
+
+    // Get the most recent response (should be the one we just created)
+    const responses = fetchResult?.data?.value || [];
+    const createdResponse = responses.length > 0 ? responses[0] : null;
+
+    if (!createdResponse || !createdResponse.quartech_workbookresponseid) {
+      logger.error({
+        fn: 'createResponse',
+        message: `Failed to fetch created response`,
+        data: { workbookId, questionId, responses, fetchResult },
+      });
+      throw new Error('Failed to retrieve created response ID');
+    }
+
+    logger.info({
+      fn: 'createResponse',
+      message: `Successfully fetched created response`,
       data: {
         workbookId,
         questionId,
-        responseId: result?.data?.quartech_workbookresponseid,
+        responseId: createdResponse.quartech_workbookresponseid,
+        fullResponseData: createdResponse,
       },
     });
 
     // Update questionnaire store if loaded
-    if (isQuestionnaireLoaded() && result?.data) {
+    if (isQuestionnaireLoaded() && createdResponse) {
       try {
-        updateQuestionResponse(questionId, response, true, result.data);
+        updateQuestionResponse(questionId, response, true, createdResponse);
         logger.info({
           fn: 'createResponse',
           message: `Updated questionnaire store for question ${questionId}`,
@@ -234,7 +266,7 @@ export async function createResponse(questionId, response, options = {}) {
     }
 
     return {
-      response: result?.data,
+      response: createdResponse,
       success: true,
       workbookId,
       questionId,

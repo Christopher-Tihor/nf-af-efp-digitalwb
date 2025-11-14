@@ -1,5 +1,5 @@
 /*!
-* powerpod 4.3.3
+* powerpod 4.3.4
 * https://github.com/bcgov/nr-af-pods/powerpod
 *
 * @license GPLv3 for open source use only
@@ -1566,6 +1566,10 @@
     get_workbookresponses_by_workbook_and_question: function get_workbookresponses_by_workbook_and_question(workbookId, questionId) {
       return "/_api/quartech_workbooks(".concat(workbookId, ")?$expand=quartech_workbookresponse_Workbook_quartech_workbook($filter=_quartech_question_value eq ").concat(questionId, " and statecode eq 0;$select=quartech_workbookresponseid,quartech_response,createdon,modifiedon,_quartech_question_value;$expand=quartech_Question($select=quartech_questiontext,quartech_questiontype);$orderby=createdon desc)");
     },
+    // Direct query to workbook responses collection - simpler and more reliable
+    get_workbookresponses_direct: function get_workbookresponses_direct(workbookId, questionId) {
+      return "/_api/quartech_workbookresponses?$filter=_quartech_workbook_value eq ".concat(workbookId, " and _quartech_question_value eq ").concat(questionId, " and statecode eq 0&$orderby=createdon desc&$top=1");
+    },
     post_workbookresponse_data: "/_api/quartech_workbookresponses",
     patch_workbookresponse_data: function patch_workbookresponse_data(id) {
       return "/_api/quartech_workbookresponses(".concat(id, ")");
@@ -1574,10 +1578,18 @@
       return "/_api/quartech_workbookresponses(".concat(id, ")");
     }
   };
+  var CONTENT_TYPE = {
+    json: 'application/json; charset=utf-8'
+  };
+  var DATATYPE = {
+    json: 'json'
+  };
   POWERPOD.fetch = {
     fetch: fetch$1,
     CACHED_RESULTS: {},
     ENDPOINT_URL: ENDPOINT_URL,
+    CONTENT_TYPE: CONTENT_TYPE,
+    DATATYPE: DATATYPE,
     getEnvVarsData: getEnvVarsData,
     getApplicationFormData: getApplicationFormData,
     getClaimFormData: getClaimFormData,
@@ -1612,12 +1624,6 @@
     postWorkbookResponseData: postWorkbookResponseData,
     patchWorkbookResponseData: patchWorkbookResponseData,
     deleteWorkbookResponseData: deleteWorkbookResponseData
-  };
-  var CONTENT_TYPE = {
-    json: 'application/json; charset=utf-8'
-  };
-  var DATATYPE = {
-    json: 'json'
   };
   var setODataHeaders = function setODataHeaders(XMLHttpRequest) {
     XMLHttpRequest.setRequestHeader('Accept', 'application/json');
@@ -1711,7 +1717,7 @@
                   _setReqVerificationHeaderToken(XMLHttpRequest);
                 }
                 if (includeODataHeaders) setODataHeaders(XMLHttpRequest);
-                if (_beforeSend && typeof _beforeSend === 'function') _beforeSend();
+                if (_beforeSend && typeof _beforeSend === 'function') _beforeSend(XMLHttpRequest);
               },
               success: function success(data, textStatus, jqXHR) {
                 logger$P.info({
@@ -33325,9 +33331,11 @@
     _createResponse = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee3(questionId, response) {
       var options,
         workbookId,
-        _result$data9,
+        _fetchResult$data,
         chapterId,
-        result,
+        fetchResult,
+        responses,
+        createdResponse,
         _args3 = arguments;
       return _regeneratorRuntime().wrap(function _callee3$(_context3) {
         while (1) switch (_context3.prev = _context3.next) {
@@ -33353,6 +33361,8 @@
                 response: (response === null || response === void 0 ? void 0 : response.substring(0, 100)) + '...'
               }
             });
+
+            // Create the response (returns 204 No Content)
             _context3.next = 9;
             return POWERPOD.fetch.postWorkbookResponseData(_objectSpread2({
               workbookId: workbookId,
@@ -33361,21 +33371,62 @@
               response: response
             }, options));
           case 9:
-            result = _context3.sent;
             logger$7.info({
               fn: 'createResponse',
-              message: "Successfully created response",
+              message: "POST request completed (204 No Content), fetching created response...",
+              data: {
+                workbookId: workbookId,
+                questionId: questionId
+              }
+            });
+
+            // Since POST returns 204 with no body, we need to fetch the newly created response
+            // to get its ID and full data. Use direct query to workbook responses collection.
+            _context3.next = 12;
+            return POWERPOD.fetch.fetch({
+              url: POWERPOD.fetch.ENDPOINT_URL.get_workbookresponses_direct(workbookId, questionId),
+              contentType: POWERPOD.fetch.CONTENT_TYPE.json,
+              datatype: POWERPOD.fetch.DATATYPE.json,
+              includeODataHeaders: true,
+              returnData: true,
+              skipCache: true // Always get fresh data
+            });
+          case 12:
+            fetchResult = _context3.sent;
+            // Get the most recent response (should be the one we just created)
+            responses = (fetchResult === null || fetchResult === void 0 || (_fetchResult$data = fetchResult.data) === null || _fetchResult$data === void 0 ? void 0 : _fetchResult$data.value) || [];
+            createdResponse = responses.length > 0 ? responses[0] : null;
+            if (!(!createdResponse || !createdResponse.quartech_workbookresponseid)) {
+              _context3.next = 18;
+              break;
+            }
+            logger$7.error({
+              fn: 'createResponse',
+              message: "Failed to fetch created response",
               data: {
                 workbookId: workbookId,
                 questionId: questionId,
-                responseId: result === null || result === void 0 || (_result$data9 = result.data) === null || _result$data9 === void 0 ? void 0 : _result$data9.quartech_workbookresponseid
+                responses: responses,
+                fetchResult: fetchResult
+              }
+            });
+            throw new Error('Failed to retrieve created response ID');
+          case 18:
+            logger$7.info({
+              fn: 'createResponse',
+              message: "Successfully fetched created response",
+              data: {
+                workbookId: workbookId,
+                questionId: questionId,
+                responseId: createdResponse.quartech_workbookresponseid,
+                fullResponseData: createdResponse
               }
             });
 
             // Update questionnaire store if loaded
-            if (isQuestionnaireLoaded() && result !== null && result !== void 0 && result.data) {
+            if (isQuestionnaireLoaded() && createdResponse) {
               try {
-                updateQuestionResponse(questionId, response, true, result.data);
+                updateQuestionResponse(questionId, response, true, createdResponse);
                 logger$7.info({
                   fn: 'createResponse',
                   message: "Updated questionnaire store for question ".concat(questionId)
@@ -33391,13 +33442,13 @@
               }
             }
             return _context3.abrupt("return", {
-              response: result === null || result === void 0 ? void 0 : result.data,
+              response: createdResponse,
               success: true,
               workbookId: workbookId,
               questionId: questionId
             });
-          case 15:
-            _context3.prev = 15;
+          case 23:
+            _context3.prev = 23;
             _context3.t0 = _context3["catch"](4);
             logger$7.error({
               fn: 'createResponse',
@@ -33409,11 +33460,11 @@
               }
             });
             throw new Error("Failed to create workbook response: ".concat(_context3.t0.message));
-          case 19:
+          case 27:
           case "end":
             return _context3.stop();
         }
-      }, _callee3, null, [[4, 15]]);
+      }, _callee3, null, [[4, 23]]);
     }));
     return _createResponse.apply(this, arguments);
   }
@@ -38172,17 +38223,18 @@
       }
       // Helper method to save rating responses
       async saveRatingResponse(questionId, ratingValue) {
-          var _a;
+          var _a, _b, _c;
           try {
               const responseText = String(ratingValue);
               const notes = `Rating: ${ratingValue}`;
               // Check if response already exists
               const existingResponse = this.getResponseForQuestion(questionId);
-              let result;
               let responseData;
-              if (existingResponse) {
+              let isNewResponse = false;
+              // Only update if we have an existing response WITH a valid ID
+              if (existingResponse && existingResponse.quartech_workbookresponseid) {
                   // Update existing response
-                  result = await WorkbookResponseHelper.updateResponse(existingResponse.quartech_workbookresponseid, responseText, { notes });
+                  await WorkbookResponseHelper.updateResponse(existingResponse.quartech_workbookresponseid, responseText, { notes });
                   // Create updated response data
                   responseData = {
                       ...existingResponse,
@@ -38192,23 +38244,29 @@
                   };
               }
               else {
-                  // Create new response
-                  result = await WorkbookResponseHelper.createResponse(questionId, responseText, { notes });
+                  // Create new response (either no response exists, or existing response lacks valid ID)
+                  isNewResponse = true;
+                  const createResult = await WorkbookResponseHelper.createResponse(questionId, responseText, { notes });
                   const workbookId = getWorkbookId();
-                  // Create new response data
+                  // Create new response data with all fields from the API response
                   responseData = {
-                      quartech_workbookresponseid: (_a = result.response) === null || _a === void 0 ? void 0 : _a.quartech_workbookresponseid,
+                      ...createResult.response,
+                      quartech_workbookresponseid: (_a = createResult.response) === null || _a === void 0 ? void 0 : _a.quartech_workbookresponseid,
                       quartech_response: responseText,
                       quartech_notes: notes,
                       _quartech_question_value: questionId,
                       _quartech_workbook_value: workbookId,
-                      createdon: new Date().toISOString(),
-                      modifiedon: new Date().toISOString(),
-                      ...result.response
+                      createdon: ((_b = createResult.response) === null || _b === void 0 ? void 0 : _b.createdon) || new Date().toISOString(),
+                      modifiedon: ((_c = createResult.response) === null || _c === void 0 ? void 0 : _c.modifiedon) || new Date().toISOString()
                   };
+                  // CRITICAL: Update memory structures IMMEDIATELY after creation
+                  // This ensures subsequent rapid saves will find the response and update instead of creating duplicates
+                  this.updateMemoryStructuresForRating(questionId, responseData, true);
               }
-              // Update memory structures
-              await this.updateMemoryStructuresForRating(questionId, responseData, !existingResponse);
+              // Update memory structures for updates (for creates, already done above)
+              if (!isNewResponse) {
+                  this.updateMemoryStructuresForRating(questionId, responseData, false);
+              }
               // Update completion and navigation icons
               this.updateCompletionAndNavigation();
               // Trigger re-render (already called by updateCompletionAndNavigation, but keeping for clarity)
@@ -39224,7 +39282,7 @@
       };
     };
     // @ts-ignore
-    POWERPOD.version = '4.3.3';
+    POWERPOD.version = '4.3.4';
     // @ts-ignore
     window.powerpod = POWERPOD;
   }

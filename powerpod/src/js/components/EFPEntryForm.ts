@@ -997,13 +997,14 @@ export class EFPEntryForm extends LitElement {
       const existingResponse = this.getResponseForQuestion(questionId);
 
 
-      let result;
       let responseData;
+      let isNewResponse = false;
 
-      if (existingResponse) {
+      // Only update if we have an existing response WITH a valid ID
+      if (existingResponse && existingResponse.quartech_workbookresponseid) {
         // Update existing response
 
-        result = await WorkbookResponseHelper.updateResponse(
+        await WorkbookResponseHelper.updateResponse(
           existingResponse.quartech_workbookresponseid,
           responseText,
           { notes }
@@ -1020,29 +1021,34 @@ export class EFPEntryForm extends LitElement {
 
 
       } else {
-        // Create new response
+        // Create new response (either no response exists, or existing response lacks valid ID)
+        isNewResponse = true;
 
-        result = await WorkbookResponseHelper.createResponse(questionId, responseText, { notes });
+        const createResult = await WorkbookResponseHelper.createResponse(questionId, responseText, { notes }) as any;
 
         const workbookId = getWorkbookId();
 
-        // Create new response data
+        // Create new response data with all fields from the API response
         responseData = {
-          quartech_workbookresponseid: result.response?.quartech_workbookresponseid,
+          ...createResult.response,
+          quartech_workbookresponseid: createResult.response?.quartech_workbookresponseid,
           quartech_response: responseText,
           quartech_notes: notes,
           _quartech_question_value: questionId,
           _quartech_workbook_value: workbookId,
-          createdon: new Date().toISOString(),
-          modifiedon: new Date().toISOString(),
-          ...result.response
+          createdon: createResult.response?.createdon || new Date().toISOString(),
+          modifiedon: createResult.response?.modifiedon || new Date().toISOString()
         };
 
-
+        // CRITICAL: Update memory structures IMMEDIATELY after creation
+        // This ensures subsequent rapid saves will find the response and update instead of creating duplicates
+        this.updateMemoryStructuresForRating(questionId, responseData, true);
       }
 
-      // Update memory structures
-      await this.updateMemoryStructuresForRating(questionId, responseData, !existingResponse);
+      // Update memory structures for updates (for creates, already done above)
+      if (!isNewResponse) {
+        this.updateMemoryStructuresForRating(questionId, responseData, false);
+      }
 
       // Update completion and navigation icons
       this.updateCompletionAndNavigation();
