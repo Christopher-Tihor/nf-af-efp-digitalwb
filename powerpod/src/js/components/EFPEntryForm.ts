@@ -69,6 +69,7 @@ export class EFPEntryForm extends LitElement {
   @property({ type: Array, attribute: false }) workbookResponses: any[] = [];
   @property({ type: Boolean, attribute: false }) isLoadingResponses = false;
   @property({ type: Boolean, attribute: false }) questionnaireStoreLoaded = false;
+  @property({ type: Boolean, attribute: false }) questionsAndResponsesLoaded = false;
   private isNavigating = false; // Flag to prevent tab change interference
   @property({ type: Object }) activeContent: EFPActiveContent = {
     title: 'Introduction to the Environmental Farm Plan (EFP)',
@@ -1269,6 +1270,15 @@ export class EFPEntryForm extends LitElement {
       // Update completion and navigation icons when responses change
       this.updateCompletionAndNavigation();
     }
+
+    // Update active content when questions and responses are loaded
+    if (changedProps.has('questionsAndResponsesLoaded')) {
+      // Refresh the active content to show updated renderResponsesSummary
+      const currentStep = this.flatSteps[this.currentStepIndex];
+      if (currentStep) {
+        this.activeContent = { title: currentStep.label, content: currentStep.content };
+      }
+    }
   }
 
   // Lifecycle methods
@@ -1311,6 +1321,7 @@ export class EFPEntryForm extends LitElement {
           POWERPOD.workbookQuestionsAndResponses.workbookId === workbookId) {
 
         this.syncFromPOWERPOD();
+        this.questionsAndResponsesLoaded = true;
         return;
       }
 
@@ -1342,6 +1353,9 @@ export class EFPEntryForm extends LitElement {
 
       // Sync to local component state for UI binding
       this.syncFromPOWERPOD();
+
+      // Update the reactive property to trigger re-render
+      this.questionsAndResponsesLoaded = true;
 
       logger.info({ message: `Loaded ${result.stats.totalQuestions} questions with ${result.stats.answeredQuestions} responses (${result.stats.completionPercentage}% complete)` });
 

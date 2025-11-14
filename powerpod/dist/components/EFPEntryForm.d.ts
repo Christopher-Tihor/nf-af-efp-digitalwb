@@ -22,6 +22,7 @@ export declare class EFPEntryForm extends LitElement {
     workbookResponses: any[];
     isLoadingResponses: boolean;
     questionnaireStoreLoaded: boolean;
+    questionsAndResponsesLoaded: boolean;
     private isNavigating;
     activeContent: EFPActiveContent;
     tabGroupEl: HTMLElement & {

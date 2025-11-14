@@ -1,5 +1,5 @@
 /*!
-* powerpod 4.3.1
+* powerpod 4.3.3
 * https://github.com/bcgov/nr-af-pods/powerpod
 *
 * @license GPLv3 for open source use only
@@ -37393,6 +37393,7 @@
           this.workbookResponses = [];
           this.isLoadingResponses = false;
           this.questionnaireStoreLoaded = false;
+          this.questionsAndResponsesLoaded = false;
           this.isNavigating = false; // Flag to prevent tab change interference
           this.activeContent = {
               title: 'Introduction to the Environmental Farm Plan (EFP)',
@@ -38385,6 +38386,14 @@
               // Update completion and navigation icons when responses change
               this.updateCompletionAndNavigation();
           }
+          // Update active content when questions and responses are loaded
+          if (changedProps.has('questionsAndResponsesLoaded')) {
+              // Refresh the active content to show updated renderResponsesSummary
+              const currentStep = this.flatSteps[this.currentStepIndex];
+              if (currentStep) {
+                  this.activeContent = { title: currentStep.label, content: currentStep.content };
+              }
+          }
       }
       // Lifecycle methods
       firstUpdated() {
@@ -38415,6 +38424,7 @@
               if (POWERPOD.workbookQuestionsAndResponses.isLoaded &&
                   POWERPOD.workbookQuestionsAndResponses.workbookId === workbookId) {
                   this.syncFromPOWERPOD();
+                  this.questionsAndResponsesLoaded = true;
                   return;
               }
               logger$4.info({ message: `Loading workbook questions and responses for workbook: ${workbookId}` });
@@ -38440,6 +38450,8 @@
               });
               // Sync to local component state for UI binding
               this.syncFromPOWERPOD();
+              // Update the reactive property to trigger re-render
+              this.questionsAndResponsesLoaded = true;
               logger$4.info({ message: `Loaded ${result.stats.totalQuestions} questions with ${result.stats.answeredQuestions} responses (${result.stats.completionPercentage}% complete)` });
               // Trigger a re-render to update the UI with loaded data
               this.requestUpdate();
@@ -38869,6 +38881,9 @@
       n$2({ type: Boolean, attribute: false })
   ], EFPEntryForm.prototype, "questionnaireStoreLoaded", void 0);
   __decorate([
+      n$2({ type: Boolean, attribute: false })
+  ], EFPEntryForm.prototype, "questionsAndResponsesLoaded", void 0);
+  __decorate([
       n$2({ type: Object })
   ], EFPEntryForm.prototype, "activeContent", void 0);
   __decorate([
@@ -39192,7 +39207,7 @@
       };
     };
     // @ts-ignore
-    POWERPOD.version = '4.3.1';
+    POWERPOD.version = '4.3.3';
     // @ts-ignore
     window.powerpod = POWERPOD;
   }
