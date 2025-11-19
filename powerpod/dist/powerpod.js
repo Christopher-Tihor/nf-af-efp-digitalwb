@@ -36451,7 +36451,13 @@
       getRatingDescription(ratingNum) {
           var _a;
           const descKey = `rating${ratingNum}Description`;
-          return ((_a = this.ratingMetadata) === null || _a === void 0 ? void 0 : _a[descKey]) || '';
+          let description = ((_a = this.ratingMetadata) === null || _a === void 0 ? void 0 : _a[descKey]) || '';
+          // Remove inline font-family styles that override our CSS
+          if (description) {
+              description = description.replace(/font-family:\s*[^;}"']+;?/gi, '');
+              description = description.replace(/font-size:\s*[^;}"']+;?/gi, '');
+          }
+          return description;
       }
       renderRatingOption(option) {
           const isSelected = this.selectedValue === option.value;
@@ -36568,20 +36574,25 @@
       padding: 1rem;
       text-align: left;
       position: relative;
+      background-color: white;
     }
 
     .rating-card-header {
       font-weight: 700;
       font-size: 0.95rem;
-      margin-bottom: 0.5rem;
-      padding-bottom: 0.5rem;
-      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+      margin: -1rem -1rem 0 -1rem;
+      padding: 0.75rem 1rem;
+      border-radius: 8px 8px 0 0;
     }
 
     .rating-card-description {
       font-size: 0.85rem;
       line-height: 1.4;
       flex: 1;
+      background-color: white;
+      color: #333;
+      padding: 0.75rem 0 0 0;
+      font-family: 'BCSans', 'Noto Sans', Verdana, sans-serif !important;
     }
 
     .rating-card-description :global(*) {
@@ -36589,20 +36600,37 @@
       padding: 0;
       font-size: inherit;
       line-height: inherit;
+      font-family: 'BCSans', 'Noto Sans', Verdana, sans-serif !important;
     }
 
     .rating-card-description :global(p) {
       margin-bottom: 0.5rem;
+      font-family: 'BCSans', 'Noto Sans', Verdana, sans-serif !important;
     }
 
     .rating-card-description :global(p:last-child) {
       margin-bottom: 0;
     }
 
+    .rating-card-description :global(div) {
+      font-family: 'BCSans', 'Noto Sans', Verdana, sans-serif !important;
+    }
+
+    .rating-card-description :global(span) {
+      font-family: 'BCSans', 'Noto Sans', Verdana, sans-serif !important;
+    }
+
     /* N/A specific styles */
-    .rating-box.na,
+    .rating-box.na {
+      background-color: #e0e0e0;
+      color: #333;
+      flex: 0 0 auto;
+      min-width: 70px;
+      max-width: 90px;
+    }
+
     .rating-card.na {
-      background-color: #d4c5a0;
+      background-color: white;
       color: #333;
       flex: 0 0 auto;
       min-width: 70px;
@@ -36611,9 +36639,11 @@
 
     .rating-card.na .rating-card-header {
       text-align: center;
-      border-bottom: none;
-      margin-bottom: 0;
-      padding-bottom: 0;
+      background-color: #e0e0e0;
+      color: #333;
+      margin: -1rem -1rem 0 -1rem;
+      padding: 0.75rem 1rem;
+      border-radius: 8px 8px 0 0;
     }
 
     /* Hover states */
@@ -36667,26 +36697,44 @@
     }
 
     /* Color schemes for Point Rating - Blue-to-Red Sequential Scale */
-    .rating-box.rating-1,
-    .rating-card.rating-1 {
+    /* Compact buttons get full background color */
+    .rating-box.rating-1 {
       background-color: #12436D;
       color: white;
     }
 
-    .rating-box.rating-2,
-    .rating-card.rating-2 {
+    .rating-box.rating-2 {
       background-color: #28A197;
       color: white;
     }
 
-    .rating-box.rating-3,
-    .rating-card.rating-3 {
+    .rating-box.rating-3 {
       background-color: #F46A25;
       color: white;
     }
 
-    .rating-box.rating-4,
-    .rating-card.rating-4 {
+    .rating-box.rating-4 {
+      background-color: #D4351C;
+      color: white;
+    }
+
+    /* Card headers get colored backgrounds */
+    .rating-card.rating-1 .rating-card-header {
+      background-color: #12436D;
+      color: white;
+    }
+
+    .rating-card.rating-2 .rating-card-header {
+      background-color: #28A197;
+      color: white;
+    }
+
+    .rating-card.rating-3 .rating-card-header {
+      background-color: #F46A25;
+      color: white;
+    }
+
+    .rating-card.rating-4 .rating-card-header {
       background-color: #D4351C;
       color: white;
     }
