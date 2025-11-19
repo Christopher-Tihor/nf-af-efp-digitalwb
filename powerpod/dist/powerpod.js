@@ -38387,10 +38387,10 @@
               if (existingTimer) {
                   clearTimeout(existingTimer);
               }
-              // Set a new debounce timer (1500ms delay)
+              // Set a new debounce timer (500ms delay)
               const timer = window.setTimeout(() => {
                   this.saveDebouncedResponse(questionId);
-              }, 1500);
+              }, 500);
               this.responseSaveDebounceTimers.set(questionId, timer);
               // Also call the original handler for any additional processing
               EFPEventUtils.handleRatingChanged(event, (questionId, value) => {
