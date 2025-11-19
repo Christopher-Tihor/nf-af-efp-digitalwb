@@ -37674,7 +37674,7 @@
   .main-content h4,
   .main-content h5,
   .main-content h6 {
-    font-family: var(--chapter-font) !important;
+    font-family: var(--body-font) !important;
   }
 
   /* Radio buttons and form elements */
