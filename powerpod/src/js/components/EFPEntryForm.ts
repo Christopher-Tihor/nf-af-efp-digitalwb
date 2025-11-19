@@ -400,11 +400,24 @@ export class EFPEntryForm extends LitElement {
         const existingResponse2 = this.getResponseForQuestion(question.id);
         const selectedValue = existingResponse2?.quartech_response || '';
 
+        // Prepare rating metadata for Point Rating questions
+        const ratingMetadata = questionType === 'Point Rating' ? {
+          rating1OverwriteLabel: question.rating1OverwriteLabel,
+          rating1Description: question.rating1Description,
+          rating2OverwriteLabel: question.rating2OverwriteLabel,
+          rating2Description: question.rating2Description,
+          rating3OverwriteLabel: question.rating3OverwriteLabel,
+          rating3Description: question.rating3Description,
+          rating4OverwriteLabel: question.rating4OverwriteLabel,
+          rating4Description: question.rating4Description
+        } : {};
+
         return html`
           <rating-question
             .questionId=${question.id}
             .questionType=${questionType}
             .selectedValue=${selectedValue}
+            .ratingMetadata=${ratingMetadata}
             @rating-changed=${this.handleRatingChanged}
           ></rating-question>
         `;

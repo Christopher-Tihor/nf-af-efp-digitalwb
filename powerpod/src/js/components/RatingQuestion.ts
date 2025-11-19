@@ -1,10 +1,22 @@
-import { LitElement, html, css } from 'lit';
+import { LitElement, html, css, TemplateResult } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
+import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 
 export interface RatingOption {
   value: string;
   label: string;
   color: string;
+}
+
+export interface RatingMetadata {
+  rating1OverwriteLabel?: string | null;
+  rating1Description?: string | null;
+  rating2OverwriteLabel?: string | null;
+  rating2Description?: string | null;
+  rating3OverwriteLabel?: string | null;
+  rating3Description?: string | null;
+  rating4OverwriteLabel?: string | null;
+  rating4Description?: string | null;
 }
 
 @customElement('rating-question')
@@ -13,7 +25,8 @@ export class RatingQuestion extends LitElement {
   @property({ type: String }) questionType = '';
   @property({ type: Array }) options: RatingOption[] = [];
   @property({ type: String }) selectedValue = '';
-  
+  @property({ type: Object }) ratingMetadata: RatingMetadata = {};
+
   @state() private hoveredValue = '';
 
   // Debug lifecycle to see when selectedValue changes
@@ -29,17 +42,22 @@ export class RatingQuestion extends LitElement {
       flex-direction: column;
       gap: 0.5rem;
       margin: 1rem 0;
+      width: 100%;
+      max-width: 100%;
+      overflow: hidden;
     }
 
     .rating-options {
       display: flex;
-      gap: 2px;
-      align-items: center;
+      gap: 0.5rem;
+      align-items: stretch;
       flex-wrap: wrap;
+      width: 100%;
     }
 
+    /* Compact button style (for Yes/No/NA and Point Rating without descriptions) */
     .rating-box {
-      width: 60px;
+      min-width: 60px;
       height: 40px;
       border: 2px solid #333;
       border-radius: 4px;
@@ -53,19 +71,107 @@ export class RatingQuestion extends LitElement {
       color: #333;
       position: relative;
       user-select: none;
+      padding: 0.5rem;
     }
 
-    .rating-box:hover {
-      transform: scale(1.05);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    /* Card style (for Point Rating with descriptions) */
+    .rating-card {
+      flex: 1 1 auto;
+      min-width: 160px;
+      max-width: 250px;
+      border: 2px solid #333;
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      user-select: none;
+      padding: 1rem;
+      text-align: left;
+      position: relative;
     }
 
-    .rating-box.selected {
+    .rating-card-header {
+      font-weight: 700;
+      font-size: 0.95rem;
+      margin-bottom: 0.5rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    .rating-card-description {
+      font-size: 0.85rem;
+      line-height: 1.4;
+      flex: 1;
+    }
+
+    .rating-card-description :global(*) {
+      margin: 0;
+      padding: 0;
+      font-size: inherit;
+      line-height: inherit;
+    }
+
+    .rating-card-description :global(p) {
+      margin-bottom: 0.5rem;
+    }
+
+    .rating-card-description :global(p:last-child) {
+      margin-bottom: 0;
+    }
+
+    /* N/A specific styles */
+    .rating-box.na,
+    .rating-card.na {
+      background-color: #d4c5a0;
+      color: #333;
+      flex: 0 0 auto;
+      min-width: 70px;
+      max-width: 90px;
+    }
+
+    .rating-card.na .rating-card-header {
+      text-align: center;
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    /* Hover states */
+    .rating-box:hover,
+    .rating-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Selected states */
+    .rating-box.selected,
+    .rating-card.selected {
       border-color: #000;
-      border-width: 3px;
-      transform: scale(1.02);
+      border-width: 4px;
+      box-shadow: 0 0 0 3px #FFD700, 0 4px 12px rgba(0, 0, 0, 0.3);
+      transform: translateY(-2px);
     }
 
+    .rating-card.selected::before {
+      content: '✓';
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
+      background-color: #FFD700;
+      color: #000;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 1rem;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Color schemes for Yes/No/NA */
     .rating-box.yes {
       background-color: #8bc34a;
       color: white;
@@ -81,31 +187,32 @@ export class RatingQuestion extends LitElement {
       color: #333;
     }
 
-    .rating-box.na {
-      background-color: #d4c5a0;
-      color: #333;
-    }
-
-    .rating-box.rating-1 {
-      background-color: #f44336;
+    /* Color schemes for Point Rating - Blue-to-Red Sequential Scale */
+    .rating-box.rating-1,
+    .rating-card.rating-1 {
+      background-color: #12436D;
       color: white;
     }
 
-    .rating-box.rating-2 {
-      background-color: #ff9800;
+    .rating-box.rating-2,
+    .rating-card.rating-2 {
+      background-color: #28A197;
       color: white;
     }
 
-    .rating-box.rating-3 {
-      background-color: #ffeb3b;
-      color: #333;
-    }
-
-    .rating-box.rating-4 {
-      background-color: #8bc34a;
+    .rating-box.rating-3,
+    .rating-card.rating-3 {
+      background-color: #F46A25;
       color: white;
     }
 
+    .rating-box.rating-4,
+    .rating-card.rating-4 {
+      background-color: #D4351C;
+      color: white;
+    }
+
+    /* Legacy 5-6 point support */
     .rating-box.rating-5 {
       background-color: #4caf50;
       color: white;
@@ -116,22 +223,46 @@ export class RatingQuestion extends LitElement {
       color: white;
     }
 
-    .rating-label {
-      font-size: 0.8rem;
-      margin-top: 0.25rem;
-      text-align: center;
-      color: var(--sl-color-neutral-600);
+    /* Tablet and smaller - stack cards vertically */
+    @media (max-width: 992px) {
+      .rating-options {
+        flex-direction: column;
+      }
+
+      .rating-box {
+        width: 100%;
+        min-width: unset;
+      }
+
+      .rating-card {
+        min-width: unset;
+        max-width: unset;
+        width: 100%;
+      }
+
+      .rating-card.na {
+        max-width: unset;
+        width: 100%;
+      }
+
+      .rating-card-header {
+        font-size: 0.9rem;
+      }
+
+      .rating-card-description {
+        font-size: 0.8rem;
+      }
     }
 
-    @media (max-width: 768px) {
+    /* Desktop - ensure cards stay in one row when possible */
+    @media (min-width: 993px) {
       .rating-options {
-        justify-content: center;
+        flex-wrap: nowrap;
       }
-      
-      .rating-box {
-        width: 50px;
-        height: 35px;
-        font-size: 0.8rem;
+
+      .rating-card {
+        flex: 1 1 0;
+        min-width: 0;
       }
     }
   `;
@@ -145,17 +276,18 @@ export class RatingQuestion extends LitElement {
           { value: 'unknown', label: '?', color: 'unknown' },
           { value: 'na', label: 'N/A', color: 'na' }
         ];
-      
+
       case 'Point Rating':
-        return [
-          { value: '1', label: '1', color: 'rating-1' },
-          { value: '2', label: '2', color: 'rating-2' },
-          { value: '3', label: '3', color: 'rating-3' },
-          { value: '4', label: '4', color: 'rating-4' },
-          { value: '5', label: '5', color: 'rating-5' },
-          { value: '6', label: '6', color: 'rating-6' }
+        // 4-point system with N/A option first
+        const options: RatingOption[] = [
+          { value: 'na', label: 'N/A', color: 'na' },
+          { value: '1', label: this.ratingMetadata?.rating1OverwriteLabel || '1', color: 'rating-1' },
+          { value: '2', label: this.ratingMetadata?.rating2OverwriteLabel || '2', color: 'rating-2' },
+          { value: '3', label: this.ratingMetadata?.rating3OverwriteLabel || '3', color: 'rating-3' },
+          { value: '4', label: this.ratingMetadata?.rating4OverwriteLabel || '4', color: 'rating-4' }
         ];
-      
+        return options;
+
       default:
         return [];
     }
@@ -183,25 +315,90 @@ export class RatingQuestion extends LitElement {
     this.hoveredValue = '';
   }
 
+  private hasRatingDescriptions(): boolean {
+    if (this.questionType !== 'Point Rating') return false;
+
+    return !!(
+      this.ratingMetadata?.rating1Description ||
+      this.ratingMetadata?.rating2Description ||
+      this.ratingMetadata?.rating3Description ||
+      this.ratingMetadata?.rating4Description
+    );
+  }
+
+  private getRatingLabel(ratingNum: number): string {
+    const labelKey = `rating${ratingNum}OverwriteLabel` as keyof RatingMetadata;
+    return this.ratingMetadata?.[labelKey] || `Risk Rating ${ratingNum}`;
+  }
+
+  private getRatingDescription(ratingNum: number): string {
+    const descKey = `rating${ratingNum}Description` as keyof RatingMetadata;
+    return this.ratingMetadata?.[descKey] || '';
+  }
+
+  private renderRatingOption(option: RatingOption) {
+    const isSelected = this.selectedValue === option.value;
+    const isNA = option.value === 'na';
+
+    // For Point Rating with descriptions, use card layout
+    if (this.questionType === 'Point Rating' && this.hasRatingDescriptions()) {
+      // N/A card (compact, no description)
+      if (isNA) {
+        return html`
+          <div
+            class="rating-card na ${isSelected ? 'selected' : ''}"
+            @click=${() => this.handleOptionClick(option.value)}
+            title="Not Applicable"
+          >
+            <div class="rating-card-header">N/A</div>
+          </div>
+        `;
+      }
+
+      // Rating cards with descriptions
+      const ratingNum = parseInt(option.value);
+      const label = this.getRatingLabel(ratingNum);
+      const description = this.getRatingDescription(ratingNum);
+
+      return html`
+        <div
+          class="rating-card ${option.color} ${isSelected ? 'selected' : ''}"
+          @click=${() => this.handleOptionClick(option.value)}
+          title="${label}"
+        >
+          <div class="rating-card-header">${label}</div>
+          ${description ? html`
+            <div class="rating-card-description">
+              ${unsafeHTML(description)}
+            </div>
+          ` : ''}
+        </div>
+      `;
+    }
+
+    // For Yes/No/NA or Point Rating without descriptions, use compact button layout
+    return html`
+      <div
+        class="rating-box ${option.color} ${isSelected ? 'selected' : ''}"
+        @click=${() => this.handleOptionClick(option.value)}
+        @mouseenter=${() => this.handleMouseEnter(option.value)}
+        @mouseleave=${this.handleMouseLeave}
+        title="${option.label}"
+      >
+        ${option.label}
+      </div>
+    `;
+  }
+
   render() {
-    const optionsToRender = this.options.length > 0 
-      ? this.options 
+    const optionsToRender = this.options.length > 0
+      ? this.options
       : this.getDefaultOptions(this.questionType);
 
     return html`
       <div class="rating-container">
         <div class="rating-options">
-          ${optionsToRender.map(option => html`
-            <div
-              class="rating-box ${option.color} ${this.selectedValue === option.value ? 'selected' : ''}"
-              @click=${() => this.handleOptionClick(option.value)}
-              @mouseenter=${() => this.handleMouseEnter(option.value)}
-              @mouseleave=${this.handleMouseLeave}
-              title="${option.label}"
-            >
-              ${option.label}
-            </div>
-          `)}
+          ${optionsToRender.map(option => this.renderRatingOption(option))}
         </div>
       </div>
     `;

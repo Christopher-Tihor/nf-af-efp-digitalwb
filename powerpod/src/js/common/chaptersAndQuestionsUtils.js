@@ -327,7 +327,15 @@ export function getChaptersWithNestedQuestionsAndSubchapters() {
       textBelowQuestion: question.quartech_textbelowquestion,
       tooltip: question.quartech_tooltip,
       responseOptionColor: question.quartech_responseoptioncolor,
-      multiselectOptions: question.quartech_multiselectoptions
+      multiselectOptions: question.quartech_multiselectoptions,
+      rating1OverwriteLabel: question.quartech_rating1overwritelabel,
+      rating1Description: question.quartech_rating1description,
+      rating2OverwriteLabel: question.quartech_rating2overwritelabel,
+      rating2Description: question.quartech_rating2description,
+      rating3OverwriteLabel: question.quartech_rating3overwritelabel,
+      rating3Description: question.quartech_rating3description,
+      rating4OverwriteLabel: question.quartech_rating4overwritelabel,
+      rating4Description: question.quartech_rating4description
     })),
     subchapters: (chapter.subchapters || []).map(subchapter => ({
       id: subchapter.quartech_chapterid,
@@ -348,7 +356,15 @@ export function getChaptersWithNestedQuestionsAndSubchapters() {
         textBelowQuestion: question.quartech_textbelowquestion,
         tooltip: question.quartech_tooltip,
         responseOptionColor: question.quartech_responseoptioncolor,
-        multiselectOptions: question.quartech_multiselectoptions
+        multiselectOptions: question.quartech_multiselectoptions,
+        rating1OverwriteLabel: question.quartech_rating1overwritelabel,
+        rating1Description: question.quartech_rating1description,
+        rating2OverwriteLabel: question.quartech_rating2overwritelabel,
+        rating2Description: question.quartech_rating2description,
+        rating3OverwriteLabel: question.quartech_rating3overwritelabel,
+        rating3Description: question.quartech_rating3description,
+        rating4OverwriteLabel: question.quartech_rating4overwritelabel,
+        rating4Description: question.quartech_rating4description
       })),
       // Handle 3rd level subchapters (sub-subchapters)
       subchapters: (subchapter.subchapters || []).map(subSubchapter => ({
@@ -370,7 +386,15 @@ export function getChaptersWithNestedQuestionsAndSubchapters() {
           textBelowQuestion: question.quartech_textbelowquestion,
           tooltip: question.quartech_tooltip,
           responseOptionColor: question.quartech_responseoptioncolor,
-          multiselectOptions: question.quartech_multiselectoptions
+          multiselectOptions: question.quartech_multiselectoptions,
+          rating1OverwriteLabel: question.quartech_rating1overwritelabel,
+          rating1Description: question.quartech_rating1description,
+          rating2OverwriteLabel: question.quartech_rating2overwritelabel,
+          rating2Description: question.quartech_rating2description,
+          rating3OverwriteLabel: question.quartech_rating3overwritelabel,
+          rating3Description: question.quartech_rating3description,
+          rating4OverwriteLabel: question.quartech_rating4overwritelabel,
+          rating4Description: question.quartech_rating4description
         }))
       }))
     }))
