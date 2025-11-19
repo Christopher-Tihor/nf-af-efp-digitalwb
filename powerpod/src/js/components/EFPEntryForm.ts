@@ -841,10 +841,10 @@ export class EFPEntryForm extends LitElement {
         clearTimeout(existingTimer);
       }
 
-      // Set a new debounce timer (500ms delay)
+      // Set a new debounce timer (1000ms delay)
       const timer = window.setTimeout(() => {
         this.saveDebouncedResponse(questionId);
-      }, 500);
+      }, 1000);
 
       this.responseSaveDebounceTimers.set(questionId, timer);
 

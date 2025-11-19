@@ -1,5 +1,5 @@
 /*!
-* powerpod 4.3.8
+* powerpod 4.3.9
 * https://github.com/bcgov/nr-af-pods/powerpod
 *
 * @license GPLv3 for open source use only
@@ -38387,10 +38387,10 @@
               if (existingTimer) {
                   clearTimeout(existingTimer);
               }
-              // Set a new debounce timer (500ms delay)
+              // Set a new debounce timer (1000ms delay)
               const timer = window.setTimeout(() => {
                   this.saveDebouncedResponse(questionId);
-              }, 500);
+              }, 1000);
               this.responseSaveDebounceTimers.set(questionId, timer);
               // Also call the original handler for any additional processing
               EFPEventUtils.handleRatingChanged(event, (questionId, value) => {
@@ -39572,7 +39572,7 @@
       };
     };
     // @ts-ignore
-    POWERPOD.version = '4.3.8';
+    POWERPOD.version = '4.3.9';
     // @ts-ignore
     window.powerpod = POWERPOD;
   }
