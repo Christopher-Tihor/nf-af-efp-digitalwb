@@ -44,15 +44,16 @@ export class RatingQuestion extends LitElement {
       margin: 1rem 0;
       width: 100%;
       max-width: 100%;
-      overflow: hidden;
+      box-sizing: border-box;
     }
 
     .rating-options {
       display: flex;
       gap: 0.5rem;
       align-items: stretch;
-      flex-wrap: wrap;
+      flex-direction: row;
       width: 100%;
+      box-sizing: border-box;
     }
 
     /* Compact button style (for Yes/No/NA and Point Rating without descriptions) */
@@ -72,13 +73,13 @@ export class RatingQuestion extends LitElement {
       position: relative;
       user-select: none;
       padding: 0.5rem;
+      box-sizing: border-box;
     }
 
     /* Card style (for Point Rating with descriptions) */
     .rating-card {
-      flex: 1 1 auto;
-      min-width: 160px;
-      max-width: 250px;
+      flex: 1 1 0;
+      min-width: 140px;
       border: 2px solid #333;
       border-radius: 8px;
       display: flex;
@@ -90,6 +91,7 @@ export class RatingQuestion extends LitElement {
       text-align: left;
       position: relative;
       background-color: white;
+      box-sizing: border-box;
     }
 
     .rating-card-header {
@@ -140,16 +142,16 @@ export class RatingQuestion extends LitElement {
       background-color: #e0e0e0;
       color: #333;
       flex: 0 0 auto;
-      min-width: 70px;
-      max-width: 90px;
+      min-width: 60px;
+      max-width: 80px;
     }
 
     .rating-card.na {
       background-color: white;
       color: #333;
       flex: 0 0 auto;
-      min-width: 70px;
-      max-width: 90px;
+      min-width: 60px;
+      max-width: 80px;
     }
 
     .rating-card.na .rating-card-header {
@@ -265,26 +267,22 @@ export class RatingQuestion extends LitElement {
       color: white;
     }
 
-    /* Tablet and smaller - stack cards vertically */
+    /* Narrow devices - switch to vertical layout (5 rows) */
     @media (max-width: 992px) {
       .rating-options {
         flex-direction: column;
       }
 
-      .rating-box {
-        width: 100%;
-        min-width: unset;
-      }
-
       .rating-card {
-        min-width: unset;
-        max-width: unset;
         width: 100%;
+        min-width: unset;
+        flex: 0 0 auto;
       }
 
       .rating-card.na {
-        max-width: unset;
         width: 100%;
+        min-width: unset;
+        max-width: unset;
       }
 
       .rating-card-header {
@@ -292,19 +290,45 @@ export class RatingQuestion extends LitElement {
       }
 
       .rating-card-description {
-        font-size: 0.8rem;
+        font-size: 0.85rem;
       }
     }
 
-    /* Desktop - ensure cards stay in one row when possible */
-    @media (min-width: 993px) {
+    /* Mobile devices - ensure cards stay within container */
+    @media (max-width: 768px) {
+      .rating-container {
+        padding: 0;
+        margin: 0.5rem 0;
+      }
+
       .rating-options {
-        flex-wrap: nowrap;
+        gap: 0.5rem;
+        width: 100%;
+        max-width: 100%;
       }
 
       .rating-card {
-        flex: 1 1 0;
-        min-width: 0;
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0.75rem;
+      }
+
+      .rating-card.na {
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+      }
+
+      .rating-card-header {
+        font-size: 0.85rem;
+        padding: 0.5rem 0.75rem;
+      }
+
+      .rating-card-description {
+        font-size: 0.8rem;
+        padding: 0.5rem 0.75rem;
       }
     }
   `;
