@@ -36635,12 +36635,12 @@
       background-color: white;
       color: #333;
       flex: 0 0 auto;
-      min-width: 60px;
-      max-width: 80px;
+      min-width: 100px;
+      max-width: 120px;
     }
 
     .rating-card.na .rating-card-header {
-      text-align: center;
+      text-align: left;
       background-color: #e0e0e0;
       color: #333;
       margin: -1rem -1rem 0 -1rem;
@@ -37469,12 +37469,12 @@
 
   @media (max-width: 992px) {
     .sidebar {
-      order: 2;
+      order: 1;
       flex: 0 0 100%;
     }
 
     .main-content {
-      order: 1;
+      order: 2;
       flex: 0 0 100%;
     }
   }

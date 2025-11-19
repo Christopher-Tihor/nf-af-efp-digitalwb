@@ -75,12 +75,12 @@ export const efpEntryFormStyles = css`
 
   @media (max-width: 992px) {
     .sidebar {
-      order: 2;
+      order: 1;
       flex: 0 0 100%;
     }
 
     .main-content {
-      order: 1;
+      order: 2;
       flex: 0 0 100%;
     }
   }
