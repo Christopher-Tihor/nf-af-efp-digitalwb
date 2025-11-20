@@ -1,5 +1,5 @@
 /*!
-* powerpod 4.3.9
+* powerpod 4.4.0
 * https://github.com/bcgov/nr-af-pods/powerpod
 *
 * @license GPLv3 for open source use only
@@ -36979,6 +36979,15 @@
               return text;
           return text.substring(0, maxLength - 3) + '...';
       }
+      /**
+       * Converts newline characters (\n) to HTML line breaks (<br>)
+       * Useful for displaying text with line breaks from the database
+       */
+      static convertNewlinesToBreaks(text) {
+          if (!text)
+              return '';
+          return text.replace(/\n/g, '<br>');
+      }
   }
 
   class EFPCompletionUtils {
@@ -37958,7 +37967,7 @@
         ` : ''}
 
         <div class="question-label">
-          <span>${o$1(question.label)}</span>
+          <span>${o$1(EFPTextUtils.convertNewlinesToBreaks(question.label))}</span>
           ${question.tooltip ? x `
             <sl-tooltip placement="top" style="--max-width: 300px;">
               <div slot="content">${o$1(question.tooltip)}</div>
@@ -39057,7 +39066,7 @@
                 ${chapterQuestions.map(entry => `
                   <div style="padding: 0.5rem; margin: 0.5rem 0; background-color: white; border-radius: var(--sl-border-radius-small); border-left: 3px solid ${entry.response ? 'var(--sl-color-success-600)' : 'var(--sl-color-neutral-300)'};">
                     <p style="margin: 0 0 0.25rem 0; font-weight: 500; font-size: 0.875rem;">
-                      ${entry.question ? entry.question.quartech_questiontext || 'Question text not available' : 'Question data not loaded'}
+                      ${entry.question ? (entry.question.quartech_label || entry.question.quartech_questiontext || 'Question text not available').replace(/\n/g, '<br>') : 'Question data not loaded'}
                     </p>
                     ${entry.response ? `
                       <p style="margin: 0 0 0.25rem 0; color: var(--sl-color-success-800);">
@@ -39084,7 +39093,7 @@
                 <p style="margin: 0 0 0.25rem 0; font-weight: 500; font-size: 0.875rem;">Question ID: ${questionId}</p>
                 ${entry.question ? `
                   <p style="margin: 0 0 0.25rem 0; color: var(--sl-color-neutral-700);">
-                    <strong>Question:</strong> ${entry.question.quartech_questiontext || 'No question text'}
+                    <strong>Question:</strong> ${(entry.question.quartech_label || entry.question.quartech_questiontext || 'No question text').replace(/\n/g, '<br>')}
                   </p>
                 ` : ''}
                 ${entry.response ? `
@@ -39572,7 +39581,7 @@
       };
     };
     // @ts-ignore
-    POWERPOD.version = '4.3.9';
+    POWERPOD.version = '4.4.0';
     // @ts-ignore
     window.powerpod = POWERPOD;
   }

@@ -60,5 +60,14 @@ export class EFPTextUtils {
     if (text.length <= maxLength) return text;
     return text.substring(0, maxLength - 3) + '...';
   }
+
+  /**
+   * Converts newline characters (\n) to HTML line breaks (<br>)
+   * Useful for displaying text with line breaks from the database
+   */
+  static convertNewlinesToBreaks(text: string): string {
+    if (!text) return '';
+    return text.replace(/\n/g, '<br>');
+  }
 }
 
