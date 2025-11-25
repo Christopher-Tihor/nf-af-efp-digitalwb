@@ -8,5 +8,7 @@ declare namespace _default {
     function addValidationError(state: any, payload: any): any;
     function removeValidationError(state: any, payload: any): any;
     function addToFieldOrder(state: any, payload: any): any;
+    function setPortalPageData(state: any, payload: any): any;
+    function setUserRoles(state: any, payload: any): any;
 }
 export default _default;

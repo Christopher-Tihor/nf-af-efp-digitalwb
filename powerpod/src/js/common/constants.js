@@ -22,7 +22,7 @@ export const Hosts = {
 export const ClaimPaths = ['/claim/', '/claim-dev/'];
 export const ApplicationPaths = ['/application/', '/application-dev/'];
 export const HomePaths = ['/', '/home-dev/'];
-export const WorkbookPaths = ['/efpworkbook/', '/efpworkbook-dev/'];
+export const WorkbookPaths = ['/efpworkbook/', '/efpworkbook-dev/', '/efpworkbook-dev2/'];
 
 export const Form = {
   Application: 'Application',

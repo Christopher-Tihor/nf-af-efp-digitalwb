@@ -177,4 +177,25 @@ export default {
     state.fieldOrder = newFieldOrder;
     return state;
   },
+  setPortalPageData(state, payload) {
+    logger.info({
+      fn: this.setPortalPageData,
+      message: 'Set portal page data in state',
+      data: { state, payload },
+    });
+    if (!state.portalPages) {
+      state.portalPages = {};
+    }
+    state.portalPages[payload.name] = payload.data;
+    return state;
+  },
+  setUserRoles(state, payload) {
+    logger.info({
+      fn: this.setUserRoles,
+      message: 'Set user roles in state',
+      data: { state, payload },
+    });
+    state.userRoles = payload.roles;
+    return state;
+  },
 };

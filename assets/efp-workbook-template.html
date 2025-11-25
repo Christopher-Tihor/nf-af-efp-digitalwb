@@ -1,0 +1,37 @@
+<main class="container">
+  <h1>{{ page.title }}</h1>
+
+  <div id="loader">
+    <div id="spinner"></div>
+  </div>
+  <script type="text/javascript">
+    if (
+      !!document.querySelector('#loader') &&
+      !window?.location?.search?.includes('&msg=success')
+    ) {
+      document.head.insertAdjacentHTML(
+        'beforeend',
+        `
+          <style id="loader-style" type="text/css">
+            #header-container, #body-container {
+              display: none !important;
+            }
+            #loader, #spinner {
+              display: flex;
+            }
+          </style>
+      `
+      );
+    }
+  </script>
+  <div class="row sectionBlockLayout text-start" style="display: flex; flex-wrap: wrap; margin: 0px; min-height: auto; padding: 8px;">
+    <div class="container" style="padding: 0px; display: flex; flex-wrap: wrap;"><div class="col-lg-12 efpEntryFormContainer" style="flex-grow: 1; display: flex; flex-direction: column; min-width: 250px;"></div></div>
+  </div>
+</main>
+{% if user %}
+  <script id="pp-user-roles" type="application/json">
+    {{ user.roles | json }}
+  </script>
+{% else %}
+  <script id="pp-user-roles" type="application/json">[]</script>
+{% endif %}

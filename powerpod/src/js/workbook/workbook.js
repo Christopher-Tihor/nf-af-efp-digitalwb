@@ -12,8 +12,11 @@ import {
 } from '../common/chaptersAndQuestionsUtils.js';
 import { loadQuestionnaireWithResponses } from '../common/questionnaire.js';
 import { POWERPOD } from '../common/constants.js';
+import { getPortalPageData } from '../common/fetch.js';
+import store from '../store';
 import '../common/workbookResponseHelper.js';
 import '../components/EFPEntryForm.ts';
+import { loadUserRoles } from '../common/userRoles.js';
 
 const logger = Logger('workbook/workbook');
 
@@ -98,6 +101,9 @@ export async function initWorkbook() {
     fn: initWorkbook,
     message: `workbook initialized!`,
   });
+
+  // Load user roles from DOM into state
+  loadUserRoles();
 
   // Get workbook ID and load data
   const workbookId = getWorkbookId();
@@ -194,7 +200,64 @@ export async function initWorkbook() {
     });
   }
 
+  // Load portal page data for Section C
+  loadPortalPageData();
+
   hideLoadingAnimation();
+}
+
+// Function to load portal page data for Section C
+async function loadPortalPageData() {
+  const portalPageName = 'Workbook Terms and Conditions Sign-off';
+
+  try {
+    logger.info({ message: `Loading portal page: "${portalPageName}"` });
+
+    // Build filter parameter
+    const filterParam = `$filter=quartech_name eq '${portalPageName}'`;
+
+    const result = await getPortalPageData({ params: filterParam });
+
+    if (!result?.data?.value) {
+      throw new Error('Invalid response structure from portal page API');
+    }
+
+    const portalPages = result.data.value;
+
+    // Validate exactly one result
+    if (portalPages.length === 0) {
+      throw new Error(`No portal page found with name "${portalPageName}"`);
+    }
+
+    if (portalPages.length > 1) {
+      throw new Error(`Multiple portal pages found with name "${portalPageName}". Expected exactly 1, found ${portalPages.length}`);
+    }
+
+    const portalPageData = portalPages[0];
+
+    logger.info({
+      message: `Successfully loaded portal page: "${portalPageName}"`,
+      data: portalPageData
+    });
+
+    // Store in state using the store pattern
+    store.dispatch('setPortalPageData', {
+      name: portalPageName,
+      data: portalPageData
+    });
+
+    logger.info({
+      message: `Portal page "${portalPageName}" stored in state`,
+      data: portalPageData
+    });
+
+  } catch (error) {
+    logger.error({
+      message: `Failed to load portal page "${portalPageName}"`,
+      data: { error: (error instanceof Error) ? error.message : String(error) }
+    });
+    // Don't throw - allow the workbook to continue loading even if portal page fails
+  }
 }
 
 // Function to insert the element

@@ -11,6 +11,7 @@ import { LitElement } from 'lit';
 import './NavigationButtons';
 import './RatingQuestion';
 import './EFPBreadcrumbs';
+import './WorkbookSignOffButtons';
 interface EFPActiveContent {
     title: string;
     content: string;
@@ -46,6 +47,7 @@ export declare class EFPEntryForm extends LitElement {
     private renderContainerChapter;
     private renderMainContent;
     private getSectionBItemsFromStore;
+    private getSectionCItemsFromPortalPage;
     private getCompletionFromStore;
     private getSectionCompletionFromStore;
     updateNestedChapterStructure(nestedStructure: any[]): void;

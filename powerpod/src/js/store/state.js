@@ -2,5 +2,7 @@ export default {
   validationError: '',
   fields: {},
   fieldOrder: [],
-  questionnaire: {}
+  questionnaire: {},
+  portalPages: {},
+  userRoles: []
 };

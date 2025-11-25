@@ -46,6 +46,7 @@ export const ENDPOINT_URL = {
   get_program_intake_data: `/_api/quartech_programintakes?$select=quartech_intakeenddate,quartech_intakestartdate,quartech_openintakedescription,quartech_closedintakedescription`,
   get_program_home_page_content_data: `/_api/quartech_programhomepagecontents`,
   get_workbook_data_by_id: (id) => `/_api/quartech_workbooks(${id})`,
+  patch_workbook_data: (id) => `/_api/quartech_workbooks(${id})`,
   get_chapters_data: `/_api/quartech_chapters?$filter=statecode eq 0`,
   get_workbookquestions_data: `/_api/quartech_workbookquestions?$filter=statecode eq 0`,
   get_workbookresponses_data: `/_api/quartech_workbookresponses?$filter=statecode eq 0`,
@@ -59,6 +60,7 @@ export const ENDPOINT_URL = {
   post_workbookresponse_data: `/_api/quartech_workbookresponses`,
   patch_workbookresponse_data: (id) => `/_api/quartech_workbookresponses(${id})`,
   delete_workbookresponse_data: (id) => `/_api/quartech_workbookresponses(${id})`,
+  get_portal_page_data: (params = '') => `/_api/quartech_portalpages${params ? `?${params}` : ''}`,
 };
 
 const CONTENT_TYPE = {
@@ -101,6 +103,7 @@ POWERPOD.fetch = {
   getProgramIntakeData,
   getProgramHomePageContentData,
   getWorkbookDataById,
+  patchWorkbookData,
   getChaptersData,
   getWorkbookQuestionsData,
   getWorkbookResponsesData,
@@ -109,6 +112,7 @@ POWERPOD.fetch = {
   postWorkbookResponseData,
   patchWorkbookResponseData,
   deleteWorkbookResponseData,
+  getPortalPageData,
 };
 
 const setODataHeaders = (XMLHttpRequest) => {
@@ -697,6 +701,22 @@ export async function getWorkbookDataById({ id, ...options }) {
   });
 }
 
+export async function patchWorkbookData({ id, fieldData, ...options }) {
+  return fetch({
+    method: 'PATCH',
+    url: ENDPOINT_URL.patch_workbook_data(id),
+    datatype: DATATYPE.json,
+    includeODataHeaders: true,
+    addRequestVerificationToken: true,
+    processData: false,
+    returnData: true,
+    data: JSON.stringify({
+      ...fieldData,
+    }),
+    ...options,
+  });
+}
+
 export async function getChaptersData({ ...options } = {}) {
   return fetch({
     url: ENDPOINT_URL.get_chapters_data,
@@ -924,6 +944,17 @@ export async function deleteWorkbookResponseData({ id, ...options }) {
     method: 'DELETE',
     url: ENDPOINT_URL.delete_workbookresponse_data(id),
     addRequestVerificationToken: true,
+    returnData: true,
+    ...options,
+  });
+}
+
+export async function getPortalPageData({ params = '', ...options } = {}) {
+  return fetch({
+    url: ENDPOINT_URL.get_portal_page_data(params),
+    contentType: CONTENT_TYPE.json,
+    datatype: DATATYPE.json,
+    includeODataHeaders: true,
     returnData: true,
     ...options,
   });

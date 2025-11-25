@@ -26,4 +26,10 @@ export default {
   updateQuestionnaireQuestion(context, payload) {
     context.commit('updateQuestionnaireQuestion', payload);
   },
+  setPortalPageData(context, payload) {
+    context.commit('setPortalPageData', payload);
+  },
+  setUserRoles(context, payload) {
+    context.commit('setUserRoles', payload);
+  },
 };

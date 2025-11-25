@@ -8,5 +8,7 @@ declare namespace _default {
     function setQuestionnaireData(context: any, payload: any): void;
     function updateQuestionnaireChapter(context: any, payload: any): void;
     function updateQuestionnaireQuestion(context: any, payload: any): void;
+    function setPortalPageData(context: any, payload: any): void;
+    function setUserRoles(context: any, payload: any): void;
 }
 export default _default;
