@@ -4,13 +4,18 @@ import { Logger } from '../common/logger.js';
 import { hasRole } from '../common/userRoles.js';
 import { getCurrentWorkbookId, getWorkbookData } from '../common/workbookUtils.js';
 import { patchWorkbookData } from '../common/fetch.js';
+import { YES_VALUE, NO_VALUE } from '../common/constants.js';
 
 const logger = Logger('components/WorkbookSignOffButtons');
 
+// Convert string values to integers for API
+const YES_INT = parseInt(YES_VALUE, 10); // 100000000
+const NO_INT = parseInt(NO_VALUE, 10);   // 100000001
+
 @customElement('workbook-sign-off-buttons')
 export class WorkbookSignOffButtons extends LitElement {
-  @state() private paSignOffDate: string | null = null;
-  @state() private producerSignOffDate: string | null = null;
+  @state() private paSigned: boolean = false;
+  @state() private producerSigned: boolean = false;
   @state() private isLoading: boolean = false;
   @state() private showPAButton: boolean = false;
   @state() private showProducerButton: boolean = false;
@@ -99,33 +104,37 @@ export class WorkbookSignOffButtons extends LitElement {
 
   private loadSignOffData() {
     const workbookData = getWorkbookData();
-    
+
     if (workbookData) {
-      this.paSignOffDate = workbookData.quartech_dateofpasignoff || null;
-      this.producerSignOffDate = workbookData.quartech_dateofproducersignoff || null;
+      // Convert integer values to boolean
+      // YES_INT (100000000) = true (signed), NO_INT (100000001) or null/undefined = false (not signed)
+      this.paSigned = workbookData.quartech_pasigned === YES_INT;
+      this.producerSigned = workbookData.quartech_producersigned === YES_INT;
 
       logger.info({
         fn: 'loadSignOffData',
-        message: 'Loaded sign-off dates from workbook data',
+        message: 'Loaded sign-off status from workbook data',
         data: {
-          paSignOffDate: this.paSignOffDate,
-          producerSignOffDate: this.producerSignOffDate,
+          paSigned: this.paSigned,
+          producerSigned: this.producerSigned,
+          rawPAValue: workbookData.quartech_pasigned,
+          rawProducerValue: workbookData.quartech_producersigned,
         },
       });
     }
   }
 
   private async handlePASignOff() {
-    await this.handleSignOff('PA', 'quartech_dateofpasignoff');
+    await this.handleSignOff('PA', 'quartech_pasigned');
   }
 
   private async handleProducerSignOff() {
-    await this.handleSignOff('Producer', 'quartech_dateofproducersignoff');
+    await this.handleSignOff('Producer', 'quartech_producersigned');
   }
 
   private async handleSignOff(roleType: string, fieldName: string) {
     const workbookId = getCurrentWorkbookId();
-    
+
     if (!workbookId) {
       logger.error({
         fn: 'handleSignOff',
@@ -138,8 +147,9 @@ export class WorkbookSignOffButtons extends LitElement {
     this.isLoading = true;
 
     try {
-      const currentDate = roleType === 'PA' ? this.paSignOffDate : this.producerSignOffDate;
-      const newValue = currentDate ? null : new Date().toISOString();
+      // Toggle the sign-off: if currently signed (Yes), set to No; if not signed (No), set to Yes
+      const currentlySigned = roleType === 'PA' ? this.paSigned : this.producerSigned;
+      const newValue = currentlySigned ? NO_INT : YES_INT;
 
       logger.info({
         fn: 'handleSignOff',
@@ -147,9 +157,10 @@ export class WorkbookSignOffButtons extends LitElement {
         data: {
           workbookId,
           fieldName,
-          currentDate,
+          currentlySigned,
           newValue,
-          action: currentDate ? 'clear' : 'sign',
+          newValueMeaning: currentlySigned ? 'No (100000001)' : 'Yes (100000000)',
+          action: currentlySigned ? 'clear' : 'sign',
         },
       });
 
@@ -161,15 +172,15 @@ export class WorkbookSignOffButtons extends LitElement {
 
       // Update local state
       if (roleType === 'PA') {
-        this.paSignOffDate = newValue;
+        this.paSigned = !currentlySigned;
       } else {
-        this.producerSignOffDate = newValue;
+        this.producerSigned = !currentlySigned;
       }
 
       logger.info({
         fn: 'handleSignOff',
         message: `Successfully updated ${roleType} sign-off`,
-        data: { newValue },
+        data: { newSigned: !currentlySigned },
       });
 
     } catch (error) {
@@ -181,26 +192,6 @@ export class WorkbookSignOffButtons extends LitElement {
       alert(`Error updating sign-off: ${error.message || 'Unknown error'}`);
     } finally {
       this.isLoading = false;
-    }
-  }
-
-  private formatDate(dateString: string | null): string {
-    if (!dateString) return '';
-    
-    try {
-      const date = new Date(dateString);
-      return date.toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-      });
-    } catch (error) {
-      logger.warn({
-        fn: 'formatDate',
-        message: 'Failed to format date',
-        data: { dateString, error },
-      });
-      return dateString;
     }
   }
 
@@ -217,18 +208,18 @@ export class WorkbookSignOffButtons extends LitElement {
           <div class="sign-off-row">
             <div class="sign-off-label">Planning Advisor:</div>
             <div class="sign-off-status">
-              ${this.paSignOffDate
-                ? html`<span class="status-signed">✓ Signed on ${this.formatDate(this.paSignOffDate)}</span>`
-                : html`<span class="status-not-signed">Not signed</span>`
+              ${this.paSigned
+                ? html`<span class="status-signed">✓ Signed</span>`
+                : html`<span class="status-not-signed">⚠ Not signed</span>`
               }
             </div>
             <sl-button
-              variant=${this.paSignOffDate ? 'default' : 'primary'}
+              variant=${this.paSigned ? 'default' : 'primary'}
               size="medium"
               ?loading=${this.isLoading}
               @click=${this.handlePASignOff}
             >
-              ${this.paSignOffDate ? 'Clear Sign-Off' : 'Sign-Off (PA)'}
+              ${this.paSigned ? 'Clear Sign-Off' : 'Sign-Off (PA)'}
             </sl-button>
           </div>
         ` : ''}
@@ -237,18 +228,18 @@ export class WorkbookSignOffButtons extends LitElement {
           <div class="sign-off-row">
             <div class="sign-off-label">Producer:</div>
             <div class="sign-off-status">
-              ${this.producerSignOffDate
-                ? html`<span class="status-signed">✓ Signed on ${this.formatDate(this.producerSignOffDate)}</span>`
-                : html`<span class="status-not-signed">Not signed</span>`
+              ${this.producerSigned
+                ? html`<span class="status-signed">✓ Signed</span>`
+                : html`<span class="status-not-signed">⚠ Not signed</span>`
               }
             </div>
             <sl-button
-              variant=${this.producerSignOffDate ? 'default' : 'primary'}
+              variant=${this.producerSigned ? 'default' : 'primary'}
               size="medium"
               ?loading=${this.isLoading}
               @click=${this.handleProducerSignOff}
             >
-              ${this.producerSignOffDate ? 'Clear Sign-Off' : 'Sign-Off (Producer)'}
+              ${this.producerSigned ? 'Clear Sign-Off' : 'Sign-Off (Producer)'}
             </sl-button>
           </div>
         ` : ''}

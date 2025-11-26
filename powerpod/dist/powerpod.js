@@ -1,5 +1,5 @@
 /*!
-* powerpod 4.4.1
+* powerpod 4.4.2
 * https://github.com/bcgov/nr-af-pods/powerpod
 *
 * @license GPLv3 for open source use only
@@ -649,8 +649,8 @@
   var ProgramIds = {
     VLB: '8806d490-8f44-ef11-a316-002248ae4517'
   };
-  var YES_VALUE = '255550000';
-  var NO_VALUE = '255550001';
+  var YES_VALUE = '100000000';
+  var NO_VALUE = '100000001';
   var GROUP_APPLICATION_VALUE = '255550001';
 
   // TODO: move this to some kind of state management module
@@ -37056,11 +37056,14 @@
   }
 
   const logger$7 = Logger('components/WorkbookSignOffButtons');
+  // Convert string values to integers for API
+  const YES_INT = parseInt(YES_VALUE, 10); // 100000000
+  const NO_INT = parseInt(NO_VALUE, 10); // 100000001
   let WorkbookSignOffButtons = class WorkbookSignOffButtons extends s$1 {
       constructor() {
           super(...arguments);
-          this.paSignOffDate = null;
-          this.producerSignOffDate = null;
+          this.paSigned = false;
+          this.producerSigned = false;
           this.isLoading = false;
           this.showPAButton = false;
           this.showProducerButton = false;
@@ -37085,23 +37088,27 @@
       loadSignOffData() {
           const workbookData = getWorkbookData();
           if (workbookData) {
-              this.paSignOffDate = workbookData.quartech_dateofpasignoff || null;
-              this.producerSignOffDate = workbookData.quartech_dateofproducersignoff || null;
+              // Convert integer values to boolean
+              // YES_INT (100000000) = true (signed), NO_INT (100000001) or null/undefined = false (not signed)
+              this.paSigned = workbookData.quartech_pasigned === YES_INT;
+              this.producerSigned = workbookData.quartech_producersigned === YES_INT;
               logger$7.info({
                   fn: 'loadSignOffData',
-                  message: 'Loaded sign-off dates from workbook data',
+                  message: 'Loaded sign-off status from workbook data',
                   data: {
-                      paSignOffDate: this.paSignOffDate,
-                      producerSignOffDate: this.producerSignOffDate,
+                      paSigned: this.paSigned,
+                      producerSigned: this.producerSigned,
+                      rawPAValue: workbookData.quartech_pasigned,
+                      rawProducerValue: workbookData.quartech_producersigned,
                   },
               });
           }
       }
       async handlePASignOff() {
-          await this.handleSignOff('PA', 'quartech_dateofpasignoff');
+          await this.handleSignOff('PA', 'quartech_pasigned');
       }
       async handleProducerSignOff() {
-          await this.handleSignOff('Producer', 'quartech_dateofproducersignoff');
+          await this.handleSignOff('Producer', 'quartech_producersigned');
       }
       async handleSignOff(roleType, fieldName) {
           const workbookId = getCurrentWorkbookId();
@@ -37115,17 +37122,19 @@
           }
           this.isLoading = true;
           try {
-              const currentDate = roleType === 'PA' ? this.paSignOffDate : this.producerSignOffDate;
-              const newValue = currentDate ? null : new Date().toISOString();
+              // Toggle the sign-off: if currently signed (Yes), set to No; if not signed (No), set to Yes
+              const currentlySigned = roleType === 'PA' ? this.paSigned : this.producerSigned;
+              const newValue = currentlySigned ? NO_INT : YES_INT;
               logger$7.info({
                   fn: 'handleSignOff',
                   message: `${roleType} sign-off button clicked`,
                   data: {
                       workbookId,
                       fieldName,
-                      currentDate,
+                      currentlySigned,
                       newValue,
-                      action: currentDate ? 'clear' : 'sign',
+                      newValueMeaning: currentlySigned ? 'No (100000001)' : 'Yes (100000000)',
+                      action: currentlySigned ? 'clear' : 'sign',
                   },
               });
               const fieldData = {
@@ -37134,15 +37143,15 @@
               await patchWorkbookData({ id: workbookId, fieldData });
               // Update local state
               if (roleType === 'PA') {
-                  this.paSignOffDate = newValue;
+                  this.paSigned = !currentlySigned;
               }
               else {
-                  this.producerSignOffDate = newValue;
+                  this.producerSigned = !currentlySigned;
               }
               logger$7.info({
                   fn: 'handleSignOff',
                   message: `Successfully updated ${roleType} sign-off`,
-                  data: { newValue },
+                  data: { newSigned: !currentlySigned },
               });
           }
           catch (error) {
@@ -37157,26 +37166,6 @@
               this.isLoading = false;
           }
       }
-      formatDate(dateString) {
-          if (!dateString)
-              return '';
-          try {
-              const date = new Date(dateString);
-              return date.toLocaleDateString('en-US', {
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric',
-              });
-          }
-          catch (error) {
-              logger$7.warn({
-                  fn: 'formatDate',
-                  message: 'Failed to format date',
-                  data: { dateString, error },
-              });
-              return dateString;
-          }
-      }
       render() {
           if (!this.showPAButton && !this.showProducerButton) {
               return x ``;
@@ -37189,17 +37178,17 @@
           <div class="sign-off-row">
             <div class="sign-off-label">Planning Advisor:</div>
             <div class="sign-off-status">
-              ${this.paSignOffDate
-            ? x `<span class="status-signed">✓ Signed on ${this.formatDate(this.paSignOffDate)}</span>`
-            : x `<span class="status-not-signed">Not signed</span>`}
+              ${this.paSigned
+            ? x `<span class="status-signed">✓ Signed</span>`
+            : x `<span class="status-not-signed">⚠ Not signed</span>`}
             </div>
             <sl-button
-              variant=${this.paSignOffDate ? 'default' : 'primary'}
+              variant=${this.paSigned ? 'default' : 'primary'}
               size="medium"
               ?loading=${this.isLoading}
               @click=${this.handlePASignOff}
             >
-              ${this.paSignOffDate ? 'Clear Sign-Off' : 'Sign-Off (PA)'}
+              ${this.paSigned ? 'Clear Sign-Off' : 'Sign-Off (PA)'}
             </sl-button>
           </div>
         ` : ''}
@@ -37208,17 +37197,17 @@
           <div class="sign-off-row">
             <div class="sign-off-label">Producer:</div>
             <div class="sign-off-status">
-              ${this.producerSignOffDate
-            ? x `<span class="status-signed">✓ Signed on ${this.formatDate(this.producerSignOffDate)}</span>`
-            : x `<span class="status-not-signed">Not signed</span>`}
+              ${this.producerSigned
+            ? x `<span class="status-signed">✓ Signed</span>`
+            : x `<span class="status-not-signed">⚠ Not signed</span>`}
             </div>
             <sl-button
-              variant=${this.producerSignOffDate ? 'default' : 'primary'}
+              variant=${this.producerSigned ? 'default' : 'primary'}
               size="medium"
               ?loading=${this.isLoading}
               @click=${this.handleProducerSignOff}
             >
-              ${this.producerSignOffDate ? 'Clear Sign-Off' : 'Sign-Off (Producer)'}
+              ${this.producerSigned ? 'Clear Sign-Off' : 'Sign-Off (Producer)'}
             </sl-button>
           </div>
         ` : ''}
@@ -37289,10 +37278,10 @@
   `;
   __decorate([
       r()
-  ], WorkbookSignOffButtons.prototype, "paSignOffDate", void 0);
+  ], WorkbookSignOffButtons.prototype, "paSigned", void 0);
   __decorate([
       r()
-  ], WorkbookSignOffButtons.prototype, "producerSignOffDate", void 0);
+  ], WorkbookSignOffButtons.prototype, "producerSigned", void 0);
   __decorate([
       r()
   ], WorkbookSignOffButtons.prototype, "isLoading", void 0);
@@ -40166,7 +40155,7 @@
       };
     };
     // @ts-ignore
-    POWERPOD.version = '4.4.1';
+    POWERPOD.version = '4.4.2';
     // @ts-ignore
     window.powerpod = POWERPOD;
   }
