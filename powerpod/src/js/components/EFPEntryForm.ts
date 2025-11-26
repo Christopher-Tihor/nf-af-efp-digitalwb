@@ -1037,6 +1037,44 @@ export class EFPEntryForm extends LitElement {
     }
   }
 
+  // Helper method to build rating description for Point Rating questions
+  private buildRatingDescription(questionId: string, ratingValue: any): string | null {
+    // Only build description for Point Rating questions with numeric values (1-4)
+    const ratingNum = parseInt(String(ratingValue));
+    if (isNaN(ratingNum) || ratingNum < 1 || ratingNum > 4) {
+      return null;
+    }
+
+    // Get question data from memory
+    const questionData = this.getQuestionForQuestion(questionId);
+    if (!questionData) {
+      return null;
+    }
+
+    // Check if this is a Point Rating question
+    if (questionData.quartech_questiontype !== 100000001) { // 100000001 is Point Rating
+      return null;
+    }
+
+    // Get the rating label and description
+    const labelKey = `quartech_rating${ratingNum}overwritelabel`;
+    const descKey = `quartech_rating${ratingNum}description`;
+
+    const label = questionData[labelKey] || `Risk Rating ${ratingNum}`;
+    const description = questionData[descKey];
+
+    // Only build description if there's a description field
+    if (!description) {
+      return null;
+    }
+
+    // Strip HTML tags from description to get plain text
+    const plainDescription = description.replace(/<[^>]*>/g, '').trim();
+
+    // Build the description in the format: "Rating Label: Description"
+    return `${label}: ${plainDescription}`;
+  }
+
   // Helper method to save rating responses
   private async saveRatingResponse(questionId: string, ratingValue: any): Promise<any> {
 
@@ -1044,7 +1082,8 @@ export class EFPEntryForm extends LitElement {
       const responseText = String(ratingValue);
       const notes = `Rating: ${ratingValue}`;
 
-
+      // Build description for Point Rating questions with descriptions
+      const description = this.buildRatingDescription(questionId, ratingValue);
 
       // Check if response already exists
       const existingResponse = this.getResponseForQuestion(questionId);
@@ -1060,7 +1099,7 @@ export class EFPEntryForm extends LitElement {
         await WorkbookResponseHelper.updateResponse(
           existingResponse.quartech_workbookresponseid,
           responseText,
-          { notes }
+          { notes, description }
         );
 
         // Create updated response data
@@ -1068,6 +1107,7 @@ export class EFPEntryForm extends LitElement {
           ...existingResponse,
           quartech_response: responseText,
           quartech_notes: notes,
+          quartech_description: description,
           modifiedon: new Date().toISOString()
         };
 
@@ -1077,7 +1117,7 @@ export class EFPEntryForm extends LitElement {
         // Create new response (either no response exists, or existing response lacks valid ID)
         isNewResponse = true;
 
-        const createResult = await WorkbookResponseHelper.createResponse(questionId, responseText, { notes }) as any;
+        const createResult = await WorkbookResponseHelper.createResponse(questionId, responseText, { notes, description }) as any;
 
         const workbookId = getWorkbookId();
 
@@ -1087,6 +1127,7 @@ export class EFPEntryForm extends LitElement {
           quartech_workbookresponseid: createResult.response?.quartech_workbookresponseid,
           quartech_response: responseText,
           quartech_notes: notes,
+          quartech_description: description,
           _quartech_question_value: questionId,
           _quartech_workbook_value: workbookId,
           createdon: createResult.response?.createdon || new Date().toISOString(),

@@ -864,6 +864,11 @@ export async function postWorkbookResponseData({
     payload['quartech_Chapter@odata.bind'] = `/quartech_chapters(${chapterId})`;
   }
 
+  // Add description if provided in options
+  if (options.description !== undefined && options.description !== null) {
+    payload.quartech_description = options.description;
+  }
+
   return fetch({
     method: 'POST',
     url: ENDPOINT_URL.post_workbookresponse_data,
@@ -895,6 +900,11 @@ export async function patchWorkbookResponseData({
   const updateData = {};
   if (response !== null) updateData.quartech_response = response;
   if (chapterId !== null) updateData['quartech_Chapter@odata.bind'] = `/quartech_chapters(${chapterId})`;
+
+  // Add description if provided in options
+  if (options.description !== undefined && options.description !== null) {
+    updateData.quartech_description = options.description;
+  }
 
   if (Object.keys(updateData).length === 0) {
     logger.warn({

@@ -1,5 +1,5 @@
 /*!
-* powerpod 4.4.2
+* powerpod 4.4.3
 * https://github.com/bcgov/nr-af-pods/powerpod
 *
 * @license GPLv3 for open source use only
@@ -2883,6 +2883,11 @@
             if (chapterId) {
               payload['quartech_Chapter@odata.bind'] = "/quartech_chapters(".concat(chapterId, ")");
             }
+
+            // Add description if provided in options
+            if (options.description !== undefined && options.description !== null) {
+              payload.quartech_description = options.description;
+            }
             return _context35.abrupt("return", fetch$1(_objectSpread2({
               method: 'POST',
               url: ENDPOINT_URL.post_workbookresponse_data,
@@ -2893,7 +2898,7 @@
               returnData: true,
               data: JSON.stringify(payload)
             }, options)));
-          case 8:
+          case 9:
           case "end":
             return _context35.stop();
         }
@@ -2927,8 +2932,13 @@
             updateData = {};
             if (response !== null) updateData.quartech_response = response;
             if (chapterId !== null) updateData['quartech_Chapter@odata.bind'] = "/quartech_chapters(".concat(chapterId, ")");
+
+            // Add description if provided in options
+            if (options.description !== undefined && options.description !== null) {
+              updateData.quartech_description = options.description;
+            }
             if (!(Object.keys(updateData).length === 0)) {
-              _context36.next = 10;
+              _context36.next = 11;
               break;
             }
             logger$R.warn({
@@ -2943,7 +2953,7 @@
             return _context36.abrupt("return", Promise.resolve({
               data: null
             }));
-          case 10:
+          case 11:
             logger$R.info({
               fn: patchWorkbookResponseData,
               message: 'Updating workbook response',
@@ -2962,7 +2972,7 @@
               returnData: true,
               data: JSON.stringify(updateData)
             }, options)));
-          case 12:
+          case 13:
           case "end":
             return _context36.stop();
         }
@@ -39011,12 +39021,44 @@
               // Don't delete pending value on error, so user can retry
           }
       }
+      // Helper method to build rating description for Point Rating questions
+      buildRatingDescription(questionId, ratingValue) {
+          // Only build description for Point Rating questions with numeric values (1-4)
+          const ratingNum = parseInt(String(ratingValue));
+          if (isNaN(ratingNum) || ratingNum < 1 || ratingNum > 4) {
+              return null;
+          }
+          // Get question data from memory
+          const questionData = this.getQuestionForQuestion(questionId);
+          if (!questionData) {
+              return null;
+          }
+          // Check if this is a Point Rating question
+          if (questionData.quartech_questiontype !== 100000001) { // 100000001 is Point Rating
+              return null;
+          }
+          // Get the rating label and description
+          const labelKey = `quartech_rating${ratingNum}overwritelabel`;
+          const descKey = `quartech_rating${ratingNum}description`;
+          const label = questionData[labelKey] || `Risk Rating ${ratingNum}`;
+          const description = questionData[descKey];
+          // Only build description if there's a description field
+          if (!description) {
+              return null;
+          }
+          // Strip HTML tags from description to get plain text
+          const plainDescription = description.replace(/<[^>]*>/g, '').trim();
+          // Build the description in the format: "Rating Label: Description"
+          return `${label}: ${plainDescription}`;
+      }
       // Helper method to save rating responses
       async saveRatingResponse(questionId, ratingValue) {
           var _a, _b, _c;
           try {
               const responseText = String(ratingValue);
               const notes = `Rating: ${ratingValue}`;
+              // Build description for Point Rating questions with descriptions
+              const description = this.buildRatingDescription(questionId, ratingValue);
               // Check if response already exists
               const existingResponse = this.getResponseForQuestion(questionId);
               let responseData;
@@ -39024,19 +39066,20 @@
               // Only update if we have an existing response WITH a valid ID
               if (existingResponse && existingResponse.quartech_workbookresponseid) {
                   // Update existing response
-                  await WorkbookResponseHelper.updateResponse(existingResponse.quartech_workbookresponseid, responseText, { notes });
+                  await WorkbookResponseHelper.updateResponse(existingResponse.quartech_workbookresponseid, responseText, { notes, description });
                   // Create updated response data
                   responseData = {
                       ...existingResponse,
                       quartech_response: responseText,
                       quartech_notes: notes,
+                      quartech_description: description,
                       modifiedon: new Date().toISOString()
                   };
               }
               else {
                   // Create new response (either no response exists, or existing response lacks valid ID)
                   isNewResponse = true;
-                  const createResult = await WorkbookResponseHelper.createResponse(questionId, responseText, { notes });
+                  const createResult = await WorkbookResponseHelper.createResponse(questionId, responseText, { notes, description });
                   const workbookId = getWorkbookId();
                   // Create new response data with all fields from the API response
                   responseData = {
@@ -39044,6 +39087,7 @@
                       quartech_workbookresponseid: (_a = createResult.response) === null || _a === void 0 ? void 0 : _a.quartech_workbookresponseid,
                       quartech_response: responseText,
                       quartech_notes: notes,
+                      quartech_description: description,
                       _quartech_question_value: questionId,
                       _quartech_workbook_value: workbookId,
                       createdon: ((_b = createResult.response) === null || _b === void 0 ? void 0 : _b.createdon) || new Date().toISOString(),
@@ -40155,7 +40199,7 @@
       };
     };
     // @ts-ignore
-    POWERPOD.version = '4.4.2';
+    POWERPOD.version = '4.4.3';
     // @ts-ignore
     window.powerpod = POWERPOD;
   }
