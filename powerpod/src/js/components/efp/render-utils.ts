@@ -35,9 +35,9 @@ export class EFPRenderUtils {
     renderContainerSubchapter: (subchapterData: any) => any,
     renderContainerChapter: (chapterData: any) => any
   ): any {
-    // Check if we're in Section B and have a chapter to render
-    if (currentSectionIndex === 1) {
-      // Section B is index 1
+    // Check if we're in My Workbook (first section) and have a chapter to render
+    if (currentSectionIndex === 0) {
+      // My Workbook is index 0
       const currentStep = flatSteps[currentStepIndex];
 
       // Check if it's a container item (should not be selectable)

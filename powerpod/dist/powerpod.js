@@ -1,5 +1,5 @@
 /*!
-* powerpod 4.4.5
+* powerpod 4.4.6
 * https://github.com/bcgov/nr-af-pods/powerpod
 *
 * @license GPLv3 for open source use only
@@ -37767,9 +37767,9 @@
 
   class EFPRenderUtils {
       static renderMainContent(currentSectionIndex, flatSteps, currentStepIndex, activeContent, html, unsafeHTML, renderSubchapter, renderChapter, renderContainerSubchapter, renderContainerChapter) {
-          // Check if we're in Section B and have a chapter to render
-          if (currentSectionIndex === 1) {
-              // Section B is index 1
+          // Check if we're in My Workbook (first section) and have a chapter to render
+          if (currentSectionIndex === 0) {
+              // My Workbook is index 0
               const currentStep = flatSteps[currentStepIndex];
               // Check if it's a container item (should not be selectable)
               if (currentStep && 'isContainer' in currentStep && currentStep.isContainer) {
@@ -37928,7 +37928,7 @@
   }
 
   .sidebar {
-    flex: 0 0 25%;
+    flex: 0 0 26%;
     padding: 1rem;
     border-right: 1px solid var(--sl-color-neutral-200);
     font-family: var(--body-font);
@@ -38356,71 +38356,12 @@
       get sections() {
           return [
               {
-                  tab: 'Section A',
-                  title: 'Farm Business Profile',
-                  items: [
-                      {
-                          label: 'Farm Business Name',
-                          content: `
-          <h3>Farm Business Name</h3>
-          <p>Please enter the legal name under which your farm operates. This should match your tax documents and business registration.</p>
-          <p>If your farm uses a different operating name or DBA ("doing business as"), include that as well.</p>
-          ${this.renderResponsesSummary()}
-        `,
-                          complete: true,
-                      },
-                      {
-                          label: 'Ownership Details',
-                          content: `
-          <h3>Ownership Details</h3>
-          <p>Provide details about the ownership structure of your farm.</p>
-          <ul>
-            <li>Is the farm owned by an individual, partnership, or corporation?</li>
-            <li>List all owners and their roles.</li>
-            <li>Indicate who is responsible for daily operations and environmental decision-making.</li>
-          </ul>
-        `,
-                          complete: false,
-                      },
-                      {
-                          label: 'Nested Section: Certifications',
-                          title: 'Nested Section: Certifications',
-                          items: [
-                              {
-                                  label: 'Organic Certification',
-                                  content: `
-              <h3>Organic Certification</h3>
-              <p>This section documents your organic certification status.</p>
-              <p>Certified by: <strong>Pacific Organic Growers (POG)</strong></p>
-              <p>Include your certificate number and expiration date, and upload supporting documentation if available.</p>
-            `,
-                                  complete: true,
-                              },
-                              {
-                                  label: 'Other Accreditation',
-                                  content: `
-              <h3>Other Environmental or Farm Certifications</h3>
-              <p>If your farm has additional certifications such as:</p>
-              <ul>
-                <li>Environmental Farm Stewardship</li>
-                <li>Salmon Safe</li>
-                <li>Bee-Friendly Farming</li>
-              </ul>
-              <p>Provide issuing organization, validity period, and documentation.</p>
-            `,
-                                  complete: false,
-                              },
-                          ],
-                      },
-                  ],
-              },
-              {
-                  tab: 'Section B',
+                  tab: 'My Workbook',
                   title: 'Environmental Farm Plan Questionnaire',
                   items: this.getSectionBItemsFromStore(),
               },
               {
-                  tab: 'Section C',
+                  tab: 'Review & Submit',
                   title: 'Declaration & Consent',
                   items: this.getSectionCItemsFromPortalPage(),
               },
@@ -38888,8 +38829,8 @@
       }
       // Get section completion status from questionnaire store
       getSectionCompletionFromStore(section) {
-          // For Section B, use questionnaire store completion
-          if (section.tab === 'Section B' && isQuestionnaireLoaded()) {
+          // For My Workbook, use questionnaire store completion
+          if (section.tab === 'My Workbook' && isQuestionnaireLoaded()) {
               try {
                   // Import questionnaire stats dynamically to avoid circular imports
                   const questionnaire = getQuestionnaireFromStore();
@@ -39655,8 +39596,8 @@
       // Update section items using questionnaire store data
       updateSectionItemsFromQuestionnaireStore() {
           this.sections.forEach(section => {
-              if (section.tab === 'Section B') {
-                  // Update Section B items using questionnaire store
+              if (section.tab === 'My Workbook') {
+                  // Update My Workbook items using questionnaire store
                   this.updateSectionItemsFromStore(section.items);
               }
           });
@@ -40433,7 +40374,7 @@
       };
     };
     // @ts-ignore
-    POWERPOD.version = '4.4.5';
+    POWERPOD.version = '4.4.6';
     // @ts-ignore
     window.powerpod = POWERPOD;
   }

@@ -3,8 +3,8 @@ import { EFPNavigationUtils } from '../../../js/components/efp/navigation-utils.
 // Build a sample sections structure with containers and leaf items
 const buildSections = () => ([
   {
-    tab: 'Section A',
-    title: 'A',
+    tab: 'My Workbook',
+    title: 'Environmental Farm Plan Questionnaire',
     items: [
       {
         label: 'Chapter 1',
@@ -19,8 +19,8 @@ const buildSections = () => ([
     ],
   },
   {
-    tab: 'Section B',
-    title: 'B',
+    tab: 'Review & Submit',
+    title: 'Declaration & Consent',
     items: [
       {
         label: 'Chapter 2',
@@ -43,12 +43,12 @@ describe('EFPNavigationUtils - flattening and navigation', () => {
     const labels = getLabels(flat);
 
     expect(labels).toEqual([
-      'Section A', // section header
+      'My Workbook', // section header
       'Chapter 1', // container
       'Sub 1.1',
       'Sub 1.2',
       'Standalone',
-      'Section B', // section header
+      'Review & Submit', // section header
       'Chapter 2', // container
       'Sub 2.1',
     ]);
@@ -72,7 +72,7 @@ describe('EFPNavigationUtils - flattening and navigation', () => {
 
     const indexOfStandalone = flat.findIndex(s => s.label === 'Standalone');
     const nextFromStandalone = EFPNavigationUtils.findNextSelectableStep(indexOfStandalone, flat, sections);
-    expect(flat[nextFromStandalone].label).toBe('Sub 2.1'); // skips 'Section B' and 'Chapter 2'
+    expect(flat[nextFromStandalone].label).toBe('Sub 2.1'); // skips 'Review & Submit' and 'Chapter 2'
   });
 
   test('findPreviousSelectableStep skips containers and section headers', () => {
@@ -92,13 +92,13 @@ describe('EFPNavigationUtils - flattening and navigation', () => {
     const sections = buildSections();
     const flat = EFPNavigationUtils.getFlatStepsFromSections(sections);
 
-    const targetA = EFPNavigationUtils.navigateToSection(0, flat, sections);
-    expect(flat[targetA.stepIndex].label).toBe('Sub 1.1');
-    expect(targetA.sectionIndex).toBe(0);
+    const targetB = EFPNavigationUtils.navigateToSection(0, flat, sections);
+    expect(flat[targetB.stepIndex].label).toBe('Sub 1.1');
+    expect(targetB.sectionIndex).toBe(0);
 
-    const targetB = EFPNavigationUtils.navigateToSection(1, flat, sections);
-    expect(flat[targetB.stepIndex].label).toBe('Sub 2.1');
-    expect(targetB.sectionIndex).toBe(1);
+    const targetC = EFPNavigationUtils.navigateToSection(1, flat, sections);
+    expect(flat[targetC.stepIndex].label).toBe('Sub 2.1');
+    expect(targetC.sectionIndex).toBe(1);
   });
 
   test('next/previous return null at boundaries', () => {

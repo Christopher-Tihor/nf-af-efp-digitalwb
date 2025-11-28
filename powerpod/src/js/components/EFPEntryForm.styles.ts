@@ -59,7 +59,7 @@ export const efpEntryFormStyles = css`
   }
 
   .sidebar {
-    flex: 0 0 25%;
+    flex: 0 0 26%;
     padding: 1rem;
     border-right: 1px solid var(--sl-color-neutral-200);
     font-family: var(--body-font);
