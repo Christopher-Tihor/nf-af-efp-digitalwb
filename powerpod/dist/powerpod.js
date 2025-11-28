@@ -1,5 +1,5 @@
 /*!
-* powerpod 4.4.4
+* powerpod 4.4.5
 * https://github.com/bcgov/nr-af-pods/powerpod
 *
 * @license GPLv3 for open source use only
@@ -38192,10 +38192,34 @@
     gap: 0.5rem;
   }
 
+  .multiline-text-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: -0.25rem;
+    gap: 1rem;
+  }
+
+  .character-counter {
+    font-family: var(--body-font);
+    font-size: 0.875rem;
+    color: var(--sl-color-neutral-600);
+    padding: 0.375rem 0.75rem;
+    border-radius: var(--sl-border-radius-small);
+    background-color: var(--sl-color-neutral-50);
+    border: 1px solid var(--sl-color-neutral-200);
+  }
+
+  .character-counter.over-limit {
+    color: var(--sl-color-danger-700);
+    background-color: var(--sl-color-danger-50);
+    border-color: var(--sl-color-danger-300);
+    font-weight: 600;
+  }
+
   .multiline-text-status {
     display: flex;
     justify-content: flex-end;
-    margin-top: -0.25rem;
   }
 
   .status-indicator {
@@ -38282,6 +38306,8 @@
           this.pendingMultiselectValues = new Map();
           // Multiline text save status (questionId -> 'draft' | 'saving' | 'saved')
           this.multilineTextSaveStatus = new Map();
+          // Multiline text character counts (questionId -> character count)
+          this.multilineTextCharCounts = new Map();
       }
       connectedCallback() {
           super.connectedCallback();
@@ -38515,6 +38541,12 @@
                   const existingResponse3 = this.getResponseForQuestion(question.id);
                   const textValue = (existingResponse3 === null || existingResponse3 === void 0 ? void 0 : existingResponse3.quartech_response) || '';
                   const saveStatus = this.multilineTextSaveStatus.get(question.id) || 'saved';
+                  // Use tracked character count if available, otherwise use text value length
+                  const charCount = this.multilineTextCharCounts.has(question.id)
+                      ? this.multilineTextCharCounts.get(question.id)
+                      : textValue.length;
+                  const maxChars = 5000;
+                  const isOverLimit = charCount > maxChars;
                   return x `
           <div class="multiline-text-container">
             <sl-textarea
@@ -38522,26 +38554,32 @@
               name="question-${question.id}"
               rows="6"
               placeholder="Enter your response..."
+              maxlength="${maxChars}"
               .value=${textValue}
               @sl-input=${(e) => this.handleMultilineTextInput(question.id, e.target.value)}
             ></sl-textarea>
-            <div class="multiline-text-status">
-              <span
-                class="status-indicator status-${saveStatus}"
-                @click=${() => this.handleForceSave(question.id)}
-                role="button"
-                tabindex="0"
-                @keydown=${(e) => {
+            <div class="multiline-text-footer">
+              <div class="character-counter ${isOverLimit ? 'over-limit' : ''}">
+                ${charCount} / ${maxChars} characters
+              </div>
+              <div class="multiline-text-status">
+                <span
+                  class="status-indicator status-${saveStatus}"
+                  @click=${() => this.handleForceSave(question.id)}
+                  role="button"
+                  tabindex="0"
+                  @keydown=${(e) => {
                     if (e.key === 'Enter' || e.key === ' ') {
                         e.preventDefault();
                         this.handleForceSave(question.id);
                     }
                 }}
-              >
-                ${saveStatus === 'draft' ? '📝 Draft (click to save)' :
+                >
+                  ${saveStatus === 'draft' ? '📝 Draft (click to save)' :
                     saveStatus === 'saving' ? '⏳ Saving...' :
                         '✓ Saved'}
-              </span>
+                </span>
+              </div>
             </div>
           </div>
         `;
@@ -39134,10 +39172,13 @@
       handleMultilineTextInput(questionId, value) {
           try {
               logger$4.info({ message: `Multiline text input for question ${questionId}` });
+              // Update character count immediately (no debounce)
+              this.multilineTextCharCounts.set(questionId, value.length);
               // Store the pending value
               this.pendingResponseValues.set(questionId, value);
               // Update status to draft
               this.multilineTextSaveStatus.set(questionId, 'draft');
+              // Request update to re-render with new character count
               this.requestUpdate();
               // Clear any existing debounce timer for this question
               const existingTimer = this.responseSaveDebounceTimers.get(questionId);
@@ -39988,6 +40029,9 @@
   __decorate([
       n$2({ type: Object, attribute: false })
   ], EFPEntryForm.prototype, "multilineTextSaveStatus", void 0);
+  __decorate([
+      n$2({ type: Object, attribute: false })
+  ], EFPEntryForm.prototype, "multilineTextCharCounts", void 0);
   EFPEntryForm = __decorate([
       t$1('efp-entry-form')
   ], EFPEntryForm);
@@ -40389,7 +40433,7 @@
       };
     };
     // @ts-ignore
-    POWERPOD.version = '4.4.4';
+    POWERPOD.version = '4.4.5';
     // @ts-ignore
     window.powerpod = POWERPOD;
   }

@@ -90,6 +90,9 @@ export class EFPEntryForm extends LitElement {
   // Multiline text save status (questionId -> 'draft' | 'saving' | 'saved')
   @property({ type: Object, attribute: false })
   private multilineTextSaveStatus: Map<string, 'draft' | 'saving' | 'saved'> = new Map();
+  // Multiline text character counts (questionId -> character count)
+  @property({ type: Object, attribute: false })
+  private multilineTextCharCounts: Map<string, number> = new Map();
 
   connectedCallback() {
     super.connectedCallback();
@@ -345,6 +348,13 @@ export class EFPEntryForm extends LitElement {
         const textValue = existingResponse3?.quartech_response || '';
         const saveStatus = this.multilineTextSaveStatus.get(question.id) || 'saved';
 
+        // Use tracked character count if available, otherwise use text value length
+        const charCount = this.multilineTextCharCounts.has(question.id)
+          ? this.multilineTextCharCounts.get(question.id)!
+          : textValue.length;
+        const maxChars = 5000;
+        const isOverLimit = charCount > maxChars;
+
         return html`
           <div class="multiline-text-container">
             <sl-textarea
@@ -352,26 +362,32 @@ export class EFPEntryForm extends LitElement {
               name="question-${question.id}"
               rows="6"
               placeholder="Enter your response..."
+              maxlength="${maxChars}"
               .value=${textValue}
               @sl-input=${(e: Event) => this.handleMultilineTextInput(question.id, (e.target as any).value)}
             ></sl-textarea>
-            <div class="multiline-text-status">
-              <span
-                class="status-indicator status-${saveStatus}"
-                @click=${() => this.handleForceSave(question.id)}
-                role="button"
-                tabindex="0"
-                @keydown=${(e: KeyboardEvent) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    this.handleForceSave(question.id);
-                  }
-                }}
-              >
-                ${saveStatus === 'draft' ? '📝 Draft (click to save)' :
-                  saveStatus === 'saving' ? '⏳ Saving...' :
-                  '✓ Saved'}
-              </span>
+            <div class="multiline-text-footer">
+              <div class="character-counter ${isOverLimit ? 'over-limit' : ''}">
+                ${charCount} / ${maxChars} characters
+              </div>
+              <div class="multiline-text-status">
+                <span
+                  class="status-indicator status-${saveStatus}"
+                  @click=${() => this.handleForceSave(question.id)}
+                  role="button"
+                  tabindex="0"
+                  @keydown=${(e: KeyboardEvent) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      this.handleForceSave(question.id);
+                    }
+                  }}
+                >
+                  ${saveStatus === 'draft' ? '📝 Draft (click to save)' :
+                    saveStatus === 'saving' ? '⏳ Saving...' :
+                    '✓ Saved'}
+                </span>
+              </div>
             </div>
           </div>
         `;
@@ -1083,11 +1099,16 @@ export class EFPEntryForm extends LitElement {
     try {
       logger.info({ message: `Multiline text input for question ${questionId}` });
 
+      // Update character count immediately (no debounce)
+      this.multilineTextCharCounts.set(questionId, value.length);
+
       // Store the pending value
       this.pendingResponseValues.set(questionId, value);
 
       // Update status to draft
       this.multilineTextSaveStatus.set(questionId, 'draft');
+
+      // Request update to re-render with new character count
       this.requestUpdate();
 
       // Clear any existing debounce timer for this question

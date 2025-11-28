@@ -33,6 +33,7 @@ export declare class EFPEntryForm extends LitElement {
     private pendingResponseValues;
     private pendingMultiselectValues;
     private multilineTextSaveStatus;
+    private multilineTextCharCounts;
     connectedCallback(): void;
     disconnectedCallback(): void;
     private updateQuestionnaireStoreStatus;

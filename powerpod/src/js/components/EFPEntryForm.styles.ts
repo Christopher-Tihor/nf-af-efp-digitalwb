@@ -323,10 +323,34 @@ export const efpEntryFormStyles = css`
     gap: 0.5rem;
   }
 
+  .multiline-text-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: -0.25rem;
+    gap: 1rem;
+  }
+
+  .character-counter {
+    font-family: var(--body-font);
+    font-size: 0.875rem;
+    color: var(--sl-color-neutral-600);
+    padding: 0.375rem 0.75rem;
+    border-radius: var(--sl-border-radius-small);
+    background-color: var(--sl-color-neutral-50);
+    border: 1px solid var(--sl-color-neutral-200);
+  }
+
+  .character-counter.over-limit {
+    color: var(--sl-color-danger-700);
+    background-color: var(--sl-color-danger-50);
+    border-color: var(--sl-color-danger-300);
+    font-weight: 600;
+  }
+
   .multiline-text-status {
     display: flex;
     justify-content: flex-end;
-    margin-top: -0.25rem;
   }
 
   .status-indicator {
