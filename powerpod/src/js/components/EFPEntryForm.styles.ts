@@ -315,5 +315,76 @@ export const efpEntryFormStyles = css`
   .main-content div {
     font-family: inherit !important;
   }
+
+  /* Multiline text container and status indicator */
+  .multiline-text-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .multiline-text-status {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: -0.25rem;
+  }
+
+  .status-indicator {
+    font-family: var(--body-font);
+    font-size: 0.875rem;
+    padding: 0.375rem 0.75rem;
+    border-radius: var(--sl-border-radius-small);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    user-select: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .status-indicator:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .status-indicator:active {
+    transform: translateY(0);
+  }
+
+  .status-indicator:focus {
+    outline: 2px solid var(--sl-color-primary-600);
+    outline-offset: 2px;
+  }
+
+  .status-draft {
+    background-color: var(--sl-color-warning-100);
+    color: var(--sl-color-warning-800);
+    border: 1px solid var(--sl-color-warning-300);
+  }
+
+  .status-draft:hover {
+    background-color: var(--sl-color-warning-200);
+    border-color: var(--sl-color-warning-400);
+  }
+
+  .status-saving {
+    background-color: var(--sl-color-neutral-100);
+    color: var(--sl-color-neutral-700);
+    border: 1px solid var(--sl-color-neutral-300);
+    cursor: default;
+    pointer-events: none;
+  }
+
+  .status-saved {
+    background-color: var(--sl-color-success-100);
+    color: var(--sl-color-success-800);
+    border: 1px solid var(--sl-color-success-300);
+    cursor: default;
+  }
+
+  .status-saved:hover {
+    transform: none;
+    box-shadow: none;
+  }
 `;
 

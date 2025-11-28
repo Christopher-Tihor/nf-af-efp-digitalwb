@@ -1,5 +1,5 @@
 /*!
-* powerpod 4.4.3
+* powerpod 4.4.4
 * https://github.com/bcgov/nr-af-pods/powerpod
 *
 * @license GPLv3 for open source use only
@@ -38184,6 +38184,77 @@
   .main-content div {
     font-family: inherit !important;
   }
+
+  /* Multiline text container and status indicator */
+  .multiline-text-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .multiline-text-status {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: -0.25rem;
+  }
+
+  .status-indicator {
+    font-family: var(--body-font);
+    font-size: 0.875rem;
+    padding: 0.375rem 0.75rem;
+    border-radius: var(--sl-border-radius-small);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    user-select: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .status-indicator:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .status-indicator:active {
+    transform: translateY(0);
+  }
+
+  .status-indicator:focus {
+    outline: 2px solid var(--sl-color-primary-600);
+    outline-offset: 2px;
+  }
+
+  .status-draft {
+    background-color: var(--sl-color-warning-100);
+    color: var(--sl-color-warning-800);
+    border: 1px solid var(--sl-color-warning-300);
+  }
+
+  .status-draft:hover {
+    background-color: var(--sl-color-warning-200);
+    border-color: var(--sl-color-warning-400);
+  }
+
+  .status-saving {
+    background-color: var(--sl-color-neutral-100);
+    color: var(--sl-color-neutral-700);
+    border: 1px solid var(--sl-color-neutral-300);
+    cursor: default;
+    pointer-events: none;
+  }
+
+  .status-saved {
+    background-color: var(--sl-color-success-100);
+    color: var(--sl-color-success-800);
+    border: 1px solid var(--sl-color-success-300);
+    cursor: default;
+  }
+
+  .status-saved:hover {
+    transform: none;
+    box-shadow: none;
+  }
 `;
 
   // Create logger instance for EFP components
@@ -38209,6 +38280,8 @@
           this.pendingResponseValues = new Map();
           // Pending multi-select values (questionId -> selected options array)
           this.pendingMultiselectValues = new Map();
+          // Multiline text save status (questionId -> 'draft' | 'saving' | 'saved')
+          this.multilineTextSaveStatus = new Map();
       }
       connectedCallback() {
           super.connectedCallback();
@@ -38333,6 +38406,7 @@
               100000000: 'Yes/No/NA',
               100000001: 'Point Rating',
               100000002: 'Multi-select List',
+              100000003: 'Multiline Text',
               // Add more question types as needed
           };
           const questionTypeName = questionTypeMap[question.questionType] || 'Unknown';
@@ -38435,6 +38509,41 @@
             .ratingMetadata=${ratingMetadata}
             @rating-changed=${this.handleRatingChanged}
           ></rating-question>
+        `;
+              case 'Multiline Text':
+                  // Get existing response value for this question
+                  const existingResponse3 = this.getResponseForQuestion(question.id);
+                  const textValue = (existingResponse3 === null || existingResponse3 === void 0 ? void 0 : existingResponse3.quartech_response) || '';
+                  const saveStatus = this.multilineTextSaveStatus.get(question.id) || 'saved';
+                  return x `
+          <div class="multiline-text-container">
+            <sl-textarea
+              label="Your response"
+              name="question-${question.id}"
+              rows="6"
+              placeholder="Enter your response..."
+              .value=${textValue}
+              @sl-input=${(e) => this.handleMultilineTextInput(question.id, e.target.value)}
+            ></sl-textarea>
+            <div class="multiline-text-status">
+              <span
+                class="status-indicator status-${saveStatus}"
+                @click=${() => this.handleForceSave(question.id)}
+                role="button"
+                tabindex="0"
+                @keydown=${(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        this.handleForceSave(question.id);
+                    }
+                }}
+              >
+                ${saveStatus === 'draft' ? '📝 Draft (click to save)' :
+                    saveStatus === 'saving' ? '⏳ Saving...' :
+                        '✓ Saved'}
+              </span>
+            </div>
+          </div>
         `;
               default:
                   return x `
@@ -39018,6 +39127,84 @@
           }
           catch (error) {
               logger$4.error({ message: `Failed to save multi-select response: ${error.message}` });
+              // Don't delete pending value on error, so user can retry
+          }
+      }
+      // Handle multiline text input with debounced save
+      handleMultilineTextInput(questionId, value) {
+          try {
+              logger$4.info({ message: `Multiline text input for question ${questionId}` });
+              // Store the pending value
+              this.pendingResponseValues.set(questionId, value);
+              // Update status to draft
+              this.multilineTextSaveStatus.set(questionId, 'draft');
+              this.requestUpdate();
+              // Clear any existing debounce timer for this question
+              const existingTimer = this.responseSaveDebounceTimers.get(questionId);
+              if (existingTimer) {
+                  clearTimeout(existingTimer);
+              }
+              // Set a new debounce timer (2000ms delay)
+              const timer = window.setTimeout(() => {
+                  this.saveMultilineTextResponse(questionId);
+              }, 2000);
+              this.responseSaveDebounceTimers.set(questionId, timer);
+          }
+          catch (error) {
+              logger$4.error({ message: `Failed to handle multiline text input: ${error.message}` });
+          }
+      }
+      // Force save multiline text (when user clicks the status indicator)
+      async handleForceSave(questionId) {
+          try {
+              const status = this.multilineTextSaveStatus.get(questionId);
+              // Only allow force save if status is 'draft'
+              if (status !== 'draft') {
+                  return;
+              }
+              logger$4.info({ message: `Force saving multiline text for question ${questionId}` });
+              // Clear any existing debounce timer
+              const existingTimer = this.responseSaveDebounceTimers.get(questionId);
+              if (existingTimer) {
+                  clearTimeout(existingTimer);
+                  this.responseSaveDebounceTimers.delete(questionId);
+              }
+              // Save immediately
+              await this.saveMultilineTextResponse(questionId);
+          }
+          catch (error) {
+              logger$4.error({ message: `Failed to force save multiline text: ${error.message}` });
+          }
+      }
+      // Save the multiline text response
+      async saveMultilineTextResponse(questionId) {
+          try {
+              const responseValue = this.pendingResponseValues.get(questionId);
+              if (responseValue === undefined) {
+                  logger$4.warn({ message: `No pending value found for question ${questionId}` });
+                  return;
+              }
+              logger$4.info({ message: `Saving multiline text response for question ${questionId}` });
+              // Update status to saving
+              this.multilineTextSaveStatus.set(questionId, 'saving');
+              this.requestUpdate();
+              // Save the response
+              const responseData = await this.saveRatingResponse(questionId, responseValue);
+              // Update the questionnaire store with the full response data
+              updateQuestionResponse(questionId, responseValue, true, responseData);
+              logger$4.info({ message: `Successfully saved multiline text response for question ${questionId}` });
+              // Update status to saved
+              this.multilineTextSaveStatus.set(questionId, 'saved');
+              this.requestUpdate();
+              // Clean up
+              this.pendingResponseValues.delete(questionId);
+              this.responseSaveDebounceTimers.delete(questionId);
+          }
+          catch (error) {
+              logger$4.error({ message: `Failed to save multiline text response: ${error.message}` });
+              // Revert status to draft on error
+              this.multilineTextSaveStatus.set(questionId, 'draft');
+              this.requestUpdate();
               // Don't delete pending value on error, so user can retry
           }
       }
@@ -39798,6 +39985,9 @@
   __decorate([
       e$5('sl-tab-group')
   ], EFPEntryForm.prototype, "tabGroupEl", void 0);
+  __decorate([
+      n$2({ type: Object, attribute: false })
+  ], EFPEntryForm.prototype, "multilineTextSaveStatus", void 0);
   EFPEntryForm = __decorate([
       t$1('efp-entry-form')
   ], EFPEntryForm);
@@ -40199,7 +40389,7 @@
       };
     };
     // @ts-ignore
-    POWERPOD.version = '4.4.3';
+    POWERPOD.version = '4.4.4';
     // @ts-ignore
     window.powerpod = POWERPOD;
   }

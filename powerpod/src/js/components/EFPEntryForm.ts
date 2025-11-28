@@ -87,6 +87,9 @@ export class EFPEntryForm extends LitElement {
   private pendingResponseValues: Map<string, string> = new Map();
   // Pending multi-select values (questionId -> selected options array)
   private pendingMultiselectValues: Map<string, string[]> = new Map();
+  // Multiline text save status (questionId -> 'draft' | 'saving' | 'saved')
+  @property({ type: Object, attribute: false })
+  private multilineTextSaveStatus: Map<string, 'draft' | 'saving' | 'saved'> = new Map();
 
   connectedCallback() {
     super.connectedCallback();
@@ -223,6 +226,7 @@ export class EFPEntryForm extends LitElement {
       100000000: 'Yes/No/NA',
       100000001: 'Point Rating',
       100000002: 'Multi-select List',
+      100000003: 'Multiline Text',
       // Add more question types as needed
     };
 
@@ -333,6 +337,43 @@ export class EFPEntryForm extends LitElement {
             .ratingMetadata=${ratingMetadata}
             @rating-changed=${this.handleRatingChanged}
           ></rating-question>
+        `;
+
+      case 'Multiline Text':
+        // Get existing response value for this question
+        const existingResponse3 = this.getResponseForQuestion(question.id);
+        const textValue = existingResponse3?.quartech_response || '';
+        const saveStatus = this.multilineTextSaveStatus.get(question.id) || 'saved';
+
+        return html`
+          <div class="multiline-text-container">
+            <sl-textarea
+              label="Your response"
+              name="question-${question.id}"
+              rows="6"
+              placeholder="Enter your response..."
+              .value=${textValue}
+              @sl-input=${(e: Event) => this.handleMultilineTextInput(question.id, (e.target as any).value)}
+            ></sl-textarea>
+            <div class="multiline-text-status">
+              <span
+                class="status-indicator status-${saveStatus}"
+                @click=${() => this.handleForceSave(question.id)}
+                role="button"
+                tabindex="0"
+                @keydown=${(e: KeyboardEvent) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    this.handleForceSave(question.id);
+                  }
+                }}
+              >
+                ${saveStatus === 'draft' ? '📝 Draft (click to save)' :
+                  saveStatus === 'saving' ? '⏳ Saving...' :
+                  '✓ Saved'}
+              </span>
+            </div>
+          </div>
         `;
 
       default:
@@ -1033,6 +1074,103 @@ export class EFPEntryForm extends LitElement {
 
     } catch (error) {
       logger.error({ message: `Failed to save multi-select response: ${(error as Error).message}` });
+      // Don't delete pending value on error, so user can retry
+    }
+  }
+
+  // Handle multiline text input with debounced save
+  private handleMultilineTextInput(questionId: string, value: string) {
+    try {
+      logger.info({ message: `Multiline text input for question ${questionId}` });
+
+      // Store the pending value
+      this.pendingResponseValues.set(questionId, value);
+
+      // Update status to draft
+      this.multilineTextSaveStatus.set(questionId, 'draft');
+      this.requestUpdate();
+
+      // Clear any existing debounce timer for this question
+      const existingTimer = this.responseSaveDebounceTimers.get(questionId);
+      if (existingTimer) {
+        clearTimeout(existingTimer);
+      }
+
+      // Set a new debounce timer (2000ms delay)
+      const timer = window.setTimeout(() => {
+        this.saveMultilineTextResponse(questionId);
+      }, 2000);
+
+      this.responseSaveDebounceTimers.set(questionId, timer);
+
+    } catch (error) {
+      logger.error({ message: `Failed to handle multiline text input: ${(error as Error).message}` });
+    }
+  }
+
+  // Force save multiline text (when user clicks the status indicator)
+  private async handleForceSave(questionId: string) {
+    try {
+      const status = this.multilineTextSaveStatus.get(questionId);
+
+      // Only allow force save if status is 'draft'
+      if (status !== 'draft') {
+        return;
+      }
+
+      logger.info({ message: `Force saving multiline text for question ${questionId}` });
+
+      // Clear any existing debounce timer
+      const existingTimer = this.responseSaveDebounceTimers.get(questionId);
+      if (existingTimer) {
+        clearTimeout(existingTimer);
+        this.responseSaveDebounceTimers.delete(questionId);
+      }
+
+      // Save immediately
+      await this.saveMultilineTextResponse(questionId);
+
+    } catch (error) {
+      logger.error({ message: `Failed to force save multiline text: ${(error as Error).message}` });
+    }
+  }
+
+  // Save the multiline text response
+  private async saveMultilineTextResponse(questionId: string) {
+    try {
+      const responseValue = this.pendingResponseValues.get(questionId);
+      if (responseValue === undefined) {
+        logger.warn({ message: `No pending value found for question ${questionId}` });
+        return;
+      }
+
+      logger.info({ message: `Saving multiline text response for question ${questionId}` });
+
+      // Update status to saving
+      this.multilineTextSaveStatus.set(questionId, 'saving');
+      this.requestUpdate();
+
+      // Save the response
+      const responseData = await this.saveRatingResponse(questionId, responseValue);
+
+      // Update the questionnaire store with the full response data
+      updateQuestionResponse(questionId, responseValue, true, responseData);
+
+      logger.info({ message: `Successfully saved multiline text response for question ${questionId}` });
+
+      // Update status to saved
+      this.multilineTextSaveStatus.set(questionId, 'saved');
+      this.requestUpdate();
+
+      // Clean up
+      this.pendingResponseValues.delete(questionId);
+      this.responseSaveDebounceTimers.delete(questionId);
+
+    } catch (error) {
+      logger.error({ message: `Failed to save multiline text response: ${(error as Error).message}` });
+      // Revert status to draft on error
+      this.multilineTextSaveStatus.set(questionId, 'draft');
+      this.requestUpdate();
       // Don't delete pending value on error, so user can retry
     }
   }

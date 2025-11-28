@@ -32,6 +32,7 @@ export declare class EFPEntryForm extends LitElement {
     private responseSaveDebounceTimers;
     private pendingResponseValues;
     private pendingMultiselectValues;
+    private multilineTextSaveStatus;
     connectedCallback(): void;
     disconnectedCallback(): void;
     private updateQuestionnaireStoreStatus;
@@ -61,6 +62,9 @@ export declare class EFPEntryForm extends LitElement {
     private handleMultiselectChange;
     private saveDebouncedResponse;
     private saveMultiselectResponse;
+    private handleMultilineTextInput;
+    private handleForceSave;
+    private saveMultilineTextResponse;
     private buildRatingDescription;
     private saveRatingResponse;
     private updateMemoryStructuresForRating;
