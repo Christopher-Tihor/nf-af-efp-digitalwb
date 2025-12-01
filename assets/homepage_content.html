@@ -2,10 +2,10 @@
   -------------------
   FILE INFO
   -------------------
-  version: 1.0.0
+  version: 1.0.2
   name: Home Page Web Template
   type: Web Template/HTML
-  description: This is the dynamic liquid HTML content that renders the logged in or logged out content for the home page.
+  description: Dynamic Liquid HTML that renders logged-in or logged-out content for the home page.
 -->
 
 {% comment %}
@@ -118,7 +118,7 @@ Fetch the portal page content for the chosen internalName
   text-decoration:none;
 }
 
-/* ✅ BUTTONS — FIXED */
+/* Buttons */
 .bcgov-page .button1,
 .bcgov-btn--primary {
   background: var(--bcgov-blue-70) !important;
@@ -128,7 +128,8 @@ Fetch the portal page content for the chosen internalName
   border-radius: 4px;
   text-decoration: none !important;
   display: inline-block;
-  font-weight: 600;
+  font-weight: 800;
+  font-size: 16px;
 }
 .bcgov-page .button1:hover,
 .bcgov-btn--primary:hover {
@@ -145,7 +146,8 @@ Fetch the portal page content for the chosen internalName
   border-radius: 4px;
   text-decoration: none !important;
   display: inline-block;
-  font-weight: 600;
+  font-weight: 800;
+  font-size: 16px;
 }
 .bcgov-page .button2:hover,
 .bcgov-btn--secondary:hover {
@@ -197,12 +199,13 @@ Fetch the portal page content for the chosen internalName
   margin:6px 0 8px;
   color:var(--bcgov-muted);
 }
+
 /* Make the entire page background match the BC Gov surface */
 html, body,
 .wrapper-body,
 #mainContent,
 .page-copy {
-  background: var(--bcgov-bg) !important; /* #fafafa */
+  background: var(--bcgov-bg) !important;
 }
 
 /* Ensure inner DIVs don’t re-introduce a white panel */
@@ -211,9 +214,8 @@ html, body,
 .xrm-attribute-value {
   background: transparent !important;
 }
-/* --- BC Gov Header Navigation Fix --- */
 
-/* Ensure navbar uses BC Gov brand colours */
+/* --- BC Gov Header Navigation Fix --- */
 .navbar.navbar-dark,
 .navbar.navbar-dark .navbar-brand,
 .navbar.navbar-dark .navbar-header {
@@ -256,43 +258,72 @@ html, body,
   background: #f4f7fb !important;
   color: var(--bcgov-blue) !important;
 }
-
+.bcgov-content h2 {
+  color: black !important;
+}
 </style>
 
 <div class="row sectionBlockLayout text-start bcgov-page" style="display:flex;flex-wrap:wrap;margin:0;min-height:auto;padding:8px;">
   <div class="container">
 
-    <!-- Status debug (optional) -->
-    <!-- <div class="bcgov-status">
-      Status: {% if isAuthenticated %}Logged in{% else %}Anonymous{% endif %}
-      {% if efpProducer %} | Role: EFP Producer{% endif %}
-      {% if efpAdvisor %} | Role: EFP Planning Advisor{% endif %}
-    </div> -->
+    <div class="bcgov-content">
+      <h2>Welcome to the BC Environmental Farm Plan Workbook</h2>
+
+      {% if isAuthenticated %}
+        <div style="margin:8px 0 16px;">
+          <a href="/" class="button1">Create workbook</a>
+        </div>
+      {% else %}
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin:8px 0 16px;">
+          <a href="/signin" class="button1">Sign in</a>
+          <a href="/Account/Login/Register?returnUrl=%2F" class="button2">Create account</a>
+        </div>
+      {% endif %}
+    </div>
 
     {% if content %}
-      {% if content.quartech_section1 %}
-        <section>{{ content.quartech_section1 }}</section>
+
+      {% if isAuthenticated %}
+        {% if content.quartech_section1 %}
+          <section>{{ content.quartech_section1 }}</section>
+        {% endif %}
+        {% if content.quartech_section2 %}
+          <section>{{ content.quartech_section2 }}</section>
+        {% endif %}
+        {% if content.quartech_section3 %}
+          <section>{{ content.quartech_section3 }}</section>
+        {% endif %}
+        {% if content.quartech_section4 %}
+          <section>{{ content.quartech_section4 }}</section>
+        {% endif %}
+        {% if content.quartech_section5 %}
+          <section>{{ content.quartech_section5 }}</section>
+        {% endif %}
+        {% if content.quartech_section6 %}
+          <section>{{ content.quartech_section6 }}</section>
+        {% endif %}
+
+      {% else %}
+        {% if content.quartech_section1 %}
+          <section>{{ content.quartech_section1 }}</section>
+        {% endif %}
+        {% if content.quartech_section2 %}
+          <section>{{ content.quartech_section2 }}</section>
+        {% endif %}
+        {% if content.quartech_section3 %}
+          <section>{{ content.quartech_section3 }}</section>
+        {% endif %}
+        {% if content.quartech_section4 %}
+          <section>{{ content.quartech_section4 }}</section>
+        {% endif %}
+        {% if content.quartech_section5 %}
+          <section>{{ content.quartech_section5 }}</section>
+        {% endif %}
+        {% if content.quartech_section6 %}
+          <section>{{ content.quartech_section6 }}</section>
+        {% endif %}
       {% endif %}
 
-      {% if content.quartech_section2 %}
-        <section>{{ content.quartech_section2 }}</section>
-      {% endif %}
-
-      {% if content.quartech_section3 %}
-        <section>{{ content.quartech_section3 }}</section>
-      {% endif %}
-
-      {% if content.quartech_section4 %}
-        <section>{{ content.quartech_section4 }}</section>
-      {% endif %}
-
-      {% if content.quartech_section5 %}
-        <section>{{ content.quartech_section5 }}</section>
-      {% endif %}
-
-      {% if content.quartech_section6 %}
-        <section>{{ content.quartech_section6 }}</section>
-      {% endif %}
     {% else %}
       <section>No content found for {{ internalName }}.</section>
     {% endif %}
