@@ -2,7 +2,7 @@
   -------------------
   FILE INFO
   -------------------
-  version: 1.0.4
+  version: 1.0.5
   name: Home Page Web Template
   type: Web Template/HTML
   description: Dynamic Liquid HTML that renders logged-in or logged-out content for the home page.
@@ -271,7 +271,7 @@ html, body,
 
       {% if efpProducer %}
         <div style="margin:8px 0 16px;">
-          <a href="/" class="button1">Create workbook</a>
+          <a href="/my-efp-workbooks/" class="button1">Create workbook</a>
         </div>
       {% elsif isAuthenticated %}
         <div style="margin:8px 0 16px;">
@@ -279,7 +279,7 @@ html, body,
         </div>
       {% else %}
         <div style="display:flex;gap:10px;flex-wrap:wrap;margin:8px 0 16px;">
-          <a href="/signin" class="button1">Sign in</a>
+          <a href="/SignIn?returnUrl=%2F" class="button1">Sign in</a>
           <a href="/Account/Login/Register?returnUrl=%2F" class="button2">Create account</a>
         </div>
       {% endif %}
