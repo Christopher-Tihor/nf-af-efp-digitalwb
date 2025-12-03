@@ -38383,22 +38383,13 @@
                   return;
               }
               if (this.activeContent.title === 'My Action Plan') {
-                  console.log('🔍 Attempting to append to light DOM');
-                  console.log('🔍 this.contains(actionPlanDiv):', this.contains(actionPlanDiv));
                   // Append the div to this component's light DOM (not shadow DOM)
                   // This keeps it in the light DOM where scripts work
                   if (!this.contains(actionPlanDiv)) {
                       this.appendChild(actionPlanDiv);
                       actionPlanDiv.style.display = 'block';
                       actionPlanDiv.style.marginTop = '1.5rem';
-                      actionPlanDiv.style.backgroundColor = 'lightyellow'; // Debug styling
-                      actionPlanDiv.style.padding = '20px';
-                      actionPlanDiv.style.border = '2px solid red'; // Debug border
                       console.log('✅ Action Plan content appended to light DOM');
-                      console.log('🔍 actionPlanDiv.innerHTML:', actionPlanDiv.innerHTML.substring(0, 200));
-                  }
-                  else {
-                      console.log('🔍 Action Plan div already in light DOM');
                   }
               }
               else {
