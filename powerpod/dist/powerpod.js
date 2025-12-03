@@ -38326,14 +38326,18 @@
           this.responseSaveDebounceTimers.clear();
           this.pendingResponseValues.clear();
           this.pendingMultiselectValues.clear();
-          logger$4.info({ message: 'EFPEntryForm disconnected, cleared pending timers' });
+          logger$4.info({
+              message: 'EFPEntryForm disconnected, cleared pending timers',
+          });
       }
       // Update the reactive property based on store status
       updateQuestionnaireStoreStatus() {
           const wasLoaded = this.questionnaireStoreLoaded;
           this.questionnaireStoreLoaded = isQuestionnaireLoaded();
           if (!wasLoaded && this.questionnaireStoreLoaded) {
-              logger$4.info({ message: '📋 Questionnaire store loaded, updating navigation' });
+              logger$4.info({
+                  message: '📋 Questionnaire store loaded, updating navigation',
+              });
               this.requestUpdate(); // Force re-render when store becomes available
           }
       }
@@ -38379,31 +38383,39 @@
           const questionTypeName = questionTypeMap[question.questionType] || 'Unknown';
           return x `
       <div class="question-container">
-        ${question.textAboveQuestion ? x `
-          <div class="question-text">
-            ${o$1(question.textAboveQuestion)}
-          </div>
-        ` : ''}
+        ${question.textAboveQuestion
+            ? x `
+              <div class="question-text">
+                ${o$1(question.textAboveQuestion)}
+              </div>
+            `
+            : ''}
 
         <div class="question-label">
-          <span>${o$1(EFPTextUtils.convertNewlinesToBreaks(question.label))}</span>
-          ${question.tooltip ? x `
-            <sl-tooltip placement="top" style="--max-width: 300px;">
-              <div slot="content">${o$1(question.tooltip)}</div>
-              <sl-icon
-                name="question-circle"
-                class="question-tooltip-icon"
-                aria-label="Question help"
-              ></sl-icon>
-            </sl-tooltip>
-          ` : ''}
+          <span
+            >${o$1(EFPTextUtils.convertNewlinesToBreaks(question.label))}</span
+          >
+          ${question.tooltip
+            ? x `
+                <sl-tooltip placement="top" style="--max-width: 300px;">
+                  <div slot="content">${o$1(question.tooltip)}</div>
+                  <sl-icon
+                    name="question-circle"
+                    class="question-tooltip-icon"
+                    aria-label="Question help"
+                  ></sl-icon>
+                </sl-tooltip>
+              `
+            : ''}
         </div>
 
-        ${question.textBelowQuestion ? x `
-          <div class="question-text">
-            ${o$1(question.textBelowQuestion)}
-          </div>
-        ` : ''}
+        ${question.textBelowQuestion
+            ? x `
+              <div class="question-text">
+                ${o$1(question.textBelowQuestion)}
+              </div>
+            `
+            : ''}
 
         <div class="question-response">
           ${this.renderQuestionInput(question, questionTypeName)}
@@ -38416,7 +38428,10 @@
               case 'Multi-select List':
                   // Parse the semicolon-separated options from the question
                   const optionsString = question.multiselectOptions || '';
-                  const options = optionsString.split(';').map((opt) => opt.trim()).filter((opt) => opt.length > 0);
+                  const options = optionsString
+                      .split(';')
+                      .map((opt) => opt.trim())
+                      .filter((opt) => opt.length > 0);
                   // Get selected options - prefer pending value over saved response
                   let selectedOptions;
                   if (this.pendingMultiselectValues.has(question.id)) {
@@ -38427,7 +38442,10 @@
                       // Otherwise get from existing response
                       const existingResponse = this.getResponseForQuestion(question.id);
                       const selectedOptionsString = (existingResponse === null || existingResponse === void 0 ? void 0 : existingResponse.quartech_response) || '';
-                      const existingSelectedOptions = selectedOptionsString.split(';').map((opt) => opt.trim()).filter((opt) => opt.length > 0);
+                      const existingSelectedOptions = selectedOptionsString
+                          .split(';')
+                          .map((opt) => opt.trim())
+                          .filter((opt) => opt.length > 0);
                       // Filter to only include options that are valid for the current question
                       // This prevents old/invalid options from being displayed as checked
                       selectedOptions = existingSelectedOptions.filter((opt) => options.includes(opt));
@@ -38438,7 +38456,9 @@
                     const isChecked = selectedOptions.includes(option);
                     return x `
                 <div class="multiselect-option">
-                  <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; padding: 0.5rem 0;">
+                  <label
+                    style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; padding: 0.5rem 0;"
+                  >
                     <input
                       type="checkbox"
                       .checked=${isChecked}
@@ -38458,16 +38478,18 @@
                   const existingResponse2 = this.getResponseForQuestion(question.id);
                   const selectedValue = (existingResponse2 === null || existingResponse2 === void 0 ? void 0 : existingResponse2.quartech_response) || '';
                   // Prepare rating metadata for Point Rating questions
-                  const ratingMetadata = questionType === 'Point Rating' ? {
-                      rating1OverwriteLabel: question.rating1OverwriteLabel,
-                      rating1Description: question.rating1Description,
-                      rating2OverwriteLabel: question.rating2OverwriteLabel,
-                      rating2Description: question.rating2Description,
-                      rating3OverwriteLabel: question.rating3OverwriteLabel,
-                      rating3Description: question.rating3Description,
-                      rating4OverwriteLabel: question.rating4OverwriteLabel,
-                      rating4Description: question.rating4Description
-                  } : {};
+                  const ratingMetadata = questionType === 'Point Rating'
+                      ? {
+                          rating1OverwriteLabel: question.rating1OverwriteLabel,
+                          rating1Description: question.rating1Description,
+                          rating2OverwriteLabel: question.rating2OverwriteLabel,
+                          rating2Description: question.rating2Description,
+                          rating3OverwriteLabel: question.rating3OverwriteLabel,
+                          rating3Description: question.rating3Description,
+                          rating4OverwriteLabel: question.rating4OverwriteLabel,
+                          rating4Description: question.rating4Description,
+                      }
+                      : {};
                   return x `
           <rating-question
             .questionId=${question.id}
@@ -38516,9 +38538,11 @@
                     }
                 }}
                 >
-                  ${saveStatus === 'draft' ? '📝 Draft (click to save)' :
-                    saveStatus === 'saving' ? '⏳ Saving...' :
-                        '✓ Saved'}
+                  ${saveStatus === 'draft'
+                    ? '📝 Draft (click to save)'
+                    : saveStatus === 'saving'
+                        ? '⏳ Saving...'
+                        : '✓ Saved'}
                 </span>
               </div>
             </div>
@@ -38537,56 +38561,68 @@
       }
       renderSubchapter(subchapter) {
           return x `
-      ${subchapter.description ? x `
-        <div class="subchapter-header">
-          <div>${o$1(subchapter.description)}</div>
-        </div>
-      ` : ''}
+      ${subchapter.description
+            ? x `
+            <div class="subchapter-header">
+              <div>${o$1(subchapter.description)}</div>
+            </div>
+          `
+            : ''}
       ${subchapter.questions.map((question) => this.renderQuestion(question))}
-
-      ${subchapter.subchapters ? subchapter.subchapters.map((subSubchapter) => this.renderSubSubchapter(subSubchapter)) : ''}
+      ${subchapter.subchapters
+            ? subchapter.subchapters.map((subSubchapter) => this.renderSubSubchapter(subSubchapter))
+            : ''}
     `;
       }
       renderContainerSubchapter(subchapter) {
           return x `
-      ${subchapter.description ? x `
-        <div class="subchapter-header">
-          <div>${o$1(subchapter.description)}</div>
-        </div>
-      ` : ''}
+      ${subchapter.description
+            ? x `
+            <div class="subchapter-header">
+              <div>${o$1(subchapter.description)}</div>
+            </div>
+          `
+            : ''}
     `;
       }
       renderSubSubchapter(subSubchapter) {
           return x `
-      ${subSubchapter.description ? x `
-        <div class="sub-subchapter-header">
-          <div>${o$1(subSubchapter.description)}</div>
-        </div>
-      ` : ''}
-
+      ${subSubchapter.description
+            ? x `
+            <div class="sub-subchapter-header">
+              <div>${o$1(subSubchapter.description)}</div>
+            </div>
+          `
+            : ''}
       ${subSubchapter.questions.map((question) => this.renderQuestion(question))}
     `;
       }
       renderChapter(chapter) {
           return x `
-      ${(chapter === null || chapter === void 0 ? void 0 : chapter.description) ? x `
-        <div class="chapter-header">
-          <div>${o$1(chapter.description)}</div>
-        </div>
-      ` : ''}
-
-      ${(chapter === null || chapter === void 0 ? void 0 : chapter.questions) ? chapter.questions.map((question) => this.renderQuestion(question)) : ''}
-
-      ${(chapter === null || chapter === void 0 ? void 0 : chapter.subchapters) ? chapter.subchapters.map((subchapter) => this.renderSubchapter(subchapter)) : ''}
+      ${(chapter === null || chapter === void 0 ? void 0 : chapter.description)
+            ? x `
+            <div class="chapter-header">
+              <div>${o$1(chapter.description)}</div>
+            </div>
+          `
+            : ''}
+      ${(chapter === null || chapter === void 0 ? void 0 : chapter.questions)
+            ? chapter.questions.map((question) => this.renderQuestion(question))
+            : ''}
+      ${(chapter === null || chapter === void 0 ? void 0 : chapter.subchapters)
+            ? chapter.subchapters.map((subchapter) => this.renderSubchapter(subchapter))
+            : ''}
     `;
       }
       renderContainerChapter(chapter) {
           return x `
-      ${(chapter === null || chapter === void 0 ? void 0 : chapter.description) ? x `
-        <div class="chapter-header">
-          <div>${o$1(chapter.description)}</div>
-        </div>
-      ` : ''}
+      ${(chapter === null || chapter === void 0 ? void 0 : chapter.description)
+            ? x `
+            <div class="chapter-header">
+              <div>${o$1(chapter.description)}</div>
+            </div>
+          `
+            : ''}
     `;
       }
       renderMainContent() {
@@ -38598,7 +38634,9 @@
           const questionnaire = getQuestionnaireFromStore();
           // If questionnaire store is not loaded, show loading state
           if (!((_a = questionnaire === null || questionnaire === void 0 ? void 0 : questionnaire.chapters) === null || _a === void 0 ? void 0 : _a.length)) {
-              logger$4.info({ message: '📋 Questionnaire store not loaded, showing loading state' });
+              logger$4.info({
+                  message: '📋 Questionnaire store not loaded, showing loading state',
+              });
               return [
                   {
                       label: 'Loading Environmental Farm Plan...',
@@ -38608,7 +38646,7 @@
             <p><em>The questionnaire store is being initialized...</em></p>
           `,
                       complete: false,
-                  }
+                  },
               ];
           }
           const chapters = questionnaire.chapters[0] || [];
@@ -38622,7 +38660,7 @@
                   complete: chapter.complete || false, // Use completion from store
                   isContainer: true,
                   chapterId: chapter.id, // Store chapter ID for completion lookup
-                  items: []
+                  items: [],
               };
               // Add all subchapters as direct clickable items under the main chapter
               if (chapter.subchapters && chapter.subchapters.length > 0) {
@@ -38664,7 +38702,7 @@
                       content: EFPSectionGenerator.renderChapterContent(chapter),
                       complete: chapter.complete || false, // Use completion from store
                       chapterId: chapter.id, // Store chapter ID for completion lookup
-                      chapterData: chapter // Keep for backward compatibility
+                      chapterData: chapter, // Keep for backward compatibility
                   });
               }
               items.push(chapterItem);
@@ -38678,7 +38716,9 @@
           const portalPageData = (_b = (_a = POWERPOD.state) === null || _a === void 0 ? void 0 : _a.portalPages) === null || _b === void 0 ? void 0 : _b[portalPageName];
           // If portal page data is not loaded yet, return loading state
           if (!portalPageData) {
-              logger$4.info({ message: '📄 Portal page data not loaded yet, showing loading state' });
+              logger$4.info({
+                  message: '📄 Portal page data not loaded yet, showing loading state',
+              });
               return [
                   {
                       label: '',
@@ -38688,7 +38728,7 @@
             </div>
           `,
                       complete: false,
-                  }
+                  },
               ];
           }
           // Build the terms and conditions content from sections 1-6
@@ -38699,9 +38739,9 @@
               portalPageData.quartech_section4,
               portalPageData.quartech_section5,
               portalPageData.quartech_section6,
-          ].filter(section => section); // Filter out null/undefined sections
+          ].filter((section) => section); // Filter out null/undefined sections
           // Clean up the HTML content to remove problematic font-family styles
-          const cleanedSections = sections.map(section => {
+          const cleanedSections = sections.map((section) => {
               if (!section)
                   return section;
               // Replace Roboto Slab font-family with BC Sans
@@ -38823,7 +38863,9 @@
               return item.complete || false;
           }
           catch (error) {
-              logger$4.warn({ message: `Failed to get completion from questionnaire store: ${String(error)}` });
+              logger$4.warn({
+                  message: `Failed to get completion from questionnaire store: ${String(error)}`,
+              });
               return item.complete || false;
           }
       }
@@ -38857,7 +38899,9 @@
                   }
               }
               catch (error) {
-                  logger$4.warn({ message: `Failed to get section completion from questionnaire store: ${String(error)}` });
+                  logger$4.warn({
+                      message: `Failed to get section completion from questionnaire store: ${String(error)}`,
+                  });
               }
           }
           // Fallback to existing logic
@@ -38865,11 +38909,15 @@
       }
       // Public API methods
       updateNestedChapterStructure(nestedStructure) {
-          logger$4.info({ message: `updateNestedChapterStructure called with ${(nestedStructure === null || nestedStructure === void 0 ? void 0 : nestedStructure.length) || 0} chapters` });
+          logger$4.info({
+              message: `updateNestedChapterStructure called with ${(nestedStructure === null || nestedStructure === void 0 ? void 0 : nestedStructure.length) || 0} chapters`,
+          });
           this.nestedChapterStructure = nestedStructure;
           // Also update the questionnaire store if not already loaded
           if (!isQuestionnaireLoaded()) {
-              logger$4.info({ message: 'Loading questionnaire data into store from updateNestedChapterStructure' });
+              logger$4.info({
+                  message: 'Loading questionnaire data into store from updateNestedChapterStructure',
+              });
               // Import the loadQuestionnaireIntoStore function dynamically to avoid circular imports
               Promise.resolve().then(function () { return questionnaire; }).then(({ loadQuestionnaireIntoStore }) => {
                   loadQuestionnaireIntoStore(nestedStructure);
@@ -38904,11 +38952,15 @@
                       if (questionnaire.chapters && questionnaire.chapters.length > 0) {
                           countInChapters(questionnaire.chapters[0]);
                       }
-                      return totalQuestions > 0 ? Math.round((answeredQuestions / totalQuestions) * 100) : 0;
+                      return totalQuestions > 0
+                          ? Math.round((answeredQuestions / totalQuestions) * 100)
+                          : 0;
                   }
               }
               catch (error) {
-                  logger$4.warn({ message: 'Failed to get completion from questionnaire store, falling back' });
+                  logger$4.warn({
+                      message: 'Failed to get completion from questionnaire store, falling back',
+                  });
               }
           }
           // Use workbook responses completion if available, otherwise fall back to static completion
@@ -38920,17 +38972,25 @@
       // Navigation methods
       goToNext() {
           var _a;
-          logger$4.info({ message: `goToNext called, current step: ${this.currentStepIndex}, ${(_a = this.flatSteps[this.currentStepIndex]) === null || _a === void 0 ? void 0 : _a.label}` });
+          logger$4.info({
+              message: `goToNext called, current step: ${this.currentStepIndex}, ${(_a = this.flatSteps[this.currentStepIndex]) === null || _a === void 0 ? void 0 : _a.label}`,
+          });
           // Handle case where currentStepIndex is -1 (step not found in flatSteps)
           if (this.currentStepIndex === -1) {
-              logger$4.warn({ message: 'currentStepIndex is -1, trying to find current step by activeContent title' });
-              const foundIndex = this.flatSteps.findIndex(step => step.label === this.activeContent.title);
+              logger$4.warn({
+                  message: 'currentStepIndex is -1, trying to find current step by activeContent title',
+              });
+              const foundIndex = this.flatSteps.findIndex((step) => step.label === this.activeContent.title);
               if (foundIndex !== -1) {
-                  logger$4.info({ message: `Found current step "${this.activeContent.title}" at index ${foundIndex}` });
+                  logger$4.info({
+                      message: `Found current step "${this.activeContent.title}" at index ${foundIndex}`,
+                  });
                   this.currentStepIndex = foundIndex;
               }
               else {
-                  logger$4.error({ message: `Could not find current step "${this.activeContent.title}" in flatSteps` });
+                  logger$4.error({
+                      message: `Could not find current step "${this.activeContent.title}" in flatSteps`,
+                  });
                   return; // Don't proceed with navigation if we can't find current position
               }
           }
@@ -38942,7 +39002,9 @@
               this.currentSectionIndex = nextStep.sectionIndex;
               this.activeContent = { title: nextStep.label, content: nextStep.content };
               this.updateNavigationState(nextStep.label);
-              setTimeout(() => { this.isNavigating = false; }, 100);
+              setTimeout(() => {
+                  this.isNavigating = false;
+              }, 100);
               this.requestUpdate();
           }
       }
@@ -38977,7 +39039,9 @@
       handleRatingChanged(event) {
           const { questionId, value } = event.detail;
           try {
-              logger$4.info({ message: `Rating changed for question ${questionId}: ${value}` });
+              logger$4.info({
+                  message: `Rating changed for question ${questionId}: ${value}`,
+              });
               // Store the pending value
               this.pendingResponseValues.set(questionId, String(value));
               // Clear any existing debounce timer for this question
@@ -38992,25 +39056,36 @@
               this.responseSaveDebounceTimers.set(questionId, timer);
               // Also call the original handler for any additional processing
               EFPEventUtils.handleRatingChanged(event, (questionId, value) => {
-                  logger$4.info({ message: `Rating stored in memory for question ${questionId}: ${value}` });
+                  logger$4.info({
+                      message: `Rating stored in memory for question ${questionId}: ${value}`,
+                  });
               });
           }
           catch (error) {
-              logger$4.error({ message: `Failed to save rating response: ${error.message}` });
+              logger$4.error({
+                  message: `Failed to save rating response: ${error.message}`,
+              });
               // Still call the original handler even if save fails
               EFPEventUtils.handleRatingChanged(event, (questionId, value) => {
-                  logger$4.info({ message: `Rating stored locally for question ${questionId}: ${value} (save failed)` });
+                  logger$4.info({
+                      message: `Rating stored locally for question ${questionId}: ${value} (save failed)`,
+                  });
               });
           }
       }
       // Multi-select list interaction event handler
       handleMultiselectChange(questionId, option, isChecked) {
           try {
-              logger$4.info({ message: `Multi-select option changed for question ${questionId}: ${option} = ${isChecked}` });
+              logger$4.info({
+                  message: `Multi-select option changed for question ${questionId}: ${option} = ${isChecked}`,
+              });
               // Get the valid options for this question
               const question = getQuestionFromStore(questionId);
               const optionsString = (question === null || question === void 0 ? void 0 : question.multiselectOptions) || '';
-              const validOptions = optionsString.split(';').map((opt) => opt.trim()).filter((opt) => opt.length > 0);
+              const validOptions = optionsString
+                  .split(';')
+                  .map((opt) => opt.trim())
+                  .filter((opt) => opt.length > 0);
               // Get current pending value or existing response
               let selectedOptions;
               if (this.pendingMultiselectValues.has(questionId)) {
@@ -39021,7 +39096,10 @@
                   // Start with an empty array and only add valid options from existing response
                   const existingResponse = this.getResponseForQuestion(questionId);
                   const currentSelectedString = (existingResponse === null || existingResponse === void 0 ? void 0 : existingResponse.quartech_response) || '';
-                  const existingSelectedOptions = currentSelectedString.split(';').map((opt) => opt.trim()).filter((opt) => opt.length > 0);
+                  const existingSelectedOptions = currentSelectedString
+                      .split(';')
+                      .map((opt) => opt.trim())
+                      .filter((opt) => opt.length > 0);
                   // Filter to only include options that are valid for the current question
                   selectedOptions = existingSelectedOptions.filter((opt) => validOptions.includes(opt));
                   logger$4.info({
@@ -39029,8 +39107,8 @@
                       data: {
                           existingOptions: existingSelectedOptions,
                           validOptions: validOptions,
-                          filteredOptions: selectedOptions
-                      }
+                          filteredOptions: selectedOptions,
+                      },
                   });
               }
               // Update the selected options based on checkbox state
@@ -39058,7 +39136,9 @@
               this.responseSaveDebounceTimers.set(questionId, timer);
           }
           catch (error) {
-              logger$4.error({ message: `Failed to handle multi-select change: ${error.message}` });
+              logger$4.error({
+                  message: `Failed to handle multi-select change: ${error.message}`,
+              });
           }
       }
       // Save the debounced response (for rating questions and other text-based responses)
@@ -39066,21 +39146,29 @@
           try {
               const responseValue = this.pendingResponseValues.get(questionId);
               if (responseValue === undefined) {
-                  logger$4.warn({ message: `No pending value found for question ${questionId}` });
+                  logger$4.warn({
+                      message: `No pending value found for question ${questionId}`,
+                  });
                   return;
               }
-              logger$4.info({ message: `Saving debounced response for question ${questionId}: ${responseValue}` });
+              logger$4.info({
+                  message: `Saving debounced response for question ${questionId}: ${responseValue}`,
+              });
               // Save the response
               const responseData = await this.saveRatingResponse(questionId, responseValue);
               // Update the questionnaire store with the full response data
               updateQuestionResponse(questionId, responseValue, true, responseData);
-              logger$4.info({ message: `Successfully saved debounced response for question ${questionId}` });
+              logger$4.info({
+                  message: `Successfully saved debounced response for question ${questionId}`,
+              });
               // Clean up
               this.pendingResponseValues.delete(questionId);
               this.responseSaveDebounceTimers.delete(questionId);
           }
           catch (error) {
-              logger$4.error({ message: `Failed to save debounced response: ${error.message}` });
+              logger$4.error({
+                  message: `Failed to save debounced response: ${error.message}`,
+              });
               // Don't delete pending value on error, so user can retry
           }
       }
@@ -39089,30 +39177,40 @@
           try {
               const selectedOptions = this.pendingMultiselectValues.get(questionId);
               if (!selectedOptions) {
-                  logger$4.warn({ message: `No pending value found for question ${questionId}` });
+                  logger$4.warn({
+                      message: `No pending value found for question ${questionId}`,
+                  });
                   return;
               }
               // Create semicolon-delimited string
               const newValue = selectedOptions.join(';');
-              logger$4.info({ message: `Saving multi-select value for question ${questionId}: ${newValue}` });
+              logger$4.info({
+                  message: `Saving multi-select value for question ${questionId}: ${newValue}`,
+              });
               // Save the response
               const responseData = await this.saveRatingResponse(questionId, newValue);
               // Update the questionnaire store with the full response data
               updateQuestionResponse(questionId, newValue, true, responseData);
-              logger$4.info({ message: `Successfully saved multi-select response for question ${questionId}` });
+              logger$4.info({
+                  message: `Successfully saved multi-select response for question ${questionId}`,
+              });
               // Clean up
               this.pendingMultiselectValues.delete(questionId);
               this.responseSaveDebounceTimers.delete(questionId);
           }
           catch (error) {
-              logger$4.error({ message: `Failed to save multi-select response: ${error.message}` });
+              logger$4.error({
+                  message: `Failed to save multi-select response: ${error.message}`,
+              });
               // Don't delete pending value on error, so user can retry
           }
       }
       // Handle multiline text input with debounced save
       handleMultilineTextInput(questionId, value) {
           try {
-              logger$4.info({ message: `Multiline text input for question ${questionId}` });
+              logger$4.info({
+                  message: `Multiline text input for question ${questionId}`,
+              });
               // Update character count immediately (no debounce)
               this.multilineTextCharCounts.set(questionId, value.length);
               // Store the pending value
@@ -39133,7 +39231,9 @@
               this.responseSaveDebounceTimers.set(questionId, timer);
           }
           catch (error) {
-              logger$4.error({ message: `Failed to handle multiline text input: ${error.message}` });
+              logger$4.error({
+                  message: `Failed to handle multiline text input: ${error.message}`,
+              });
           }
       }
       // Force save multiline text (when user clicks the status indicator)
@@ -39144,7 +39244,9 @@
               if (status !== 'draft') {
                   return;
               }
-              logger$4.info({ message: `Force saving multiline text for question ${questionId}` });
+              logger$4.info({
+                  message: `Force saving multiline text for question ${questionId}`,
+              });
               // Clear any existing debounce timer
               const existingTimer = this.responseSaveDebounceTimers.get(questionId);
               if (existingTimer) {
@@ -39155,7 +39257,9 @@
               await this.saveMultilineTextResponse(questionId);
           }
           catch (error) {
-              logger$4.error({ message: `Failed to force save multiline text: ${error.message}` });
+              logger$4.error({
+                  message: `Failed to force save multiline text: ${error.message}`,
+              });
           }
       }
       // Save the multiline text response
@@ -39163,10 +39267,14 @@
           try {
               const responseValue = this.pendingResponseValues.get(questionId);
               if (responseValue === undefined) {
-                  logger$4.warn({ message: `No pending value found for question ${questionId}` });
+                  logger$4.warn({
+                      message: `No pending value found for question ${questionId}`,
+                  });
                   return;
               }
-              logger$4.info({ message: `Saving multiline text response for question ${questionId}` });
+              logger$4.info({
+                  message: `Saving multiline text response for question ${questionId}`,
+              });
               // Update status to saving
               this.multilineTextSaveStatus.set(questionId, 'saving');
               this.requestUpdate();
@@ -39174,7 +39282,9 @@
               const responseData = await this.saveRatingResponse(questionId, responseValue);
               // Update the questionnaire store with the full response data
               updateQuestionResponse(questionId, responseValue, true, responseData);
-              logger$4.info({ message: `Successfully saved multiline text response for question ${questionId}` });
+              logger$4.info({
+                  message: `Successfully saved multiline text response for question ${questionId}`,
+              });
               // Update status to saved
               this.multilineTextSaveStatus.set(questionId, 'saved');
               this.requestUpdate();
@@ -39183,7 +39293,9 @@
               this.responseSaveDebounceTimers.delete(questionId);
           }
           catch (error) {
-              logger$4.error({ message: `Failed to save multiline text response: ${error.message}` });
+              logger$4.error({
+                  message: `Failed to save multiline text response: ${error.message}`,
+              });
               // Revert status to draft on error
               this.multilineTextSaveStatus.set(questionId, 'draft');
               this.requestUpdate();
@@ -39203,7 +39315,8 @@
               return null;
           }
           // Check if this is a Point Rating question
-          if (questionData.quartech_questiontype !== 100000001) { // 100000001 is Point Rating
+          if (questionData.quartech_questiontype !== 100000001) {
+              // 100000001 is Point Rating
               return null;
           }
           // Get the rating label and description
@@ -39242,13 +39355,13 @@
                       quartech_response: responseText,
                       quartech_notes: notes,
                       quartech_description: description,
-                      modifiedon: new Date().toISOString()
+                      modifiedon: new Date().toISOString(),
                   };
               }
               else {
                   // Create new response (either no response exists, or existing response lacks valid ID)
                   isNewResponse = true;
-                  const createResult = await WorkbookResponseHelper.createResponse(questionId, responseText, { notes, description });
+                  const createResult = (await WorkbookResponseHelper.createResponse(questionId, responseText, { notes, description }));
                   const workbookId = getWorkbookId();
                   // Create new response data with all fields from the API response
                   responseData = {
@@ -39260,7 +39373,7 @@
                       _quartech_question_value: questionId,
                       _quartech_workbook_value: workbookId,
                       createdon: ((_b = createResult.response) === null || _b === void 0 ? void 0 : _b.createdon) || new Date().toISOString(),
-                      modifiedon: ((_c = createResult.response) === null || _c === void 0 ? void 0 : _c.modifiedon) || new Date().toISOString()
+                      modifiedon: ((_c = createResult.response) === null || _c === void 0 ? void 0 : _c.modifiedon) || new Date().toISOString(),
                   };
                   // CRITICAL: Update memory structures IMMEDIATELY after creation
                   // This ensures subsequent rapid saves will find the response and update instead of creating duplicates
@@ -39278,7 +39391,9 @@
               return responseData;
           }
           catch (error) {
-              logger$4.error({ message: `Failed to save rating response: ${String(error)}` });
+              logger$4.error({
+                  message: `Failed to save rating response: ${String(error)}`,
+              });
               throw error;
           }
       }
@@ -39295,17 +39410,21 @@
               }
               else {
                   // Update existing entry in data array
-                  const dataIndex = POWERPOD.workbookResponses.data.findIndex((r) => r.quartech_workbookresponseid === responseData.quartech_workbookresponseid);
+                  const dataIndex = POWERPOD.workbookResponses.data.findIndex((r) => r.quartech_workbookresponseid ===
+                      responseData.quartech_workbookresponseid);
                   if (dataIndex !== -1) {
                       POWERPOD.workbookResponses.data[dataIndex] = responseData;
                   }
               }
               // Update memory metadata for both structures
               POWERPOD.workbookResponses.lastUpdated = new Date().toISOString();
-              POWERPOD.workbookQuestionsAndResponses.lastUpdated = new Date().toISOString();
+              POWERPOD.workbookQuestionsAndResponses.lastUpdated =
+                  new Date().toISOString();
           }
           catch (error) {
-              logger$4.error({ message: `Failed to update memory structures for rating: ${String(error)}` });
+              logger$4.error({
+                  message: `Failed to update memory structures for rating: ${String(error)}`,
+              });
               // Don't throw - this is a memory update issue, not a save issue
           }
       }
@@ -39324,18 +39443,20 @@
           if (!allDetails)
               return;
           // First, close all details
-          allDetails.forEach(detail => {
+          allDetails.forEach((detail) => {
               detail.open = false;
           });
           // Find which containers should be open based on the current item
           const containersToOpen = EFPNavigationUtils.findContainersForItem(currentLabel, this.sections);
           // Open the relevant containers
-          allDetails.forEach(detail => {
+          allDetails.forEach((detail) => {
               // Check data attribute first (most reliable), then fallback to other methods
               const containerTitle = detail.getAttribute('data-container-title');
               const summary = detail.getAttribute('summary');
               const customSummarySpan = detail.querySelector('[slot="summary"] span');
-              const summaryText = containerTitle || summary || (customSummarySpan ? customSummarySpan.textContent : null);
+              const summaryText = containerTitle ||
+                  summary ||
+                  (customSummarySpan ? customSummarySpan.textContent : null);
               if (summaryText && containersToOpen.includes(summaryText)) {
                   detail.open = true;
               }
@@ -39343,17 +39464,25 @@
       }
       goToPrevious() {
           var _a;
-          logger$4.info({ message: `goToPrevious called, current step: ${this.currentStepIndex}, ${(_a = this.flatSteps[this.currentStepIndex]) === null || _a === void 0 ? void 0 : _a.label}` });
+          logger$4.info({
+              message: `goToPrevious called, current step: ${this.currentStepIndex}, ${(_a = this.flatSteps[this.currentStepIndex]) === null || _a === void 0 ? void 0 : _a.label}`,
+          });
           // Handle case where currentStepIndex is -1 (step not found in flatSteps)
           if (this.currentStepIndex === -1) {
-              logger$4.warn({ message: 'currentStepIndex is -1, trying to find current step by activeContent title' });
-              const foundIndex = this.flatSteps.findIndex(step => step.label === this.activeContent.title);
+              logger$4.warn({
+                  message: 'currentStepIndex is -1, trying to find current step by activeContent title',
+              });
+              const foundIndex = this.flatSteps.findIndex((step) => step.label === this.activeContent.title);
               if (foundIndex !== -1) {
-                  logger$4.info({ message: `Found current step "${this.activeContent.title}" at index ${foundIndex}` });
+                  logger$4.info({
+                      message: `Found current step "${this.activeContent.title}" at index ${foundIndex}`,
+                  });
                   this.currentStepIndex = foundIndex;
               }
               else {
-                  logger$4.error({ message: `Could not find current step "${this.activeContent.title}" in flatSteps` });
+                  logger$4.error({
+                      message: `Could not find current step "${this.activeContent.title}" in flatSteps`,
+                  });
                   return; // Don't proceed with navigation if we can't find current position
               }
           }
@@ -39365,7 +39494,9 @@
               this.currentSectionIndex = prevStep.sectionIndex;
               this.activeContent = { title: prevStep.label, content: prevStep.content };
               this.updateNavigationState(prevStep.label);
-              setTimeout(() => { this.isNavigating = false; }, 100);
+              setTimeout(() => {
+                  this.isNavigating = false;
+              }, 100);
               this.requestUpdate();
           }
       }
@@ -39374,7 +39505,10 @@
       }
       initializeToFirstSelectableStep() {
           // Only initialize if we have sections and steps available
-          if (!this.sections || this.sections.length === 0 || !this.flatSteps || this.flatSteps.length === 0) {
+          if (!this.sections ||
+              this.sections.length === 0 ||
+              !this.flatSteps ||
+              this.flatSteps.length === 0) {
               return;
           }
           // Navigate to first selectable step in the first section via utils
@@ -39432,7 +39566,7 @@
       }
       navigateToHierarchyItem(targetLabel) {
           // Find and navigate to this hierarchy level
-          const hierarchyStepIndex = this.flatSteps.findIndex(step => step.label === targetLabel);
+          const hierarchyStepIndex = this.flatSteps.findIndex((step) => step.label === targetLabel);
           if (hierarchyStepIndex !== -1) {
               const hierarchyStep = this.flatSteps[hierarchyStepIndex];
               this.currentStepIndex = hierarchyStepIndex;
@@ -39469,7 +39603,10 @@
               // Refresh the active content to show updated renderResponsesSummary
               const currentStep = this.flatSteps[this.currentStepIndex];
               if (currentStep) {
-                  this.activeContent = { title: currentStep.label, content: currentStep.content };
+                  this.activeContent = {
+                      title: currentStep.label,
+                      content: currentStep.content,
+                  };
               }
           }
       }
@@ -39495,7 +39632,9 @@
               POWERPOD.workbookQuestionsAndResponses.error = null;
               const workbookId = getWorkbookId();
               if (!workbookId) {
-                  logger$4.warn({ message: 'No workbook ID found, skipping response loading' });
+                  logger$4.warn({
+                      message: 'No workbook ID found, skipping response loading',
+                  });
                   return;
               }
               // Check if we already have questions and responses for this workbook
@@ -39505,20 +39644,22 @@
                   this.questionsAndResponsesLoaded = true;
                   return;
               }
-              logger$4.info({ message: `Loading workbook questions and responses for workbook: ${workbookId}` });
+              logger$4.info({
+                  message: `Loading workbook questions and responses for workbook: ${workbookId}`,
+              });
               // Load questions and responses into nested structure
-              const result = await WorkbookResponseHelper.loadQuestionsAndResponses(workbookId);
+              const result = (await WorkbookResponseHelper.loadQuestionsAndResponses(workbookId));
               // Also maintain backward compatibility with old structure
               const responses = Array.from(result.questionsWithResponses.values())
-                  .map(entry => entry.response)
-                  .filter(response => response !== null);
+                  .map((entry) => entry.response)
+                  .filter((response) => response !== null);
               POWERPOD.workbookResponses.data = responses;
               POWERPOD.workbookResponses.workbookId = workbookId;
               POWERPOD.workbookResponses.isLoaded = true;
               POWERPOD.workbookResponses.lastUpdated = new Date().toISOString();
               // Build quick lookup map for backward compatibility
               POWERPOD.workbookResponses.responsesByQuestion.clear();
-              responses.forEach(response => {
+              responses.forEach((response) => {
                   const questionId = response._quartech_question_value;
                   if (questionId) {
                       if (!POWERPOD.workbookResponses.responsesByQuestion.has(questionId)) {
@@ -39530,12 +39671,16 @@
               this.syncFromPOWERPOD();
               // Update the reactive property to trigger re-render
               this.questionsAndResponsesLoaded = true;
-              logger$4.info({ message: `Loaded ${result.stats.totalQuestions} questions with ${result.stats.answeredQuestions} responses (${result.stats.completionPercentage}% complete)` });
+              logger$4.info({
+                  message: `Loaded ${result.stats.totalQuestions} questions with ${result.stats.answeredQuestions} responses (${result.stats.completionPercentage}% complete)`,
+              });
               // Trigger a re-render to update the UI with loaded data
               this.requestUpdate();
           }
           catch (error) {
-              logger$4.error({ message: 'Failed to load workbook questions and responses' });
+              logger$4.error({
+                  message: 'Failed to load workbook questions and responses',
+              });
               const errMsg = (error === null || error === void 0 ? void 0 : error.message) || 'Failed to load questions and responses';
               POWERPOD.workbookQuestionsAndResponses.error = errMsg;
               // Don't throw - we want the component to still work even if loading fails
@@ -39573,29 +39718,35 @@
                   Promise.resolve().then(function () { return questionnaire; }).then(({ updateQuestionnaireCompletion }) => {
                       updateQuestionnaireCompletion();
                       this.updateSectionItemsFromQuestionnaireStore();
-                      logger$4.info({ message: '✅ Updated completion using questionnaire store' });
+                      logger$4.info({
+                          message: '✅ Updated completion using questionnaire store',
+                      });
                   });
                   return;
               }
               catch (error) {
-                  logger$4.warn({ message: '⚠️ Failed to use questionnaire store for completion, falling back to legacy method' });
+                  logger$4.warn({
+                      message: '⚠️ Failed to use questionnaire store for completion, falling back to legacy method',
+                  });
               }
           }
           // Fallback to legacy method if questionnaire store is not available
           if (!POWERPOD.workbookQuestionsAndResponses.isLoaded) {
-              logger$4.warn({ message: '⚠️ Neither questionnaire store nor workbook responses loaded, skipping completion update' });
+              logger$4.warn({
+                  message: '⚠️ Neither questionnaire store nor workbook responses loaded, skipping completion update',
+              });
               return;
           }
           const questionsWithResponses = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses;
           POWERPOD.workbookQuestionsAndResponses.questionsByChapter;
           // Update section completion based on chapter completion
-          this.sections.forEach(section => {
+          this.sections.forEach((section) => {
               this.updateSectionItemsCompletion(section.items, questionsWithResponses);
           });
       }
       // Update section items using questionnaire store data
       updateSectionItemsFromQuestionnaireStore() {
-          this.sections.forEach(section => {
+          this.sections.forEach((section) => {
               if (section.tab === 'My Workbook') {
                   // Update My Workbook items using questionnaire store
                   this.updateSectionItemsFromStore(section.items);
@@ -39604,7 +39755,7 @@
       }
       // Recursively update section items using questionnaire store
       updateSectionItemsFromStore(items) {
-          items.forEach(item => {
+          items.forEach((item) => {
               if ('items' in item && Array.isArray(item.items)) {
                   // Recursively update nested items
                   this.updateSectionItemsFromStore(item.items);
@@ -39647,14 +39798,15 @@
       }
       // Recursively update completion status for section items (legacy method)
       updateSectionItemsCompletion(items, questionsWithResponses) {
-          items.forEach(item => {
+          items.forEach((item) => {
               if ('items' in item && Array.isArray(item.items)) {
                   // Recursively update nested items
                   this.updateSectionItemsCompletion(item.items, questionsWithResponses);
                   // Update parent item completion based on children
                   const childItems = this.getAllLeafItems(item.items);
-                  const completedChildren = childItems.filter(child => child.complete).length;
-                  item.complete = completedChildren === childItems.length && childItems.length > 0;
+                  const completedChildren = childItems.filter((child) => child.complete).length;
+                  item.complete =
+                      completedChildren === childItems.length && childItems.length > 0;
               }
               else if (item.questionId) {
                   // This is a question item - check if it has a response
@@ -39689,7 +39841,7 @@
               return questionAndResponse.response;
           }
           // Fallback to old structure for backward compatibility
-          return POWERPOD.workbookResponses.responsesByQuestion.get(questionId) || null;
+          return (POWERPOD.workbookResponses.responsesByQuestion.get(questionId) || null);
       }
       // Helper method to get question data for a specific question
       getQuestionForQuestion(questionId) {
@@ -39702,13 +39854,13 @@
           if (questionAndResponse) {
               return {
                   question: questionAndResponse.question,
-                  response: questionAndResponse.response
+                  response: questionAndResponse.response,
               };
           }
           // Fallback to old structure
           return {
               question: null,
-              response: this.getResponseForQuestion(questionId)
+              response: this.getResponseForQuestion(questionId),
           };
       }
       // Helper method to render response information for a question
@@ -39727,7 +39879,9 @@
         </div>
         <div style="font-size: 0.875rem; color: var(--sl-color-neutral-600);">
           <p style="margin: 0;"><strong>Created:</strong> ${createdDate}</p>
-          ${createdDate !== modifiedDate ? `<p style="margin: 0;"><strong>Last Modified:</strong> ${modifiedDate}</p>` : ''}
+          ${createdDate !== modifiedDate
+            ? `<p style="margin: 0;"><strong>Last Modified:</strong> ${modifiedDate}</p>`
+            : ''}
         </div>
       </div>
     `;
@@ -39754,65 +39908,91 @@
           <div>
             <p><strong>Completion:</strong> ${POWERPOD.workbookQuestionsAndResponses.stats.completionPercentage}%</p>
             <p><strong>Chapters:</strong> ${POWERPOD.workbookQuestionsAndResponses.questionsByChapter.size}</p>
-            <p><strong>Last Updated:</strong> ${POWERPOD.workbookQuestionsAndResponses.lastUpdated ? new Date(POWERPOD.workbookQuestionsAndResponses.lastUpdated).toLocaleString() : 'Unknown'}</p>
+            <p><strong>Last Updated:</strong> ${POWERPOD.workbookQuestionsAndResponses.lastUpdated
+            ? new Date(POWERPOD.workbookQuestionsAndResponses.lastUpdated).toLocaleString()
+            : 'Unknown'}</p>
           </div>
         </div>
 
         <details style="margin-top: 1rem;">
           <summary style="cursor: pointer; font-weight: 500;">View Questions & Responses by Chapter</summary>
           <div style="margin-top: 0.5rem; max-height: 400px; overflow-y: auto;">
-            ${Array.from(questionsAndResponses.questionsByChapter.entries()).map(([chapterId, chapterQuestions]) => `
+            ${Array.from(questionsAndResponses.questionsByChapter.entries())
+            .map(([chapterId, chapterQuestions]) => `
               <div style="margin-bottom: 1.5rem; padding: 1rem; background-color: var(--sl-color-neutral-50); border-radius: var(--sl-border-radius-medium);">
                 <h5 style="margin: 0 0 0.75rem 0; color: var(--sl-color-primary-600);">Chapter: ${chapterId}</h5>
                 <p style="margin: 0 0 0.75rem 0; font-size: 0.875rem; color: var(--sl-color-neutral-600);">
-                  ${chapterQuestions.length} questions, ${chapterQuestions.filter(q => q.response).length} answered
+                  ${chapterQuestions.length} questions, ${chapterQuestions.filter((q) => q.response).length} answered
                 </p>
-                ${chapterQuestions.map(entry => `
-                  <div style="padding: 0.5rem; margin: 0.5rem 0; background-color: white; border-radius: var(--sl-border-radius-small); border-left: 3px solid ${entry.response ? 'var(--sl-color-success-600)' : 'var(--sl-color-neutral-300)'};">
+                ${chapterQuestions
+            .map((entry) => `
+                  <div style="padding: 0.5rem; margin: 0.5rem 0; background-color: white; border-radius: var(--sl-border-radius-small); border-left: 3px solid ${entry.response
+            ? 'var(--sl-color-success-600)'
+            : 'var(--sl-color-neutral-300)'};">
                     <p style="margin: 0 0 0.25rem 0; font-weight: 500; font-size: 0.875rem;">
-                      ${entry.question ? (entry.question.quartech_label || entry.question.quartech_questiontext || 'Question text not available').replace(/\n/g, '<br>') : 'Question data not loaded'}
+                      ${entry.question
+            ? (entry.question.quartech_label ||
+                entry.question.quartech_questiontext ||
+                'Question text not available').replace(/\n/g, '<br>')
+            : 'Question data not loaded'}
                     </p>
-                    ${entry.response ? `
+                    ${entry.response
+            ? `
                       <p style="margin: 0 0 0.25rem 0; color: var(--sl-color-success-800);">
                         <strong>Response:</strong> ${entry.response.quartech_response || 'No response text'}
                       </p>
                       <p style="margin: 0; font-size: 0.75rem; color: var(--sl-color-neutral-600);">
                         Answered: ${new Date(entry.response.createdon).toLocaleString()}
                       </p>
-                    ` : `
+                    `
+            : `
                       <p style="margin: 0; font-style: italic; color: var(--sl-color-neutral-500);">Not answered yet</p>
                     `}
                   </div>
-                `).join('')}
+                `)
+            .join('')}
               </div>
-            `).join('')}
+            `)
+            .join('')}
           </div>
         </details>
 
         <details style="margin-top: 1rem;">
           <summary style="cursor: pointer; font-weight: 500;">View All Questions & Responses (Flat List)</summary>
           <div style="margin-top: 0.5rem; max-height: 300px; overflow-y: auto;">
-            ${Array.from(questionsAndResponses.questionsWithResponses.entries()).map(([questionId, entry]) => `
-              <div style="padding: 0.5rem; margin: 0.5rem 0; background-color: var(--sl-color-neutral-50); border-radius: var(--sl-border-radius-small); border-left: 3px solid ${entry.response ? 'var(--sl-color-success-600)' : 'var(--sl-color-neutral-300)'};">
+            ${Array.from(questionsAndResponses.questionsWithResponses.entries())
+            .map(([questionId, entry]) => `
+              <div style="padding: 0.5rem; margin: 0.5rem 0; background-color: var(--sl-color-neutral-50); border-radius: var(--sl-border-radius-small); border-left: 3px solid ${entry.response
+            ? 'var(--sl-color-success-600)'
+            : 'var(--sl-color-neutral-300)'};">
                 <p style="margin: 0 0 0.25rem 0; font-weight: 500; font-size: 0.875rem;">Question ID: ${questionId}</p>
-                ${entry.question ? `
+                ${entry.question
+            ? `
                   <p style="margin: 0 0 0.25rem 0; color: var(--sl-color-neutral-700);">
-                    <strong>Question:</strong> ${(entry.question.quartech_label || entry.question.quartech_questiontext || 'No question text').replace(/\n/g, '<br>')}
+                    <strong>Question:</strong> ${(entry.question.quartech_label ||
+                entry.question.quartech_questiontext ||
+                'No question text').replace(/\n/g, '<br>')}
                   </p>
-                ` : ''}
-                ${entry.response ? `
+                `
+            : ''}
+                ${entry.response
+            ? `
                   <p style="margin: 0 0 0.25rem 0; color: var(--sl-color-success-800);">
                     <strong>Response:</strong> ${entry.response.quartech_response || 'No response text'}
                   </p>
                   <p style="margin: 0; font-size: 0.75rem; color: var(--sl-color-neutral-600);">
                     Created: ${new Date(entry.response.createdon).toLocaleString()}
-                    ${entry.response.modifiedon !== entry.response.createdon ? ` | Modified: ${new Date(entry.response.modifiedon).toLocaleString()}` : ''}
+                    ${entry.response.modifiedon !== entry.response.createdon
+                ? ` | Modified: ${new Date(entry.response.modifiedon).toLocaleString()}`
+                : ''}
                   </p>
-                ` : `
+                `
+            : `
                   <p style="margin: 0; font-style: italic; color: var(--sl-color-neutral-500);">Not answered yet</p>
                 `}
               </div>
-            `).join('')}
+            `)
+            .join('')}
           </div>
         </details>
       </div>
@@ -39829,18 +40009,37 @@
             <div>
               <strong>Questions & Responses:</strong>
               ${POWERPOD.workbookQuestionsAndResponses.isLoading
-            ? x `<span style="color: var(--sl-color-warning-600);">Loading...</span>`
+            ? x `<span style="color: var(--sl-color-warning-600);"
+                    >Loading...</span
+                  >`
             : POWERPOD.workbookQuestionsAndResponses.error
-                ? x `<span style="color: var(--sl-color-danger-600);">Error loading</span>`
-                : x `<span style="color: var(--sl-color-success-600);">Loaded</span>`}
+                ? x `<span style="color: var(--sl-color-danger-600);"
+                    >Error loading</span
+                  >`
+                : x `<span style="color: var(--sl-color-success-600);"
+                    >Loaded</span
+                  >`}
             </div>
             ${POWERPOD.workbookQuestionsAndResponses.isLoaded
             ? x `
-                <div><strong>Total Questions:</strong> ${POWERPOD.workbookQuestionsAndResponses.stats.totalQuestions}</div>
-                <div><strong>Answered:</strong> ${POWERPOD.workbookQuestionsAndResponses.stats.answeredQuestions}</div>
-                <div><strong>Completion:</strong> ${POWERPOD.workbookQuestionsAndResponses.stats.completionPercentage}%</div>
-                <div><strong>Chapters:</strong> ${POWERPOD.workbookQuestionsAndResponses.questionsByChapter.size}</div>
-              `
+                  <div>
+                    <strong>Total Questions:</strong> ${POWERPOD
+                .workbookQuestionsAndResponses.stats.totalQuestions}
+                  </div>
+                  <div>
+                    <strong>Answered:</strong> ${POWERPOD
+                .workbookQuestionsAndResponses.stats.answeredQuestions}
+                  </div>
+                  <div>
+                    <strong>Completion:</strong> ${POWERPOD
+                .workbookQuestionsAndResponses.stats
+                .completionPercentage}%
+                  </div>
+                  <div>
+                    <strong>Chapters:</strong> ${POWERPOD
+                .workbookQuestionsAndResponses.questionsByChapter.size}
+                  </div>
+                `
             : ''}
           </div>
 
@@ -39882,29 +40081,43 @@
         <!-- Main Content -->
         <main class="main-content">
           <div class="card">
-            <strong>${POWERPOD.workbookQuestionsAndResponses.isLoaded ? POWERPOD.workbookQuestionsAndResponses.stats.completionPercentage : this.completionPercent}% Complete</strong>
-            <div style="
+            <strong
+              >${POWERPOD.workbookQuestionsAndResponses.isLoaded
+            ? POWERPOD.workbookQuestionsAndResponses.stats
+                .completionPercentage
+            : this.completionPercent}%
+              Complete</strong
+            >
+            <div
+              style="
               width: 100%;
               height: 0.75rem;
               background-color: #e5e7eb;
               border-radius: 0.375rem;
               margin-top: 0.5rem;
               overflow: hidden;
-            ">
-              <div style="
+            "
+            >
+              <div
+                style="
                 height: 100%;
                 background-color: #3b82f6;
                 border-radius: 0.375rem;
                 transition: width 0.3s ease;
-                width: ${POWERPOD.workbookQuestionsAndResponses.isLoaded ? POWERPOD.workbookQuestionsAndResponses.stats.completionPercentage : this.completionPercent}%;
-              "></div>
+                width: ${POWERPOD.workbookQuestionsAndResponses.isLoaded
+            ? POWERPOD.workbookQuestionsAndResponses.stats
+                .completionPercentage
+            : this.completionPercent}%;
+              "
+              ></div>
             </div>
           </div>
 
           <!-- Navigation buttons above content -->
           <navigation-buttons
             .isPreviousDisabled=${this.currentStepIndex === 0}
-            .isContinueDisabled=${this.currentStepIndex >= this.flatSteps.length - 1}
+            .isContinueDisabled=${this.currentStepIndex >=
+            this.flatSteps.length - 1}
             .sectionsLength=${this.sections.length}
             @previous-clicked=${this.handleNavigationPrevious}
             @skip-clicked=${this.handleNavigationSkip}
@@ -39928,7 +40141,8 @@
           <!-- Navigation buttons below content -->
           <navigation-buttons
             .isPreviousDisabled=${this.currentStepIndex === 0}
-            .isContinueDisabled=${this.currentStepIndex >= this.flatSteps.length - 1}
+            .isContinueDisabled=${this.currentStepIndex >=
+            this.flatSteps.length - 1}
             .sectionsLength=${this.sections.length}
             @previous-clicked=${this.handleNavigationPrevious}
             @skip-clicked=${this.handleNavigationSkip}

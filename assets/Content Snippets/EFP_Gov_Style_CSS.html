@@ -2,7 +2,7 @@
   -------------------
   FILE INFO
   -------------------
-  version: 1.0.0
+  version: 1.0.1
   name: EFP_Gov_Style_CSS
   type: Content Snippet
   description: This is the CSS used on the Home Page.
@@ -66,7 +66,7 @@
     text-decoration: none;
   }
 
-  /* ✅ BUTTONS — FIXED */
+  /* Buttons */
   .bcgov-page .button1,
   .bcgov-btn--primary {
     background: var(--bcgov-blue-70) !important;
@@ -76,7 +76,8 @@
     border-radius: 4px;
     text-decoration: none !important;
     display: inline-block;
-    font-weight: 600;
+    font-weight: 800;
+    font-size: 16px;
   }
   .bcgov-page .button1:hover,
   .bcgov-btn--primary:hover {
@@ -93,7 +94,8 @@
     border-radius: 4px;
     text-decoration: none !important;
     display: inline-block;
-    font-weight: 600;
+    font-weight: 800;
+    font-size: 16px;
   }
   .bcgov-page .button2:hover,
   .bcgov-btn--secondary:hover {
@@ -147,13 +149,14 @@
     margin: 6px 0 8px;
     color: var(--bcgov-muted);
   }
+
   /* Make the entire page background match the BC Gov surface */
   html,
   body,
   .wrapper-body,
   #mainContent,
   .page-copy {
-    background: var(--bcgov-bg) !important; /* #fafafa */
+    background: var(--bcgov-bg) !important;
   }
 
   /* Ensure inner DIVs don’t re-introduce a white panel */
@@ -162,13 +165,13 @@
   .xrm-attribute-value {
     background: transparent !important;
   }
-  /* --- BC Gov Header Navigation Fix --- */
 
-  /* Ensure navbar uses BC Gov brand colours */
+  /* --- BC Gov Header Navigation Fix --- */
   .navbar.navbar-dark,
   .navbar.navbar-dark .navbar-brand,
   .navbar.navbar-dark .navbar-header {
     background-color: var(--bcgov-blue) !important;
+    color: #ffffff !important;
   }
 
   /* Top-level nav links */
@@ -197,14 +200,16 @@
 
   /* Dropdown menu styling */
   .navbar-dark .dropdown-menu {
-    background: #ffffff !important;
     border: 1px solid #dcdcdc !important;
   }
   .navbar-dark .dropdown-menu .dropdown-item {
     color: var(--bcgov-blue-70) !important;
   }
   .navbar-dark .dropdown-menu .dropdown-item:hover {
-    background: #f4f7fb !important;
-    color: var(--bcgov-blue) !important;
+    background: #000 !important;
+    color: white !important;
+  }
+  .bcgov-content h2 {
+    color: black !important;
   }
 </style>

@@ -24,7 +24,7 @@ import {
   getChapterFromStore,
   getQuestionFromStore,
   updateQuestionResponse,
-  isQuestionnaireLoaded
+  isQuestionnaireLoaded,
 } from '../common/questionnaire.js';
 import { EFPEventUtils } from './efp/event-utils.js';
 import { EFPTextUtils } from './efp/text-utils.js';
@@ -34,16 +34,15 @@ import { EFPLifecycleUtils } from './efp/lifecycle-utils.js';
 import { EFPSectionGenerator } from './efp/section-generator.js';
 import { EFPRenderUtils } from './efp/render-utils.js';
 
-
-
-
-
-
-
 import { efpEntryFormStyles } from './EFPEntryForm.styles';
 
 // Shared type definitions
-import { EFPStep, EFPSection, EFPSectionItem, QuestionsAndResponsesMemory } from './efp/types.js';
+import {
+  EFPStep,
+  EFPSection,
+  EFPSectionItem,
+  QuestionsAndResponsesMemory,
+} from './efp/types.js';
 
 interface EFPActiveContent {
   title: string;
@@ -53,24 +52,18 @@ interface EFPActiveContent {
 // Create logger instance for EFP components
 const logger = Logger('components/EFPEntryForm');
 
-
-
-
-
-
-
-
-
-
 @customElement('efp-entry-form')
 export class EFPEntryForm extends LitElement {
   @property({ type: Number }) currentSectionIndex = 0;
   @property({ type: Number }) currentStepIndex = 0;
-  @property({ type: Array, attribute: false }) nestedChapterStructure: any[] = [];
+  @property({ type: Array, attribute: false }) nestedChapterStructure: any[] =
+    [];
   @property({ type: Array, attribute: false }) workbookResponses: any[] = [];
   @property({ type: Boolean, attribute: false }) isLoadingResponses = false;
-  @property({ type: Boolean, attribute: false }) questionnaireStoreLoaded = false;
-  @property({ type: Boolean, attribute: false }) questionsAndResponsesLoaded = false;
+  @property({ type: Boolean, attribute: false }) questionnaireStoreLoaded =
+    false;
+  @property({ type: Boolean, attribute: false }) questionsAndResponsesLoaded =
+    false;
   private isNavigating = false; // Flag to prevent tab change interference
   @property({ type: Object }) activeContent: EFPActiveContent = {
     title: 'Introduction to the Environmental Farm Plan (EFP)',
@@ -89,7 +82,8 @@ export class EFPEntryForm extends LitElement {
   private pendingMultiselectValues: Map<string, string[]> = new Map();
   // Multiline text save status (questionId -> 'draft' | 'saving' | 'saved')
   @property({ type: Object, attribute: false })
-  private multilineTextSaveStatus: Map<string, 'draft' | 'saving' | 'saved'> = new Map();
+  private multilineTextSaveStatus: Map<string, 'draft' | 'saving' | 'saved'> =
+    new Map();
   // Multiline text character counts (questionId -> character count)
   @property({ type: Object, attribute: false })
   private multilineTextCharCounts: Map<string, number> = new Map();
@@ -116,7 +110,9 @@ export class EFPEntryForm extends LitElement {
     this.pendingResponseValues.clear();
     this.pendingMultiselectValues.clear();
 
-    logger.info({ message: 'EFPEntryForm disconnected, cleared pending timers' });
+    logger.info({
+      message: 'EFPEntryForm disconnected, cleared pending timers',
+    });
   }
 
   // Update the reactive property based on store status
@@ -125,7 +121,9 @@ export class EFPEntryForm extends LitElement {
     this.questionnaireStoreLoaded = isQuestionnaireLoaded();
 
     if (!wasLoaded && this.questionnaireStoreLoaded) {
-      logger.info({ message: '📋 Questionnaire store loaded, updating navigation' });
+      logger.info({
+        message: '📋 Questionnaire store loaded, updating navigation',
+      });
       this.requestUpdate(); // Force re-render when store becomes available
     }
   }
@@ -151,17 +149,17 @@ export class EFPEntryForm extends LitElement {
 
   private get sections(): EFPSection[] {
     return [
-    {
-      tab: 'My Workbook',
-      title: 'Environmental Farm Plan Questionnaire',
-      items: this.getSectionBItemsFromStore(),
-    },
-    {
-      tab: 'Review & Submit',
-      title: 'Declaration & Consent',
-      items: this.getSectionCItemsFromPortalPage(),
-    },
-  ];
+      {
+        tab: 'My Workbook',
+        title: 'Environmental Farm Plan Questionnaire',
+        items: this.getSectionBItemsFromStore(),
+      },
+      {
+        tab: 'Review & Submit',
+        title: 'Declaration & Consent',
+        items: this.getSectionCItemsFromPortalPage(),
+      },
+    ];
   }
 
   // Rendering methods
@@ -174,35 +172,46 @@ export class EFPEntryForm extends LitElement {
       // Add more question types as needed
     };
 
-    const questionTypeName = questionTypeMap[question.questionType] || 'Unknown';
+    const questionTypeName =
+      questionTypeMap[question.questionType] || 'Unknown';
 
     return html`
       <div class="question-container">
-        ${question.textAboveQuestion ? html`
-          <div class="question-text">
-            ${unsafeHTML(question.textAboveQuestion)}
-          </div>
-        ` : ''}
+        ${question.textAboveQuestion
+          ? html`
+              <div class="question-text">
+                ${unsafeHTML(question.textAboveQuestion)}
+              </div>
+            `
+          : ''}
 
         <div class="question-label">
-          <span>${unsafeHTML(EFPTextUtils.convertNewlinesToBreaks(question.label))}</span>
-          ${question.tooltip ? html`
-            <sl-tooltip placement="top" style="--max-width: 300px;">
-              <div slot="content">${unsafeHTML(question.tooltip)}</div>
-              <sl-icon
-                name="question-circle"
-                class="question-tooltip-icon"
-                aria-label="Question help"
-              ></sl-icon>
-            </sl-tooltip>
-          ` : ''}
+          <span
+            >${unsafeHTML(
+              EFPTextUtils.convertNewlinesToBreaks(question.label)
+            )}</span
+          >
+          ${question.tooltip
+            ? html`
+                <sl-tooltip placement="top" style="--max-width: 300px;">
+                  <div slot="content">${unsafeHTML(question.tooltip)}</div>
+                  <sl-icon
+                    name="question-circle"
+                    class="question-tooltip-icon"
+                    aria-label="Question help"
+                  ></sl-icon>
+                </sl-tooltip>
+              `
+            : ''}
         </div>
 
-        ${question.textBelowQuestion ? html`
-          <div class="question-text">
-            ${unsafeHTML(question.textBelowQuestion)}
-          </div>
-        ` : ''}
+        ${question.textBelowQuestion
+          ? html`
+              <div class="question-text">
+                ${unsafeHTML(question.textBelowQuestion)}
+              </div>
+            `
+          : ''}
 
         <div class="question-response">
           ${this.renderQuestionInput(question, questionTypeName)}
@@ -216,7 +225,10 @@ export class EFPEntryForm extends LitElement {
       case 'Multi-select List':
         // Parse the semicolon-separated options from the question
         const optionsString = question.multiselectOptions || '';
-        const options = optionsString.split(';').map((opt: string) => opt.trim()).filter((opt: string) => opt.length > 0);
+        const options = optionsString
+          .split(';')
+          .map((opt: string) => opt.trim())
+          .filter((opt: string) => opt.length > 0);
 
         // Get selected options - prefer pending value over saved response
         let selectedOptions: string[];
@@ -226,12 +238,18 @@ export class EFPEntryForm extends LitElement {
         } else {
           // Otherwise get from existing response
           const existingResponse = this.getResponseForQuestion(question.id);
-          const selectedOptionsString = existingResponse?.quartech_response || '';
-          const existingSelectedOptions = selectedOptionsString.split(';').map((opt: string) => opt.trim()).filter((opt: string) => opt.length > 0);
+          const selectedOptionsString =
+            existingResponse?.quartech_response || '';
+          const existingSelectedOptions = selectedOptionsString
+            .split(';')
+            .map((opt: string) => opt.trim())
+            .filter((opt: string) => opt.length > 0);
 
           // Filter to only include options that are valid for the current question
           // This prevents old/invalid options from being displayed as checked
-          selectedOptions = existingSelectedOptions.filter((opt: string) => options.includes(opt));
+          selectedOptions = existingSelectedOptions.filter((opt: string) =>
+            options.includes(opt)
+          );
         }
 
         return html`
@@ -240,11 +258,18 @@ export class EFPEntryForm extends LitElement {
               const isChecked = selectedOptions.includes(option);
               return html`
                 <div class="multiselect-option">
-                  <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; padding: 0.5rem 0;">
+                  <label
+                    style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; padding: 0.5rem 0;"
+                  >
                     <input
                       type="checkbox"
                       .checked=${isChecked}
-                      @change=${(e: Event) => this.handleMultiselectChange(question.id, option, (e.target as HTMLInputElement).checked)}
+                      @change=${(e: Event) =>
+                        this.handleMultiselectChange(
+                          question.id,
+                          option,
+                          (e.target as HTMLInputElement).checked
+                        )}
                       style="transform: scale(1.2);"
                     />
                     <span>${option}</span>
@@ -262,16 +287,19 @@ export class EFPEntryForm extends LitElement {
         const selectedValue = existingResponse2?.quartech_response || '';
 
         // Prepare rating metadata for Point Rating questions
-        const ratingMetadata = questionType === 'Point Rating' ? {
-          rating1OverwriteLabel: question.rating1OverwriteLabel,
-          rating1Description: question.rating1Description,
-          rating2OverwriteLabel: question.rating2OverwriteLabel,
-          rating2Description: question.rating2Description,
-          rating3OverwriteLabel: question.rating3OverwriteLabel,
-          rating3Description: question.rating3Description,
-          rating4OverwriteLabel: question.rating4OverwriteLabel,
-          rating4Description: question.rating4Description
-        } : {};
+        const ratingMetadata =
+          questionType === 'Point Rating'
+            ? {
+                rating1OverwriteLabel: question.rating1OverwriteLabel,
+                rating1Description: question.rating1Description,
+                rating2OverwriteLabel: question.rating2OverwriteLabel,
+                rating2Description: question.rating2Description,
+                rating3OverwriteLabel: question.rating3OverwriteLabel,
+                rating3Description: question.rating3Description,
+                rating4OverwriteLabel: question.rating4OverwriteLabel,
+                rating4Description: question.rating4Description,
+              }
+            : {};
 
         return html`
           <rating-question
@@ -287,7 +315,8 @@ export class EFPEntryForm extends LitElement {
         // Get existing response value for this question
         const existingResponse3 = this.getResponseForQuestion(question.id);
         const textValue = existingResponse3?.quartech_response || '';
-        const saveStatus = this.multilineTextSaveStatus.get(question.id) || 'saved';
+        const saveStatus =
+          this.multilineTextSaveStatus.get(question.id) || 'saved';
 
         // Use tracked character count if available, otherwise use text value length
         const charCount = this.multilineTextCharCounts.has(question.id)
@@ -305,7 +334,11 @@ export class EFPEntryForm extends LitElement {
               placeholder="Enter your response..."
               maxlength="${maxChars}"
               .value=${textValue}
-              @sl-input=${(e: Event) => this.handleMultilineTextInput(question.id, (e.target as any).value)}
+              @sl-input=${(e: Event) =>
+                this.handleMultilineTextInput(
+                  question.id,
+                  (e.target as any).value
+                )}
             ></sl-textarea>
             <div class="multiline-text-footer">
               <div class="character-counter ${isOverLimit ? 'over-limit' : ''}">
@@ -324,9 +357,11 @@ export class EFPEntryForm extends LitElement {
                     }
                   }}
                 >
-                  ${saveStatus === 'draft' ? '📝 Draft (click to save)' :
-                    saveStatus === 'saving' ? '⏳ Saving...' :
-                    '✓ Saved'}
+                  ${saveStatus === 'draft'
+                    ? '📝 Draft (click to save)'
+                    : saveStatus === 'saving'
+                    ? '⏳ Saving...'
+                    : '✓ Saved'}
                 </span>
               </div>
             </div>
@@ -347,64 +382,84 @@ export class EFPEntryForm extends LitElement {
 
   private renderSubchapter(subchapter: any) {
     return html`
-      ${subchapter.description ? html`
-        <div class="subchapter-header">
-          <div>${unsafeHTML(subchapter.description)}</div>
-        </div>
-      ` : ''}
-      ${subchapter.questions.map((question: any) => this.renderQuestion(question))}
-
-      ${subchapter.subchapters ? subchapter.subchapters.map((subSubchapter: any) => this.renderSubSubchapter(subSubchapter)) : ''}
+      ${subchapter.description
+        ? html`
+            <div class="subchapter-header">
+              <div>${unsafeHTML(subchapter.description)}</div>
+            </div>
+          `
+        : ''}
+      ${subchapter.questions.map((question: any) =>
+        this.renderQuestion(question)
+      )}
+      ${subchapter.subchapters
+        ? subchapter.subchapters.map((subSubchapter: any) =>
+            this.renderSubSubchapter(subSubchapter)
+          )
+        : ''}
     `;
   }
 
-    private renderContainerSubchapter(subchapter: any) {
+  private renderContainerSubchapter(subchapter: any) {
     return html`
-      ${subchapter.description ? html`
-        <div class="subchapter-header">
-          <div>${unsafeHTML(subchapter.description)}</div>
-        </div>
-      ` : ''}
+      ${subchapter.description
+        ? html`
+            <div class="subchapter-header">
+              <div>${unsafeHTML(subchapter.description)}</div>
+            </div>
+          `
+        : ''}
     `;
   }
 
   private renderSubSubchapter(subSubchapter: any) {
     return html`
-      ${subSubchapter.description ? html`
-        <div class="sub-subchapter-header">
-          <div>${unsafeHTML(subSubchapter.description)}</div>
-        </div>
-      ` : ''}
-
-      ${subSubchapter.questions.map((question: any) => this.renderQuestion(question))}
+      ${subSubchapter.description
+        ? html`
+            <div class="sub-subchapter-header">
+              <div>${unsafeHTML(subSubchapter.description)}</div>
+            </div>
+          `
+        : ''}
+      ${subSubchapter.questions.map((question: any) =>
+        this.renderQuestion(question)
+      )}
     `;
   }
 
   private renderChapter(chapter: any) {
     return html`
-      ${chapter?.description ? html`
-        <div class="chapter-header">
-          <div>${unsafeHTML(chapter.description)}</div>
-        </div>
-      ` : ''}
-
-      ${chapter?.questions ? chapter.questions.map((question: any) => this.renderQuestion(question)) : ''}
-
-      ${chapter?.subchapters ? chapter.subchapters.map((subchapter: any) => this.renderSubchapter(subchapter)) : ''}
+      ${chapter?.description
+        ? html`
+            <div class="chapter-header">
+              <div>${unsafeHTML(chapter.description)}</div>
+            </div>
+          `
+        : ''}
+      ${chapter?.questions
+        ? chapter.questions.map((question: any) =>
+            this.renderQuestion(question)
+          )
+        : ''}
+      ${chapter?.subchapters
+        ? chapter.subchapters.map((subchapter: any) =>
+            this.renderSubchapter(subchapter)
+          )
+        : ''}
     `;
   }
 
   private renderContainerChapter(chapter: any) {
     return html`
-      ${chapter?.description ? html`
-        <div class="chapter-header">
-          <div>${unsafeHTML(chapter.description)}</div>
-        </div>
-      ` : ''}
+      ${chapter?.description
+        ? html`
+            <div class="chapter-header">
+              <div>${unsafeHTML(chapter.description)}</div>
+            </div>
+          `
+        : ''}
     `;
   }
-
-
 
   private renderMainContent() {
     return EFPRenderUtils.renderMainContent(
@@ -421,15 +476,15 @@ export class EFPEntryForm extends LitElement {
     );
   }
 
-
-
   // Generate Section B items directly from questionnaire store
   private getSectionBItemsFromStore(): EFPSectionItem[] {
     const questionnaire: any = getQuestionnaireFromStore();
 
     // If questionnaire store is not loaded, show loading state
     if (!questionnaire?.chapters?.length) {
-      logger.info({ message: '📋 Questionnaire store not loaded, showing loading state' });
+      logger.info({
+        message: '📋 Questionnaire store not loaded, showing loading state',
+      });
       return [
         {
           label: 'Loading Environmental Farm Plan...',
@@ -439,18 +494,14 @@ export class EFPEntryForm extends LitElement {
             <p><em>The questionnaire store is being initialized...</em></p>
           `,
           complete: false,
-        }
+        },
       ];
     }
-
-
 
     const chapters = questionnaire.chapters[0] || [];
     const items: EFPSectionItem[] = [];
 
     chapters.forEach((chapter: any) => {
-
-
       // Create the main chapter container (collapsible parent)
       const chapterItem: EFPSectionItem = {
         label: EFPTextUtils.formatChapterTitle(chapter),
@@ -459,14 +510,15 @@ export class EFPEntryForm extends LitElement {
         complete: chapter.complete || false, // Use completion from store
         isContainer: true,
         chapterId: chapter.id, // Store chapter ID for completion lookup
-        items: []
+        items: [],
       };
 
       // Add all subchapters as direct clickable items under the main chapter
       if (chapter.subchapters && chapter.subchapters.length > 0) {
         chapter.subchapters.forEach((subchapter: any) => {
           // Add the subchapter as a clickable item
-          const formattedSubchapterTitle = EFPTextUtils.formatChapterTitle(subchapter);
+          const formattedSubchapterTitle =
+            EFPTextUtils.formatChapterTitle(subchapter);
           const subchapterItem: EFPSectionItem = {
             label: formattedSubchapterTitle,
             content: EFPSectionGenerator.renderSubchapterContent(subchapter),
@@ -477,18 +529,22 @@ export class EFPEntryForm extends LitElement {
 
           // If subchapter has sub-subchapters, add them as nested items
           if (subchapter.subchapters && subchapter.subchapters.length > 0) {
-            subchapterItem.items = subchapter.subchapters.map((subSubchapter: any) => {
-              // Format sub-subchapter title
-              const formattedSubSubTitle = EFPTextUtils.formatChapterTitle(subSubchapter);
+            subchapterItem.items = subchapter.subchapters.map(
+              (subSubchapter: any) => {
+                // Format sub-subchapter title
+                const formattedSubSubTitle =
+                  EFPTextUtils.formatChapterTitle(subSubchapter);
 
-              return {
-                label: formattedSubSubTitle,
-                content: EFPSectionGenerator.renderSubchapterContent(subSubchapter),
-                complete: subSubchapter.complete || false, // Use completion from store
-                chapterId: subSubchapter.id, // Store chapter ID for completion lookup
-                subchapterData: subSubchapter, // Keep for backward compatibility
-              };
-            });
+                return {
+                  label: formattedSubSubTitle,
+                  content:
+                    EFPSectionGenerator.renderSubchapterContent(subSubchapter),
+                  complete: subSubchapter.complete || false, // Use completion from store
+                  chapterId: subSubchapter.id, // Store chapter ID for completion lookup
+                  subchapterData: subSubchapter, // Keep for backward compatibility
+                };
+              }
+            );
 
             // Add title property for sl-details rendering
             subchapterItem.title = subchapterItem.label;
@@ -505,13 +561,12 @@ export class EFPEntryForm extends LitElement {
           content: EFPSectionGenerator.renderChapterContent(chapter),
           complete: chapter.complete || false, // Use completion from store
           chapterId: chapter.id, // Store chapter ID for completion lookup
-          chapterData: chapter // Keep for backward compatibility
+          chapterData: chapter, // Keep for backward compatibility
         });
       }
 
       items.push(chapterItem);
     });
-
 
     return items;
   }
@@ -523,7 +578,9 @@ export class EFPEntryForm extends LitElement {
 
     // If portal page data is not loaded yet, return loading state
     if (!portalPageData) {
-      logger.info({ message: '📄 Portal page data not loaded yet, showing loading state' });
+      logger.info({
+        message: '📄 Portal page data not loaded yet, showing loading state',
+      });
       return [
         {
           label: '',
@@ -533,7 +590,7 @@ export class EFPEntryForm extends LitElement {
             </div>
           `,
           complete: false,
-        }
+        },
       ];
     }
 
@@ -545,17 +602,23 @@ export class EFPEntryForm extends LitElement {
       portalPageData.quartech_section4,
       portalPageData.quartech_section5,
       portalPageData.quartech_section6,
-    ].filter(section => section); // Filter out null/undefined sections
+    ].filter((section) => section); // Filter out null/undefined sections
 
     // Clean up the HTML content to remove problematic font-family styles
-    const cleanedSections = sections.map(section => {
+    const cleanedSections = sections.map((section) => {
       if (!section) return section;
       // Replace Roboto Slab font-family with BC Sans
-      let cleaned = section.replace(/font-family:\s*&quot;Roboto Slab&quot;[^;]*;/gi, '');
+      let cleaned = section.replace(
+        /font-family:\s*&quot;Roboto Slab&quot;[^;]*;/gi,
+        ''
+      );
       cleaned = cleaned.replace(/font-family:\s*"Roboto Slab"[^;]*;/gi, '');
       cleaned = cleaned.replace(/font-family:\s*'Roboto Slab'[^;]*;/gi, '');
       // Also replace list-style-position: inside with outside
-      cleaned = cleaned.replace(/list-style-position:\s*inside/gi, 'list-style-position: outside');
+      cleaned = cleaned.replace(
+        /list-style-position:\s*inside/gi,
+        'list-style-position: outside'
+      );
       return cleaned;
     });
 
@@ -645,8 +708,6 @@ export class EFPEntryForm extends LitElement {
 
   // Get completion status from questionnaire store for navigation items
   private getCompletionFromStore(item: any): boolean {
-
-
     if (!isQuestionnaireLoaded()) {
       // Fallback to item's current complete status
 
@@ -673,7 +734,9 @@ export class EFPEntryForm extends LitElement {
       // For nested items (containers), check children completion
       if ('items' in item && Array.isArray(item.items)) {
         // All child items must be complete for parent to be complete
-        const childrenComplete = item.items.every((child: any) => this.getCompletionFromStore(child));
+        const childrenComplete = item.items.every((child: any) =>
+          this.getCompletionFromStore(child)
+        );
 
         return childrenComplete;
       }
@@ -681,9 +744,12 @@ export class EFPEntryForm extends LitElement {
       // Fallback to item's current status
 
       return item.complete || false;
-
     } catch (error) {
-      logger.warn({ message: `Failed to get completion from questionnaire store: ${String(error)}` });
+      logger.warn({
+        message: `Failed to get completion from questionnaire store: ${String(
+          error
+        )}`,
+      });
       return item.complete || false;
     }
   }
@@ -704,7 +770,9 @@ export class EFPEntryForm extends LitElement {
             chapters.forEach((chapter: any) => {
               if (chapter.questions) {
                 totalQuestions += chapter.questions.length;
-                answeredQuestions += chapter.questions.filter((q: any) => q.complete).length;
+                answeredQuestions += chapter.questions.filter(
+                  (q: any) => q.complete
+                ).length;
               }
               if (chapter.subchapters) {
                 countInChapters(chapter.subchapters);
@@ -720,7 +788,11 @@ export class EFPEntryForm extends LitElement {
           return totalQuestions > 0 && answeredQuestions === totalQuestions;
         }
       } catch (error) {
-        logger.warn({ message: `Failed to get section completion from questionnaire store: ${String(error)}` });
+        logger.warn({
+          message: `Failed to get section completion from questionnaire store: ${String(
+            error
+          )}`,
+        });
       }
     }
 
@@ -730,17 +802,26 @@ export class EFPEntryForm extends LitElement {
 
   // Public API methods
   public updateNestedChapterStructure(nestedStructure: any[]) {
-    logger.info({ message: `updateNestedChapterStructure called with ${nestedStructure?.length || 0} chapters` });
+    logger.info({
+      message: `updateNestedChapterStructure called with ${
+        nestedStructure?.length || 0
+      } chapters`,
+    });
 
     this.nestedChapterStructure = nestedStructure;
 
     // Also update the questionnaire store if not already loaded
     if (!isQuestionnaireLoaded()) {
-      logger.info({ message: 'Loading questionnaire data into store from updateNestedChapterStructure' });
-      // Import the loadQuestionnaireIntoStore function dynamically to avoid circular imports
-      import('../common/questionnaire.js').then(({ loadQuestionnaireIntoStore }) => {
-        loadQuestionnaireIntoStore(nestedStructure);
+      logger.info({
+        message:
+          'Loading questionnaire data into store from updateNestedChapterStructure',
       });
+      // Import the loadQuestionnaireIntoStore function dynamically to avoid circular imports
+      import('../common/questionnaire.js').then(
+        ({ loadQuestionnaireIntoStore }) => {
+          loadQuestionnaireIntoStore(nestedStructure);
+        }
+      );
     }
 
     // The @property decorator will automatically trigger a re-render
@@ -764,7 +845,9 @@ export class EFPEntryForm extends LitElement {
             chapters.forEach((chapter: any) => {
               if (chapter.questions) {
                 totalQuestions += chapter.questions.length;
-                answeredQuestions += chapter.questions.filter((q: any) => q.complete).length;
+                answeredQuestions += chapter.questions.filter(
+                  (q: any) => q.complete
+                ).length;
               }
               if (chapter.subchapters) {
                 countInChapters(chapter.subchapters);
@@ -776,10 +859,15 @@ export class EFPEntryForm extends LitElement {
             countInChapters(questionnaire.chapters[0]);
           }
 
-          return totalQuestions > 0 ? Math.round((answeredQuestions / totalQuestions) * 100) : 0;
+          return totalQuestions > 0
+            ? Math.round((answeredQuestions / totalQuestions) * 100)
+            : 0;
         }
       } catch (error) {
-        logger.warn({ message: 'Failed to get completion from questionnaire store, falling back' });
+        logger.warn({
+          message:
+            'Failed to get completion from questionnaire store, falling back',
+        });
       }
     }
 
@@ -792,22 +880,39 @@ export class EFPEntryForm extends LitElement {
 
   // Navigation methods
   private goToNext() {
-    logger.info({ message: `goToNext called, current step: ${this.currentStepIndex}, ${this.flatSteps[this.currentStepIndex]?.label}` });
+    logger.info({
+      message: `goToNext called, current step: ${this.currentStepIndex}, ${
+        this.flatSteps[this.currentStepIndex]?.label
+      }`,
+    });
 
     // Handle case where currentStepIndex is -1 (step not found in flatSteps)
     if (this.currentStepIndex === -1) {
-      logger.warn({ message: 'currentStepIndex is -1, trying to find current step by activeContent title' });
-      const foundIndex = this.flatSteps.findIndex(step => step.label === this.activeContent.title);
+      logger.warn({
+        message:
+          'currentStepIndex is -1, trying to find current step by activeContent title',
+      });
+      const foundIndex = this.flatSteps.findIndex(
+        (step) => step.label === this.activeContent.title
+      );
       if (foundIndex !== -1) {
-        logger.info({ message: `Found current step "${this.activeContent.title}" at index ${foundIndex}` });
+        logger.info({
+          message: `Found current step "${this.activeContent.title}" at index ${foundIndex}`,
+        });
         this.currentStepIndex = foundIndex;
       } else {
-        logger.error({ message: `Could not find current step "${this.activeContent.title}" in flatSteps` });
+        logger.error({
+          message: `Could not find current step "${this.activeContent.title}" in flatSteps`,
+        });
         return; // Don't proceed with navigation if we can't find current position
       }
     }
 
-    const nextIndex = EFPNavigationUtils.findNextSelectableStep(this.currentStepIndex, this.flatSteps, this.sections);
+    const nextIndex = EFPNavigationUtils.findNextSelectableStep(
+      this.currentStepIndex,
+      this.flatSteps,
+      this.sections
+    );
     if (nextIndex != null) {
       const nextStep = this.flatSteps[nextIndex];
       this.isNavigating = true;
@@ -815,12 +920,12 @@ export class EFPEntryForm extends LitElement {
       this.currentSectionIndex = nextStep.sectionIndex;
       this.activeContent = { title: nextStep.label, content: nextStep.content };
       this.updateNavigationState(nextStep.label);
-      setTimeout(() => { this.isNavigating = false; }, 100);
+      setTimeout(() => {
+        this.isNavigating = false;
+      }, 100);
       this.requestUpdate();
     }
   }
-
-
 
   // Navigation event handlers
   private handleNavigationPrevious() {
@@ -863,12 +968,12 @@ export class EFPEntryForm extends LitElement {
 
   // Question interaction event handler
   private handleRatingChanged(event: CustomEvent) {
-
     const { questionId, value } = event.detail;
 
     try {
-
-      logger.info({ message: `Rating changed for question ${questionId}: ${value}` });
+      logger.info({
+        message: `Rating changed for question ${questionId}: ${value}`,
+      });
 
       // Store the pending value
       this.pendingResponseValues.set(questionId, String(value));
@@ -890,33 +995,46 @@ export class EFPEntryForm extends LitElement {
       EFPEventUtils.handleRatingChanged(
         event,
         (questionId: string, value: any) => {
-          logger.info({ message: `Rating stored in memory for question ${questionId}: ${value}` });
+          logger.info({
+            message: `Rating stored in memory for question ${questionId}: ${value}`,
+          });
         }
       );
-
     } catch (error) {
-
-      logger.error({ message: `Failed to save rating response: ${(error as Error).message}` });
+      logger.error({
+        message: `Failed to save rating response: ${(error as Error).message}`,
+      });
 
       // Still call the original handler even if save fails
       EFPEventUtils.handleRatingChanged(
         event,
         (questionId: string, value: any) => {
-          logger.info({ message: `Rating stored locally for question ${questionId}: ${value} (save failed)` });
+          logger.info({
+            message: `Rating stored locally for question ${questionId}: ${value} (save failed)`,
+          });
         }
       );
     }
   }
 
   // Multi-select list interaction event handler
-  private handleMultiselectChange(questionId: string, option: string, isChecked: boolean) {
+  private handleMultiselectChange(
+    questionId: string,
+    option: string,
+    isChecked: boolean
+  ) {
     try {
-      logger.info({ message: `Multi-select option changed for question ${questionId}: ${option} = ${isChecked}` });
+      logger.info({
+        message: `Multi-select option changed for question ${questionId}: ${option} = ${isChecked}`,
+      });
 
       // Get the valid options for this question
       const question = getQuestionFromStore(questionId);
       const optionsString = question?.multiselectOptions || '';
-      const validOptions = optionsString.split(';').map((opt: string) => opt.trim()).filter((opt: string) => opt.length > 0);
+      const validOptions = optionsString
+        .split(';')
+        .map((opt: string) => opt.trim())
+        .filter((opt: string) => opt.length > 0);
 
       // Get current pending value or existing response
       let selectedOptions: string[];
@@ -927,18 +1045,23 @@ export class EFPEntryForm extends LitElement {
         // Start with an empty array and only add valid options from existing response
         const existingResponse = this.getResponseForQuestion(questionId);
         const currentSelectedString = existingResponse?.quartech_response || '';
-        const existingSelectedOptions = currentSelectedString.split(';').map((opt: string) => opt.trim()).filter((opt: string) => opt.length > 0);
+        const existingSelectedOptions = currentSelectedString
+          .split(';')
+          .map((opt: string) => opt.trim())
+          .filter((opt: string) => opt.length > 0);
 
         // Filter to only include options that are valid for the current question
-        selectedOptions = existingSelectedOptions.filter((opt: string) => validOptions.includes(opt));
+        selectedOptions = existingSelectedOptions.filter((opt: string) =>
+          validOptions.includes(opt)
+        );
 
         logger.info({
           message: `Filtered existing response for question ${questionId}`,
           data: {
             existingOptions: existingSelectedOptions,
             validOptions: validOptions,
-            filteredOptions: selectedOptions
-          }
+            filteredOptions: selectedOptions,
+          },
         });
       }
 
@@ -950,7 +1073,9 @@ export class EFPEntryForm extends LitElement {
         }
       } else {
         // Remove option
-        selectedOptions = selectedOptions.filter((opt: string) => opt !== option);
+        selectedOptions = selectedOptions.filter(
+          (opt: string) => opt !== option
+        );
       }
 
       // Store the pending value
@@ -968,9 +1093,12 @@ export class EFPEntryForm extends LitElement {
       }, 2000);
 
       this.responseSaveDebounceTimers.set(questionId, timer);
-
     } catch (error) {
-      logger.error({ message: `Failed to handle multi-select change: ${(error as Error).message}` });
+      logger.error({
+        message: `Failed to handle multi-select change: ${
+          (error as Error).message
+        }`,
+      });
     }
   }
 
@@ -979,26 +1107,38 @@ export class EFPEntryForm extends LitElement {
     try {
       const responseValue = this.pendingResponseValues.get(questionId);
       if (responseValue === undefined) {
-        logger.warn({ message: `No pending value found for question ${questionId}` });
+        logger.warn({
+          message: `No pending value found for question ${questionId}`,
+        });
         return;
       }
 
-      logger.info({ message: `Saving debounced response for question ${questionId}: ${responseValue}` });
+      logger.info({
+        message: `Saving debounced response for question ${questionId}: ${responseValue}`,
+      });
 
       // Save the response
-      const responseData = await this.saveRatingResponse(questionId, responseValue);
+      const responseData = await this.saveRatingResponse(
+        questionId,
+        responseValue
+      );
 
       // Update the questionnaire store with the full response data
       updateQuestionResponse(questionId, responseValue, true, responseData);
 
-      logger.info({ message: `Successfully saved debounced response for question ${questionId}` });
+      logger.info({
+        message: `Successfully saved debounced response for question ${questionId}`,
+      });
 
       // Clean up
       this.pendingResponseValues.delete(questionId);
       this.responseSaveDebounceTimers.delete(questionId);
-
     } catch (error) {
-      logger.error({ message: `Failed to save debounced response: ${(error as Error).message}` });
+      logger.error({
+        message: `Failed to save debounced response: ${
+          (error as Error).message
+        }`,
+      });
       // Don't delete pending value on error, so user can retry
     }
   }
@@ -1008,14 +1148,18 @@ export class EFPEntryForm extends LitElement {
     try {
       const selectedOptions = this.pendingMultiselectValues.get(questionId);
       if (!selectedOptions) {
-        logger.warn({ message: `No pending value found for question ${questionId}` });
+        logger.warn({
+          message: `No pending value found for question ${questionId}`,
+        });
         return;
       }
 
       // Create semicolon-delimited string
       const newValue = selectedOptions.join(';');
 
-      logger.info({ message: `Saving multi-select value for question ${questionId}: ${newValue}` });
+      logger.info({
+        message: `Saving multi-select value for question ${questionId}: ${newValue}`,
+      });
 
       // Save the response
       const responseData = await this.saveRatingResponse(questionId, newValue);
@@ -1023,14 +1167,19 @@ export class EFPEntryForm extends LitElement {
       // Update the questionnaire store with the full response data
       updateQuestionResponse(questionId, newValue, true, responseData);
 
-      logger.info({ message: `Successfully saved multi-select response for question ${questionId}` });
+      logger.info({
+        message: `Successfully saved multi-select response for question ${questionId}`,
+      });
 
       // Clean up
       this.pendingMultiselectValues.delete(questionId);
       this.responseSaveDebounceTimers.delete(questionId);
-
     } catch (error) {
-      logger.error({ message: `Failed to save multi-select response: ${(error as Error).message}` });
+      logger.error({
+        message: `Failed to save multi-select response: ${
+          (error as Error).message
+        }`,
+      });
       // Don't delete pending value on error, so user can retry
     }
   }
@@ -1038,7 +1187,9 @@ export class EFPEntryForm extends LitElement {
   // Handle multiline text input with debounced save
   private handleMultilineTextInput(questionId: string, value: string) {
     try {
-      logger.info({ message: `Multiline text input for question ${questionId}` });
+      logger.info({
+        message: `Multiline text input for question ${questionId}`,
+      });
 
       // Update character count immediately (no debounce)
       this.multilineTextCharCounts.set(questionId, value.length);
@@ -1064,9 +1215,12 @@ export class EFPEntryForm extends LitElement {
       }, 2000);
 
       this.responseSaveDebounceTimers.set(questionId, timer);
-
     } catch (error) {
-      logger.error({ message: `Failed to handle multiline text input: ${(error as Error).message}` });
+      logger.error({
+        message: `Failed to handle multiline text input: ${
+          (error as Error).message
+        }`,
+      });
     }
   }
 
@@ -1080,7 +1234,9 @@ export class EFPEntryForm extends LitElement {
         return;
       }
 
-      logger.info({ message: `Force saving multiline text for question ${questionId}` });
+      logger.info({
+        message: `Force saving multiline text for question ${questionId}`,
+      });
 
       // Clear any existing debounce timer
       const existingTimer = this.responseSaveDebounceTimers.get(questionId);
@@ -1091,9 +1247,12 @@ export class EFPEntryForm extends LitElement {
 
       // Save immediately
       await this.saveMultilineTextResponse(questionId);
-
     } catch (error) {
-      logger.error({ message: `Failed to force save multiline text: ${(error as Error).message}` });
+      logger.error({
+        message: `Failed to force save multiline text: ${
+          (error as Error).message
+        }`,
+      });
     }
   }
 
@@ -1102,23 +1261,32 @@ export class EFPEntryForm extends LitElement {
     try {
       const responseValue = this.pendingResponseValues.get(questionId);
       if (responseValue === undefined) {
-        logger.warn({ message: `No pending value found for question ${questionId}` });
+        logger.warn({
+          message: `No pending value found for question ${questionId}`,
+        });
         return;
       }
 
-      logger.info({ message: `Saving multiline text response for question ${questionId}` });
+      logger.info({
+        message: `Saving multiline text response for question ${questionId}`,
+      });
 
       // Update status to saving
       this.multilineTextSaveStatus.set(questionId, 'saving');
       this.requestUpdate();
 
       // Save the response
-      const responseData = await this.saveRatingResponse(questionId, responseValue);
+      const responseData = await this.saveRatingResponse(
+        questionId,
+        responseValue
+      );
 
       // Update the questionnaire store with the full response data
       updateQuestionResponse(questionId, responseValue, true, responseData);
 
-      logger.info({ message: `Successfully saved multiline text response for question ${questionId}` });
+      logger.info({
+        message: `Successfully saved multiline text response for question ${questionId}`,
+      });
 
       // Update status to saved
       this.multilineTextSaveStatus.set(questionId, 'saved');
@@ -1127,9 +1295,12 @@ export class EFPEntryForm extends LitElement {
       // Clean up
       this.pendingResponseValues.delete(questionId);
       this.responseSaveDebounceTimers.delete(questionId);
-
     } catch (error) {
-      logger.error({ message: `Failed to save multiline text response: ${(error as Error).message}` });
+      logger.error({
+        message: `Failed to save multiline text response: ${
+          (error as Error).message
+        }`,
+      });
       // Revert status to draft on error
       this.multilineTextSaveStatus.set(questionId, 'draft');
       this.requestUpdate();
@@ -1138,7 +1309,10 @@ export class EFPEntryForm extends LitElement {
   }
 
   // Helper method to build rating description for Point Rating questions
-  private buildRatingDescription(questionId: string, ratingValue: any): string | null {
+  private buildRatingDescription(
+    questionId: string,
+    ratingValue: any
+  ): string | null {
     // Only build description for Point Rating questions with numeric values (1-4)
     const ratingNum = parseInt(String(ratingValue));
     if (isNaN(ratingNum) || ratingNum < 1 || ratingNum > 4) {
@@ -1152,7 +1326,8 @@ export class EFPEntryForm extends LitElement {
     }
 
     // Check if this is a Point Rating question
-    if (questionData.quartech_questiontype !== 100000001) { // 100000001 is Point Rating
+    if (questionData.quartech_questiontype !== 100000001) {
+      // 100000001 is Point Rating
       return null;
     }
 
@@ -1176,8 +1351,10 @@ export class EFPEntryForm extends LitElement {
   }
 
   // Helper method to save rating responses
-  private async saveRatingResponse(questionId: string, ratingValue: any): Promise<any> {
-
+  private async saveRatingResponse(
+    questionId: string,
+    ratingValue: any
+  ): Promise<any> {
     try {
       const responseText = String(ratingValue);
       const notes = `Rating: ${ratingValue}`;
@@ -1187,7 +1364,6 @@ export class EFPEntryForm extends LitElement {
 
       // Check if response already exists
       const existingResponse = this.getResponseForQuestion(questionId);
-
 
       let responseData;
       let isNewResponse = false;
@@ -1208,30 +1384,34 @@ export class EFPEntryForm extends LitElement {
           quartech_response: responseText,
           quartech_notes: notes,
           quartech_description: description,
-          modifiedon: new Date().toISOString()
+          modifiedon: new Date().toISOString(),
         };
-
-
-
       } else {
         // Create new response (either no response exists, or existing response lacks valid ID)
         isNewResponse = true;
 
-        const createResult = await WorkbookResponseHelper.createResponse(questionId, responseText, { notes, description }) as any;
+        const createResult = (await WorkbookResponseHelper.createResponse(
+          questionId,
+          responseText,
+          { notes, description }
+        )) as any;
 
         const workbookId = getWorkbookId();
 
         // Create new response data with all fields from the API response
         responseData = {
           ...createResult.response,
-          quartech_workbookresponseid: createResult.response?.quartech_workbookresponseid,
+          quartech_workbookresponseid:
+            createResult.response?.quartech_workbookresponseid,
           quartech_response: responseText,
           quartech_notes: notes,
           quartech_description: description,
           _quartech_question_value: questionId,
           _quartech_workbook_value: workbookId,
-          createdon: createResult.response?.createdon || new Date().toISOString(),
-          modifiedon: createResult.response?.modifiedon || new Date().toISOString()
+          createdon:
+            createResult.response?.createdon || new Date().toISOString(),
+          modifiedon:
+            createResult.response?.modifiedon || new Date().toISOString(),
         };
 
         // CRITICAL: Update memory structures IMMEDIATELY after creation
@@ -1252,21 +1432,29 @@ export class EFPEntryForm extends LitElement {
 
       // Return the response data for use in questionnaire store
       return responseData;
-
     } catch (error) {
-      logger.error({ message: `Failed to save rating response: ${String(error)}` });
+      logger.error({
+        message: `Failed to save rating response: ${String(error)}`,
+      });
       throw error;
     }
   }
 
   // Update memory structures for rating responses
-  private async updateMemoryStructuresForRating(questionId: string, responseData: any, isNewResponse: boolean) {
+  private async updateMemoryStructuresForRating(
+    questionId: string,
+    responseData: any,
+    isNewResponse: boolean
+  ) {
     try {
       // Update new nested structure using helper function
       WorkbookResponseHelper.updateResponseInMemory(questionId, responseData);
 
       // Update old structure for backward compatibility
-      POWERPOD.workbookResponses.responsesByQuestion.set(questionId, responseData);
+      POWERPOD.workbookResponses.responsesByQuestion.set(
+        questionId,
+        responseData
+      );
 
       if (isNewResponse) {
         // Add to beginning of data array (most recent first)
@@ -1274,7 +1462,9 @@ export class EFPEntryForm extends LitElement {
       } else {
         // Update existing entry in data array
         const dataIndex = POWERPOD.workbookResponses.data.findIndex(
-          (r: any) => r.quartech_workbookresponseid === responseData.quartech_workbookresponseid
+          (r: any) =>
+            r.quartech_workbookresponseid ===
+            responseData.quartech_workbookresponseid
         );
         if (dataIndex !== -1) {
           POWERPOD.workbookResponses.data[dataIndex] = responseData;
@@ -1283,12 +1473,14 @@ export class EFPEntryForm extends LitElement {
 
       // Update memory metadata for both structures
       POWERPOD.workbookResponses.lastUpdated = new Date().toISOString();
-      POWERPOD.workbookQuestionsAndResponses.lastUpdated = new Date().toISOString();
-
-
-
+      POWERPOD.workbookQuestionsAndResponses.lastUpdated =
+        new Date().toISOString();
     } catch (error) {
-      logger.error({ message: `Failed to update memory structures for rating: ${String(error)}` });
+      logger.error({
+        message: `Failed to update memory structures for rating: ${String(
+          error
+        )}`,
+      });
       // Don't throw - this is a memory update issue, not a save issue
     }
   }
@@ -1313,20 +1505,26 @@ export class EFPEntryForm extends LitElement {
     if (!allDetails) return;
 
     // First, close all details
-    allDetails.forEach(detail => {
+    allDetails.forEach((detail) => {
       detail.open = false;
     });
 
     // Find which containers should be open based on the current item
-    const containersToOpen = EFPNavigationUtils.findContainersForItem(currentLabel, this.sections);
+    const containersToOpen = EFPNavigationUtils.findContainersForItem(
+      currentLabel,
+      this.sections
+    );
 
     // Open the relevant containers
-    allDetails.forEach(detail => {
+    allDetails.forEach((detail) => {
       // Check data attribute first (most reliable), then fallback to other methods
       const containerTitle = detail.getAttribute('data-container-title');
       const summary = detail.getAttribute('summary');
       const customSummarySpan = detail.querySelector('[slot="summary"] span');
-      const summaryText = containerTitle || summary || (customSummarySpan ? customSummarySpan.textContent : null);
+      const summaryText =
+        containerTitle ||
+        summary ||
+        (customSummarySpan ? customSummarySpan.textContent : null);
 
       if (summaryText && containersToOpen.includes(summaryText)) {
         detail.open = true;
@@ -1335,22 +1533,39 @@ export class EFPEntryForm extends LitElement {
   }
 
   private goToPrevious() {
-    logger.info({ message: `goToPrevious called, current step: ${this.currentStepIndex}, ${this.flatSteps[this.currentStepIndex]?.label}` });
+    logger.info({
+      message: `goToPrevious called, current step: ${this.currentStepIndex}, ${
+        this.flatSteps[this.currentStepIndex]?.label
+      }`,
+    });
 
     // Handle case where currentStepIndex is -1 (step not found in flatSteps)
     if (this.currentStepIndex === -1) {
-      logger.warn({ message: 'currentStepIndex is -1, trying to find current step by activeContent title' });
-      const foundIndex = this.flatSteps.findIndex(step => step.label === this.activeContent.title);
+      logger.warn({
+        message:
+          'currentStepIndex is -1, trying to find current step by activeContent title',
+      });
+      const foundIndex = this.flatSteps.findIndex(
+        (step) => step.label === this.activeContent.title
+      );
       if (foundIndex !== -1) {
-        logger.info({ message: `Found current step "${this.activeContent.title}" at index ${foundIndex}` });
+        logger.info({
+          message: `Found current step "${this.activeContent.title}" at index ${foundIndex}`,
+        });
         this.currentStepIndex = foundIndex;
       } else {
-        logger.error({ message: `Could not find current step "${this.activeContent.title}" in flatSteps` });
+        logger.error({
+          message: `Could not find current step "${this.activeContent.title}" in flatSteps`,
+        });
         return; // Don't proceed with navigation if we can't find current position
       }
     }
 
-    const prevIndex = EFPNavigationUtils.findPreviousSelectableStep(this.currentStepIndex, this.flatSteps, this.sections);
+    const prevIndex = EFPNavigationUtils.findPreviousSelectableStep(
+      this.currentStepIndex,
+      this.flatSteps,
+      this.sections
+    );
     if (prevIndex != null) {
       const prevStep = this.flatSteps[prevIndex];
       this.isNavigating = true;
@@ -1358,7 +1573,9 @@ export class EFPEntryForm extends LitElement {
       this.currentSectionIndex = prevStep.sectionIndex;
       this.activeContent = { title: prevStep.label, content: prevStep.content };
       this.updateNavigationState(prevStep.label);
-      setTimeout(() => { this.isNavigating = false; }, 100);
+      setTimeout(() => {
+        this.isNavigating = false;
+      }, 100);
       this.requestUpdate();
     }
   }
@@ -1367,16 +1584,23 @@ export class EFPEntryForm extends LitElement {
     return EFPNavigationUtils.getFlatStepsFromSections(this.sections);
   }
 
-
   private initializeToFirstSelectableStep() {
     // Only initialize if we have sections and steps available
-    if (!this.sections || this.sections.length === 0 || !this.flatSteps || this.flatSteps.length === 0) {
-
+    if (
+      !this.sections ||
+      this.sections.length === 0 ||
+      !this.flatSteps ||
+      this.flatSteps.length === 0
+    ) {
       return;
     }
 
     // Navigate to first selectable step in the first section via utils
-    const target = EFPNavigationUtils.navigateToSection(0, this.flatSteps, this.sections);
+    const target = EFPNavigationUtils.navigateToSection(
+      0,
+      this.flatSteps,
+      this.sections
+    );
     if (target) {
       const step = this.flatSteps[target.stepIndex];
       this.currentStepIndex = target.stepIndex;
@@ -1385,8 +1609,6 @@ export class EFPEntryForm extends LitElement {
       this.updateNavigationState(step.label);
     }
   }
-
-
 
   private handleBreadcrumbNavigation(event: CustomEvent) {
     const { type, data } = event.detail;
@@ -1406,7 +1628,11 @@ export class EFPEntryForm extends LitElement {
 
   private navigateToHome() {
     // Navigate to first selectable step in first section
-    const target = EFPNavigationUtils.navigateToSection(0, this.flatSteps, this.sections);
+    const target = EFPNavigationUtils.navigateToSection(
+      0,
+      this.flatSteps,
+      this.sections
+    );
     if (target) {
       const step = this.flatSteps[target.stepIndex];
       this.currentStepIndex = target.stepIndex;
@@ -1423,7 +1649,11 @@ export class EFPEntryForm extends LitElement {
   }
 
   private navigateToSection(sectionIndex: number) {
-    const target = EFPNavigationUtils.navigateToSection(sectionIndex, this.flatSteps, this.sections);
+    const target = EFPNavigationUtils.navigateToSection(
+      sectionIndex,
+      this.flatSteps,
+      this.sections
+    );
     if (target) {
       const step = this.flatSteps[target.stepIndex];
       this.currentStepIndex = target.stepIndex;
@@ -1436,7 +1666,9 @@ export class EFPEntryForm extends LitElement {
 
   private navigateToHierarchyItem(targetLabel: string) {
     // Find and navigate to this hierarchy level
-    const hierarchyStepIndex = this.flatSteps.findIndex(step => step.label === targetLabel);
+    const hierarchyStepIndex = this.flatSteps.findIndex(
+      (step) => step.label === targetLabel
+    );
     if (hierarchyStepIndex !== -1) {
       const hierarchyStep = this.flatSteps[hierarchyStepIndex];
       this.currentStepIndex = hierarchyStepIndex;
@@ -1487,7 +1719,6 @@ export class EFPEntryForm extends LitElement {
 
     // Re-render rating questions when workbook responses are loaded/updated
     if (changedProps.has('workbookResponses')) {
-
       // Update completion and navigation icons when responses change
       this.updateCompletionAndNavigation();
     }
@@ -1497,7 +1728,10 @@ export class EFPEntryForm extends LitElement {
       // Refresh the active content to show updated renderResponsesSummary
       const currentStep = this.flatSteps[this.currentStepIndex];
       if (currentStep) {
-        this.activeContent = { title: currentStep.label, content: currentStep.content };
+        this.activeContent = {
+          title: currentStep.label,
+          content: currentStep.content,
+        };
       }
     }
   }
@@ -1533,28 +1767,35 @@ export class EFPEntryForm extends LitElement {
 
       const workbookId = getWorkbookId();
       if (!workbookId) {
-        logger.warn({ message: 'No workbook ID found, skipping response loading' });
+        logger.warn({
+          message: 'No workbook ID found, skipping response loading',
+        });
         return;
       }
 
       // Check if we already have questions and responses for this workbook
-      if (POWERPOD.workbookQuestionsAndResponses.isLoaded &&
-          POWERPOD.workbookQuestionsAndResponses.workbookId === workbookId) {
-
+      if (
+        POWERPOD.workbookQuestionsAndResponses.isLoaded &&
+        POWERPOD.workbookQuestionsAndResponses.workbookId === workbookId
+      ) {
         this.syncFromPOWERPOD();
         this.questionsAndResponsesLoaded = true;
         return;
       }
 
-      logger.info({ message: `Loading workbook questions and responses for workbook: ${workbookId}` });
+      logger.info({
+        message: `Loading workbook questions and responses for workbook: ${workbookId}`,
+      });
 
       // Load questions and responses into nested structure
-      const result = await WorkbookResponseHelper.loadQuestionsAndResponses(workbookId) as QuestionsAndResponsesMemory;
+      const result = (await WorkbookResponseHelper.loadQuestionsAndResponses(
+        workbookId
+      )) as QuestionsAndResponsesMemory;
 
       // Also maintain backward compatibility with old structure
       const responses = Array.from(result.questionsWithResponses.values())
-        .map(entry => entry.response)
-        .filter(response => response !== null);
+        .map((entry) => entry.response)
+        .filter((response) => response !== null);
 
       POWERPOD.workbookResponses.data = responses;
       POWERPOD.workbookResponses.workbookId = workbookId;
@@ -1563,11 +1804,14 @@ export class EFPEntryForm extends LitElement {
 
       // Build quick lookup map for backward compatibility
       POWERPOD.workbookResponses.responsesByQuestion.clear();
-      responses.forEach(response => {
+      responses.forEach((response) => {
         const questionId = response._quartech_question_value;
         if (questionId) {
           if (!POWERPOD.workbookResponses.responsesByQuestion.has(questionId)) {
-            POWERPOD.workbookResponses.responsesByQuestion.set(questionId, response);
+            POWERPOD.workbookResponses.responsesByQuestion.set(
+              questionId,
+              response
+            );
           }
         }
       });
@@ -1578,17 +1822,18 @@ export class EFPEntryForm extends LitElement {
       // Update the reactive property to trigger re-render
       this.questionsAndResponsesLoaded = true;
 
-      logger.info({ message: `Loaded ${result.stats.totalQuestions} questions with ${result.stats.answeredQuestions} responses (${result.stats.completionPercentage}% complete)` });
-
-
-
+      logger.info({
+        message: `Loaded ${result.stats.totalQuestions} questions with ${result.stats.answeredQuestions} responses (${result.stats.completionPercentage}% complete)`,
+      });
 
       // Trigger a re-render to update the UI with loaded data
       this.requestUpdate();
-
     } catch (error) {
-      logger.error({ message: 'Failed to load workbook questions and responses' });
-      const errMsg = (error as any)?.message || 'Failed to load questions and responses';
+      logger.error({
+        message: 'Failed to load workbook questions and responses',
+      });
+      const errMsg =
+        (error as any)?.message || 'Failed to load questions and responses';
       POWERPOD.workbookQuestionsAndResponses.error = errMsg;
       // Don't throw - we want the component to still work even if loading fails
     } finally {
@@ -1607,8 +1852,6 @@ export class EFPEntryForm extends LitElement {
 
   // Update completion tracking and navigation icons based on current responses
   private updateCompletionAndNavigation() {
-
-
     // Update section completion status based on workbook responses
     this.updateSectionCompletionStatus();
 
@@ -1621,7 +1864,6 @@ export class EFPEntryForm extends LitElement {
 
     if (POWERPOD.workbookQuestionsAndResponses.isLoaded) {
       const stats = POWERPOD.workbookQuestionsAndResponses.stats;
-
     }
   }
 
@@ -1629,43 +1871,49 @@ export class EFPEntryForm extends LitElement {
   private updateSectionCompletionStatus() {
     // Try to use questionnaire store first (preferred method)
     if (isQuestionnaireLoaded()) {
-
       try {
         // Import the completion function dynamically to avoid circular imports
-        import('../common/questionnaire.js').then(({ updateQuestionnaireCompletion }) => {
-          updateQuestionnaireCompletion();
-          this.updateSectionItemsFromQuestionnaireStore();
-          logger.info({ message: '✅ Updated completion using questionnaire store' });
-        });
+        import('../common/questionnaire.js').then(
+          ({ updateQuestionnaireCompletion }) => {
+            updateQuestionnaireCompletion();
+            this.updateSectionItemsFromQuestionnaireStore();
+            logger.info({
+              message: '✅ Updated completion using questionnaire store',
+            });
+          }
+        );
         return;
       } catch (error) {
-        logger.warn({ message: '⚠️ Failed to use questionnaire store for completion, falling back to legacy method' });
+        logger.warn({
+          message:
+            '⚠️ Failed to use questionnaire store for completion, falling back to legacy method',
+        });
       }
     }
 
     // Fallback to legacy method if questionnaire store is not available
     if (!POWERPOD.workbookQuestionsAndResponses.isLoaded) {
-      logger.warn({ message: '⚠️ Neither questionnaire store nor workbook responses loaded, skipping completion update' });
+      logger.warn({
+        message:
+          '⚠️ Neither questionnaire store nor workbook responses loaded, skipping completion update',
+      });
       return;
     }
 
-
-    const questionsWithResponses = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses;
-    const questionsByChapter = POWERPOD.workbookQuestionsAndResponses.questionsByChapter;
-
-
+    const questionsWithResponses =
+      POWERPOD.workbookQuestionsAndResponses.questionsWithResponses;
+    const questionsByChapter =
+      POWERPOD.workbookQuestionsAndResponses.questionsByChapter;
 
     // Update section completion based on chapter completion
-    this.sections.forEach(section => {
+    this.sections.forEach((section) => {
       this.updateSectionItemsCompletion(section.items, questionsWithResponses);
     });
   }
 
   // Update section items using questionnaire store data
   private updateSectionItemsFromQuestionnaireStore() {
-
-
-    this.sections.forEach(section => {
+    this.sections.forEach((section) => {
       if (section.tab === 'My Workbook') {
         // Update My Workbook items using questionnaire store
         this.updateSectionItemsFromStore(section.items);
@@ -1675,7 +1923,7 @@ export class EFPEntryForm extends LitElement {
 
   // Recursively update section items using questionnaire store
   private updateSectionItemsFromStore(items: any[]) {
-    items.forEach(item => {
+    items.forEach((item) => {
       if ('items' in item && Array.isArray(item.items)) {
         // Recursively update nested items
         this.updateSectionItemsFromStore(item.items);
@@ -1686,17 +1934,18 @@ export class EFPEntryForm extends LitElement {
             return child.complete;
           } else if (child.questionId) {
             // Import questionnaire functions dynamically
-            import('../common/questionnaire.js').then(({ getQuestionFromStore }) => {
-              const question = getQuestionFromStore(child.questionId);
-              child.complete = question?.complete || false;
-            });
+            import('../common/questionnaire.js').then(
+              ({ getQuestionFromStore }) => {
+                const question = getQuestionFromStore(child.questionId);
+                child.complete = question?.complete || false;
+              }
+            );
             return child.complete;
           }
           return child.complete;
         });
 
         item.complete = allChildrenComplete;
-
       } else if (item.chapterId) {
         // This is a chapter item - get completion from questionnaire store
         import('../common/questionnaire.js').then(({ getChapterFromStore }) => {
@@ -1707,30 +1956,35 @@ export class EFPEntryForm extends LitElement {
         });
       } else if (item.questionId) {
         // This is a question item - get completion from questionnaire store
-        import('../common/questionnaire.js').then(({ getQuestionFromStore }) => {
-          const question = getQuestionFromStore(item.questionId);
-          if (question) {
-            item.complete = question.complete;
+        import('../common/questionnaire.js').then(
+          ({ getQuestionFromStore }) => {
+            const question = getQuestionFromStore(item.questionId);
+            if (question) {
+              item.complete = question.complete;
+            }
           }
-        });
+        );
       }
     });
   }
 
   // Recursively update completion status for section items (legacy method)
-  private updateSectionItemsCompletion(items: any[], questionsWithResponses: Map<string, any>) {
-    items.forEach(item => {
+  private updateSectionItemsCompletion(
+    items: any[],
+    questionsWithResponses: Map<string, any>
+  ) {
+    items.forEach((item) => {
       if ('items' in item && Array.isArray(item.items)) {
         // Recursively update nested items
         this.updateSectionItemsCompletion(item.items, questionsWithResponses);
 
         // Update parent item completion based on children
         const childItems = this.getAllLeafItems(item.items);
-        const completedChildren = childItems.filter(child => child.complete).length;
-        item.complete = completedChildren === childItems.length && childItems.length > 0;
-
-
-
+        const completedChildren = childItems.filter(
+          (child) => child.complete
+        ).length;
+        item.complete =
+          completedChildren === childItems.length && childItems.length > 0;
       } else if (item.questionId) {
         // This is a question item - check if it has a response
         const questionResponse = questionsWithResponses.get(item.questionId);
@@ -1738,7 +1992,6 @@ export class EFPEntryForm extends LitElement {
         item.complete = questionResponse && questionResponse.response !== null;
 
         if (wasComplete !== item.complete) {
-
         }
       }
     });
@@ -1765,35 +2018,43 @@ export class EFPEntryForm extends LitElement {
   // Helper method to get response for a specific question
   getResponseForQuestion(questionId: string): any | null {
     // Use new nested structure first, fall back to old structure
-    const questionAndResponse = WorkbookResponseHelper.getQuestionAndResponseFromMemory(questionId);
+    const questionAndResponse =
+      WorkbookResponseHelper.getQuestionAndResponseFromMemory(questionId);
     if (questionAndResponse) {
       return questionAndResponse.response;
     }
 
     // Fallback to old structure for backward compatibility
-    return POWERPOD.workbookResponses.responsesByQuestion.get(questionId) || null;
+    return (
+      POWERPOD.workbookResponses.responsesByQuestion.get(questionId) || null
+    );
   }
 
   // Helper method to get question data for a specific question
   getQuestionForQuestion(questionId: string): any | null {
-    const questionAndResponse = WorkbookResponseHelper.getQuestionAndResponseFromMemory(questionId);
+    const questionAndResponse =
+      WorkbookResponseHelper.getQuestionAndResponseFromMemory(questionId);
     return questionAndResponse?.question || null;
   }
 
   // Helper method to get both question and response data
-  getQuestionAndResponse(questionId: string): { question: any | null, response: any | null } {
-    const questionAndResponse = WorkbookResponseHelper.getQuestionAndResponseFromMemory(questionId);
+  getQuestionAndResponse(questionId: string): {
+    question: any | null;
+    response: any | null;
+  } {
+    const questionAndResponse =
+      WorkbookResponseHelper.getQuestionAndResponseFromMemory(questionId);
     if (questionAndResponse) {
       return {
         question: questionAndResponse.question,
-        response: questionAndResponse.response
+        response: questionAndResponse.response,
       };
     }
 
     // Fallback to old structure
     return {
       question: null,
-      response: this.getResponseForQuestion(questionId)
+      response: this.getResponseForQuestion(questionId),
     };
   }
 
@@ -1811,11 +2072,17 @@ export class EFPEntryForm extends LitElement {
       <div style="margin-top: 1.5rem; padding: 1rem; background-color: var(--sl-color-success-50); border-radius: var(--sl-border-radius-medium); border-left: 4px solid var(--sl-color-success-600);">
         <h4 style="margin: 0 0 0.75rem 0; color: var(--sl-color-success-800); font-size: 1.1rem;">Your Previous Response</h4>
         <div style="background-color: white; padding: 0.75rem; border-radius: var(--sl-border-radius-small); margin-bottom: 0.75rem;">
-          <p style="margin: 0; line-height: 1.5; color: var(--sl-color-neutral-800);">${response.quartech_response || 'No response text available.'}</p>
+          <p style="margin: 0; line-height: 1.5; color: var(--sl-color-neutral-800);">${
+            response.quartech_response || 'No response text available.'
+          }</p>
         </div>
         <div style="font-size: 0.875rem; color: var(--sl-color-neutral-600);">
           <p style="margin: 0;"><strong>Created:</strong> ${createdDate}</p>
-          ${createdDate !== modifiedDate ? `<p style="margin: 0;"><strong>Last Modified:</strong> ${modifiedDate}</p>` : ''}
+          ${
+            createdDate !== modifiedDate
+              ? `<p style="margin: 0;"><strong>Last Modified:</strong> ${modifiedDate}</p>`
+              : ''
+          }
         </div>
       </div>
     `;
@@ -1839,72 +2106,148 @@ export class EFPEntryForm extends LitElement {
         <h4>Questions & Responses Summary</h4>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
           <div>
-            <p><strong>Total Questions:</strong> ${POWERPOD.workbookQuestionsAndResponses.stats.totalQuestions}</p>
-            <p><strong>Answered Questions:</strong> ${POWERPOD.workbookQuestionsAndResponses.stats.answeredQuestions}</p>
-            <p><strong>Unanswered Questions:</strong> ${POWERPOD.workbookQuestionsAndResponses.stats.unansweredQuestions}</p>
+            <p><strong>Total Questions:</strong> ${
+              POWERPOD.workbookQuestionsAndResponses.stats.totalQuestions
+            }</p>
+            <p><strong>Answered Questions:</strong> ${
+              POWERPOD.workbookQuestionsAndResponses.stats.answeredQuestions
+            }</p>
+            <p><strong>Unanswered Questions:</strong> ${
+              POWERPOD.workbookQuestionsAndResponses.stats.unansweredQuestions
+            }</p>
           </div>
           <div>
-            <p><strong>Completion:</strong> ${POWERPOD.workbookQuestionsAndResponses.stats.completionPercentage}%</p>
-            <p><strong>Chapters:</strong> ${POWERPOD.workbookQuestionsAndResponses.questionsByChapter.size}</p>
-            <p><strong>Last Updated:</strong> ${POWERPOD.workbookQuestionsAndResponses.lastUpdated ? new Date(POWERPOD.workbookQuestionsAndResponses.lastUpdated).toLocaleString() : 'Unknown'}</p>
+            <p><strong>Completion:</strong> ${
+              POWERPOD.workbookQuestionsAndResponses.stats.completionPercentage
+            }%</p>
+            <p><strong>Chapters:</strong> ${
+              POWERPOD.workbookQuestionsAndResponses.questionsByChapter.size
+            }</p>
+            <p><strong>Last Updated:</strong> ${
+              POWERPOD.workbookQuestionsAndResponses.lastUpdated
+                ? new Date(
+                    POWERPOD.workbookQuestionsAndResponses.lastUpdated
+                  ).toLocaleString()
+                : 'Unknown'
+            }</p>
           </div>
         </div>
 
         <details style="margin-top: 1rem;">
           <summary style="cursor: pointer; font-weight: 500;">View Questions & Responses by Chapter</summary>
           <div style="margin-top: 0.5rem; max-height: 400px; overflow-y: auto;">
-            ${Array.from(questionsAndResponses.questionsByChapter.entries()).map(([chapterId, chapterQuestions]) => `
+            ${Array.from(questionsAndResponses.questionsByChapter.entries())
+              .map(
+                ([chapterId, chapterQuestions]) => `
               <div style="margin-bottom: 1.5rem; padding: 1rem; background-color: var(--sl-color-neutral-50); border-radius: var(--sl-border-radius-medium);">
                 <h5 style="margin: 0 0 0.75rem 0; color: var(--sl-color-primary-600);">Chapter: ${chapterId}</h5>
                 <p style="margin: 0 0 0.75rem 0; font-size: 0.875rem; color: var(--sl-color-neutral-600);">
-                  ${chapterQuestions.length} questions, ${chapterQuestions.filter(q => q.response).length} answered
+                  ${chapterQuestions.length} questions, ${
+                  chapterQuestions.filter((q) => q.response).length
+                } answered
                 </p>
-                ${chapterQuestions.map(entry => `
-                  <div style="padding: 0.5rem; margin: 0.5rem 0; background-color: white; border-radius: var(--sl-border-radius-small); border-left: 3px solid ${entry.response ? 'var(--sl-color-success-600)' : 'var(--sl-color-neutral-300)'};">
+                ${chapterQuestions
+                  .map(
+                    (entry) => `
+                  <div style="padding: 0.5rem; margin: 0.5rem 0; background-color: white; border-radius: var(--sl-border-radius-small); border-left: 3px solid ${
+                    entry.response
+                      ? 'var(--sl-color-success-600)'
+                      : 'var(--sl-color-neutral-300)'
+                  };">
                     <p style="margin: 0 0 0.25rem 0; font-weight: 500; font-size: 0.875rem;">
-                      ${entry.question ? (entry.question.quartech_label || entry.question.quartech_questiontext || 'Question text not available').replace(/\n/g, '<br>') : 'Question data not loaded'}
+                      ${
+                        entry.question
+                          ? (
+                              entry.question.quartech_label ||
+                              entry.question.quartech_questiontext ||
+                              'Question text not available'
+                            ).replace(/\n/g, '<br>')
+                          : 'Question data not loaded'
+                      }
                     </p>
-                    ${entry.response ? `
+                    ${
+                      entry.response
+                        ? `
                       <p style="margin: 0 0 0.25rem 0; color: var(--sl-color-success-800);">
-                        <strong>Response:</strong> ${entry.response.quartech_response || 'No response text'}
+                        <strong>Response:</strong> ${
+                          entry.response.quartech_response || 'No response text'
+                        }
                       </p>
                       <p style="margin: 0; font-size: 0.75rem; color: var(--sl-color-neutral-600);">
-                        Answered: ${new Date(entry.response.createdon).toLocaleString()}
+                        Answered: ${new Date(
+                          entry.response.createdon
+                        ).toLocaleString()}
                       </p>
-                    ` : `
+                    `
+                        : `
                       <p style="margin: 0; font-style: italic; color: var(--sl-color-neutral-500);">Not answered yet</p>
-                    `}
+                    `
+                    }
                   </div>
-                `).join('')}
+                `
+                  )
+                  .join('')}
               </div>
-            `).join('')}
+            `
+              )
+              .join('')}
           </div>
         </details>
 
         <details style="margin-top: 1rem;">
           <summary style="cursor: pointer; font-weight: 500;">View All Questions & Responses (Flat List)</summary>
           <div style="margin-top: 0.5rem; max-height: 300px; overflow-y: auto;">
-            ${Array.from(questionsAndResponses.questionsWithResponses.entries()).map(([questionId, entry]) => `
-              <div style="padding: 0.5rem; margin: 0.5rem 0; background-color: var(--sl-color-neutral-50); border-radius: var(--sl-border-radius-small); border-left: 3px solid ${entry.response ? 'var(--sl-color-success-600)' : 'var(--sl-color-neutral-300)'};">
+            ${Array.from(questionsAndResponses.questionsWithResponses.entries())
+              .map(
+                ([questionId, entry]) => `
+              <div style="padding: 0.5rem; margin: 0.5rem 0; background-color: var(--sl-color-neutral-50); border-radius: var(--sl-border-radius-small); border-left: 3px solid ${
+                entry.response
+                  ? 'var(--sl-color-success-600)'
+                  : 'var(--sl-color-neutral-300)'
+              };">
                 <p style="margin: 0 0 0.25rem 0; font-weight: 500; font-size: 0.875rem;">Question ID: ${questionId}</p>
-                ${entry.question ? `
+                ${
+                  entry.question
+                    ? `
                   <p style="margin: 0 0 0.25rem 0; color: var(--sl-color-neutral-700);">
-                    <strong>Question:</strong> ${(entry.question.quartech_label || entry.question.quartech_questiontext || 'No question text').replace(/\n/g, '<br>')}
+                    <strong>Question:</strong> ${(
+                      entry.question.quartech_label ||
+                      entry.question.quartech_questiontext ||
+                      'No question text'
+                    ).replace(/\n/g, '<br>')}
                   </p>
-                ` : ''}
-                ${entry.response ? `
+                `
+                    : ''
+                }
+                ${
+                  entry.response
+                    ? `
                   <p style="margin: 0 0 0.25rem 0; color: var(--sl-color-success-800);">
-                    <strong>Response:</strong> ${entry.response.quartech_response || 'No response text'}
+                    <strong>Response:</strong> ${
+                      entry.response.quartech_response || 'No response text'
+                    }
                   </p>
                   <p style="margin: 0; font-size: 0.75rem; color: var(--sl-color-neutral-600);">
-                    Created: ${new Date(entry.response.createdon).toLocaleString()}
-                    ${entry.response.modifiedon !== entry.response.createdon ? ` | Modified: ${new Date(entry.response.modifiedon).toLocaleString()}` : ''}
+                    Created: ${new Date(
+                      entry.response.createdon
+                    ).toLocaleString()}
+                    ${
+                      entry.response.modifiedon !== entry.response.createdon
+                        ? ` | Modified: ${new Date(
+                            entry.response.modifiedon
+                          ).toLocaleString()}`
+                        : ''
+                    }
                   </p>
-                ` : `
+                `
+                    : `
                   <p style="margin: 0; font-style: italic; color: var(--sl-color-neutral-500);">Not answered yet</p>
-                `}
+                `
+                }
               </div>
-            `).join('')}
+            `
+              )
+              .join('')}
           </div>
         </details>
       </div>
@@ -1922,21 +2265,38 @@ export class EFPEntryForm extends LitElement {
             <div>
               <strong>Questions & Responses:</strong>
               ${POWERPOD.workbookQuestionsAndResponses.isLoading
-                ? html`<span style="color: var(--sl-color-warning-600);">Loading...</span>`
+                ? html`<span style="color: var(--sl-color-warning-600);"
+                    >Loading...</span
+                  >`
                 : POWERPOD.workbookQuestionsAndResponses.error
-                  ? html`<span style="color: var(--sl-color-danger-600);">Error loading</span>`
-                  : html`<span style="color: var(--sl-color-success-600);">Loaded</span>`
-              }
+                ? html`<span style="color: var(--sl-color-danger-600);"
+                    >Error loading</span
+                  >`
+                : html`<span style="color: var(--sl-color-success-600);"
+                    >Loaded</span
+                  >`}
             </div>
             ${POWERPOD.workbookQuestionsAndResponses.isLoaded
               ? html`
-                <div><strong>Total Questions:</strong> ${POWERPOD.workbookQuestionsAndResponses.stats.totalQuestions}</div>
-                <div><strong>Answered:</strong> ${POWERPOD.workbookQuestionsAndResponses.stats.answeredQuestions}</div>
-                <div><strong>Completion:</strong> ${POWERPOD.workbookQuestionsAndResponses.stats.completionPercentage}%</div>
-                <div><strong>Chapters:</strong> ${POWERPOD.workbookQuestionsAndResponses.questionsByChapter.size}</div>
-              `
-              : ''
-            }
+                  <div>
+                    <strong>Total Questions:</strong> ${POWERPOD
+                      .workbookQuestionsAndResponses.stats.totalQuestions}
+                  </div>
+                  <div>
+                    <strong>Answered:</strong> ${POWERPOD
+                      .workbookQuestionsAndResponses.stats.answeredQuestions}
+                  </div>
+                  <div>
+                    <strong>Completion:</strong> ${POWERPOD
+                      .workbookQuestionsAndResponses.stats
+                      .completionPercentage}%
+                  </div>
+                  <div>
+                    <strong>Chapters:</strong> ${POWERPOD
+                      .workbookQuestionsAndResponses.questionsByChapter.size}
+                  </div>
+                `
+              : ''}
           </div>
 
           <sl-tab-group
@@ -1980,29 +2340,43 @@ export class EFPEntryForm extends LitElement {
         <!-- Main Content -->
         <main class="main-content">
           <div class="card">
-            <strong>${POWERPOD.workbookQuestionsAndResponses.isLoaded ? POWERPOD.workbookQuestionsAndResponses.stats.completionPercentage : this.completionPercent}% Complete</strong>
-            <div style="
+            <strong
+              >${POWERPOD.workbookQuestionsAndResponses.isLoaded
+                ? POWERPOD.workbookQuestionsAndResponses.stats
+                    .completionPercentage
+                : this.completionPercent}%
+              Complete</strong
+            >
+            <div
+              style="
               width: 100%;
               height: 0.75rem;
               background-color: #e5e7eb;
               border-radius: 0.375rem;
               margin-top: 0.5rem;
               overflow: hidden;
-            ">
-              <div style="
+            "
+            >
+              <div
+                style="
                 height: 100%;
                 background-color: #3b82f6;
                 border-radius: 0.375rem;
                 transition: width 0.3s ease;
-                width: ${POWERPOD.workbookQuestionsAndResponses.isLoaded ? POWERPOD.workbookQuestionsAndResponses.stats.completionPercentage : this.completionPercent}%;
-              "></div>
+                width: ${POWERPOD.workbookQuestionsAndResponses.isLoaded
+                  ? POWERPOD.workbookQuestionsAndResponses.stats
+                      .completionPercentage
+                  : this.completionPercent}%;
+              "
+              ></div>
             </div>
           </div>
 
           <!-- Navigation buttons above content -->
           <navigation-buttons
             .isPreviousDisabled=${this.currentStepIndex === 0}
-            .isContinueDisabled=${this.currentStepIndex >= this.flatSteps.length - 1}
+            .isContinueDisabled=${this.currentStepIndex >=
+            this.flatSteps.length - 1}
             .sectionsLength=${this.sections.length}
             @previous-clicked=${this.handleNavigationPrevious}
             @skip-clicked=${this.handleNavigationSkip}
@@ -2026,7 +2400,8 @@ export class EFPEntryForm extends LitElement {
           <!-- Navigation buttons below content -->
           <navigation-buttons
             .isPreviousDisabled=${this.currentStepIndex === 0}
-            .isContinueDisabled=${this.currentStepIndex >= this.flatSteps.length - 1}
+            .isContinueDisabled=${this.currentStepIndex >=
+            this.flatSteps.length - 1}
             .sectionsLength=${this.sections.length}
             @previous-clicked=${this.handleNavigationPrevious}
             @skip-clicked=${this.handleNavigationSkip}
