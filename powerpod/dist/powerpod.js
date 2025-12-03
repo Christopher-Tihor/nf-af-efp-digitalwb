@@ -37815,9 +37815,20 @@
                   const firstItem = item.items[0];
                   return html `
           <div
-            style="display: flex; align-items: center; gap: 8px; padding: 0.5rem 1rem; cursor: pointer; ${activeContentTitle === firstItem.label
+            style="
+              display: flex;
+              align-items: center;
+              gap: 8px;
+              padding: 0.75rem 1rem;
+              cursor: pointer;
+              border: 1px solid var(--sl-color-neutral-200);
+              border-radius: var(--sl-border-radius-medium);
+              background-color: var(--sl-color-neutral-0);
+              margin-bottom: 0.75rem;
+              ${activeContentTitle === firstItem.label
                     ? 'font-weight: 600; background-color: var(--sl-color-primary-50); color: var(--sl-color-primary-800);'
-                    : 'font-weight: 500;'}"
+                    : 'font-weight: 500;'}
+            "
             @click=${() => onItemClick(firstItem)}
           >
             <sl-icon
