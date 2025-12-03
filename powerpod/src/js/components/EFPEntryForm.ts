@@ -574,9 +574,26 @@ export class EFPEntryForm extends LitElement {
       title: 'My Action Plan',
       content: `
         <div class="chapter-header">
-          <h2>My Action Plan</h2>
-          <p>This is your personalized action plan based on your Environmental Farm Plan assessment.</p>
-          <p><em>Placeholder content - This section will contain your customized action items and recommendations.</em></p>
+          <p>Develop an Action Plan to address the concerns identified during your EFP visit.</p>
+          <p>Your Planning Advisor will help you prioritize each action item and if applicable, identify if you may be eligible for BMP funding to support completing your plan.</p>
+        </div>
+        <div style="margin-top: 1.5rem;">
+          <h3 style="font-family: var(--chapter-font); font-weight: 600; color: var(--sl-color-neutral-800); margin-bottom: 0.75rem;">Resources:</h3>
+          <ul style="line-height: 1.8; color: var(--sl-color-neutral-700);">
+            <li>
+              <strong>BMP funding:</strong>
+              <a href="https://iafbc.ca/beneficial-management-practices-program/" target="_blank" rel="noopener noreferrer" style="color: var(--sl-color-primary-600); text-decoration: underline;">
+                https://iafbc.ca/beneficial-management-practices-program/
+              </a>
+            </li>
+            <li>
+              <strong>EFP reference guide:</strong>
+              <a href="https://www2.gov.bc.ca/gov/content/industry/agriculture-seafood/programs/environmental-farm-plan" target="_blank" rel="noopener noreferrer" style="color: var(--sl-color-primary-600); text-decoration: underline;">
+                https://www2.gov.bc.ca/gov/content/industry/agriculture-seafood/programs/environmental-farm-plan
+              </a>
+            </li>
+            <li><strong>Etc</strong></li>
+          </ul>
         </div>
       `,
       complete: false,
@@ -588,8 +605,26 @@ export class EFPEntryForm extends LitElement {
           content: `
             <div class="chapter-header">
               <h2>My Action Plan</h2>
-              <p>This is your personalized action plan based on your Environmental Farm Plan assessment.</p>
-              <p><em>Placeholder content - This section will contain your customized action items and recommendations.</em></p>
+              <p>Develop an Action Plan to address the concerns identified during your EFP visit.</p>
+              <p>Your Planning Advisor will help you prioritize each action item and if applicable, identify if you may be eligible for BMP funding to support completing your plan.</p>
+            </div>
+            <div style="margin-top: 1.5rem;">
+              <h3 style="font-family: var(--chapter-font); font-weight: 600; color: var(--sl-color-neutral-800); margin-bottom: 0.75rem;">Resources:</h3>
+              <ul style="line-height: 1.8; color: var(--sl-color-neutral-700);">
+                <li>
+                  <strong>BMP funding:</strong>
+                  <a href="https://iafbc.ca/beneficial-management-practices-program/" target="_blank" rel="noopener noreferrer" style="color: var(--sl-color-primary-600); text-decoration: underline;">
+                    https://iafbc.ca/beneficial-management-practices-program/
+                  </a>
+                </li>
+                <li>
+                  <strong>EFP reference guide:</strong>
+                  <a href="https://www2.gov.bc.ca/gov/content/industry/agriculture-seafood/programs/environmental-farm-plan" target="_blank" rel="noopener noreferrer" style="color: var(--sl-color-primary-600); text-decoration: underline;">
+                    https://www2.gov.bc.ca/gov/content/industry/agriculture-seafood/programs/environmental-farm-plan
+                  </a>
+                </li>
+                <li><strong>Etc</strong></li>
+              </ul>
             </div>
           `,
           complete: false,
