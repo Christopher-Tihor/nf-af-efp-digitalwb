@@ -19,6 +19,7 @@ export interface EFPSectionItem {
   subchapterData?: any;
   questionId?: string;
   chapterId?: string;
+  disableExpand?: boolean; // If true, item will not be expandable even if it has items
 }
 
 export interface EFPSection {

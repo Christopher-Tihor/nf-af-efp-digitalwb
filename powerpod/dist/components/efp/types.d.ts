@@ -18,6 +18,7 @@ export interface EFPSectionItem {
     subchapterData?: any;
     questionId?: string;
     chapterId?: string;
+    disableExpand?: boolean;
 }
 export interface EFPSection {
     tab: string;

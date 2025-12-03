@@ -20,6 +20,7 @@ export interface EFPSectionItem {
   complete?: boolean;
   items?: EFPSectionItem[];
   title?: string;
+  disableExpand?: boolean; // If true, item will not be expandable even if it has items
 }
 
 export class EFPRenderUtils {
@@ -86,6 +87,29 @@ export class EFPRenderUtils {
       // Determine item capabilities based on content
       const hasContent = item.content && item.content.trim() !== '';
       const hasSubitems = 'items' in item && Array.isArray(item.items) && item.items.length > 0;
+
+      // Check if expansion is disabled
+      const isExpandDisabled = item.disableExpand === true;
+
+      // If disableExpand is true, render as non-expandable container that clicks first item
+      if (isExpandDisabled && hasSubitems) {
+        // Get the first item to click when the container is clicked
+        const firstItem = item.items![0];
+        return html`
+          <div
+            style="display: flex; align-items: center; gap: 8px; padding: 0.5rem 1rem; cursor: pointer; ${activeContentTitle === firstItem.label
+              ? 'font-weight: 600; background-color: var(--sl-color-primary-50); color: var(--sl-color-primary-800);'
+              : 'font-weight: 500;'}"
+            @click=${() => onItemClick(firstItem)}
+          >
+            <sl-icon
+              name=${iconName}
+              style="color: ${iconColor}"
+            ></sl-icon>
+            <span>${item.title || item.label}</span>
+          </div>
+        `;
+      }
 
       if (hasContent && hasSubitems) {
         // BOTH clickable AND expandable - render in one line with sl-details

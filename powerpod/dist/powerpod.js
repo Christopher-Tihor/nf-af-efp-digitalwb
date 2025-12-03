@@ -37807,6 +37807,27 @@
               // Determine item capabilities based on content
               const hasContent = item.content && item.content.trim() !== '';
               const hasSubitems = 'items' in item && Array.isArray(item.items) && item.items.length > 0;
+              // Check if expansion is disabled
+              const isExpandDisabled = item.disableExpand === true;
+              // If disableExpand is true, render as non-expandable container that clicks first item
+              if (isExpandDisabled && hasSubitems) {
+                  // Get the first item to click when the container is clicked
+                  const firstItem = item.items[0];
+                  return html `
+          <div
+            style="display: flex; align-items: center; gap: 8px; padding: 0.5rem 1rem; cursor: pointer; ${activeContentTitle === firstItem.label
+                    ? 'font-weight: 600; background-color: var(--sl-color-primary-50); color: var(--sl-color-primary-800);'
+                    : 'font-weight: 500;'}"
+            @click=${() => onItemClick(firstItem)}
+          >
+            <sl-icon
+              name=${iconName}
+              style="color: ${iconColor}"
+            ></sl-icon>
+            <span>${item.title || item.label}</span>
+          </div>
+        `;
+              }
               if (hasContent && hasSubitems) {
                   // BOTH clickable AND expandable - render in one line with sl-details
                   return html `
@@ -38707,6 +38728,35 @@
               }
               items.push(chapterItem);
           });
+          // Add hard-coded "My Action Plan" chapter at the end
+          const myActionPlanItem = {
+              label: 'My Action Plan',
+              title: 'My Action Plan',
+              content: `
+        <div class="chapter-header">
+          <h2>My Action Plan</h2>
+          <p>This is your personalized action plan based on your Environmental Farm Plan assessment.</p>
+          <p><em>Placeholder content - This section will contain your customized action items and recommendations.</em></p>
+        </div>
+      `,
+              complete: false,
+              isContainer: true,
+              disableExpand: true, // This chapter should not be expandable
+              items: [
+                  {
+                      label: 'My Action Plan',
+                      content: `
+            <div class="chapter-header">
+              <h2>My Action Plan</h2>
+              <p>This is your personalized action plan based on your Environmental Farm Plan assessment.</p>
+              <p><em>Placeholder content - This section will contain your customized action items and recommendations.</em></p>
+            </div>
+          `,
+                      complete: false,
+                  }
+              ],
+          };
+          items.push(myActionPlanItem);
           return items;
       }
       // Generate Section C items from portal page data

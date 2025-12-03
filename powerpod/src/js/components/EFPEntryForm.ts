@@ -568,6 +568,37 @@ export class EFPEntryForm extends LitElement {
       items.push(chapterItem);
     });
 
+    // Add hard-coded "My Action Plan" chapter at the end
+    const myActionPlanItem: EFPSectionItem = {
+      label: 'My Action Plan',
+      title: 'My Action Plan',
+      content: `
+        <div class="chapter-header">
+          <h2>My Action Plan</h2>
+          <p>This is your personalized action plan based on your Environmental Farm Plan assessment.</p>
+          <p><em>Placeholder content - This section will contain your customized action items and recommendations.</em></p>
+        </div>
+      `,
+      complete: false,
+      isContainer: true,
+      disableExpand: true, // This chapter should not be expandable
+      items: [
+        {
+          label: 'My Action Plan',
+          content: `
+            <div class="chapter-header">
+              <h2>My Action Plan</h2>
+              <p>This is your personalized action plan based on your Environmental Farm Plan assessment.</p>
+              <p><em>Placeholder content - This section will contain your customized action items and recommendations.</em></p>
+            </div>
+          `,
+          complete: false,
+        }
+      ],
+    };
+
+    items.push(myActionPlanItem);
+
     return items;
   }
 

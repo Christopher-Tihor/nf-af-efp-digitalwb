@@ -17,6 +17,7 @@ export interface EFPSectionItem {
     complete?: boolean;
     items?: EFPSectionItem[];
     title?: string;
+    disableExpand?: boolean;
 }
 export declare class EFPRenderUtils {
     static renderMainContent(currentSectionIndex: number, flatSteps: EFPStep[], currentStepIndex: number, activeContent: EFPActiveContent, html: any, unsafeHTML: any, renderSubchapter: (subchapterData: any) => any, renderChapter: (chapterData: any) => any, renderContainerSubchapter: (subchapterData: any) => any, renderContainerChapter: (chapterData: any) => any): any;
