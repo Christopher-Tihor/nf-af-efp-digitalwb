@@ -99,6 +99,79 @@ export class EFPEntryForm extends LitElement {
     this.setupQuestionnaireStoreWatcher();
   }
 
+  public moveActionPlanContent() {
+    // Find the efpactionplan div in the DOM
+    const actionPlanDiv = document.getElementById('efpactionplan');
+
+    console.log('🔍 moveActionPlanContent called');
+    console.log('🔍 Looking for div with id "efpactionplan"');
+    console.log('🔍 Found div:', actionPlanDiv);
+
+    if (actionPlanDiv) {
+      console.log('🔍 Div innerHTML (first 200 chars):', actionPlanDiv.innerHTML.substring(0, 200));
+      console.log('🔍 Div parent:', actionPlanDiv.parentElement);
+
+      // Store reference to the original div and its parent
+      (window as any).efpActionPlanDiv = actionPlanDiv;
+      (window as any).efpActionPlanOriginalParent = actionPlanDiv.parentElement;
+
+      logger.info({ message: 'Action Plan div found and stored' });
+      console.log('✅ Action Plan div found and stored');
+
+      // Try to append it to the component's light DOM
+      this.appendActionPlanToLightDOM();
+    } else {
+      logger.warn({ message: 'efpactionplan div not found in DOM' });
+      console.warn('⚠️ efpactionplan div not found in DOM');
+      console.warn('⚠️ All divs with id containing "action":',
+        Array.from(document.querySelectorAll('[id*="action"]')).map(el => el.id));
+    }
+  }
+
+  private appendActionPlanToLightDOM() {
+    setTimeout(() => {
+      const actionPlanDiv = (window as any).efpActionPlanDiv as HTMLElement;
+
+      console.log('🔍 appendActionPlanToLightDOM called');
+      console.log('🔍 activeContent.title:', this.activeContent.title);
+      console.log('🔍 actionPlanDiv:', actionPlanDiv);
+
+      if (!actionPlanDiv) {
+        console.warn('⚠️ Action Plan div not available');
+        return;
+      }
+
+      if (this.activeContent.title === 'My Action Plan') {
+        console.log('🔍 Attempting to append to light DOM');
+        console.log('🔍 this.contains(actionPlanDiv):', this.contains(actionPlanDiv));
+
+        // Append the div to this component's light DOM (not shadow DOM)
+        // This keeps it in the light DOM where scripts work
+        if (!this.contains(actionPlanDiv)) {
+          this.appendChild(actionPlanDiv);
+          actionPlanDiv.style.display = 'block';
+          actionPlanDiv.style.marginTop = '1.5rem';
+          actionPlanDiv.style.backgroundColor = 'lightyellow'; // Debug styling
+          actionPlanDiv.style.padding = '20px';
+          actionPlanDiv.style.border = '2px solid red'; // Debug border
+          console.log('✅ Action Plan content appended to light DOM');
+          console.log('🔍 actionPlanDiv.innerHTML:', actionPlanDiv.innerHTML.substring(0, 200));
+        } else {
+          console.log('🔍 Action Plan div already in light DOM');
+        }
+      } else {
+        console.log('🔍 Not viewing My Action Plan, moving back');
+        // Move it back to original parent when not viewing
+        const originalParent = (window as any).efpActionPlanOriginalParent;
+        if (originalParent && this.contains(actionPlanDiv)) {
+          originalParent.appendChild(actionPlanDiv);
+          actionPlanDiv.style.display = 'none';
+          console.log('✅ Action Plan content moved back to original parent');
+        }
+      }
+    }, 100);
+  }
+
   disconnectedCallback() {
     super.disconnectedCallback();
 
@@ -124,6 +197,10 @@ export class EFPEntryForm extends LitElement {
       logger.info({
         message: '📋 Questionnaire store loaded, updating navigation',
       });
+
+      // Move the action plan content after questionnaire is loaded
+      this.moveActionPlanContent();
+
       this.requestUpdate(); // Force re-render when store becomes available
     }
   }
@@ -1800,6 +1877,11 @@ export class EFPEntryForm extends LitElement {
         };
       }
     }
+
+    // Check if we're now viewing "My Action Plan" and append to light DOM
+    if (changedProps.has('activeContent') || changedProps.has('currentStepIndex')) {
+      this.appendActionPlanToLightDOM();
+    }
   }
 
   // Lifecycle methods
@@ -2461,6 +2543,9 @@ export class EFPEntryForm extends LitElement {
             ></efp-breadcrumbs>
             <h2>${this.activeContent.title}</h2>
             ${this.renderMainContent()}
+
+            <!-- Slot for light DOM content (e.g., action plan) -->
+            <slot></slot>
           </div>
 
           <!-- Navigation buttons below content -->
