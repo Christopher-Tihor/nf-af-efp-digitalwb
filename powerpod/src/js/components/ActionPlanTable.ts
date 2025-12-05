@@ -2,8 +2,6 @@ import shoelace from '../../assets/css/shoelace.css';
 import bootstrap from '../../assets/css/bootstrap.css';
 import '@shoelace-style/shoelace/dist/components/button/button.js';
 import '@shoelace-style/shoelace/dist/components/dialog/dialog.js';
-import '@shoelace-style/shoelace/dist/components/select/select.js';
-import '@shoelace-style/shoelace/dist/components/option/option.js';
 import '@shoelace-style/shoelace/dist/components/textarea/textarea.js';
 import '@shoelace-style/shoelace/dist/components/alert/alert.js';
 import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
@@ -14,6 +12,8 @@ import { getActionPlansData, postActionPlanData } from '../common/fetch';
 import { getCurrentWorkbookId } from '../common/workbookUtils';
 import { getQuestionnaireFromStore, getQuestionFromStore } from '../common/questionnaire';
 import store from '../store/index.js';
+import './SearchableDropdown.js';
+import type { DropdownOption } from './SearchableDropdown.js';
 
 const logger = Logger('components/ActionPlanTable');
 
@@ -41,10 +41,10 @@ class ActionPlanTable extends LitElement {
   @state() private creating = false;
   @state() private chapters: any[] = [];
   @state() private questions: any[] = [];
+  @state() private chapterOptions: DropdownOption[] = [];
+  @state() private questionOptions: DropdownOption[] = [];
 
   @query('#create-dialog') dialog!: any;
-  @query('#chapter-select') chapterSelect!: any;
-  @query('#question-select') questionSelect!: any;
 
   static styles = [
     css`
@@ -229,6 +229,12 @@ class ActionPlanTable extends LitElement {
       };
       flattenChapters(questionnaire.chapters);
 
+      // Convert chapters to dropdown options
+      this.chapterOptions = this.chapters.map(chapter => ({
+        value: chapter.id,
+        label: chapter.name
+      }));
+
       // Load all questions from all chapters for the unfiltered dropdown
       this.loadAllQuestions();
 
@@ -256,6 +262,12 @@ class ActionPlanTable extends LitElement {
     }
     this.questions = allQuestions;
 
+    // Convert questions to dropdown options
+    this.questionOptions = this.questions.map(question => ({
+      value: question.id,
+      label: question.label || question.name
+    }));
+
     logger.info({
       fn: 'loadAllQuestions',
       message: 'All questions loaded',
@@ -263,9 +275,8 @@ class ActionPlanTable extends LitElement {
     });
   }
 
-  private handleChapterChange(e: Event) {
-    const target = e.target as any;
-    this.selectedChapterId = target?.value || '';
+  private handleChapterChange(e: CustomEvent) {
+    this.selectedChapterId = e.detail?.value || '';
     this.selectedQuestionId = ''; // Reset question when chapter changes
 
     logger.info({
@@ -278,15 +289,18 @@ class ActionPlanTable extends LitElement {
     if (this.selectedChapterId) {
       const chapter = this.chapters.find(c => c.id === this.selectedChapterId);
       this.questions = chapter?.questions || [];
+      this.questionOptions = this.questions.map(question => ({
+        value: question.id,
+        label: question.label || question.name
+      }));
     } else {
       // Load all questions when no chapter is selected
       this.loadAllQuestions();
     }
   }
 
-  private handleQuestionChange(e: Event) {
-    const target = e.target as any;
-    this.selectedQuestionId = target?.value || '';
+  private handleQuestionChange(e: CustomEvent) {
+    this.selectedQuestionId = e.detail?.value || '';
 
     logger.info({
       fn: 'handleQuestionChange',
@@ -451,39 +465,27 @@ class ActionPlanTable extends LitElement {
         <!-- Create Action Plan Dialog -->
         <sl-dialog id="create-dialog" label="Create Action Plan">
           <div class="form-field">
-            <label>Chapter (Optional)</label>
-            <sl-select
-              id="chapter-select"
-              placeholder="Select a chapter"
-              .value=${this.selectedChapterId}
-              @sl-change=${this.handleChapterChange}
+            <searchable-dropdown
+              id="chapter-dropdown"
+              .options=${this.chapterOptions}
+              .selectedValue=${this.selectedChapterId}
+              fieldLabel="Chapter (Optional)"
+              placeholder="Search or select a chapter"
               clearable
-              hoist
-            >
-              ${this.chapters.map(
-                (chapter) => html`
-                  <sl-option value=${chapter.id}>${chapter.name}</sl-option>
-                `
-              )}
-            </sl-select>
+              @onChangeSearchableDropdown=${this.handleChapterChange}
+            ></searchable-dropdown>
           </div>
 
           <div class="form-field">
-            <label>Question (Optional)</label>
-            <sl-select
-              id="question-select"
-              placeholder="Select a question"
-              .value=${this.selectedQuestionId}
-              @sl-change=${this.handleQuestionChange}
+            <searchable-dropdown
+              id="question-dropdown"
+              .options=${this.questionOptions}
+              .selectedValue=${this.selectedQuestionId}
+              fieldLabel="Question (Optional)"
+              placeholder="Search or select a question"
               clearable
-              hoist
-            >
-              ${this.questions.map(
-                (question) => html`
-                  <sl-option value=${question.id}>${question.label || question.name}</sl-option>
-                `
-              )}
-            </sl-select>
+              @onChangeSearchableDropdown=${this.handleQuestionChange}
+            ></searchable-dropdown>
           </div>
 
           <div class="form-field">

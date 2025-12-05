@@ -1,11 +1,10 @@
 import '@shoelace-style/shoelace/dist/components/button/button.js';
 import '@shoelace-style/shoelace/dist/components/dialog/dialog.js';
-import '@shoelace-style/shoelace/dist/components/select/select.js';
-import '@shoelace-style/shoelace/dist/components/option/option.js';
 import '@shoelace-style/shoelace/dist/components/textarea/textarea.js';
 import '@shoelace-style/shoelace/dist/components/alert/alert.js';
 import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
 import { LitElement } from 'lit';
+import './SearchableDropdown.js';
 type ActionPlan = {
     quartech_actionplanid: string;
     quartech_action: string;
@@ -28,9 +27,9 @@ declare class ActionPlanTable extends LitElement {
     private creating;
     private chapters;
     private questions;
+    private chapterOptions;
+    private questionOptions;
     dialog: any;
-    chapterSelect: any;
-    questionSelect: any;
     static styles: import("lit").CSSResult[];
     connectedCallback(): void;
     disconnectedCallback(): void;
