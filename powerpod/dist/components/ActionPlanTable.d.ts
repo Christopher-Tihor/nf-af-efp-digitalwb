@@ -42,6 +42,7 @@ declare class ActionPlanTable extends LitElement {
     private openCreateDialog;
     private closeCreateDialog;
     private handleCreateActionPlan;
+    private stripHtmlAndDecode;
     private getChapterName;
     private getQuestionLabel;
     private formatDate;

@@ -40661,7 +40661,7 @@
           // Convert questions to dropdown options
           this.questionOptions = this.questions.map(question => ({
               value: question.id,
-              label: question.label || question.name
+              label: this.stripHtmlAndDecode(question.label || question.name)
           }));
           logger$7.info({
               fn: 'loadAllQuestions',
@@ -40684,7 +40684,7 @@
               this.questions = (chapter === null || chapter === void 0 ? void 0 : chapter.questions) || [];
               this.questionOptions = this.questions.map(question => ({
                   value: question.id,
-                  label: question.label || question.name
+                  label: this.stripHtmlAndDecode(question.label || question.name)
               }));
           }
           else {
@@ -40771,6 +40771,17 @@
               this.creating = false;
           }
       }
+      stripHtmlAndDecode(html) {
+          if (!html)
+              return '';
+          // Create a temporary DOM element to decode HTML entities and strip tags
+          const tempDiv = document.createElement('div');
+          tempDiv.innerHTML = html;
+          // Get the text content (this automatically strips HTML tags)
+          const text = tempDiv.textContent || tempDiv.innerText || '';
+          // Clean up extra whitespace
+          return text.replace(/\s+/g, ' ').trim();
+      }
       getChapterName(chapterId) {
           if (!chapterId)
               return '-';
@@ -40781,7 +40792,8 @@
           if (!questionId)
               return '-';
           const question = getQuestionFromStore(questionId);
-          return (question === null || question === void 0 ? void 0 : question.label) || questionId;
+          const label = (question === null || question === void 0 ? void 0 : question.label) || questionId;
+          return this.stripHtmlAndDecode(label);
       }
       formatDate(dateString, formattedValue) {
           if (formattedValue)

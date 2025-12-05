@@ -265,7 +265,7 @@ class ActionPlanTable extends LitElement {
     // Convert questions to dropdown options
     this.questionOptions = this.questions.map(question => ({
       value: question.id,
-      label: question.label || question.name
+      label: this.stripHtmlAndDecode(question.label || question.name)
     }));
 
     logger.info({
@@ -291,7 +291,7 @@ class ActionPlanTable extends LitElement {
       this.questions = chapter?.questions || [];
       this.questionOptions = this.questions.map(question => ({
         value: question.id,
-        label: question.label || question.name
+        label: this.stripHtmlAndDecode(question.label || question.name)
       }));
     } else {
       // Load all questions when no chapter is selected
@@ -390,6 +390,20 @@ class ActionPlanTable extends LitElement {
     }
   }
 
+  private stripHtmlAndDecode(html: string): string {
+    if (!html) return '';
+
+    // Create a temporary DOM element to decode HTML entities and strip tags
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = html;
+
+    // Get the text content (this automatically strips HTML tags)
+    const text = tempDiv.textContent || tempDiv.innerText || '';
+
+    // Clean up extra whitespace
+    return text.replace(/\s+/g, ' ').trim();
+  }
+
   private getChapterName(chapterId: string | null): string {
     if (!chapterId) return '-';
     const chapter = this.chapters.find(c => c.id === chapterId);
@@ -399,7 +413,8 @@ class ActionPlanTable extends LitElement {
   private getQuestionLabel(questionId: string | null): string {
     if (!questionId) return '-';
     const question = getQuestionFromStore(questionId);
-    return question?.label || questionId;
+    const label = question?.label || questionId;
+    return this.stripHtmlAndDecode(label);
   }
 
   private formatDate(dateString: string, formattedValue?: string): string {
