@@ -42,6 +42,8 @@ class ActionPlanTable extends LitElement {
   @state() private questions: any[] = [];
 
   @query('#create-dialog') dialog!: any;
+  @query('#chapter-select') chapterSelect!: any;
+  @query('#question-select') questionSelect!: any;
 
   static styles = [
     css`
@@ -216,9 +218,16 @@ class ActionPlanTable extends LitElement {
     }
   }
 
-  private handleChapterChange(e: CustomEvent) {
-    this.selectedChapterId = e.detail.value;
+  private handleChapterChange(e: Event) {
+    const target = e.target as any;
+    this.selectedChapterId = target?.value || '';
     this.selectedQuestionId = ''; // Reset question when chapter changes
+
+    logger.info({
+      fn: 'handleChapterChange',
+      message: 'Chapter changed',
+      data: { selectedChapterId: this.selectedChapterId },
+    });
 
     // Load questions for selected chapter
     if (this.selectedChapterId) {
@@ -229,19 +238,35 @@ class ActionPlanTable extends LitElement {
     }
   }
 
-  private handleQuestionChange(e: CustomEvent) {
-    this.selectedQuestionId = e.detail.value;
+  private handleQuestionChange(e: Event) {
+    const target = e.target as any;
+    this.selectedQuestionId = target?.value || '';
+
+    logger.info({
+      fn: 'handleQuestionChange',
+      message: 'Question changed',
+      data: { selectedQuestionId: this.selectedQuestionId },
+    });
   }
 
-  private handleActionChange(e: CustomEvent) {
-    this.actionDescription = e.detail.value;
+  private handleActionChange(e: Event) {
+    const target = e.target as any;
+    this.actionDescription = target?.value || '';
   }
 
   private openCreateDialog() {
+    // Ensure chapters are loaded before showing dialog
+    this.loadChaptersAndQuestions();
+
+    // Reset form state
     this.selectedChapterId = '';
     this.selectedQuestionId = '';
     this.actionDescription = '';
     this.questions = [];
+
+    // Force update to ensure the selects are cleared
+    this.requestUpdate();
+
     this.dialog?.show();
   }
 
@@ -377,12 +402,13 @@ class ActionPlanTable extends LitElement {
           <div class="form-field">
             <label>Chapter (Optional)</label>
             <sl-select
+              id="chapter-select"
               placeholder="Select a chapter"
-              value=${this.selectedChapterId}
+              .value=${this.selectedChapterId}
               @sl-change=${this.handleChapterChange}
+              clearable
               hoist
             >
-              <sl-option value="">None</sl-option>
               ${this.chapters.map(
                 (chapter) => html`
                   <sl-option value=${chapter.id}>${chapter.name}</sl-option>
@@ -394,13 +420,14 @@ class ActionPlanTable extends LitElement {
           <div class="form-field">
             <label>Question (Optional)</label>
             <sl-select
+              id="question-select"
               placeholder="Select a question"
-              value=${this.selectedQuestionId}
+              .value=${this.selectedQuestionId}
               @sl-change=${this.handleQuestionChange}
               ?disabled=${!this.selectedChapterId}
+              clearable
               hoist
             >
-              <sl-option value="">None</sl-option>
               ${this.questions.map(
                 (question) => html`
                   <sl-option value=${question.id}>${question.label || question.name}</sl-option>
@@ -414,7 +441,7 @@ class ActionPlanTable extends LitElement {
             <sl-textarea
               placeholder="Enter action description"
               rows="4"
-              value=${this.actionDescription}
+              .value=${this.actionDescription}
               @sl-input=${this.handleActionChange}
               required
             ></sl-textarea>

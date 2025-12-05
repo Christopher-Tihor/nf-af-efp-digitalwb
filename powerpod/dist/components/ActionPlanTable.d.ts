@@ -28,6 +28,8 @@ declare class ActionPlanTable extends LitElement {
     private chapters;
     private questions;
     dialog: any;
+    chapterSelect: any;
+    questionSelect: any;
     static styles: import("lit").CSSResult[];
     connectedCallback(): void;
     private loadActionPlans;

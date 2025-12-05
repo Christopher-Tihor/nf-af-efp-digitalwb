@@ -38495,8 +38495,14 @@
           }
       }
       handleChapterChange(e) {
-          this.selectedChapterId = e.detail.value;
+          const target = e.target;
+          this.selectedChapterId = (target === null || target === void 0 ? void 0 : target.value) || '';
           this.selectedQuestionId = ''; // Reset question when chapter changes
+          logger$7.info({
+              fn: 'handleChapterChange',
+              message: 'Chapter changed',
+              data: { selectedChapterId: this.selectedChapterId },
+          });
           // Load questions for selected chapter
           if (this.selectedChapterId) {
               const chapter = this.chapters.find(c => c.id === this.selectedChapterId);
@@ -38507,17 +38513,29 @@
           }
       }
       handleQuestionChange(e) {
-          this.selectedQuestionId = e.detail.value;
+          const target = e.target;
+          this.selectedQuestionId = (target === null || target === void 0 ? void 0 : target.value) || '';
+          logger$7.info({
+              fn: 'handleQuestionChange',
+              message: 'Question changed',
+              data: { selectedQuestionId: this.selectedQuestionId },
+          });
       }
       handleActionChange(e) {
-          this.actionDescription = e.detail.value;
+          const target = e.target;
+          this.actionDescription = (target === null || target === void 0 ? void 0 : target.value) || '';
       }
       openCreateDialog() {
           var _a;
+          // Ensure chapters are loaded before showing dialog
+          this.loadChaptersAndQuestions();
+          // Reset form state
           this.selectedChapterId = '';
           this.selectedQuestionId = '';
           this.actionDescription = '';
           this.questions = [];
+          // Force update to ensure the selects are cleared
+          this.requestUpdate();
           (_a = this.dialog) === null || _a === void 0 ? void 0 : _a.show();
       }
       closeCreateDialog() {
@@ -38645,12 +38663,13 @@
           <div class="form-field">
             <label>Chapter (Optional)</label>
             <sl-select
+              id="chapter-select"
               placeholder="Select a chapter"
-              value=${this.selectedChapterId}
+              .value=${this.selectedChapterId}
               @sl-change=${this.handleChapterChange}
+              clearable
               hoist
             >
-              <sl-option value="">None</sl-option>
               ${this.chapters.map((chapter) => x `
                   <sl-option value=${chapter.id}>${chapter.name}</sl-option>
                 `)}
@@ -38660,13 +38679,14 @@
           <div class="form-field">
             <label>Question (Optional)</label>
             <sl-select
+              id="question-select"
               placeholder="Select a question"
-              value=${this.selectedQuestionId}
+              .value=${this.selectedQuestionId}
               @sl-change=${this.handleQuestionChange}
               ?disabled=${!this.selectedChapterId}
+              clearable
               hoist
             >
-              <sl-option value="">None</sl-option>
               ${this.questions.map((question) => x `
                   <sl-option value=${question.id}>${question.label || question.name}</sl-option>
                 `)}
@@ -38678,7 +38698,7 @@
             <sl-textarea
               placeholder="Enter action description"
               rows="4"
-              value=${this.actionDescription}
+              .value=${this.actionDescription}
               @sl-input=${this.handleActionChange}
               required
             ></sl-textarea>
@@ -38813,6 +38833,12 @@
   __decorate([
       e$5('#create-dialog')
   ], ActionPlanTable.prototype, "dialog", void 0);
+  __decorate([
+      e$5('#chapter-select')
+  ], ActionPlanTable.prototype, "chapterSelect", void 0);
+  __decorate([
+      e$5('#question-select')
+  ], ActionPlanTable.prototype, "questionSelect", void 0);
   ActionPlanTable = __decorate([
       t$1('action-plan-table')
   ], ActionPlanTable);
