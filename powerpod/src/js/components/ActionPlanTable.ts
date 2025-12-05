@@ -229,6 +229,9 @@ class ActionPlanTable extends LitElement {
       };
       flattenChapters(questionnaire.chapters);
 
+      // Load all questions from all chapters for the unfiltered dropdown
+      this.loadAllQuestions();
+
       logger.info({
         fn: 'loadChaptersAndQuestions',
         message: 'Chapters loaded',
@@ -243,6 +246,23 @@ class ActionPlanTable extends LitElement {
     }
   }
 
+  private loadAllQuestions() {
+    // Collect all questions from all chapters
+    const allQuestions: any[] = [];
+    for (const chapter of this.chapters) {
+      if (chapter.questions && Array.isArray(chapter.questions)) {
+        allQuestions.push(...chapter.questions);
+      }
+    }
+    this.questions = allQuestions;
+
+    logger.info({
+      fn: 'loadAllQuestions',
+      message: 'All questions loaded',
+      data: { count: this.questions.length },
+    });
+  }
+
   private handleChapterChange(e: Event) {
     const target = e.target as any;
     this.selectedChapterId = target?.value || '';
@@ -254,12 +274,13 @@ class ActionPlanTable extends LitElement {
       data: { selectedChapterId: this.selectedChapterId },
     });
 
-    // Load questions for selected chapter
+    // Load questions for selected chapter, or all questions if no chapter selected
     if (this.selectedChapterId) {
       const chapter = this.chapters.find(c => c.id === this.selectedChapterId);
       this.questions = chapter?.questions || [];
     } else {
-      this.questions = [];
+      // Load all questions when no chapter is selected
+      this.loadAllQuestions();
     }
   }
 
@@ -287,7 +308,9 @@ class ActionPlanTable extends LitElement {
     this.selectedChapterId = '';
     this.selectedQuestionId = '';
     this.actionDescription = '';
-    this.questions = [];
+
+    // Load all questions initially (since no chapter is selected)
+    this.loadAllQuestions();
 
     // Force update to ensure the selects are cleared
     this.requestUpdate();
@@ -452,7 +475,6 @@ class ActionPlanTable extends LitElement {
               placeholder="Select a question"
               .value=${this.selectedQuestionId}
               @sl-change=${this.handleQuestionChange}
-              ?disabled=${!this.selectedChapterId}
               clearable
               hoist
             >

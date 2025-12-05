@@ -36,6 +36,7 @@ declare class ActionPlanTable extends LitElement {
     disconnectedCallback(): void;
     private loadActionPlans;
     private loadChaptersAndQuestions;
+    private loadAllQuestions;
     private handleChapterChange;
     private handleQuestionChange;
     private handleActionChange;

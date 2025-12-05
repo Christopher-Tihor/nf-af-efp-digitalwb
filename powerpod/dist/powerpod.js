@@ -38498,6 +38498,8 @@
                   }
               };
               flattenChapters(questionnaire.chapters);
+              // Load all questions from all chapters for the unfiltered dropdown
+              this.loadAllQuestions();
               logger$7.info({
                   fn: 'loadChaptersAndQuestions',
                   message: 'Chapters loaded',
@@ -38512,6 +38514,21 @@
               });
           }
       }
+      loadAllQuestions() {
+          // Collect all questions from all chapters
+          const allQuestions = [];
+          for (const chapter of this.chapters) {
+              if (chapter.questions && Array.isArray(chapter.questions)) {
+                  allQuestions.push(...chapter.questions);
+              }
+          }
+          this.questions = allQuestions;
+          logger$7.info({
+              fn: 'loadAllQuestions',
+              message: 'All questions loaded',
+              data: { count: this.questions.length },
+          });
+      }
       handleChapterChange(e) {
           const target = e.target;
           this.selectedChapterId = (target === null || target === void 0 ? void 0 : target.value) || '';
@@ -38521,13 +38538,14 @@
               message: 'Chapter changed',
               data: { selectedChapterId: this.selectedChapterId },
           });
-          // Load questions for selected chapter
+          // Load questions for selected chapter, or all questions if no chapter selected
           if (this.selectedChapterId) {
               const chapter = this.chapters.find(c => c.id === this.selectedChapterId);
               this.questions = (chapter === null || chapter === void 0 ? void 0 : chapter.questions) || [];
           }
           else {
-              this.questions = [];
+              // Load all questions when no chapter is selected
+              this.loadAllQuestions();
           }
       }
       handleQuestionChange(e) {
@@ -38551,7 +38569,8 @@
           this.selectedChapterId = '';
           this.selectedQuestionId = '';
           this.actionDescription = '';
-          this.questions = [];
+          // Load all questions initially (since no chapter is selected)
+          this.loadAllQuestions();
           // Force update to ensure the selects are cleared
           this.requestUpdate();
           (_a = this.dialog) === null || _a === void 0 ? void 0 : _a.show();
@@ -38704,7 +38723,6 @@
               placeholder="Select a question"
               .value=${this.selectedQuestionId}
               @sl-change=${this.handleQuestionChange}
-              ?disabled=${!this.selectedChapterId}
               clearable
               hoist
             >
