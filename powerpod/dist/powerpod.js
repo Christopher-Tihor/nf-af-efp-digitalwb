@@ -40266,13 +40266,18 @@
               this.searchInput.value = option.label;
           }
           this.filteredOptions = [...this.options];
+          // Force a re-render to update checkmarks
+          this.requestUpdate();
           this.emitEvent();
           // Close dropdown after selection
           if (this.dropdown) {
               this.dropdown.hide();
           }
       }
-      handleClear() {
+      handleClear(event) {
+          // Prevent any default behavior and stop propagation
+          event.preventDefault();
+          event.stopPropagation();
           this.isClearing = true;
           this.selectedValue = '';
           this.searchTerm = '';
@@ -40280,11 +40285,13 @@
               this.searchInput.value = '';
           }
           this.filteredOptions = [...this.options];
-          this.emitEvent();
-          // Ensure dropdown is closed
-          if (this.dropdown) {
+          // Force close the dropdown immediately
+          if (this.dropdown && this.isOpen) {
               this.dropdown.hide();
           }
+          // Force a re-render to update checkmarks
+          this.requestUpdate();
+          this.emitEvent();
           // Reset the clearing flag after a short delay
           setTimeout(() => {
               this.isClearing = false;
@@ -40370,7 +40377,7 @@
               ?disabled=${this.disabled || this.readOnly}
               ?clearable=${this.clearable && !!this.selectedValue}
               @sl-input=${this.handleSearchInput}
-              @sl-clear=${this.handleClear}
+              @sl-clear=${(e) => this.handleClear(e)}
             >
               <sl-icon
                 name="chevron-down"
