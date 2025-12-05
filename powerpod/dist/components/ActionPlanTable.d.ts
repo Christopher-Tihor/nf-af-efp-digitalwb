@@ -1,0 +1,46 @@
+import '@shoelace-style/shoelace/dist/components/button/button.js';
+import '@shoelace-style/shoelace/dist/components/dialog/dialog.js';
+import '@shoelace-style/shoelace/dist/components/select/select.js';
+import '@shoelace-style/shoelace/dist/components/option/option.js';
+import '@shoelace-style/shoelace/dist/components/textarea/textarea.js';
+import '@shoelace-style/shoelace/dist/components/alert/alert.js';
+import { LitElement } from 'lit';
+type ActionPlan = {
+    quartech_actionplanid: string;
+    quartech_action: string;
+    _quartech_workbook_value: string;
+    _quartech_chapter_value: string | null;
+    _quartech_workbookquestion_value: string | null;
+    createdon: string;
+    _createdby_value: string;
+    'createdon@OData.Community.Display.V1.FormattedValue'?: string;
+    '_createdby_value@OData.Community.Display.V1.FormattedValue'?: string;
+    '_quartech_workbook_value@OData.Community.Display.V1.FormattedValue'?: string;
+};
+declare class ActionPlanTable extends LitElement {
+    actionPlans: ActionPlan[];
+    private loading;
+    private error;
+    private selectedChapterId;
+    private selectedQuestionId;
+    private actionDescription;
+    private creating;
+    private chapters;
+    private questions;
+    dialog: any;
+    static styles: import("lit").CSSResult[];
+    connectedCallback(): void;
+    private loadActionPlans;
+    private loadChaptersAndQuestions;
+    private handleChapterChange;
+    private handleQuestionChange;
+    private handleActionChange;
+    private openCreateDialog;
+    private closeCreateDialog;
+    private handleCreateActionPlan;
+    private getChapterName;
+    private getQuestionLabel;
+    private formatDate;
+    render(): import("lit-html").TemplateResult<1>;
+}
+export default ActionPlanTable;

@@ -12,6 +12,7 @@ import './NavigationButtons';
 import './RatingQuestion';
 import './EFPBreadcrumbs';
 import './WorkbookSignOffButtons';
+import './ActionPlanTable';
 interface EFPActiveContent {
     title: string;
     content: string;

@@ -15,6 +15,7 @@ import './NavigationButtons';
 import './RatingQuestion';
 import './EFPBreadcrumbs';
 import './WorkbookSignOffButtons';
+import './ActionPlanTable';
 import WorkbookResponseHelper from '../common/workbookResponseHelper.js';
 import { getWorkbookId } from '../common/workbookUtils.js';
 import { POWERPOD } from '../common/constants.js';
@@ -671,6 +672,7 @@ export class EFPEntryForm extends LitElement {
         <div class="action-plan-content">
           ${cleanedSections.join('\n')}
         </div>
+        <action-plan-table></action-plan-table>
       </div>
     `;
 
