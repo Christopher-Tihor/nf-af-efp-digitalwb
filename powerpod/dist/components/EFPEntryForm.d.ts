@@ -35,8 +35,6 @@ export declare class EFPEntryForm extends LitElement {
     private multilineTextSaveStatus;
     private multilineTextCharCounts;
     connectedCallback(): void;
-    moveActionPlanContent(): void;
-    private appendActionPlanToLightDOM;
     disconnectedCallback(): void;
     private updateQuestionnaireStoreStatus;
     private setupQuestionnaireStoreWatcher;

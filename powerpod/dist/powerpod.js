@@ -38349,61 +38349,6 @@
           // Set up periodic check for questionnaire store loading
           this.setupQuestionnaireStoreWatcher();
       }
-      moveActionPlanContent() {
-          // Find the efpactionplan div in the DOM
-          const actionPlanDiv = document.getElementById('efpactionplan');
-          console.log('🔍 moveActionPlanContent called');
-          console.log('🔍 Looking for div with id "efpactionplan"');
-          console.log('🔍 Found div:', actionPlanDiv);
-          if (actionPlanDiv) {
-              console.log('🔍 Div innerHTML (first 200 chars):', actionPlanDiv.innerHTML.substring(0, 200));
-              console.log('🔍 Div parent:', actionPlanDiv.parentElement);
-              // Store reference to the original div and its parent
-              window.efpActionPlanDiv = actionPlanDiv;
-              window.efpActionPlanOriginalParent = actionPlanDiv.parentElement;
-              logger$4.info({ message: 'Action Plan div found and stored' });
-              console.log('✅ Action Plan div found and stored');
-              // Try to append it to the component's light DOM
-              this.appendActionPlanToLightDOM();
-          }
-          else {
-              logger$4.warn({ message: 'efpactionplan div not found in DOM' });
-              console.warn('⚠️ efpactionplan div not found in DOM');
-              console.warn('⚠️ All divs with id containing "action":', Array.from(document.querySelectorAll('[id*="action"]')).map(el => el.id));
-          }
-      }
-      appendActionPlanToLightDOM() {
-          setTimeout(() => {
-              const actionPlanDiv = window.efpActionPlanDiv;
-              console.log('🔍 appendActionPlanToLightDOM called');
-              console.log('🔍 activeContent.title:', this.activeContent.title);
-              console.log('🔍 actionPlanDiv:', actionPlanDiv);
-              if (!actionPlanDiv) {
-                  console.warn('⚠️ Action Plan div not available');
-                  return;
-              }
-              if (this.activeContent.title === 'My Action Plan') {
-                  // Append the div to this component's light DOM (not shadow DOM)
-                  // This keeps it in the light DOM where scripts work
-                  if (!this.contains(actionPlanDiv)) {
-                      this.appendChild(actionPlanDiv);
-                      actionPlanDiv.style.display = 'block';
-                      actionPlanDiv.style.marginTop = '1.5rem';
-                      console.log('✅ Action Plan content appended to light DOM');
-                  }
-              }
-              else {
-                  console.log('🔍 Not viewing My Action Plan, moving back');
-                  // Move it back to original parent when not viewing
-                  const originalParent = window.efpActionPlanOriginalParent;
-                  if (originalParent && this.contains(actionPlanDiv)) {
-                      originalParent.appendChild(actionPlanDiv);
-                      actionPlanDiv.style.display = 'none';
-                      console.log('✅ Action Plan content moved back to original parent');
-                  }
-              }
-          }, 100);
-      }
       disconnectedCallback() {
           super.disconnectedCallback();
           // Clear all pending debounce timers
@@ -38425,8 +38370,6 @@
               logger$4.info({
                   message: '📋 Questionnaire store loaded, updating navigation',
               });
-              // Move the action plan content after questionnaire is loaded
-              this.moveActionPlanContent();
               this.requestUpdate(); // Force re-render when store becomes available
           }
       }
@@ -39805,10 +39748,6 @@
                       content: currentStep.content,
                   };
               }
-          }
-          // Check if we're now viewing "My Action Plan" and append to light DOM
-          if (changedProps.has('activeContent') || changedProps.has('currentStepIndex')) {
-              this.appendActionPlanToLightDOM();
           }
       }
       // Lifecycle methods
