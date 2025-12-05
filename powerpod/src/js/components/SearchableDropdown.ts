@@ -30,6 +30,7 @@ class SearchableDropdown extends LitElement {
   @state() private filteredOptions: DropdownOption[] = [];
   @state() private searchTerm: string = '';
   @state() private isOpen: boolean = false;
+  @state() private isClearing: boolean = false;
 
   static styles = css`
     sl-input::part(base) {
@@ -137,8 +138,8 @@ class SearchableDropdown extends LitElement {
       );
     }
 
-    // Ensure dropdown stays open when typing
-    if (!this.isOpen && this.dropdown) {
+    // Ensure dropdown stays open when typing, but not when clearing
+    if (!this.isOpen && this.dropdown && !this.isClearing) {
       this.dropdown.show();
     }
   }
@@ -159,6 +160,7 @@ class SearchableDropdown extends LitElement {
   }
 
   private handleClear() {
+    this.isClearing = true;
     this.selectedValue = '';
     this.searchTerm = '';
     if (this.searchInput) {
@@ -166,6 +168,16 @@ class SearchableDropdown extends LitElement {
     }
     this.filteredOptions = [...this.options];
     this.emitEvent();
+
+    // Ensure dropdown is closed
+    if (this.dropdown) {
+      this.dropdown.hide();
+    }
+
+    // Reset the clearing flag after a short delay
+    setTimeout(() => {
+      this.isClearing = false;
+    }, 100);
   }
 
   private handleDropdownShow() {

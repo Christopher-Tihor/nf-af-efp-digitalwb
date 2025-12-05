@@ -25,6 +25,7 @@ declare class SearchableDropdown extends LitElement {
     private filteredOptions;
     private searchTerm;
     private isOpen;
+    private isClearing;
     static styles: import("lit").CSSResult;
     connectedCallback(): void;
     updated(changedProperties: Map<string, any>): void;

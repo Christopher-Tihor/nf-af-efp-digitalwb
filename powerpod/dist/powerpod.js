@@ -40232,6 +40232,7 @@
           this.filteredOptions = [];
           this.searchTerm = '';
           this.isOpen = false;
+          this.isClearing = false;
       }
       connectedCallback() {
           super.connectedCallback();
@@ -40253,8 +40254,8 @@
               this.filteredOptions = this.options.filter(option => option.label.toLowerCase().includes(searchLower) ||
                   option.value.toLowerCase().includes(searchLower));
           }
-          // Ensure dropdown stays open when typing
-          if (!this.isOpen && this.dropdown) {
+          // Ensure dropdown stays open when typing, but not when clearing
+          if (!this.isOpen && this.dropdown && !this.isClearing) {
               this.dropdown.show();
           }
       }
@@ -40272,6 +40273,7 @@
           }
       }
       handleClear() {
+          this.isClearing = true;
           this.selectedValue = '';
           this.searchTerm = '';
           if (this.searchInput) {
@@ -40279,6 +40281,14 @@
           }
           this.filteredOptions = [...this.options];
           this.emitEvent();
+          // Ensure dropdown is closed
+          if (this.dropdown) {
+              this.dropdown.hide();
+          }
+          // Reset the clearing flag after a short delay
+          setTimeout(() => {
+              this.isClearing = false;
+          }, 100);
       }
       handleDropdownShow() {
           this.isOpen = true;
@@ -40524,6 +40534,9 @@
   __decorate([
       r$1()
   ], SearchableDropdown.prototype, "isOpen", void 0);
+  __decorate([
+      r$1()
+  ], SearchableDropdown.prototype, "isClearing", void 0);
   SearchableDropdown = __decorate([
       t$1('searchable-dropdown')
   ], SearchableDropdown);
