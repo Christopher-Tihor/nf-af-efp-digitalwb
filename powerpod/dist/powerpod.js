@@ -38398,6 +38398,8 @@
 
   SlDialog.define("sl-dialog");
 
+  SlSpinner.define("sl-spinner");
+
   const logger$7 = Logger('components/ActionPlanTable');
   let ActionPlanTable = class ActionPlanTable extends s$1 {
       constructor() {
@@ -38416,6 +38418,22 @@
           super.connectedCallback();
           this.loadActionPlans();
           this.loadChaptersAndQuestions();
+          // Subscribe to store changes to update when questionnaire data loads
+          store.events.subscribe('stateChange', (state) => {
+              var _a, _b;
+              if (((_b = (_a = state.questionnaire) === null || _a === void 0 ? void 0 : _a.chapters) === null || _b === void 0 ? void 0 : _b.length) > 0 && this.chapters.length === 0) {
+                  logger$7.info({
+                      fn: 'connectedCallback',
+                      message: 'Questionnaire data loaded in store, updating chapters',
+                  });
+                  this.loadChaptersAndQuestions();
+                  this.requestUpdate();
+              }
+          });
+      }
+      disconnectedCallback() {
+          super.disconnectedCallback();
+          // Note: PubSub doesn't have unsubscribe, but component cleanup happens automatically
       }
       async loadActionPlans() {
           var _a;
@@ -38624,7 +38642,10 @@
         </div>
 
         ${this.loading
-            ? x `<div class="loading-message">Loading action plans...</div>`
+            ? x `<div class="loading-message">
+              <sl-spinner style="font-size: 3rem;"></sl-spinner>
+              <div>Loading action plans...</div>
+            </div>`
             : this.error
                 ? x `<div class="error-message">Error: ${this.error}</div>`
                 : this.actionPlans.length === 0
@@ -38777,6 +38798,13 @@
       .loading-message, .error-message, .empty-message {
         padding: 2rem;
         text-align: center;
+      }
+
+      .loading-message {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
       }
 
       .error-message {

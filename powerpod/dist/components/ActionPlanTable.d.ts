@@ -4,6 +4,7 @@ import '@shoelace-style/shoelace/dist/components/select/select.js';
 import '@shoelace-style/shoelace/dist/components/option/option.js';
 import '@shoelace-style/shoelace/dist/components/textarea/textarea.js';
 import '@shoelace-style/shoelace/dist/components/alert/alert.js';
+import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
 import { LitElement } from 'lit';
 type ActionPlan = {
     quartech_actionplanid: string;
@@ -32,6 +33,7 @@ declare class ActionPlanTable extends LitElement {
     questionSelect: any;
     static styles: import("lit").CSSResult[];
     connectedCallback(): void;
+    disconnectedCallback(): void;
     private loadActionPlans;
     private loadChaptersAndQuestions;
     private handleChapterChange;

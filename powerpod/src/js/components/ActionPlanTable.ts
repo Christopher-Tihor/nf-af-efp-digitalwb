@@ -6,13 +6,14 @@ import '@shoelace-style/shoelace/dist/components/select/select.js';
 import '@shoelace-style/shoelace/dist/components/option/option.js';
 import '@shoelace-style/shoelace/dist/components/textarea/textarea.js';
 import '@shoelace-style/shoelace/dist/components/alert/alert.js';
+import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
 import { LitElement, css, html, unsafeCSS } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { Logger } from '../common/logger';
 import { getActionPlansData, postActionPlanData } from '../common/fetch';
 import { getCurrentWorkbookId } from '../common/workbookUtils';
-import { getQuestionnaireFromStore, getChapterFromStore, getQuestionFromStore } from '../common/questionnaire';
-import { POWERPOD } from '../common/constants';
+import { getQuestionnaireFromStore, getQuestionFromStore } from '../common/questionnaire';
+import store from '../store/index.js';
 
 const logger = Logger('components/ActionPlanTable');
 
@@ -102,6 +103,13 @@ class ActionPlanTable extends LitElement {
         text-align: center;
       }
 
+      .loading-message {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+      }
+
       .error-message {
         color: #dc3545;
       }
@@ -131,6 +139,23 @@ class ActionPlanTable extends LitElement {
     super.connectedCallback();
     this.loadActionPlans();
     this.loadChaptersAndQuestions();
+
+    // Subscribe to store changes to update when questionnaire data loads
+    store.events.subscribe('stateChange', (state: any) => {
+      if (state.questionnaire?.chapters?.length > 0 && this.chapters.length === 0) {
+        logger.info({
+          fn: 'connectedCallback',
+          message: 'Questionnaire data loaded in store, updating chapters',
+        });
+        this.loadChaptersAndQuestions();
+        this.requestUpdate();
+      }
+    });
+  }
+
+  disconnectedCallback(): void {
+    super.disconnectedCallback();
+    // Note: PubSub doesn't have unsubscribe, but component cleanup happens automatically
   }
 
   private async loadActionPlans() {
@@ -361,7 +386,10 @@ class ActionPlanTable extends LitElement {
         </div>
 
         ${this.loading
-          ? html`<div class="loading-message">Loading action plans...</div>`
+          ? html`<div class="loading-message">
+              <sl-spinner style="font-size: 3rem;"></sl-spinner>
+              <div>Loading action plans...</div>
+            </div>`
           : this.error
           ? html`<div class="error-message">Error: ${this.error}</div>`
           : this.actionPlans.length === 0
