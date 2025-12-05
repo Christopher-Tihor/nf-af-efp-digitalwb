@@ -153,6 +153,14 @@ export function deleteWorkbookResponseData({ id, ...options }: {
 export function getPortalPageData({ params, ...options }?: {
     params?: string | undefined;
 }): Promise<any>;
+export function getActionPlansData({ ...options }?: {}): Promise<any>;
+export function postActionPlanData({ workbookId, chapterId, questionId, action, ...options }: {
+    [x: string]: any;
+    workbookId: any;
+    chapterId: any;
+    questionId: any;
+    action: any;
+}): Promise<any>;
 export namespace ENDPOINT_URL {
     let get_env_vars_data: string;
     function get_application_form_data(programId: any): string;
@@ -192,4 +200,6 @@ export namespace ENDPOINT_URL {
     function patch_workbookresponse_data(id: any): string;
     function delete_workbookresponse_data(id: any): string;
     function get_portal_page_data(params?: string): string;
+    let get_actionplans_data: string;
+    let post_actionplan_data: string;
 }

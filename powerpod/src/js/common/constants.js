@@ -127,6 +127,7 @@ export const SECTOR_WIDE_ID_VALUE = '6ce2584f-4740-ee11-be6e-000d3af3ac95';
 // TODO: move this to some kind of state management module
 // cache common elements
 export const POWERPOD = {
+  actionPlanHelper: {},
   state: {},
   program: {},
   applicationUtils: {},

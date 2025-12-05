@@ -15,6 +15,7 @@ import { POWERPOD } from '../common/constants.js';
 import { getPortalPageData } from '../common/fetch.js';
 import store from '../store';
 import '../common/workbookResponseHelper.js';
+import '../common/actionPlanHelper.js';
 import '../components/EFPEntryForm.ts';
 import { loadUserRoles } from '../common/userRoles.js';
 

@@ -75,6 +75,7 @@ export const OTHER_VALUE: "255550010";
 export const GROUP_APPLICATION_VALUE: "255550001";
 export const SECTOR_WIDE_ID_VALUE: "6ce2584f-4740-ee11-be6e-000d3af3ac95";
 export namespace POWERPOD {
+    let actionPlanHelper: {};
     let state: {};
     let program: {};
     let applicationUtils: {};

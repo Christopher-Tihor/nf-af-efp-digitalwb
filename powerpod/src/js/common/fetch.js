@@ -61,6 +61,8 @@ export const ENDPOINT_URL = {
   patch_workbookresponse_data: (id) => `/_api/quartech_workbookresponses(${id})`,
   delete_workbookresponse_data: (id) => `/_api/quartech_workbookresponses(${id})`,
   get_portal_page_data: (params = '') => `/_api/quartech_portalpages${params ? `?${params}` : ''}`,
+  get_actionplans_data: `/_api/quartech_actionplans?$filter=statecode eq 0`,
+  post_actionplan_data: `/_api/quartech_actionplans`,
 };
 
 const CONTENT_TYPE = {
@@ -113,6 +115,8 @@ POWERPOD.fetch = {
   patchWorkbookResponseData,
   deleteWorkbookResponseData,
   getPortalPageData,
+  getActionPlansData,
+  postActionPlanData,
 };
 
 const setODataHeaders = (XMLHttpRequest) => {
@@ -966,6 +970,69 @@ export async function getPortalPageData({ params = '', ...options } = {}) {
     datatype: DATATYPE.json,
     includeODataHeaders: true,
     returnData: true,
+    ...options,
+  });
+}
+
+// Action Plan API Functions
+export async function getActionPlansData({ ...options } = {}) {
+  return fetch({
+    url: ENDPOINT_URL.get_actionplans_data,
+    contentType: CONTENT_TYPE.json,
+    datatype: DATATYPE.json,
+    includeODataHeaders: true,
+    returnData: true,
+    skipCache: true,
+    ...options,
+  });
+}
+
+export async function postActionPlanData({
+  workbookId,
+  chapterId,
+  questionId,
+  action,
+  ...options
+}) {
+  if (!workbookId || !action) {
+    logger.error({
+      fn: postActionPlanData,
+      message: 'Missing required parameters',
+      data: { workbookId, chapterId, questionId, action },
+    });
+    throw new Error('workbookId and action are required');
+  }
+
+  logger.info({
+    fn: postActionPlanData,
+    message: 'Creating action plan',
+    data: { workbookId, chapterId, questionId, action },
+  });
+
+  const payload = {
+    quartech_action: action,
+    'quartech_Workbook@odata.bind': `/quartech_workbooks(${workbookId})`,
+  };
+
+  // Add chapterId if provided
+  if (chapterId) {
+    payload['quartech_chapter@odata.bind'] = `/quartech_chapters(${chapterId})`;
+  }
+
+  // Add questionId if provided
+  if (questionId) {
+    payload['quartech_workbookquestion@odata.bind'] = `/quartech_workbookquestions(${questionId})`;
+  }
+
+  return fetch({
+    method: 'POST',
+    url: ENDPOINT_URL.post_actionplan_data,
+    datatype: DATATYPE.json,
+    includeODataHeaders: true,
+    addRequestVerificationToken: true,
+    processData: false,
+    returnData: true,
+    data: JSON.stringify(payload),
     ...options,
   });
 }

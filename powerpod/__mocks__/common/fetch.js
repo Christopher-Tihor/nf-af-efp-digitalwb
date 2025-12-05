@@ -8,6 +8,8 @@ import getContactDataJson from '../../src/test/mock/api/get_contact_data.json';
 import deleteDocumentDataJson from '../../src/test/mock/api/delete_document_data.json';
 import getTypesOfFoodDataJson from '../../src/test/mock/api/get_types_of_food_data.json';
 import getCommoditiesDataJson from '../../src/test/mock/api/get_commodities_data.json';
+import getActionPlansDataJson from '../../src/test/mock/api/get_actionplans_data.json';
+import postActionPlanDataJson from '../../src/test/mock/api/post_actionplan_data.json';
 
 export function getMunicipalData() {
   return getMunicipalDataJson;
@@ -40,4 +42,13 @@ export function getTypesOfFoodData() {
 
 export function getCommoditiesData() {
   return getCommoditiesDataJson;
+}
+
+export function getActionPlansData() {
+  return getActionPlansDataJson;
+}
+
+export async function postActionPlanData() {
+  await delay(500);
+  return postActionPlanDataJson;
 }
