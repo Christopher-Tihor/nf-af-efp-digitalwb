@@ -1,5 +1,5 @@
 /*!
-* powerpod 4.4.7
+* powerpod 4.4.8
 * https://github.com/bcgov/nr-af-pods/powerpod
 *
 * @license GPLv3 for open source use only
@@ -38796,71 +38796,115 @@
               }
               items.push(chapterItem);
           });
-          // Add hard-coded "My Action Plan" chapter at the end
-          const myActionPlanItem = {
+          // Add "My Action Plan" chapter from portal page data
+          const myActionPlanItem = this.getMyActionPlanItemsFromPortalPage();
+          items.push(myActionPlanItem);
+          return items;
+      }
+      // Generate My Action Plan items from portal page data
+      getMyActionPlanItemsFromPortalPage() {
+          var _a, _b;
+          const portalPageName = 'My Action Plan';
+          const portalPageData = (_b = (_a = POWERPOD.state) === null || _a === void 0 ? void 0 : _a.portalPages) === null || _b === void 0 ? void 0 : _b[portalPageName];
+          // If portal page data is not loaded yet, return loading state
+          if (!portalPageData) {
+              logger$4.info({
+                  message: '📄 My Action Plan portal page data not loaded yet, showing loading state',
+              });
+              return {
+                  label: 'My Action Plan',
+                  title: 'My Action Plan',
+                  content: `
+          <div style="display: flex; justify-content: center; align-items: center; min-height: 300px;">
+            <div id="spinner"></div>
+          </div>
+        `,
+                  complete: false,
+                  isContainer: true,
+                  disableExpand: true,
+                  items: [
+                      {
+                          label: 'My Action Plan',
+                          content: `
+              <div style="display: flex; justify-content: center; align-items: center; min-height: 300px;">
+                <div id="spinner"></div>
+              </div>
+            `,
+                          complete: false,
+                      }
+                  ],
+              };
+          }
+          // Build the content from sections 1-6
+          const sections = [
+              portalPageData.quartech_section1,
+              portalPageData.quartech_section2,
+              portalPageData.quartech_section3,
+              portalPageData.quartech_section4,
+              portalPageData.quartech_section5,
+              portalPageData.quartech_section6,
+          ].filter((section) => section); // Filter out null/undefined sections
+          // Clean up the HTML content to remove problematic font-family styles
+          const cleanedSections = sections.map((section) => {
+              if (!section)
+                  return section;
+              // Replace Roboto Slab font-family with BC Sans
+              let cleaned = section.replace(/font-family:\s*&quot;Roboto Slab&quot;[^;]*;/gi, '');
+              cleaned = cleaned.replace(/font-family:\s*"Roboto Slab"[^;]*;/gi, '');
+              cleaned = cleaned.replace(/font-family:\s*'Roboto Slab'[^;]*;/gi, '');
+              // Also replace list-style-position: inside with outside
+              cleaned = cleaned.replace(/list-style-position:\s*inside/gi, 'list-style-position: outside');
+              return cleaned;
+          });
+          const actionPlanContent = `
+      <div style="font-family: 'BC Sans', 'Noto Sans', Verdana, sans-serif !important;">
+        <style>
+          .action-plan-content * {
+            font-family: 'BC Sans', 'Noto Sans', Verdana, sans-serif !important;
+          }
+          .action-plan-content ul {
+            list-style-position: outside !important;
+            padding-left: 2em !important;
+            margin: 1em 0 !important;
+          }
+          .action-plan-content ol {
+            list-style-position: outside !important;
+            padding-left: 2em !important;
+            margin: 1em 0 !important;
+          }
+          .action-plan-content li {
+            display: list-item !important;
+            padding-left: 0.5em !important;
+            line-height: 1.6 !important;
+          }
+          .action-plan-content h1, .action-plan-content h2, .action-plan-content h3,
+          .action-plan-content h4, .action-plan-content h5, .action-plan-content h6 {
+            font-family: 'BC Sans', 'Noto Sans', Verdana, sans-serif !important;
+          }
+          .action-plan-content p {
+            font-family: 'BC Sans', 'Noto Sans', Verdana, sans-serif !important;
+          }
+        </style>
+        <div class="action-plan-content">
+          ${cleanedSections.join('\n')}
+        </div>
+      </div>
+    `;
+          return {
               label: 'My Action Plan',
               title: 'My Action Plan',
-              content: `
-        <div class="chapter-header">
-          <p>Develop an Action Plan to address the concerns identified during your EFP visit.</p>
-          <p>Your Planning Advisor will help you prioritize each action item and if applicable, identify if you may be eligible for BMP funding to support completing your plan.</p>
-        </div>
-        <div style="margin-top: 1.5rem;">
-          <h3 style="font-family: var(--chapter-font); font-weight: 600; color: var(--sl-color-neutral-800); margin-bottom: 0.75rem;">Resources:</h3>
-          <ul style="line-height: 1.8; color: var(--sl-color-neutral-700);">
-            <li>
-              <strong>BMP funding:</strong>
-              <a href="https://iafbc.ca/beneficial-management-practices-program/" target="_blank" rel="noopener noreferrer" style="color: var(--sl-color-primary-600); text-decoration: underline;">
-                https://iafbc.ca/beneficial-management-practices-program/
-              </a>
-            </li>
-            <li>
-              <strong>EFP reference guide:</strong>
-              <a href="https://www2.gov.bc.ca/gov/content/industry/agriculture-seafood/programs/environmental-farm-plan" target="_blank" rel="noopener noreferrer" style="color: var(--sl-color-primary-600); text-decoration: underline;">
-                https://www2.gov.bc.ca/gov/content/industry/agriculture-seafood/programs/environmental-farm-plan
-              </a>
-            </li>
-            <li><strong>Etc</strong></li>
-          </ul>
-        </div>
-      `,
+              content: actionPlanContent,
               complete: false,
               isContainer: true,
-              disableExpand: true, // This chapter should not be expandable
+              disableExpand: true,
               items: [
                   {
                       label: 'My Action Plan',
-                      content: `
-            <div class="chapter-header">
-              <h2>My Action Plan</h2>
-              <p>Develop an Action Plan to address the concerns identified during your EFP visit.</p>
-              <p>Your Planning Advisor will help you prioritize each action item and if applicable, identify if you may be eligible for BMP funding to support completing your plan.</p>
-            </div>
-            <div style="margin-top: 1.5rem;">
-              <h3 style="font-family: var(--chapter-font); font-weight: 600; color: var(--sl-color-neutral-800); margin-bottom: 0.75rem;">Resources:</h3>
-              <ul style="line-height: 1.8; color: var(--sl-color-neutral-700);">
-                <li>
-                  <strong>BMP funding:</strong>
-                  <a href="https://iafbc.ca/beneficial-management-practices-program/" target="_blank" rel="noopener noreferrer" style="color: var(--sl-color-primary-600); text-decoration: underline;">
-                    https://iafbc.ca/beneficial-management-practices-program/
-                  </a>
-                </li>
-                <li>
-                  <strong>EFP reference guide:</strong>
-                  <a href="https://www2.gov.bc.ca/gov/content/industry/agriculture-seafood/programs/environmental-farm-plan" target="_blank" rel="noopener noreferrer" style="color: var(--sl-color-primary-600); text-decoration: underline;">
-                    https://www2.gov.bc.ca/gov/content/industry/agriculture-seafood/programs/environmental-farm-plan
-                  </a>
-                </li>
-                <li><strong>Etc</strong></li>
-              </ul>
-            </div>
-          `,
+                      content: actionPlanContent,
                       complete: false,
                   }
               ],
           };
-          items.push(myActionPlanItem);
-          return items;
       }
       // Generate Section C items from portal page data
       getSectionCItemsFromPortalPage() {
@@ -40413,7 +40457,7 @@
     return _initWorkbook.apply(this, arguments);
   }
 
-  // Function to load portal page data for Section C
+  // Function to load portal page data for Section C and My Action Plan
   function _initWorkbook() {
     _initWorkbook = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee() {
       var existingToken, workbookId, nestedStructure, _workbookId;
@@ -40548,7 +40592,7 @@
               });
             }
 
-            // Load portal page data for Section C
+            // Load portal page data for Section C and My Action Plan
             loadPortalPageData();
             hideLoadingAnimation();
           case 22:
@@ -40564,43 +40608,50 @@
   } // Function to insert the element
   function _loadPortalPageData() {
     _loadPortalPageData = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee2() {
-      var portalPageName, _result$data, filterParam, result, portalPages, portalPageData;
+      var portalPageNames, _i, _portalPageNames, portalPageName, _result$data, filterParam, result, portalPages, portalPageData;
       return _regeneratorRuntime().wrap(function _callee2$(_context2) {
         while (1) switch (_context2.prev = _context2.next) {
           case 0:
-            portalPageName = 'Workbook Terms and Conditions Sign-off';
-            _context2.prev = 1;
+            portalPageNames = ['Workbook Terms and Conditions Sign-off', 'My Action Plan'];
+            _i = 0, _portalPageNames = portalPageNames;
+          case 2:
+            if (!(_i < _portalPageNames.length)) {
+              _context2.next = 29;
+              break;
+            }
+            portalPageName = _portalPageNames[_i];
+            _context2.prev = 4;
             logger$3.info({
               message: "Loading portal page: \"".concat(portalPageName, "\"")
             });
 
-            // Build filter parameter
-            filterParam = "$filter=quartech_name eq '".concat(portalPageName, "'");
-            _context2.next = 6;
+            // Build filter parameter with statecode filter
+            filterParam = "$filter=quartech_name eq '".concat(portalPageName, "' and statecode eq 0");
+            _context2.next = 9;
             return getPortalPageData({
               params: filterParam
             });
-          case 6:
+          case 9:
             result = _context2.sent;
             if (result !== null && result !== void 0 && (_result$data = result.data) !== null && _result$data !== void 0 && _result$data.value) {
-              _context2.next = 9;
-              break;
-            }
-            throw new Error('Invalid response structure from portal page API');
-          case 9:
-            portalPages = result.data.value; // Validate exactly one result
-            if (!(portalPages.length === 0)) {
               _context2.next = 12;
               break;
             }
-            throw new Error("No portal page found with name \"".concat(portalPageName, "\""));
+            throw new Error('Invalid response structure from portal page API');
           case 12:
+            portalPages = result.data.value; // Validate exactly one result
+            if (!(portalPages.length === 0)) {
+              _context2.next = 15;
+              break;
+            }
+            throw new Error("No portal page found with name \"".concat(portalPageName, "\""));
+          case 15:
             if (!(portalPages.length > 1)) {
-              _context2.next = 14;
+              _context2.next = 17;
               break;
             }
             throw new Error("Multiple portal pages found with name \"".concat(portalPageName, "\". Expected exactly 1, found ").concat(portalPages.length));
-          case 14:
+          case 17:
             portalPageData = portalPages[0];
             logger$3.info({
               message: "Successfully loaded portal page: \"".concat(portalPageName, "\""),
@@ -40616,11 +40667,11 @@
               message: "Portal page \"".concat(portalPageName, "\" stored in state"),
               data: portalPageData
             });
-            _context2.next = 23;
+            _context2.next = 26;
             break;
-          case 20:
-            _context2.prev = 20;
-            _context2.t0 = _context2["catch"](1);
+          case 23:
+            _context2.prev = 23;
+            _context2.t0 = _context2["catch"](4);
             logger$3.error({
               message: "Failed to load portal page \"".concat(portalPageName, "\""),
               data: {
@@ -40628,11 +40679,15 @@
               }
             });
             // Don't throw - allow the workbook to continue loading even if portal page fails
-          case 23:
+          case 26:
+            _i++;
+            _context2.next = 2;
+            break;
+          case 29:
           case "end":
             return _context2.stop();
         }
-      }, _callee2, null, [[1, 20]]);
+      }, _callee2, null, [[4, 23]]);
     }));
     return _loadPortalPageData.apply(this, arguments);
   }
@@ -40748,7 +40803,7 @@
       };
     };
     // @ts-ignore
-    POWERPOD.version = '4.4.7';
+    POWERPOD.version = '4.4.8';
     // @ts-ignore
     window.powerpod = POWERPOD;
   }

@@ -200,63 +200,68 @@ export async function initWorkbook() {
     });
   }
 
-  // Load portal page data for Section C
+  // Load portal page data for Section C and My Action Plan
   loadPortalPageData();
 
   hideLoadingAnimation();
 }
 
-// Function to load portal page data for Section C
+// Function to load portal page data for Section C and My Action Plan
 async function loadPortalPageData() {
-  const portalPageName = 'Workbook Terms and Conditions Sign-off';
+  const portalPageNames = [
+    'Workbook Terms and Conditions Sign-off',
+    'My Action Plan'
+  ];
 
-  try {
-    logger.info({ message: `Loading portal page: "${portalPageName}"` });
+  for (const portalPageName of portalPageNames) {
+    try {
+      logger.info({ message: `Loading portal page: "${portalPageName}"` });
 
-    // Build filter parameter
-    const filterParam = `$filter=quartech_name eq '${portalPageName}'`;
+      // Build filter parameter with statecode filter
+      const filterParam = `$filter=quartech_name eq '${portalPageName}' and statecode eq 0`;
 
-    const result = await getPortalPageData({ params: filterParam });
+      const result = await getPortalPageData({ params: filterParam });
 
-    if (!result?.data?.value) {
-      throw new Error('Invalid response structure from portal page API');
+      if (!result?.data?.value) {
+        throw new Error('Invalid response structure from portal page API');
+      }
+
+      const portalPages = result.data.value;
+
+      // Validate exactly one result
+      if (portalPages.length === 0) {
+        throw new Error(`No portal page found with name "${portalPageName}"`);
+      }
+
+      if (portalPages.length > 1) {
+        throw new Error(`Multiple portal pages found with name "${portalPageName}". Expected exactly 1, found ${portalPages.length}`);
+      }
+
+      const portalPageData = portalPages[0];
+
+      logger.info({
+        message: `Successfully loaded portal page: "${portalPageName}"`,
+        data: portalPageData
+      });
+
+      // Store in state using the store pattern
+      store.dispatch('setPortalPageData', {
+        name: portalPageName,
+        data: portalPageData
+      });
+
+      logger.info({
+        message: `Portal page "${portalPageName}" stored in state`,
+        data: portalPageData
+      });
+
+    } catch (error) {
+      logger.error({
+        message: `Failed to load portal page "${portalPageName}"`,
+        data: { error: (error instanceof Error) ? error.message : String(error) }
+      });
+      // Don't throw - allow the workbook to continue loading even if portal page fails
     }
-
-    const portalPages = result.data.value;
-
-    // Validate exactly one result
-    if (portalPages.length === 0) {
-      throw new Error(`No portal page found with name "${portalPageName}"`);
-    }
-
-    if (portalPages.length > 1) {
-      throw new Error(`Multiple portal pages found with name "${portalPageName}". Expected exactly 1, found ${portalPages.length}`);
-    }
-
-    const portalPageData = portalPages[0];
-
-    logger.info({
-      message: `Successfully loaded portal page: "${portalPageName}"`,
-      data: portalPageData
-    });
-
-    // Store in state using the store pattern
-    store.dispatch('setPortalPageData', {
-      name: portalPageName,
-      data: portalPageData
-    });
-
-    logger.info({
-      message: `Portal page "${portalPageName}" stored in state`,
-      data: portalPageData
-    });
-
-  } catch (error) {
-    logger.error({
-      message: `Failed to load portal page "${portalPageName}"`,
-      data: { error: (error instanceof Error) ? error.message : String(error) }
-    });
-    // Don't throw - allow the workbook to continue loading even if portal page fails
   }
 }
 

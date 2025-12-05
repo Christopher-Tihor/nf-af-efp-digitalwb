@@ -51,6 +51,7 @@ export declare class EFPEntryForm extends LitElement {
     private renderContainerChapter;
     private renderMainContent;
     private getSectionBItemsFromStore;
+    private getMyActionPlanItemsFromPortalPage;
     private getSectionCItemsFromPortalPage;
     private getCompletionFromStore;
     private getSectionCompletionFromStore;

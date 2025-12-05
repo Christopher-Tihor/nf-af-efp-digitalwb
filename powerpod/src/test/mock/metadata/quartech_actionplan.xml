@@ -1,0 +1,81 @@
+<EntityType Name="quartech_actionplan" BaseType="mscrm.crmbaseentity">
+  <Key>
+    <PropertyRef Name="quartech_actionplanid" />
+  </Key>
+  <Property Name="versionnumber" Type="Edm.Int64" />
+  <Property Name="_quartech_chapter_value" Type="Edm.Guid" />
+  <Property Name="_organizationid_value" Type="Edm.Guid" />
+  <Property Name="_modifiedonbehalfby_value" Type="Edm.Guid" />
+  <Property Name="quartech_actionplanid" Type="Edm.Guid" />
+  <Property Name="_createdby_value" Type="Edm.Guid" />
+  <Property Name="createdon" Type="Edm.DateTimeOffset" />
+  <Property Name="timezoneruleversionnumber" Type="Edm.Int32" />
+  <Property Name="modifiedon" Type="Edm.DateTimeOffset" />
+  <Property Name="importsequencenumber" Type="Edm.Int32" />
+  <Property Name="overriddencreatedon" Type="Edm.DateTimeOffset" />
+  <Property Name="quartech_actionplanname" Type="Edm.String" Unicode="false" />
+  <Property Name="_createdonbehalfby_value" Type="Edm.Guid" />
+  <Property Name="utcconversiontimezonecode" Type="Edm.Int32" />
+  <Property Name="_quartech_workbook_value" Type="Edm.Guid" />
+  <Property Name="statuscode" Type="Edm.Int32" />
+  <Property Name="_modifiedby_value" Type="Edm.Guid" />
+  <Property Name="quartech_action" Type="Edm.String" Unicode="false" />
+  <Property Name="statecode" Type="Edm.Int32" />
+  <Property Name="_quartech_workbookquestion_value" Type="Edm.Guid" />
+  <NavigationProperty Name="createdby" Type="mscrm.systemuser" Nullable="false"
+    Partner="lk_quartech_actionplan_createdby">
+    <ReferentialConstraint Property="_createdby_value" ReferencedProperty="systemuserid" />
+  </NavigationProperty>
+  <NavigationProperty Name="createdonbehalfby" Type="mscrm.systemuser" Nullable="false"
+    Partner="lk_quartech_actionplan_createdonbehalfby">
+    <ReferentialConstraint Property="_createdonbehalfby_value"
+      ReferencedProperty="systemuserid" />
+  </NavigationProperty>
+  <NavigationProperty Name="modifiedby" Type="mscrm.systemuser" Nullable="false"
+    Partner="lk_quartech_actionplan_modifiedby">
+    <ReferentialConstraint Property="_modifiedby_value" ReferencedProperty="systemuserid" />
+  </NavigationProperty>
+  <NavigationProperty Name="modifiedonbehalfby" Type="mscrm.systemuser" Nullable="false"
+    Partner="lk_quartech_actionplan_modifiedonbehalfby">
+    <ReferentialConstraint Property="_modifiedonbehalfby_value"
+      ReferencedProperty="systemuserid" />
+  </NavigationProperty>
+  <NavigationProperty Name="organizationid" Type="mscrm.organization" Nullable="false"
+    Partner="organization_quartech_actionplan">
+    <ReferentialConstraint Property="_organizationid_value"
+      ReferencedProperty="organizationid" />
+  </NavigationProperty>
+  <NavigationProperty Name="quartech_actionplan_SyncErrors" Type="Collection(mscrm.syncerror)"
+    Partner="regardingobjectid_quartech_actionplan" />
+  <NavigationProperty Name="quartech_actionplan_AsyncOperations"
+    Type="Collection(mscrm.asyncoperation)" Partner="regardingobjectid_quartech_actionplan" />
+  <NavigationProperty Name="quartech_actionplan_MailboxTrackingFolders"
+    Type="Collection(mscrm.mailboxtrackingfolder)"
+    Partner="regardingobjectid_quartech_actionplan" />
+  <NavigationProperty Name="quartech_actionplan_ProcessSession"
+    Type="Collection(mscrm.processsession)" Partner="regardingobjectid_quartech_actionplan" />
+  <NavigationProperty Name="quartech_actionplan_BulkDeleteFailures"
+    Type="Collection(mscrm.bulkdeletefailure)" Partner="regardingobjectid_quartech_actionplan" />
+  <NavigationProperty Name="quartech_actionplan_PrincipalObjectAttributeAccesses"
+    Type="Collection(mscrm.principalobjectattributeaccess)"
+    Partner="objectid_quartech_actionplan" />
+  <NavigationProperty Name="quartech_actionplan_DuplicateMatchingRecord"
+    Type="Collection(mscrm.duplicaterecord)" Partner="duplicaterecordid_quartech_actionplan" />
+  <NavigationProperty Name="quartech_actionplan_DuplicateBaseRecord"
+    Type="Collection(mscrm.duplicaterecord)" Partner="baserecordid_quartech_actionplan" />
+  <NavigationProperty Name="quartech_chapter" Type="mscrm.quartech_chapter" Nullable="false"
+    Partner="quartech_actionplan_chapter_quartech_chapter">
+    <ReferentialConstraint Property="_quartech_chapter_value"
+      ReferencedProperty="quartech_chapterid" />
+  </NavigationProperty>
+  <NavigationProperty Name="quartech_workbookquestion" Type="mscrm.quartech_workbookquestion"
+    Nullable="false" Partner="quartech_actionplan_workbookquestion_quartech_workbookquestion">
+    <ReferentialConstraint Property="_quartech_workbookquestion_value"
+      ReferencedProperty="quartech_workbookquestionid" />
+  </NavigationProperty>
+  <NavigationProperty Name="quartech_Workbook" Type="mscrm.quartech_workbook" Nullable="false"
+    Partner="quartech_actionplan_Workbook_quartech_workbook">
+    <ReferentialConstraint Property="_quartech_workbook_value"
+      ReferencedProperty="quartech_workbookid" />
+  </NavigationProperty>
+</EntityType>

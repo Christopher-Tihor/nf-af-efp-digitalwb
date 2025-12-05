@@ -636,73 +636,126 @@ export class EFPEntryForm extends LitElement {
       items.push(chapterItem);
     });
 
-    // Add hard-coded "My Action Plan" chapter at the end
-    const myActionPlanItem: EFPSectionItem = {
+    // Add "My Action Plan" chapter from portal page data
+    const myActionPlanItem = this.getMyActionPlanItemsFromPortalPage();
+    items.push(myActionPlanItem);
+
+    return items;
+  }
+
+  // Generate My Action Plan items from portal page data
+  private getMyActionPlanItemsFromPortalPage(): EFPSectionItem {
+    const portalPageName = 'My Action Plan';
+    const portalPageData = POWERPOD.state?.portalPages?.[portalPageName];
+
+    // If portal page data is not loaded yet, return loading state
+    if (!portalPageData) {
+      logger.info({
+        message: '📄 My Action Plan portal page data not loaded yet, showing loading state',
+      });
+      return {
+        label: 'My Action Plan',
+        title: 'My Action Plan',
+        content: `
+          <div style="display: flex; justify-content: center; align-items: center; min-height: 300px;">
+            <div id="spinner"></div>
+          </div>
+        `,
+        complete: false,
+        isContainer: true,
+        disableExpand: true,
+        items: [
+          {
+            label: 'My Action Plan',
+            content: `
+              <div style="display: flex; justify-content: center; align-items: center; min-height: 300px;">
+                <div id="spinner"></div>
+              </div>
+            `,
+            complete: false,
+          }
+        ],
+      };
+    }
+
+    // Build the content from sections 1-6
+    const sections = [
+      portalPageData.quartech_section1,
+      portalPageData.quartech_section2,
+      portalPageData.quartech_section3,
+      portalPageData.quartech_section4,
+      portalPageData.quartech_section5,
+      portalPageData.quartech_section6,
+    ].filter((section) => section); // Filter out null/undefined sections
+
+    // Clean up the HTML content to remove problematic font-family styles
+    const cleanedSections = sections.map((section) => {
+      if (!section) return section;
+      // Replace Roboto Slab font-family with BC Sans
+      let cleaned = section.replace(
+        /font-family:\s*&quot;Roboto Slab&quot;[^;]*;/gi,
+        ''
+      );
+      cleaned = cleaned.replace(/font-family:\s*"Roboto Slab"[^;]*;/gi, '');
+      cleaned = cleaned.replace(/font-family:\s*'Roboto Slab'[^;]*;/gi, '');
+      // Also replace list-style-position: inside with outside
+      cleaned = cleaned.replace(
+        /list-style-position:\s*inside/gi,
+        'list-style-position: outside'
+      );
+      return cleaned;
+    });
+
+    const actionPlanContent = `
+      <div style="font-family: 'BC Sans', 'Noto Sans', Verdana, sans-serif !important;">
+        <style>
+          .action-plan-content * {
+            font-family: 'BC Sans', 'Noto Sans', Verdana, sans-serif !important;
+          }
+          .action-plan-content ul {
+            list-style-position: outside !important;
+            padding-left: 2em !important;
+            margin: 1em 0 !important;
+          }
+          .action-plan-content ol {
+            list-style-position: outside !important;
+            padding-left: 2em !important;
+            margin: 1em 0 !important;
+          }
+          .action-plan-content li {
+            display: list-item !important;
+            padding-left: 0.5em !important;
+            line-height: 1.6 !important;
+          }
+          .action-plan-content h1, .action-plan-content h2, .action-plan-content h3,
+          .action-plan-content h4, .action-plan-content h5, .action-plan-content h6 {
+            font-family: 'BC Sans', 'Noto Sans', Verdana, sans-serif !important;
+          }
+          .action-plan-content p {
+            font-family: 'BC Sans', 'Noto Sans', Verdana, sans-serif !important;
+          }
+        </style>
+        <div class="action-plan-content">
+          ${cleanedSections.join('\n')}
+        </div>
+      </div>
+    `;
+
+    return {
       label: 'My Action Plan',
       title: 'My Action Plan',
-      content: `
-        <div class="chapter-header">
-          <p>Develop an Action Plan to address the concerns identified during your EFP visit.</p>
-          <p>Your Planning Advisor will help you prioritize each action item and if applicable, identify if you may be eligible for BMP funding to support completing your plan.</p>
-        </div>
-        <div style="margin-top: 1.5rem;">
-          <h3 style="font-family: var(--chapter-font); font-weight: 600; color: var(--sl-color-neutral-800); margin-bottom: 0.75rem;">Resources:</h3>
-          <ul style="line-height: 1.8; color: var(--sl-color-neutral-700);">
-            <li>
-              <strong>BMP funding:</strong>
-              <a href="https://iafbc.ca/beneficial-management-practices-program/" target="_blank" rel="noopener noreferrer" style="color: var(--sl-color-primary-600); text-decoration: underline;">
-                https://iafbc.ca/beneficial-management-practices-program/
-              </a>
-            </li>
-            <li>
-              <strong>EFP reference guide:</strong>
-              <a href="https://www2.gov.bc.ca/gov/content/industry/agriculture-seafood/programs/environmental-farm-plan" target="_blank" rel="noopener noreferrer" style="color: var(--sl-color-primary-600); text-decoration: underline;">
-                https://www2.gov.bc.ca/gov/content/industry/agriculture-seafood/programs/environmental-farm-plan
-              </a>
-            </li>
-            <li><strong>Etc</strong></li>
-          </ul>
-        </div>
-      `,
+      content: actionPlanContent,
       complete: false,
       isContainer: true,
-      disableExpand: true, // This chapter should not be expandable
+      disableExpand: true,
       items: [
         {
           label: 'My Action Plan',
-          content: `
-            <div class="chapter-header">
-              <h2>My Action Plan</h2>
-              <p>Develop an Action Plan to address the concerns identified during your EFP visit.</p>
-              <p>Your Planning Advisor will help you prioritize each action item and if applicable, identify if you may be eligible for BMP funding to support completing your plan.</p>
-            </div>
-            <div style="margin-top: 1.5rem;">
-              <h3 style="font-family: var(--chapter-font); font-weight: 600; color: var(--sl-color-neutral-800); margin-bottom: 0.75rem;">Resources:</h3>
-              <ul style="line-height: 1.8; color: var(--sl-color-neutral-700);">
-                <li>
-                  <strong>BMP funding:</strong>
-                  <a href="https://iafbc.ca/beneficial-management-practices-program/" target="_blank" rel="noopener noreferrer" style="color: var(--sl-color-primary-600); text-decoration: underline;">
-                    https://iafbc.ca/beneficial-management-practices-program/
-                  </a>
-                </li>
-                <li>
-                  <strong>EFP reference guide:</strong>
-                  <a href="https://www2.gov.bc.ca/gov/content/industry/agriculture-seafood/programs/environmental-farm-plan" target="_blank" rel="noopener noreferrer" style="color: var(--sl-color-primary-600); text-decoration: underline;">
-                    https://www2.gov.bc.ca/gov/content/industry/agriculture-seafood/programs/environmental-farm-plan
-                  </a>
-                </li>
-                <li><strong>Etc</strong></li>
-              </ul>
-            </div>
-          `,
+          content: actionPlanContent,
           complete: false,
         }
       ],
     };
-
-    items.push(myActionPlanItem);
-
-    return items;
   }
 
   // Generate Section C items from portal page data
