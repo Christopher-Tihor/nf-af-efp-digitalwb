@@ -124,6 +124,17 @@ export const OTHER_VALUE = '255550010';
 export const GROUP_APPLICATION_VALUE = '255550001';
 export const SECTOR_WIDE_ID_VALUE = '6ce2584f-4740-ee11-be6e-000d3af3ac95';
 
+// Workbook status codes (based on Dynamics 365 option set values)
+export const WORKBOOK_STATUS = {
+  DRAFT: 100000000,        // Draft status
+  ASSIGNED: 100000004,     // Assigned status
+  PRODUCER_SIGNED: 100000002, // Producer Signed status
+  PA_SIGNED: 100000003,    // PA Signed status
+  COMPLETED: 100000001,    // Completed status
+  VALIDATED: 100000005,    // Validated status
+  EXPIRED: 100000006,      // Expired status
+};
+
 // TODO: move this to some kind of state management module
 // cache common elements
 export const POWERPOD = {

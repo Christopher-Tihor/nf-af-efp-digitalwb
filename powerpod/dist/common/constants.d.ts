@@ -74,6 +74,15 @@ export const NO_VALUE: "100000001";
 export const OTHER_VALUE: "255550010";
 export const GROUP_APPLICATION_VALUE: "255550001";
 export const SECTOR_WIDE_ID_VALUE: "6ce2584f-4740-ee11-be6e-000d3af3ac95";
+export namespace WORKBOOK_STATUS {
+    let DRAFT: number;
+    let ASSIGNED: number;
+    let PRODUCER_SIGNED: number;
+    let PA_SIGNED: number;
+    let COMPLETED: number;
+    let VALIDATED: number;
+    let EXPIRED: number;
+}
 export namespace POWERPOD {
     let actionPlanHelper: {};
     let state: {};

@@ -1,5 +1,5 @@
 /*!
-* powerpod 4.4.8
+* powerpod 4.4.9
 * https://github.com/bcgov/nr-af-pods/powerpod
 *
 * @license GPLv3 for open source use only
@@ -652,6 +652,23 @@
   var YES_VALUE = '100000000';
   var NO_VALUE = '100000001';
   var GROUP_APPLICATION_VALUE = '255550001';
+
+  // Workbook status codes (based on Dynamics 365 option set values)
+  var WORKBOOK_STATUS = {
+    DRAFT: 100000000,
+    // Draft status
+    ASSIGNED: 100000004,
+    // Assigned status
+    PRODUCER_SIGNED: 100000002,
+    // Producer Signed status
+    PA_SIGNED: 100000003,
+    // PA Signed status
+    COMPLETED: 100000001,
+    // Completed status
+    VALIDATED: 100000005,
+    // Validated status
+    EXPIRED: 100000006 // Expired status
+  };
 
   // TODO: move this to some kind of state management module
   // cache common elements
@@ -37578,6 +37595,7 @@
           this.isLoading = false;
           this.showPAButton = false;
           this.showProducerButton = false;
+          this.workbookStatus = null;
       }
       connectedCallback() {
           super.connectedCallback();
@@ -37597,23 +37615,86 @@
           });
       }
       loadSignOffData() {
+          var _a;
           const workbookData = getWorkbookData();
           if (workbookData) {
               // Convert integer values to boolean
               // YES_INT (100000000) = true (signed), NO_INT (100000001) or null/undefined = false (not signed)
               this.paSigned = workbookData.quartech_pasigned === YES_INT;
               this.producerSigned = workbookData.quartech_producersigned === YES_INT;
+              this.workbookStatus = (_a = workbookData.quartech_workbookstatus) !== null && _a !== void 0 ? _a : null;
               logger$8.info({
                   fn: 'loadSignOffData',
                   message: 'Loaded sign-off status from workbook data',
                   data: {
                       paSigned: this.paSigned,
                       producerSigned: this.producerSigned,
+                      workbookStatus: this.workbookStatus,
                       rawPAValue: workbookData.quartech_pasigned,
                       rawProducerValue: workbookData.quartech_producersigned,
                   },
               });
           }
+      }
+      /**
+       * Check if PA sign-off button should be enabled
+       * Enable sign-off only when:
+       * - Workbook in Assigned status OR Producer Signed status (meaning Producer has signed)
+       *
+       * Disable sign-off for:
+       * - Workbook in Draft status
+       * - PA Signed (for the PA - they already signed)
+       * - Workbook in Completed status
+       * - Workbook in Validated status
+       * - Workbook in Expired status
+       */
+      canPASignOff() {
+          // If already signed, can only cancel (not sign)
+          if (this.paSigned) {
+              return false;
+          }
+          // Can sign if workbook is in Assigned status OR Producer Signed status
+          // This allows PA to sign when workbook is assigned or after Producer has signed
+          return this.workbookStatus === WORKBOOK_STATUS.ASSIGNED ||
+              this.workbookStatus === WORKBOOK_STATUS.PRODUCER_SIGNED;
+      }
+      /**
+       * Check if PA can cancel their sign-off
+       * Enable cancel sign-off only for:
+       * - PA Signed (for the PA)
+       */
+      canPACancelSignOff() {
+          return this.paSigned;
+      }
+      /**
+       * Check if Producer sign-off button should be enabled
+       * Enable sign-off only when:
+       * - Workbook in Assigned status OR PA Signed status (meaning PA has signed)
+       *
+       * Disable sign-off for:
+       * - Workbook in Draft status
+       * - Producer Signed (for the Producer - they already signed)
+       * - Workbook in Completed status
+       * - Workbook in Validated status
+       * - Workbook in Expired status
+       */
+      canProducerSignOff() {
+          // If already signed, can only cancel (not sign)
+          if (this.producerSigned) {
+              return false;
+          }
+          // Can sign if workbook is in Assigned status OR PA Signed status
+          // This allows Producer to sign when workbook is assigned or after PA has signed
+          return this.workbookStatus === WORKBOOK_STATUS.ASSIGNED ||
+              this.workbookStatus === WORKBOOK_STATUS.PA_SIGNED;
+      }
+      /**
+       * Check if Producer can cancel their sign-off
+       * Enable cancel sign-off only for:
+       * - Producer Signed (for the Producer)
+       */
+      canProducerCancelSignOff() {
+          return this.producerSigned;
       }
       async handlePASignOff() {
           await this.handleSignOff('PA', 'quartech_pasigned');
@@ -37681,6 +37762,14 @@
           if (!this.showPAButton && !this.showProducerButton) {
               return x ``;
           }
+          // Determine button states for PA
+          const canPASign = this.canPASignOff();
+          const canPACancel = this.canPACancelSignOff();
+          const isPAButtonEnabled = canPASign || canPACancel;
+          // Determine button states for Producer
+          const canProducerSign = this.canProducerSignOff();
+          const canProducerCancel = this.canProducerCancelSignOff();
+          const isProducerButtonEnabled = canProducerSign || canProducerCancel;
           return x `
       <div class="sign-off-container">
         <div class="sign-off-title">Sign-Off</div>
@@ -37697,6 +37786,7 @@
               variant=${this.paSigned ? 'default' : 'primary'}
               size="medium"
               ?loading=${this.isLoading}
+              ?disabled=${!isPAButtonEnabled}
               @click=${this.handlePASignOff}
             >
               ${this.paSigned ? 'Clear Sign-Off' : 'Sign-Off (PA)'}
@@ -37716,6 +37806,7 @@
               variant=${this.producerSigned ? 'default' : 'primary'}
               size="medium"
               ?loading=${this.isLoading}
+              ?disabled=${!isProducerButtonEnabled}
               @click=${this.handleProducerSignOff}
             >
               ${this.producerSigned ? 'Clear Sign-Off' : 'Sign-Off (Producer)'}
@@ -37802,6 +37893,9 @@
   __decorate([
       r$1()
   ], WorkbookSignOffButtons.prototype, "showProducerButton", void 0);
+  __decorate([
+      r$1()
+  ], WorkbookSignOffButtons.prototype, "workbookStatus", void 0);
   WorkbookSignOffButtons = __decorate([
       t$1('workbook-sign-off-buttons')
   ], WorkbookSignOffButtons);
@@ -42688,43 +42782,6 @@
                   content: termsContent,
                   complete: false,
               },
-              {
-                  label: 'Agreement & Consent',
-                  content: `
-          <h3>Declaration of Agreement</h3>
-          <p>By checking the box below, you acknowledge that you have read, understood, and agree to the terms and conditions outlined in this Environmental Farm Plan program.</p>
-
-          <div style="background-color: var(--sl-color-neutral-50); padding: 1.5rem; border-radius: var(--sl-border-radius-medium); border: 1px solid var(--sl-color-neutral-200); margin: 1.5rem 0;">
-            <label style="display: flex; align-items: flex-start; gap: 0.75rem; cursor: pointer; font-family: var(--body-font); font-size: 1rem; line-height: 1.5;">
-              <input
-                type="checkbox"
-                id="terms-agreement"
-                name="terms-agreement"
-                style="margin-top: 0.25rem; transform: scale(1.2);"
-                required
-              />
-              <span>
-                <strong>I agree to the terms and conditions</strong> of the Environmental Farm Plan program as outlined above.
-                I understand that my participation is voluntary and that the information I provide will be used to develop
-                environmental recommendations for my farm operation. I certify that the information I have provided is
-                accurate and complete to the best of my knowledge.
-              </span>
-            </label>
-          </div>
-
-          <p style="font-size: 0.9rem; color: var(--sl-color-neutral-600); font-style: italic;">
-            <strong>Note:</strong> You must agree to these terms and conditions to proceed with your Environmental Farm Plan submission.
-            If you have any questions about these terms, please contact the program administrator before proceeding.
-          </p>
-
-          <div style="margin-top: 2rem; padding: 1rem; background-color: var(--sl-color-primary-50); border-radius: var(--sl-border-radius-small); border-left: 4px solid var(--sl-color-primary-600);">
-            <p style="margin: 0; font-size: 0.95rem; color: var(--sl-color-primary-800);">
-              <strong>Ready to submit?</strong> Once you've agreed to the terms and conditions, you can proceed to submit your Environmental Farm Plan for review and receive your customized environmental recommendations.
-            </p>
-          </div>
-        `,
-                  complete: false,
-              },
           ];
       }
       // Get completion status from questionnaire store for navigation items
@@ -44495,7 +44552,7 @@
       };
     };
     // @ts-ignore
-    POWERPOD.version = '4.4.8';
+    POWERPOD.version = '4.4.9';
     // @ts-ignore
     window.powerpod = POWERPOD;
   }

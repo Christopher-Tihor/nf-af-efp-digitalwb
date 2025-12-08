@@ -788,43 +788,6 @@ export class EFPEntryForm extends LitElement {
         content: termsContent,
         complete: false,
       },
-      {
-        label: 'Agreement & Consent',
-        content: `
-          <h3>Declaration of Agreement</h3>
-          <p>By checking the box below, you acknowledge that you have read, understood, and agree to the terms and conditions outlined in this Environmental Farm Plan program.</p>
-
-          <div style="background-color: var(--sl-color-neutral-50); padding: 1.5rem; border-radius: var(--sl-border-radius-medium); border: 1px solid var(--sl-color-neutral-200); margin: 1.5rem 0;">
-            <label style="display: flex; align-items: flex-start; gap: 0.75rem; cursor: pointer; font-family: var(--body-font); font-size: 1rem; line-height: 1.5;">
-              <input
-                type="checkbox"
-                id="terms-agreement"
-                name="terms-agreement"
-                style="margin-top: 0.25rem; transform: scale(1.2);"
-                required
-              />
-              <span>
-                <strong>I agree to the terms and conditions</strong> of the Environmental Farm Plan program as outlined above.
-                I understand that my participation is voluntary and that the information I provide will be used to develop
-                environmental recommendations for my farm operation. I certify that the information I have provided is
-                accurate and complete to the best of my knowledge.
-              </span>
-            </label>
-          </div>
-
-          <p style="font-size: 0.9rem; color: var(--sl-color-neutral-600); font-style: italic;">
-            <strong>Note:</strong> You must agree to these terms and conditions to proceed with your Environmental Farm Plan submission.
-            If you have any questions about these terms, please contact the program administrator before proceeding.
-          </p>
-
-          <div style="margin-top: 2rem; padding: 1rem; background-color: var(--sl-color-primary-50); border-radius: var(--sl-border-radius-small); border-left: 4px solid var(--sl-color-primary-600);">
-            <p style="margin: 0; font-size: 0.95rem; color: var(--sl-color-primary-800);">
-              <strong>Ready to submit?</strong> Once you've agreed to the terms and conditions, you can proceed to submit your Environmental Farm Plan for review and receive your customized environmental recommendations.
-            </p>
-          </div>
-        `,
-        complete: false,
-      },
     ];
   }
 

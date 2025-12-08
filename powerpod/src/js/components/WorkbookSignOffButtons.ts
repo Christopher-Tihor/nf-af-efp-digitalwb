@@ -4,7 +4,7 @@ import { Logger } from '../common/logger.js';
 import { hasRole } from '../common/userRoles.js';
 import { getCurrentWorkbookId, getWorkbookData } from '../common/workbookUtils.js';
 import { patchWorkbookData } from '../common/fetch.js';
-import { YES_VALUE, NO_VALUE } from '../common/constants.js';
+import { YES_VALUE, NO_VALUE, WORKBOOK_STATUS } from '../common/constants.js';
 
 const logger = Logger('components/WorkbookSignOffButtons');
 
@@ -19,6 +19,7 @@ export class WorkbookSignOffButtons extends LitElement {
   @state() private isLoading: boolean = false;
   @state() private showPAButton: boolean = false;
   @state() private showProducerButton: boolean = false;
+  @state() private workbookStatus: number | null = null;
 
   static styles = css`
     .sign-off-container {
@@ -110,6 +111,7 @@ export class WorkbookSignOffButtons extends LitElement {
       // YES_INT (100000000) = true (signed), NO_INT (100000001) or null/undefined = false (not signed)
       this.paSigned = workbookData.quartech_pasigned === YES_INT;
       this.producerSigned = workbookData.quartech_producersigned === YES_INT;
+      this.workbookStatus = workbookData.quartech_workbookstatus ?? null;
 
       logger.info({
         fn: 'loadSignOffData',
@@ -117,11 +119,78 @@ export class WorkbookSignOffButtons extends LitElement {
         data: {
           paSigned: this.paSigned,
           producerSigned: this.producerSigned,
+          workbookStatus: this.workbookStatus,
           rawPAValue: workbookData.quartech_pasigned,
           rawProducerValue: workbookData.quartech_producersigned,
         },
       });
     }
+  }
+
+  /**
+   * Check if PA sign-off button should be enabled
+   * Enable sign-off only when:
+   * - Workbook in Assigned status OR Producer Signed status (meaning Producer has signed)
+   *
+   * Disable sign-off for:
+   * - Workbook in Draft status
+   * - PA Signed (for the PA - they already signed)
+   * - Workbook in Completed status
+   * - Workbook in Validated status
+   * - Workbook in Expired status
+   */
+  private canPASignOff(): boolean {
+    // If already signed, can only cancel (not sign)
+    if (this.paSigned) {
+      return false;
+    }
+
+    // Can sign if workbook is in Assigned status OR Producer Signed status
+    // This allows PA to sign when workbook is assigned or after Producer has signed
+    return this.workbookStatus === WORKBOOK_STATUS.ASSIGNED ||
+           this.workbookStatus === WORKBOOK_STATUS.PRODUCER_SIGNED;
+  }
+
+  /**
+   * Check if PA can cancel their sign-off
+   * Enable cancel sign-off only for:
+   * - PA Signed (for the PA)
+   */
+  private canPACancelSignOff(): boolean {
+    return this.paSigned;
+  }
+
+  /**
+   * Check if Producer sign-off button should be enabled
+   * Enable sign-off only when:
+   * - Workbook in Assigned status OR PA Signed status (meaning PA has signed)
+   *
+   * Disable sign-off for:
+   * - Workbook in Draft status
+   * - Producer Signed (for the Producer - they already signed)
+   * - Workbook in Completed status
+   * - Workbook in Validated status
+   * - Workbook in Expired status
+   */
+  private canProducerSignOff(): boolean {
+    // If already signed, can only cancel (not sign)
+    if (this.producerSigned) {
+      return false;
+    }
+
+    // Can sign if workbook is in Assigned status OR PA Signed status
+    // This allows Producer to sign when workbook is assigned or after PA has signed
+    return this.workbookStatus === WORKBOOK_STATUS.ASSIGNED ||
+           this.workbookStatus === WORKBOOK_STATUS.PA_SIGNED;
+  }
+
+  /**
+   * Check if Producer can cancel their sign-off
+   * Enable cancel sign-off only for:
+   * - Producer Signed (for the Producer)
+   */
+  private canProducerCancelSignOff(): boolean {
+    return this.producerSigned;
   }
 
   private async handlePASignOff() {
@@ -200,6 +269,16 @@ export class WorkbookSignOffButtons extends LitElement {
       return html``;
     }
 
+    // Determine button states for PA
+    const canPASign = this.canPASignOff();
+    const canPACancel = this.canPACancelSignOff();
+    const isPAButtonEnabled = canPASign || canPACancel;
+
+    // Determine button states for Producer
+    const canProducerSign = this.canProducerSignOff();
+    const canProducerCancel = this.canProducerCancelSignOff();
+    const isProducerButtonEnabled = canProducerSign || canProducerCancel;
+
     return html`
       <div class="sign-off-container">
         <div class="sign-off-title">Sign-Off</div>
@@ -217,6 +296,7 @@ export class WorkbookSignOffButtons extends LitElement {
               variant=${this.paSigned ? 'default' : 'primary'}
               size="medium"
               ?loading=${this.isLoading}
+              ?disabled=${!isPAButtonEnabled}
               @click=${this.handlePASignOff}
             >
               ${this.paSigned ? 'Clear Sign-Off' : 'Sign-Off (PA)'}
@@ -237,6 +317,7 @@ export class WorkbookSignOffButtons extends LitElement {
               variant=${this.producerSigned ? 'default' : 'primary'}
               size="medium"
               ?loading=${this.isLoading}
+              ?disabled=${!isProducerButtonEnabled}
               @click=${this.handleProducerSignOff}
             >
               ${this.producerSigned ? 'Clear Sign-Off' : 'Sign-Off (Producer)'}
