@@ -37696,6 +37696,56 @@
       canProducerCancelSignOff() {
           return this.producerSigned;
       }
+      /**
+       * Get tooltip message for PA button when disabled
+       */
+      getPADisabledTooltip() {
+          if (this.paSigned) {
+              return 'You have already signed. Click to cancel your sign-off.';
+          }
+          if (this.workbookStatus === WORKBOOK_STATUS.DRAFT) {
+              return 'Sign-off is not available for workbooks in Draft status.';
+          }
+          if (this.workbookStatus === WORKBOOK_STATUS.COMPLETED) {
+              return 'Sign-off is not available for workbooks in Completed status.';
+          }
+          if (this.workbookStatus === WORKBOOK_STATUS.VALIDATED) {
+              return 'Sign-off is not available for workbooks in Validated status.';
+          }
+          if (this.workbookStatus === WORKBOOK_STATUS.EXPIRED) {
+              return 'Sign-off is not available for workbooks in Expired status.';
+          }
+          if (this.workbookStatus !== WORKBOOK_STATUS.ASSIGNED &&
+              this.workbookStatus !== WORKBOOK_STATUS.PRODUCER_SIGNED) {
+              return 'You can only sign off when the workbook is in Assigned status or after the Producer has signed.';
+          }
+          return 'Sign-off is currently disabled.';
+      }
+      /**
+       * Get tooltip message for Producer button when disabled
+       */
+      getProducerDisabledTooltip() {
+          if (this.producerSigned) {
+              return 'You have already signed. Click to cancel your sign-off.';
+          }
+          if (this.workbookStatus === WORKBOOK_STATUS.DRAFT) {
+              return 'Sign-off is not available for workbooks in Draft status.';
+          }
+          if (this.workbookStatus === WORKBOOK_STATUS.COMPLETED) {
+              return 'Sign-off is not available for workbooks in Completed status.';
+          }
+          if (this.workbookStatus === WORKBOOK_STATUS.VALIDATED) {
+              return 'Sign-off is not available for workbooks in Validated status.';
+          }
+          if (this.workbookStatus === WORKBOOK_STATUS.EXPIRED) {
+              return 'Sign-off is not available for workbooks in Expired status.';
+          }
+          if (this.workbookStatus !== WORKBOOK_STATUS.ASSIGNED &&
+              this.workbookStatus !== WORKBOOK_STATUS.PA_SIGNED) {
+              return 'You can only sign off when the workbook is in Assigned status or after the PA has signed.';
+          }
+          return 'Sign-off is currently disabled.';
+      }
       async handlePASignOff() {
           await this.handleSignOff('PA', 'quartech_pasigned');
       }
@@ -37752,7 +37802,8 @@
                   message: `Failed to update ${roleType} sign-off`,
                   data: { error },
               });
-              alert(`Error updating sign-off: ${error.message || 'Unknown error'}`);
+              const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+              alert(`Error updating sign-off: ${errorMessage}`);
           }
           finally {
               this.isLoading = false;
@@ -37766,10 +37817,12 @@
           const canPASign = this.canPASignOff();
           const canPACancel = this.canPACancelSignOff();
           const isPAButtonEnabled = canPASign || canPACancel;
+          const paTooltip = !isPAButtonEnabled ? this.getPADisabledTooltip() : '';
           // Determine button states for Producer
           const canProducerSign = this.canProducerSignOff();
           const canProducerCancel = this.canProducerCancelSignOff();
           const isProducerButtonEnabled = canProducerSign || canProducerCancel;
+          const producerTooltip = !isProducerButtonEnabled ? this.getProducerDisabledTooltip() : '';
           return x `
       <div class="sign-off-container">
         <div class="sign-off-title">Sign-Off</div>
@@ -37782,15 +37835,29 @@
             ? x `<span class="status-signed">✓ Signed</span>`
             : x `<span class="status-not-signed">⚠ Not signed</span>`}
             </div>
-            <sl-button
-              variant=${this.paSigned ? 'default' : 'primary'}
-              size="medium"
-              ?loading=${this.isLoading}
-              ?disabled=${!isPAButtonEnabled}
-              @click=${this.handlePASignOff}
-            >
-              ${this.paSigned ? 'Clear Sign-Off' : 'Sign-Off (PA)'}
-            </sl-button>
+            ${!isPAButtonEnabled ? x `
+              <sl-tooltip content=${paTooltip}>
+                <sl-button
+                  variant=${this.paSigned ? 'default' : 'primary'}
+                  size="medium"
+                  ?loading=${this.isLoading}
+                  ?disabled=${!isPAButtonEnabled}
+                  @click=${this.handlePASignOff}
+                >
+                  ${this.paSigned ? 'Clear Sign-Off' : 'Sign-Off (PA)'}
+                </sl-button>
+              </sl-tooltip>
+            ` : x `
+              <sl-button
+                variant=${this.paSigned ? 'default' : 'primary'}
+                size="medium"
+                ?loading=${this.isLoading}
+                ?disabled=${!isPAButtonEnabled}
+                @click=${this.handlePASignOff}
+              >
+                ${this.paSigned ? 'Clear Sign-Off' : 'Sign-Off (PA)'}
+              </sl-button>
+            `}
           </div>
         ` : ''}
 
@@ -37802,15 +37869,29 @@
             ? x `<span class="status-signed">✓ Signed</span>`
             : x `<span class="status-not-signed">⚠ Not signed</span>`}
             </div>
-            <sl-button
-              variant=${this.producerSigned ? 'default' : 'primary'}
-              size="medium"
-              ?loading=${this.isLoading}
-              ?disabled=${!isProducerButtonEnabled}
-              @click=${this.handleProducerSignOff}
-            >
-              ${this.producerSigned ? 'Clear Sign-Off' : 'Sign-Off (Producer)'}
-            </sl-button>
+            ${!isProducerButtonEnabled ? x `
+              <sl-tooltip content=${producerTooltip}>
+                <sl-button
+                  variant=${this.producerSigned ? 'default' : 'primary'}
+                  size="medium"
+                  ?loading=${this.isLoading}
+                  ?disabled=${!isProducerButtonEnabled}
+                  @click=${this.handleProducerSignOff}
+                >
+                  ${this.producerSigned ? 'Clear Sign-Off' : 'Sign-Off (Producer)'}
+                </sl-button>
+              </sl-tooltip>
+            ` : x `
+              <sl-button
+                variant=${this.producerSigned ? 'default' : 'primary'}
+                size="medium"
+                ?loading=${this.isLoading}
+                ?disabled=${!isProducerButtonEnabled}
+                @click=${this.handleProducerSignOff}
+              >
+                ${this.producerSigned ? 'Clear Sign-Off' : 'Sign-Off (Producer)'}
+              </sl-button>
+            `}
           </div>
         ` : ''}
       </div>

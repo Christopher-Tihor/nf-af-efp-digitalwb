@@ -48,6 +48,14 @@ export declare class WorkbookSignOffButtons extends LitElement {
      * - Producer Signed (for the Producer)
      */
     private canProducerCancelSignOff;
+    /**
+     * Get tooltip message for PA button when disabled
+     */
+    private getPADisabledTooltip;
+    /**
+     * Get tooltip message for Producer button when disabled
+     */
+    private getProducerDisabledTooltip;
     private handlePASignOff;
     private handleProducerSignOff;
     private handleSignOff;
