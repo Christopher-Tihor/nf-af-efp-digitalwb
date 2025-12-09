@@ -1,5 +1,5 @@
 /*!
-* powerpod 4.4.9
+* powerpod 4.5.0
 * https://github.com/bcgov/nr-af-pods/powerpod
 *
 * @license GPLv3 for open source use only
@@ -1553,7 +1553,9 @@
     _excluded28 = ["id", "response", "chapterId"],
     _excluded29 = ["id"],
     _excluded30 = ["params"],
-    _excluded31 = ["workbookId", "chapterId", "questionId", "action"];
+    _excluded31 = ["workbookId", "chapterId", "questionId", "action"],
+    _excluded32 = ["actionPlanId", "action", "chapterId", "questionId"],
+    _excluded33 = ["actionPlanId"];
   var logger$T = Logger('common/fetch');
   var ENDPOINT_URL = {
     get_env_vars_data: "/_api/environmentvariabledefinitions?$filter=contains(schemaname,'quartech_')&$select=schemaname,environmentvariabledefinitionid&$expand=environmentvariabledefinition_environmentvariablevalue($select=value)",
@@ -1641,7 +1643,13 @@
       return "/_api/quartech_portalpages".concat(params ? "?".concat(params) : '');
     },
     get_actionplans_data: "/_api/quartech_actionplans?$filter=statecode eq 0",
-    post_actionplan_data: "/_api/quartech_actionplans"
+    post_actionplan_data: "/_api/quartech_actionplans",
+    patch_actionplan_data: function patch_actionplan_data(id) {
+      return "/_api/quartech_actionplans(".concat(id, ")");
+    },
+    delete_actionplan_data: function delete_actionplan_data(id) {
+      return "/_api/quartech_actionplans(".concat(id, ")");
+    }
   };
   var CONTENT_TYPE = {
     json: 'application/json; charset=utf-8'
@@ -1692,7 +1700,9 @@
     deleteWorkbookResponseData: deleteWorkbookResponseData,
     getPortalPageData: getPortalPageData,
     getActionPlansData: getActionPlansData,
-    postActionPlanData: postActionPlanData
+    postActionPlanData: postActionPlanData,
+    patchActionPlanData: patchActionPlanData,
+    deleteActionPlanData: deleteActionPlanData
   };
   var setODataHeaders = function setODataHeaders(XMLHttpRequest) {
     XMLHttpRequest.setRequestHeader('Accept', 'application/json');
@@ -3171,6 +3181,126 @@
       }, _callee40);
     }));
     return _postActionPlanData.apply(this, arguments);
+  }
+  function patchActionPlanData(_x32) {
+    return _patchActionPlanData.apply(this, arguments);
+  }
+  function _patchActionPlanData() {
+    _patchActionPlanData = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee41(_ref40) {
+      var actionPlanId, action, chapterId, questionId, options, payload;
+      return _regeneratorRuntime().wrap(function _callee41$(_context41) {
+        while (1) switch (_context41.prev = _context41.next) {
+          case 0:
+            actionPlanId = _ref40.actionPlanId, action = _ref40.action, chapterId = _ref40.chapterId, questionId = _ref40.questionId, options = _objectWithoutProperties(_ref40, _excluded32);
+            if (!(!actionPlanId || !action)) {
+              _context41.next = 4;
+              break;
+            }
+            logger$T.error({
+              fn: patchActionPlanData,
+              message: 'Missing required parameters',
+              data: {
+                actionPlanId: actionPlanId,
+                action: action,
+                chapterId: chapterId,
+                questionId: questionId
+              }
+            });
+            throw new Error('actionPlanId and action are required');
+          case 4:
+            logger$T.info({
+              fn: patchActionPlanData,
+              message: 'Updating action plan',
+              data: {
+                actionPlanId: actionPlanId,
+                action: action,
+                chapterId: chapterId,
+                questionId: questionId
+              }
+            });
+            payload = {
+              quartech_action: action
+            }; // Add chapterId if provided (null clears it)
+            if (chapterId !== undefined) {
+              if (chapterId) {
+                payload['quartech_chapter@odata.bind'] = "/quartech_chapters(".concat(chapterId, ")");
+              } else {
+                payload['quartech_chapter@odata.bind'] = null;
+              }
+            }
+
+            // Add questionId if provided (null clears it)
+            if (questionId !== undefined) {
+              if (questionId) {
+                payload['quartech_workbookquestion@odata.bind'] = "/quartech_workbookquestions(".concat(questionId, ")");
+              } else {
+                payload['quartech_workbookquestion@odata.bind'] = null;
+              }
+            }
+            return _context41.abrupt("return", fetch$1(_objectSpread2({
+              method: 'PATCH',
+              url: ENDPOINT_URL.patch_actionplan_data(actionPlanId),
+              datatype: DATATYPE.json,
+              includeODataHeaders: true,
+              addRequestVerificationToken: true,
+              processData: false,
+              returnData: true,
+              data: JSON.stringify(payload)
+            }, options)));
+          case 9:
+          case "end":
+            return _context41.stop();
+        }
+      }, _callee41);
+    }));
+    return _patchActionPlanData.apply(this, arguments);
+  }
+  function deleteActionPlanData(_x33) {
+    return _deleteActionPlanData.apply(this, arguments);
+  }
+  function _deleteActionPlanData() {
+    _deleteActionPlanData = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee42(_ref41) {
+      var actionPlanId, options;
+      return _regeneratorRuntime().wrap(function _callee42$(_context42) {
+        while (1) switch (_context42.prev = _context42.next) {
+          case 0:
+            actionPlanId = _ref41.actionPlanId, options = _objectWithoutProperties(_ref41, _excluded33);
+            if (actionPlanId) {
+              _context42.next = 4;
+              break;
+            }
+            logger$T.error({
+              fn: deleteActionPlanData,
+              message: 'Missing required parameter',
+              data: {
+                actionPlanId: actionPlanId
+              }
+            });
+            throw new Error('actionPlanId is required');
+          case 4:
+            logger$T.info({
+              fn: deleteActionPlanData,
+              message: 'Deleting action plan',
+              data: {
+                actionPlanId: actionPlanId
+              }
+            });
+            return _context42.abrupt("return", fetch$1(_objectSpread2({
+              method: 'DELETE',
+              url: ENDPOINT_URL.delete_actionplan_data(actionPlanId),
+              datatype: DATATYPE.json,
+              includeODataHeaders: true,
+              addRequestVerificationToken: true,
+              processData: false,
+              returnData: false
+            }, options)));
+          case 6:
+          case "end":
+            return _context42.stop();
+        }
+      }, _callee42);
+    }));
+    return _deleteActionPlanData.apply(this, arguments);
   }
 
   const logger$S = Logger('common/env');
@@ -40738,6 +40868,10 @@
           this.questions = [];
           this.chapterOptions = [];
           this.questionOptions = [];
+          this.editing = false;
+          this.deleting = false;
+          this.editingPlan = null;
+          this.deletingPlan = null;
       }
       connectedCallback() {
           super.connectedCallback();
@@ -40918,6 +41052,132 @@
           var _a;
           (_a = this.dialog) === null || _a === void 0 ? void 0 : _a.hide();
       }
+      openEditDialog(plan) {
+          var _a;
+          // Ensure chapters are loaded before showing dialog
+          this.loadChaptersAndQuestions();
+          // Set form state from the plan being edited
+          this.editingPlan = plan;
+          this.selectedChapterId = plan._quartech_chapter_value || '';
+          this.selectedQuestionId = plan._quartech_workbookquestion_value || '';
+          this.actionDescription = plan.quartech_action || '';
+          // Load questions based on selected chapter
+          if (this.selectedChapterId) {
+              const chapter = this.chapters.find(c => c.id === this.selectedChapterId);
+              this.questions = (chapter === null || chapter === void 0 ? void 0 : chapter.questions) || [];
+              this.questionOptions = this.questions.map(question => ({
+                  value: question.id,
+                  label: this.stripHtmlAndDecode(question.label || question.name)
+              }));
+          }
+          else {
+              this.loadAllQuestions();
+          }
+          // Force update to ensure the selects show correct values
+          this.requestUpdate();
+          (_a = this.editDialog) === null || _a === void 0 ? void 0 : _a.show();
+      }
+      closeEditDialog() {
+          var _a;
+          (_a = this.editDialog) === null || _a === void 0 ? void 0 : _a.hide();
+          this.editingPlan = null;
+      }
+      async handleEditActionPlan() {
+          if (!this.actionDescription.trim()) {
+              alert('Action description is required');
+              return;
+          }
+          if (!this.editingPlan) {
+              alert('No action plan selected for editing');
+              return;
+          }
+          try {
+              this.editing = true;
+              logger$7.info({
+                  fn: 'handleEditActionPlan',
+                  message: 'Updating action plan',
+                  data: {
+                      actionPlanId: this.editingPlan.quartech_actionplanid,
+                      chapterId: this.selectedChapterId || null,
+                      questionId: this.selectedQuestionId || null,
+                      action: this.actionDescription,
+                  },
+              });
+              await patchActionPlanData({
+                  actionPlanId: this.editingPlan.quartech_actionplanid,
+                  chapterId: this.selectedChapterId || null,
+                  questionId: this.selectedQuestionId || null,
+                  action: this.actionDescription,
+              });
+              logger$7.info({
+                  fn: 'handleEditActionPlan',
+                  message: 'Action plan updated successfully',
+              });
+              // Reload action plans
+              await this.loadActionPlans();
+              // Close dialog
+              this.closeEditDialog();
+          }
+          catch (err) {
+              logger$7.error({
+                  fn: 'handleEditActionPlan',
+                  message: 'Failed to update action plan',
+                  data: { error: err },
+              });
+              alert('Failed to update action plan: ' + (err instanceof Error ? err.message : 'Unknown error'));
+          }
+          finally {
+              this.editing = false;
+          }
+      }
+      openDeleteDialog(plan) {
+          var _a;
+          this.deletingPlan = plan;
+          (_a = this.deleteDialog) === null || _a === void 0 ? void 0 : _a.show();
+      }
+      closeDeleteDialog() {
+          var _a;
+          (_a = this.deleteDialog) === null || _a === void 0 ? void 0 : _a.hide();
+          this.deletingPlan = null;
+      }
+      async handleDeleteActionPlan() {
+          if (!this.deletingPlan) {
+              alert('No action plan selected for deletion');
+              return;
+          }
+          try {
+              this.deleting = true;
+              logger$7.info({
+                  fn: 'handleDeleteActionPlan',
+                  message: 'Deleting action plan',
+                  data: {
+                      actionPlanId: this.deletingPlan.quartech_actionplanid,
+                  },
+              });
+              await deleteActionPlanData({
+                  actionPlanId: this.deletingPlan.quartech_actionplanid,
+              });
+              logger$7.info({
+                  fn: 'handleDeleteActionPlan',
+                  message: 'Action plan deleted successfully',
+              });
+              // Reload action plans
+              await this.loadActionPlans();
+              // Close dialog
+              this.closeDeleteDialog();
+          }
+          catch (err) {
+              logger$7.error({
+                  fn: 'handleDeleteActionPlan',
+                  message: 'Failed to delete action plan',
+                  data: { error: err },
+              });
+              alert('Failed to delete action plan: ' + (err instanceof Error ? err.message : 'Unknown error'));
+          }
+          finally {
+              this.deleting = false;
+          }
+      }
       async handleCreateActionPlan() {
           if (!this.actionDescription.trim()) {
               alert('Action description is required');
@@ -41025,23 +41285,30 @@
                 <table class="table table-striped">
                   <thead>
                     <tr>
-                      <th>Workbook</th>
                       <th>Chapter</th>
                       <th>Question</th>
                       <th>Action</th>
                       <th>Created On</th>
-                      <th>Created By</th>
+                      <th>Actions</th>
                     </tr>
                   </thead>
                   <tbody>
                     ${this.actionPlans.map((plan) => x `
                         <tr>
-                          <td>${plan['_quartech_workbook_value@OData.Community.Display.V1.FormattedValue'] || plan._quartech_workbook_value}</td>
                           <td>${this.getChapterName(plan._quartech_chapter_value)}</td>
                           <td>${this.getQuestionLabel(plan._quartech_workbookquestion_value)}</td>
                           <td>${plan.quartech_action}</td>
                           <td>${this.formatDate(plan.createdon, plan['createdon@OData.Community.Display.V1.FormattedValue'])}</td>
-                          <td>${plan['_createdby_value@OData.Community.Display.V1.FormattedValue'] || plan._createdby_value}</td>
+                          <td>
+                            <div class="action-buttons">
+                              <sl-button size="small" variant="default" @click=${() => this.openEditDialog(plan)}>
+                                Edit
+                              </sl-button>
+                              <sl-button size="small" variant="danger" @click=${() => this.openDeleteDialog(plan)}>
+                                Delete
+                              </sl-button>
+                            </div>
+                          </td>
                         </tr>
                       `)}
                   </tbody>
@@ -41097,6 +41364,89 @@
               ?disabled=${!this.actionDescription.trim()}
             >
               Create
+            </sl-button>
+          </div>
+        </sl-dialog>
+
+        <!-- Edit Action Plan Dialog -->
+        <sl-dialog id="edit-dialog" label="Edit Action Plan">
+          <div class="form-field">
+            <searchable-dropdown
+              id="edit-chapter-dropdown"
+              .options=${this.chapterOptions}
+              .selectedValue=${this.selectedChapterId}
+              fieldLabel="Chapter (Optional)"
+              placeholder="Search or select a chapter"
+              clearable
+              @onChangeSearchableDropdown=${this.handleChapterChange}
+            ></searchable-dropdown>
+          </div>
+
+          <div class="form-field">
+            <searchable-dropdown
+              id="edit-question-dropdown"
+              .options=${this.questionOptions}
+              .selectedValue=${this.selectedQuestionId}
+              fieldLabel="Question (Optional)"
+              placeholder="Search or select a question"
+              clearable
+              @onChangeSearchableDropdown=${this.handleQuestionChange}
+            ></searchable-dropdown>
+          </div>
+
+          <div class="form-field">
+            <label class="required">Action Description</label>
+            <sl-textarea
+              placeholder="Enter action description"
+              rows="4"
+              .value=${this.actionDescription}
+              @sl-input=${this.handleActionChange}
+              required
+            ></sl-textarea>
+          </div>
+
+          <div slot="footer">
+            <sl-button variant="default" @click=${this.closeEditDialog}>
+              Cancel
+            </sl-button>
+            <sl-button
+              variant="primary"
+              @click=${this.handleEditActionPlan}
+              ?loading=${this.editing}
+              ?disabled=${!this.actionDescription.trim()}
+            >
+              Save Changes
+            </sl-button>
+          </div>
+        </sl-dialog>
+
+        <!-- Delete Confirmation Dialog -->
+        <sl-dialog id="delete-dialog" label="Delete Action Plan">
+          <p class="delete-warning">Are you sure you want to delete this action plan? This action cannot be undone.</p>
+
+          ${this.deletingPlan ? x `
+            <div class="delete-plan-details">
+              <dl>
+                <dt>Chapter</dt>
+                <dd>${this.getChapterName(this.deletingPlan._quartech_chapter_value)}</dd>
+                <dt>Question</dt>
+                <dd>${this.getQuestionLabel(this.deletingPlan._quartech_workbookquestion_value)}</dd>
+                <dt>Action</dt>
+                <dd>${this.deletingPlan.quartech_action}</dd>
+              </dl>
+            </div>
+          ` : ''}
+
+          <div slot="footer">
+            <sl-button variant="default" @click=${this.closeDeleteDialog}>
+              Cancel
+            </sl-button>
+            <sl-button
+              variant="danger"
+              @click=${this.handleDeleteActionPlan}
+              ?loading=${this.deleting}
+            >
+              Delete
             </sl-button>
           </div>
         </sl-dialog>
@@ -41190,6 +41540,38 @@
       sl-button::part(base) {
         font-family: 'BC Sans', 'Noto Sans', Verdana, sans-serif;
       }
+
+      .action-buttons {
+        display: flex;
+        gap: 0.5rem;
+      }
+
+      .action-buttons sl-button::part(base) {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.875rem;
+      }
+
+      .delete-warning {
+        color: #dc3545;
+        margin-bottom: 1rem;
+      }
+
+      .delete-plan-details {
+        background-color: #f8f9fa;
+        padding: 1rem;
+        border-radius: 4px;
+        margin-bottom: 1rem;
+      }
+
+      .delete-plan-details dt {
+        font-weight: 600;
+        margin-top: 0.5rem;
+      }
+
+      .delete-plan-details dd {
+        margin-left: 0;
+        margin-bottom: 0.5rem;
+      }
     `,
   ];
   __decorate([
@@ -41226,8 +41608,26 @@
       r$1()
   ], ActionPlanTable.prototype, "questionOptions", void 0);
   __decorate([
+      r$1()
+  ], ActionPlanTable.prototype, "editing", void 0);
+  __decorate([
+      r$1()
+  ], ActionPlanTable.prototype, "deleting", void 0);
+  __decorate([
+      r$1()
+  ], ActionPlanTable.prototype, "editingPlan", void 0);
+  __decorate([
+      r$1()
+  ], ActionPlanTable.prototype, "deletingPlan", void 0);
+  __decorate([
       e$6('#create-dialog')
   ], ActionPlanTable.prototype, "dialog", void 0);
+  __decorate([
+      e$6('#edit-dialog')
+  ], ActionPlanTable.prototype, "editDialog", void 0);
+  __decorate([
+      e$6('#delete-dialog')
+  ], ActionPlanTable.prototype, "deleteDialog", void 0);
   ActionPlanTable = __decorate([
       t$1('action-plan-table')
   ], ActionPlanTable);
@@ -44633,7 +45033,7 @@
       };
     };
     // @ts-ignore
-    POWERPOD.version = '4.4.9';
+    POWERPOD.version = '4.5.0';
     // @ts-ignore
     window.powerpod = POWERPOD;
   }

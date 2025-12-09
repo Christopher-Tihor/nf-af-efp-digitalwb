@@ -29,7 +29,13 @@ declare class ActionPlanTable extends LitElement {
     private questions;
     private chapterOptions;
     private questionOptions;
+    private editing;
+    private deleting;
+    private editingPlan;
+    private deletingPlan;
     dialog: any;
+    editDialog: any;
+    deleteDialog: any;
     static styles: import("lit").CSSResult[];
     connectedCallback(): void;
     disconnectedCallback(): void;
@@ -41,6 +47,12 @@ declare class ActionPlanTable extends LitElement {
     private handleActionChange;
     private openCreateDialog;
     private closeCreateDialog;
+    private openEditDialog;
+    private closeEditDialog;
+    private handleEditActionPlan;
+    private openDeleteDialog;
+    private closeDeleteDialog;
+    private handleDeleteActionPlan;
     private handleCreateActionPlan;
     private stripHtmlAndDecode;
     private getChapterName;

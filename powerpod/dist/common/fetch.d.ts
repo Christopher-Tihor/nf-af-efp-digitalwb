@@ -161,6 +161,17 @@ export function postActionPlanData({ workbookId, chapterId, questionId, action, 
     questionId: any;
     action: any;
 }): Promise<any>;
+export function patchActionPlanData({ actionPlanId, action, chapterId, questionId, ...options }: {
+    [x: string]: any;
+    actionPlanId: any;
+    action: any;
+    chapterId: any;
+    questionId: any;
+}): Promise<any>;
+export function deleteActionPlanData({ actionPlanId, ...options }: {
+    [x: string]: any;
+    actionPlanId: any;
+}): Promise<any>;
 export namespace ENDPOINT_URL {
     let get_env_vars_data: string;
     function get_application_form_data(programId: any): string;
@@ -202,4 +213,6 @@ export namespace ENDPOINT_URL {
     function get_portal_page_data(params?: string): string;
     let get_actionplans_data: string;
     let post_actionplan_data: string;
+    function patch_actionplan_data(id: any): string;
+    function delete_actionplan_data(id: any): string;
 }

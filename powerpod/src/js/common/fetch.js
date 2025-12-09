@@ -63,6 +63,8 @@ export const ENDPOINT_URL = {
   get_portal_page_data: (params = '') => `/_api/quartech_portalpages${params ? `?${params}` : ''}`,
   get_actionplans_data: `/_api/quartech_actionplans?$filter=statecode eq 0`,
   post_actionplan_data: `/_api/quartech_actionplans`,
+  patch_actionplan_data: (id) => `/_api/quartech_actionplans(${id})`,
+  delete_actionplan_data: (id) => `/_api/quartech_actionplans(${id})`,
 };
 
 const CONTENT_TYPE = {
@@ -117,6 +119,8 @@ POWERPOD.fetch = {
   getPortalPageData,
   getActionPlansData,
   postActionPlanData,
+  patchActionPlanData,
+  deleteActionPlanData,
 };
 
 const setODataHeaders = (XMLHttpRequest) => {
@@ -1033,6 +1037,91 @@ export async function postActionPlanData({
     processData: false,
     returnData: true,
     data: JSON.stringify(payload),
+    ...options,
+  });
+}
+
+export async function patchActionPlanData({
+  actionPlanId,
+  action,
+  chapterId,
+  questionId,
+  ...options
+}) {
+  if (!actionPlanId || !action) {
+    logger.error({
+      fn: patchActionPlanData,
+      message: 'Missing required parameters',
+      data: { actionPlanId, action, chapterId, questionId },
+    });
+    throw new Error('actionPlanId and action are required');
+  }
+
+  logger.info({
+    fn: patchActionPlanData,
+    message: 'Updating action plan',
+    data: { actionPlanId, action, chapterId, questionId },
+  });
+
+  const payload = {
+    quartech_action: action,
+  };
+
+  // Add chapterId if provided (null clears it)
+  if (chapterId !== undefined) {
+    if (chapterId) {
+      payload['quartech_chapter@odata.bind'] = `/quartech_chapters(${chapterId})`;
+    } else {
+      payload['quartech_chapter@odata.bind'] = null;
+    }
+  }
+
+  // Add questionId if provided (null clears it)
+  if (questionId !== undefined) {
+    if (questionId) {
+      payload['quartech_workbookquestion@odata.bind'] = `/quartech_workbookquestions(${questionId})`;
+    } else {
+      payload['quartech_workbookquestion@odata.bind'] = null;
+    }
+  }
+
+  return fetch({
+    method: 'PATCH',
+    url: ENDPOINT_URL.patch_actionplan_data(actionPlanId),
+    datatype: DATATYPE.json,
+    includeODataHeaders: true,
+    addRequestVerificationToken: true,
+    processData: false,
+    returnData: true,
+    data: JSON.stringify(payload),
+    ...options,
+  });
+}
+
+export async function deleteActionPlanData({ actionPlanId, ...options }) {
+  if (!actionPlanId) {
+    logger.error({
+      fn: deleteActionPlanData,
+      message: 'Missing required parameter',
+      data: { actionPlanId },
+    });
+    throw new Error('actionPlanId is required');
+  }
+
+  logger.info({
+    fn: deleteActionPlanData,
+    message: 'Deleting action plan',
+    data: { actionPlanId },
+  });
+
+  return fetch({
+    method: 'DELETE',
+    url: ENDPOINT_URL.delete_actionplan_data(actionPlanId),
+    datatype: DATATYPE.json,
+    includeODataHeaders: true,
+    addRequestVerificationToken: true,
+    processData: false,
+    returnData: false,
     ...options,
   });
 }

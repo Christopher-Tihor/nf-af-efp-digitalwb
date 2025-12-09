@@ -8,7 +8,7 @@ import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
 import { LitElement, css, html, unsafeCSS } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { Logger } from '../common/logger';
-import { getActionPlansData, postActionPlanData } from '../common/fetch';
+import { getActionPlansData, postActionPlanData, patchActionPlanData, deleteActionPlanData } from '../common/fetch';
 import { getCurrentWorkbookId } from '../common/workbookUtils';
 import { getQuestionnaireFromStore, getQuestionFromStore } from '../common/questionnaire';
 import store from '../store/index.js';
@@ -43,8 +43,14 @@ class ActionPlanTable extends LitElement {
   @state() private questions: any[] = [];
   @state() private chapterOptions: DropdownOption[] = [];
   @state() private questionOptions: DropdownOption[] = [];
+  @state() private editing = false;
+  @state() private deleting = false;
+  @state() private editingPlan: ActionPlan | null = null;
+  @state() private deletingPlan: ActionPlan | null = null;
 
   @query('#create-dialog') dialog!: any;
+  @query('#edit-dialog') editDialog!: any;
+  @query('#delete-dialog') deleteDialog!: any;
 
   static styles = [
     css`
@@ -131,6 +137,38 @@ class ActionPlanTable extends LitElement {
 
       sl-button::part(base) {
         font-family: 'BC Sans', 'Noto Sans', Verdana, sans-serif;
+      }
+
+      .action-buttons {
+        display: flex;
+        gap: 0.5rem;
+      }
+
+      .action-buttons sl-button::part(base) {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.875rem;
+      }
+
+      .delete-warning {
+        color: #dc3545;
+        margin-bottom: 1rem;
+      }
+
+      .delete-plan-details {
+        background-color: #f8f9fa;
+        padding: 1rem;
+        border-radius: 4px;
+        margin-bottom: 1rem;
+      }
+
+      .delete-plan-details dt {
+        font-weight: 600;
+        margin-top: 0.5rem;
+      }
+
+      .delete-plan-details dd {
+        margin-left: 0;
+        margin-bottom: 0.5rem;
       }
     `,
   ];
@@ -336,6 +374,146 @@ class ActionPlanTable extends LitElement {
     this.dialog?.hide();
   }
 
+  private openEditDialog(plan: ActionPlan) {
+    // Ensure chapters are loaded before showing dialog
+    this.loadChaptersAndQuestions();
+
+    // Set form state from the plan being edited
+    this.editingPlan = plan;
+    this.selectedChapterId = plan._quartech_chapter_value || '';
+    this.selectedQuestionId = plan._quartech_workbookquestion_value || '';
+    this.actionDescription = plan.quartech_action || '';
+
+    // Load questions based on selected chapter
+    if (this.selectedChapterId) {
+      const chapter = this.chapters.find(c => c.id === this.selectedChapterId);
+      this.questions = chapter?.questions || [];
+      this.questionOptions = this.questions.map(question => ({
+        value: question.id,
+        label: this.stripHtmlAndDecode(question.label || question.name)
+      }));
+    } else {
+      this.loadAllQuestions();
+    }
+
+    // Force update to ensure the selects show correct values
+    this.requestUpdate();
+
+    this.editDialog?.show();
+  }
+
+  private closeEditDialog() {
+    this.editDialog?.hide();
+    this.editingPlan = null;
+  }
+
+  private async handleEditActionPlan() {
+    if (!this.actionDescription.trim()) {
+      alert('Action description is required');
+      return;
+    }
+
+    if (!this.editingPlan) {
+      alert('No action plan selected for editing');
+      return;
+    }
+
+    try {
+      this.editing = true;
+
+      logger.info({
+        fn: 'handleEditActionPlan',
+        message: 'Updating action plan',
+        data: {
+          actionPlanId: this.editingPlan.quartech_actionplanid,
+          chapterId: this.selectedChapterId || null,
+          questionId: this.selectedQuestionId || null,
+          action: this.actionDescription,
+        },
+      });
+
+      await patchActionPlanData({
+        actionPlanId: this.editingPlan.quartech_actionplanid,
+        chapterId: this.selectedChapterId || null,
+        questionId: this.selectedQuestionId || null,
+        action: this.actionDescription,
+      });
+
+      logger.info({
+        fn: 'handleEditActionPlan',
+        message: 'Action plan updated successfully',
+      });
+
+      // Reload action plans
+      await this.loadActionPlans();
+
+      // Close dialog
+      this.closeEditDialog();
+    } catch (err) {
+      logger.error({
+        fn: 'handleEditActionPlan',
+        message: 'Failed to update action plan',
+        data: { error: err },
+      });
+      alert('Failed to update action plan: ' + (err instanceof Error ? err.message : 'Unknown error'));
+    } finally {
+      this.editing = false;
+    }
+  }
+
+  private openDeleteDialog(plan: ActionPlan) {
+    this.deletingPlan = plan;
+    this.deleteDialog?.show();
+  }
+
+  private closeDeleteDialog() {
+    this.deleteDialog?.hide();
+    this.deletingPlan = null;
+  }
+
+  private async handleDeleteActionPlan() {
+    if (!this.deletingPlan) {
+      alert('No action plan selected for deletion');
+      return;
+    }
+
+    try {
+      this.deleting = true;
+
+      logger.info({
+        fn: 'handleDeleteActionPlan',
+        message: 'Deleting action plan',
+        data: {
+          actionPlanId: this.deletingPlan.quartech_actionplanid,
+        },
+      });
+
+      await deleteActionPlanData({
+        actionPlanId: this.deletingPlan.quartech_actionplanid,
+      });
+
+      logger.info({
+        fn: 'handleDeleteActionPlan',
+        message: 'Action plan deleted successfully',
+      });
+
+      // Reload action plans
+      await this.loadActionPlans();
+
+      // Close dialog
+      this.closeDeleteDialog();
+    } catch (err) {
+      logger.error({
+        fn: 'handleDeleteActionPlan',
+        message: 'Failed to delete action plan',
+        data: { error: err },
+      });
+      alert('Failed to delete action plan: ' + (err instanceof Error ? err.message : 'Unknown error'));
+    } finally {
+      this.deleting = false;
+    }
+  }
+
   private async handleCreateActionPlan() {
     if (!this.actionDescription.trim()) {
       alert('Action description is required');
@@ -451,24 +629,31 @@ class ActionPlanTable extends LitElement {
                 <table class="table table-striped">
                   <thead>
                     <tr>
-                      <th>Workbook</th>
                       <th>Chapter</th>
                       <th>Question</th>
                       <th>Action</th>
                       <th>Created On</th>
-                      <th>Created By</th>
+                      <th>Actions</th>
                     </tr>
                   </thead>
                   <tbody>
                     ${this.actionPlans.map(
                       (plan) => html`
                         <tr>
-                          <td>${plan['_quartech_workbook_value@OData.Community.Display.V1.FormattedValue'] || plan._quartech_workbook_value}</td>
                           <td>${this.getChapterName(plan._quartech_chapter_value)}</td>
                           <td>${this.getQuestionLabel(plan._quartech_workbookquestion_value)}</td>
                           <td>${plan.quartech_action}</td>
                           <td>${this.formatDate(plan.createdon, plan['createdon@OData.Community.Display.V1.FormattedValue'])}</td>
-                          <td>${plan['_createdby_value@OData.Community.Display.V1.FormattedValue'] || plan._createdby_value}</td>
+                          <td>
+                            <div class="action-buttons">
+                              <sl-button size="small" variant="default" @click=${() => this.openEditDialog(plan)}>
+                                Edit
+                              </sl-button>
+                              <sl-button size="small" variant="danger" @click=${() => this.openDeleteDialog(plan)}>
+                                Delete
+                              </sl-button>
+                            </div>
+                          </td>
                         </tr>
                       `
                     )}
@@ -525,6 +710,89 @@ class ActionPlanTable extends LitElement {
               ?disabled=${!this.actionDescription.trim()}
             >
               Create
+            </sl-button>
+          </div>
+        </sl-dialog>
+
+        <!-- Edit Action Plan Dialog -->
+        <sl-dialog id="edit-dialog" label="Edit Action Plan">
+          <div class="form-field">
+            <searchable-dropdown
+              id="edit-chapter-dropdown"
+              .options=${this.chapterOptions}
+              .selectedValue=${this.selectedChapterId}
+              fieldLabel="Chapter (Optional)"
+              placeholder="Search or select a chapter"
+              clearable
+              @onChangeSearchableDropdown=${this.handleChapterChange}
+            ></searchable-dropdown>
+          </div>
+
+          <div class="form-field">
+            <searchable-dropdown
+              id="edit-question-dropdown"
+              .options=${this.questionOptions}
+              .selectedValue=${this.selectedQuestionId}
+              fieldLabel="Question (Optional)"
+              placeholder="Search or select a question"
+              clearable
+              @onChangeSearchableDropdown=${this.handleQuestionChange}
+            ></searchable-dropdown>
+          </div>
+
+          <div class="form-field">
+            <label class="required">Action Description</label>
+            <sl-textarea
+              placeholder="Enter action description"
+              rows="4"
+              .value=${this.actionDescription}
+              @sl-input=${this.handleActionChange}
+              required
+            ></sl-textarea>
+          </div>
+
+          <div slot="footer">
+            <sl-button variant="default" @click=${this.closeEditDialog}>
+              Cancel
+            </sl-button>
+            <sl-button
+              variant="primary"
+              @click=${this.handleEditActionPlan}
+              ?loading=${this.editing}
+              ?disabled=${!this.actionDescription.trim()}
+            >
+              Save Changes
+            </sl-button>
+          </div>
+        </sl-dialog>
+
+        <!-- Delete Confirmation Dialog -->
+        <sl-dialog id="delete-dialog" label="Delete Action Plan">
+          <p class="delete-warning">Are you sure you want to delete this action plan? This action cannot be undone.</p>
+
+          ${this.deletingPlan ? html`
+            <div class="delete-plan-details">
+              <dl>
+                <dt>Chapter</dt>
+                <dd>${this.getChapterName(this.deletingPlan._quartech_chapter_value)}</dd>
+                <dt>Question</dt>
+                <dd>${this.getQuestionLabel(this.deletingPlan._quartech_workbookquestion_value)}</dd>
+                <dt>Action</dt>
+                <dd>${this.deletingPlan.quartech_action}</dd>
+              </dl>
+            </div>
+          ` : ''}
+
+          <div slot="footer">
+            <sl-button variant="default" @click=${this.closeDeleteDialog}>
+              Cancel
+            </sl-button>
+            <sl-button
+              variant="danger"
+              @click=${this.handleDeleteActionPlan}
+              ?loading=${this.deleting}
+            >
+              Delete
             </sl-button>
           </div>
         </sl-dialog>
