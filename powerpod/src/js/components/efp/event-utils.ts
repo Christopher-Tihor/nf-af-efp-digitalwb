@@ -41,33 +41,41 @@ export class EFPEventUtils {
       logger.info({ message: 'Ignoring section change during navigation' });
       return;
     }
-    
+
     // Find the first CONTENT step in the new section (skip section headers)
     const stepsInSection = flatSteps.filter(step => step.sectionIndex === newSectionIndex);
-    
-    // Skip the first step if it's just the section header
-    let firstContentStep = stepsInSection.find(step => 
-      !step.label.startsWith('Section ') && 
-      step.content && 
+    logger.info({ message: `Found ${stepsInSection.length} steps in section ${newSectionIndex}`, data: { steps: stepsInSection.map(s => s.label) } });
+
+    // Skip the first step if it's just the section header (tab name)
+    // The first step is typically the tab name itself (e.g., "My Workbook", "Review & Submit")
+    // We want to skip that and go to the actual content
+    let firstContentStep = stepsInSection.find(step =>
+      !step.label.startsWith('Section ') &&
+      step.content &&
       step.content.trim() !== '' &&
-      step.content !== step.label
+      step.content !== step.label &&
+      // Also skip if the label matches common tab names
+      step.label !== 'My Workbook' &&
+      step.label !== 'Review & Submit'
     );
-    
+
     // If no content step found, fall back to the first step after the section header
     if (!firstContentStep && stepsInSection.length > 1) {
+      logger.info({ message: 'No content step found, using second step (after header)' });
       firstContentStep = stepsInSection[1];
     }
-    
+
     // If still no step found, use the first step in the section
     if (!firstContentStep && stepsInSection.length > 0) {
+      logger.info({ message: 'Using first step in section as fallback' });
       firstContentStep = stepsInSection[0];
     }
-    
+
     if (firstContentStep) {
       const stepIndex = flatSteps.indexOf(firstContentStep);
+      logger.info({ message: `Navigating to first content step: "${firstContentStep.label}" at index ${stepIndex}` });
       onStepChange(stepIndex, newSectionIndex);
       onNavigationUpdate(firstContentStep.label);
-      logger.info({ message: `Navigated to first content step in section: ${firstContentStep.label}` });
     } else {
       logger.warn({ message: `No steps found for section: ${newSectionIndex}` });
     }
