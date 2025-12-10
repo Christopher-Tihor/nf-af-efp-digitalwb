@@ -445,6 +445,11 @@ export class EFPEntryForm extends LitElement {
     const currentStep = this.flatSteps[this.currentStepIndex];
     if (!currentStep) return null;
 
+    // First check if chapterId is directly on the step (for container chapters)
+    if (currentStep.chapterId) {
+      return currentStep.chapterId;
+    }
+
     // For subchapters, get the chapter ID from subchapterData
     if (currentStep.subchapterData) {
       return currentStep.subchapterData.id || currentStep.subchapterData.quartech_chapterid;

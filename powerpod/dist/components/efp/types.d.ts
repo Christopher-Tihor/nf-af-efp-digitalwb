@@ -3,6 +3,7 @@ export interface EFPStep {
     content: string;
     complete?: boolean;
     sectionIndex: number;
+    chapterId?: string;
     chapterData?: any;
     subchapterData?: any;
     isContainer?: boolean;

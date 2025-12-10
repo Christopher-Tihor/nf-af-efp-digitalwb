@@ -3,6 +3,7 @@ export interface EFPStep {
   content: string;
   complete?: boolean;
   sectionIndex: number;
+  chapterId?: string; // Chapter ID for direct lookup in questionnaire store
   chapterData?: any;
   subchapterData?: any;
   isContainer?: boolean;

@@ -42323,6 +42323,9 @@
                           sectionIndex,
                           isContainer: true,
                       };
+                      if (item.chapterId) {
+                          containerStep.chapterId = item.chapterId;
+                      }
                       if (item.hideSkipChapterCheckbox) {
                           containerStep.hideSkipChapterCheckbox = item.hideSkipChapterCheckbox;
                       }
@@ -42336,6 +42339,9 @@
                           complete: (_c = item.complete) !== null && _c !== void 0 ? _c : false,
                           sectionIndex,
                       };
+                      if (item.chapterId) {
+                          stepItem.chapterId = item.chapterId;
+                      }
                       if (item.chapterData) {
                           stepItem.chapterData = item.chapterData;
                       }
@@ -43390,6 +43396,10 @@
           const currentStep = this.flatSteps[this.currentStepIndex];
           if (!currentStep)
               return null;
+          // First check if chapterId is directly on the step (for container chapters)
+          if (currentStep.chapterId) {
+              return currentStep.chapterId;
+          }
           // For subchapters, get the chapter ID from subchapterData
           if (currentStep.subchapterData) {
               return currentStep.subchapterData.id || currentStep.subchapterData.quartech_chapterid;
