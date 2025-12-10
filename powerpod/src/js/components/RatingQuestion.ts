@@ -26,6 +26,7 @@ export class RatingQuestion extends LitElement {
   @property({ type: Array }) options: RatingOption[] = [];
   @property({ type: String }) selectedValue = '';
   @property({ type: Object }) ratingMetadata: RatingMetadata = {};
+  @property({ type: Boolean }) disabled = false;
 
   @state() private hoveredValue = '';
 
@@ -163,11 +164,25 @@ export class RatingQuestion extends LitElement {
       border-radius: 8px 8px 0 0;
     }
 
+    /* Disabled states */
+    .rating-box.disabled,
+    .rating-card.disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
     /* Hover states */
     .rating-box:hover,
     .rating-card:hover {
       transform: translateY(-2px);
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .rating-box.disabled:hover,
+    .rating-card.disabled:hover {
+      transform: none;
+      box-shadow: none;
     }
 
     /* Selected states */
@@ -360,8 +375,10 @@ export class RatingQuestion extends LitElement {
   }
 
   private handleOptionClick(value: string) {
+    if (this.disabled) return;
+
     this.selectedValue = value;
-    
+
     // Dispatch custom event for parent component
     this.dispatchEvent(new CustomEvent('rating-changed', {
       detail: {
@@ -420,7 +437,7 @@ export class RatingQuestion extends LitElement {
       if (isNA) {
         return html`
           <div
-            class="rating-card na ${isSelected ? 'selected' : ''}"
+            class="rating-card na ${isSelected ? 'selected' : ''} ${this.disabled ? 'disabled' : ''}"
             @click=${() => this.handleOptionClick(option.value)}
             title="Not Applicable"
           >
@@ -436,7 +453,7 @@ export class RatingQuestion extends LitElement {
 
       return html`
         <div
-          class="rating-card ${option.color} ${isSelected ? 'selected' : ''}"
+          class="rating-card ${option.color} ${isSelected ? 'selected' : ''} ${this.disabled ? 'disabled' : ''}"
           @click=${() => this.handleOptionClick(option.value)}
           title="${label}"
         >
@@ -453,7 +470,7 @@ export class RatingQuestion extends LitElement {
     // For Yes/No/NA or Point Rating without descriptions, use compact button layout
     return html`
       <div
-        class="rating-box ${option.color} ${isSelected ? 'selected' : ''}"
+        class="rating-box ${option.color} ${isSelected ? 'selected' : ''} ${this.disabled ? 'disabled' : ''}"
         @click=${() => this.handleOptionClick(option.value)}
         @mouseenter=${() => this.handleMouseEnter(option.value)}
         @mouseleave=${this.handleMouseLeave}

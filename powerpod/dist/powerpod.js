@@ -37525,6 +37525,7 @@
           this.options = [];
           this.selectedValue = '';
           this.ratingMetadata = {};
+          this.disabled = false;
           this.hoveredValue = '';
       }
       // Debug lifecycle to see when selectedValue changes
@@ -37558,6 +37559,8 @@
           }
       }
       handleOptionClick(value) {
+          if (this.disabled)
+              return;
           this.selectedValue = value;
           // Dispatch custom event for parent component
           this.dispatchEvent(new CustomEvent('rating-changed', {
@@ -37609,7 +37612,7 @@
               if (isNA) {
                   return x `
           <div
-            class="rating-card na ${isSelected ? 'selected' : ''}"
+            class="rating-card na ${isSelected ? 'selected' : ''} ${this.disabled ? 'disabled' : ''}"
             @click=${() => this.handleOptionClick(option.value)}
             title="Not Applicable"
           >
@@ -37623,7 +37626,7 @@
               const description = this.getRatingDescription(ratingNum);
               return x `
         <div
-          class="rating-card ${option.color} ${isSelected ? 'selected' : ''}"
+          class="rating-card ${option.color} ${isSelected ? 'selected' : ''} ${this.disabled ? 'disabled' : ''}"
           @click=${() => this.handleOptionClick(option.value)}
           title="${label}"
         >
@@ -37639,7 +37642,7 @@
           // For Yes/No/NA or Point Rating without descriptions, use compact button layout
           return x `
       <div
-        class="rating-box ${option.color} ${isSelected ? 'selected' : ''}"
+        class="rating-box ${option.color} ${isSelected ? 'selected' : ''} ${this.disabled ? 'disabled' : ''}"
         @click=${() => this.handleOptionClick(option.value)}
         @mouseenter=${() => this.handleMouseEnter(option.value)}
         @mouseleave=${this.handleMouseLeave}
@@ -37789,11 +37792,25 @@
       border-radius: 8px 8px 0 0;
     }
 
+    /* Disabled states */
+    .rating-box.disabled,
+    .rating-card.disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
     /* Hover states */
     .rating-box:hover,
     .rating-card:hover {
       transform: translateY(-2px);
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .rating-box.disabled:hover,
+    .rating-card.disabled:hover {
+      transform: none;
+      box-shadow: none;
     }
 
     /* Selected states */
@@ -37973,6 +37990,9 @@
   __decorate([
       n$4({ type: Object })
   ], RatingQuestion.prototype, "ratingMetadata", void 0);
+  __decorate([
+      n$4({ type: Boolean })
+  ], RatingQuestion.prototype, "disabled", void 0);
   __decorate([
       r$1()
   ], RatingQuestion.prototype, "hoveredValue", void 0);
@@ -42752,6 +42772,13 @@
     font-family: var(--body-font);
   }
 
+  .question-container.question-disabled {
+    opacity: 0.6;
+    background-color: var(--sl-color-neutral-100);
+    pointer-events: none;
+    user-select: none;
+  }
+
   .question-label {
     font-family: var(--chapter-font);
     font-weight: 600;
@@ -43160,8 +43187,10 @@
               // Add more question types as needed
           };
           const questionTypeName = questionTypeMap[question.questionType] || 'Unknown';
+          // Check if this question is disabled (in a skipped chapter)
+          const isDisabled = this.isQuestionDisabled(question.id);
           return x `
-      <div class="question-container">
+      <div class="question-container ${isDisabled ? 'question-disabled' : ''}">
         ${question.textAboveQuestion
             ? x `
               <div class="question-text">
@@ -43197,12 +43226,12 @@
             : ''}
 
         <div class="question-response">
-          ${this.renderQuestionInput(question, questionTypeName)}
+          ${this.renderQuestionInput(question, questionTypeName, isDisabled)}
         </div>
       </div>
     `;
       }
-      renderQuestionInput(question, questionType) {
+      renderQuestionInput(question, questionType, isDisabled = false) {
           switch (questionType) {
               case 'Multi-select List':
                   // Parse the semicolon-separated options from the question
@@ -43236,11 +43265,12 @@
                     return x `
                 <div class="multiselect-option">
                   <label
-                    style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; padding: 0.5rem 0;"
+                    style="display: flex; align-items: center; gap: 0.5rem; cursor: ${isDisabled ? 'not-allowed' : 'pointer'}; padding: 0.5rem 0; opacity: ${isDisabled ? '0.6' : '1'};"
                   >
                     <input
                       type="checkbox"
                       .checked=${isChecked}
+                      ?disabled=${isDisabled}
                       @change=${(e) => this.handleMultiselectChange(question.id, option, e.target.checked)}
                       style="transform: scale(1.2);"
                     />
@@ -43275,6 +43305,7 @@
             .questionType=${questionType}
             .selectedValue=${selectedValue}
             .ratingMetadata=${ratingMetadata}
+            .disabled=${isDisabled}
             @rating-changed=${this.handleRatingChanged}
           ></rating-question>
         `;
@@ -43298,6 +43329,7 @@
               placeholder="Enter your response..."
               maxlength="${maxChars}"
               .value=${textValue}
+              ?disabled=${isDisabled}
               @sl-input=${(e) => this.handleMultilineTextInput(question.id, e.target.value)}
             ></sl-textarea>
             <div class="multiline-text-footer">
@@ -43334,6 +43366,7 @@
             name="question-${question.id}"
             rows="3"
             placeholder="Enter your response..."
+            ?disabled=${isDisabled}
           ></sl-textarea>
         `;
           }
@@ -43376,6 +43409,12 @@
               const entry = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.get(q.id);
               return ((_a = entry === null || entry === void 0 ? void 0 : entry.response) === null || _a === void 0 ? void 0 : _a.quartech_chapterskipped) === 100000000;
           });
+      }
+      // Check if a specific question is in a skipped chapter
+      isQuestionDisabled(questionId) {
+          var _a;
+          const entry = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.get(questionId);
+          return ((_a = entry === null || entry === void 0 ? void 0 : entry.response) === null || _a === void 0 ? void 0 : _a.quartech_chapterskipped) === 100000000;
       }
       // Check if a chapter (by ID) is skipped
       isChapterSkippedById(chapterId) {

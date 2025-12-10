@@ -20,6 +20,7 @@ export declare class RatingQuestion extends LitElement {
     options: RatingOption[];
     selectedValue: string;
     ratingMetadata: RatingMetadata;
+    disabled: boolean;
     private hoveredValue;
     updated(changedProperties: Map<string, unknown>): void;
     static styles: import("lit").CSSResult;

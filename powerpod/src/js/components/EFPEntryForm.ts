@@ -179,8 +179,11 @@ export class EFPEntryForm extends LitElement {
     const questionTypeName =
       questionTypeMap[question.questionType] || 'Unknown';
 
+    // Check if this question is disabled (in a skipped chapter)
+    const isDisabled = this.isQuestionDisabled(question.id);
+
     return html`
-      <div class="question-container">
+      <div class="question-container ${isDisabled ? 'question-disabled' : ''}">
         ${question.textAboveQuestion
           ? html`
               <div class="question-text">
@@ -218,13 +221,13 @@ export class EFPEntryForm extends LitElement {
           : ''}
 
         <div class="question-response">
-          ${this.renderQuestionInput(question, questionTypeName)}
+          ${this.renderQuestionInput(question, questionTypeName, isDisabled)}
         </div>
       </div>
     `;
   }
 
-  private renderQuestionInput(question: any, questionType: string) {
+  private renderQuestionInput(question: any, questionType: string, isDisabled: boolean = false) {
     switch (questionType) {
       case 'Multi-select List':
         // Parse the semicolon-separated options from the question
@@ -263,11 +266,12 @@ export class EFPEntryForm extends LitElement {
               return html`
                 <div class="multiselect-option">
                   <label
-                    style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; padding: 0.5rem 0;"
+                    style="display: flex; align-items: center; gap: 0.5rem; cursor: ${isDisabled ? 'not-allowed' : 'pointer'}; padding: 0.5rem 0; opacity: ${isDisabled ? '0.6' : '1'};"
                   >
                     <input
                       type="checkbox"
                       .checked=${isChecked}
+                      ?disabled=${isDisabled}
                       @change=${(e: Event) =>
                         this.handleMultiselectChange(
                           question.id,
@@ -311,6 +315,7 @@ export class EFPEntryForm extends LitElement {
             .questionType=${questionType}
             .selectedValue=${selectedValue}
             .ratingMetadata=${ratingMetadata}
+            .disabled=${isDisabled}
             @rating-changed=${this.handleRatingChanged}
           ></rating-question>
         `;
@@ -338,6 +343,7 @@ export class EFPEntryForm extends LitElement {
               placeholder="Enter your response..."
               maxlength="${maxChars}"
               .value=${textValue}
+              ?disabled=${isDisabled}
               @sl-input=${(e: Event) =>
                 this.handleMultilineTextInput(
                   question.id,
@@ -379,6 +385,7 @@ export class EFPEntryForm extends LitElement {
             name="question-${question.id}"
             rows="3"
             placeholder="Enter your response..."
+            ?disabled=${isDisabled}
           ></sl-textarea>
         `;
     }
@@ -424,6 +431,12 @@ export class EFPEntryForm extends LitElement {
       const entry = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.get(q.id);
       return entry?.response?.quartech_chapterskipped === 100000000;
     });
+  }
+
+  // Check if a specific question is in a skipped chapter
+  private isQuestionDisabled(questionId: string): boolean {
+    const entry = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.get(questionId);
+    return entry?.response?.quartech_chapterskipped === 100000000;
   }
 
   // Check if a chapter (by ID) is skipped

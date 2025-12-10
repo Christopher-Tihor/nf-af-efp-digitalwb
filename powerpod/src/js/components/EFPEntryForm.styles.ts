@@ -117,6 +117,13 @@ export const efpEntryFormStyles = css`
     font-family: var(--body-font);
   }
 
+  .question-container.question-disabled {
+    opacity: 0.6;
+    background-color: var(--sl-color-neutral-100);
+    pointer-events: none;
+    user-select: none;
+  }
+
   .question-label {
     font-family: var(--chapter-font);
     font-weight: 600;
