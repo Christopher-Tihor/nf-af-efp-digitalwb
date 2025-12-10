@@ -32774,7 +32774,8 @@
             if (responseEntry && responseEntry.response) {
               question.response = responseEntry.response.quartech_response;
               question.responseData = responseEntry.response;
-              question.complete = true;
+              // A question is only complete if it has a non-empty response
+              question.complete = !!(question.response && question.response.trim() !== '');
               question.hasResponse = true;
               logger$c.info({
                 fn: mergeResponsesWithQuestions,
@@ -32782,6 +32783,7 @@
                 data: {
                   questionId: question.id,
                   response: question.response,
+                  complete: question.complete,
                   hasResponseData: !!question.responseData
                 }
               });
@@ -33054,25 +33056,28 @@
    * Update a question's response
    * @param {string} questionId - The question ID to update
    * @param {any} response - The response value
-   * @param {boolean} complete - Whether the question is complete
+   * @param {boolean} complete - Whether the question is complete (optional, auto-calculated if not provided)
    * @param {Object} responseData - Full response data object (optional)
    */
   function updateQuestionResponse(questionId, response) {
-    var complete = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
+    var complete = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
     var responseData = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : null;
+    // Auto-calculate completion if not explicitly provided
+    // A question is complete only if it has a non-empty response
+    var isComplete = complete !== null ? complete : !!(response && typeof response === 'string' && response.trim() !== '');
     logger$c.info({
       fn: updateQuestionResponse,
       message: 'Updating question response',
       data: {
         questionId: questionId,
         response: response,
-        complete: complete,
+        complete: isComplete,
         hasResponseData: !!responseData
       }
     });
     var updateData = {
       response: response,
-      complete: complete,
+      complete: isComplete,
       hasResponse: !!response
     };
 
@@ -33901,7 +33906,8 @@
             // Update questionnaire store if loaded
             if (isQuestionnaireLoaded() && createdResponse) {
               try {
-                updateQuestionResponse(questionId, response, true, createdResponse);
+                // Let updateQuestionResponse auto-calculate completion based on response content
+                updateQuestionResponse(questionId, response, null, createdResponse);
                 logger$b.info({
                   fn: 'createResponse',
                   message: "Updated questionnaire store for question ".concat(questionId)
@@ -34038,7 +34044,8 @@
               questionId = result.data._quartech_question_value;
               if (questionId) {
                 try {
-                  updateQuestionResponse(questionId, response, true, result.data);
+                  // Let updateQuestionResponse auto-calculate completion based on response content
+                  updateQuestionResponse(questionId, response, null, result.data);
                   logger$b.info({
                     fn: 'updateResponse',
                     message: "Updated questionnaire store for question ".concat(questionId)
@@ -34721,7 +34728,8 @@
                 // Update each question in the questionnaire store with its response
                 questionsWithResponses.forEach(function (entry, questionId) {
                   if (entry.response) {
-                    updateQuestionResponse(questionId, entry.response.quartech_response, true, entry.response);
+                    // Let updateQuestionResponse auto-calculate completion based on response content
+                    updateQuestionResponse(questionId, entry.response.quartech_response, null, entry.response);
                   }
                 });
                 logger$b.info({
@@ -34871,7 +34879,8 @@
     // Also update questionnaire store if loaded
     if (isQuestionnaireLoaded() && responseData) {
       try {
-        updateQuestionResponse(questionId, responseData.quartech_response, true, responseData);
+        // Let updateQuestionResponse auto-calculate completion based on response content
+        updateQuestionResponse(questionId, responseData.quartech_response, null, responseData);
         logger$b.info({
           fn: 'updateResponseInMemory',
           message: "Updated questionnaire store for question ".concat(questionId)
@@ -44224,7 +44233,8 @@
               // Save the response
               const responseData = await this.saveRatingResponse(questionId, responseValue);
               // Update the questionnaire store with the full response data
-              updateQuestionResponse(questionId, responseValue, true, responseData);
+              // Let updateQuestionResponse auto-calculate completion based on response content
+              updateQuestionResponse(questionId, responseValue, undefined, responseData);
               logger$4.info({
                   message: `Successfully saved debounced response for question ${questionId}`,
               });
@@ -44257,7 +44267,8 @@
               // Save the response
               const responseData = await this.saveRatingResponse(questionId, newValue);
               // Update the questionnaire store with the full response data
-              updateQuestionResponse(questionId, newValue, true, responseData);
+              // Let updateQuestionResponse auto-calculate completion based on response content
+              updateQuestionResponse(questionId, newValue, undefined, responseData);
               logger$4.info({
                   message: `Successfully saved multi-select response for question ${questionId}`,
               });

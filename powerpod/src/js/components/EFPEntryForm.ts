@@ -1490,7 +1490,8 @@ export class EFPEntryForm extends LitElement {
       );
 
       // Update the questionnaire store with the full response data
-      updateQuestionResponse(questionId, responseValue, true, responseData);
+      // Let updateQuestionResponse auto-calculate completion based on response content
+      updateQuestionResponse(questionId, responseValue, undefined, responseData);
 
       logger.info({
         message: `Successfully saved debounced response for question ${questionId}`,
@@ -1531,7 +1532,8 @@ export class EFPEntryForm extends LitElement {
       const responseData = await this.saveRatingResponse(questionId, newValue);
 
       // Update the questionnaire store with the full response data
-      updateQuestionResponse(questionId, newValue, true, responseData);
+      // Let updateQuestionResponse auto-calculate completion based on response content
+      updateQuestionResponse(questionId, newValue, undefined, responseData);
 
       logger.info({
         message: `Successfully saved multi-select response for question ${questionId}`,

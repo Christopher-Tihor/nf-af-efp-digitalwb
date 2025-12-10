@@ -251,7 +251,8 @@ export async function createResponse(questionId, response, options = {}) {
     // Update questionnaire store if loaded
     if (isQuestionnaireLoaded() && createdResponse) {
       try {
-        updateQuestionResponse(questionId, response, true, createdResponse);
+        // Let updateQuestionResponse auto-calculate completion based on response content
+        updateQuestionResponse(questionId, response, null, createdResponse);
         logger.info({
           fn: 'createResponse',
           message: `Updated questionnaire store for question ${questionId}`,
@@ -327,7 +328,8 @@ export async function updateResponse(responseId, response = null, options = {}) 
       const questionId = result.data._quartech_question_value;
       if (questionId) {
         try {
-          updateQuestionResponse(questionId, response, true, result.data);
+          // Let updateQuestionResponse auto-calculate completion based on response content
+          updateQuestionResponse(questionId, response, null, result.data);
           logger.info({
             fn: 'updateResponse',
             message: `Updated questionnaire store for question ${questionId}`,
@@ -839,7 +841,8 @@ export async function loadQuestionsAndResponses(workbookId, options = {}) {
         // Update each question in the questionnaire store with its response
         questionsWithResponses.forEach((entry, questionId) => {
           if (entry.response) {
-            updateQuestionResponse(questionId, entry.response.quartech_response, true, entry.response);
+            // Let updateQuestionResponse auto-calculate completion based on response content
+            updateQuestionResponse(questionId, entry.response.quartech_response, null, entry.response);
           }
         });
 
@@ -976,7 +979,8 @@ export function updateResponseInMemory(questionId, responseData) {
   // Also update questionnaire store if loaded
   if (isQuestionnaireLoaded() && responseData) {
     try {
-      updateQuestionResponse(questionId, responseData.quartech_response, true, responseData);
+      // Let updateQuestionResponse auto-calculate completion based on response content
+      updateQuestionResponse(questionId, responseData.quartech_response, null, responseData);
       logger.info({
         fn: 'updateResponseInMemory',
         message: `Updated questionnaire store for question ${questionId}`

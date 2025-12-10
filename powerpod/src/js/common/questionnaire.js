@@ -54,7 +54,8 @@ function mergeResponsesWithQuestions(nestedChapterStructure, responseData) {
           if (responseEntry && responseEntry.response) {
             question.response = responseEntry.response.quartech_response;
             question.responseData = responseEntry.response;
-            question.complete = true;
+            // A question is only complete if it has a non-empty response
+            question.complete = !!(question.response && question.response.trim() !== '');
             question.hasResponse = true;
 
             logger.info({
@@ -63,6 +64,7 @@ function mergeResponsesWithQuestions(nestedChapterStructure, responseData) {
               data: {
                 questionId: question.id,
                 response: question.response,
+                complete: question.complete,
                 hasResponseData: !!question.responseData
               }
             });
@@ -290,19 +292,25 @@ export function updateChapterCompletion(chapterId, complete) {
  * Update a question's response
  * @param {string} questionId - The question ID to update
  * @param {any} response - The response value
- * @param {boolean} complete - Whether the question is complete
+ * @param {boolean} complete - Whether the question is complete (optional, auto-calculated if not provided)
  * @param {Object} responseData - Full response data object (optional)
  */
-export function updateQuestionResponse(questionId, response, complete = true, responseData = null) {
+export function updateQuestionResponse(questionId, response, complete = null, responseData = null) {
+  // Auto-calculate completion if not explicitly provided
+  // A question is complete only if it has a non-empty response
+  const isComplete = complete !== null
+    ? complete
+    : !!(response && typeof response === 'string' && response.trim() !== '');
+
   logger.info({
     fn: updateQuestionResponse,
     message: 'Updating question response',
-    data: { questionId, response, complete, hasResponseData: !!responseData },
+    data: { questionId, response, complete: isComplete, hasResponseData: !!responseData },
   });
 
   const updateData = {
     response,
-    complete,
+    complete: isComplete,
     hasResponse: !!response
   };
 

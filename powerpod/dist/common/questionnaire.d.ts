@@ -33,7 +33,7 @@ export function updateChapterCompletion(chapterId: string, complete: boolean): v
  * Update a question's response
  * @param {string} questionId - The question ID to update
  * @param {any} response - The response value
- * @param {boolean} complete - Whether the question is complete
+ * @param {boolean} complete - Whether the question is complete (optional, auto-calculated if not provided)
  * @param {Object} responseData - Full response data object (optional)
  */
 export function updateQuestionResponse(questionId: string, response: any, complete?: boolean, responseData?: Object): void;
