@@ -144,6 +144,13 @@ class SearchableDropdown extends LitElement {
     }
   }
 
+  private handleKeyDown(event: KeyboardEvent) {
+    // Prevent space key from closing the dropdown
+    if (event.key === ' ' || event.code === 'Space') {
+      event.stopPropagation();
+    }
+  }
+
   private handleSelect(option: DropdownOption) {
     this.selectedValue = option.value;
     this.searchTerm = option.label;
@@ -277,6 +284,7 @@ class SearchableDropdown extends LitElement {
               ?clearable=${this.clearable && !!this.selectedValue}
               @sl-input=${this.handleSearchInput}
               @sl-clear=${(e: Event) => this.handleClear(e)}
+              @keydown=${this.handleKeyDown}
             >
               <sl-icon
                 name="chevron-down"

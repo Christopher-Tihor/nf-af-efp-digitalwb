@@ -1,5 +1,5 @@
 /*!
-* powerpod 4.5.1
+* powerpod 4.5.2
 * https://github.com/bcgov/nr-af-pods/powerpod
 *
 * @license GPLv3 for open source use only
@@ -40964,6 +40964,12 @@
               this.dropdown.show();
           }
       }
+      handleKeyDown(event) {
+          // Prevent space key from closing the dropdown
+          if (event.key === ' ' || event.code === 'Space') {
+              event.stopPropagation();
+          }
+      }
       handleSelect(option) {
           this.selectedValue = option.value;
           this.searchTerm = option.label;
@@ -41083,6 +41089,7 @@
               ?clearable=${this.clearable && !!this.selectedValue}
               @sl-input=${this.handleSearchInput}
               @sl-clear=${(e) => this.handleClear(e)}
+              @keydown=${this.handleKeyDown}
             >
               <sl-icon
                 name="chevron-down"
@@ -45844,7 +45851,7 @@
       };
     };
     // @ts-ignore
-    POWERPOD.version = '4.5.1';
+    POWERPOD.version = '4.5.2';
     // @ts-ignore
     window.powerpod = POWERPOD;
   }

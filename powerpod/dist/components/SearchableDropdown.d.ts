@@ -30,6 +30,7 @@ declare class SearchableDropdown extends LitElement {
     connectedCallback(): void;
     updated(changedProperties: Map<string, any>): void;
     private handleSearchInput;
+    private handleKeyDown;
     private handleSelect;
     private handleClear;
     private handleDropdownShow;
