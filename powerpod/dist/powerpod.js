@@ -32775,6 +32775,7 @@
               question.response = responseEntry.response.quartech_response;
               question.responseData = responseEntry.response;
               // A question is only complete if it has a non-empty response
+              // Skipped questions are NOT marked as complete, but they count as "done" for parent chapter completion
               question.complete = !!(question.response && question.response.trim() !== '');
               question.hasResponse = true;
               logger$c.info({
@@ -33337,9 +33338,9 @@
   }
 
   /**
-   * Calculate completion status for a chapter based on questionnaire store rules
-   * @param {Object} chapter - The chapter object
-   * @returns {boolean} True if the chapter should be marked complete
+   * Check if a question is complete or skipped
+   * @param {Object} question - The question object
+   * @returns {boolean} True if the question is complete or skipped
    */
   function _refreshQuestionnaireResponses() {
     _refreshQuestionnaireResponses = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee2(workbookId) {
@@ -33404,6 +33405,27 @@
     }));
     return _refreshQuestionnaireResponses.apply(this, arguments);
   }
+  function isQuestionCompleteOrSkipped(question) {
+    var _question$responseDat;
+    // A question is considered "done" if it's either:
+    // 1. Complete (has non-empty response), OR
+    // 2. Skipped (quartech_chapterskipped === 100000000)
+    if (question.complete) {
+      return true;
+    }
+
+    // Check if question is skipped
+    if (((_question$responseDat = question.responseData) === null || _question$responseDat === void 0 ? void 0 : _question$responseDat.quartech_chapterskipped) === 100000000) {
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Calculate completion status for a chapter based on questionnaire store rules
+   * @param {Object} chapter - The chapter object
+   * @returns {boolean} True if the chapter should be marked complete
+   */
   function calculateChapterCompletion(chapter) {
     if (!chapter) return false;
     var hasQuestions = chapter.questions && Array.isArray(chapter.questions) && chapter.questions.length > 0;
@@ -33414,10 +33436,10 @@
       return true;
     }
 
-    // Rule: If a parent has only questions, mark it complete when all questions are completed
+    // Rule: If a parent has only questions, mark it complete when all questions are completed or skipped
     if (hasQuestions && !hasSubchapters) {
       return chapter.questions.every(function (question) {
-        return question.complete;
+        return isQuestionCompleteOrSkipped(question);
       });
     }
 
@@ -33428,15 +33450,15 @@
       });
     }
 
-    // Rule: If a parent has both questions and subchapters, mark it complete when all questions and subchapters are complete
+    // Rule: If a parent has both questions and subchapters, mark it complete when all questions are complete/skipped and all subchapters are complete
     if (hasQuestions && hasSubchapters) {
-      var allQuestionsComplete = chapter.questions.every(function (question) {
-        return question.complete;
+      var allQuestionsCompleteOrSkipped = chapter.questions.every(function (question) {
+        return isQuestionCompleteOrSkipped(question);
       });
       var allSubchaptersComplete = chapter.subchapters.every(function (subchapter) {
         return calculateChapterCompletion(subchapter);
       });
-      return allQuestionsComplete && allSubchaptersComplete;
+      return allQuestionsCompleteOrSkipped && allSubchaptersComplete;
     }
     return false;
   }
@@ -43448,6 +43470,8 @@
                       if (isChecked) {
                           entry.response.quartech_response = '';
                       }
+                      // Update questionnaire store with the updated response data
+                      updateQuestionResponse(questionId, entry.response.quartech_response, undefined, entry.response);
                       logger$4.info({
                           message: `Updated response for question ${questionId}`,
                           data: { questionId, responseId, chapterSkippedValue },
@@ -43463,9 +43487,13 @@
               else {
                   // If no response exists, create one with chapterSkipped set
                   try {
-                      await WorkbookResponseHelper.createResponse(questionId, '', {
+                      const createdResponse = await WorkbookResponseHelper.createResponse(questionId, '', {
                           chapterSkipped: chapterSkippedValue,
                       });
+                      // Update questionnaire store with the created response
+                      if (createdResponse === null || createdResponse === void 0 ? void 0 : createdResponse.response) {
+                          updateQuestionResponse(questionId, '', undefined, createdResponse.response);
+                      }
                       logger$4.info({
                           message: `Created response for question ${questionId} with chapterSkipped`,
                           data: { questionId, chapterSkippedValue },
@@ -43480,32 +43508,23 @@
               }
           });
           await Promise.all(updatePromises);
-          // Update chapter completion status based on checkbox state
+          // Trigger automatic completion recalculation for all chapters
+          // This will update the current chapter AND all parent chapters based on the new response data
           try {
-              if (isChecked) {
-                  // When checking, set chapter completion to true (skipped chapters are considered complete)
-                  updateChapterCompletion(chapterId, true);
-                  logger$4.info({
-                      message: `Set chapter completion to true (skipped)`,
-                      data: { chapterId },
-                  });
-              }
-              else {
-                  // When unchecking, set chapter completion to false
-                  updateChapterCompletion(chapterId, false);
-                  logger$4.info({
-                      message: `Set chapter completion to false`,
-                      data: { chapterId },
-                  });
-              }
+              const { updateQuestionnaireCompletion } = await Promise.resolve().then(function () { return questionnaire; });
+              updateQuestionnaireCompletion();
+              logger$4.info({
+                  message: `Triggered automatic completion recalculation after ${isChecked ? 'skipping' : 'unskipping'} chapter`,
+                  data: { chapterId, isChecked },
+              });
           }
           catch (error) {
               logger$4.error({
-                  message: `Failed to update chapter completion`,
+                  message: `Failed to update questionnaire completion`,
                   data: { chapterId, error: error.message },
               });
           }
-          // Trigger a re-render to update the checkbox state
+          // Trigger a re-render to update the checkbox state and navigation icons
           this.requestUpdate();
           logger$4.info({
               message: 'Finished updating chapter skipped status',

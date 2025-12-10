@@ -540,6 +540,9 @@ export class EFPEntryForm extends LitElement {
             entry.response.quartech_response = '';
           }
 
+          // Update questionnaire store with the updated response data
+          updateQuestionResponse(questionId, entry.response.quartech_response, undefined, entry.response);
+
           logger.info({
             message: `Updated response for question ${questionId}`,
             data: { questionId, responseId, chapterSkippedValue },
@@ -553,9 +556,14 @@ export class EFPEntryForm extends LitElement {
       } else {
         // If no response exists, create one with chapterSkipped set
         try {
-          await WorkbookResponseHelper.createResponse(questionId, '', {
+          const createdResponse = await WorkbookResponseHelper.createResponse(questionId, '', {
             chapterSkipped: chapterSkippedValue,
           });
+
+          // Update questionnaire store with the created response
+          if (createdResponse?.response) {
+            updateQuestionResponse(questionId, '', undefined, createdResponse.response);
+          }
 
           logger.info({
             message: `Created response for question ${questionId} with chapterSkipped`,
@@ -572,33 +580,24 @@ export class EFPEntryForm extends LitElement {
 
     await Promise.all(updatePromises);
 
-    // Update chapter completion status based on checkbox state
+    // Trigger automatic completion recalculation for all chapters
+    // This will update the current chapter AND all parent chapters based on the new response data
     try {
-      if (isChecked) {
-        // When checking, set chapter completion to true (skipped chapters are considered complete)
-        updateChapterCompletion(chapterId, true);
+      const { updateQuestionnaireCompletion } = await import('../common/questionnaire.js');
+      updateQuestionnaireCompletion();
 
-        logger.info({
-          message: `Set chapter completion to true (skipped)`,
-          data: { chapterId },
-        });
-      } else {
-        // When unchecking, set chapter completion to false
-        updateChapterCompletion(chapterId, false);
-
-        logger.info({
-          message: `Set chapter completion to false`,
-          data: { chapterId },
-        });
-      }
+      logger.info({
+        message: `Triggered automatic completion recalculation after ${isChecked ? 'skipping' : 'unskipping'} chapter`,
+        data: { chapterId, isChecked },
+      });
     } catch (error) {
       logger.error({
-        message: `Failed to update chapter completion`,
+        message: `Failed to update questionnaire completion`,
         data: { chapterId, error: (error as Error).message },
       });
     }
 
-    // Trigger a re-render to update the checkbox state
+    // Trigger a re-render to update the checkbox state and navigation icons
     this.requestUpdate();
 
     logger.info({

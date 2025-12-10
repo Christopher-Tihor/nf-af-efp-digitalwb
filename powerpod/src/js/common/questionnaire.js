@@ -55,6 +55,7 @@ function mergeResponsesWithQuestions(nestedChapterStructure, responseData) {
             question.response = responseEntry.response.quartech_response;
             question.responseData = responseEntry.response;
             // A question is only complete if it has a non-empty response
+            // Skipped questions are NOT marked as complete, but they count as "done" for parent chapter completion
             question.complete = !!(question.response && question.response.trim() !== '');
             question.hasResponse = true;
 
@@ -552,6 +553,27 @@ export async function refreshQuestionnaireResponses(workbookId) {
 }
 
 /**
+ * Check if a question is complete or skipped
+ * @param {Object} question - The question object
+ * @returns {boolean} True if the question is complete or skipped
+ */
+function isQuestionCompleteOrSkipped(question) {
+  // A question is considered "done" if it's either:
+  // 1. Complete (has non-empty response), OR
+  // 2. Skipped (quartech_chapterskipped === 100000000)
+  if (question.complete) {
+    return true;
+  }
+
+  // Check if question is skipped
+  if (question.responseData?.quartech_chapterskipped === 100000000) {
+    return true;
+  }
+
+  return false;
+}
+
+/**
  * Calculate completion status for a chapter based on questionnaire store rules
  * @param {Object} chapter - The chapter object
  * @returns {boolean} True if the chapter should be marked complete
@@ -567,9 +589,9 @@ export function calculateChapterCompletion(chapter) {
     return true;
   }
 
-  // Rule: If a parent has only questions, mark it complete when all questions are completed
+  // Rule: If a parent has only questions, mark it complete when all questions are completed or skipped
   if (hasQuestions && !hasSubchapters) {
-    return chapter.questions.every(question => question.complete);
+    return chapter.questions.every(question => isQuestionCompleteOrSkipped(question));
   }
 
   // Rule: If a parent has only subchapters, mark it complete when all subchapters are complete
@@ -577,11 +599,11 @@ export function calculateChapterCompletion(chapter) {
     return chapter.subchapters.every(subchapter => calculateChapterCompletion(subchapter));
   }
 
-  // Rule: If a parent has both questions and subchapters, mark it complete when all questions and subchapters are complete
+  // Rule: If a parent has both questions and subchapters, mark it complete when all questions are complete/skipped and all subchapters are complete
   if (hasQuestions && hasSubchapters) {
-    const allQuestionsComplete = chapter.questions.every(question => question.complete);
+    const allQuestionsCompleteOrSkipped = chapter.questions.every(question => isQuestionCompleteOrSkipped(question));
     const allSubchaptersComplete = chapter.subchapters.every(subchapter => calculateChapterCompletion(subchapter));
-    return allQuestionsComplete && allSubchaptersComplete;
+    return allQuestionsCompleteOrSkipped && allSubchaptersComplete;
   }
 
   return false;
