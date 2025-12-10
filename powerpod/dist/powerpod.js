@@ -43278,7 +43278,8 @@
           if (this.currentSectionIndex === 0) {
               const currentStep = this.flatSteps[this.currentStepIndex];
               // Check if current step is a chapter, subchapter, or sub-subchapter
-              if (currentStep && (currentStep.chapterData || currentStep.subchapterData)) {
+              // This includes: container chapters (isContainer), leaf chapters (chapterData), and subchapters (subchapterData)
+              if (currentStep && (currentStep.chapterData || currentStep.subchapterData || currentStep.isContainer)) {
                   return x `
           <div class="section-not-applicable">
             <sl-checkbox>This section does not apply to this EFP.</sl-checkbox>
