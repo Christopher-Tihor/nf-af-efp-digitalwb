@@ -43462,36 +43462,77 @@
               message: `Updating chapter skipped status for ${questions.length} questions`,
               data: { chapterId, isChecked, chapterSkippedValue, questionCount: questions.length },
           });
-          // Update all questions in this chapter
+          // STEP 1: Optimistically update in-memory data and questionnaire store FIRST
+          // This makes the UI respond instantly without waiting for API calls
+          questions.forEach((question) => {
+              const questionId = question.id;
+              const entry = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.get(questionId);
+              if (entry === null || entry === void 0 ? void 0 : entry.response) {
+                  // Update existing response in memory
+                  entry.response.quartech_chapterskipped = chapterSkippedValue;
+                  if (isChecked) {
+                      entry.response.quartech_response = '';
+                  }
+                  // Update questionnaire store immediately
+                  updateQuestionResponse(questionId, entry.response.quartech_response, undefined, entry.response);
+              }
+              else {
+                  // Create a temporary response object in memory for questions without responses
+                  const tempResponse = {
+                      quartech_workbookresponseid: null, // Will be set after API call
+                      quartech_response: '',
+                      quartech_chapterskipped: chapterSkippedValue,
+                      _quartech_question_value: questionId,
+                      _quartech_workbook_value: workbookId,
+                  };
+                  // Update in-memory structure
+                  if (!entry) {
+                      POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.set(questionId, {
+                          question: question,
+                          response: tempResponse,
+                      });
+                  }
+                  else {
+                      entry.response = tempResponse;
+                  }
+                  // Update questionnaire store immediately
+                  updateQuestionResponse(questionId, '', undefined, tempResponse);
+              }
+          });
+          // STEP 2: Trigger UI update immediately (before API calls complete)
+          const { updateQuestionnaireCompletion } = await Promise.resolve().then(function () { return questionnaire; });
+          updateQuestionnaireCompletion();
+          this.requestUpdate();
+          logger$4.info({
+              message: `Optimistically updated ${questions.length} questions in memory and store`,
+              data: { chapterId, isChecked },
+          });
+          // STEP 3: Make API calls in the background (non-blocking)
+          // Use Promise.allSettled to continue even if some requests fail
           const updatePromises = questions.map(async (question) => {
+              var _a;
               const questionId = question.id;
               const entry = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.get(questionId);
               // If response exists, update it
-              if (entry === null || entry === void 0 ? void 0 : entry.response) {
+              if ((_a = entry === null || entry === void 0 ? void 0 : entry.response) === null || _a === void 0 ? void 0 : _a.quartech_workbookresponseid) {
                   const responseId = entry.response.quartech_workbookresponseid;
                   try {
                       await POWERPOD.fetch.patchWorkbookResponseData({
                           id: responseId,
                           chapterSkipped: chapterSkippedValue,
-                          response: isChecked ? '' : entry.response.quartech_response, // Blank response if checked
+                          response: isChecked ? '' : entry.response.quartech_response,
                       });
-                      // Update in memory
-                      entry.response.quartech_chapterskipped = chapterSkippedValue;
-                      if (isChecked) {
-                          entry.response.quartech_response = '';
-                      }
-                      // Update questionnaire store with the updated response data
-                      updateQuestionResponse(questionId, entry.response.quartech_response, undefined, entry.response);
                       logger$4.info({
-                          message: `Updated response for question ${questionId}`,
+                          message: `API: Updated response for question ${questionId}`,
                           data: { questionId, responseId, chapterSkippedValue },
                       });
                   }
                   catch (error) {
                       logger$4.error({
-                          message: `Failed to update response for question ${questionId}`,
+                          message: `API: Failed to update response for question ${questionId}`,
                           data: { questionId, responseId, error: error.message },
                       });
+                      throw error; // Re-throw to be caught by Promise.allSettled
                   }
               }
               else {
@@ -43500,42 +43541,57 @@
                       const createdResponse = await WorkbookResponseHelper.createResponse(questionId, '', {
                           chapterSkipped: chapterSkippedValue,
                       });
-                      // Update questionnaire store with the created response
-                      if (createdResponse === null || createdResponse === void 0 ? void 0 : createdResponse.response) {
-                          updateQuestionResponse(questionId, '', undefined, createdResponse.response);
+                      // Update the response ID in memory now that we have it from the API
+                      if ((createdResponse === null || createdResponse === void 0 ? void 0 : createdResponse.response) && (entry === null || entry === void 0 ? void 0 : entry.response)) {
+                          entry.response.quartech_workbookresponseid = createdResponse.response.quartech_workbookresponseid;
                       }
                       logger$4.info({
-                          message: `Created response for question ${questionId} with chapterSkipped`,
+                          message: `API: Created response for question ${questionId}`,
                           data: { questionId, chapterSkippedValue },
                       });
                   }
                   catch (error) {
                       logger$4.error({
-                          message: `Failed to create response for question ${questionId}`,
+                          message: `API: Failed to create response for question ${questionId}`,
                           data: { questionId, error: error.message },
                       });
+                      throw error; // Re-throw to be caught by Promise.allSettled
                   }
               }
           });
-          await Promise.all(updatePromises);
-          // Trigger automatic completion recalculation for all chapters
-          // This will update the current chapter AND all parent chapters based on the new response data
-          try {
-              const { updateQuestionnaireCompletion } = await Promise.resolve().then(function () { return questionnaire; });
-              updateQuestionnaireCompletion();
+          // Wait for all API calls to complete (or fail)
+          const results = await Promise.allSettled(updatePromises);
+          // Count successes and failures
+          const succeeded = results.filter(r => r.status === 'fulfilled').length;
+          const failed = results.filter(r => r.status === 'rejected').length;
+          if (failed > 0) {
+              logger$4.warn({
+                  message: `API: Completed with ${failed} failures out of ${questions.length} requests`,
+                  data: { chapterId, succeeded, failed, total: questions.length },
+              });
+          }
+          else {
               logger$4.info({
-                  message: `Triggered automatic completion recalculation after ${isChecked ? 'skipping' : 'unskipping'} chapter`,
-                  data: { chapterId, isChecked },
+                  message: `API: Successfully completed all ${succeeded} requests`,
+                  data: { chapterId, succeeded },
               });
           }
-          catch (error) {
-              logger$4.error({
-                  message: `Failed to update questionnaire completion`,
-                  data: { chapterId, error: error.message },
+          // Final UI update after API calls complete (in case any failed and need to be reverted)
+          // Note: We already updated the UI optimistically, so this is just a safety measure
+          if (failed === 0) {
+              logger$4.info({
+                  message: `Successfully ${isChecked ? 'skipped' : 'unskipped'} chapter with ${questions.length} questions`,
+                  data: { chapterId, isChecked, questionCount: questions.length },
               });
           }
-          // Trigger a re-render to update the checkbox state and navigation icons
-          this.requestUpdate();
+          else {
+              // If some requests failed, we might want to show a warning to the user
+              // For now, just log it - the optimistic update is already applied
+              logger$4.warn({
+                  message: `Chapter ${isChecked ? 'skip' : 'unskip'} completed with errors`,
+                  data: { chapterId, isChecked, succeeded, failed },
+              });
+          }
           logger$4.info({
               message: 'Finished updating chapter skipped status',
               data: { chapterId, isChecked, questionCount: questions.length },
