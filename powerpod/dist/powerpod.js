@@ -42279,12 +42279,16 @@
               var _a, _b, _c;
               for (const item of items) {
                   if ('items' in item && Array.isArray(item.items)) {
-                      result.push({
+                      const containerStep = {
                           label: item.title || item.label,
                           content: (_a = item.content) !== null && _a !== void 0 ? _a : '',
                           sectionIndex,
                           isContainer: true,
-                      });
+                      };
+                      if (item.hideSkipChapterCheckbox) {
+                          containerStep.hideSkipChapterCheckbox = item.hideSkipChapterCheckbox;
+                      }
+                      result.push(containerStep);
                       collect(item.items, sectionIndex);
                   }
                   else {
@@ -42302,6 +42306,9 @@
                       }
                       if (item.isContainer) {
                           stepItem.isContainer = item.isContainer;
+                      }
+                      if (item.hideSkipChapterCheckbox) {
+                          stepItem.hideSkipChapterCheckbox = item.hideSkipChapterCheckbox;
                       }
                       result.push(stepItem);
                   }
@@ -43279,7 +43286,10 @@
               const currentStep = this.flatSteps[this.currentStepIndex];
               // Check if current step is a chapter, subchapter, or sub-subchapter
               // This includes: container chapters (isContainer), leaf chapters (chapterData), and subchapters (subchapterData)
-              if (currentStep && (currentStep.chapterData || currentStep.subchapterData || currentStep.isContainer)) {
+              // Also check if the checkbox should be hidden for this specific step
+              if (currentStep &&
+                  (currentStep.chapterData || currentStep.subchapterData || currentStep.isContainer) &&
+                  !currentStep.hideSkipChapterCheckbox) {
                   return x `
           <div class="section-not-applicable">
             <sl-checkbox>This section does not apply to this EFP.</sl-checkbox>
@@ -43463,6 +43473,7 @@
                   complete: false,
                   isContainer: true,
                   disableExpand: true,
+                  hideSkipChapterCheckbox: true,
                   items: [
                       {
                           label: 'My Action Plan',
@@ -43472,6 +43483,7 @@
               </div>
             `,
                           complete: false,
+                          hideSkipChapterCheckbox: true,
                       }
                   ],
               };
@@ -43539,11 +43551,13 @@
               complete: false,
               isContainer: true,
               disableExpand: true,
+              hideSkipChapterCheckbox: true,
               items: [
                   {
                       label: 'My Action Plan',
                       content: actionPlanContent,
                       complete: false,
+                      hideSkipChapterCheckbox: true,
                   }
               ],
           };

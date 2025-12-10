@@ -6,6 +6,7 @@ export interface EFPStep {
     chapterData?: any;
     subchapterData?: any;
     isContainer?: boolean;
+    hideSkipChapterCheckbox?: boolean;
 }
 export interface EFPActiveContent {
     title: string;

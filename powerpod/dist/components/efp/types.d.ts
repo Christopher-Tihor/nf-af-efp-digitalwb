@@ -6,6 +6,7 @@ export interface EFPStep {
     chapterData?: any;
     subchapterData?: any;
     isContainer?: boolean;
+    hideSkipChapterCheckbox?: boolean;
 }
 export interface EFPSectionItem {
     label: string;
@@ -19,6 +20,7 @@ export interface EFPSectionItem {
     questionId?: string;
     chapterId?: string;
     disableExpand?: boolean;
+    hideSkipChapterCheckbox?: boolean;
 }
 export interface EFPSection {
     tab: string;

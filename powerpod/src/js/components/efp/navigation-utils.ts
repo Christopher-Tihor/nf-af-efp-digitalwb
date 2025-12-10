@@ -155,12 +155,18 @@ export class EFPNavigationUtils {
     const collect = (items: EFPSectionItem[], sectionIndex: number) => {
       for (const item of items) {
         if ('items' in item && Array.isArray(item.items)) {
-          result.push({
+          const containerStep: EFPStep = {
             label: item.title || item.label,
             content: item.content ?? '',
             sectionIndex,
             isContainer: true,
-          });
+          };
+
+          if (item.hideSkipChapterCheckbox) {
+            containerStep.hideSkipChapterCheckbox = item.hideSkipChapterCheckbox;
+          }
+
+          result.push(containerStep);
           collect(item.items, sectionIndex);
         } else {
           const stepItem: EFPStep = {
@@ -180,6 +186,10 @@ export class EFPNavigationUtils {
 
           if (item.isContainer) {
             stepItem.isContainer = item.isContainer;
+          }
+
+          if (item.hideSkipChapterCheckbox) {
+            stepItem.hideSkipChapterCheckbox = item.hideSkipChapterCheckbox;
           }
 
           result.push(stepItem);

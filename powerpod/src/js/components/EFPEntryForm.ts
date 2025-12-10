@@ -389,7 +389,10 @@ export class EFPEntryForm extends LitElement {
       const currentStep = this.flatSteps[this.currentStepIndex];
       // Check if current step is a chapter, subchapter, or sub-subchapter
       // This includes: container chapters (isContainer), leaf chapters (chapterData), and subchapters (subchapterData)
-      if (currentStep && (currentStep.chapterData || currentStep.subchapterData || currentStep.isContainer)) {
+      // Also check if the checkbox should be hidden for this specific step
+      if (currentStep &&
+          (currentStep.chapterData || currentStep.subchapterData || currentStep.isContainer) &&
+          !currentStep.hideSkipChapterCheckbox) {
         return html`
           <div class="section-not-applicable">
             <sl-checkbox>This section does not apply to this EFP.</sl-checkbox>
@@ -616,6 +619,7 @@ export class EFPEntryForm extends LitElement {
         complete: false,
         isContainer: true,
         disableExpand: true,
+        hideSkipChapterCheckbox: true,
         items: [
           {
             label: 'My Action Plan',
@@ -625,6 +629,7 @@ export class EFPEntryForm extends LitElement {
               </div>
             `,
             complete: false,
+            hideSkipChapterCheckbox: true,
           }
         ],
       };
@@ -701,11 +706,13 @@ export class EFPEntryForm extends LitElement {
       complete: false,
       isContainer: true,
       disableExpand: true,
+      hideSkipChapterCheckbox: true,
       items: [
         {
           label: 'My Action Plan',
           content: actionPlanContent,
           complete: false,
+          hideSkipChapterCheckbox: true,
         }
       ],
     };

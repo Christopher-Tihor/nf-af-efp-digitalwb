@@ -7,6 +7,7 @@ export interface EFPStep {
   chapterData?: any;
   subchapterData?: any;
   isContainer?: boolean;
+  hideSkipChapterCheckbox?: boolean; // If true, the "This section does not apply" checkbox will be hidden
 }
 
 export interface EFPActiveContent {

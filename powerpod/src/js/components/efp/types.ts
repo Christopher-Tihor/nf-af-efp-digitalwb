@@ -6,6 +6,7 @@ export interface EFPStep {
   chapterData?: any;
   subchapterData?: any;
   isContainer?: boolean;
+  hideSkipChapterCheckbox?: boolean; // If true, the "This section does not apply" checkbox will be hidden
 }
 
 export interface EFPSectionItem {
@@ -20,6 +21,7 @@ export interface EFPSectionItem {
   questionId?: string;
   chapterId?: string;
   disableExpand?: boolean; // If true, item will not be expandable even if it has items
+  hideSkipChapterCheckbox?: boolean; // If true, the "This section does not apply" checkbox will be hidden
 }
 
 export interface EFPSection {
