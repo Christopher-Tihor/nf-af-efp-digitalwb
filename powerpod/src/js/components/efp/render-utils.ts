@@ -78,12 +78,27 @@ export class EFPRenderUtils {
     activeContentTitle: string,
     onItemClick: (item: EFPSectionItem) => void,
     renderItems: (items: EFPSectionItem[]) => any,
-    getCompletion?: (item: EFPSectionItem) => boolean
+    getCompletion?: (item: EFPSectionItem) => boolean,
+    getSkipped?: (item: EFPSectionItem) => boolean
   ): any {
     return items.map((item) => {
       const isComplete = getCompletion ? getCompletion(item) : (item.complete || false);
-      const iconName = isComplete ? 'check-circle' : 'pencil';
-      const iconColor = isComplete ? 'var(--sl-color-success-600)' : 'var(--sl-color-warning-600)';
+      const isSkipped = getSkipped ? getSkipped(item) : false;
+
+      // Determine icon based on state: skipped > complete > incomplete
+      let iconName: string;
+      let iconColor: string;
+
+      if (isSkipped) {
+        iconName = 'dash-circle-fill';
+        iconColor = 'var(--sl-color-neutral-500)';
+      } else if (isComplete) {
+        iconName = 'check-circle';
+        iconColor = 'var(--sl-color-success-600)';
+      } else {
+        iconName = 'pencil';
+        iconColor = 'var(--sl-color-warning-600)';
+      }
 
       // Determine item capabilities based on content
       const hasContent = item.content && item.content.trim() !== '';
@@ -144,7 +159,7 @@ export class EFPRenderUtils {
               ></sl-icon>
               <span>${item.title || item.label}</span>
             </div>
-            ${EFPRenderUtils.renderItems(item.items || [], html, activeContentTitle, onItemClick, renderItems, getCompletion)}
+            ${EFPRenderUtils.renderItems(item.items || [], html, activeContentTitle, onItemClick, renderItems, getCompletion, getSkipped)}
           </sl-details>
         `;
       } else if (hasSubitems) {
@@ -158,7 +173,7 @@ export class EFPRenderUtils {
               ></sl-icon>
               <span>${item.title || item.label}</span>
             </div>
-            ${EFPRenderUtils.renderItems(item.items || [], html, activeContentTitle, onItemClick, renderItems, getCompletion)}
+            ${EFPRenderUtils.renderItems(item.items || [], html, activeContentTitle, onItemClick, renderItems, getCompletion, getSkipped)}
           </sl-details>
         `;
       } else {

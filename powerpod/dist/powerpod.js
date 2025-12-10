@@ -1550,7 +1550,7 @@
     _excluded25 = ["workbookId"],
     _excluded26 = ["workbookId", "questionId"],
     _excluded27 = ["workbookId", "questionId", "chapterId", "response"],
-    _excluded28 = ["id", "response", "chapterId"],
+    _excluded28 = ["id", "response", "chapterId", "chapterSkipped"],
     _excluded29 = ["id"],
     _excluded30 = ["params"],
     _excluded31 = ["workbookId", "chapterId", "questionId", "action"],
@@ -2917,6 +2917,11 @@
               payload['quartech_Chapter@odata.bind'] = "/quartech_chapters(".concat(chapterId, ")");
             }
 
+            // Add chapterSkipped if provided in options
+            if (options.chapterSkipped !== undefined && options.chapterSkipped !== null) {
+              payload.quartech_chapterskipped = options.chapterSkipped;
+            }
+
             // Add description if provided in options
             if (options.description !== undefined && options.description !== null) {
               payload.quartech_description = options.description;
@@ -2931,7 +2936,7 @@
               returnData: true,
               data: JSON.stringify(payload)
             }, options)));
-          case 9:
+          case 10:
           case "end":
             return _context35.stop();
         }
@@ -2944,11 +2949,11 @@
   }
   function _patchWorkbookResponseData() {
     _patchWorkbookResponseData = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee36(_ref35) {
-      var id, _ref35$response, response, _ref35$chapterId, chapterId, options, updateData;
+      var id, _ref35$response, response, _ref35$chapterId, chapterId, _ref35$chapterSkipped, chapterSkipped, options, updateData;
       return _regeneratorRuntime().wrap(function _callee36$(_context36) {
         while (1) switch (_context36.prev = _context36.next) {
           case 0:
-            id = _ref35.id, _ref35$response = _ref35.response, response = _ref35$response === void 0 ? null : _ref35$response, _ref35$chapterId = _ref35.chapterId, chapterId = _ref35$chapterId === void 0 ? null : _ref35$chapterId, options = _objectWithoutProperties(_ref35, _excluded28);
+            id = _ref35.id, _ref35$response = _ref35.response, response = _ref35$response === void 0 ? null : _ref35$response, _ref35$chapterId = _ref35.chapterId, chapterId = _ref35$chapterId === void 0 ? null : _ref35$chapterId, _ref35$chapterSkipped = _ref35.chapterSkipped, chapterSkipped = _ref35$chapterSkipped === void 0 ? null : _ref35$chapterSkipped, options = _objectWithoutProperties(_ref35, _excluded28);
             if (id) {
               _context36.next = 4;
               break;
@@ -2965,13 +2970,14 @@
             updateData = {};
             if (response !== null) updateData.quartech_response = response;
             if (chapterId !== null) updateData['quartech_Chapter@odata.bind'] = "/quartech_chapters(".concat(chapterId, ")");
+            if (chapterSkipped !== null) updateData.quartech_chapterskipped = chapterSkipped;
 
             // Add description if provided in options
             if (options.description !== undefined && options.description !== null) {
               updateData.quartech_description = options.description;
             }
             if (!(Object.keys(updateData).length === 0)) {
-              _context36.next = 11;
+              _context36.next = 12;
               break;
             }
             logger$T.warn({
@@ -2980,13 +2986,14 @@
               data: {
                 id: id,
                 response: response,
-                chapterId: chapterId
+                chapterId: chapterId,
+                chapterSkipped: chapterSkipped
               }
             });
             return _context36.abrupt("return", Promise.resolve({
               data: null
             }));
-          case 11:
+          case 12:
             logger$T.info({
               fn: patchWorkbookResponseData,
               message: 'Updating workbook response',
@@ -3005,7 +3012,7 @@
               returnData: true,
               data: JSON.stringify(updateData)
             }, options)));
-          case 13:
+          case 14:
           case "end":
             return _context36.stop();
         }
@@ -42475,11 +42482,25 @@
           // Default content rendering
           return html `<div>${unsafeHTML(activeContent.content)}</div>`;
       }
-      static renderItems(items, html, activeContentTitle, onItemClick, renderItems, getCompletion) {
+      static renderItems(items, html, activeContentTitle, onItemClick, renderItems, getCompletion, getSkipped) {
           return items.map((item) => {
               const isComplete = getCompletion ? getCompletion(item) : (item.complete || false);
-              const iconName = isComplete ? 'check-circle' : 'pencil';
-              const iconColor = isComplete ? 'var(--sl-color-success-600)' : 'var(--sl-color-warning-600)';
+              const isSkipped = getSkipped ? getSkipped(item) : false;
+              // Determine icon based on state: skipped > complete > incomplete
+              let iconName;
+              let iconColor;
+              if (isSkipped) {
+                  iconName = 'dash-circle-fill';
+                  iconColor = 'var(--sl-color-neutral-500)';
+              }
+              else if (isComplete) {
+                  iconName = 'check-circle';
+                  iconColor = 'var(--sl-color-success-600)';
+              }
+              else {
+                  iconName = 'pencil';
+                  iconColor = 'var(--sl-color-warning-600)';
+              }
               // Determine item capabilities based on content
               const hasContent = item.content && item.content.trim() !== '';
               const hasSubitems = 'items' in item && Array.isArray(item.items) && item.items.length > 0;
@@ -42536,7 +42557,7 @@
               ></sl-icon>
               <span>${item.title || item.label}</span>
             </div>
-            ${EFPRenderUtils.renderItems(item.items || [], html, activeContentTitle, onItemClick, renderItems, getCompletion)}
+            ${EFPRenderUtils.renderItems(item.items || [], html, activeContentTitle, onItemClick, renderItems, getCompletion, getSkipped)}
           </sl-details>
         `;
               }
@@ -42551,7 +42572,7 @@
               ></sl-icon>
               <span>${item.title || item.label}</span>
             </div>
-            ${EFPRenderUtils.renderItems(item.items || [], html, activeContentTitle, onItemClick, renderItems, getCompletion)}
+            ${EFPRenderUtils.renderItems(item.items || [], html, activeContentTitle, onItemClick, renderItems, getCompletion, getSkipped)}
           </sl-details>
         `;
               }
@@ -43290,14 +43311,197 @@
               if (currentStep &&
                   (currentStep.chapterData || currentStep.subchapterData || currentStep.isContainer) &&
                   !currentStep.hideSkipChapterCheckbox) {
+                  const isSkipped = this.isChapterSkipped();
                   return x `
           <div class="section-not-applicable">
-            <sl-checkbox>This section does not apply to this EFP.</sl-checkbox>
+            <sl-checkbox
+              ?checked=${isSkipped}
+              @sl-change=${this.handleChapterSkippedChange}>
+              This section does not apply to this EFP.
+            </sl-checkbox>
           </div>
         `;
               }
           }
           return '';
+      }
+      // Check if the current chapter should be marked as skipped
+      isChapterSkipped() {
+          const chapterId = this.getCurrentChapterId();
+          if (!chapterId)
+              return false;
+          const questions = this.getQuestionsForCurrentChapter(chapterId);
+          if (questions.length === 0)
+              return false;
+          // Check if ALL questions have quartech_chapterskipped set to YES (100000000)
+          return questions.every(q => {
+              var _a;
+              const entry = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.get(q.id);
+              return ((_a = entry === null || entry === void 0 ? void 0 : entry.response) === null || _a === void 0 ? void 0 : _a.quartech_chapterskipped) === 100000000;
+          });
+      }
+      // Check if a chapter (by ID) is skipped
+      isChapterSkippedById(chapterId) {
+          if (!chapterId)
+              return false;
+          const questions = this.getQuestionsForCurrentChapter(chapterId);
+          if (questions.length === 0)
+              return false;
+          // Check if ALL questions have quartech_chapterskipped set to YES (100000000)
+          return questions.every(q => {
+              var _a;
+              const entry = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.get(q.id);
+              return ((_a = entry === null || entry === void 0 ? void 0 : entry.response) === null || _a === void 0 ? void 0 : _a.quartech_chapterskipped) === 100000000;
+          });
+      }
+      // Get the chapter ID for the current step
+      getCurrentChapterId() {
+          const currentStep = this.flatSteps[this.currentStepIndex];
+          if (!currentStep)
+              return null;
+          // For subchapters, get the chapter ID from subchapterData
+          if (currentStep.subchapterData) {
+              return currentStep.subchapterData.id || currentStep.subchapterData.quartech_chapterid;
+          }
+          // For chapters, get the chapter ID from chapterData
+          if (currentStep.chapterData) {
+              return currentStep.chapterData.id || currentStep.chapterData.quartech_chapterid;
+          }
+          return null;
+      }
+      // Get all questions for the current chapter (including subchapters)
+      getQuestionsForCurrentChapter(chapterId) {
+          const chapter = getChapterFromStore(chapterId);
+          if (!chapter)
+              return [];
+          let questions = [...(chapter.questions || [])];
+          // Also collect questions from subchapters
+          if (chapter.subchapters) {
+              const collectQuestionsFromSubchapters = (subchapters) => {
+                  for (const subchapter of subchapters) {
+                      questions = questions.concat(subchapter.questions || []);
+                      if (subchapter.subchapters) {
+                          collectQuestionsFromSubchapters(subchapter.subchapters);
+                      }
+                  }
+              };
+              collectQuestionsFromSubchapters(chapter.subchapters);
+          }
+          return questions;
+      }
+      // Handle checkbox change event
+      async handleChapterSkippedChange(event) {
+          const checkbox = event.target;
+          const isChecked = checkbox.checked;
+          const chapterId = this.getCurrentChapterId();
+          if (!chapterId) {
+              logger$4.warn({
+                  message: 'Cannot update chapter skipped: no chapter ID found',
+              });
+              return;
+          }
+          const questions = this.getQuestionsForCurrentChapter(chapterId);
+          if (questions.length === 0) {
+              logger$4.warn({
+                  message: 'Cannot update chapter skipped: no questions found',
+                  data: { chapterId },
+              });
+              return;
+          }
+          const workbookId = getWorkbookId();
+          if (!workbookId) {
+              logger$4.error({
+                  message: 'Cannot update chapter skipped: no workbook ID found',
+              });
+              return;
+          }
+          // Set quartech_chapterskipped to YES (100000000) if checked, NO (100000001) if unchecked
+          const chapterSkippedValue = isChecked ? 100000000 : 100000001;
+          logger$4.info({
+              message: `Updating chapter skipped status for ${questions.length} questions`,
+              data: { chapterId, isChecked, chapterSkippedValue, questionCount: questions.length },
+          });
+          // Update all questions in this chapter
+          const updatePromises = questions.map(async (question) => {
+              const questionId = question.id;
+              const entry = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.get(questionId);
+              // If response exists, update it
+              if (entry === null || entry === void 0 ? void 0 : entry.response) {
+                  const responseId = entry.response.quartech_workbookresponseid;
+                  try {
+                      await POWERPOD.fetch.patchWorkbookResponseData({
+                          id: responseId,
+                          chapterSkipped: chapterSkippedValue,
+                          response: isChecked ? '' : entry.response.quartech_response, // Blank response if checked
+                      });
+                      // Update in memory
+                      entry.response.quartech_chapterskipped = chapterSkippedValue;
+                      if (isChecked) {
+                          entry.response.quartech_response = '';
+                      }
+                      logger$4.info({
+                          message: `Updated response for question ${questionId}`,
+                          data: { questionId, responseId, chapterSkippedValue },
+                      });
+                  }
+                  catch (error) {
+                      logger$4.error({
+                          message: `Failed to update response for question ${questionId}`,
+                          data: { questionId, responseId, error: error.message },
+                      });
+                  }
+              }
+              else {
+                  // If no response exists, create one with chapterSkipped set
+                  try {
+                      await WorkbookResponseHelper.createResponse(questionId, '', {
+                          chapterSkipped: chapterSkippedValue,
+                      });
+                      logger$4.info({
+                          message: `Created response for question ${questionId} with chapterSkipped`,
+                          data: { questionId, chapterSkippedValue },
+                      });
+                  }
+                  catch (error) {
+                      logger$4.error({
+                          message: `Failed to create response for question ${questionId}`,
+                          data: { questionId, error: error.message },
+                      });
+                  }
+              }
+          });
+          await Promise.all(updatePromises);
+          // Update chapter completion status based on checkbox state
+          try {
+              if (isChecked) {
+                  // When checking, set chapter completion to true (skipped chapters are considered complete)
+                  updateChapterCompletion(chapterId, true);
+                  logger$4.info({
+                      message: `Set chapter completion to true (skipped)`,
+                      data: { chapterId },
+                  });
+              }
+              else {
+                  // When unchecking, set chapter completion to false
+                  updateChapterCompletion(chapterId, false);
+                  logger$4.info({
+                      message: `Set chapter completion to false`,
+                      data: { chapterId },
+                  });
+              }
+          }
+          catch (error) {
+              logger$4.error({
+                  message: `Failed to update chapter completion`,
+                  data: { chapterId, error: error.message },
+              });
+          }
+          // Trigger a re-render to update the checkbox state
+          this.requestUpdate();
+          logger$4.info({
+              message: 'Finished updating chapter skipped status',
+              data: { chapterId, isChecked, questionCount: questions.length },
+          });
       }
       renderSubchapter(subchapter) {
           return x `
@@ -43722,6 +43926,53 @@
           }
           // Fallback to existing logic
           return EFPCompletionUtils.isSectionComplete(section);
+      }
+      // Get section skipped status from questionnaire store
+      getSectionSkippedFromStore(section) {
+          // Only check for My Workbook section
+          if (section.tab !== 'My Workbook') {
+              return false;
+          }
+          if (!POWERPOD.workbookQuestionsAndResponses.isLoaded) {
+              return false;
+          }
+          try {
+              const questionnaire = getQuestionnaireFromStore();
+              if (!questionnaire) {
+                  return false;
+              }
+              // Check if ALL questions in the section are skipped
+              let totalQuestions = 0;
+              let skippedQuestions = 0;
+              const countInChapters = (chapters) => {
+                  chapters.forEach((chapter) => {
+                      if (chapter.questions) {
+                          chapter.questions.forEach((question) => {
+                              var _a;
+                              totalQuestions++;
+                              const entry = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.get(question.id);
+                              if (((_a = entry === null || entry === void 0 ? void 0 : entry.response) === null || _a === void 0 ? void 0 : _a.quartech_chapterskipped) === 100000000) {
+                                  skippedQuestions++;
+                              }
+                          });
+                      }
+                      if (chapter.subchapters) {
+                          countInChapters(chapter.subchapters);
+                      }
+                  });
+              };
+              if (questionnaire.chapters && questionnaire.chapters.length > 0) {
+                  countInChapters(questionnaire.chapters[0]);
+              }
+              // Section is skipped if all questions are skipped
+              return totalQuestions > 0 && skippedQuestions === totalQuestions;
+          }
+          catch (error) {
+              logger$4.warn({
+                  message: `Failed to get section skipped status: ${String(error)}`,
+              });
+              return false;
+          }
       }
       // Public API methods
       updateNestedChapterStructure(nestedStructure) {
@@ -44398,7 +44649,24 @@
           }
       }
       renderItems(items) {
-          return EFPRenderUtils.renderItems(items, x, this.activeContent.title, (item) => this.handleItemClick(item), (items) => this.renderItems(items), (item) => this.getCompletionFromStore(item));
+          return EFPRenderUtils.renderItems(items, x, this.activeContent.title, (item) => this.handleItemClick(item), (items) => this.renderItems(items), (item) => this.getCompletionFromStore(item), (item) => this.getSkippedFromStore(item));
+      }
+      // Get skipped status for an item from the store
+      getSkippedFromStore(item) {
+          // Only check for chapters (not questions or other items)
+          if (!item.chapterId) {
+              return false;
+          }
+          try {
+              return this.isChapterSkippedById(item.chapterId);
+          }
+          catch (error) {
+              logger$4.error({
+                  message: 'Error checking chapter skipped status',
+                  data: { chapterId: item.chapterId, error: error.message },
+              });
+              return false;
+          }
       }
       updated(changedProps) {
           if (changedProps.has('currentStepIndex')) {
@@ -44869,8 +45137,22 @@
             ${this.sections.map((section, index) => {
             const isActive = index === this.currentSectionIndex;
             const isComplete = this.getSectionCompletionFromStore(section);
-            const icon = isComplete ? 'check-circle' : 'pencil';
-            const color = isActive ? 'orange' : isComplete ? 'green' : 'gray';
+            const isSkipped = this.getSectionSkippedFromStore(section);
+            // Determine icon based on state: skipped > complete > incomplete
+            let icon;
+            let color;
+            if (isSkipped) {
+                icon = 'dash-circle-fill';
+                color = isActive ? 'orange' : 'gray';
+            }
+            else if (isComplete) {
+                icon = 'check-circle';
+                color = isActive ? 'orange' : 'green';
+            }
+            else {
+                icon = 'pencil';
+                color = isActive ? 'orange' : 'gray';
+            }
             return x `
                 <sl-tab slot="nav" panel="section-${index}">
                   <sl-icon

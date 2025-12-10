@@ -872,6 +872,11 @@ export async function postWorkbookResponseData({
     payload['quartech_Chapter@odata.bind'] = `/quartech_chapters(${chapterId})`;
   }
 
+  // Add chapterSkipped if provided in options
+  if (options.chapterSkipped !== undefined && options.chapterSkipped !== null) {
+    payload.quartech_chapterskipped = options.chapterSkipped;
+  }
+
   // Add description if provided in options
   if (options.description !== undefined && options.description !== null) {
     payload.quartech_description = options.description;
@@ -894,6 +899,7 @@ export async function patchWorkbookResponseData({
   id,
   response = null,
   chapterId = null,
+  chapterSkipped = null,
   ...options
 }) {
   if (!id) {
@@ -908,6 +914,7 @@ export async function patchWorkbookResponseData({
   const updateData = {};
   if (response !== null) updateData.quartech_response = response;
   if (chapterId !== null) updateData['quartech_Chapter@odata.bind'] = `/quartech_chapters(${chapterId})`;
+  if (chapterSkipped !== null) updateData.quartech_chapterskipped = chapterSkipped;
 
   // Add description if provided in options
   if (options.description !== undefined && options.description !== null) {
@@ -918,7 +925,7 @@ export async function patchWorkbookResponseData({
     logger.warn({
       fn: patchWorkbookResponseData,
       message: 'No data to update',
-      data: { id, response, chapterId },
+      data: { id, response, chapterId, chapterSkipped },
     });
     return Promise.resolve({ data: null });
   }

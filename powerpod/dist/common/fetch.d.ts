@@ -140,11 +140,12 @@ export function postWorkbookResponseData({ workbookId, questionId, chapterId, re
     chapterId: any;
     response: any;
 }): Promise<any>;
-export function patchWorkbookResponseData({ id, response, chapterId, ...options }: {
+export function patchWorkbookResponseData({ id, response, chapterId, chapterSkipped, ...options }: {
     [x: string]: any;
     id: any;
     response?: null | undefined;
     chapterId?: null | undefined;
+    chapterSkipped?: null | undefined;
 }): Promise<any>;
 export function deleteWorkbookResponseData({ id, ...options }: {
     [x: string]: any;

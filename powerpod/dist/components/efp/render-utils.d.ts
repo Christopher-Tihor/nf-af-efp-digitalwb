@@ -22,5 +22,5 @@ export interface EFPSectionItem {
 }
 export declare class EFPRenderUtils {
     static renderMainContent(currentSectionIndex: number, flatSteps: EFPStep[], currentStepIndex: number, activeContent: EFPActiveContent, html: any, unsafeHTML: any, renderSubchapter: (subchapterData: any) => any, renderChapter: (chapterData: any) => any, renderContainerSubchapter: (subchapterData: any) => any, renderContainerChapter: (chapterData: any) => any): any;
-    static renderItems(items: EFPSectionItem[], html: any, activeContentTitle: string, onItemClick: (item: EFPSectionItem) => void, renderItems: (items: EFPSectionItem[]) => any, getCompletion?: (item: EFPSectionItem) => boolean): any;
+    static renderItems(items: EFPSectionItem[], html: any, activeContentTitle: string, onItemClick: (item: EFPSectionItem) => void, renderItems: (items: EFPSectionItem[]) => any, getCompletion?: (item: EFPSectionItem) => boolean, getSkipped?: (item: EFPSectionItem) => boolean): any;
 }

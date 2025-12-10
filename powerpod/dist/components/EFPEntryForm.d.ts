@@ -45,6 +45,11 @@ export declare class EFPEntryForm extends LitElement {
     private renderQuestion;
     private renderQuestionInput;
     private renderSectionNotApplicableCheckbox;
+    private isChapterSkipped;
+    private isChapterSkippedById;
+    private getCurrentChapterId;
+    private getQuestionsForCurrentChapter;
+    private handleChapterSkippedChange;
     private renderSubchapter;
     private renderContainerSubchapter;
     private renderSubSubchapter;
@@ -56,6 +61,7 @@ export declare class EFPEntryForm extends LitElement {
     private getSectionCItemsFromPortalPage;
     private getCompletionFromStore;
     private getSectionCompletionFromStore;
+    private getSectionSkippedFromStore;
     updateNestedChapterStructure(nestedStructure: any[]): void;
     private get completionPercent();
     private goToNext;
@@ -83,6 +89,7 @@ export declare class EFPEntryForm extends LitElement {
     private navigateToSection;
     private navigateToHierarchyItem;
     private renderItems;
+    private getSkippedFromStore;
     updated(changedProps: Map<string, unknown>): void;
     firstUpdated(): void;
     willUpdate(changedProps: Map<string, unknown>): void;

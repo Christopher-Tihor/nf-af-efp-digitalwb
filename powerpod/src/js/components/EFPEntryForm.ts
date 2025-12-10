@@ -27,6 +27,7 @@ import {
   getQuestionFromStore,
   updateQuestionResponse,
   isQuestionnaireLoaded,
+  updateChapterCompletion,
 } from '../common/questionnaire.js';
 import { EFPEventUtils } from './efp/event-utils.js';
 import { EFPTextUtils } from './efp/text-utils.js';
@@ -393,14 +394,217 @@ export class EFPEntryForm extends LitElement {
       if (currentStep &&
           (currentStep.chapterData || currentStep.subchapterData || currentStep.isContainer) &&
           !currentStep.hideSkipChapterCheckbox) {
+
+        const isSkipped = this.isChapterSkipped();
+
         return html`
           <div class="section-not-applicable">
-            <sl-checkbox>This section does not apply to this EFP.</sl-checkbox>
+            <sl-checkbox
+              ?checked=${isSkipped}
+              @sl-change=${this.handleChapterSkippedChange}>
+              This section does not apply to this EFP.
+            </sl-checkbox>
           </div>
         `;
       }
     }
     return '';
+  }
+
+  // Check if the current chapter should be marked as skipped
+  private isChapterSkipped(): boolean {
+    const chapterId = this.getCurrentChapterId();
+    if (!chapterId) return false;
+
+    const questions = this.getQuestionsForCurrentChapter(chapterId);
+    if (questions.length === 0) return false;
+
+    // Check if ALL questions have quartech_chapterskipped set to YES (100000000)
+    return questions.every(q => {
+      const entry = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.get(q.id);
+      return entry?.response?.quartech_chapterskipped === 100000000;
+    });
+  }
+
+  // Check if a chapter (by ID) is skipped
+  private isChapterSkippedById(chapterId: string): boolean {
+    if (!chapterId) return false;
+
+    const questions = this.getQuestionsForCurrentChapter(chapterId);
+    if (questions.length === 0) return false;
+
+    // Check if ALL questions have quartech_chapterskipped set to YES (100000000)
+    return questions.every(q => {
+      const entry = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.get(q.id);
+      return entry?.response?.quartech_chapterskipped === 100000000;
+    });
+  }
+
+  // Get the chapter ID for the current step
+  private getCurrentChapterId(): string | null {
+    const currentStep = this.flatSteps[this.currentStepIndex];
+    if (!currentStep) return null;
+
+    // For subchapters, get the chapter ID from subchapterData
+    if (currentStep.subchapterData) {
+      return currentStep.subchapterData.id || currentStep.subchapterData.quartech_chapterid;
+    }
+
+    // For chapters, get the chapter ID from chapterData
+    if (currentStep.chapterData) {
+      return currentStep.chapterData.id || currentStep.chapterData.quartech_chapterid;
+    }
+
+    return null;
+  }
+
+  // Get all questions for the current chapter (including subchapters)
+  private getQuestionsForCurrentChapter(chapterId: string): any[] {
+    const chapter = getChapterFromStore(chapterId);
+    if (!chapter) return [];
+
+    let questions: any[] = [...(chapter.questions || [])];
+
+    // Also collect questions from subchapters
+    if (chapter.subchapters) {
+      const collectQuestionsFromSubchapters = (subchapters: any[]) => {
+        for (const subchapter of subchapters) {
+          questions = questions.concat(subchapter.questions || []);
+          if (subchapter.subchapters) {
+            collectQuestionsFromSubchapters(subchapter.subchapters);
+          }
+        }
+      };
+      collectQuestionsFromSubchapters(chapter.subchapters);
+    }
+
+    return questions;
+  }
+
+  // Handle checkbox change event
+  private async handleChapterSkippedChange(event: CustomEvent) {
+    const checkbox = event.target as any;
+    const isChecked = checkbox.checked;
+
+    const chapterId = this.getCurrentChapterId();
+    if (!chapterId) {
+      logger.warn({
+        message: 'Cannot update chapter skipped: no chapter ID found',
+      });
+      return;
+    }
+
+    const questions = this.getQuestionsForCurrentChapter(chapterId);
+    if (questions.length === 0) {
+      logger.warn({
+        message: 'Cannot update chapter skipped: no questions found',
+        data: { chapterId },
+      });
+      return;
+    }
+
+    const workbookId = getWorkbookId();
+    if (!workbookId) {
+      logger.error({
+        message: 'Cannot update chapter skipped: no workbook ID found',
+      });
+      return;
+    }
+
+    // Set quartech_chapterskipped to YES (100000000) if checked, NO (100000001) if unchecked
+    const chapterSkippedValue = isChecked ? 100000000 : 100000001;
+
+    logger.info({
+      message: `Updating chapter skipped status for ${questions.length} questions`,
+      data: { chapterId, isChecked, chapterSkippedValue, questionCount: questions.length },
+    });
+
+    // Update all questions in this chapter
+    const updatePromises = questions.map(async (question) => {
+      const questionId = question.id;
+      const entry = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.get(questionId);
+
+      // If response exists, update it
+      if (entry?.response) {
+        const responseId = entry.response.quartech_workbookresponseid;
+        try {
+          await POWERPOD.fetch.patchWorkbookResponseData({
+            id: responseId,
+            chapterSkipped: chapterSkippedValue,
+            response: isChecked ? '' : entry.response.quartech_response, // Blank response if checked
+          });
+
+          // Update in memory
+          entry.response.quartech_chapterskipped = chapterSkippedValue;
+          if (isChecked) {
+            entry.response.quartech_response = '';
+          }
+
+          logger.info({
+            message: `Updated response for question ${questionId}`,
+            data: { questionId, responseId, chapterSkippedValue },
+          });
+        } catch (error) {
+          logger.error({
+            message: `Failed to update response for question ${questionId}`,
+            data: { questionId, responseId, error: (error as Error).message },
+          });
+        }
+      } else {
+        // If no response exists, create one with chapterSkipped set
+        try {
+          await WorkbookResponseHelper.createResponse(questionId, '', {
+            chapterSkipped: chapterSkippedValue,
+          });
+
+          logger.info({
+            message: `Created response for question ${questionId} with chapterSkipped`,
+            data: { questionId, chapterSkippedValue },
+          });
+        } catch (error) {
+          logger.error({
+            message: `Failed to create response for question ${questionId}`,
+            data: { questionId, error: (error as Error).message },
+          });
+        }
+      }
+    });
+
+    await Promise.all(updatePromises);
+
+    // Update chapter completion status based on checkbox state
+    try {
+      if (isChecked) {
+        // When checking, set chapter completion to true (skipped chapters are considered complete)
+        updateChapterCompletion(chapterId, true);
+
+        logger.info({
+          message: `Set chapter completion to true (skipped)`,
+          data: { chapterId },
+        });
+      } else {
+        // When unchecking, set chapter completion to false
+        updateChapterCompletion(chapterId, false);
+
+        logger.info({
+          message: `Set chapter completion to false`,
+          data: { chapterId },
+        });
+      }
+    } catch (error) {
+      logger.error({
+        message: `Failed to update chapter completion`,
+        data: { chapterId, error: (error as Error).message },
+      });
+    }
+
+    // Trigger a re-render to update the checkbox state
+    this.requestUpdate();
+
+    logger.info({
+      message: 'Finished updating chapter skipped status',
+      data: { chapterId, isChecked, questionCount: questions.length },
+    });
   }
 
   private renderSubchapter(subchapter: any) {
@@ -908,6 +1112,58 @@ export class EFPEntryForm extends LitElement {
 
     // Fallback to existing logic
     return EFPCompletionUtils.isSectionComplete(section);
+  }
+
+  // Get section skipped status from questionnaire store
+  private getSectionSkippedFromStore(section: any): boolean {
+    // Only check for My Workbook section
+    if (section.tab !== 'My Workbook') {
+      return false;
+    }
+
+    if (!POWERPOD.workbookQuestionsAndResponses.isLoaded) {
+      return false;
+    }
+
+    try {
+      const questionnaire = getQuestionnaireFromStore();
+      if (!questionnaire) {
+        return false;
+      }
+
+      // Check if ALL questions in the section are skipped
+      let totalQuestions = 0;
+      let skippedQuestions = 0;
+
+      const countInChapters = (chapters: any[]) => {
+        chapters.forEach((chapter: any) => {
+          if (chapter.questions) {
+            chapter.questions.forEach((question: any) => {
+              totalQuestions++;
+              const entry = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.get(question.id);
+              if (entry?.response?.quartech_chapterskipped === 100000000) {
+                skippedQuestions++;
+              }
+            });
+          }
+          if (chapter.subchapters) {
+            countInChapters(chapter.subchapters);
+          }
+        });
+      };
+
+      if (questionnaire.chapters && questionnaire.chapters.length > 0) {
+        countInChapters(questionnaire.chapters[0]);
+      }
+
+      // Section is skipped if all questions are skipped
+      return totalQuestions > 0 && skippedQuestions === totalQuestions;
+    } catch (error) {
+      logger.warn({
+        message: `Failed to get section skipped status: ${String(error)}`,
+      });
+      return false;
+    }
   }
 
   // Public API methods
@@ -1803,8 +2059,27 @@ export class EFPEntryForm extends LitElement {
       this.activeContent.title,
       (item: EFPSectionItem) => this.handleItemClick(item),
       (items: EFPSectionItem[]) => this.renderItems(items),
-      (item: EFPSectionItem) => this.getCompletionFromStore(item)
+      (item: EFPSectionItem) => this.getCompletionFromStore(item),
+      (item: EFPSectionItem) => this.getSkippedFromStore(item)
     );
+  }
+
+  // Get skipped status for an item from the store
+  private getSkippedFromStore(item: EFPSectionItem): boolean {
+    // Only check for chapters (not questions or other items)
+    if (!item.chapterId) {
+      return false;
+    }
+
+    try {
+      return this.isChapterSkippedById(item.chapterId);
+    } catch (error) {
+      logger.error({
+        message: 'Error checking chapter skipped status',
+        data: { chapterId: item.chapterId, error: (error as Error).message },
+      });
+      return false;
+    }
   }
 
   updated(changedProps: Map<string, unknown>) {
@@ -2419,8 +2694,22 @@ export class EFPEntryForm extends LitElement {
             ${this.sections.map((section, index) => {
               const isActive = index === this.currentSectionIndex;
               const isComplete = this.getSectionCompletionFromStore(section);
-              const icon = isComplete ? 'check-circle' : 'pencil';
-              const color = isActive ? 'orange' : isComplete ? 'green' : 'gray';
+              const isSkipped = this.getSectionSkippedFromStore(section);
+
+              // Determine icon based on state: skipped > complete > incomplete
+              let icon: string;
+              let color: string;
+
+              if (isSkipped) {
+                icon = 'dash-circle-fill';
+                color = isActive ? 'orange' : 'gray';
+              } else if (isComplete) {
+                icon = 'check-circle';
+                color = isActive ? 'orange' : 'green';
+              } else {
+                icon = 'pencil';
+                color = isActive ? 'orange' : 'gray';
+              }
 
               return html`
                 <sl-tab slot="nav" panel="section-${index}">
