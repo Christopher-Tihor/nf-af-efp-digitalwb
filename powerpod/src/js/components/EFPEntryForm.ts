@@ -1,6 +1,7 @@
 import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 import '@shoelace-style/shoelace/dist/components/details/details.js';
 import '@shoelace-style/shoelace/dist/components/button/button.js';
+import '@shoelace-style/shoelace/dist/components/checkbox/checkbox.js';
 import '@shoelace-style/shoelace/dist/components/icon/icon.js';
 import '@shoelace-style/shoelace/dist/components/progress-bar/progress-bar.js';
 import '@shoelace-style/shoelace/dist/components/tab-group/tab-group.js';
@@ -380,6 +381,22 @@ export class EFPEntryForm extends LitElement {
           ></sl-textarea>
         `;
     }
+  }
+
+  private renderSectionNotApplicableCheckbox() {
+    // Only show checkbox when viewing a chapter/subchapter in My Workbook section
+    if (this.currentSectionIndex === 0) {
+      const currentStep = this.flatSteps[this.currentStepIndex];
+      // Check if current step is a chapter, subchapter, or sub-subchapter
+      if (currentStep && (currentStep.chapterData || currentStep.subchapterData)) {
+        return html`
+          <div class="section-not-applicable">
+            <sl-checkbox>This section does not apply to this EFP.</sl-checkbox>
+          </div>
+        `;
+      }
+    }
+    return '';
   }
 
   private renderSubchapter(subchapter: any) {
@@ -2478,6 +2495,7 @@ export class EFPEntryForm extends LitElement {
               .sections=${this.sections}
               @breadcrumb-navigate=${this.handleBreadcrumbNavigation}
             ></efp-breadcrumbs>
+            ${this.renderSectionNotApplicableCheckbox()}
             <h2>${this.activeContent.title}</h2>
             ${this.renderMainContent()}
 

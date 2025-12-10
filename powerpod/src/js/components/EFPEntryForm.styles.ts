@@ -50,7 +50,7 @@ export const efpEntryFormStyles = css`
   }
 
   sl-details::part(content) {
-    padding: 0.25rem 0.75rem 0.5rem 0.75rem !important;
+    padding: 0.25rem 0.75rem 0.5rem 8js63bd7*0.75rem !important;
   }
 
   /* Spacing for standalone navigation items after collapsible containers */
@@ -145,6 +145,19 @@ export const efpEntryFormStyles = css`
     font-size: 0.95rem;
     line-height: 1.6;
     font-family: var(--body-font);
+  }
+
+  .section-not-applicable {
+    margin: -1rem -1rem 1rem -1rem;
+    padding: 0.75rem 1rem;
+    background-color: var(--sl-color-neutral-50);
+    border-bottom: 1px solid var(--sl-color-neutral-200);
+  }
+
+  .section-not-applicable sl-checkbox {
+    font-family: var(--body-font);
+    font-size: 0.95rem;
+    color: var(--sl-color-neutral-700);
   }
 
   .chapter-header {

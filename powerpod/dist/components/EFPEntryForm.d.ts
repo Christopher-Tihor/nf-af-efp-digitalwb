@@ -1,5 +1,6 @@
 import '@shoelace-style/shoelace/dist/components/details/details.js';
 import '@shoelace-style/shoelace/dist/components/button/button.js';
+import '@shoelace-style/shoelace/dist/components/checkbox/checkbox.js';
 import '@shoelace-style/shoelace/dist/components/icon/icon.js';
 import '@shoelace-style/shoelace/dist/components/progress-bar/progress-bar.js';
 import '@shoelace-style/shoelace/dist/components/tab-group/tab-group.js';
@@ -43,6 +44,7 @@ export declare class EFPEntryForm extends LitElement {
     private get sections();
     private renderQuestion;
     private renderQuestionInput;
+    private renderSectionNotApplicableCheckbox;
     private renderSubchapter;
     private renderContainerSubchapter;
     private renderSubSubchapter;

@@ -1,5 +1,5 @@
 /*!
-* powerpod 4.5.0
+* powerpod 4.5.1
 * https://github.com/bcgov/nr-af-pods/powerpod
 *
 * @license GPLv3 for open source use only
@@ -35635,6 +35635,354 @@
 
   SlDetails.define("sl-details");
 
+  // src/components/checkbox/checkbox.styles.ts
+  var checkbox_styles_default = i$4`
+  :host {
+    display: inline-block;
+  }
+
+  .checkbox {
+    position: relative;
+    display: inline-flex;
+    align-items: flex-start;
+    font-family: var(--sl-input-font-family);
+    font-weight: var(--sl-input-font-weight);
+    color: var(--sl-input-label-color);
+    vertical-align: middle;
+    cursor: pointer;
+  }
+
+  .checkbox--small {
+    --toggle-size: var(--sl-toggle-size-small);
+    font-size: var(--sl-input-font-size-small);
+  }
+
+  .checkbox--medium {
+    --toggle-size: var(--sl-toggle-size-medium);
+    font-size: var(--sl-input-font-size-medium);
+  }
+
+  .checkbox--large {
+    --toggle-size: var(--sl-toggle-size-large);
+    font-size: var(--sl-input-font-size-large);
+  }
+
+  .checkbox__control {
+    flex: 0 0 auto;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--toggle-size);
+    height: var(--toggle-size);
+    border: solid var(--sl-input-border-width) var(--sl-input-border-color);
+    border-radius: 2px;
+    background-color: var(--sl-input-background-color);
+    color: var(--sl-color-neutral-0);
+    transition:
+      var(--sl-transition-fast) border-color,
+      var(--sl-transition-fast) background-color,
+      var(--sl-transition-fast) color,
+      var(--sl-transition-fast) box-shadow;
+  }
+
+  .checkbox__input {
+    position: absolute;
+    opacity: 0;
+    padding: 0;
+    margin: 0;
+    pointer-events: none;
+  }
+
+  .checkbox__checked-icon,
+  .checkbox__indeterminate-icon {
+    display: inline-flex;
+    width: var(--toggle-size);
+    height: var(--toggle-size);
+  }
+
+  /* Hover */
+  .checkbox:not(.checkbox--checked):not(.checkbox--disabled) .checkbox__control:hover {
+    border-color: var(--sl-input-border-color-hover);
+    background-color: var(--sl-input-background-color-hover);
+  }
+
+  /* Focus */
+  .checkbox:not(.checkbox--checked):not(.checkbox--disabled) .checkbox__input:focus-visible ~ .checkbox__control {
+    outline: var(--sl-focus-ring);
+    outline-offset: var(--sl-focus-ring-offset);
+  }
+
+  /* Checked/indeterminate */
+  .checkbox--checked .checkbox__control,
+  .checkbox--indeterminate .checkbox__control {
+    border-color: var(--sl-color-primary-600);
+    background-color: var(--sl-color-primary-600);
+  }
+
+  /* Checked/indeterminate + hover */
+  .checkbox.checkbox--checked:not(.checkbox--disabled) .checkbox__control:hover,
+  .checkbox.checkbox--indeterminate:not(.checkbox--disabled) .checkbox__control:hover {
+    border-color: var(--sl-color-primary-500);
+    background-color: var(--sl-color-primary-500);
+  }
+
+  /* Checked/indeterminate + focus */
+  .checkbox.checkbox--checked:not(.checkbox--disabled) .checkbox__input:focus-visible ~ .checkbox__control,
+  .checkbox.checkbox--indeterminate:not(.checkbox--disabled) .checkbox__input:focus-visible ~ .checkbox__control {
+    outline: var(--sl-focus-ring);
+    outline-offset: var(--sl-focus-ring-offset);
+  }
+
+  /* Disabled */
+  .checkbox--disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .checkbox__label {
+    display: inline-block;
+    color: var(--sl-input-label-color);
+    line-height: var(--toggle-size);
+    margin-inline-start: 0.5em;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  :host([required]) .checkbox__label::after {
+    content: var(--sl-input-required-content);
+    color: var(--sl-input-required-content-color);
+    margin-inline-start: var(--sl-input-required-content-offset);
+  }
+`;
+
+  /**
+   * @license
+   * Copyright 2020 Google LLC
+   * SPDX-License-Identifier: BSD-3-Clause
+   */const l=e$5(class extends i$1{constructor(r){if(super(r),r.type!==t.PROPERTY&&r.type!==t.ATTRIBUTE&&r.type!==t.BOOLEAN_ATTRIBUTE)throw Error("The `live` directive is not allowed on child or event bindings");if(!f$1(r))throw Error("`live` bindings can only contain a single expression")}render(r){return r}update(i,[t$1]){if(t$1===w||t$1===T)return t$1;const o=i.element,l=i.name;if(i.type===t.PROPERTY){if(t$1===o[l])return w}else if(i.type===t.BOOLEAN_ATTRIBUTE){if(!!t$1===o.hasAttribute(l))return w}else if(i.type===t.ATTRIBUTE&&o.getAttribute(l)===t$1+"")return w;return m(i),t$1}});
+
+  var SlCheckbox = class extends ShoelaceElement {
+    constructor() {
+      super(...arguments);
+      this.formControlController = new FormControlController(this, {
+        value: (control) => control.checked ? control.value || "on" : void 0,
+        defaultValue: (control) => control.defaultChecked,
+        setValue: (control, checked) => control.checked = checked
+      });
+      this.hasSlotController = new HasSlotController(this, "help-text");
+      this.hasFocus = false;
+      this.title = "";
+      this.name = "";
+      this.size = "medium";
+      this.disabled = false;
+      this.checked = false;
+      this.indeterminate = false;
+      this.defaultChecked = false;
+      this.form = "";
+      this.required = false;
+      this.helpText = "";
+    }
+    /** Gets the validity state object */
+    get validity() {
+      return this.input.validity;
+    }
+    /** Gets the validation message */
+    get validationMessage() {
+      return this.input.validationMessage;
+    }
+    firstUpdated() {
+      this.formControlController.updateValidity();
+    }
+    handleClick() {
+      this.checked = !this.checked;
+      this.indeterminate = false;
+      this.emit("sl-change");
+    }
+    handleBlur() {
+      this.hasFocus = false;
+      this.emit("sl-blur");
+    }
+    handleInput() {
+      this.emit("sl-input");
+    }
+    handleInvalid(event) {
+      this.formControlController.setValidity(false);
+      this.formControlController.emitInvalidEvent(event);
+    }
+    handleFocus() {
+      this.hasFocus = true;
+      this.emit("sl-focus");
+    }
+    handleDisabledChange() {
+      this.formControlController.setValidity(this.disabled);
+    }
+    handleStateChange() {
+      this.input.checked = this.checked;
+      this.input.indeterminate = this.indeterminate;
+      this.formControlController.updateValidity();
+    }
+    /** Simulates a click on the checkbox. */
+    click() {
+      this.input.click();
+    }
+    /** Sets focus on the checkbox. */
+    focus(options) {
+      this.input.focus(options);
+    }
+    /** Removes focus from the checkbox. */
+    blur() {
+      this.input.blur();
+    }
+    /** Checks for validity but does not show a validation message. Returns `true` when valid and `false` when invalid. */
+    checkValidity() {
+      return this.input.checkValidity();
+    }
+    /** Gets the associated form, if one exists. */
+    getForm() {
+      return this.formControlController.getForm();
+    }
+    /** Checks for validity and shows the browser's validation message if the control is invalid. */
+    reportValidity() {
+      return this.input.reportValidity();
+    }
+    /**
+     * Sets a custom validation message. The value provided will be shown to the user when the form is submitted. To clear
+     * the custom validation message, call this method with an empty string.
+     */
+    setCustomValidity(message) {
+      this.input.setCustomValidity(message);
+      this.formControlController.updateValidity();
+    }
+    render() {
+      const hasHelpTextSlot = this.hasSlotController.test("help-text");
+      const hasHelpText = this.helpText ? true : !!hasHelpTextSlot;
+      return x`
+      <div
+        class=${e$4({
+      "form-control": true,
+      "form-control--small": this.size === "small",
+      "form-control--medium": this.size === "medium",
+      "form-control--large": this.size === "large",
+      "form-control--has-help-text": hasHelpText
+    })}
+      >
+        <label
+          part="base"
+          class=${e$4({
+      checkbox: true,
+      "checkbox--checked": this.checked,
+      "checkbox--disabled": this.disabled,
+      "checkbox--focused": this.hasFocus,
+      "checkbox--indeterminate": this.indeterminate,
+      "checkbox--small": this.size === "small",
+      "checkbox--medium": this.size === "medium",
+      "checkbox--large": this.size === "large"
+    })}
+        >
+          <input
+            class="checkbox__input"
+            type="checkbox"
+            title=${this.title}
+            name=${this.name}
+            value=${o$4(this.value)}
+            .indeterminate=${l(this.indeterminate)}
+            .checked=${l(this.checked)}
+            .disabled=${this.disabled}
+            .required=${this.required}
+            aria-checked=${this.checked ? "true" : "false"}
+            aria-describedby="help-text"
+            @click=${this.handleClick}
+            @input=${this.handleInput}
+            @invalid=${this.handleInvalid}
+            @blur=${this.handleBlur}
+            @focus=${this.handleFocus}
+          />
+
+          <span
+            part="control${this.checked ? " control--checked" : ""}${this.indeterminate ? " control--indeterminate" : ""}"
+            class="checkbox__control"
+          >
+            ${this.checked ? x`
+                  <sl-icon part="checked-icon" class="checkbox__checked-icon" library="system" name="check"></sl-icon>
+                ` : ""}
+            ${!this.checked && this.indeterminate ? x`
+                  <sl-icon
+                    part="indeterminate-icon"
+                    class="checkbox__indeterminate-icon"
+                    library="system"
+                    name="indeterminate"
+                  ></sl-icon>
+                ` : ""}
+          </span>
+
+          <div part="label" class="checkbox__label">
+            <slot></slot>
+          </div>
+        </label>
+
+        <div
+          aria-hidden=${hasHelpText ? "false" : "true"}
+          class="form-control__help-text"
+          id="help-text"
+          part="form-control-help-text"
+        >
+          <slot name="help-text">${this.helpText}</slot>
+        </div>
+      </div>
+    `;
+    }
+  };
+  SlCheckbox.styles = [component_styles_default, form_control_styles_default, checkbox_styles_default];
+  SlCheckbox.dependencies = { "sl-icon": SlIcon };
+  __decorateClass([
+    e$6('input[type="checkbox"]')
+  ], SlCheckbox.prototype, "input", 2);
+  __decorateClass([
+    r$1()
+  ], SlCheckbox.prototype, "hasFocus", 2);
+  __decorateClass([
+    n$4()
+  ], SlCheckbox.prototype, "title", 2);
+  __decorateClass([
+    n$4()
+  ], SlCheckbox.prototype, "name", 2);
+  __decorateClass([
+    n$4()
+  ], SlCheckbox.prototype, "value", 2);
+  __decorateClass([
+    n$4({ reflect: true })
+  ], SlCheckbox.prototype, "size", 2);
+  __decorateClass([
+    n$4({ type: Boolean, reflect: true })
+  ], SlCheckbox.prototype, "disabled", 2);
+  __decorateClass([
+    n$4({ type: Boolean, reflect: true })
+  ], SlCheckbox.prototype, "checked", 2);
+  __decorateClass([
+    n$4({ type: Boolean, reflect: true })
+  ], SlCheckbox.prototype, "indeterminate", 2);
+  __decorateClass([
+    defaultValue("checked")
+  ], SlCheckbox.prototype, "defaultChecked", 2);
+  __decorateClass([
+    n$4({ reflect: true })
+  ], SlCheckbox.prototype, "form", 2);
+  __decorateClass([
+    n$4({ type: Boolean, reflect: true })
+  ], SlCheckbox.prototype, "required", 2);
+  __decorateClass([
+    n$4({ attribute: "help-text" })
+  ], SlCheckbox.prototype, "helpText", 2);
+  __decorateClass([
+    watch("disabled", { waitUntilFirstUpdate: true })
+  ], SlCheckbox.prototype, "handleDisabledChange", 1);
+  __decorateClass([
+    watch(["checked", "indeterminate"], { waitUntilFirstUpdate: true })
+  ], SlCheckbox.prototype, "handleStateChange", 1);
+
+  SlCheckbox.define("sl-checkbox");
+
   // src/components/progress-bar/progress-bar.styles.ts
   var progress_bar_styles_default = i$4`
   :host {
@@ -36706,12 +37054,6 @@
     overflow-y: hidden;
   }
 `;
-
-  /**
-   * @license
-   * Copyright 2020 Google LLC
-   * SPDX-License-Identifier: BSD-3-Clause
-   */const l=e$5(class extends i$1{constructor(r){if(super(r),r.type!==t.PROPERTY&&r.type!==t.ATTRIBUTE&&r.type!==t.BOOLEAN_ATTRIBUTE)throw Error("The `live` directive is not allowed on child or event bindings");if(!f$1(r))throw Error("`live` bindings can only contain a single expression")}render(r){return r}update(i,[t$1]){if(t$1===w||t$1===T)return t$1;const o=i.element,l=i.name;if(i.type===t.PROPERTY){if(t$1===o[l])return w}else if(i.type===t.BOOLEAN_ATTRIBUTE){if(!!t$1===o.hasAttribute(l))return w}else if(i.type===t.ATTRIBUTE&&o.getAttribute(l)===t$1+"")return w;return m(i),t$1}});
 
   var SlTextarea = class extends ShoelaceElement {
     constructor() {
@@ -42278,7 +42620,7 @@
   }
 
   sl-details::part(content) {
-    padding: 0.25rem 0.75rem 0.5rem 0.75rem !important;
+    padding: 0.25rem 0.75rem 0.5rem 8js63bd7*0.75rem !important;
   }
 
   /* Spacing for standalone navigation items after collapsible containers */
@@ -42373,6 +42715,19 @@
     font-size: 0.95rem;
     line-height: 1.6;
     font-family: var(--body-font);
+  }
+
+  .section-not-applicable {
+    margin: -1rem -1rem 1rem -1rem;
+    padding: 0.75rem 1rem;
+    background-color: var(--sl-color-neutral-50);
+    border-bottom: 1px solid var(--sl-color-neutral-200);
+  }
+
+  .section-not-applicable sl-checkbox {
+    font-family: var(--body-font);
+    font-size: 0.95rem;
+    color: var(--sl-color-neutral-700);
   }
 
   .chapter-header {
@@ -42917,6 +43272,21 @@
           ></sl-textarea>
         `;
           }
+      }
+      renderSectionNotApplicableCheckbox() {
+          // Only show checkbox when viewing a chapter/subchapter in My Workbook section
+          if (this.currentSectionIndex === 0) {
+              const currentStep = this.flatSteps[this.currentStepIndex];
+              // Check if current step is a chapter, subchapter, or sub-subchapter
+              if (currentStep && (currentStep.chapterData || currentStep.subchapterData)) {
+                  return x `
+          <div class="section-not-applicable">
+            <sl-checkbox>This section does not apply to this EFP.</sl-checkbox>
+          </div>
+        `;
+              }
+          }
+          return '';
       }
       renderSubchapter(subchapter) {
           return x `
@@ -44565,6 +44935,7 @@
               .sections=${this.sections}
               @breadcrumb-navigate=${this.handleBreadcrumbNavigation}
             ></efp-breadcrumbs>
+            ${this.renderSectionNotApplicableCheckbox()}
             <h2>${this.activeContent.title}</h2>
             ${this.renderMainContent()}
 
@@ -45033,7 +45404,7 @@
       };
     };
     // @ts-ignore
-    POWERPOD.version = '4.5.0';
+    POWERPOD.version = '4.5.1';
     // @ts-ignore
     window.powerpod = POWERPOD;
   }
