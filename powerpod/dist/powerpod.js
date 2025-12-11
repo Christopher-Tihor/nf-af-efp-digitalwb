@@ -1,5 +1,5 @@
 /*!
-* powerpod 4.5.3
+* powerpod 4.5.4
 * https://github.com/bcgov/nr-af-pods/powerpod
 *
 * @license GPLv3 for open source use only
@@ -3227,22 +3227,14 @@
             });
             payload = {
               quartech_action: action
-            }; // Add chapterId if provided (null clears it)
-            if (chapterId !== undefined) {
-              if (chapterId) {
-                payload['quartech_chapter@odata.bind'] = "/quartech_chapters(".concat(chapterId, ")");
-              } else {
-                payload['quartech_chapter@odata.bind'] = null;
-              }
+            }; // Add chapterId if provided (only include if truthy)
+            if (chapterId) {
+              payload['quartech_chapter@odata.bind'] = "/quartech_chapters(".concat(chapterId, ")");
             }
 
-            // Add questionId if provided (null clears it)
-            if (questionId !== undefined) {
-              if (questionId) {
-                payload['quartech_workbookquestion@odata.bind'] = "/quartech_workbookquestions(".concat(questionId, ")");
-              } else {
-                payload['quartech_workbookquestion@odata.bind'] = null;
-              }
+            // Add questionId if provided (only include if truthy)
+            if (questionId) {
+              payload['quartech_workbookquestion@odata.bind'] = "/quartech_workbookquestions(".concat(questionId, ")");
             }
             return _context41.abrupt("return", fetch$1(_objectSpread2({
               method: 'PATCH',
@@ -46030,7 +46022,7 @@
       };
     };
     // @ts-ignore
-    POWERPOD.version = '4.5.3';
+    POWERPOD.version = '4.5.4';
     // @ts-ignore
     window.powerpod = POWERPOD;
   }

@@ -1074,22 +1074,14 @@ export async function patchActionPlanData({
     quartech_action: action,
   };
 
-  // Add chapterId if provided (null clears it)
-  if (chapterId !== undefined) {
-    if (chapterId) {
-      payload['quartech_chapter@odata.bind'] = `/quartech_chapters(${chapterId})`;
-    } else {
-      payload['quartech_chapter@odata.bind'] = null;
-    }
+  // Add chapterId if provided (only include if truthy)
+  if (chapterId) {
+    payload['quartech_chapter@odata.bind'] = `/quartech_chapters(${chapterId})`;
   }
 
-  // Add questionId if provided (null clears it)
-  if (questionId !== undefined) {
-    if (questionId) {
-      payload['quartech_workbookquestion@odata.bind'] = `/quartech_workbookquestions(${questionId})`;
-    } else {
-      payload['quartech_workbookquestion@odata.bind'] = null;
-    }
+  // Add questionId if provided (only include if truthy)
+  if (questionId) {
+    payload['quartech_workbookquestion@odata.bind'] = `/quartech_workbookquestions(${questionId})`;
   }
 
   return fetch({
