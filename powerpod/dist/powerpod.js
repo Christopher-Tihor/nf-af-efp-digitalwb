@@ -1,5 +1,5 @@
 /*!
-* powerpod 4.5.2
+* powerpod 4.5.3
 * https://github.com/bcgov/nr-af-pods/powerpod
 *
 * @license GPLv3 for open source use only
@@ -38113,10 +38113,112 @@
     });
   }
 
+  /**
+   * WorkbookSignOffButtons Component
+   *
+   * Provides sign-off functionality for PA (Planning Advisor) and Producer roles.
+   *
+   * DEBUG MODE:
+   * For testing purposes, you can enable debug mode to bypass the Draft status requirement
+   * and override user roles for testing sign-off functionality.
+   *
+   * In the browser console, run:
+   *   - enableSignOffDebugging()   // Allows sign-off in Draft status
+   *   - disableSignOffDebugging()  // Restores normal Draft status requirement
+   *   - setSignOffRole('producer') // Show only Producer sign-off button
+   *   - setSignOffRole('advisor')  // Show only Planning Advisor sign-off button
+   *   - setSignOffRole('both')     // Show both sign-off buttons
+   *   - setSignOffRole('none')     // Hide all sign-off buttons
+   *   - resetSignOffRole()         // Restore actual user roles
+   *   - getSignOffDebugStatus()    // Display current debug settings
+   */
   const logger$8 = Logger('components/WorkbookSignOffButtons');
   // Convert string values to integers for API
   const YES_INT = parseInt(YES_VALUE, 10); // 100000000
   const NO_INT = parseInt(NO_VALUE, 10); // 100000001
+  // Debug mode flags
+  let debugModeEnabled = false;
+  let debugRoleOverride = null;
+  // Enable debug mode - allows sign-off in Draft status
+  window.enableSignOffDebugging = () => {
+      debugModeEnabled = true;
+      logger$8.info({
+          fn: 'enableSignOffDebugging',
+          message: '🐛 DEBUG MODE ENABLED: Draft status requirement will be ignored for sign-off',
+      });
+      console.log('✅ Sign-off debugging enabled. Draft status requirement is now ignored.');
+      // Trigger re-render of all sign-off button instances
+      document.querySelectorAll('workbook-sign-off-buttons').forEach((el) => {
+          var _a;
+          (_a = el.requestUpdate) === null || _a === void 0 ? void 0 : _a.call(el);
+      });
+  };
+  // Disable debug mode - restores normal Draft status requirement
+  window.disableSignOffDebugging = () => {
+      debugModeEnabled = false;
+      logger$8.info({
+          fn: 'disableSignOffDebugging',
+          message: '🐛 DEBUG MODE DISABLED: Draft status requirement restored for sign-off',
+      });
+      console.log('✅ Sign-off debugging disabled. Draft status requirement is now enforced.');
+      // Trigger re-render of all sign-off button instances
+      document.querySelectorAll('workbook-sign-off-buttons').forEach((el) => {
+          var _a;
+          (_a = el.requestUpdate) === null || _a === void 0 ? void 0 : _a.call(el);
+      });
+  };
+  // Set role override for testing
+  window.setSignOffRole = (role) => {
+      debugRoleOverride = role;
+      logger$8.info({
+          fn: 'setSignOffRole',
+          message: `🐛 DEBUG ROLE OVERRIDE: Set to '${role}'`,
+          data: { role },
+      });
+      const roleMessages = {
+          producer: 'Producer role only',
+          advisor: 'Planning Advisor role only',
+          both: 'Both Producer and Planning Advisor roles',
+          none: 'No roles (buttons hidden)',
+      };
+      console.log(`✅ Sign-off role override set to: ${roleMessages[role]}`);
+      // Trigger re-render of all sign-off button instances
+      document.querySelectorAll('workbook-sign-off-buttons').forEach((el) => {
+          var _a;
+          (_a = el.requestUpdate) === null || _a === void 0 ? void 0 : _a.call(el);
+      });
+  };
+  // Reset role override - restore actual user roles
+  window.resetSignOffRole = () => {
+      debugRoleOverride = null;
+      logger$8.info({
+          fn: 'resetSignOffRole',
+          message: '🐛 DEBUG ROLE OVERRIDE: Reset to actual user roles',
+      });
+      console.log('✅ Sign-off role override reset. Using actual user roles.');
+      // Trigger re-render of all sign-off button instances
+      document.querySelectorAll('workbook-sign-off-buttons').forEach((el) => {
+          var _a;
+          (_a = el.requestUpdate) === null || _a === void 0 ? void 0 : _a.call(el);
+      });
+  };
+  // Get current debug status
+  window.getSignOffDebugStatus = () => {
+      const status = {
+          statusBypassEnabled: debugModeEnabled,
+          roleOverride: debugRoleOverride || 'none (using actual roles)',
+      };
+      console.log('🐛 Sign-off Debug Status:');
+      console.log(`  - Draft status bypass: ${status.statusBypassEnabled ? '✅ ENABLED' : '❌ DISABLED'}`);
+      console.log(`  - Role override: ${status.roleOverride}`);
+      console.log('\nAvailable debug commands:');
+      console.log('  - enableSignOffDebugging()');
+      console.log('  - disableSignOffDebugging()');
+      console.log('  - setSignOffRole("producer" | "advisor" | "both" | "none")');
+      console.log('  - resetSignOffRole()');
+      console.log('  - getSignOffDebugStatus()');
+      return status;
+  };
   let WorkbookSignOffButtons = class WorkbookSignOffButtons extends s$2 {
       constructor() {
           super(...arguments);
@@ -38133,16 +38235,49 @@
           this.checkUserRoles();
       }
       checkUserRoles() {
-          this.showPAButton = hasRole('EFP Planning Advisor');
-          this.showProducerButton = hasRole('EFP Producer');
-          logger$8.info({
-              fn: 'checkUserRoles',
-              message: 'Checked user roles for sign-off buttons',
-              data: {
-                  showPAButton: this.showPAButton,
-                  showProducerButton: this.showProducerButton,
-              },
-          });
+          // Check if debug role override is active
+          if (debugRoleOverride !== null) {
+              switch (debugRoleOverride) {
+                  case 'producer':
+                      this.showPAButton = false;
+                      this.showProducerButton = true;
+                      break;
+                  case 'advisor':
+                      this.showPAButton = true;
+                      this.showProducerButton = false;
+                      break;
+                  case 'both':
+                      this.showPAButton = true;
+                      this.showProducerButton = true;
+                      break;
+                  case 'none':
+                      this.showPAButton = false;
+                      this.showProducerButton = false;
+                      break;
+              }
+              logger$8.info({
+                  fn: 'checkUserRoles',
+                  message: '🐛 DEBUG ROLE OVERRIDE: Using debug role settings',
+                  data: {
+                      debugRoleOverride,
+                      showPAButton: this.showPAButton,
+                      showProducerButton: this.showProducerButton,
+                  },
+              });
+          }
+          else {
+              // Use actual user roles
+              this.showPAButton = hasRole('EFP Planning Advisor');
+              this.showProducerButton = hasRole('EFP Producer');
+              logger$8.info({
+                  fn: 'checkUserRoles',
+                  message: 'Checked user roles for sign-off buttons',
+                  data: {
+                      showPAButton: this.showPAButton,
+                      showProducerButton: this.showProducerButton,
+                  },
+              });
+          }
       }
       loadSignOffData() {
           var _a;
@@ -38172,7 +38307,7 @@
        * - Workbook in Assigned status OR Producer Signed status (meaning Producer has signed)
        *
        * Disable sign-off for:
-       * - Workbook in Draft status
+       * - Workbook in Draft status (unless debug mode is enabled)
        * - PA Signed (for the PA - they already signed)
        * - Workbook in Completed status
        * - Workbook in Validated status
@@ -38183,6 +38318,15 @@
           if (this.paSigned) {
               return false;
           }
+          // In debug mode, allow sign-off in Draft status
+          if (debugModeEnabled) {
+              logger$8.info({
+                  fn: 'canPASignOff',
+                  message: '🐛 DEBUG MODE: Allowing PA sign-off regardless of workbook status',
+                  data: { workbookStatus: this.workbookStatus },
+              });
+              return true;
+          }
           // Can sign if workbook is in Assigned status OR Producer Signed status
           // This allows PA to sign when workbook is assigned or after Producer has signed
           return this.workbookStatus === WORKBOOK_STATUS.ASSIGNED ||
@@ -38192,8 +38336,13 @@
        * Check if PA can cancel their sign-off
        * Enable cancel sign-off only for:
        * - PA Signed (for the PA)
+       * - UNLESS both PA and Producer have signed (then disable Clear Sign-Off)
        */
       canPACancelSignOff() {
+          // If both PA and Producer have signed, disable Clear Sign-Off
+          if (this.paSigned && this.producerSigned) {
+              return false;
+          }
           return this.paSigned;
       }
       /**
@@ -38202,7 +38351,7 @@
        * - Workbook in Assigned status OR PA Signed status (meaning PA has signed)
        *
        * Disable sign-off for:
-       * - Workbook in Draft status
+       * - Workbook in Draft status (unless debug mode is enabled)
        * - Producer Signed (for the Producer - they already signed)
        * - Workbook in Completed status
        * - Workbook in Validated status
@@ -38213,6 +38362,15 @@
           if (this.producerSigned) {
               return false;
           }
+          // In debug mode, allow sign-off in Draft status
+          if (debugModeEnabled) {
+              logger$8.info({
+                  fn: 'canProducerSignOff',
+                  message: '🐛 DEBUG MODE: Allowing Producer sign-off regardless of workbook status',
+                  data: { workbookStatus: this.workbookStatus },
+              });
+              return true;
+          }
           // Can sign if workbook is in Assigned status OR PA Signed status
           // This allows Producer to sign when workbook is assigned or after PA has signed
           return this.workbookStatus === WORKBOOK_STATUS.ASSIGNED ||
@@ -38222,8 +38380,13 @@
        * Check if Producer can cancel their sign-off
        * Enable cancel sign-off only for:
        * - Producer Signed (for the Producer)
+       * - UNLESS both PA and Producer have signed (then disable Clear Sign-Off)
        */
       canProducerCancelSignOff() {
+          // If both PA and Producer have signed, disable Clear Sign-Off
+          if (this.paSigned && this.producerSigned) {
+              return false;
+          }
           return this.producerSigned;
       }
       /**
@@ -38231,7 +38394,15 @@
        */
       getPADisabledTooltip() {
           if (this.paSigned) {
+              // If both have signed, show different message
+              if (this.producerSigned) {
+                  return 'Cannot clear sign-off when both Planning Advisor and Producer have signed.';
+              }
               return 'You have already signed. Click to cancel your sign-off.';
+          }
+          // In debug mode, show debug message
+          if (debugModeEnabled) {
+              return '🐛 DEBUG MODE: Draft status requirement is bypassed';
           }
           if (this.workbookStatus === WORKBOOK_STATUS.DRAFT) {
               return 'Sign-off is not available for workbooks in Draft status.';
@@ -38256,7 +38427,15 @@
        */
       getProducerDisabledTooltip() {
           if (this.producerSigned) {
+              // If both have signed, show different message
+              if (this.paSigned) {
+                  return 'Cannot clear sign-off when both Planning Advisor and Producer have signed.';
+              }
               return 'You have already signed. Click to cancel your sign-off.';
+          }
+          // In debug mode, show debug message
+          if (debugModeEnabled) {
+              return '🐛 DEBUG MODE: Draft status requirement is bypassed';
           }
           if (this.workbookStatus === WORKBOOK_STATUS.DRAFT) {
               return 'Sign-off is not available for workbooks in Draft status.';
@@ -45851,7 +46030,7 @@
       };
     };
     // @ts-ignore
-    POWERPOD.version = '4.5.2';
+    POWERPOD.version = '4.5.3';
     // @ts-ignore
     window.powerpod = POWERPOD;
   }
