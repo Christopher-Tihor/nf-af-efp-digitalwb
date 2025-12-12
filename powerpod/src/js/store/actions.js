@@ -32,4 +32,7 @@ export default {
   setUserRoles(context, payload) {
     context.commit('setUserRoles', payload);
   },
+  setWorkbookLocked(context, payload) {
+    context.commit('setWorkbookLocked', payload);
+  },
 };

@@ -198,4 +198,13 @@ export default {
     state.userRoles = payload.roles;
     return state;
   },
+  setWorkbookLocked(state, payload) {
+    logger.info({
+      fn: this.setWorkbookLocked,
+      message: 'Set workbook locked status in state',
+      data: { state, payload },
+    });
+    state.workbookLocked = payload.locked;
+    return state;
+  },
 };

@@ -10,5 +10,6 @@ declare namespace _default {
     function addToFieldOrder(state: any, payload: any): any;
     function setPortalPageData(state: any, payload: any): any;
     function setUserRoles(state: any, payload: any): any;
+    function setWorkbookLocked(state: any, payload: any): any;
 }
 export default _default;

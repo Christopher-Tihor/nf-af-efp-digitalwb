@@ -1,5 +1,5 @@
 /*!
-* powerpod 4.5.4
+* powerpod 4.5.6
 * https://github.com/bcgov/nr-af-pods/powerpod
 *
 * @license GPLv3 for open source use only
@@ -877,6 +877,9 @@
     },
     setUserRoles: function setUserRoles(context, payload) {
       context.commit('setUserRoles', payload);
+    },
+    setWorkbookLocked: function setWorkbookLocked(context, payload) {
+      context.commit('setWorkbookLocked', payload);
     }
   };
 
@@ -1112,6 +1115,18 @@
       });
       state.userRoles = payload.roles;
       return state;
+    },
+    setWorkbookLocked: function setWorkbookLocked(state, payload) {
+      logger$V.info({
+        fn: this.setWorkbookLocked,
+        message: 'Set workbook locked status in state',
+        data: {
+          state: state,
+          payload: payload
+        }
+      });
+      state.workbookLocked = payload.locked;
+      return state;
     }
   };
 
@@ -1121,7 +1136,8 @@
     fieldOrder: [],
     questionnaire: {},
     portalPages: {},
-    userRoles: []
+    userRoles: [],
+    workbookLocked: false
   };
 
   var PubSub = /*#__PURE__*/function () {
@@ -38115,14 +38131,16 @@
    * and override user roles for testing sign-off functionality.
    *
    * In the browser console, run:
-   *   - enableSignOffDebugging()   // Allows sign-off in Draft status
-   *   - disableSignOffDebugging()  // Restores normal Draft status requirement
-   *   - setSignOffRole('producer') // Show only Producer sign-off button
-   *   - setSignOffRole('advisor')  // Show only Planning Advisor sign-off button
-   *   - setSignOffRole('both')     // Show both sign-off buttons
-   *   - setSignOffRole('none')     // Hide all sign-off buttons
-   *   - resetSignOffRole()         // Restore actual user roles
-   *   - getSignOffDebugStatus()    // Display current debug settings
+   *   - enableSignOffDebugging()      // Allows sign-off in Draft status
+   *   - disableSignOffDebugging()     // Restores normal Draft status requirement
+   *   - enableClearSignOffDebugging() // Allows clearing sign-off even when both have signed
+   *   - disableClearSignOffDebugging()// Restores normal clear sign-off restriction
+   *   - setSignOffRole('producer')    // Show only Producer sign-off button
+   *   - setSignOffRole('advisor')     // Show only Planning Advisor sign-off button
+   *   - setSignOffRole('both')        // Show both sign-off buttons
+   *   - setSignOffRole('none')        // Hide all sign-off buttons
+   *   - resetSignOffRole()            // Restore actual user roles
+   *   - getSignOffDebugStatus()       // Display current debug settings
    */
   const logger$8 = Logger('components/WorkbookSignOffButtons');
   // Convert string values to integers for API
@@ -38130,6 +38148,7 @@
   const NO_INT = parseInt(NO_VALUE, 10); // 100000001
   // Debug mode flags
   let debugModeEnabled = false;
+  let debugClearSignOffEnabled = false;
   let debugRoleOverride = null;
   // Enable debug mode - allows sign-off in Draft status
   window.enableSignOffDebugging = () => {
@@ -38153,6 +38172,34 @@
           message: '🐛 DEBUG MODE DISABLED: Draft status requirement restored for sign-off',
       });
       console.log('✅ Sign-off debugging disabled. Draft status requirement is now enforced.');
+      // Trigger re-render of all sign-off button instances
+      document.querySelectorAll('workbook-sign-off-buttons').forEach((el) => {
+          var _a;
+          (_a = el.requestUpdate) === null || _a === void 0 ? void 0 : _a.call(el);
+      });
+  };
+  // Enable clear sign-off debug mode - allows clearing sign-off even when both have signed
+  window.enableClearSignOffDebugging = () => {
+      debugClearSignOffEnabled = true;
+      logger$8.info({
+          fn: 'enableClearSignOffDebugging',
+          message: '🐛 DEBUG MODE ENABLED: Clear Sign-Off will be enabled even when both PA and Producer have signed',
+      });
+      console.log('✅ Clear Sign-Off debugging enabled. You can now clear sign-off even when both have signed.');
+      // Trigger re-render of all sign-off button instances
+      document.querySelectorAll('workbook-sign-off-buttons').forEach((el) => {
+          var _a;
+          (_a = el.requestUpdate) === null || _a === void 0 ? void 0 : _a.call(el);
+      });
+  };
+  // Disable clear sign-off debug mode - restores normal restriction
+  window.disableClearSignOffDebugging = () => {
+      debugClearSignOffEnabled = false;
+      logger$8.info({
+          fn: 'disableClearSignOffDebugging',
+          message: '🐛 DEBUG MODE DISABLED: Clear Sign-Off restriction restored (disabled when both have signed)',
+      });
+      console.log('✅ Clear Sign-Off debugging disabled. Clear Sign-Off is now disabled when both have signed.');
       // Trigger re-render of all sign-off button instances
       document.querySelectorAll('workbook-sign-off-buttons').forEach((el) => {
           var _a;
@@ -38198,14 +38245,18 @@
   window.getSignOffDebugStatus = () => {
       const status = {
           statusBypassEnabled: debugModeEnabled,
+          clearSignOffEnabled: debugClearSignOffEnabled,
           roleOverride: debugRoleOverride || 'none (using actual roles)',
       };
       console.log('🐛 Sign-off Debug Status:');
       console.log(`  - Draft status bypass: ${status.statusBypassEnabled ? '✅ ENABLED' : '❌ DISABLED'}`);
+      console.log(`  - Clear Sign-Off bypass: ${status.clearSignOffEnabled ? '✅ ENABLED' : '❌ DISABLED'}`);
       console.log(`  - Role override: ${status.roleOverride}`);
       console.log('\nAvailable debug commands:');
       console.log('  - enableSignOffDebugging()');
       console.log('  - disableSignOffDebugging()');
+      console.log('  - enableClearSignOffDebugging()');
+      console.log('  - disableClearSignOffDebugging()');
       console.log('  - setSignOffRole("producer" | "advisor" | "both" | "none")');
       console.log('  - resetSignOffRole()');
       console.log('  - getSignOffDebugStatus()');
@@ -38329,8 +38380,18 @@
        * Enable cancel sign-off only for:
        * - PA Signed (for the PA)
        * - UNLESS both PA and Producer have signed (then disable Clear Sign-Off)
+       *   (can be bypassed with debug mode)
        */
       canPACancelSignOff() {
+          // In debug mode, allow clearing sign-off even when both have signed
+          if (debugClearSignOffEnabled && this.paSigned) {
+              logger$8.info({
+                  fn: 'canPACancelSignOff',
+                  message: '🐛 DEBUG MODE: Allowing PA to clear sign-off even when both have signed',
+                  data: { paSigned: this.paSigned, producerSigned: this.producerSigned },
+              });
+              return true;
+          }
           // If both PA and Producer have signed, disable Clear Sign-Off
           if (this.paSigned && this.producerSigned) {
               return false;
@@ -38373,8 +38434,18 @@
        * Enable cancel sign-off only for:
        * - Producer Signed (for the Producer)
        * - UNLESS both PA and Producer have signed (then disable Clear Sign-Off)
+       *   (can be bypassed with debug mode)
        */
       canProducerCancelSignOff() {
+          // In debug mode, allow clearing sign-off even when both have signed
+          if (debugClearSignOffEnabled && this.producerSigned) {
+              logger$8.info({
+                  fn: 'canProducerCancelSignOff',
+                  message: '🐛 DEBUG MODE: Allowing Producer to clear sign-off even when both have signed',
+                  data: { paSigned: this.paSigned, producerSigned: this.producerSigned },
+              });
+              return true;
+          }
           // If both PA and Producer have signed, disable Clear Sign-Off
           if (this.paSigned && this.producerSigned) {
               return false;
@@ -38388,6 +38459,10 @@
           if (this.paSigned) {
               // If both have signed, show different message
               if (this.producerSigned) {
+                  // In debug mode, show debug message
+                  if (debugClearSignOffEnabled) {
+                      return '🐛 DEBUG MODE: Clear Sign-Off restriction is bypassed';
+                  }
                   return 'Cannot clear sign-off when both Planning Advisor and Producer have signed.';
               }
               return 'You have already signed. Click to cancel your sign-off.';
@@ -38421,6 +38496,10 @@
           if (this.producerSigned) {
               // If both have signed, show different message
               if (this.paSigned) {
+                  // In debug mode, show debug message
+                  if (debugClearSignOffEnabled) {
+                      return '🐛 DEBUG MODE: Clear Sign-Off restriction is bypassed';
+                  }
                   return 'Cannot clear sign-off when both Planning Advisor and Producer have signed.';
               }
               return 'You have already signed. Click to cancel your sign-off.';
@@ -38491,11 +38570,32 @@
               else {
                   this.producerSigned = !currentlySigned;
               }
+              // CRITICAL: Update the cached workbook data to prevent stale state
+              // This ensures that when navigating away and back, the correct state is loaded
+              const workbookData = getWorkbookData();
+              if (workbookData) {
+                  workbookData[fieldName] = newValue;
+                  logger$8.info({
+                      fn: 'handleSignOff',
+                      message: `Updated cached workbook data for ${fieldName}`,
+                      data: { fieldName, newValue },
+                  });
+              }
               logger$8.info({
                   fn: 'handleSignOff',
                   message: `Successfully updated ${roleType} sign-off`,
                   data: { newSigned: !currentlySigned },
               });
+              // Dispatch custom event to notify other components that sign-off status changed
+              this.dispatchEvent(new CustomEvent('sign-off-changed', {
+                  bubbles: true,
+                  composed: true,
+                  detail: {
+                      roleType,
+                      fieldName,
+                      signed: !currentlySigned,
+                  },
+              }));
           }
           catch (error) {
               logger$8.error({
@@ -42935,6 +43035,28 @@
     font-family: var(--body-font);
   }
 
+  .card-with-lock {
+    position: relative;
+  }
+
+  .workbook-lock-indicator {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    z-index: 10;
+  }
+
+  .lock-icon {
+    font-size: 1.5rem;
+    color: var(--sl-color-warning-600);
+    cursor: help;
+    transition: color 0.2s ease;
+  }
+
+  .lock-icon:hover {
+    color: var(--sl-color-warning-700);
+  }
+
   .nav {
     display: flex;
     flex-direction: column;
@@ -43285,6 +43407,7 @@
           this.isLoadingResponses = false;
           this.questionnaireStoreLoaded = false;
           this.questionsAndResponsesLoaded = false;
+          this.workbookLocked = false;
           this.isNavigating = false; // Flag to prevent tab change interference
           this.activeContent = {
               title: 'Introduction to the Environmental Farm Plan (EFP)',
@@ -43300,6 +43423,15 @@
           this.multilineTextSaveStatus = new Map();
           // Multiline text character counts (questionId -> character count)
           this.multilineTextCharCounts = new Map();
+          // Handle sign-off changed event
+          this.handleSignOffChanged = (event) => {
+              logger$4.info({
+                  message: 'Sign-off changed, updating workbook lock status',
+                  data: event.detail,
+              });
+              // Update workbook lock status when sign-off changes
+              this.updateWorkbookLockStatus();
+          };
       }
       connectedCallback() {
           super.connectedCallback();
@@ -43308,9 +43440,15 @@
           this.updateQuestionnaireStoreStatus();
           // Set up periodic check for questionnaire store loading
           this.setupQuestionnaireStoreWatcher();
+          // Check and update workbook lock status
+          this.updateWorkbookLockStatus();
+          // Listen for sign-off changes to update lock status
+          this.addEventListener('sign-off-changed', this.handleSignOffChanged);
       }
       disconnectedCallback() {
           super.disconnectedCallback();
+          // Remove event listener
+          this.removeEventListener('sign-off-changed', this.handleSignOffChanged);
           // Clear all pending debounce timers
           this.responseSaveDebounceTimers.forEach((timer) => {
               clearTimeout(timer);
@@ -43348,6 +43486,29 @@
           setTimeout(() => {
               clearInterval(checkInterval);
           }, 30000);
+      }
+      // Check if workbook is locked based on sign-offs
+      isWorkbookLocked() {
+          const workbookData = getWorkbookData();
+          if (!workbookData)
+              return false;
+          const YES_INT = parseInt(YES_VALUE, 10); // 100000000
+          // Workbook is locked if either PA or Producer has signed off
+          const paSigned = workbookData.quartech_pasigned === YES_INT;
+          const producerSigned = workbookData.quartech_producersigned === YES_INT;
+          return paSigned || producerSigned;
+      }
+      // Update workbook lock status in component state and store
+      updateWorkbookLockStatus() {
+          const isLocked = this.isWorkbookLocked();
+          // Update component state
+          this.workbookLocked = isLocked;
+          // Update store
+          store.dispatch('setWorkbookLocked', { locked: isLocked });
+          logger$4.info({
+              message: 'Updated workbook lock status',
+              data: { workbookLocked: isLocked },
+          });
       }
       get sections() {
           return [
@@ -43572,6 +43733,7 @@
           <div class="section-not-applicable">
             <sl-checkbox
               ?checked=${isSkipped}
+              ?disabled=${this.workbookLocked}
               @sl-change=${this.handleChapterSkippedChange}>
               This section does not apply to this EFP.
             </sl-checkbox>
@@ -43580,6 +43742,41 @@
               }
           }
           return '';
+      }
+      // Render lock icon with tooltip
+      renderLockIcon() {
+          if (!this.workbookLocked) {
+              return '';
+          }
+          // Determine the tooltip message based on which sign-off exists
+          const workbookData = getWorkbookData();
+          const YES_INT = parseInt(YES_VALUE, 10);
+          let tooltipMessage = 'This workbook is locked because a Producer or Planning Advisor has signed off.';
+          if (workbookData) {
+              const paSigned = workbookData.quartech_pasigned === YES_INT;
+              const producerSigned = workbookData.quartech_producersigned === YES_INT;
+              if (paSigned && producerSigned) {
+                  tooltipMessage = 'This workbook is locked because both the Producer and Planning Advisor have signed off.';
+              }
+              else if (paSigned) {
+                  tooltipMessage = 'This workbook is locked because the Planning Advisor has signed off.';
+              }
+              else if (producerSigned) {
+                  tooltipMessage = 'This workbook is locked because the Producer has signed off.';
+              }
+          }
+          return x `
+      <div class="workbook-lock-indicator">
+        <sl-tooltip placement="left" style="--max-width: 300px;">
+          <div slot="content">${tooltipMessage}</div>
+          <sl-icon
+            name="lock-fill"
+            class="lock-icon"
+            aria-label="Workbook locked"
+          ></sl-icon>
+        </sl-tooltip>
+      </div>
+    `;
       }
       // Check if the current chapter should be marked as skipped
       isChapterSkipped() {
@@ -43596,9 +43793,14 @@
               return ((_a = entry === null || entry === void 0 ? void 0 : entry.response) === null || _a === void 0 ? void 0 : _a.quartech_chapterskipped) === 100000000;
           });
       }
-      // Check if a specific question is in a skipped chapter
+      // Check if a specific question is in a skipped chapter or if workbook is locked
       isQuestionDisabled(questionId) {
           var _a;
+          // Check if workbook is locked (takes precedence)
+          if (this.workbookLocked) {
+              return true;
+          }
+          // Check if question is in a skipped chapter
           const entry = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.get(questionId);
           return ((_a = entry === null || entry === void 0 ? void 0 : entry.response) === null || _a === void 0 ? void 0 : _a.quartech_chapterskipped) === 100000000;
       }
@@ -45543,7 +45745,8 @@
             @continue-clicked=${this.handleNavigationContinue}
           ></navigation-buttons>
 
-          <div class="card">
+          <div class="card card-with-lock">
+            ${this.renderLockIcon()}
             <efp-breadcrumbs
               .currentStep=${this.flatSteps[this.currentStepIndex]}
               .currentSection=${this.sections[this.currentSectionIndex]}
@@ -45598,6 +45801,9 @@
   __decorate([
       n$4({ type: Boolean, attribute: false })
   ], EFPEntryForm.prototype, "questionsAndResponsesLoaded", void 0);
+  __decorate([
+      n$4({ type: Boolean, attribute: false })
+  ], EFPEntryForm.prototype, "workbookLocked", void 0);
   __decorate([
       n$4({ type: Object })
   ], EFPEntryForm.prototype, "activeContent", void 0);
@@ -46022,7 +46228,7 @@
       };
     };
     // @ts-ignore
-    POWERPOD.version = '4.5.4';
+    POWERPOD.version = '4.5.6';
     // @ts-ignore
     window.powerpod = POWERPOD;
   }

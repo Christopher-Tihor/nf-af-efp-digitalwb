@@ -18,9 +18,10 @@ import './EFPBreadcrumbs';
 import './WorkbookSignOffButtons';
 import './ActionPlanTable';
 import WorkbookResponseHelper from '../common/workbookResponseHelper.js';
-import { getWorkbookId } from '../common/workbookUtils.js';
-import { POWERPOD } from '../common/constants.js';
+import { getWorkbookId, getWorkbookData } from '../common/workbookUtils.js';
+import { POWERPOD, YES_VALUE } from '../common/constants.js';
 import { Logger } from '../common/logger.js';
+import store from '../store/index.js';
 import {
   getQuestionnaireFromStore,
   getChapterFromStore,
@@ -67,6 +68,7 @@ export class EFPEntryForm extends LitElement {
     false;
   @property({ type: Boolean, attribute: false }) questionsAndResponsesLoaded =
     false;
+  @property({ type: Boolean, attribute: false }) workbookLocked = false;
   private isNavigating = false; // Flag to prevent tab change interference
   @property({ type: Object }) activeContent: EFPActiveContent = {
     title: 'Introduction to the Environmental Farm Plan (EFP)',
@@ -100,10 +102,19 @@ export class EFPEntryForm extends LitElement {
 
     // Set up periodic check for questionnaire store loading
     this.setupQuestionnaireStoreWatcher();
+
+    // Check and update workbook lock status
+    this.updateWorkbookLockStatus();
+
+    // Listen for sign-off changes to update lock status
+    this.addEventListener('sign-off-changed', this.handleSignOffChanged as EventListener);
   }
 
   disconnectedCallback() {
     super.disconnectedCallback();
+
+    // Remove event listener
+    this.removeEventListener('sign-off-changed', this.handleSignOffChanged as EventListener);
 
     // Clear all pending debounce timers
     this.responseSaveDebounceTimers.forEach((timer) => {
@@ -117,6 +128,17 @@ export class EFPEntryForm extends LitElement {
       message: 'EFPEntryForm disconnected, cleared pending timers',
     });
   }
+
+  // Handle sign-off changed event
+  private handleSignOffChanged = (event: CustomEvent) => {
+    logger.info({
+      message: 'Sign-off changed, updating workbook lock status',
+      data: event.detail,
+    });
+
+    // Update workbook lock status when sign-off changes
+    this.updateWorkbookLockStatus();
+  };
 
   // Update the reactive property based on store status
   private updateQuestionnaireStoreStatus() {
@@ -147,6 +169,36 @@ export class EFPEntryForm extends LitElement {
     setTimeout(() => {
       clearInterval(checkInterval);
     }, 30000);
+  }
+
+  // Check if workbook is locked based on sign-offs
+  private isWorkbookLocked(): boolean {
+    const workbookData = getWorkbookData();
+    if (!workbookData) return false;
+
+    const YES_INT = parseInt(YES_VALUE, 10); // 100000000
+
+    // Workbook is locked if either PA or Producer has signed off
+    const paSigned = workbookData.quartech_pasigned === YES_INT;
+    const producerSigned = workbookData.quartech_producersigned === YES_INT;
+
+    return paSigned || producerSigned;
+  }
+
+  // Update workbook lock status in component state and store
+  private updateWorkbookLockStatus() {
+    const isLocked = this.isWorkbookLocked();
+
+    // Update component state
+    this.workbookLocked = isLocked;
+
+    // Update store
+    store.dispatch('setWorkbookLocked', { locked: isLocked });
+
+    logger.info({
+      message: 'Updated workbook lock status',
+      data: { workbookLocked: isLocked },
+    });
   }
 
   static styles = efpEntryFormStyles;
@@ -408,6 +460,7 @@ export class EFPEntryForm extends LitElement {
           <div class="section-not-applicable">
             <sl-checkbox
               ?checked=${isSkipped}
+              ?disabled=${this.workbookLocked}
               @sl-change=${this.handleChapterSkippedChange}>
               This section does not apply to this EFP.
             </sl-checkbox>
@@ -416,6 +469,45 @@ export class EFPEntryForm extends LitElement {
       }
     }
     return '';
+  }
+
+  // Render lock icon with tooltip
+  private renderLockIcon() {
+    if (!this.workbookLocked) {
+      return '';
+    }
+
+    // Determine the tooltip message based on which sign-off exists
+    const workbookData = getWorkbookData();
+    const YES_INT = parseInt(YES_VALUE, 10);
+
+    let tooltipMessage = 'This workbook is locked because a Producer or Planning Advisor has signed off.';
+
+    if (workbookData) {
+      const paSigned = workbookData.quartech_pasigned === YES_INT;
+      const producerSigned = workbookData.quartech_producersigned === YES_INT;
+
+      if (paSigned && producerSigned) {
+        tooltipMessage = 'This workbook is locked because both the Producer and Planning Advisor have signed off.';
+      } else if (paSigned) {
+        tooltipMessage = 'This workbook is locked because the Planning Advisor has signed off.';
+      } else if (producerSigned) {
+        tooltipMessage = 'This workbook is locked because the Producer has signed off.';
+      }
+    }
+
+    return html`
+      <div class="workbook-lock-indicator">
+        <sl-tooltip placement="left" style="--max-width: 300px;">
+          <div slot="content">${tooltipMessage}</div>
+          <sl-icon
+            name="lock-fill"
+            class="lock-icon"
+            aria-label="Workbook locked"
+          ></sl-icon>
+        </sl-tooltip>
+      </div>
+    `;
   }
 
   // Check if the current chapter should be marked as skipped
@@ -433,8 +525,14 @@ export class EFPEntryForm extends LitElement {
     });
   }
 
-  // Check if a specific question is in a skipped chapter
+  // Check if a specific question is in a skipped chapter or if workbook is locked
   private isQuestionDisabled(questionId: string): boolean {
+    // Check if workbook is locked (takes precedence)
+    if (this.workbookLocked) {
+      return true;
+    }
+
+    // Check if question is in a skipped chapter
     const entry = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.get(questionId);
     return entry?.response?.quartech_chapterskipped === 100000000;
   }
@@ -2857,7 +2955,8 @@ export class EFPEntryForm extends LitElement {
             @continue-clicked=${this.handleNavigationContinue}
           ></navigation-buttons>
 
-          <div class="card">
+          <div class="card card-with-lock">
+            ${this.renderLockIcon()}
             <efp-breadcrumbs
               .currentStep=${this.flatSteps[this.currentStepIndex]}
               .currentSection=${this.sections[this.currentSectionIndex]}

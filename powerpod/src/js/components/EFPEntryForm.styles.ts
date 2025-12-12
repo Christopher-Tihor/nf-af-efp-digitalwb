@@ -94,6 +94,28 @@ export const efpEntryFormStyles = css`
     font-family: var(--body-font);
   }
 
+  .card-with-lock {
+    position: relative;
+  }
+
+  .workbook-lock-indicator {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    z-index: 10;
+  }
+
+  .lock-icon {
+    font-size: 1.5rem;
+    color: var(--sl-color-warning-600);
+    cursor: help;
+    transition: color 0.2s ease;
+  }
+
+  .lock-icon:hover {
+    color: var(--sl-color-warning-700);
+  }
+
   .nav {
     display: flex;
     flex-direction: column;

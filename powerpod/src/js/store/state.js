@@ -4,5 +4,6 @@ export default {
   fieldOrder: [],
   questionnaire: {},
   portalPages: {},
-  userRoles: []
+  userRoles: [],
+  workbookLocked: false
 };

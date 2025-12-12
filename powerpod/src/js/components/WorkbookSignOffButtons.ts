@@ -8,14 +8,16 @@
  * and override user roles for testing sign-off functionality.
  *
  * In the browser console, run:
- *   - enableSignOffDebugging()   // Allows sign-off in Draft status
- *   - disableSignOffDebugging()  // Restores normal Draft status requirement
- *   - setSignOffRole('producer') // Show only Producer sign-off button
- *   - setSignOffRole('advisor')  // Show only Planning Advisor sign-off button
- *   - setSignOffRole('both')     // Show both sign-off buttons
- *   - setSignOffRole('none')     // Hide all sign-off buttons
- *   - resetSignOffRole()         // Restore actual user roles
- *   - getSignOffDebugStatus()    // Display current debug settings
+ *   - enableSignOffDebugging()      // Allows sign-off in Draft status
+ *   - disableSignOffDebugging()     // Restores normal Draft status requirement
+ *   - enableClearSignOffDebugging() // Allows clearing sign-off even when both have signed
+ *   - disableClearSignOffDebugging()// Restores normal clear sign-off restriction
+ *   - setSignOffRole('producer')    // Show only Producer sign-off button
+ *   - setSignOffRole('advisor')     // Show only Planning Advisor sign-off button
+ *   - setSignOffRole('both')        // Show both sign-off buttons
+ *   - setSignOffRole('none')        // Hide all sign-off buttons
+ *   - resetSignOffRole()            // Restore actual user roles
+ *   - getSignOffDebugStatus()       // Display current debug settings
  */
 
 import { LitElement, html, css } from 'lit';
@@ -34,6 +36,7 @@ const NO_INT = parseInt(NO_VALUE, 10);   // 100000001
 
 // Debug mode flags
 let debugModeEnabled = false;
+let debugClearSignOffEnabled = false;
 let debugRoleOverride: 'producer' | 'advisor' | 'both' | 'none' | null = null;
 
 // Expose debug functions to window for console access
@@ -41,6 +44,8 @@ declare global {
   interface Window {
     enableSignOffDebugging: () => void;
     disableSignOffDebugging: () => void;
+    enableClearSignOffDebugging: () => void;
+    disableClearSignOffDebugging: () => void;
     setSignOffRole: (role: 'producer' | 'advisor' | 'both' | 'none') => void;
     resetSignOffRole: () => void;
     getSignOffDebugStatus: () => void;
@@ -69,6 +74,34 @@ window.disableSignOffDebugging = () => {
     message: '🐛 DEBUG MODE DISABLED: Draft status requirement restored for sign-off',
   });
   console.log('✅ Sign-off debugging disabled. Draft status requirement is now enforced.');
+  // Trigger re-render of all sign-off button instances
+  document.querySelectorAll('workbook-sign-off-buttons').forEach((el: any) => {
+    el.requestUpdate?.();
+  });
+};
+
+// Enable clear sign-off debug mode - allows clearing sign-off even when both have signed
+window.enableClearSignOffDebugging = () => {
+  debugClearSignOffEnabled = true;
+  logger.info({
+    fn: 'enableClearSignOffDebugging',
+    message: '🐛 DEBUG MODE ENABLED: Clear Sign-Off will be enabled even when both PA and Producer have signed',
+  });
+  console.log('✅ Clear Sign-Off debugging enabled. You can now clear sign-off even when both have signed.');
+  // Trigger re-render of all sign-off button instances
+  document.querySelectorAll('workbook-sign-off-buttons').forEach((el: any) => {
+    el.requestUpdate?.();
+  });
+};
+
+// Disable clear sign-off debug mode - restores normal restriction
+window.disableClearSignOffDebugging = () => {
+  debugClearSignOffEnabled = false;
+  logger.info({
+    fn: 'disableClearSignOffDebugging',
+    message: '🐛 DEBUG MODE DISABLED: Clear Sign-Off restriction restored (disabled when both have signed)',
+  });
+  console.log('✅ Clear Sign-Off debugging disabled. Clear Sign-Off is now disabled when both have signed.');
   // Trigger re-render of all sign-off button instances
   document.querySelectorAll('workbook-sign-off-buttons').forEach((el: any) => {
     el.requestUpdate?.();
@@ -118,15 +151,19 @@ window.resetSignOffRole = () => {
 window.getSignOffDebugStatus = () => {
   const status = {
     statusBypassEnabled: debugModeEnabled,
+    clearSignOffEnabled: debugClearSignOffEnabled,
     roleOverride: debugRoleOverride || 'none (using actual roles)',
   };
 
   console.log('🐛 Sign-off Debug Status:');
   console.log(`  - Draft status bypass: ${status.statusBypassEnabled ? '✅ ENABLED' : '❌ DISABLED'}`);
+  console.log(`  - Clear Sign-Off bypass: ${status.clearSignOffEnabled ? '✅ ENABLED' : '❌ DISABLED'}`);
   console.log(`  - Role override: ${status.roleOverride}`);
   console.log('\nAvailable debug commands:');
   console.log('  - enableSignOffDebugging()');
   console.log('  - disableSignOffDebugging()');
+  console.log('  - enableClearSignOffDebugging()');
+  console.log('  - disableClearSignOffDebugging()');
   console.log('  - setSignOffRole("producer" | "advisor" | "both" | "none")');
   console.log('  - resetSignOffRole()');
   console.log('  - getSignOffDebugStatus()');
@@ -321,8 +358,19 @@ export class WorkbookSignOffButtons extends LitElement {
    * Enable cancel sign-off only for:
    * - PA Signed (for the PA)
    * - UNLESS both PA and Producer have signed (then disable Clear Sign-Off)
+   *   (can be bypassed with debug mode)
    */
   private canPACancelSignOff(): boolean {
+    // In debug mode, allow clearing sign-off even when both have signed
+    if (debugClearSignOffEnabled && this.paSigned) {
+      logger.info({
+        fn: 'canPACancelSignOff',
+        message: '🐛 DEBUG MODE: Allowing PA to clear sign-off even when both have signed',
+        data: { paSigned: this.paSigned, producerSigned: this.producerSigned },
+      });
+      return true;
+    }
+
     // If both PA and Producer have signed, disable Clear Sign-Off
     if (this.paSigned && this.producerSigned) {
       return false;
@@ -369,8 +417,19 @@ export class WorkbookSignOffButtons extends LitElement {
    * Enable cancel sign-off only for:
    * - Producer Signed (for the Producer)
    * - UNLESS both PA and Producer have signed (then disable Clear Sign-Off)
+   *   (can be bypassed with debug mode)
    */
   private canProducerCancelSignOff(): boolean {
+    // In debug mode, allow clearing sign-off even when both have signed
+    if (debugClearSignOffEnabled && this.producerSigned) {
+      logger.info({
+        fn: 'canProducerCancelSignOff',
+        message: '🐛 DEBUG MODE: Allowing Producer to clear sign-off even when both have signed',
+        data: { paSigned: this.paSigned, producerSigned: this.producerSigned },
+      });
+      return true;
+    }
+
     // If both PA and Producer have signed, disable Clear Sign-Off
     if (this.paSigned && this.producerSigned) {
       return false;
@@ -385,6 +444,10 @@ export class WorkbookSignOffButtons extends LitElement {
     if (this.paSigned) {
       // If both have signed, show different message
       if (this.producerSigned) {
+        // In debug mode, show debug message
+        if (debugClearSignOffEnabled) {
+          return '🐛 DEBUG MODE: Clear Sign-Off restriction is bypassed';
+        }
         return 'Cannot clear sign-off when both Planning Advisor and Producer have signed.';
       }
       return 'You have already signed. Click to cancel your sign-off.';
@@ -426,6 +489,10 @@ export class WorkbookSignOffButtons extends LitElement {
     if (this.producerSigned) {
       // If both have signed, show different message
       if (this.paSigned) {
+        // In debug mode, show debug message
+        if (debugClearSignOffEnabled) {
+          return '🐛 DEBUG MODE: Clear Sign-Off restriction is bypassed';
+        }
         return 'Cannot clear sign-off when both Planning Advisor and Producer have signed.';
       }
       return 'You have already signed. Click to cancel your sign-off.';
@@ -513,11 +580,34 @@ export class WorkbookSignOffButtons extends LitElement {
         this.producerSigned = !currentlySigned;
       }
 
+      // CRITICAL: Update the cached workbook data to prevent stale state
+      // This ensures that when navigating away and back, the correct state is loaded
+      const workbookData = getWorkbookData();
+      if (workbookData) {
+        (workbookData as any)[fieldName] = newValue;
+        logger.info({
+          fn: 'handleSignOff',
+          message: `Updated cached workbook data for ${fieldName}`,
+          data: { fieldName, newValue },
+        });
+      }
+
       logger.info({
         fn: 'handleSignOff',
         message: `Successfully updated ${roleType} sign-off`,
         data: { newSigned: !currentlySigned },
       });
+
+      // Dispatch custom event to notify other components that sign-off status changed
+      this.dispatchEvent(new CustomEvent('sign-off-changed', {
+        bubbles: true,
+        composed: true,
+        detail: {
+          roleType,
+          fieldName,
+          signed: !currentlySigned,
+        },
+      }));
 
     } catch (error) {
       logger.error({

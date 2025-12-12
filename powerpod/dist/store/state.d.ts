@@ -5,5 +5,6 @@ declare namespace _default {
     let questionnaire: {};
     let portalPages: {};
     let userRoles: never[];
+    let workbookLocked: boolean;
 }
 export default _default;

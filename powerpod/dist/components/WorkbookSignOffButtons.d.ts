@@ -8,20 +8,24 @@
  * and override user roles for testing sign-off functionality.
  *
  * In the browser console, run:
- *   - enableSignOffDebugging()   // Allows sign-off in Draft status
- *   - disableSignOffDebugging()  // Restores normal Draft status requirement
- *   - setSignOffRole('producer') // Show only Producer sign-off button
- *   - setSignOffRole('advisor')  // Show only Planning Advisor sign-off button
- *   - setSignOffRole('both')     // Show both sign-off buttons
- *   - setSignOffRole('none')     // Hide all sign-off buttons
- *   - resetSignOffRole()         // Restore actual user roles
- *   - getSignOffDebugStatus()    // Display current debug settings
+ *   - enableSignOffDebugging()      // Allows sign-off in Draft status
+ *   - disableSignOffDebugging()     // Restores normal Draft status requirement
+ *   - enableClearSignOffDebugging() // Allows clearing sign-off even when both have signed
+ *   - disableClearSignOffDebugging()// Restores normal clear sign-off restriction
+ *   - setSignOffRole('producer')    // Show only Producer sign-off button
+ *   - setSignOffRole('advisor')     // Show only Planning Advisor sign-off button
+ *   - setSignOffRole('both')        // Show both sign-off buttons
+ *   - setSignOffRole('none')        // Hide all sign-off buttons
+ *   - resetSignOffRole()            // Restore actual user roles
+ *   - getSignOffDebugStatus()       // Display current debug settings
  */
 import { LitElement } from 'lit';
 declare global {
     interface Window {
         enableSignOffDebugging: () => void;
         disableSignOffDebugging: () => void;
+        enableClearSignOffDebugging: () => void;
+        disableClearSignOffDebugging: () => void;
         setSignOffRole: (role: 'producer' | 'advisor' | 'both' | 'none') => void;
         resetSignOffRole: () => void;
         getSignOffDebugStatus: () => void;
@@ -56,6 +60,7 @@ export declare class WorkbookSignOffButtons extends LitElement {
      * Enable cancel sign-off only for:
      * - PA Signed (for the PA)
      * - UNLESS both PA and Producer have signed (then disable Clear Sign-Off)
+     *   (can be bypassed with debug mode)
      */
     private canPACancelSignOff;
     /**
@@ -76,6 +81,7 @@ export declare class WorkbookSignOffButtons extends LitElement {
      * Enable cancel sign-off only for:
      * - Producer Signed (for the Producer)
      * - UNLESS both PA and Producer have signed (then disable Clear Sign-Off)
+     *   (can be bypassed with debug mode)
      */
     private canProducerCancelSignOff;
     /**

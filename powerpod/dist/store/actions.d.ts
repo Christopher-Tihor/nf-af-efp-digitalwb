@@ -10,5 +10,6 @@ declare namespace _default {
     function updateQuestionnaireQuestion(context: any, payload: any): void;
     function setPortalPageData(context: any, payload: any): void;
     function setUserRoles(context: any, payload: any): void;
+    function setWorkbookLocked(context: any, payload: any): void;
 }
 export default _default;

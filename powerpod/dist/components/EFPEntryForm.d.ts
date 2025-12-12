@@ -26,6 +26,7 @@ export declare class EFPEntryForm extends LitElement {
     isLoadingResponses: boolean;
     questionnaireStoreLoaded: boolean;
     questionsAndResponsesLoaded: boolean;
+    workbookLocked: boolean;
     private isNavigating;
     activeContent: EFPActiveContent;
     tabGroupEl: HTMLElement & {
@@ -38,13 +39,17 @@ export declare class EFPEntryForm extends LitElement {
     private multilineTextCharCounts;
     connectedCallback(): void;
     disconnectedCallback(): void;
+    private handleSignOffChanged;
     private updateQuestionnaireStoreStatus;
     private setupQuestionnaireStoreWatcher;
+    private isWorkbookLocked;
+    private updateWorkbookLockStatus;
     static styles: import("lit").CSSResult;
     private get sections();
     private renderQuestion;
     private renderQuestionInput;
     private renderSectionNotApplicableCheckbox;
+    private renderLockIcon;
     private isChapterSkipped;
     private isQuestionDisabled;
     private isChapterSkippedById;
