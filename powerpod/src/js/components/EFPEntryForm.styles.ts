@@ -140,8 +140,6 @@ export const efpEntryFormStyles = css`
   }
 
   .question-container.question-disabled {
-    opacity: 0.6;
-    background-color: var(--sl-color-neutral-100);
     pointer-events: none;
     user-select: none;
   }
