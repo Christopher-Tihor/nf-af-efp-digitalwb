@@ -1673,13 +1673,125 @@ export class EFPEntryForm extends LitElement {
     }
   }
 
+  // Find the next required step (earliest unanswered, non-skipped question)
+  private findNextRequiredStep(): number | null {
+    if (!POWERPOD.workbookQuestionsAndResponses.isLoaded) {
+      logger.warn({
+        message: 'Cannot find next required step: workbook questions and responses not loaded',
+      });
+      return null;
+    }
+
+    const questionnaire = getQuestionnaireFromStore();
+    if (!questionnaire?.chapters?.length) {
+      logger.warn({
+        message: 'Cannot find next required step: questionnaire not loaded',
+      });
+      return null;
+    }
+
+    // Start searching from the beginning to find the earliest required question
+    const startIndex = 0;
+
+    // Iterate through all steps in the My Workbook section (section index 0)
+    for (let i = startIndex; i < this.flatSteps.length; i++) {
+      const step = this.flatSteps[i];
+
+      // Only check steps in My Workbook section
+      if (step.sectionIndex !== 0) {
+        continue;
+      }
+
+      // Skip container steps
+      if (step.isContainer || step.label.startsWith('Section ')) {
+        continue;
+      }
+
+      // Get the chapter ID for this step
+      const chapterId = step.chapterId ||
+                       step.chapterData?.id ||
+                       step.subchapterData?.id;
+
+      if (!chapterId) {
+        continue;
+      }
+
+      // Get all questions for this chapter
+      const questions = this.getQuestionsForCurrentChapter(chapterId);
+
+      // Check if this chapter has any unanswered, non-skipped questions
+      const hasUnansweredRequired = questions.some((question: any) => {
+        const entry = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.get(question.id);
+        const isSkipped = entry?.response?.quartech_chapterskipped === 100000000;
+        const hasResponse = entry?.response?.quartech_response &&
+                           entry.response.quartech_response.trim() !== '';
+
+        // Question is required and unanswered if it's not skipped AND has no response
+        return !isSkipped && !hasResponse;
+      });
+
+      if (hasUnansweredRequired) {
+        logger.info({
+          message: 'Found next required step with unanswered questions',
+          data: {
+            stepIndex: i,
+            stepLabel: step.label,
+            chapterId,
+          },
+        });
+        return i;
+      }
+    }
+
+    logger.info({
+      message: 'No required unanswered questions found after current step',
+    });
+    return null;
+  }
+
   // Navigation event handlers
   private handleNavigationPrevious() {
     this.goToPrevious();
   }
 
   private handleNavigationSkip(event: CustomEvent) {
-    this.currentSectionIndex = event.detail.sectionIndex;
+    // Find the next required question that hasn't been skipped or completed
+    const nextRequiredStepIndex = this.findNextRequiredStep();
+
+    if (nextRequiredStepIndex !== null) {
+      const nextStep = this.flatSteps[nextRequiredStepIndex];
+
+      logger.info({
+        message: 'Navigating to next required step',
+        data: {
+          stepIndex: nextRequiredStepIndex,
+          stepLabel: nextStep.label,
+        },
+      });
+
+      this.isNavigating = true;
+      this.currentStepIndex = nextRequiredStepIndex;
+      this.currentSectionIndex = nextStep.sectionIndex;
+      this.activeContent = { title: nextStep.label, content: nextStep.content };
+      this.updateNavigationState(nextStep.label);
+
+      // Scroll to top of main content to provide visual feedback
+      this.updateComplete.then(() => {
+        const mainContent = this.shadowRoot?.querySelector('main.main-content');
+        if (mainContent) {
+          mainContent.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+
+      setTimeout(() => {
+        this.isNavigating = false;
+      }, 100);
+      this.requestUpdate();
+    } else {
+      logger.info({
+        message: 'No required unanswered questions found',
+      });
+    }
   }
 
   private handleNavigationContinue() {

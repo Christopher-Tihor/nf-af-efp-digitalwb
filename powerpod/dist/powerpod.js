@@ -44833,12 +44833,110 @@
               this.requestUpdate();
           }
       }
+      // Find the next required step (earliest unanswered, non-skipped question)
+      findNextRequiredStep() {
+          var _a, _b, _c;
+          if (!POWERPOD.workbookQuestionsAndResponses.isLoaded) {
+              logger$4.warn({
+                  message: 'Cannot find next required step: workbook questions and responses not loaded',
+              });
+              return null;
+          }
+          const questionnaire = getQuestionnaireFromStore();
+          if (!((_a = questionnaire === null || questionnaire === void 0 ? void 0 : questionnaire.chapters) === null || _a === void 0 ? void 0 : _a.length)) {
+              logger$4.warn({
+                  message: 'Cannot find next required step: questionnaire not loaded',
+              });
+              return null;
+          }
+          // Start searching from the beginning to find the earliest required question
+          const startIndex = 0;
+          // Iterate through all steps in the My Workbook section (section index 0)
+          for (let i = startIndex; i < this.flatSteps.length; i++) {
+              const step = this.flatSteps[i];
+              // Only check steps in My Workbook section
+              if (step.sectionIndex !== 0) {
+                  continue;
+              }
+              // Skip container steps
+              if (step.isContainer || step.label.startsWith('Section ')) {
+                  continue;
+              }
+              // Get the chapter ID for this step
+              const chapterId = step.chapterId ||
+                  ((_b = step.chapterData) === null || _b === void 0 ? void 0 : _b.id) ||
+                  ((_c = step.subchapterData) === null || _c === void 0 ? void 0 : _c.id);
+              if (!chapterId) {
+                  continue;
+              }
+              // Get all questions for this chapter
+              const questions = this.getQuestionsForCurrentChapter(chapterId);
+              // Check if this chapter has any unanswered, non-skipped questions
+              const hasUnansweredRequired = questions.some((question) => {
+                  var _a, _b;
+                  const entry = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.get(question.id);
+                  const isSkipped = ((_a = entry === null || entry === void 0 ? void 0 : entry.response) === null || _a === void 0 ? void 0 : _a.quartech_chapterskipped) === 100000000;
+                  const hasResponse = ((_b = entry === null || entry === void 0 ? void 0 : entry.response) === null || _b === void 0 ? void 0 : _b.quartech_response) &&
+                      entry.response.quartech_response.trim() !== '';
+                  // Question is required and unanswered if it's not skipped AND has no response
+                  return !isSkipped && !hasResponse;
+              });
+              if (hasUnansweredRequired) {
+                  logger$4.info({
+                      message: 'Found next required step with unanswered questions',
+                      data: {
+                          stepIndex: i,
+                          stepLabel: step.label,
+                          chapterId,
+                      },
+                  });
+                  return i;
+              }
+          }
+          logger$4.info({
+              message: 'No required unanswered questions found after current step',
+          });
+          return null;
+      }
       // Navigation event handlers
       handleNavigationPrevious() {
           this.goToPrevious();
       }
       handleNavigationSkip(event) {
-          this.currentSectionIndex = event.detail.sectionIndex;
+          // Find the next required question that hasn't been skipped or completed
+          const nextRequiredStepIndex = this.findNextRequiredStep();
+          if (nextRequiredStepIndex !== null) {
+              const nextStep = this.flatSteps[nextRequiredStepIndex];
+              logger$4.info({
+                  message: 'Navigating to next required step',
+                  data: {
+                      stepIndex: nextRequiredStepIndex,
+                      stepLabel: nextStep.label,
+                  },
+              });
+              this.isNavigating = true;
+              this.currentStepIndex = nextRequiredStepIndex;
+              this.currentSectionIndex = nextStep.sectionIndex;
+              this.activeContent = { title: nextStep.label, content: nextStep.content };
+              this.updateNavigationState(nextStep.label);
+              // Scroll to top of main content to provide visual feedback
+              this.updateComplete.then(() => {
+                  var _a;
+                  const mainContent = (_a = this.shadowRoot) === null || _a === void 0 ? void 0 : _a.querySelector('main.main-content');
+                  if (mainContent) {
+                      mainContent.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }
+              });
+              setTimeout(() => {
+                  this.isNavigating = false;
+              }, 100);
+              this.requestUpdate();
+          }
+          else {
+              logger$4.info({
+                  message: 'No required unanswered questions found',
+              });
+          }
       }
       handleNavigationContinue() {
           // Force a fresh validation check before proceeding

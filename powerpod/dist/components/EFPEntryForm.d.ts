@@ -83,6 +83,7 @@ export declare class EFPEntryForm extends LitElement {
     updateNestedChapterStructure(nestedStructure: any[]): void;
     private get completionPercent();
     private goToNext;
+    private findNextRequiredStep;
     private handleNavigationPrevious;
     private handleNavigationSkip;
     private handleNavigationContinue;
