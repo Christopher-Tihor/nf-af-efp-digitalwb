@@ -1,5 +1,5 @@
 /*!
-* powerpod 4.5.6
+* powerpod 4.5.7
 * https://github.com/bcgov/nr-af-pods/powerpod
 *
 * @license GPLv3 for open source use only
@@ -37430,11 +37430,624 @@
 
   SlTextarea.define("sl-textarea");
 
+  // src/internal/tabbable.ts
+  var computedStyleMap = /* @__PURE__ */ new WeakMap();
+  function getCachedComputedStyle(el) {
+    let computedStyle = computedStyleMap.get(el);
+    if (!computedStyle) {
+      computedStyle = window.getComputedStyle(el, null);
+      computedStyleMap.set(el, computedStyle);
+    }
+    return computedStyle;
+  }
+  function isVisible(el) {
+    if (typeof el.checkVisibility === "function") {
+      return el.checkVisibility({ checkOpacity: false, checkVisibilityCSS: true });
+    }
+    const computedStyle = getCachedComputedStyle(el);
+    return computedStyle.visibility !== "hidden" && computedStyle.display !== "none";
+  }
+  function isOverflowingAndTabbable(el) {
+    const computedStyle = getCachedComputedStyle(el);
+    const { overflowY, overflowX } = computedStyle;
+    if (overflowY === "scroll" || overflowX === "scroll") {
+      return true;
+    }
+    if (overflowY !== "auto" || overflowX !== "auto") {
+      return false;
+    }
+    const isOverflowingY = el.scrollHeight > el.clientHeight;
+    if (isOverflowingY && overflowY === "auto") {
+      return true;
+    }
+    const isOverflowingX = el.scrollWidth > el.clientWidth;
+    if (isOverflowingX && overflowX === "auto") {
+      return true;
+    }
+    return false;
+  }
+  function isTabbable(el) {
+    const tag = el.tagName.toLowerCase();
+    const tabindex = Number(el.getAttribute("tabindex"));
+    const hasTabindex = el.hasAttribute("tabindex");
+    if (hasTabindex && (isNaN(tabindex) || tabindex <= -1)) {
+      return false;
+    }
+    if (el.hasAttribute("disabled")) {
+      return false;
+    }
+    if (el.closest("[inert]")) {
+      return false;
+    }
+    if (tag === "input" && el.getAttribute("type") === "radio" && !el.hasAttribute("checked")) {
+      return false;
+    }
+    if (!isVisible(el)) {
+      return false;
+    }
+    if ((tag === "audio" || tag === "video") && el.hasAttribute("controls")) {
+      return true;
+    }
+    if (el.hasAttribute("tabindex")) {
+      return true;
+    }
+    if (el.hasAttribute("contenteditable") && el.getAttribute("contenteditable") !== "false") {
+      return true;
+    }
+    const isNativelyTabbable = [
+      "button",
+      "input",
+      "select",
+      "textarea",
+      "a",
+      "audio",
+      "video",
+      "summary",
+      "iframe"
+    ].includes(tag);
+    if (isNativelyTabbable) {
+      return true;
+    }
+    return isOverflowingAndTabbable(el);
+  }
+  function getTabbableBoundary(root) {
+    var _a, _b;
+    const tabbableElements = getTabbableElements(root);
+    const start = (_a = tabbableElements[0]) != null ? _a : null;
+    const end = (_b = tabbableElements[tabbableElements.length - 1]) != null ? _b : null;
+    return { start, end };
+  }
+  function getSlottedChildrenOutsideRootElement(slotElement, root) {
+    var _a;
+    return ((_a = slotElement.getRootNode({ composed: true })) == null ? void 0 : _a.host) !== root;
+  }
+  function getTabbableElements(root) {
+    const walkedEls = /* @__PURE__ */ new WeakMap();
+    const tabbableElements = [];
+    function walk(el) {
+      if (el instanceof Element) {
+        if (el.hasAttribute("inert") || el.closest("[inert]")) {
+          return;
+        }
+        if (walkedEls.has(el)) {
+          return;
+        }
+        walkedEls.set(el, true);
+        if (!tabbableElements.includes(el) && isTabbable(el)) {
+          tabbableElements.push(el);
+        }
+        if (el instanceof HTMLSlotElement && getSlottedChildrenOutsideRootElement(el, root)) {
+          el.assignedElements({ flatten: true }).forEach((assignedEl) => {
+            walk(assignedEl);
+          });
+        }
+        if (el.shadowRoot !== null && el.shadowRoot.mode === "open") {
+          walk(el.shadowRoot);
+        }
+      }
+      for (const e of el.children) {
+        walk(e);
+      }
+    }
+    walk(root);
+    return tabbableElements.sort((a, b) => {
+      const aTabindex = Number(a.getAttribute("tabindex")) || 0;
+      const bTabindex = Number(b.getAttribute("tabindex")) || 0;
+      return bTabindex - aTabindex;
+    });
+  }
+
+  // src/internal/active-elements.ts
+  function* activeElements(activeElement = document.activeElement) {
+    if (activeElement === null || activeElement === void 0)
+      return;
+    yield activeElement;
+    if ("shadowRoot" in activeElement && activeElement.shadowRoot && activeElement.shadowRoot.mode !== "closed") {
+      yield* __yieldStar(activeElements(activeElement.shadowRoot.activeElement));
+    }
+  }
+  function getDeepestActiveElement() {
+    return [...activeElements()].pop();
+  }
+
+  // src/internal/modal.ts
+  var activeModals = [];
+  var Modal = class {
+    constructor(element) {
+      this.tabDirection = "forward";
+      this.handleFocusIn = () => {
+        if (!this.isActive())
+          return;
+        this.checkFocus();
+      };
+      this.handleKeyDown = (event) => {
+        var _a;
+        if (event.key !== "Tab" || this.isExternalActivated)
+          return;
+        if (!this.isActive())
+          return;
+        const currentActiveElement = getDeepestActiveElement();
+        this.previousFocus = currentActiveElement;
+        if (this.previousFocus && this.possiblyHasTabbableChildren(this.previousFocus)) {
+          return;
+        }
+        if (event.shiftKey) {
+          this.tabDirection = "backward";
+        } else {
+          this.tabDirection = "forward";
+        }
+        const tabbableElements = getTabbableElements(this.element);
+        let currentFocusIndex = tabbableElements.findIndex((el) => el === currentActiveElement);
+        this.previousFocus = this.currentFocus;
+        const addition = this.tabDirection === "forward" ? 1 : -1;
+        while (true) {
+          if (currentFocusIndex + addition >= tabbableElements.length) {
+            currentFocusIndex = 0;
+          } else if (currentFocusIndex + addition < 0) {
+            currentFocusIndex = tabbableElements.length - 1;
+          } else {
+            currentFocusIndex += addition;
+          }
+          this.previousFocus = this.currentFocus;
+          const nextFocus = (
+            /** @type {HTMLElement} */
+            tabbableElements[currentFocusIndex]
+          );
+          if (this.tabDirection === "backward") {
+            if (this.previousFocus && this.possiblyHasTabbableChildren(this.previousFocus)) {
+              return;
+            }
+          }
+          if (nextFocus && this.possiblyHasTabbableChildren(nextFocus)) {
+            return;
+          }
+          event.preventDefault();
+          this.currentFocus = nextFocus;
+          (_a = this.currentFocus) == null ? void 0 : _a.focus({ preventScroll: false });
+          const allActiveElements = [...activeElements()];
+          if (allActiveElements.includes(this.currentFocus) || !allActiveElements.includes(this.previousFocus)) {
+            break;
+          }
+        }
+        setTimeout(() => this.checkFocus());
+      };
+      this.handleKeyUp = () => {
+        this.tabDirection = "forward";
+      };
+      this.element = element;
+      this.elementsWithTabbableControls = ["iframe"];
+    }
+    /** Activates focus trapping. */
+    activate() {
+      activeModals.push(this.element);
+      document.addEventListener("focusin", this.handleFocusIn);
+      document.addEventListener("keydown", this.handleKeyDown);
+      document.addEventListener("keyup", this.handleKeyUp);
+    }
+    /** Deactivates focus trapping. */
+    deactivate() {
+      activeModals = activeModals.filter((modal) => modal !== this.element);
+      this.currentFocus = null;
+      document.removeEventListener("focusin", this.handleFocusIn);
+      document.removeEventListener("keydown", this.handleKeyDown);
+      document.removeEventListener("keyup", this.handleKeyUp);
+    }
+    /** Determines if this modal element is currently active or not. */
+    isActive() {
+      return activeModals[activeModals.length - 1] === this.element;
+    }
+    /** Activates external modal behavior and temporarily disables focus trapping. */
+    activateExternal() {
+      this.isExternalActivated = true;
+    }
+    /** Deactivates external modal behavior and re-enables focus trapping. */
+    deactivateExternal() {
+      this.isExternalActivated = false;
+    }
+    checkFocus() {
+      if (this.isActive() && !this.isExternalActivated) {
+        const tabbableElements = getTabbableElements(this.element);
+        if (!this.element.matches(":focus-within")) {
+          const start = tabbableElements[0];
+          const end = tabbableElements[tabbableElements.length - 1];
+          const target = this.tabDirection === "forward" ? start : end;
+          if (typeof (target == null ? void 0 : target.focus) === "function") {
+            this.currentFocus = target;
+            target.focus({ preventScroll: false });
+          }
+        }
+      }
+    }
+    possiblyHasTabbableChildren(element) {
+      return this.elementsWithTabbableControls.includes(element.tagName.toLowerCase()) || element.hasAttribute("controls");
+    }
+  };
+
+  // src/components/dialog/dialog.styles.ts
+  var dialog_styles_default = i$4`
+  :host {
+    --width: 31rem;
+    --header-spacing: var(--sl-spacing-large);
+    --body-spacing: var(--sl-spacing-large);
+    --footer-spacing: var(--sl-spacing-large);
+
+    display: contents;
+  }
+
+  .dialog {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: var(--sl-z-index-dialog);
+  }
+
+  .dialog__panel {
+    display: flex;
+    flex-direction: column;
+    z-index: 2;
+    width: var(--width);
+    max-width: calc(100% - var(--sl-spacing-2x-large));
+    max-height: calc(100% - var(--sl-spacing-2x-large));
+    background-color: var(--sl-panel-background-color);
+    border-radius: var(--sl-border-radius-medium);
+    box-shadow: var(--sl-shadow-x-large);
+  }
+
+  .dialog__panel:focus {
+    outline: none;
+  }
+
+  /* Ensure there's enough vertical padding for phones that don't update vh when chrome appears (e.g. iPhone) */
+  @media screen and (max-width: 420px) {
+    .dialog__panel {
+      max-height: 80vh;
+    }
+  }
+
+  .dialog--open .dialog__panel {
+    display: flex;
+    opacity: 1;
+  }
+
+  .dialog__header {
+    flex: 0 0 auto;
+    display: flex;
+  }
+
+  .dialog__title {
+    flex: 1 1 auto;
+    font: inherit;
+    font-size: var(--sl-font-size-large);
+    line-height: var(--sl-line-height-dense);
+    padding: var(--header-spacing);
+    margin: 0;
+  }
+
+  .dialog__header-actions {
+    flex-shrink: 0;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: end;
+    gap: var(--sl-spacing-2x-small);
+    padding: 0 var(--header-spacing);
+  }
+
+  .dialog__header-actions sl-icon-button,
+  .dialog__header-actions ::slotted(sl-icon-button) {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    font-size: var(--sl-font-size-medium);
+  }
+
+  .dialog__body {
+    flex: 1 1 auto;
+    display: block;
+    padding: var(--body-spacing);
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .dialog__footer {
+    flex: 0 0 auto;
+    text-align: right;
+    padding: var(--footer-spacing);
+  }
+
+  .dialog__footer ::slotted(sl-button:not(:first-of-type)) {
+    margin-inline-start: var(--sl-spacing-x-small);
+  }
+
+  .dialog:not(.dialog--has-footer) .dialog__footer {
+    display: none;
+  }
+
+  .dialog__overlay {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background-color: var(--sl-overlay-background-color);
+  }
+
+  @media (forced-colors: active) {
+    .dialog__panel {
+      border: solid 1px var(--sl-color-neutral-0);
+    }
+  }
+`;
+
+  var SlDialog = class extends ShoelaceElement {
+    constructor() {
+      super(...arguments);
+      this.hasSlotController = new HasSlotController(this, "footer");
+      this.localize = new LocalizeController(this);
+      this.modal = new Modal(this);
+      this.open = false;
+      this.label = "";
+      this.noHeader = false;
+      this.handleDocumentKeyDown = (event) => {
+        if (event.key === "Escape" && this.modal.isActive() && this.open) {
+          event.stopPropagation();
+          this.requestClose("keyboard");
+        }
+      };
+    }
+    firstUpdated() {
+      this.dialog.hidden = !this.open;
+      if (this.open) {
+        this.addOpenListeners();
+        this.modal.activate();
+        lockBodyScrolling(this);
+      }
+    }
+    disconnectedCallback() {
+      var _a;
+      super.disconnectedCallback();
+      this.modal.deactivate();
+      unlockBodyScrolling(this);
+      (_a = this.closeWatcher) == null ? void 0 : _a.destroy();
+    }
+    requestClose(source) {
+      const slRequestClose = this.emit("sl-request-close", {
+        cancelable: true,
+        detail: { source }
+      });
+      if (slRequestClose.defaultPrevented) {
+        const animation = getAnimation(this, "dialog.denyClose", { dir: this.localize.dir() });
+        animateTo(this.panel, animation.keyframes, animation.options);
+        return;
+      }
+      this.hide();
+    }
+    addOpenListeners() {
+      var _a;
+      if ("CloseWatcher" in window) {
+        (_a = this.closeWatcher) == null ? void 0 : _a.destroy();
+        this.closeWatcher = new CloseWatcher();
+        this.closeWatcher.onclose = () => this.requestClose("keyboard");
+      } else {
+        document.addEventListener("keydown", this.handleDocumentKeyDown);
+      }
+    }
+    removeOpenListeners() {
+      var _a;
+      (_a = this.closeWatcher) == null ? void 0 : _a.destroy();
+      document.removeEventListener("keydown", this.handleDocumentKeyDown);
+    }
+    async handleOpenChange() {
+      if (this.open) {
+        this.emit("sl-show");
+        this.addOpenListeners();
+        this.originalTrigger = document.activeElement;
+        this.modal.activate();
+        lockBodyScrolling(this);
+        const autoFocusTarget = this.querySelector("[autofocus]");
+        if (autoFocusTarget) {
+          autoFocusTarget.removeAttribute("autofocus");
+        }
+        await Promise.all([stopAnimations(this.dialog), stopAnimations(this.overlay)]);
+        this.dialog.hidden = false;
+        requestAnimationFrame(() => {
+          const slInitialFocus = this.emit("sl-initial-focus", { cancelable: true });
+          if (!slInitialFocus.defaultPrevented) {
+            if (autoFocusTarget) {
+              autoFocusTarget.focus({ preventScroll: true });
+            } else {
+              this.panel.focus({ preventScroll: true });
+            }
+          }
+          if (autoFocusTarget) {
+            autoFocusTarget.setAttribute("autofocus", "");
+          }
+        });
+        const panelAnimation = getAnimation(this, "dialog.show", { dir: this.localize.dir() });
+        const overlayAnimation = getAnimation(this, "dialog.overlay.show", { dir: this.localize.dir() });
+        await Promise.all([
+          animateTo(this.panel, panelAnimation.keyframes, panelAnimation.options),
+          animateTo(this.overlay, overlayAnimation.keyframes, overlayAnimation.options)
+        ]);
+        this.emit("sl-after-show");
+      } else {
+        this.emit("sl-hide");
+        this.removeOpenListeners();
+        this.modal.deactivate();
+        await Promise.all([stopAnimations(this.dialog), stopAnimations(this.overlay)]);
+        const panelAnimation = getAnimation(this, "dialog.hide", { dir: this.localize.dir() });
+        const overlayAnimation = getAnimation(this, "dialog.overlay.hide", { dir: this.localize.dir() });
+        await Promise.all([
+          animateTo(this.overlay, overlayAnimation.keyframes, overlayAnimation.options).then(() => {
+            this.overlay.hidden = true;
+          }),
+          animateTo(this.panel, panelAnimation.keyframes, panelAnimation.options).then(() => {
+            this.panel.hidden = true;
+          })
+        ]);
+        this.dialog.hidden = true;
+        this.overlay.hidden = false;
+        this.panel.hidden = false;
+        unlockBodyScrolling(this);
+        const trigger = this.originalTrigger;
+        if (typeof (trigger == null ? void 0 : trigger.focus) === "function") {
+          setTimeout(() => trigger.focus());
+        }
+        this.emit("sl-after-hide");
+      }
+    }
+    /** Shows the dialog. */
+    async show() {
+      if (this.open) {
+        return void 0;
+      }
+      this.open = true;
+      return waitForEvent(this, "sl-after-show");
+    }
+    /** Hides the dialog */
+    async hide() {
+      if (!this.open) {
+        return void 0;
+      }
+      this.open = false;
+      return waitForEvent(this, "sl-after-hide");
+    }
+    render() {
+      return x`
+      <div
+        part="base"
+        class=${e$4({
+      dialog: true,
+      "dialog--open": this.open,
+      "dialog--has-footer": this.hasSlotController.test("footer")
+    })}
+      >
+        <div part="overlay" class="dialog__overlay" @click=${() => this.requestClose("overlay")} tabindex="-1"></div>
+
+        <div
+          part="panel"
+          class="dialog__panel"
+          role="dialog"
+          aria-modal="true"
+          aria-hidden=${this.open ? "false" : "true"}
+          aria-label=${o$4(this.noHeader ? this.label : void 0)}
+          aria-labelledby=${o$4(!this.noHeader ? "title" : void 0)}
+          tabindex="-1"
+        >
+          ${!this.noHeader ? x`
+                <header part="header" class="dialog__header">
+                  <h2 part="title" class="dialog__title" id="title">
+                    <slot name="label"> ${this.label.length > 0 ? this.label : String.fromCharCode(65279)} </slot>
+                  </h2>
+                  <div part="header-actions" class="dialog__header-actions">
+                    <slot name="header-actions"></slot>
+                    <sl-icon-button
+                      part="close-button"
+                      exportparts="base:close-button__base"
+                      class="dialog__close"
+                      name="x-lg"
+                      label=${this.localize.term("close")}
+                      library="system"
+                      @click="${() => this.requestClose("close-button")}"
+                    ></sl-icon-button>
+                  </div>
+                </header>
+              ` : ""}
+          ${""}
+          <div part="body" class="dialog__body" tabindex="-1"><slot></slot></div>
+
+          <footer part="footer" class="dialog__footer">
+            <slot name="footer"></slot>
+          </footer>
+        </div>
+      </div>
+    `;
+    }
+  };
+  SlDialog.styles = [component_styles_default, dialog_styles_default];
+  SlDialog.dependencies = {
+    "sl-icon-button": SlIconButton
+  };
+  __decorateClass([
+    e$6(".dialog")
+  ], SlDialog.prototype, "dialog", 2);
+  __decorateClass([
+    e$6(".dialog__panel")
+  ], SlDialog.prototype, "panel", 2);
+  __decorateClass([
+    e$6(".dialog__overlay")
+  ], SlDialog.prototype, "overlay", 2);
+  __decorateClass([
+    n$4({ type: Boolean, reflect: true })
+  ], SlDialog.prototype, "open", 2);
+  __decorateClass([
+    n$4({ reflect: true })
+  ], SlDialog.prototype, "label", 2);
+  __decorateClass([
+    n$4({ attribute: "no-header", type: Boolean, reflect: true })
+  ], SlDialog.prototype, "noHeader", 2);
+  __decorateClass([
+    watch("open", { waitUntilFirstUpdate: true })
+  ], SlDialog.prototype, "handleOpenChange", 1);
+  setDefaultAnimation("dialog.show", {
+    keyframes: [
+      { opacity: 0, scale: 0.8 },
+      { opacity: 1, scale: 1 }
+    ],
+    options: { duration: 250, easing: "ease" }
+  });
+  setDefaultAnimation("dialog.hide", {
+    keyframes: [
+      { opacity: 1, scale: 1 },
+      { opacity: 0, scale: 0.8 }
+    ],
+    options: { duration: 250, easing: "ease" }
+  });
+  setDefaultAnimation("dialog.denyClose", {
+    keyframes: [{ scale: 1 }, { scale: 1.02 }, { scale: 1 }],
+    options: { duration: 250 }
+  });
+  setDefaultAnimation("dialog.overlay.show", {
+    keyframes: [{ opacity: 0 }, { opacity: 1 }],
+    options: { duration: 250 }
+  });
+  setDefaultAnimation("dialog.overlay.hide", {
+    keyframes: [{ opacity: 1 }, { opacity: 0 }],
+    options: { duration: 250 }
+  });
+
+  SlDialog.define("sl-dialog");
+
   let NavigationButtons = class NavigationButtons extends s$2 {
       constructor() {
           super(...arguments);
           this.isPreviousDisabled = false;
           this.isContinueDisabled = false;
+          this.continueDisabledTooltip = '';
           this.sectionsLength = 0;
       }
       handlePrevious() {
@@ -37456,7 +38069,31 @@
               composed: true
           }));
       }
+      handleContinueWrapperClick(e) {
+          // Only handle clicks when button is actually disabled
+          // When enabled, let the button's own click handler fire
+          if (!this.isContinueDisabled) {
+              return;
+          }
+          // Button is disabled, prevent default and show validation
+          e.preventDefault();
+          e.stopPropagation();
+          this.dispatchEvent(new CustomEvent('continue-disabled-clicked', {
+              bubbles: true,
+              composed: true
+          }));
+      }
       render() {
+          const continueButton = x `
+      <sl-button
+        variant="primary"
+        size="large"
+        ?disabled=${this.isContinueDisabled}
+        @click=${this.handleContinue}
+      >
+        Continue
+      </sl-button>
+    `;
           return x `
       <div class="navigation-card">
         <sl-button
@@ -37476,14 +38113,22 @@
           Skip to Next Required Step
         </sl-button>
 
-        <sl-button
-          variant="primary"
-          size="large"
-          ?disabled=${this.isContinueDisabled}
-          @click=${this.handleContinue}
-        >
-          Continue
-        </sl-button>
+        ${this.isContinueDisabled && this.continueDisabledTooltip
+            ? x `
+              <sl-tooltip
+                content=${this.continueDisabledTooltip}
+                placement="top"
+                hoist
+              >
+                <div
+                  class="continue-button-wrapper"
+                  @click=${this.handleContinueWrapperClick}
+                >
+                  ${continueButton}
+                </div>
+              </sl-tooltip>
+            `
+            : continueButton}
       </div>
     `;
       }
@@ -37501,13 +38146,21 @@
       box-shadow: var(--sl-shadow-x-small);
     }
 
+    .continue-button-wrapper {
+      display: inline-block;
+    }
+
     @media (max-width: 768px) {
       .navigation-card {
         flex-direction: column;
         gap: 0.5rem;
       }
-      
+
       sl-button {
+        width: 100%;
+      }
+
+      .continue-button-wrapper {
         width: 100%;
       }
     }
@@ -37518,6 +38171,9 @@
   __decorate([
       n$4({ type: Boolean })
   ], NavigationButtons.prototype, "isContinueDisabled", void 0);
+  __decorate([
+      n$4({ type: String })
+  ], NavigationButtons.prototype, "continueDisabledTooltip", void 0);
   __decorate([
       n$4({ type: Number })
   ], NavigationButtons.prototype, "sectionsLength", void 0);
@@ -38781,618 +39437,6 @@
   WorkbookSignOffButtons = __decorate([
       t$1('workbook-sign-off-buttons')
   ], WorkbookSignOffButtons);
-
-  // src/internal/tabbable.ts
-  var computedStyleMap = /* @__PURE__ */ new WeakMap();
-  function getCachedComputedStyle(el) {
-    let computedStyle = computedStyleMap.get(el);
-    if (!computedStyle) {
-      computedStyle = window.getComputedStyle(el, null);
-      computedStyleMap.set(el, computedStyle);
-    }
-    return computedStyle;
-  }
-  function isVisible(el) {
-    if (typeof el.checkVisibility === "function") {
-      return el.checkVisibility({ checkOpacity: false, checkVisibilityCSS: true });
-    }
-    const computedStyle = getCachedComputedStyle(el);
-    return computedStyle.visibility !== "hidden" && computedStyle.display !== "none";
-  }
-  function isOverflowingAndTabbable(el) {
-    const computedStyle = getCachedComputedStyle(el);
-    const { overflowY, overflowX } = computedStyle;
-    if (overflowY === "scroll" || overflowX === "scroll") {
-      return true;
-    }
-    if (overflowY !== "auto" || overflowX !== "auto") {
-      return false;
-    }
-    const isOverflowingY = el.scrollHeight > el.clientHeight;
-    if (isOverflowingY && overflowY === "auto") {
-      return true;
-    }
-    const isOverflowingX = el.scrollWidth > el.clientWidth;
-    if (isOverflowingX && overflowX === "auto") {
-      return true;
-    }
-    return false;
-  }
-  function isTabbable(el) {
-    const tag = el.tagName.toLowerCase();
-    const tabindex = Number(el.getAttribute("tabindex"));
-    const hasTabindex = el.hasAttribute("tabindex");
-    if (hasTabindex && (isNaN(tabindex) || tabindex <= -1)) {
-      return false;
-    }
-    if (el.hasAttribute("disabled")) {
-      return false;
-    }
-    if (el.closest("[inert]")) {
-      return false;
-    }
-    if (tag === "input" && el.getAttribute("type") === "radio" && !el.hasAttribute("checked")) {
-      return false;
-    }
-    if (!isVisible(el)) {
-      return false;
-    }
-    if ((tag === "audio" || tag === "video") && el.hasAttribute("controls")) {
-      return true;
-    }
-    if (el.hasAttribute("tabindex")) {
-      return true;
-    }
-    if (el.hasAttribute("contenteditable") && el.getAttribute("contenteditable") !== "false") {
-      return true;
-    }
-    const isNativelyTabbable = [
-      "button",
-      "input",
-      "select",
-      "textarea",
-      "a",
-      "audio",
-      "video",
-      "summary",
-      "iframe"
-    ].includes(tag);
-    if (isNativelyTabbable) {
-      return true;
-    }
-    return isOverflowingAndTabbable(el);
-  }
-  function getTabbableBoundary(root) {
-    var _a, _b;
-    const tabbableElements = getTabbableElements(root);
-    const start = (_a = tabbableElements[0]) != null ? _a : null;
-    const end = (_b = tabbableElements[tabbableElements.length - 1]) != null ? _b : null;
-    return { start, end };
-  }
-  function getSlottedChildrenOutsideRootElement(slotElement, root) {
-    var _a;
-    return ((_a = slotElement.getRootNode({ composed: true })) == null ? void 0 : _a.host) !== root;
-  }
-  function getTabbableElements(root) {
-    const walkedEls = /* @__PURE__ */ new WeakMap();
-    const tabbableElements = [];
-    function walk(el) {
-      if (el instanceof Element) {
-        if (el.hasAttribute("inert") || el.closest("[inert]")) {
-          return;
-        }
-        if (walkedEls.has(el)) {
-          return;
-        }
-        walkedEls.set(el, true);
-        if (!tabbableElements.includes(el) && isTabbable(el)) {
-          tabbableElements.push(el);
-        }
-        if (el instanceof HTMLSlotElement && getSlottedChildrenOutsideRootElement(el, root)) {
-          el.assignedElements({ flatten: true }).forEach((assignedEl) => {
-            walk(assignedEl);
-          });
-        }
-        if (el.shadowRoot !== null && el.shadowRoot.mode === "open") {
-          walk(el.shadowRoot);
-        }
-      }
-      for (const e of el.children) {
-        walk(e);
-      }
-    }
-    walk(root);
-    return tabbableElements.sort((a, b) => {
-      const aTabindex = Number(a.getAttribute("tabindex")) || 0;
-      const bTabindex = Number(b.getAttribute("tabindex")) || 0;
-      return bTabindex - aTabindex;
-    });
-  }
-
-  // src/internal/active-elements.ts
-  function* activeElements(activeElement = document.activeElement) {
-    if (activeElement === null || activeElement === void 0)
-      return;
-    yield activeElement;
-    if ("shadowRoot" in activeElement && activeElement.shadowRoot && activeElement.shadowRoot.mode !== "closed") {
-      yield* __yieldStar(activeElements(activeElement.shadowRoot.activeElement));
-    }
-  }
-  function getDeepestActiveElement() {
-    return [...activeElements()].pop();
-  }
-
-  // src/internal/modal.ts
-  var activeModals = [];
-  var Modal = class {
-    constructor(element) {
-      this.tabDirection = "forward";
-      this.handleFocusIn = () => {
-        if (!this.isActive())
-          return;
-        this.checkFocus();
-      };
-      this.handleKeyDown = (event) => {
-        var _a;
-        if (event.key !== "Tab" || this.isExternalActivated)
-          return;
-        if (!this.isActive())
-          return;
-        const currentActiveElement = getDeepestActiveElement();
-        this.previousFocus = currentActiveElement;
-        if (this.previousFocus && this.possiblyHasTabbableChildren(this.previousFocus)) {
-          return;
-        }
-        if (event.shiftKey) {
-          this.tabDirection = "backward";
-        } else {
-          this.tabDirection = "forward";
-        }
-        const tabbableElements = getTabbableElements(this.element);
-        let currentFocusIndex = tabbableElements.findIndex((el) => el === currentActiveElement);
-        this.previousFocus = this.currentFocus;
-        const addition = this.tabDirection === "forward" ? 1 : -1;
-        while (true) {
-          if (currentFocusIndex + addition >= tabbableElements.length) {
-            currentFocusIndex = 0;
-          } else if (currentFocusIndex + addition < 0) {
-            currentFocusIndex = tabbableElements.length - 1;
-          } else {
-            currentFocusIndex += addition;
-          }
-          this.previousFocus = this.currentFocus;
-          const nextFocus = (
-            /** @type {HTMLElement} */
-            tabbableElements[currentFocusIndex]
-          );
-          if (this.tabDirection === "backward") {
-            if (this.previousFocus && this.possiblyHasTabbableChildren(this.previousFocus)) {
-              return;
-            }
-          }
-          if (nextFocus && this.possiblyHasTabbableChildren(nextFocus)) {
-            return;
-          }
-          event.preventDefault();
-          this.currentFocus = nextFocus;
-          (_a = this.currentFocus) == null ? void 0 : _a.focus({ preventScroll: false });
-          const allActiveElements = [...activeElements()];
-          if (allActiveElements.includes(this.currentFocus) || !allActiveElements.includes(this.previousFocus)) {
-            break;
-          }
-        }
-        setTimeout(() => this.checkFocus());
-      };
-      this.handleKeyUp = () => {
-        this.tabDirection = "forward";
-      };
-      this.element = element;
-      this.elementsWithTabbableControls = ["iframe"];
-    }
-    /** Activates focus trapping. */
-    activate() {
-      activeModals.push(this.element);
-      document.addEventListener("focusin", this.handleFocusIn);
-      document.addEventListener("keydown", this.handleKeyDown);
-      document.addEventListener("keyup", this.handleKeyUp);
-    }
-    /** Deactivates focus trapping. */
-    deactivate() {
-      activeModals = activeModals.filter((modal) => modal !== this.element);
-      this.currentFocus = null;
-      document.removeEventListener("focusin", this.handleFocusIn);
-      document.removeEventListener("keydown", this.handleKeyDown);
-      document.removeEventListener("keyup", this.handleKeyUp);
-    }
-    /** Determines if this modal element is currently active or not. */
-    isActive() {
-      return activeModals[activeModals.length - 1] === this.element;
-    }
-    /** Activates external modal behavior and temporarily disables focus trapping. */
-    activateExternal() {
-      this.isExternalActivated = true;
-    }
-    /** Deactivates external modal behavior and re-enables focus trapping. */
-    deactivateExternal() {
-      this.isExternalActivated = false;
-    }
-    checkFocus() {
-      if (this.isActive() && !this.isExternalActivated) {
-        const tabbableElements = getTabbableElements(this.element);
-        if (!this.element.matches(":focus-within")) {
-          const start = tabbableElements[0];
-          const end = tabbableElements[tabbableElements.length - 1];
-          const target = this.tabDirection === "forward" ? start : end;
-          if (typeof (target == null ? void 0 : target.focus) === "function") {
-            this.currentFocus = target;
-            target.focus({ preventScroll: false });
-          }
-        }
-      }
-    }
-    possiblyHasTabbableChildren(element) {
-      return this.elementsWithTabbableControls.includes(element.tagName.toLowerCase()) || element.hasAttribute("controls");
-    }
-  };
-
-  // src/components/dialog/dialog.styles.ts
-  var dialog_styles_default = i$4`
-  :host {
-    --width: 31rem;
-    --header-spacing: var(--sl-spacing-large);
-    --body-spacing: var(--sl-spacing-large);
-    --footer-spacing: var(--sl-spacing-large);
-
-    display: contents;
-  }
-
-  .dialog {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: fixed;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    z-index: var(--sl-z-index-dialog);
-  }
-
-  .dialog__panel {
-    display: flex;
-    flex-direction: column;
-    z-index: 2;
-    width: var(--width);
-    max-width: calc(100% - var(--sl-spacing-2x-large));
-    max-height: calc(100% - var(--sl-spacing-2x-large));
-    background-color: var(--sl-panel-background-color);
-    border-radius: var(--sl-border-radius-medium);
-    box-shadow: var(--sl-shadow-x-large);
-  }
-
-  .dialog__panel:focus {
-    outline: none;
-  }
-
-  /* Ensure there's enough vertical padding for phones that don't update vh when chrome appears (e.g. iPhone) */
-  @media screen and (max-width: 420px) {
-    .dialog__panel {
-      max-height: 80vh;
-    }
-  }
-
-  .dialog--open .dialog__panel {
-    display: flex;
-    opacity: 1;
-  }
-
-  .dialog__header {
-    flex: 0 0 auto;
-    display: flex;
-  }
-
-  .dialog__title {
-    flex: 1 1 auto;
-    font: inherit;
-    font-size: var(--sl-font-size-large);
-    line-height: var(--sl-line-height-dense);
-    padding: var(--header-spacing);
-    margin: 0;
-  }
-
-  .dialog__header-actions {
-    flex-shrink: 0;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: end;
-    gap: var(--sl-spacing-2x-small);
-    padding: 0 var(--header-spacing);
-  }
-
-  .dialog__header-actions sl-icon-button,
-  .dialog__header-actions ::slotted(sl-icon-button) {
-    flex: 0 0 auto;
-    display: flex;
-    align-items: center;
-    font-size: var(--sl-font-size-medium);
-  }
-
-  .dialog__body {
-    flex: 1 1 auto;
-    display: block;
-    padding: var(--body-spacing);
-    overflow: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .dialog__footer {
-    flex: 0 0 auto;
-    text-align: right;
-    padding: var(--footer-spacing);
-  }
-
-  .dialog__footer ::slotted(sl-button:not(:first-of-type)) {
-    margin-inline-start: var(--sl-spacing-x-small);
-  }
-
-  .dialog:not(.dialog--has-footer) .dialog__footer {
-    display: none;
-  }
-
-  .dialog__overlay {
-    position: fixed;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    background-color: var(--sl-overlay-background-color);
-  }
-
-  @media (forced-colors: active) {
-    .dialog__panel {
-      border: solid 1px var(--sl-color-neutral-0);
-    }
-  }
-`;
-
-  var SlDialog = class extends ShoelaceElement {
-    constructor() {
-      super(...arguments);
-      this.hasSlotController = new HasSlotController(this, "footer");
-      this.localize = new LocalizeController(this);
-      this.modal = new Modal(this);
-      this.open = false;
-      this.label = "";
-      this.noHeader = false;
-      this.handleDocumentKeyDown = (event) => {
-        if (event.key === "Escape" && this.modal.isActive() && this.open) {
-          event.stopPropagation();
-          this.requestClose("keyboard");
-        }
-      };
-    }
-    firstUpdated() {
-      this.dialog.hidden = !this.open;
-      if (this.open) {
-        this.addOpenListeners();
-        this.modal.activate();
-        lockBodyScrolling(this);
-      }
-    }
-    disconnectedCallback() {
-      var _a;
-      super.disconnectedCallback();
-      this.modal.deactivate();
-      unlockBodyScrolling(this);
-      (_a = this.closeWatcher) == null ? void 0 : _a.destroy();
-    }
-    requestClose(source) {
-      const slRequestClose = this.emit("sl-request-close", {
-        cancelable: true,
-        detail: { source }
-      });
-      if (slRequestClose.defaultPrevented) {
-        const animation = getAnimation(this, "dialog.denyClose", { dir: this.localize.dir() });
-        animateTo(this.panel, animation.keyframes, animation.options);
-        return;
-      }
-      this.hide();
-    }
-    addOpenListeners() {
-      var _a;
-      if ("CloseWatcher" in window) {
-        (_a = this.closeWatcher) == null ? void 0 : _a.destroy();
-        this.closeWatcher = new CloseWatcher();
-        this.closeWatcher.onclose = () => this.requestClose("keyboard");
-      } else {
-        document.addEventListener("keydown", this.handleDocumentKeyDown);
-      }
-    }
-    removeOpenListeners() {
-      var _a;
-      (_a = this.closeWatcher) == null ? void 0 : _a.destroy();
-      document.removeEventListener("keydown", this.handleDocumentKeyDown);
-    }
-    async handleOpenChange() {
-      if (this.open) {
-        this.emit("sl-show");
-        this.addOpenListeners();
-        this.originalTrigger = document.activeElement;
-        this.modal.activate();
-        lockBodyScrolling(this);
-        const autoFocusTarget = this.querySelector("[autofocus]");
-        if (autoFocusTarget) {
-          autoFocusTarget.removeAttribute("autofocus");
-        }
-        await Promise.all([stopAnimations(this.dialog), stopAnimations(this.overlay)]);
-        this.dialog.hidden = false;
-        requestAnimationFrame(() => {
-          const slInitialFocus = this.emit("sl-initial-focus", { cancelable: true });
-          if (!slInitialFocus.defaultPrevented) {
-            if (autoFocusTarget) {
-              autoFocusTarget.focus({ preventScroll: true });
-            } else {
-              this.panel.focus({ preventScroll: true });
-            }
-          }
-          if (autoFocusTarget) {
-            autoFocusTarget.setAttribute("autofocus", "");
-          }
-        });
-        const panelAnimation = getAnimation(this, "dialog.show", { dir: this.localize.dir() });
-        const overlayAnimation = getAnimation(this, "dialog.overlay.show", { dir: this.localize.dir() });
-        await Promise.all([
-          animateTo(this.panel, panelAnimation.keyframes, panelAnimation.options),
-          animateTo(this.overlay, overlayAnimation.keyframes, overlayAnimation.options)
-        ]);
-        this.emit("sl-after-show");
-      } else {
-        this.emit("sl-hide");
-        this.removeOpenListeners();
-        this.modal.deactivate();
-        await Promise.all([stopAnimations(this.dialog), stopAnimations(this.overlay)]);
-        const panelAnimation = getAnimation(this, "dialog.hide", { dir: this.localize.dir() });
-        const overlayAnimation = getAnimation(this, "dialog.overlay.hide", { dir: this.localize.dir() });
-        await Promise.all([
-          animateTo(this.overlay, overlayAnimation.keyframes, overlayAnimation.options).then(() => {
-            this.overlay.hidden = true;
-          }),
-          animateTo(this.panel, panelAnimation.keyframes, panelAnimation.options).then(() => {
-            this.panel.hidden = true;
-          })
-        ]);
-        this.dialog.hidden = true;
-        this.overlay.hidden = false;
-        this.panel.hidden = false;
-        unlockBodyScrolling(this);
-        const trigger = this.originalTrigger;
-        if (typeof (trigger == null ? void 0 : trigger.focus) === "function") {
-          setTimeout(() => trigger.focus());
-        }
-        this.emit("sl-after-hide");
-      }
-    }
-    /** Shows the dialog. */
-    async show() {
-      if (this.open) {
-        return void 0;
-      }
-      this.open = true;
-      return waitForEvent(this, "sl-after-show");
-    }
-    /** Hides the dialog */
-    async hide() {
-      if (!this.open) {
-        return void 0;
-      }
-      this.open = false;
-      return waitForEvent(this, "sl-after-hide");
-    }
-    render() {
-      return x`
-      <div
-        part="base"
-        class=${e$4({
-      dialog: true,
-      "dialog--open": this.open,
-      "dialog--has-footer": this.hasSlotController.test("footer")
-    })}
-      >
-        <div part="overlay" class="dialog__overlay" @click=${() => this.requestClose("overlay")} tabindex="-1"></div>
-
-        <div
-          part="panel"
-          class="dialog__panel"
-          role="dialog"
-          aria-modal="true"
-          aria-hidden=${this.open ? "false" : "true"}
-          aria-label=${o$4(this.noHeader ? this.label : void 0)}
-          aria-labelledby=${o$4(!this.noHeader ? "title" : void 0)}
-          tabindex="-1"
-        >
-          ${!this.noHeader ? x`
-                <header part="header" class="dialog__header">
-                  <h2 part="title" class="dialog__title" id="title">
-                    <slot name="label"> ${this.label.length > 0 ? this.label : String.fromCharCode(65279)} </slot>
-                  </h2>
-                  <div part="header-actions" class="dialog__header-actions">
-                    <slot name="header-actions"></slot>
-                    <sl-icon-button
-                      part="close-button"
-                      exportparts="base:close-button__base"
-                      class="dialog__close"
-                      name="x-lg"
-                      label=${this.localize.term("close")}
-                      library="system"
-                      @click="${() => this.requestClose("close-button")}"
-                    ></sl-icon-button>
-                  </div>
-                </header>
-              ` : ""}
-          ${""}
-          <div part="body" class="dialog__body" tabindex="-1"><slot></slot></div>
-
-          <footer part="footer" class="dialog__footer">
-            <slot name="footer"></slot>
-          </footer>
-        </div>
-      </div>
-    `;
-    }
-  };
-  SlDialog.styles = [component_styles_default, dialog_styles_default];
-  SlDialog.dependencies = {
-    "sl-icon-button": SlIconButton
-  };
-  __decorateClass([
-    e$6(".dialog")
-  ], SlDialog.prototype, "dialog", 2);
-  __decorateClass([
-    e$6(".dialog__panel")
-  ], SlDialog.prototype, "panel", 2);
-  __decorateClass([
-    e$6(".dialog__overlay")
-  ], SlDialog.prototype, "overlay", 2);
-  __decorateClass([
-    n$4({ type: Boolean, reflect: true })
-  ], SlDialog.prototype, "open", 2);
-  __decorateClass([
-    n$4({ reflect: true })
-  ], SlDialog.prototype, "label", 2);
-  __decorateClass([
-    n$4({ attribute: "no-header", type: Boolean, reflect: true })
-  ], SlDialog.prototype, "noHeader", 2);
-  __decorateClass([
-    watch("open", { waitUntilFirstUpdate: true })
-  ], SlDialog.prototype, "handleOpenChange", 1);
-  setDefaultAnimation("dialog.show", {
-    keyframes: [
-      { opacity: 0, scale: 0.8 },
-      { opacity: 1, scale: 1 }
-    ],
-    options: { duration: 250, easing: "ease" }
-  });
-  setDefaultAnimation("dialog.hide", {
-    keyframes: [
-      { opacity: 1, scale: 1 },
-      { opacity: 0, scale: 0.8 }
-    ],
-    options: { duration: 250, easing: "ease" }
-  });
-  setDefaultAnimation("dialog.denyClose", {
-    keyframes: [{ scale: 1 }, { scale: 1.02 }, { scale: 1 }],
-    options: { duration: 250 }
-  });
-  setDefaultAnimation("dialog.overlay.show", {
-    keyframes: [{ opacity: 0 }, { opacity: 1 }],
-    options: { duration: 250 }
-  });
-  setDefaultAnimation("dialog.overlay.hide", {
-    keyframes: [{ opacity: 1 }, { opacity: 0 }],
-    options: { duration: 250 }
-  });
-
-  SlDialog.define("sl-dialog");
 
   SlSpinner.define("sl-spinner");
 
@@ -43391,6 +43435,25 @@
     transform: none;
     box-shadow: none;
   }
+
+  /* Validation alert styling */
+  sl-alert::part(base) {
+    font-family: var(--body-font);
+  }
+
+  sl-alert ul {
+    font-family: var(--body-font);
+  }
+
+  sl-alert a {
+    font-family: var(--body-font);
+    font-weight: 500;
+  }
+
+  sl-alert a:hover {
+    color: var(--sl-color-primary-700);
+    text-decoration: underline;
+  }
 `;
 
   // Create logger instance for EFP components
@@ -43406,6 +43469,9 @@
           this.questionnaireStoreLoaded = false;
           this.questionsAndResponsesLoaded = false;
           this.workbookLocked = false;
+          this.showValidationAlert = false;
+          this.incompleteChapters = [];
+          this.responseUpdateCounter = 0; // Triggers re-render when responses change
           this.isNavigating = false; // Flag to prevent tab change interference
           this.activeContent = {
               title: 'Introduction to the Environmental Farm Plan (EFP)',
@@ -43507,6 +43573,106 @@
               message: 'Updated workbook lock status',
               data: { workbookLocked: isLocked },
           });
+      }
+      // Check if all non-skipped questions in My Workbook are answered
+      canAccessReviewAndSubmit() {
+          var _a;
+          if (!POWERPOD.workbookQuestionsAndResponses.isLoaded) {
+              // If data not loaded yet, allow access (will show loading state)
+              return true;
+          }
+          const questionnaire = getQuestionnaireFromStore();
+          if (!((_a = questionnaire === null || questionnaire === void 0 ? void 0 : questionnaire.chapters) === null || _a === void 0 ? void 0 : _a.length)) {
+              return true;
+          }
+          // Check all questions in all chapters
+          let hasUnansweredQuestions = false;
+          const incompleteChaptersList = [];
+          const checkChapters = (chapters, parentName = '') => {
+              chapters.forEach((chapter) => {
+                  let chapterHasUnanswered = false;
+                  // Check questions in this chapter
+                  if (chapter.questions && chapter.questions.length > 0) {
+                      chapter.questions.forEach((question) => {
+                          var _a, _b;
+                          const entry = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.get(question.id);
+                          const isSkipped = ((_a = entry === null || entry === void 0 ? void 0 : entry.response) === null || _a === void 0 ? void 0 : _a.quartech_chapterskipped) === 100000000;
+                          const hasResponse = ((_b = entry === null || entry === void 0 ? void 0 : entry.response) === null || _b === void 0 ? void 0 : _b.quartech_response) &&
+                              entry.response.quartech_response.trim() !== '';
+                          // Question is incomplete if it's not skipped AND has no response
+                          if (!isSkipped && !hasResponse) {
+                              hasUnansweredQuestions = true;
+                              chapterHasUnanswered = true;
+                          }
+                      });
+                  }
+                  // If this chapter has unanswered questions, add it to the list
+                  if (chapterHasUnanswered) {
+                      const chapterName = chapter.name || chapter.quartech_name || 'Unknown Chapter';
+                      incompleteChaptersList.push({
+                          id: chapter.id,
+                          name: chapterName
+                      });
+                  }
+                  // Recursively check subchapters
+                  if (chapter.subchapters && chapter.subchapters.length > 0) {
+                      checkChapters(chapter.subchapters, chapter.name || '');
+                  }
+              });
+          };
+          if (questionnaire.chapters && questionnaire.chapters.length > 0) {
+              checkChapters(questionnaire.chapters[0]);
+          }
+          // Update the incomplete chapters list
+          this.incompleteChapters = incompleteChaptersList;
+          return !hasUnansweredQuestions;
+      }
+      // Show validation alert with incomplete chapters
+      showIncompleteQuestionsAlert() {
+          this.showValidationAlert = true;
+          logger$4.info({
+              message: 'Showing validation alert for incomplete questions',
+              data: {
+                  incompleteChaptersCount: this.incompleteChapters.length,
+                  incompleteChapters: this.incompleteChapters
+              },
+          });
+          // Open the dialog
+          this.updateComplete.then(() => {
+              var _a;
+              const dialog = (_a = this.shadowRoot) === null || _a === void 0 ? void 0 : _a.querySelector('sl-dialog');
+              if (dialog) {
+                  dialog.show();
+              }
+          });
+      }
+      // Hide validation alert
+      hideValidationAlert() {
+          this.showValidationAlert = false;
+      }
+      // Navigate to a specific chapter by ID
+      navigateToChapter(chapterId) {
+          logger$4.info({
+              message: 'Navigating to chapter from validation alert',
+              data: { chapterId },
+          });
+          // Hide the alert
+          this.hideValidationAlert();
+          // Find the step index for this chapter
+          const stepIndex = this.flatSteps.findIndex(step => {
+              var _a, _b;
+              return step.chapterId === chapterId ||
+                  ((_a = step.chapterData) === null || _a === void 0 ? void 0 : _a.id) === chapterId ||
+                  ((_b = step.subchapterData) === null || _b === void 0 ? void 0 : _b.id) === chapterId;
+          });
+          if (stepIndex !== -1) {
+              const step = this.flatSteps[stepIndex];
+              this.currentStepIndex = stepIndex;
+              this.currentSectionIndex = 0; // My Workbook section
+              this.activeContent = { title: step.label, content: step.content };
+              this.updateNavigationState(step.label);
+              this.requestUpdate();
+          }
       }
       get sections() {
           return [
@@ -43927,6 +44093,7 @@
           // STEP 2: Trigger UI update immediately (before API calls complete)
           const { updateQuestionnaireCompletion } = await Promise.resolve().then(function () { return questionnaire; });
           updateQuestionnaireCompletion();
+          this.responseUpdateCounter++; // Trigger re-render for validation
           this.requestUpdate();
           logger$4.info({
               message: `Optimistically updated ${questions.length} questions in memory and store`,
@@ -44583,11 +44750,83 @@
           const nextIndex = EFPNavigationUtils.findNextSelectableStep(this.currentStepIndex, this.flatSteps, this.sections);
           if (nextIndex != null) {
               const nextStep = this.flatSteps[nextIndex];
+              // Check if trying to navigate to "Review & Submit" section (section index 1)
+              if (nextStep.sectionIndex === 1 && !this.canAccessReviewAndSubmit()) {
+                  // Prevent navigation and show alert
+                  this.showIncompleteQuestionsAlert();
+                  logger$4.info({
+                      message: 'Prevented navigation to Review & Submit - incomplete questions',
+                      data: {
+                          incompleteChaptersCount: this.incompleteChapters.length,
+                          incompleteChapters: this.incompleteChapters
+                      },
+                  });
+                  return;
+              }
+              // Also check if the step AFTER the next step would be "Review & Submit"
+              // This handles the case where we're navigating to the last step before Review & Submit
+              if (nextStep.sectionIndex === 0) {
+                  const stepAfterNext = this.flatSteps[nextIndex + 1];
+                  if ((stepAfterNext === null || stepAfterNext === void 0 ? void 0 : stepAfterNext.sectionIndex) === 1 && !this.canAccessReviewAndSubmit()) {
+                      // Show alert but allow navigation (user is going to the last step)
+                      this.showIncompleteQuestionsAlert();
+                      logger$4.info({
+                          message: 'Showing alert when navigating to last step before Review & Submit',
+                          data: {
+                              incompleteChaptersCount: this.incompleteChapters.length,
+                              incompleteChapters: this.incompleteChapters
+                          },
+                      });
+                      // Continue with navigation below
+                  }
+              }
+              // Check if next step has the same label and content as current step
+              // This can happen with duplicate entries like "My Action Plan"
+              const currentStep = this.flatSteps[this.currentStepIndex];
+              const isSameContent = currentStep &&
+                  currentStep.label === nextStep.label &&
+                  currentStep.content === nextStep.content;
+              if (isSameContent) {
+                  logger$4.info({
+                      message: `Skipping duplicate step "${nextStep.label}" at index ${nextIndex}, continuing to next`,
+                  });
+                  // Skip this duplicate and go to the next step
+                  const nextNextIndex = EFPNavigationUtils.findNextSelectableStep(nextIndex, this.flatSteps, this.sections);
+                  if (nextNextIndex != null) {
+                      const nextNextStep = this.flatSteps[nextNextIndex];
+                      this.isNavigating = true;
+                      this.currentStepIndex = nextNextIndex;
+                      this.currentSectionIndex = nextNextStep.sectionIndex;
+                      this.activeContent = { title: nextNextStep.label, content: nextNextStep.content };
+                      this.updateNavigationState(nextNextStep.label);
+                      // Scroll to top of main content to provide visual feedback
+                      this.updateComplete.then(() => {
+                          var _a;
+                          const mainContent = (_a = this.shadowRoot) === null || _a === void 0 ? void 0 : _a.querySelector('main.main-content');
+                          if (mainContent) {
+                              mainContent.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                          }
+                      });
+                      setTimeout(() => {
+                          this.isNavigating = false;
+                      }, 100);
+                      this.requestUpdate();
+                  }
+                  return;
+              }
               this.isNavigating = true;
               this.currentStepIndex = nextIndex;
               this.currentSectionIndex = nextStep.sectionIndex;
               this.activeContent = { title: nextStep.label, content: nextStep.content };
               this.updateNavigationState(nextStep.label);
+              // Scroll to top of main content to provide visual feedback
+              this.updateComplete.then(() => {
+                  var _a;
+                  const mainContent = (_a = this.shadowRoot) === null || _a === void 0 ? void 0 : _a.querySelector('main.main-content');
+                  if (mainContent) {
+                      mainContent.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }
+              });
               setTimeout(() => {
                   this.isNavigating = false;
               }, 100);
@@ -44602,10 +44841,79 @@
           this.currentSectionIndex = event.detail.sectionIndex;
       }
       handleNavigationContinue() {
+          // Force a fresh validation check before proceeding
+          // This ensures we have the latest state even if the UI hasn't fully updated
+          const canProceed = this.canAccessReviewAndSubmit();
+          const nextIndex = this.currentStepIndex + 1;
+          const nextStep = this.flatSteps[nextIndex];
+          // If next step is Review & Submit and validation fails, show alert instead
+          if ((nextStep === null || nextStep === void 0 ? void 0 : nextStep.sectionIndex) === 1 && !canProceed) {
+              this.showIncompleteQuestionsAlert();
+              return;
+          }
+          // Also check if step after next would be Review & Submit
+          if ((nextStep === null || nextStep === void 0 ? void 0 : nextStep.sectionIndex) === 0) {
+              const stepAfterNext = this.flatSteps[nextIndex + 1];
+              if ((stepAfterNext === null || stepAfterNext === void 0 ? void 0 : stepAfterNext.sectionIndex) === 1 && !canProceed) {
+                  // Show alert but allow navigation
+                  this.showIncompleteQuestionsAlert();
+              }
+          }
           this.goToNext();
+      }
+      handleNavigationContinueDisabledClick() {
+          // Show the validation alert when user clicks disabled Continue button
+          this.showIncompleteQuestionsAlert();
+      }
+      // Compute if Continue button should be disabled
+      get isContinueButtonDisabled() {
+          // Reference responseUpdateCounter to ensure re-evaluation when responses change
+          void this.responseUpdateCounter;
+          // Check if we're at the last step
+          if (this.currentStepIndex >= this.flatSteps.length - 1) {
+              return true;
+          }
+          // Check if next step would be in "Review & Submit" section
+          const nextIndex = this.currentStepIndex + 1;
+          const nextStep = this.flatSteps[nextIndex];
+          const wouldBeReviewSection = (nextStep === null || nextStep === void 0 ? void 0 : nextStep.sectionIndex) === 1;
+          // Always do a fresh validation check - don't cache the result
+          const canAccess = this.canAccessReviewAndSubmit();
+          if (wouldBeReviewSection && !canAccess) {
+              return true;
+          }
+          return false;
+      }
+      // Get tooltip message for disabled Continue button
+      get continueButtonTooltip() {
+          // Reference responseUpdateCounter to ensure re-evaluation when responses change
+          void this.responseUpdateCounter;
+          if (this.currentStepIndex >= this.flatSteps.length - 1) {
+              return '';
+          }
+          const nextIndex = this.currentStepIndex + 1;
+          const nextStep = this.flatSteps[nextIndex];
+          if ((nextStep === null || nextStep === void 0 ? void 0 : nextStep.sectionIndex) === 1 && !this.canAccessReviewAndSubmit()) {
+              return 'Complete all non-skipped questions before proceeding to Review & Submit. Click this button to see which chapters are incomplete.';
+          }
+          return '';
       }
       // Section navigation event handler
       handleSectionChange(newSectionIndex) {
+          // Check if trying to navigate to "Review & Submit" (section index 1)
+          if (newSectionIndex === 1 && !this.canAccessReviewAndSubmit()) {
+              // Prevent navigation and show alert
+              this.showIncompleteQuestionsAlert();
+              // Stay on current section by resetting the tab
+              setTimeout(() => {
+                  var _a;
+                  const tabGroup = (_a = this.shadowRoot) === null || _a === void 0 ? void 0 : _a.querySelector('sl-tab-group');
+                  if (tabGroup) {
+                      tabGroup.show(`section-${this.currentSectionIndex}`);
+                  }
+              }, 0);
+              return;
+          }
           EFPEventUtils.handleSectionChange(newSectionIndex, this.isNavigating, this.flatSteps, (stepIndex, sectionIndex) => {
               this.currentStepIndex = stepIndex;
               this.currentSectionIndex = sectionIndex;
@@ -44745,6 +45053,8 @@
               // Update the questionnaire store with the full response data
               // Let updateQuestionResponse auto-calculate completion based on response content
               updateQuestionResponse(questionId, responseValue, undefined, responseData);
+              this.responseUpdateCounter++; // Trigger re-render for validation
+              this.requestUpdate(); // Force immediate UI update
               logger$4.info({
                   message: `Successfully saved debounced response for question ${questionId}`,
               });
@@ -44779,6 +45089,8 @@
               // Update the questionnaire store with the full response data
               // Let updateQuestionResponse auto-calculate completion based on response content
               updateQuestionResponse(questionId, newValue, undefined, responseData);
+              this.responseUpdateCounter++; // Trigger re-render for validation
+              this.requestUpdate(); // Force immediate UI update
               logger$4.info({
                   message: `Successfully saved multi-select response for question ${questionId}`,
               });
@@ -44870,6 +45182,8 @@
               const responseData = await this.saveRatingResponse(questionId, responseValue);
               // Update the questionnaire store with the full response data
               updateQuestionResponse(questionId, responseValue, true, responseData);
+              this.responseUpdateCounter++; // Trigger re-render for validation
+              this.requestUpdate(); // Force immediate UI update
               logger$4.info({
                   message: `Successfully saved multiline text response for question ${questionId}`,
               });
@@ -45077,11 +45391,53 @@
           const prevIndex = EFPNavigationUtils.findPreviousSelectableStep(this.currentStepIndex, this.flatSteps, this.sections);
           if (prevIndex != null) {
               const prevStep = this.flatSteps[prevIndex];
+              // Check if previous step has the same label and content as current step
+              // This can happen with duplicate entries like "My Action Plan"
+              const currentStep = this.flatSteps[this.currentStepIndex];
+              const isSameContent = currentStep &&
+                  currentStep.label === prevStep.label &&
+                  currentStep.content === prevStep.content;
+              if (isSameContent) {
+                  logger$4.info({
+                      message: `Skipping duplicate step "${prevStep.label}" at index ${prevIndex}, continuing to previous`,
+                  });
+                  // Skip this duplicate and go to the previous step
+                  const prevPrevIndex = EFPNavigationUtils.findPreviousSelectableStep(prevIndex, this.flatSteps, this.sections);
+                  if (prevPrevIndex != null) {
+                      const prevPrevStep = this.flatSteps[prevPrevIndex];
+                      this.isNavigating = true;
+                      this.currentStepIndex = prevPrevIndex;
+                      this.currentSectionIndex = prevPrevStep.sectionIndex;
+                      this.activeContent = { title: prevPrevStep.label, content: prevPrevStep.content };
+                      this.updateNavigationState(prevPrevStep.label);
+                      // Scroll to top of main content to provide visual feedback
+                      this.updateComplete.then(() => {
+                          var _a;
+                          const mainContent = (_a = this.shadowRoot) === null || _a === void 0 ? void 0 : _a.querySelector('main.main-content');
+                          if (mainContent) {
+                              mainContent.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                          }
+                      });
+                      setTimeout(() => {
+                          this.isNavigating = false;
+                      }, 100);
+                      this.requestUpdate();
+                  }
+                  return;
+              }
               this.isNavigating = true;
               this.currentStepIndex = prevIndex;
               this.currentSectionIndex = prevStep.sectionIndex;
               this.activeContent = { title: prevStep.label, content: prevStep.content };
               this.updateNavigationState(prevStep.label);
+              // Scroll to top of main content to provide visual feedback
+              this.updateComplete.then(() => {
+                  var _a;
+                  const mainContent = (_a = this.shadowRoot) === null || _a === void 0 ? void 0 : _a.querySelector('main.main-content');
+                  if (mainContent) {
+                      mainContent.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }
+              });
               setTimeout(() => {
                   this.isNavigating = false;
               }, 100);
@@ -45735,13 +46091,61 @@
           <!-- Navigation buttons above content -->
           <navigation-buttons
             .isPreviousDisabled=${this.currentStepIndex === 0}
-            .isContinueDisabled=${this.currentStepIndex >=
-            this.flatSteps.length - 1}
+            .isContinueDisabled=${this.isContinueButtonDisabled}
+            .continueDisabledTooltip=${this.continueButtonTooltip}
             .sectionsLength=${this.sections.length}
             @previous-clicked=${this.handleNavigationPrevious}
             @skip-clicked=${this.handleNavigationSkip}
             @continue-clicked=${this.handleNavigationContinue}
+            @continue-disabled-clicked=${this.handleNavigationContinueDisabledClick}
           ></navigation-buttons>
+
+          <!-- Validation Dialog for Incomplete Questions -->
+          <sl-dialog
+            label="Incomplete Questions"
+            @sl-after-hide=${this.hideValidationAlert}
+          >
+            <sl-icon slot="icon" name="exclamation-triangle" style="color: var(--sl-color-warning-600);"></sl-icon>
+            <p style="margin-top: 0;">
+              <strong>Please complete all required questions</strong>
+            </p>
+            <p>
+              You must answer all non-skipped questions before proceeding to
+              "Review & Submit". The following chapters have unanswered
+              questions:
+            </p>
+            <ul style="margin: 0.5rem 0 1rem 0; padding-left: 1.5rem;">
+              ${this.incompleteChapters.map((chapter) => x `
+                  <li>
+                    <a
+                      href="#"
+                      @click=${(e) => {
+            var _a;
+            e.preventDefault();
+            this.navigateToChapter(chapter.id);
+            // Close the dialog after navigation
+            const dialog = (_a = this.shadowRoot) === null || _a === void 0 ? void 0 : _a.querySelector('sl-dialog');
+            if (dialog) {
+                dialog.hide();
+            }
+        }}
+                      style="color: var(--sl-color-primary-600); text-decoration: underline; cursor: pointer;"
+                    >
+                      ${chapter.name}
+                    </a>
+                  </li>
+                `)}
+            </ul>
+            <sl-button slot="footer" variant="primary" @click=${() => {
+            var _a;
+            const dialog = (_a = this.shadowRoot) === null || _a === void 0 ? void 0 : _a.querySelector('sl-dialog');
+            if (dialog) {
+                dialog.hide();
+            }
+        }}>
+              Close
+            </sl-button>
+          </sl-dialog>
 
           <div class="card card-with-lock">
             ${this.renderLockIcon()}
@@ -45765,12 +46169,13 @@
           <!-- Navigation buttons below content -->
           <navigation-buttons
             .isPreviousDisabled=${this.currentStepIndex === 0}
-            .isContinueDisabled=${this.currentStepIndex >=
-            this.flatSteps.length - 1}
+            .isContinueDisabled=${this.isContinueButtonDisabled}
+            .continueDisabledTooltip=${this.continueButtonTooltip}
             .sectionsLength=${this.sections.length}
             @previous-clicked=${this.handleNavigationPrevious}
             @skip-clicked=${this.handleNavigationSkip}
             @continue-clicked=${this.handleNavigationContinue}
+            @continue-disabled-clicked=${this.handleNavigationContinueDisabledClick}
           ></navigation-buttons>
         </main>
       </div>
@@ -45802,6 +46207,15 @@
   __decorate([
       n$4({ type: Boolean, attribute: false })
   ], EFPEntryForm.prototype, "workbookLocked", void 0);
+  __decorate([
+      n$4({ type: Boolean, attribute: false })
+  ], EFPEntryForm.prototype, "showValidationAlert", void 0);
+  __decorate([
+      n$4({ type: Array, attribute: false })
+  ], EFPEntryForm.prototype, "incompleteChapters", void 0);
+  __decorate([
+      n$4({ type: Number, attribute: false })
+  ], EFPEntryForm.prototype, "responseUpdateCounter", void 0);
   __decorate([
       n$4({ type: Object })
   ], EFPEntryForm.prototype, "activeContent", void 0);
@@ -46226,7 +46640,7 @@
       };
     };
     // @ts-ignore
-    POWERPOD.version = '4.5.6';
+    POWERPOD.version = '4.5.7';
     // @ts-ignore
     window.powerpod = POWERPOD;
   }

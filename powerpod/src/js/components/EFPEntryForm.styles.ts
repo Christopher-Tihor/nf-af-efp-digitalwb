@@ -450,5 +450,24 @@ export const efpEntryFormStyles = css`
     transform: none;
     box-shadow: none;
   }
+
+  /* Validation alert styling */
+  sl-alert::part(base) {
+    font-family: var(--body-font);
+  }
+
+  sl-alert ul {
+    font-family: var(--body-font);
+  }
+
+  sl-alert a {
+    font-family: var(--body-font);
+    font-weight: 500;
+  }
+
+  sl-alert a:hover {
+    color: var(--sl-color-primary-700);
+    text-decoration: underline;
+  }
 `;
 

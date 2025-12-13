@@ -8,6 +8,8 @@ import '@shoelace-style/shoelace/dist/components/tab/tab.js';
 import '@shoelace-style/shoelace/dist/components/tab-panel/tab-panel.js';
 import '@shoelace-style/shoelace/dist/components/textarea/textarea.js';
 import '@shoelace-style/shoelace/dist/components/tooltip/tooltip.js';
+import '@shoelace-style/shoelace/dist/components/alert/alert.js';
+import '@shoelace-style/shoelace/dist/components/dialog/dialog.js';
 import { LitElement } from 'lit';
 import './NavigationButtons';
 import './RatingQuestion';
@@ -27,6 +29,12 @@ export declare class EFPEntryForm extends LitElement {
     questionnaireStoreLoaded: boolean;
     questionsAndResponsesLoaded: boolean;
     workbookLocked: boolean;
+    showValidationAlert: boolean;
+    incompleteChapters: Array<{
+        id: string;
+        name: string;
+    }>;
+    responseUpdateCounter: number;
     private isNavigating;
     activeContent: EFPActiveContent;
     tabGroupEl: HTMLElement & {
@@ -44,6 +52,10 @@ export declare class EFPEntryForm extends LitElement {
     private setupQuestionnaireStoreWatcher;
     private isWorkbookLocked;
     private updateWorkbookLockStatus;
+    private canAccessReviewAndSubmit;
+    private showIncompleteQuestionsAlert;
+    private hideValidationAlert;
+    private navigateToChapter;
     static styles: import("lit").CSSResult;
     private get sections();
     private renderQuestion;
@@ -74,6 +86,9 @@ export declare class EFPEntryForm extends LitElement {
     private handleNavigationPrevious;
     private handleNavigationSkip;
     private handleNavigationContinue;
+    private handleNavigationContinueDisabledClick;
+    private get isContinueButtonDisabled();
+    private get continueButtonTooltip();
     private handleSectionChange;
     private handleRatingChanged;
     private handleMultiselectChange;
