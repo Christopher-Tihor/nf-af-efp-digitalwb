@@ -1796,9 +1796,57 @@ export class EFPEntryForm extends LitElement {
       }, 100);
       this.requestUpdate();
     } else {
+      // No required unanswered questions found - all questions are complete
       logger.info({
-        message: 'No required unanswered questions found',
+        message: 'No required unanswered questions found - navigating to Review & Submit',
       });
+
+      // Check if all questions are complete (can access Review & Submit)
+      if (this.canAccessReviewAndSubmit()) {
+        // Navigate to Review & Submit section (section index 1)
+        const target = EFPNavigationUtils.navigateToSection(
+          1,
+          this.flatSteps,
+          this.sections
+        );
+
+        if (target) {
+          const step = this.flatSteps[target.stepIndex];
+
+          logger.info({
+            message: 'Navigating to Review & Submit section',
+            data: {
+              stepIndex: target.stepIndex,
+              stepLabel: step.label,
+            },
+          });
+
+          this.isNavigating = true;
+          this.currentStepIndex = target.stepIndex;
+          this.currentSectionIndex = target.sectionIndex;
+          this.activeContent = { title: step.label, content: step.content };
+          this.updateNavigationState(step.label);
+
+          // Scroll to top of main content
+          this.updateComplete.then(() => {
+            const mainContent = this.shadowRoot?.querySelector('main.main-content');
+            if (mainContent) {
+              mainContent.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+          });
+
+          setTimeout(() => {
+            this.isNavigating = false;
+          }, 100);
+          this.requestUpdate();
+        }
+      } else {
+        // Should not happen, but show alert just in case
+        logger.warn({
+          message: 'Cannot navigate to Review & Submit - incomplete questions',
+        });
+        this.showIncompleteQuestionsAlert();
+      }
     }
   }
 
