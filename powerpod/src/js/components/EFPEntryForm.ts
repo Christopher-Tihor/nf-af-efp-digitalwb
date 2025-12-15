@@ -1542,13 +1542,31 @@ export class EFPEntryForm extends LitElement {
       }
     }
 
-    const nextIndex = EFPNavigationUtils.findNextSelectableStep(
+    const currentStep = this.flatSteps[this.currentStepIndex];
+    let nextIndex = EFPNavigationUtils.findNextSelectableStep(
       this.currentStepIndex,
       this.flatSteps,
       this.sections
     );
     if (nextIndex != null) {
-      const nextStep = this.flatSteps[nextIndex];
+      let nextStep = this.flatSteps[nextIndex];
+
+      // When crossing section boundaries, navigate to the first content step in the new section
+      // This matches the behavior of clicking the section tab directly
+      if (currentStep && nextStep.sectionIndex !== currentStep.sectionIndex) {
+        const firstContentStep = EFPNavigationUtils.findFirstSelectableStepInSection(
+          nextStep.sectionIndex,
+          this.flatSteps,
+          this.sections
+        );
+        if (firstContentStep) {
+          logger.info({
+            message: `Crossing to section ${nextStep.sectionIndex}, navigating to first content step "${firstContentStep.step.label}"`,
+          });
+          nextIndex = firstContentStep.index;
+          nextStep = firstContentStep.step;
+        }
+      }
 
       // Block navigation to "Review & Submit" section if there are incomplete questions
       if (nextStep.sectionIndex === 1 && !this.canAccessReviewAndSubmit()) {
@@ -1561,7 +1579,6 @@ export class EFPEntryForm extends LitElement {
 
       // Check if next step has the same label and content as current step
       // This can happen with duplicate entries like "My Action Plan"
-      const currentStep = this.flatSteps[this.currentStepIndex];
       const isSameContent = currentStep &&
         currentStep.label === nextStep.label &&
         currentStep.content === nextStep.content;

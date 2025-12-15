@@ -42545,16 +42545,21 @@
           return false;
       }
       static findLastSelectableStepInSection(sectionIndex, flatSteps, sections) {
+          var _a;
           const stepsInSection = [];
           flatSteps.forEach((step, index) => {
               if (step.sectionIndex === sectionIndex) {
                   stepsInSection.push({ step, index });
               }
           });
+          // Get the section tab name to skip section header steps
+          const sectionTabName = (_a = sections[sectionIndex]) === null || _a === void 0 ? void 0 : _a.tab;
           for (let i = stepsInSection.length - 1; i >= 0; i--) {
               const { step, index } = stepsInSection[i];
               const isContainer = EFPNavigationUtils.isStepContainer(step, sections);
-              if (!isContainer) {
+              // Skip containers, section header steps (where label matches section tab), and steps starting with 'Section '
+              const isSectionHeader = step.label === sectionTabName;
+              if (!isContainer && !isSectionHeader && !step.label.startsWith('Section ')) {
                   logger$5.info({ message: `Found last selectable step in section ${sectionIndex}: "${step.label}" at index ${index}` });
                   return { step, index };
               }
@@ -42563,16 +42568,21 @@
           return null;
       }
       static findFirstSelectableStepInSection(sectionIndex, flatSteps, sections) {
+          var _a;
           const stepsInSection = [];
           flatSteps.forEach((step, index) => {
               if (step.sectionIndex === sectionIndex) {
                   stepsInSection.push({ step, index });
               }
           });
+          // Get the section tab name to skip section header steps
+          const sectionTabName = (_a = sections[sectionIndex]) === null || _a === void 0 ? void 0 : _a.tab;
           for (let i = 0; i < stepsInSection.length; i++) {
               const { step, index } = stepsInSection[i];
               const isContainer = EFPNavigationUtils.isStepContainer(step, sections);
-              if (!isContainer && !step.label.startsWith('Section ')) {
+              // Skip containers, section header steps (where label matches section tab), and steps starting with 'Section '
+              const isSectionHeader = step.label === sectionTabName;
+              if (!isContainer && !isSectionHeader && !step.label.startsWith('Section ')) {
                   logger$5.info({ message: `Found first selectable step in section ${sectionIndex}: "${step.label}" at index ${index}` });
                   return { step, index };
               }
@@ -42675,9 +42685,12 @@
           return result;
       }
       static findNextSelectableStep(currentIndex, flatSteps, sections) {
+          // Build a set of section tab names to skip section header steps
+          const sectionTabNames = new Set(sections.map(s => s.tab));
           for (let i = currentIndex + 1; i < flatSteps.length; i++) {
               const step = flatSteps[i];
-              if (!EFPNavigationUtils.isStepContainer(step, sections) && !step.label.startsWith('Section ')) {
+              const isSectionHeader = sectionTabNames.has(step.label);
+              if (!EFPNavigationUtils.isStepContainer(step, sections) && !isSectionHeader && !step.label.startsWith('Section ')) {
                   logger$5.info({ message: `Next selectable step: "${step.label}" at index ${i}` });
                   return i;
               }
@@ -42686,9 +42699,12 @@
           return null;
       }
       static findPreviousSelectableStep(currentIndex, flatSteps, sections) {
+          // Build a set of section tab names to skip section header steps
+          const sectionTabNames = new Set(sections.map(s => s.tab));
           for (let i = currentIndex - 1; i >= 0; i--) {
               const step = flatSteps[i];
-              if (!EFPNavigationUtils.isStepContainer(step, sections) && !step.label.startsWith('Section ')) {
+              const isSectionHeader = sectionTabNames.has(step.label);
+              if (!EFPNavigationUtils.isStepContainer(step, sections) && !isSectionHeader && !step.label.startsWith('Section ')) {
                   logger$5.info({ message: `Previous selectable step: "${step.label}" at index ${i}` });
                   return i;
               }
@@ -44702,9 +44718,22 @@
                   return; // Don't proceed with navigation if we can't find current position
               }
           }
-          const nextIndex = EFPNavigationUtils.findNextSelectableStep(this.currentStepIndex, this.flatSteps, this.sections);
+          const currentStep = this.flatSteps[this.currentStepIndex];
+          let nextIndex = EFPNavigationUtils.findNextSelectableStep(this.currentStepIndex, this.flatSteps, this.sections);
           if (nextIndex != null) {
-              const nextStep = this.flatSteps[nextIndex];
+              let nextStep = this.flatSteps[nextIndex];
+              // When crossing section boundaries, navigate to the first content step in the new section
+              // This matches the behavior of clicking the section tab directly
+              if (currentStep && nextStep.sectionIndex !== currentStep.sectionIndex) {
+                  const firstContentStep = EFPNavigationUtils.findFirstSelectableStepInSection(nextStep.sectionIndex, this.flatSteps, this.sections);
+                  if (firstContentStep) {
+                      logger$4.info({
+                          message: `Crossing to section ${nextStep.sectionIndex}, navigating to first content step "${firstContentStep.step.label}"`,
+                      });
+                      nextIndex = firstContentStep.index;
+                      nextStep = firstContentStep.step;
+                  }
+              }
               // Block navigation to "Review & Submit" section if there are incomplete questions
               if (nextStep.sectionIndex === 1 && !this.canAccessReviewAndSubmit()) {
                   this.showIncompleteQuestionsAlert();
@@ -44715,7 +44744,6 @@
               }
               // Check if next step has the same label and content as current step
               // This can happen with duplicate entries like "My Action Plan"
-              const currentStep = this.flatSteps[this.currentStepIndex];
               const isSameContent = currentStep &&
                   currentStep.label === nextStep.label &&
                   currentStep.content === nextStep.content;

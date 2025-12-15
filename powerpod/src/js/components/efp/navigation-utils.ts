@@ -63,11 +63,16 @@ export class EFPNavigationUtils {
       }
     });
 
+    // Get the section tab name to skip section header steps
+    const sectionTabName = sections[sectionIndex]?.tab;
+
     for (let i = stepsInSection.length - 1; i >= 0; i--) {
       const { step, index } = stepsInSection[i];
       const isContainer = EFPNavigationUtils.isStepContainer(step, sections);
 
-      if (!isContainer) {
+      // Skip containers, section header steps (where label matches section tab), and steps starting with 'Section '
+      const isSectionHeader = step.label === sectionTabName;
+      if (!isContainer && !isSectionHeader && !step.label.startsWith('Section ')) {
         logger.info({ message: `Found last selectable step in section ${sectionIndex}: "${step.label}" at index ${index}` });
         return { step, index };
       }
@@ -90,11 +95,16 @@ export class EFPNavigationUtils {
       }
     });
 
+    // Get the section tab name to skip section header steps
+    const sectionTabName = sections[sectionIndex]?.tab;
+
     for (let i = 0; i < stepsInSection.length; i++) {
       const { step, index } = stepsInSection[i];
       const isContainer = EFPNavigationUtils.isStepContainer(step, sections);
 
-      if (!isContainer && !step.label.startsWith('Section ')) {
+      // Skip containers, section header steps (where label matches section tab), and steps starting with 'Section '
+      const isSectionHeader = step.label === sectionTabName;
+      if (!isContainer && !isSectionHeader && !step.label.startsWith('Section ')) {
         logger.info({ message: `Found first selectable step in section ${sectionIndex}: "${step.label}" at index ${index}` });
         return { step, index };
       }
@@ -221,9 +231,13 @@ export class EFPNavigationUtils {
     flatSteps: EFPStep[],
     sections: EFPSection[]
   ): number | null {
+    // Build a set of section tab names to skip section header steps
+    const sectionTabNames = new Set(sections.map(s => s.tab));
+
     for (let i = currentIndex + 1; i < flatSteps.length; i++) {
       const step = flatSteps[i];
-      if (!EFPNavigationUtils.isStepContainer(step, sections) && !step.label.startsWith('Section ')) {
+      const isSectionHeader = sectionTabNames.has(step.label);
+      if (!EFPNavigationUtils.isStepContainer(step, sections) && !isSectionHeader && !step.label.startsWith('Section ')) {
         logger.info({ message: `Next selectable step: "${step.label}" at index ${i}` });
         return i;
       }
@@ -237,9 +251,13 @@ export class EFPNavigationUtils {
     flatSteps: EFPStep[],
     sections: EFPSection[]
   ): number | null {
+    // Build a set of section tab names to skip section header steps
+    const sectionTabNames = new Set(sections.map(s => s.tab));
+
     for (let i = currentIndex - 1; i >= 0; i--) {
       const step = flatSteps[i];
-      if (!EFPNavigationUtils.isStepContainer(step, sections) && !step.label.startsWith('Section ')) {
+      const isSectionHeader = sectionTabNames.has(step.label);
+      if (!EFPNavigationUtils.isStepContainer(step, sections) && !isSectionHeader && !step.label.startsWith('Section ')) {
         logger.info({ message: `Previous selectable step: "${step.label}" at index ${i}` });
         return i;
       }
