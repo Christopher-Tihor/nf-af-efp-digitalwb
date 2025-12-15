@@ -38047,7 +38047,6 @@
           super(...arguments);
           this.isPreviousDisabled = false;
           this.isContinueDisabled = false;
-          this.continueDisabledTooltip = '';
           this.sectionsLength = 0;
       }
       handlePrevious() {
@@ -38069,31 +38068,7 @@
               composed: true
           }));
       }
-      handleContinueWrapperClick(e) {
-          // Only handle clicks when button is actually disabled
-          // When enabled, let the button's own click handler fire
-          if (!this.isContinueDisabled) {
-              return;
-          }
-          // Button is disabled, prevent default and show validation
-          e.preventDefault();
-          e.stopPropagation();
-          this.dispatchEvent(new CustomEvent('continue-disabled-clicked', {
-              bubbles: true,
-              composed: true
-          }));
-      }
       render() {
-          const continueButton = x `
-      <sl-button
-        variant="primary"
-        size="large"
-        ?disabled=${this.isContinueDisabled}
-        @click=${this.handleContinue}
-      >
-        Continue
-      </sl-button>
-    `;
           return x `
       <div class="navigation-card">
         <sl-button
@@ -38113,22 +38088,14 @@
           Skip to Next Required Step
         </sl-button>
 
-        ${this.isContinueDisabled && this.continueDisabledTooltip
-            ? x `
-              <sl-tooltip
-                content=${this.continueDisabledTooltip}
-                placement="top"
-                hoist
-              >
-                <div
-                  class="continue-button-wrapper"
-                  @click=${this.handleContinueWrapperClick}
-                >
-                  ${continueButton}
-                </div>
-              </sl-tooltip>
-            `
-            : continueButton}
+        <sl-button
+          variant="primary"
+          size="large"
+          ?disabled=${this.isContinueDisabled}
+          @click=${this.handleContinue}
+        >
+          Continue
+        </sl-button>
       </div>
     `;
       }
@@ -38146,10 +38113,6 @@
       box-shadow: var(--sl-shadow-x-small);
     }
 
-    .continue-button-wrapper {
-      display: inline-block;
-    }
-
     @media (max-width: 768px) {
       .navigation-card {
         flex-direction: column;
@@ -38157,10 +38120,6 @@
       }
 
       sl-button {
-        width: 100%;
-      }
-
-      .continue-button-wrapper {
         width: 100%;
       }
     }
@@ -38171,9 +38130,6 @@
   __decorate([
       n$4({ type: Boolean })
   ], NavigationButtons.prototype, "isContinueDisabled", void 0);
-  __decorate([
-      n$4({ type: String })
-  ], NavigationButtons.prototype, "continueDisabledTooltip", void 0);
   __decorate([
       n$4({ type: Number })
   ], NavigationButtons.prototype, "sectionsLength", void 0);
@@ -43122,11 +43078,31 @@
     background-color: var(--sl-color-neutral-50);
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     font-family: var(--body-font);
+    transition: all 0.3s ease;
   }
 
   .question-container.question-disabled {
     pointer-events: none;
     user-select: none;
+  }
+
+  .question-container.question-highlight {
+    background-color: var(--sl-color-warning-100);
+    border: 2px solid var(--sl-color-warning-500);
+    box-shadow: 0 0 0 3px var(--sl-color-warning-200);
+    animation: pulse-highlight 0.5s ease-in-out;
+  }
+
+  @keyframes pulse-highlight {
+    0% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.02);
+    }
+    100% {
+      transform: scale(1);
+    }
   }
 
   .question-label {
@@ -43650,30 +43626,6 @@
       hideValidationAlert() {
           this.showValidationAlert = false;
       }
-      // Navigate to a specific chapter by ID
-      navigateToChapter(chapterId) {
-          logger$4.info({
-              message: 'Navigating to chapter from validation alert',
-              data: { chapterId },
-          });
-          // Hide the alert
-          this.hideValidationAlert();
-          // Find the step index for this chapter
-          const stepIndex = this.flatSteps.findIndex(step => {
-              var _a, _b;
-              return step.chapterId === chapterId ||
-                  ((_a = step.chapterData) === null || _a === void 0 ? void 0 : _a.id) === chapterId ||
-                  ((_b = step.subchapterData) === null || _b === void 0 ? void 0 : _b.id) === chapterId;
-          });
-          if (stepIndex !== -1) {
-              const step = this.flatSteps[stepIndex];
-              this.currentStepIndex = stepIndex;
-              this.currentSectionIndex = 0; // My Workbook section
-              this.activeContent = { title: step.label, content: step.content };
-              this.updateNavigationState(step.label);
-              this.requestUpdate();
-          }
-      }
       get sections() {
           return [
               {
@@ -43701,7 +43653,10 @@
           // Check if this question is disabled (in a skipped chapter)
           const isDisabled = this.isQuestionDisabled(question.id);
           return x `
-      <div class="question-container ${isDisabled ? 'question-disabled' : ''}">
+      <div
+        class="question-container ${isDisabled ? 'question-disabled' : ''}"
+        data-question-id="${question.id}"
+      >
         ${question.textAboveQuestion
             ? x `
               <div class="question-text">
@@ -44750,35 +44705,13 @@
           const nextIndex = EFPNavigationUtils.findNextSelectableStep(this.currentStepIndex, this.flatSteps, this.sections);
           if (nextIndex != null) {
               const nextStep = this.flatSteps[nextIndex];
-              // Check if trying to navigate to "Review & Submit" section (section index 1)
+              // Block navigation to "Review & Submit" section if there are incomplete questions
               if (nextStep.sectionIndex === 1 && !this.canAccessReviewAndSubmit()) {
-                  // Prevent navigation and show alert
                   this.showIncompleteQuestionsAlert();
                   logger$4.info({
                       message: 'Prevented navigation to Review & Submit - incomplete questions',
-                      data: {
-                          incompleteChaptersCount: this.incompleteChapters.length,
-                          incompleteChapters: this.incompleteChapters
-                      },
                   });
                   return;
-              }
-              // Also check if the step AFTER the next step would be "Review & Submit"
-              // This handles the case where we're navigating to the last step before Review & Submit
-              if (nextStep.sectionIndex === 0) {
-                  const stepAfterNext = this.flatSteps[nextIndex + 1];
-                  if ((stepAfterNext === null || stepAfterNext === void 0 ? void 0 : stepAfterNext.sectionIndex) === 1 && !this.canAccessReviewAndSubmit()) {
-                      // Show alert but allow navigation (user is going to the last step)
-                      this.showIncompleteQuestionsAlert();
-                      logger$4.info({
-                          message: 'Showing alert when navigating to last step before Review & Submit',
-                          data: {
-                              incompleteChaptersCount: this.incompleteChapters.length,
-                              incompleteChapters: this.incompleteChapters
-                          },
-                      });
-                      // Continue with navigation below
-                  }
               }
               // Check if next step has the same label and content as current step
               // This can happen with duplicate entries like "My Action Plan"
@@ -44794,6 +44727,14 @@
                   const nextNextIndex = EFPNavigationUtils.findNextSelectableStep(nextIndex, this.flatSteps, this.sections);
                   if (nextNextIndex != null) {
                       const nextNextStep = this.flatSteps[nextNextIndex];
+                      // Block navigation to "Review & Submit" section if there are incomplete questions
+                      if (nextNextStep.sectionIndex === 1 && !this.canAccessReviewAndSubmit()) {
+                          this.showIncompleteQuestionsAlert();
+                          logger$4.info({
+                              message: 'Prevented navigation to Review & Submit - incomplete questions',
+                          });
+                          return;
+                      }
                       this.isNavigating = true;
                       this.currentStepIndex = nextNextIndex;
                       this.currentSectionIndex = nextNextStep.sectionIndex;
@@ -44871,8 +44812,8 @@
               }
               // Get all questions for this chapter
               const questions = this.getQuestionsForCurrentChapter(chapterId);
-              // Check if this chapter has any unanswered, non-skipped questions
-              const hasUnansweredRequired = questions.some((question) => {
+              // Find the first unanswered, non-skipped question in this chapter
+              const firstUnansweredQuestion = questions.find((question) => {
                   var _a, _b;
                   const entry = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.get(question.id);
                   const isSkipped = ((_a = entry === null || entry === void 0 ? void 0 : entry.response) === null || _a === void 0 ? void 0 : _a.quartech_chapterskipped) === 100000000;
@@ -44881,16 +44822,17 @@
                   // Question is required and unanswered if it's not skipped AND has no response
                   return !isSkipped && !hasResponse;
               });
-              if (hasUnansweredRequired) {
+              if (firstUnansweredQuestion) {
                   logger$4.info({
                       message: 'Found next required step with unanswered questions',
                       data: {
                           stepIndex: i,
                           stepLabel: step.label,
                           chapterId,
+                          questionId: firstUnansweredQuestion.id,
                       },
                   });
-                  return i;
+                  return { stepIndex: i, questionId: firstUnansweredQuestion.id };
               }
           }
           logger$4.info({
@@ -44904,28 +44846,53 @@
       }
       handleNavigationSkip(event) {
           // Find the next required question that hasn't been skipped or completed
-          const nextRequiredStepIndex = this.findNextRequiredStep();
-          if (nextRequiredStepIndex !== null) {
-              const nextStep = this.flatSteps[nextRequiredStepIndex];
+          const result = this.findNextRequiredStep();
+          if (result !== null) {
+              const { stepIndex, questionId } = result;
+              const nextStep = this.flatSteps[stepIndex];
               logger$4.info({
                   message: 'Navigating to next required step',
                   data: {
-                      stepIndex: nextRequiredStepIndex,
+                      stepIndex,
                       stepLabel: nextStep.label,
+                      questionId,
                   },
               });
               this.isNavigating = true;
-              this.currentStepIndex = nextRequiredStepIndex;
+              this.currentStepIndex = stepIndex;
               this.currentSectionIndex = nextStep.sectionIndex;
               this.activeContent = { title: nextStep.label, content: nextStep.content };
               this.updateNavigationState(nextStep.label);
-              // Scroll to top of main content to provide visual feedback
+              // Scroll to and highlight the specific question
               this.updateComplete.then(() => {
-                  var _a;
-                  const mainContent = (_a = this.shadowRoot) === null || _a === void 0 ? void 0 : _a.querySelector('main.main-content');
-                  if (mainContent) {
-                      mainContent.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                  }
+                  // Small delay to ensure DOM is fully rendered
+                  setTimeout(() => {
+                      var _a;
+                      const questionElement = (_a = this.shadowRoot) === null || _a === void 0 ? void 0 : _a.querySelector(`[data-question-id="${questionId}"]`);
+                      if (questionElement) {
+                          // Add highlight class
+                          questionElement.classList.add('question-highlight');
+                          // Scroll to the question with some offset for better visibility
+                          questionElement.scrollIntoView({
+                              behavior: 'smooth',
+                              block: 'center'
+                          });
+                          // Remove highlight after 3 seconds
+                          setTimeout(() => {
+                              questionElement.classList.remove('question-highlight');
+                          }, 3000);
+                          logger$4.info({
+                              message: 'Scrolled to and highlighted question',
+                              data: { questionId },
+                          });
+                      }
+                      else {
+                          logger$4.warn({
+                              message: 'Could not find question element to scroll to',
+                              data: { questionId },
+                          });
+                      }
+                  }, 200);
               });
               setTimeout(() => {
                   this.isNavigating = false;
@@ -44939,62 +44906,13 @@
           }
       }
       handleNavigationContinue() {
-          // Force a fresh validation check before proceeding
-          // This ensures we have the latest state even if the UI hasn't fully updated
-          const canProceed = this.canAccessReviewAndSubmit();
-          const nextIndex = this.currentStepIndex + 1;
-          const nextStep = this.flatSteps[nextIndex];
-          // If next step is Review & Submit and validation fails, show alert instead
-          if ((nextStep === null || nextStep === void 0 ? void 0 : nextStep.sectionIndex) === 1 && !canProceed) {
-              this.showIncompleteQuestionsAlert();
-              return;
-          }
-          // Also check if step after next would be Review & Submit
-          if ((nextStep === null || nextStep === void 0 ? void 0 : nextStep.sectionIndex) === 0) {
-              const stepAfterNext = this.flatSteps[nextIndex + 1];
-              if ((stepAfterNext === null || stepAfterNext === void 0 ? void 0 : stepAfterNext.sectionIndex) === 1 && !canProceed) {
-                  // Show alert but allow navigation
-                  this.showIncompleteQuestionsAlert();
-              }
-          }
+          // goToNext handles all validation including Review & Submit blocking
           this.goToNext();
       }
-      handleNavigationContinueDisabledClick() {
-          // Show the validation alert when user clicks disabled Continue button
-          this.showIncompleteQuestionsAlert();
-      }
-      // Compute if Continue button should be disabled
+      // Compute if Continue button should be disabled - only at the very last step
       get isContinueButtonDisabled() {
-          // Reference responseUpdateCounter to ensure re-evaluation when responses change
-          void this.responseUpdateCounter;
-          // Check if we're at the last step
-          if (this.currentStepIndex >= this.flatSteps.length - 1) {
-              return true;
-          }
-          // Check if next step would be in "Review & Submit" section
-          const nextIndex = this.currentStepIndex + 1;
-          const nextStep = this.flatSteps[nextIndex];
-          const wouldBeReviewSection = (nextStep === null || nextStep === void 0 ? void 0 : nextStep.sectionIndex) === 1;
-          // Always do a fresh validation check - don't cache the result
-          const canAccess = this.canAccessReviewAndSubmit();
-          if (wouldBeReviewSection && !canAccess) {
-              return true;
-          }
-          return false;
-      }
-      // Get tooltip message for disabled Continue button
-      get continueButtonTooltip() {
-          // Reference responseUpdateCounter to ensure re-evaluation when responses change
-          void this.responseUpdateCounter;
-          if (this.currentStepIndex >= this.flatSteps.length - 1) {
-              return '';
-          }
-          const nextIndex = this.currentStepIndex + 1;
-          const nextStep = this.flatSteps[nextIndex];
-          if ((nextStep === null || nextStep === void 0 ? void 0 : nextStep.sectionIndex) === 1 && !this.canAccessReviewAndSubmit()) {
-              return 'Complete all non-skipped questions before proceeding to Review & Submit. Click this button to see which chapters are incomplete.';
-          }
-          return '';
+          // Only disable at the last step
+          return this.currentStepIndex >= this.flatSteps.length - 1;
       }
       // Section navigation event handler
       handleSectionChange(newSectionIndex) {
@@ -46190,12 +46108,10 @@
           <navigation-buttons
             .isPreviousDisabled=${this.currentStepIndex === 0}
             .isContinueDisabled=${this.isContinueButtonDisabled}
-            .continueDisabledTooltip=${this.continueButtonTooltip}
             .sectionsLength=${this.sections.length}
             @previous-clicked=${this.handleNavigationPrevious}
             @skip-clicked=${this.handleNavigationSkip}
             @continue-clicked=${this.handleNavigationContinue}
-            @continue-disabled-clicked=${this.handleNavigationContinueDisabledClick}
           ></navigation-buttons>
 
           <!-- Validation Dialog for Incomplete Questions -->
@@ -46209,38 +46125,36 @@
             </p>
             <p>
               You must answer all non-skipped questions before proceeding to
-              "Review & Submit". The following chapters have unanswered
-              questions:
+              "Review & Submit".
             </p>
-            <ul style="margin: 0.5rem 0 1rem 0; padding-left: 1.5rem;">
-              ${this.incompleteChapters.map((chapter) => x `
-                  <li>
-                    <a
-                      href="#"
-                      @click=${(e) => {
+            <sl-button
+              slot="footer"
+              variant="primary"
+              @click=${() => {
             var _a;
-            e.preventDefault();
-            this.navigateToChapter(chapter.id);
-            // Close the dialog after navigation
+            // Close the dialog
+            const dialog = (_a = this.shadowRoot) === null || _a === void 0 ? void 0 : _a.querySelector('sl-dialog');
+            if (dialog) {
+                dialog.hide();
+            }
+            // Navigate to the next required step
+            this.handleNavigationSkip(new CustomEvent('skip-clicked'));
+        }}
+            >
+              <sl-icon slot="prefix" name="arrow-right-circle"></sl-icon>
+              Skip to Next Required Step
+            </sl-button>
+            <sl-button
+              slot="footer"
+              variant="default"
+              @click=${() => {
+            var _a;
             const dialog = (_a = this.shadowRoot) === null || _a === void 0 ? void 0 : _a.querySelector('sl-dialog');
             if (dialog) {
                 dialog.hide();
             }
         }}
-                      style="color: var(--sl-color-primary-600); text-decoration: underline; cursor: pointer;"
-                    >
-                      ${chapter.name}
-                    </a>
-                  </li>
-                `)}
-            </ul>
-            <sl-button slot="footer" variant="primary" @click=${() => {
-            var _a;
-            const dialog = (_a = this.shadowRoot) === null || _a === void 0 ? void 0 : _a.querySelector('sl-dialog');
-            if (dialog) {
-                dialog.hide();
-            }
-        }}>
+            >
               Close
             </sl-button>
           </sl-dialog>
@@ -46268,12 +46182,10 @@
           <navigation-buttons
             .isPreviousDisabled=${this.currentStepIndex === 0}
             .isContinueDisabled=${this.isContinueButtonDisabled}
-            .continueDisabledTooltip=${this.continueButtonTooltip}
             .sectionsLength=${this.sections.length}
             @previous-clicked=${this.handleNavigationPrevious}
             @skip-clicked=${this.handleNavigationSkip}
             @continue-clicked=${this.handleNavigationContinue}
-            @continue-disabled-clicked=${this.handleNavigationContinueDisabledClick}
           ></navigation-buttons>
         </main>
       </div>

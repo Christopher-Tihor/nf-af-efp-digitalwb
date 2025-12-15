@@ -1,12 +1,10 @@
 import { LitElement, html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import '@shoelace-style/shoelace/dist/components/tooltip/tooltip.js';
 
 @customElement('navigation-buttons')
 export class NavigationButtons extends LitElement {
   @property({ type: Boolean }) isPreviousDisabled = false;
   @property({ type: Boolean }) isContinueDisabled = false;
-  @property({ type: String }) continueDisabledTooltip = '';
   @property({ type: Number }) sectionsLength = 0;
 
   static styles = css`
@@ -22,10 +20,6 @@ export class NavigationButtons extends LitElement {
       box-shadow: var(--sl-shadow-x-small);
     }
 
-    .continue-button-wrapper {
-      display: inline-block;
-    }
-
     @media (max-width: 768px) {
       .navigation-card {
         flex-direction: column;
@@ -33,10 +27,6 @@ export class NavigationButtons extends LitElement {
       }
 
       sl-button {
-        width: 100%;
-      }
-
-      .continue-button-wrapper {
         width: 100%;
       }
     }
@@ -64,34 +54,7 @@ export class NavigationButtons extends LitElement {
     }));
   }
 
-  private handleContinueWrapperClick(e: Event) {
-    // Only handle clicks when button is actually disabled
-    // When enabled, let the button's own click handler fire
-    if (!this.isContinueDisabled) {
-      return;
-    }
-
-    // Button is disabled, prevent default and show validation
-    e.preventDefault();
-    e.stopPropagation();
-    this.dispatchEvent(new CustomEvent('continue-disabled-clicked', {
-      bubbles: true,
-      composed: true
-    }));
-  }
-
   render() {
-    const continueButton = html`
-      <sl-button
-        variant="primary"
-        size="large"
-        ?disabled=${this.isContinueDisabled}
-        @click=${this.handleContinue}
-      >
-        Continue
-      </sl-button>
-    `;
-
     return html`
       <div class="navigation-card">
         <sl-button
@@ -111,22 +74,14 @@ export class NavigationButtons extends LitElement {
           Skip to Next Required Step
         </sl-button>
 
-        ${this.isContinueDisabled && this.continueDisabledTooltip
-          ? html`
-              <sl-tooltip
-                content=${this.continueDisabledTooltip}
-                placement="top"
-                hoist
-              >
-                <div
-                  class="continue-button-wrapper"
-                  @click=${this.handleContinueWrapperClick}
-                >
-                  ${continueButton}
-                </div>
-              </sl-tooltip>
-            `
-          : continueButton}
+        <sl-button
+          variant="primary"
+          size="large"
+          ?disabled=${this.isContinueDisabled}
+          @click=${this.handleContinue}
+        >
+          Continue
+        </sl-button>
       </div>
     `;
   }

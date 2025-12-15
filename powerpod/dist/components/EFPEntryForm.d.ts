@@ -55,7 +55,6 @@ export declare class EFPEntryForm extends LitElement {
     private canAccessReviewAndSubmit;
     private showIncompleteQuestionsAlert;
     private hideValidationAlert;
-    private navigateToChapter;
     static styles: import("lit").CSSResult;
     private get sections();
     private renderQuestion;
@@ -87,9 +86,7 @@ export declare class EFPEntryForm extends LitElement {
     private handleNavigationPrevious;
     private handleNavigationSkip;
     private handleNavigationContinue;
-    private handleNavigationContinueDisabledClick;
     private get isContinueButtonDisabled();
-    private get continueButtonTooltip();
     private handleSectionChange;
     private handleRatingChanged;
     private handleMultiselectChange;

@@ -137,11 +137,31 @@ export const efpEntryFormStyles = css`
     background-color: var(--sl-color-neutral-50);
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     font-family: var(--body-font);
+    transition: all 0.3s ease;
   }
 
   .question-container.question-disabled {
     pointer-events: none;
     user-select: none;
+  }
+
+  .question-container.question-highlight {
+    background-color: var(--sl-color-warning-100);
+    border: 2px solid var(--sl-color-warning-500);
+    box-shadow: 0 0 0 3px var(--sl-color-warning-200);
+    animation: pulse-highlight 0.5s ease-in-out;
+  }
+
+  @keyframes pulse-highlight {
+    0% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.02);
+    }
+    100% {
+      transform: scale(1);
+    }
   }
 
   .question-label {

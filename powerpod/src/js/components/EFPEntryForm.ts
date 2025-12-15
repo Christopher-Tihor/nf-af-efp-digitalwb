@@ -294,33 +294,6 @@ export class EFPEntryForm extends LitElement {
     this.showValidationAlert = false;
   }
 
-  // Navigate to a specific chapter by ID
-  private navigateToChapter(chapterId: string) {
-    logger.info({
-      message: 'Navigating to chapter from validation alert',
-      data: { chapterId },
-    });
-
-    // Hide the alert
-    this.hideValidationAlert();
-
-    // Find the step index for this chapter
-    const stepIndex = this.flatSteps.findIndex(step =>
-      step.chapterId === chapterId ||
-      step.chapterData?.id === chapterId ||
-      step.subchapterData?.id === chapterId
-    );
-
-    if (stepIndex !== -1) {
-      const step = this.flatSteps[stepIndex];
-      this.currentStepIndex = stepIndex;
-      this.currentSectionIndex = 0; // My Workbook section
-      this.activeContent = { title: step.label, content: step.content };
-      this.updateNavigationState(step.label);
-      this.requestUpdate();
-    }
-  }
-
   static styles = efpEntryFormStyles;
 
   private get sections(): EFPSection[] {
@@ -355,7 +328,10 @@ export class EFPEntryForm extends LitElement {
     const isDisabled = this.isQuestionDisabled(question.id);
 
     return html`
-      <div class="question-container ${isDisabled ? 'question-disabled' : ''}">
+      <div
+        class="question-container ${isDisabled ? 'question-disabled' : ''}"
+        data-question-id="${question.id}"
+      >
         ${question.textAboveQuestion
           ? html`
               <div class="question-text">
@@ -1574,39 +1550,13 @@ export class EFPEntryForm extends LitElement {
     if (nextIndex != null) {
       const nextStep = this.flatSteps[nextIndex];
 
-      // Check if trying to navigate to "Review & Submit" section (section index 1)
+      // Block navigation to "Review & Submit" section if there are incomplete questions
       if (nextStep.sectionIndex === 1 && !this.canAccessReviewAndSubmit()) {
-        // Prevent navigation and show alert
         this.showIncompleteQuestionsAlert();
-
         logger.info({
           message: 'Prevented navigation to Review & Submit - incomplete questions',
-          data: {
-            incompleteChaptersCount: this.incompleteChapters.length,
-            incompleteChapters: this.incompleteChapters
-          },
         });
-
         return;
-      }
-
-      // Also check if the step AFTER the next step would be "Review & Submit"
-      // This handles the case where we're navigating to the last step before Review & Submit
-      if (nextStep.sectionIndex === 0) {
-        const stepAfterNext = this.flatSteps[nextIndex + 1];
-        if (stepAfterNext?.sectionIndex === 1 && !this.canAccessReviewAndSubmit()) {
-          // Show alert but allow navigation (user is going to the last step)
-          this.showIncompleteQuestionsAlert();
-
-          logger.info({
-            message: 'Showing alert when navigating to last step before Review & Submit',
-            data: {
-              incompleteChaptersCount: this.incompleteChapters.length,
-              incompleteChapters: this.incompleteChapters
-            },
-          });
-          // Continue with navigation below
-        }
       }
 
       // Check if next step has the same label and content as current step
@@ -1630,6 +1580,16 @@ export class EFPEntryForm extends LitElement {
 
         if (nextNextIndex != null) {
           const nextNextStep = this.flatSteps[nextNextIndex];
+
+          // Block navigation to "Review & Submit" section if there are incomplete questions
+          if (nextNextStep.sectionIndex === 1 && !this.canAccessReviewAndSubmit()) {
+            this.showIncompleteQuestionsAlert();
+            logger.info({
+              message: 'Prevented navigation to Review & Submit - incomplete questions',
+            });
+            return;
+          }
+
           this.isNavigating = true;
           this.currentStepIndex = nextNextIndex;
           this.currentSectionIndex = nextNextStep.sectionIndex;
@@ -1674,7 +1634,7 @@ export class EFPEntryForm extends LitElement {
   }
 
   // Find the next required step (earliest unanswered, non-skipped question)
-  private findNextRequiredStep(): number | null {
+  private findNextRequiredStep(): { stepIndex: number; questionId: string } | null {
     if (!POWERPOD.workbookQuestionsAndResponses.isLoaded) {
       logger.warn({
         message: 'Cannot find next required step: workbook questions and responses not loaded',
@@ -1719,8 +1679,8 @@ export class EFPEntryForm extends LitElement {
       // Get all questions for this chapter
       const questions = this.getQuestionsForCurrentChapter(chapterId);
 
-      // Check if this chapter has any unanswered, non-skipped questions
-      const hasUnansweredRequired = questions.some((question: any) => {
+      // Find the first unanswered, non-skipped question in this chapter
+      const firstUnansweredQuestion = questions.find((question: any) => {
         const entry = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.get(question.id);
         const isSkipped = entry?.response?.quartech_chapterskipped === 100000000;
         const hasResponse = entry?.response?.quartech_response &&
@@ -1730,16 +1690,17 @@ export class EFPEntryForm extends LitElement {
         return !isSkipped && !hasResponse;
       });
 
-      if (hasUnansweredRequired) {
+      if (firstUnansweredQuestion) {
         logger.info({
           message: 'Found next required step with unanswered questions',
           data: {
             stepIndex: i,
             stepLabel: step.label,
             chapterId,
+            questionId: firstUnansweredQuestion.id,
           },
         });
-        return i;
+        return { stepIndex: i, questionId: firstUnansweredQuestion.id };
       }
     }
 
@@ -1756,31 +1717,61 @@ export class EFPEntryForm extends LitElement {
 
   private handleNavigationSkip(event: CustomEvent) {
     // Find the next required question that hasn't been skipped or completed
-    const nextRequiredStepIndex = this.findNextRequiredStep();
+    const result = this.findNextRequiredStep();
 
-    if (nextRequiredStepIndex !== null) {
-      const nextStep = this.flatSteps[nextRequiredStepIndex];
+    if (result !== null) {
+      const { stepIndex, questionId } = result;
+      const nextStep = this.flatSteps[stepIndex];
 
       logger.info({
         message: 'Navigating to next required step',
         data: {
-          stepIndex: nextRequiredStepIndex,
+          stepIndex,
           stepLabel: nextStep.label,
+          questionId,
         },
       });
 
       this.isNavigating = true;
-      this.currentStepIndex = nextRequiredStepIndex;
+      this.currentStepIndex = stepIndex;
       this.currentSectionIndex = nextStep.sectionIndex;
       this.activeContent = { title: nextStep.label, content: nextStep.content };
       this.updateNavigationState(nextStep.label);
 
-      // Scroll to top of main content to provide visual feedback
+      // Scroll to and highlight the specific question
       this.updateComplete.then(() => {
-        const mainContent = this.shadowRoot?.querySelector('main.main-content');
-        if (mainContent) {
-          mainContent.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
+        // Small delay to ensure DOM is fully rendered
+        setTimeout(() => {
+          const questionElement = this.shadowRoot?.querySelector(
+            `[data-question-id="${questionId}"]`
+          ) as HTMLElement;
+
+          if (questionElement) {
+            // Add highlight class
+            questionElement.classList.add('question-highlight');
+
+            // Scroll to the question with some offset for better visibility
+            questionElement.scrollIntoView({
+              behavior: 'smooth',
+              block: 'center'
+            });
+
+            // Remove highlight after 3 seconds
+            setTimeout(() => {
+              questionElement.classList.remove('question-highlight');
+            }, 3000);
+
+            logger.info({
+              message: 'Scrolled to and highlighted question',
+              data: { questionId },
+            });
+          } else {
+            logger.warn({
+              message: 'Could not find question element to scroll to',
+              data: { questionId },
+            });
+          }
+        }, 200);
       });
 
       setTimeout(() => {
@@ -1795,76 +1786,14 @@ export class EFPEntryForm extends LitElement {
   }
 
   private handleNavigationContinue() {
-    // Force a fresh validation check before proceeding
-    // This ensures we have the latest state even if the UI hasn't fully updated
-    const canProceed = this.canAccessReviewAndSubmit();
-    const nextIndex = this.currentStepIndex + 1;
-    const nextStep = this.flatSteps[nextIndex];
-
-    // If next step is Review & Submit and validation fails, show alert instead
-    if (nextStep?.sectionIndex === 1 && !canProceed) {
-      this.showIncompleteQuestionsAlert();
-      return;
-    }
-
-    // Also check if step after next would be Review & Submit
-    if (nextStep?.sectionIndex === 0) {
-      const stepAfterNext = this.flatSteps[nextIndex + 1];
-      if (stepAfterNext?.sectionIndex === 1 && !canProceed) {
-        // Show alert but allow navigation
-        this.showIncompleteQuestionsAlert();
-      }
-    }
-
+    // goToNext handles all validation including Review & Submit blocking
     this.goToNext();
   }
 
-  private handleNavigationContinueDisabledClick() {
-    // Show the validation alert when user clicks disabled Continue button
-    this.showIncompleteQuestionsAlert();
-  }
-
-  // Compute if Continue button should be disabled
+  // Compute if Continue button should be disabled - only at the very last step
   private get isContinueButtonDisabled(): boolean {
-    // Reference responseUpdateCounter to ensure re-evaluation when responses change
-    void this.responseUpdateCounter;
-
-    // Check if we're at the last step
-    if (this.currentStepIndex >= this.flatSteps.length - 1) {
-      return true;
-    }
-
-    // Check if next step would be in "Review & Submit" section
-    const nextIndex = this.currentStepIndex + 1;
-    const nextStep = this.flatSteps[nextIndex];
-    const wouldBeReviewSection = nextStep?.sectionIndex === 1;
-
-    // Always do a fresh validation check - don't cache the result
-    const canAccess = this.canAccessReviewAndSubmit();
-
-    if (wouldBeReviewSection && !canAccess) {
-      return true;
-    }
-
-    return false;
-  }
-
-  // Get tooltip message for disabled Continue button
-  private get continueButtonTooltip(): string {
-    // Reference responseUpdateCounter to ensure re-evaluation when responses change
-    void this.responseUpdateCounter;
-
-    if (this.currentStepIndex >= this.flatSteps.length - 1) {
-      return '';
-    }
-
-    const nextIndex = this.currentStepIndex + 1;
-    const nextStep = this.flatSteps[nextIndex];
-    if (nextStep?.sectionIndex === 1 && !this.canAccessReviewAndSubmit()) {
-      return 'Complete all non-skipped questions before proceeding to Review & Submit. Click this button to see which chapters are incomplete.';
-    }
-
-    return '';
+    // Only disable at the last step
+    return this.currentStepIndex >= this.flatSteps.length - 1;
   }
 
   // Section navigation event handler
@@ -3413,12 +3342,10 @@ export class EFPEntryForm extends LitElement {
           <navigation-buttons
             .isPreviousDisabled=${this.currentStepIndex === 0}
             .isContinueDisabled=${this.isContinueButtonDisabled}
-            .continueDisabledTooltip=${this.continueButtonTooltip}
             .sectionsLength=${this.sections.length}
             @previous-clicked=${this.handleNavigationPrevious}
             @skip-clicked=${this.handleNavigationSkip}
             @continue-clicked=${this.handleNavigationContinue}
-            @continue-disabled-clicked=${this.handleNavigationContinueDisabledClick}
           ></navigation-buttons>
 
           <!-- Validation Dialog for Incomplete Questions -->
@@ -3432,38 +3359,34 @@ export class EFPEntryForm extends LitElement {
             </p>
             <p>
               You must answer all non-skipped questions before proceeding to
-              "Review & Submit". The following chapters have unanswered
-              questions:
+              "Review & Submit".
             </p>
-            <ul style="margin: 0.5rem 0 1rem 0; padding-left: 1.5rem;">
-              ${this.incompleteChapters.map(
-                (chapter) => html`
-                  <li>
-                    <a
-                      href="#"
-                      @click=${(e: Event) => {
-                        e.preventDefault();
-                        this.navigateToChapter(chapter.id);
-                        // Close the dialog after navigation
-                        const dialog = this.shadowRoot?.querySelector('sl-dialog');
-                        if (dialog) {
-                          (dialog as any).hide();
-                        }
-                      }}
-                      style="color: var(--sl-color-primary-600); text-decoration: underline; cursor: pointer;"
-                    >
-                      ${chapter.name}
-                    </a>
-                  </li>
-                `
-              )}
-            </ul>
-            <sl-button slot="footer" variant="primary" @click=${() => {
-              const dialog = this.shadowRoot?.querySelector('sl-dialog');
-              if (dialog) {
-                (dialog as any).hide();
-              }
-            }}>
+            <sl-button
+              slot="footer"
+              variant="primary"
+              @click=${() => {
+                // Close the dialog
+                const dialog = this.shadowRoot?.querySelector('sl-dialog');
+                if (dialog) {
+                  (dialog as any).hide();
+                }
+                // Navigate to the next required step
+                this.handleNavigationSkip(new CustomEvent('skip-clicked'));
+              }}
+            >
+              <sl-icon slot="prefix" name="arrow-right-circle"></sl-icon>
+              Skip to Next Required Step
+            </sl-button>
+            <sl-button
+              slot="footer"
+              variant="default"
+              @click=${() => {
+                const dialog = this.shadowRoot?.querySelector('sl-dialog');
+                if (dialog) {
+                  (dialog as any).hide();
+                }
+              }}
+            >
               Close
             </sl-button>
           </sl-dialog>
@@ -3491,12 +3414,10 @@ export class EFPEntryForm extends LitElement {
           <navigation-buttons
             .isPreviousDisabled=${this.currentStepIndex === 0}
             .isContinueDisabled=${this.isContinueButtonDisabled}
-            .continueDisabledTooltip=${this.continueButtonTooltip}
             .sectionsLength=${this.sections.length}
             @previous-clicked=${this.handleNavigationPrevious}
             @skip-clicked=${this.handleNavigationSkip}
             @continue-clicked=${this.handleNavigationContinue}
-            @continue-disabled-clicked=${this.handleNavigationContinueDisabledClick}
           ></navigation-buttons>
         </main>
       </div>
