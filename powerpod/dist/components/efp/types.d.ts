@@ -38,7 +38,9 @@ export interface QuestionsAndResponsesMemory {
     stats: {
         totalQuestions: number;
         answeredQuestions: number;
+        skippedQuestions: number;
         unansweredQuestions: number;
+        nonSkippedTotal: number;
         completionPercentage: number;
         lastUpdated: string | null;
     };

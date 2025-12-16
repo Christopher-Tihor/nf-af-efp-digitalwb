@@ -153,7 +153,9 @@ export namespace POWERPOD {
         export namespace stats {
             export let totalQuestions: number;
             export let answeredQuestions: number;
+            export let skippedQuestions: number;
             export let unansweredQuestions: number;
+            export let nonSkippedTotal: number;
             export let completionPercentage: number;
             let lastUpdated_2: string | null;
             export { lastUpdated_2 as lastUpdated };

@@ -738,7 +738,9 @@
       stats: {
         totalQuestions: 0,
         answeredQuestions: 0,
+        skippedQuestions: 0,
         unansweredQuestions: 0,
+        nonSkippedTotal: 0,
         completionPercentage: 0,
         lastUpdated: (/** @type {string|null} */null)
       },
@@ -33541,6 +33543,27 @@
       fn: updateQuestionnaireCompletion,
       message: "Completion update finished - updated ".concat(updatedCount, " chapters")
     });
+
+    // Update the workbook questions and responses stats to sync the progress bar
+    // This ensures the progress bar reflects the latest completion status
+    try {
+      Promise.resolve().then(function () { return workbookResponseHelper; }).then(function (_ref) {
+        var updateQuestionsAndResponsesStats = _ref.updateQuestionsAndResponsesStats;
+        updateQuestionsAndResponsesStats();
+        logger$c.info({
+          fn: updateQuestionnaireCompletion,
+          message: 'Updated workbook stats to sync progress bar'
+        });
+      });
+    } catch (error) {
+      logger$c.warn({
+        fn: updateQuestionnaireCompletion,
+        message: 'Failed to update workbook stats',
+        data: {
+          error: error.message
+        }
+      });
+    }
     return updatedCount;
   }
 
@@ -33994,9 +34017,9 @@
       var response,
         options,
         chapterId,
-        _iterator3,
-        _step3,
-        _step3$value,
+        _iterator4,
+        _step4,
+        _step4$value,
         qId,
         entry,
         result,
@@ -34014,15 +34037,15 @@
               _context4.next = 23;
               break;
             }
-            _iterator3 = _createForOfIteratorHelper(POWERPOD.workbookQuestionsAndResponses.questionsWithResponses);
+            _iterator4 = _createForOfIteratorHelper(POWERPOD.workbookQuestionsAndResponses.questionsWithResponses);
             _context4.prev = 6;
-            _iterator3.s();
+            _iterator4.s();
           case 8:
-            if ((_step3 = _iterator3.n()).done) {
+            if ((_step4 = _iterator4.n()).done) {
               _context4.next = 15;
               break;
             }
-            _step3$value = _slicedToArray(_step3.value, 2), qId = _step3$value[0], entry = _step3$value[1];
+            _step4$value = _slicedToArray(_step4.value, 2), qId = _step4$value[0], entry = _step4$value[1];
             if (!(entry.response && entry.response.quartech_workbookresponseid === responseId)) {
               _context4.next = 13;
               break;
@@ -34038,10 +34061,10 @@
           case 17:
             _context4.prev = 17;
             _context4.t0 = _context4["catch"](6);
-            _iterator3.e(_context4.t0);
+            _iterator4.e(_context4.t0);
           case 20:
             _context4.prev = 20;
-            _iterator3.f();
+            _iterator4.f();
             return _context4.finish(20);
           case 23:
             logger$b.info({
@@ -34131,9 +34154,9 @@
     _deleteResponse = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee5(responseId) {
       var options,
         questionId,
-        _iterator4,
-        _step4,
-        _step4$value,
+        _iterator5,
+        _step5,
+        _step5$value,
         qId,
         entry,
         _args5 = arguments;
@@ -34158,15 +34181,15 @@
             }
             _context5.prev = 5;
             // Find the response in the existing data
-            _iterator4 = _createForOfIteratorHelper(POWERPOD.workbookQuestionsAndResponses.questionsWithResponses);
+            _iterator5 = _createForOfIteratorHelper(POWERPOD.workbookQuestionsAndResponses.questionsWithResponses);
             _context5.prev = 7;
-            _iterator4.s();
+            _iterator5.s();
           case 9:
-            if ((_step4 = _iterator4.n()).done) {
+            if ((_step5 = _iterator5.n()).done) {
               _context5.next = 16;
               break;
             }
-            _step4$value = _slicedToArray(_step4.value, 2), qId = _step4$value[0], entry = _step4$value[1];
+            _step5$value = _slicedToArray(_step5.value, 2), qId = _step5$value[0], entry = _step5$value[1];
             if (!(entry.response && entry.response.quartech_workbookresponseid === responseId)) {
               _context5.next = 14;
               break;
@@ -34182,10 +34205,10 @@
           case 18:
             _context5.prev = 18;
             _context5.t0 = _context5["catch"](7);
-            _iterator4.e(_context5.t0);
+            _iterator5.e(_context5.t0);
           case 21:
             _context5.prev = 21;
-            _iterator4.f();
+            _iterator5.f();
             return _context5.finish(21);
           case 24:
             if (questionId) {
@@ -34569,6 +34592,9 @@
         questionsByChapter,
         totalQuestions,
         answeredQuestions,
+        skippedQuestions,
+        completedQuestions,
+        nonSkippedTotal,
         unansweredQuestions,
         completionPercentage,
         _args9 = arguments;
@@ -34718,18 +34744,37 @@
             });
 
             // Calculate statistics
+            // Count answered questions (have actual responses) and skipped questions separately
             totalQuestions = questionsWithResponses.size;
-            answeredQuestions = Array.from(questionsWithResponses.values()).filter(function (entry) {
-              return entry.response !== null;
-            }).length;
-            unansweredQuestions = totalQuestions - answeredQuestions;
-            completionPercentage = totalQuestions > 0 ? Math.round(answeredQuestions / totalQuestions * 100) : 0; // Store in POWERPOD memory
+            answeredQuestions = 0;
+            skippedQuestions = 0;
+            Array.from(questionsWithResponses.values()).forEach(function (entry) {
+              if (entry.response !== null) {
+                // Check if skipped
+                if (entry.response.quartech_chapterskipped === 100000000) {
+                  skippedQuestions++;
+                }
+                // Check if answered (has actual content)
+                else if (entry.response.quartech_response && entry.response.quartech_response.trim() !== '') {
+                  answeredQuestions++;
+                }
+              }
+            });
+
+            // Calculate completion percentage: both answered and skipped questions count as "complete"
+            // completedQuestions = answered + skipped
+            completedQuestions = answeredQuestions + skippedQuestions;
+            nonSkippedTotal = totalQuestions - skippedQuestions;
+            unansweredQuestions = totalQuestions - completedQuestions;
+            completionPercentage = totalQuestions > 0 ? Math.round(completedQuestions / totalQuestions * 100) : 0; // Store in POWERPOD memory
             POWERPOD.workbookQuestionsAndResponses.questionsWithResponses = questionsWithResponses;
             POWERPOD.workbookQuestionsAndResponses.questionsByChapter = questionsByChapter;
             POWERPOD.workbookQuestionsAndResponses.stats = {
               totalQuestions: totalQuestions,
               answeredQuestions: answeredQuestions,
+              skippedQuestions: skippedQuestions,
               unansweredQuestions: unansweredQuestions,
+              nonSkippedTotal: nonSkippedTotal,
               completionPercentage: completionPercentage,
               lastUpdated: new Date().toISOString()
             };
@@ -34738,11 +34783,15 @@
             POWERPOD.workbookQuestionsAndResponses.lastUpdated = new Date().toISOString();
             logger$b.info({
               fn: 'loadQuestionsAndResponses',
-              message: "Loaded ".concat(totalQuestions, " questions with ").concat(answeredQuestions, " responses (").concat(completionPercentage, "% complete)"),
+              message: "Loaded ".concat(totalQuestions, " questions: ").concat(answeredQuestions, " answered, ").concat(skippedQuestions, " skipped, ").concat(unansweredQuestions, " unanswered (").concat(completionPercentage, "% complete)"),
               data: {
                 workbookId: workbookId,
                 totalQuestions: totalQuestions,
                 answeredQuestions: answeredQuestions,
+                skippedQuestions: skippedQuestions,
+                completedQuestions: completedQuestions,
+                unansweredQuestions: unansweredQuestions,
+                nonSkippedTotal: nonSkippedTotal,
                 completionPercentage: completionPercentage
               }
             });
@@ -34777,8 +34826,8 @@
               }
             }
             return _context9.abrupt("return", getQuestionsAndResponsesFromMemory());
-          case 56:
-            _context9.prev = 56;
+          case 60:
+            _context9.prev = 60;
             _context9.t1 = _context9["catch"](1);
             logger$b.error({
               fn: 'loadQuestionsAndResponses',
@@ -34790,15 +34839,15 @@
             });
             POWERPOD.workbookQuestionsAndResponses.error = _context9.t1.message || 'Failed to load questions and responses';
             throw _context9.t1;
-          case 61:
-            _context9.prev = 61;
+          case 65:
+            _context9.prev = 65;
             POWERPOD.workbookQuestionsAndResponses.isLoading = false;
-            return _context9.finish(61);
-          case 64:
+            return _context9.finish(65);
+          case 68:
           case "end":
             return _context9.stop();
         }
-      }, _callee9, null, [[1, 56, 61, 64], [9, 24]]);
+      }, _callee9, null, [[1, 60, 65, 68], [9, 24]]);
     }));
     return _loadQuestionsAndResponses.apply(this, arguments);
   }
@@ -34994,22 +35043,196 @@
 
   /**
    * Update statistics for questions and responses
+   * This function counts both answered and skipped questions as "complete"
+   * Completion percentage = (answered + skipped) / total questions
+   * A question is considered "answered" if it has a non-empty response value
+   * A question is considered "skipped" if quartech_chapterskipped === 100000000
    */
   function updateQuestionsAndResponsesStats() {
+    logger$b.info({
+      fn: 'updateQuestionsAndResponsesStats',
+      message: '🔄 updateQuestionsAndResponsesStats CALLED'
+    });
     var questionsWithResponses = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses;
     var totalQuestions = questionsWithResponses.size;
-    var answeredQuestions = Array.from(questionsWithResponses.values()).filter(function (entry) {
-      return entry.response !== null;
-    }).length;
-    var unansweredQuestions = totalQuestions - answeredQuestions;
-    var completionPercentage = totalQuestions > 0 ? Math.round(answeredQuestions / totalQuestions * 100) : 0;
+
+    // Count answered questions and skipped questions separately
+    var answeredQuestions = 0;
+    var skippedQuestions = 0;
+    try {
+      // Use imported questionnaire functions to check response data
+      if (isQuestionnaireLoaded()) {
+        // Count questions using questionnaire store data
+        var _iterator3 = _createForOfIteratorHelper(questionsWithResponses),
+          _step3;
+        try {
+          for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {
+            var _entry$response, _question$responseDat;
+            var _step3$value = _slicedToArray(_step3.value, 2),
+              questionId = _step3$value[0],
+              entry = _step3$value[1];
+            var question = getQuestionFromStore(questionId);
+
+            // Check if skipped - use both entry.response and question.responseData for reliability
+            // The entry.response is the source of truth from POWERPOD memory
+            var isSkipped = (entry === null || entry === void 0 || (_entry$response = entry.response) === null || _entry$response === void 0 ? void 0 : _entry$response.quartech_chapterskipped) === 100000000 || (question === null || question === void 0 || (_question$responseDat = question.responseData) === null || _question$responseDat === void 0 ? void 0 : _question$responseDat.quartech_chapterskipped) === 100000000;
+            if (isSkipped) {
+              skippedQuestions++;
+            } else {
+              var _entry$response2, _question$responseDat2;
+              // Check if answered (has actual response content)
+              // Use entry.response as primary source, fall back to question.responseData
+              var responseValue = (entry === null || entry === void 0 || (_entry$response2 = entry.response) === null || _entry$response2 === void 0 ? void 0 : _entry$response2.quartech_response) || (question === null || question === void 0 || (_question$responseDat2 = question.responseData) === null || _question$responseDat2 === void 0 ? void 0 : _question$responseDat2.quartech_response);
+              var _hasResponse2 = responseValue && responseValue.trim() !== '';
+              if (_hasResponse2) {
+                answeredQuestions++;
+              }
+            }
+          }
+        } catch (err) {
+          _iterator3.e(err);
+        } finally {
+          _iterator3.f();
+        }
+        logger$b.info({
+          fn: 'updateQuestionsAndResponsesStats',
+          message: 'Using questionnaire store for completion stats',
+          data: {
+            totalQuestions: totalQuestions,
+            answeredQuestions: answeredQuestions,
+            skippedQuestions: skippedQuestions
+          }
+        });
+      } else {
+        // Fallback to counting questions from response data
+        Array.from(questionsWithResponses.values()).forEach(function (entry) {
+          if (entry.response !== null) {
+            // Check if skipped
+            if (entry.response.quartech_chapterskipped === 100000000) {
+              skippedQuestions++;
+            }
+            // Check if answered (has actual content)
+            else if (entry.response.quartech_response && entry.response.quartech_response.trim() !== '') {
+              answeredQuestions++;
+            }
+          }
+        });
+        logger$b.info({
+          fn: 'updateQuestionsAndResponsesStats',
+          message: 'Using response data for completion stats (questionnaire store not loaded)',
+          data: {
+            totalQuestions: totalQuestions,
+            answeredQuestions: answeredQuestions,
+            skippedQuestions: skippedQuestions
+          }
+        });
+      }
+    } catch (error) {
+      // Fallback to counting questions from response data if questionnaire store fails
+      Array.from(questionsWithResponses.values()).forEach(function (entry) {
+        if (entry.response !== null) {
+          // Check if skipped
+          if (entry.response.quartech_chapterskipped === 100000000) {
+            skippedQuestions++;
+          }
+          // Check if answered (has actual content)
+          else if (entry.response.quartech_response && entry.response.quartech_response.trim() !== '') {
+            answeredQuestions++;
+          }
+        }
+      });
+      logger$b.warn({
+        fn: 'updateQuestionsAndResponsesStats',
+        message: 'Failed to use questionnaire store, falling back to response data',
+        data: {
+          error: error.message,
+          totalQuestions: totalQuestions,
+          answeredQuestions: answeredQuestions,
+          skippedQuestions: skippedQuestions
+        }
+      });
+    }
+
+    // Calculate completion percentage: both answered and skipped questions count as "complete"
+    // completedQuestions = answered + skipped
+    var completedQuestions = answeredQuestions + skippedQuestions;
+    var nonSkippedTotal = totalQuestions - skippedQuestions;
+    var unansweredQuestions = totalQuestions - completedQuestions;
+    var completionPercentage = totalQuestions > 0 ? Math.round(completedQuestions / totalQuestions * 100) : 0;
+    logger$b.info({
+      fn: 'updateQuestionsAndResponsesStats',
+      message: "\uD83E\uDDEE Calculated stats: ".concat(answeredQuestions, " answered + ").concat(skippedQuestions, " skipped = ").concat(completedQuestions, " complete out of ").concat(totalQuestions, " total = ").concat(completionPercentage, "%"),
+      data: {
+        totalQuestions: totalQuestions,
+        answeredQuestions: answeredQuestions,
+        skippedQuestions: skippedQuestions,
+        completedQuestions: completedQuestions,
+        unansweredQuestions: unansweredQuestions,
+        completionPercentage: completionPercentage
+      }
+    });
     POWERPOD.workbookQuestionsAndResponses.stats = {
       totalQuestions: totalQuestions,
       answeredQuestions: answeredQuestions,
+      skippedQuestions: skippedQuestions,
       unansweredQuestions: unansweredQuestions,
+      nonSkippedTotal: nonSkippedTotal,
       completionPercentage: completionPercentage,
       lastUpdated: new Date().toISOString()
     };
+
+    // Trigger UI update by dispatching a custom event
+    // This allows the EFPEntryForm component to re-render when stats change
+    try {
+      var event = new CustomEvent('workbook-stats-updated', {
+        detail: {
+          totalQuestions: totalQuestions,
+          answeredQuestions: answeredQuestions,
+          skippedQuestions: skippedQuestions,
+          unansweredQuestions: unansweredQuestions,
+          nonSkippedTotal: nonSkippedTotal,
+          completionPercentage: completionPercentage
+        },
+        bubbles: true,
+        composed: true
+      });
+
+      // Dispatch the event on the EFP entry form element if it exists
+      var efpEntryForm = document.querySelector('efp-entry-form');
+      if (efpEntryForm) {
+        logger$b.info({
+          fn: 'updateQuestionsAndResponsesStats',
+          message: "\uD83D\uDD14 DISPATCHING workbook-stats-updated event with ".concat(completionPercentage, "% complete"),
+          data: {
+            totalQuestions: totalQuestions,
+            answeredQuestions: answeredQuestions,
+            skippedQuestions: skippedQuestions,
+            completedQuestions: completedQuestions,
+            unansweredQuestions: unansweredQuestions,
+            nonSkippedTotal: nonSkippedTotal,
+            completionPercentage: completionPercentage
+          }
+        });
+        efpEntryForm.dispatchEvent(event);
+        logger$b.info({
+          fn: 'updateQuestionsAndResponsesStats',
+          message: "\u2705 Event dispatched successfully"
+        });
+      } else {
+        logger$b.warn({
+          fn: 'updateQuestionsAndResponsesStats',
+          message: "\u274C Could not find efp-entry-form element to dispatch event"
+        });
+      }
+    } catch (error) {
+      logger$b.warn({
+        fn: 'updateQuestionsAndResponsesStats',
+        message: 'Failed to dispatch stats update event',
+        data: {
+          error: error.message
+        }
+      });
+    }
   }
 
   /**
@@ -35025,7 +35248,9 @@
     POWERPOD.workbookQuestionsAndResponses.stats = {
       totalQuestions: 0,
       answeredQuestions: 0,
+      skippedQuestions: 0,
       unansweredQuestions: 0,
+      nonSkippedTotal: 0,
       completionPercentage: 0,
       lastUpdated: null
     };
@@ -35084,6 +35309,7 @@
     getChapterQuestionsAndResponsesFromMemory: getChapterQuestionsAndResponsesFromMemory,
     updateResponseInMemory: updateResponseInMemory,
     removeResponseFromMemory: removeResponseFromMemory,
+    updateQuestionsAndResponsesStats: updateQuestionsAndResponsesStats,
     clearQuestionsAndResponsesMemory: clearQuestionsAndResponsesMemory,
     'default': WorkbookResponseHelper
   });
@@ -43508,6 +43734,7 @@
           this.hasTriedToSubmit = false; // Track if user has tried to navigate to Review & Submit
           this.incompleteChapters = [];
           this.responseUpdateCounter = 0; // Triggers re-render when responses change
+          this.currentCompletionPercentage = 0; // Local copy of completion percentage for reactive rendering
           this.isNavigating = false; // Flag to prevent tab change interference
           this.activeContent = {
               title: 'Introduction to the Environmental Farm Plan (EFP)',
@@ -43523,6 +43750,32 @@
           this.multilineTextSaveStatus = new Map();
           // Multiline text character counts (questionId -> character count)
           this.multilineTextCharCounts = new Map();
+          // Handler for workbook stats updates
+          this.handleStatsUpdated = (event) => {
+              var _a;
+              const customEvent = event;
+              const oldPercentage = this.currentCompletionPercentage;
+              const newPercentage = ((_a = customEvent.detail) === null || _a === void 0 ? void 0 : _a.completionPercentage) ||
+                  POWERPOD.workbookQuestionsAndResponses.stats.completionPercentage;
+              logger$4.info({
+                  message: '📊 Workbook stats updated event received, triggering re-render',
+                  data: {
+                      oldPercentage,
+                      newPercentage,
+                      eventDetail: customEvent.detail,
+                      powerpodStats: POWERPOD.workbookQuestionsAndResponses.stats
+                  },
+              });
+              // Update the local completion percentage property to trigger reactive re-render
+              this.currentCompletionPercentage = newPercentage;
+              // Increment the response update counter to trigger re-render
+              this.responseUpdateCounter++;
+              this.requestUpdate();
+              logger$4.info({
+                  message: '📊 After update - currentCompletionPercentage is now',
+                  data: { currentCompletionPercentage: this.currentCompletionPercentage }
+              });
+          };
           // Handle sign-off changed event
           this.handleSignOffChanged = (event) => {
               logger$4.info({
@@ -43544,11 +43797,14 @@
           this.updateWorkbookLockStatus();
           // Listen for sign-off changes to update lock status
           this.addEventListener('sign-off-changed', this.handleSignOffChanged);
+          // Listen for workbook stats updates to trigger re-render of progress bar
+          this.addEventListener('workbook-stats-updated', this.handleStatsUpdated);
       }
       disconnectedCallback() {
           super.disconnectedCallback();
-          // Remove event listener
+          // Remove event listeners
           this.removeEventListener('sign-off-changed', this.handleSignOffChanged);
+          this.removeEventListener('workbook-stats-updated', this.handleStatsUpdated);
           // Clear all pending debounce timers
           this.responseSaveDebounceTimers.forEach((timer) => {
               clearTimeout(timer);
@@ -44129,6 +44385,17 @@
           // STEP 2: Trigger UI update immediately (before API calls complete)
           const { updateQuestionnaireCompletion } = await Promise.resolve().then(function () { return questionnaire; });
           updateQuestionnaireCompletion();
+          // Manually update the completion percentage immediately
+          if (POWERPOD.workbookQuestionsAndResponses.isLoaded) {
+              this.currentCompletionPercentage = POWERPOD.workbookQuestionsAndResponses.stats.completionPercentage;
+              logger$4.info({
+                  message: `📊 Manually updated completion percentage after skip/unskip`,
+                  data: {
+                      completionPercentage: this.currentCompletionPercentage,
+                      stats: POWERPOD.workbookQuestionsAndResponses.stats
+                  },
+              });
+          }
           this.responseUpdateCounter++; // Trigger re-render for validation
           this.requestUpdate();
           logger$4.info({
@@ -45829,6 +46096,8 @@
               this.syncFromPOWERPOD();
               // Update the reactive property to trigger re-render
               this.questionsAndResponsesLoaded = true;
+              // Initialize the completion percentage from loaded stats
+              this.currentCompletionPercentage = result.stats.completionPercentage;
               logger$4.info({
                   message: `Loaded ${result.stats.totalQuestions} questions with ${result.stats.answeredQuestions} responses (${result.stats.completionPercentage}% complete)`,
               });
@@ -45851,6 +46120,10 @@
       // Sync local component state from POWERPOD memory
       syncFromPOWERPOD() {
           this.workbookResponses = POWERPOD.workbookResponses.data;
+          // Sync completion percentage from POWERPOD stats
+          if (POWERPOD.workbookQuestionsAndResponses.isLoaded) {
+              this.currentCompletionPercentage = POWERPOD.workbookQuestionsAndResponses.stats.completionPercentage;
+          }
           // Update completion and navigation icons
           this.updateCompletionAndNavigation();
       }
@@ -46255,8 +46528,7 @@
           <div class="card">
             <strong
               >${POWERPOD.workbookQuestionsAndResponses.isLoaded
-            ? POWERPOD.workbookQuestionsAndResponses.stats
-                .completionPercentage
+            ? this.currentCompletionPercentage
             : this.completionPercent}%
               Complete</strong
             >
@@ -46277,8 +46549,7 @@
                 border-radius: 0.375rem;
                 transition: width 0.3s ease;
                 width: ${POWERPOD.workbookQuestionsAndResponses.isLoaded
-            ? POWERPOD.workbookQuestionsAndResponses.stats
-                .completionPercentage
+            ? this.currentCompletionPercentage
             : this.completionPercent}%;
               "
               ></div>
@@ -46410,6 +46681,9 @@
   __decorate([
       n$4({ type: Number, attribute: false })
   ], EFPEntryForm.prototype, "responseUpdateCounter", void 0);
+  __decorate([
+      n$4({ type: Number, attribute: false })
+  ], EFPEntryForm.prototype, "currentCompletionPercentage", void 0);
   __decorate([
       n$4({ type: Object })
   ], EFPEntryForm.prototype, "activeContent", void 0);

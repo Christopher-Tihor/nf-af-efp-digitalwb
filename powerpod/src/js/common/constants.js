@@ -203,7 +203,9 @@ export const POWERPOD = {
     stats: {
       totalQuestions: 0,
       answeredQuestions: 0,
+      skippedQuestions: 0,
       unansweredQuestions: 0,
+      nonSkippedTotal: 0,
       completionPercentage: 0,
       lastUpdated: /** @type {string|null} */ (null),
     },

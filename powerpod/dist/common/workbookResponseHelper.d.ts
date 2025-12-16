@@ -121,6 +121,14 @@ export function updateResponseInMemory(questionId: string, responseData: Object)
  */
 export function removeResponseFromMemory(questionId: string): void;
 /**
+ * Update statistics for questions and responses
+ * This function counts both answered and skipped questions as "complete"
+ * Completion percentage = (answered + skipped) / total questions
+ * A question is considered "answered" if it has a non-empty response value
+ * A question is considered "skipped" if quartech_chapterskipped === 100000000
+ */
+export function updateQuestionsAndResponsesStats(): void;
+/**
  * Clear questions and responses from memory
  */
 export function clearQuestionsAndResponsesMemory(): void;

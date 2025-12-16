@@ -75,6 +75,7 @@ export class EFPEntryForm extends LitElement {
   @property({ type: Boolean, attribute: false }) hasTriedToSubmit = false; // Track if user has tried to navigate to Review & Submit
   @property({ type: Array, attribute: false }) incompleteChapters: Array<{id: string, name: string}> = [];
   @property({ type: Number, attribute: false }) responseUpdateCounter = 0; // Triggers re-render when responses change
+  @property({ type: Number, attribute: false }) currentCompletionPercentage = 0; // Local copy of completion percentage for reactive rendering
   private isNavigating = false; // Flag to prevent tab change interference
   @property({ type: Object }) activeContent: EFPActiveContent = {
     title: 'Introduction to the Environmental Farm Plan (EFP)',
@@ -114,13 +115,47 @@ export class EFPEntryForm extends LitElement {
 
     // Listen for sign-off changes to update lock status
     this.addEventListener('sign-off-changed', this.handleSignOffChanged as EventListener);
+
+    // Listen for workbook stats updates to trigger re-render of progress bar
+    this.addEventListener('workbook-stats-updated', this.handleStatsUpdated as EventListener);
   }
+
+  // Handler for workbook stats updates
+  private handleStatsUpdated = (event: Event) => {
+    const customEvent = event as CustomEvent;
+    const oldPercentage = this.currentCompletionPercentage;
+    const newPercentage = customEvent.detail?.completionPercentage ||
+                         POWERPOD.workbookQuestionsAndResponses.stats.completionPercentage;
+
+    logger.info({
+      message: '📊 Workbook stats updated event received, triggering re-render',
+      data: {
+        oldPercentage,
+        newPercentage,
+        eventDetail: customEvent.detail,
+        powerpodStats: POWERPOD.workbookQuestionsAndResponses.stats
+      },
+    });
+
+    // Update the local completion percentage property to trigger reactive re-render
+    this.currentCompletionPercentage = newPercentage;
+
+    // Increment the response update counter to trigger re-render
+    this.responseUpdateCounter++;
+    this.requestUpdate();
+
+    logger.info({
+      message: '📊 After update - currentCompletionPercentage is now',
+      data: { currentCompletionPercentage: this.currentCompletionPercentage }
+    });
+  };
 
   disconnectedCallback() {
     super.disconnectedCallback();
 
-    // Remove event listener
+    // Remove event listeners
     this.removeEventListener('sign-off-changed', this.handleSignOffChanged as EventListener);
+    this.removeEventListener('workbook-stats-updated', this.handleStatsUpdated as EventListener);
 
     // Clear all pending debounce timers
     this.responseSaveDebounceTimers.forEach((timer) => {
@@ -795,6 +830,19 @@ export class EFPEntryForm extends LitElement {
     // STEP 2: Trigger UI update immediately (before API calls complete)
     const { updateQuestionnaireCompletion } = await import('../common/questionnaire.js');
     updateQuestionnaireCompletion();
+
+    // Manually update the completion percentage immediately
+    if (POWERPOD.workbookQuestionsAndResponses.isLoaded) {
+      this.currentCompletionPercentage = POWERPOD.workbookQuestionsAndResponses.stats.completionPercentage;
+      logger.info({
+        message: `📊 Manually updated completion percentage after skip/unskip`,
+        data: {
+          completionPercentage: this.currentCompletionPercentage,
+          stats: POWERPOD.workbookQuestionsAndResponses.stats
+        },
+      });
+    }
+
     this.responseUpdateCounter++; // Trigger re-render for validation
     this.requestUpdate();
 
@@ -2912,6 +2960,9 @@ export class EFPEntryForm extends LitElement {
       // Update the reactive property to trigger re-render
       this.questionsAndResponsesLoaded = true;
 
+      // Initialize the completion percentage from loaded stats
+      this.currentCompletionPercentage = result.stats.completionPercentage;
+
       logger.info({
         message: `Loaded ${result.stats.totalQuestions} questions with ${result.stats.answeredQuestions} responses (${result.stats.completionPercentage}% complete)`,
       });
@@ -2935,6 +2986,11 @@ export class EFPEntryForm extends LitElement {
   // Sync local component state from POWERPOD memory
   private syncFromPOWERPOD() {
     this.workbookResponses = POWERPOD.workbookResponses.data;
+
+    // Sync completion percentage from POWERPOD stats
+    if (POWERPOD.workbookQuestionsAndResponses.isLoaded) {
+      this.currentCompletionPercentage = POWERPOD.workbookQuestionsAndResponses.stats.completionPercentage;
+    }
 
     // Update completion and navigation icons
     this.updateCompletionAndNavigation();
@@ -3446,8 +3502,7 @@ export class EFPEntryForm extends LitElement {
           <div class="card">
             <strong
               >${POWERPOD.workbookQuestionsAndResponses.isLoaded
-                ? POWERPOD.workbookQuestionsAndResponses.stats
-                    .completionPercentage
+                ? this.currentCompletionPercentage
                 : this.completionPercent}%
               Complete</strong
             >
@@ -3468,8 +3523,7 @@ export class EFPEntryForm extends LitElement {
                 border-radius: 0.375rem;
                 transition: width 0.3s ease;
                 width: ${POWERPOD.workbookQuestionsAndResponses.isLoaded
-                  ? POWERPOD.workbookQuestionsAndResponses.stats
-                      .completionPercentage
+                  ? this.currentCompletionPercentage
                   : this.completionPercent}%;
               "
               ></div>

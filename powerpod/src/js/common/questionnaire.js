@@ -681,6 +681,24 @@ export function updateQuestionnaireCompletion() {
     message: `Completion update finished - updated ${updatedCount} chapters`
   });
 
+  // Update the workbook questions and responses stats to sync the progress bar
+  // This ensures the progress bar reflects the latest completion status
+  try {
+    import('./workbookResponseHelper.js').then(({ updateQuestionsAndResponsesStats }) => {
+      updateQuestionsAndResponsesStats();
+      logger.info({
+        fn: updateQuestionnaireCompletion,
+        message: 'Updated workbook stats to sync progress bar'
+      });
+    });
+  } catch (error) {
+    logger.warn({
+      fn: updateQuestionnaireCompletion,
+      message: 'Failed to update workbook stats',
+      data: { error: error.message }
+    });
+  }
+
   return updatedCount;
 }
 

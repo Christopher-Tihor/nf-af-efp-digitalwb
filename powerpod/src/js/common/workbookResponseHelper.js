@@ -2,7 +2,7 @@ import { POWERPOD } from './constants.js';
 import { Logger } from './logger.js';
 import { getCurrentWorkbookId } from './workbookUtils.js';
 import { loadChaptersAndQuestions, getStoredQuestionsData, isChaptersAndQuestionsLoaded } from './chaptersAndQuestionsUtils.js';
-import { updateQuestionResponse, isQuestionnaireLoaded } from './questionnaire.js';
+import { updateQuestionResponse, isQuestionnaireLoaded, getQuestionFromStore } from './questionnaire.js';
 
 const logger = Logger('common/workbookResponseHelper');
 
@@ -798,12 +798,32 @@ export async function loadQuestionsAndResponses(workbookId, options = {}) {
     });
 
     // Calculate statistics
+    // Count answered questions (have actual responses) and skipped questions separately
     const totalQuestions = questionsWithResponses.size;
-    const answeredQuestions = Array.from(questionsWithResponses.values())
-      .filter(entry => entry.response !== null).length;
-    const unansweredQuestions = totalQuestions - answeredQuestions;
+    let answeredQuestions = 0;
+    let skippedQuestions = 0;
+
+    Array.from(questionsWithResponses.values()).forEach(entry => {
+      if (entry.response !== null) {
+        // Check if skipped
+        if (entry.response.quartech_chapterskipped === 100000000) {
+          skippedQuestions++;
+        }
+        // Check if answered (has actual content)
+        else if (entry.response.quartech_response &&
+                 entry.response.quartech_response.trim() !== '') {
+          answeredQuestions++;
+        }
+      }
+    });
+
+    // Calculate completion percentage: both answered and skipped questions count as "complete"
+    // completedQuestions = answered + skipped
+    const completedQuestions = answeredQuestions + skippedQuestions;
+    const nonSkippedTotal = totalQuestions - skippedQuestions;
+    const unansweredQuestions = totalQuestions - completedQuestions;
     const completionPercentage = totalQuestions > 0 ?
-      Math.round((answeredQuestions / totalQuestions) * 100) : 0;
+      Math.round((completedQuestions / totalQuestions) * 100) : 0;
 
     // Store in POWERPOD memory
     POWERPOD.workbookQuestionsAndResponses.questionsWithResponses = questionsWithResponses;
@@ -811,7 +831,9 @@ export async function loadQuestionsAndResponses(workbookId, options = {}) {
     POWERPOD.workbookQuestionsAndResponses.stats = {
       totalQuestions,
       answeredQuestions,
+      skippedQuestions,
       unansweredQuestions,
+      nonSkippedTotal,
       completionPercentage,
       lastUpdated: new Date().toISOString()
     };
@@ -821,11 +843,15 @@ export async function loadQuestionsAndResponses(workbookId, options = {}) {
 
     logger.info({
       fn: 'loadQuestionsAndResponses',
-      message: `Loaded ${totalQuestions} questions with ${answeredQuestions} responses (${completionPercentage}% complete)`,
+      message: `Loaded ${totalQuestions} questions: ${answeredQuestions} answered, ${skippedQuestions} skipped, ${unansweredQuestions} unanswered (${completionPercentage}% complete)`,
       data: {
         workbookId,
         totalQuestions,
         answeredQuestions,
+        skippedQuestions,
+        completedQuestions,
+        unansweredQuestions,
+        nonSkippedTotal,
         completionPercentage
       }
     });
@@ -1056,23 +1082,180 @@ export function removeResponseFromMemory(questionId) {
 
 /**
  * Update statistics for questions and responses
+ * This function counts both answered and skipped questions as "complete"
+ * Completion percentage = (answered + skipped) / total questions
+ * A question is considered "answered" if it has a non-empty response value
+ * A question is considered "skipped" if quartech_chapterskipped === 100000000
  */
-function updateQuestionsAndResponsesStats() {
+export function updateQuestionsAndResponsesStats() {
+  logger.info({
+    fn: 'updateQuestionsAndResponsesStats',
+    message: '🔄 updateQuestionsAndResponsesStats CALLED'
+  });
+
   const questionsWithResponses = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses;
   const totalQuestions = questionsWithResponses.size;
-  const answeredQuestions = Array.from(questionsWithResponses.values())
-    .filter(entry => entry.response !== null).length;
-  const unansweredQuestions = totalQuestions - answeredQuestions;
+
+  // Count answered questions and skipped questions separately
+  let answeredQuestions = 0;
+  let skippedQuestions = 0;
+
+  try {
+    // Use imported questionnaire functions to check response data
+    if (isQuestionnaireLoaded()) {
+      // Count questions using questionnaire store data
+      for (const [questionId, entry] of questionsWithResponses) {
+        const question = getQuestionFromStore(questionId);
+
+        // Check if skipped - use both entry.response and question.responseData for reliability
+        // The entry.response is the source of truth from POWERPOD memory
+        const isSkipped = entry?.response?.quartech_chapterskipped === 100000000 ||
+                         question?.responseData?.quartech_chapterskipped === 100000000;
+
+        if (isSkipped) {
+          skippedQuestions++;
+        } else {
+          // Check if answered (has actual response content)
+          // Use entry.response as primary source, fall back to question.responseData
+          const responseValue = entry?.response?.quartech_response || question?.responseData?.quartech_response;
+          const hasResponse = responseValue && responseValue.trim() !== '';
+          if (hasResponse) {
+            answeredQuestions++;
+          }
+        }
+      }
+
+      logger.info({
+        fn: 'updateQuestionsAndResponsesStats',
+        message: 'Using questionnaire store for completion stats',
+        data: { totalQuestions, answeredQuestions, skippedQuestions }
+      });
+    } else {
+      // Fallback to counting questions from response data
+      Array.from(questionsWithResponses.values()).forEach(entry => {
+        if (entry.response !== null) {
+          // Check if skipped
+          if (entry.response.quartech_chapterskipped === 100000000) {
+            skippedQuestions++;
+          }
+          // Check if answered (has actual content)
+          else if (entry.response.quartech_response &&
+                   entry.response.quartech_response.trim() !== '') {
+            answeredQuestions++;
+          }
+        }
+      });
+
+      logger.info({
+        fn: 'updateQuestionsAndResponsesStats',
+        message: 'Using response data for completion stats (questionnaire store not loaded)',
+        data: { totalQuestions, answeredQuestions, skippedQuestions }
+      });
+    }
+  } catch (error) {
+    // Fallback to counting questions from response data if questionnaire store fails
+    Array.from(questionsWithResponses.values()).forEach(entry => {
+      if (entry.response !== null) {
+        // Check if skipped
+        if (entry.response.quartech_chapterskipped === 100000000) {
+          skippedQuestions++;
+        }
+        // Check if answered (has actual content)
+        else if (entry.response.quartech_response &&
+                 entry.response.quartech_response.trim() !== '') {
+          answeredQuestions++;
+        }
+      }
+    });
+
+    logger.warn({
+      fn: 'updateQuestionsAndResponsesStats',
+      message: 'Failed to use questionnaire store, falling back to response data',
+      data: { error: error.message, totalQuestions, answeredQuestions, skippedQuestions }
+    });
+  }
+
+  // Calculate completion percentage: both answered and skipped questions count as "complete"
+  // completedQuestions = answered + skipped
+  const completedQuestions = answeredQuestions + skippedQuestions;
+  const nonSkippedTotal = totalQuestions - skippedQuestions;
+  const unansweredQuestions = totalQuestions - completedQuestions;
   const completionPercentage = totalQuestions > 0 ?
-    Math.round((answeredQuestions / totalQuestions) * 100) : 0;
+    Math.round((completedQuestions / totalQuestions) * 100) : 0;
+
+  logger.info({
+    fn: 'updateQuestionsAndResponsesStats',
+    message: `🧮 Calculated stats: ${answeredQuestions} answered + ${skippedQuestions} skipped = ${completedQuestions} complete out of ${totalQuestions} total = ${completionPercentage}%`,
+    data: {
+      totalQuestions,
+      answeredQuestions,
+      skippedQuestions,
+      completedQuestions,
+      unansweredQuestions,
+      completionPercentage
+    }
+  });
 
   POWERPOD.workbookQuestionsAndResponses.stats = {
     totalQuestions,
     answeredQuestions,
+    skippedQuestions,
     unansweredQuestions,
+    nonSkippedTotal,
     completionPercentage,
     lastUpdated: new Date().toISOString()
   };
+
+  // Trigger UI update by dispatching a custom event
+  // This allows the EFPEntryForm component to re-render when stats change
+  try {
+    const event = new CustomEvent('workbook-stats-updated', {
+      detail: {
+        totalQuestions,
+        answeredQuestions,
+        skippedQuestions,
+        unansweredQuestions,
+        nonSkippedTotal,
+        completionPercentage
+      },
+      bubbles: true,
+      composed: true
+    });
+
+    // Dispatch the event on the EFP entry form element if it exists
+    const efpEntryForm = document.querySelector('efp-entry-form');
+    if (efpEntryForm) {
+      logger.info({
+        fn: 'updateQuestionsAndResponsesStats',
+        message: `🔔 DISPATCHING workbook-stats-updated event with ${completionPercentage}% complete`,
+        data: {
+          totalQuestions,
+          answeredQuestions,
+          skippedQuestions,
+          completedQuestions,
+          unansweredQuestions,
+          nonSkippedTotal,
+          completionPercentage
+        }
+      });
+      efpEntryForm.dispatchEvent(event);
+      logger.info({
+        fn: 'updateQuestionsAndResponsesStats',
+        message: `✅ Event dispatched successfully`,
+      });
+    } else {
+      logger.warn({
+        fn: 'updateQuestionsAndResponsesStats',
+        message: `❌ Could not find efp-entry-form element to dispatch event`,
+      });
+    }
+  } catch (error) {
+    logger.warn({
+      fn: 'updateQuestionsAndResponsesStats',
+      message: 'Failed to dispatch stats update event',
+      data: { error: error.message }
+    });
+  }
 }
 
 /**
@@ -1089,7 +1272,9 @@ export function clearQuestionsAndResponsesMemory() {
   POWERPOD.workbookQuestionsAndResponses.stats = {
     totalQuestions: 0,
     answeredQuestions: 0,
+    skippedQuestions: 0,
     unansweredQuestions: 0,
+    nonSkippedTotal: 0,
     completionPercentage: 0,
     lastUpdated: null
   };

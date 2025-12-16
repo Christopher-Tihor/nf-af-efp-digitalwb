@@ -36,6 +36,7 @@ export declare class EFPEntryForm extends LitElement {
         name: string;
     }>;
     responseUpdateCounter: number;
+    currentCompletionPercentage: number;
     private isNavigating;
     activeContent: EFPActiveContent;
     tabGroupEl: HTMLElement & {
@@ -47,6 +48,7 @@ export declare class EFPEntryForm extends LitElement {
     private multilineTextSaveStatus;
     private multilineTextCharCounts;
     connectedCallback(): void;
+    private handleStatsUpdated;
     disconnectedCallback(): void;
     private handleSignOffChanged;
     private updateQuestionnaireStoreStatus;
