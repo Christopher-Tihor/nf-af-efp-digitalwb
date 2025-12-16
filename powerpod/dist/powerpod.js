@@ -1,5 +1,5 @@
 /*!
-* powerpod 4.5.7
+* powerpod 4.5.8
 * https://github.com/bcgov/nr-af-pods/powerpod
 *
 * @license GPLv3 for open source use only
@@ -42841,24 +42841,29 @@
           // Default content rendering
           return html `<div>${unsafeHTML(activeContent.content)}</div>`;
       }
-      static renderItems(items, html, activeContentTitle, onItemClick, renderItems, getCompletion, getSkipped) {
+      static renderItems(items, html, activeContentTitle, onItemClick, renderItems, getCompletion, getSkipped, getIncomplete) {
           return items.map((item) => {
               const isComplete = getCompletion ? getCompletion(item) : (item.complete || false);
               const isSkipped = getSkipped ? getSkipped(item) : false;
-              // Determine icon based on state: skipped > complete > incomplete
+              const hasIncompleteQuestions = getIncomplete ? getIncomplete(item) : false;
+              // Determine icon based on state: skipped > complete > incomplete with unanswered > incomplete
               let iconName;
               let iconColor;
               if (isSkipped) {
-                  iconName = 'dash-circle-fill';
-                  iconColor = 'var(--sl-color-neutral-500)';
+                  iconName = 'skip-forward-circle';
+                  iconColor = 'var(--sl-color-primary-600)'; // blue - intentional action
               }
               else if (isComplete) {
                   iconName = 'check-circle';
-                  iconColor = 'var(--sl-color-success-600)';
+                  iconColor = 'var(--sl-color-success-600)'; // green - completed
+              }
+              else if (hasIncompleteQuestions) {
+                  iconName = 'exclamation-circle';
+                  iconColor = 'var(--sl-color-danger-600)'; // red - has incomplete questions
               }
               else {
-                  iconName = 'pencil';
-                  iconColor = 'var(--sl-color-warning-600)';
+                  iconName = 'pencil-square';
+                  iconColor = 'var(--sl-color-neutral-600)'; // gray - not started/in progress
               }
               // Determine item capabilities based on content
               const hasContent = item.content && item.content.trim() !== '';
@@ -42916,7 +42921,7 @@
               ></sl-icon>
               <span>${item.title || item.label}</span>
             </div>
-            ${EFPRenderUtils.renderItems(item.items || [], html, activeContentTitle, onItemClick, renderItems, getCompletion, getSkipped)}
+            ${EFPRenderUtils.renderItems(item.items || [], html, activeContentTitle, onItemClick, renderItems, getCompletion, getSkipped, getIncomplete)}
           </sl-details>
         `;
               }
@@ -42931,7 +42936,7 @@
               ></sl-icon>
               <span>${item.title || item.label}</span>
             </div>
-            ${EFPRenderUtils.renderItems(item.items || [], html, activeContentTitle, onItemClick, renderItems, getCompletion, getSkipped)}
+            ${EFPRenderUtils.renderItems(item.items || [], html, activeContentTitle, onItemClick, renderItems, getCompletion, getSkipped, getIncomplete)}
           </sl-details>
         `;
               }
@@ -43250,15 +43255,26 @@
   .nav-chapter-title {
     font-family: var(--chapter-font);
     font-weight: 600;
-    font-size: 0.95rem;
+    font-size: 1rem;
     color: var(--sl-color-neutral-800);
   }
 
   .nav-subchapter-title {
     font-family: var(--body-font);
     font-weight: 500;
-    font-size: 0.9rem;
+    font-size: 1rem;
     color: var(--sl-color-neutral-700);
+  }
+
+  /* Consistent icon sizing in navigation */
+  .nav sl-icon,
+  .nav-chapter-title sl-icon,
+  .nav-subchapter-title sl-icon,
+  sl-details sl-icon {
+    font-size: 1rem !important;
+    width: 1rem;
+    height: 1rem;
+    flex-shrink: 0;
   }
 
   /* Content area typography */
@@ -43462,6 +43478,7 @@
           this.questionsAndResponsesLoaded = false;
           this.workbookLocked = false;
           this.showValidationAlert = false;
+          this.hasTriedToSubmit = false; // Track if user has tried to navigate to Review & Submit
           this.incompleteChapters = [];
           this.responseUpdateCounter = 0; // Triggers re-render when responses change
           this.isNavigating = false; // Flag to prevent tab change interference
@@ -43622,6 +43639,7 @@
       // Show validation alert with incomplete chapters
       showIncompleteQuestionsAlert() {
           this.showValidationAlert = true;
+          this.hasTriedToSubmit = true; // Mark that user has tried to submit
           logger$4.info({
               message: 'Showing validation alert for incomplete questions',
               data: {
@@ -43658,6 +43676,7 @@
       }
       // Rendering methods
       renderQuestion(question) {
+          var _a, _b;
           const questionTypeMap = {
               100000000: 'Yes/No/NA',
               100000001: 'Point Rating',
@@ -43668,6 +43687,14 @@
           const questionTypeName = questionTypeMap[question.questionType] || 'Unknown';
           // Check if this question is disabled (in a skipped chapter)
           const isDisabled = this.isQuestionDisabled(question.id);
+          // Check if this question is incomplete (not skipped and no response)
+          // Only show the red icon if user has tried to submit
+          const entry = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.get(question.id);
+          const isSkipped = ((_a = entry === null || entry === void 0 ? void 0 : entry.response) === null || _a === void 0 ? void 0 : _a.quartech_chapterskipped) === 100000000;
+          const hasResponse = ((_b = entry === null || entry === void 0 ? void 0 : entry.response) === null || _b === void 0 ? void 0 : _b.quartech_response) &&
+              entry.response.quartech_response.trim() !== '';
+          const isIncomplete = !isSkipped && !hasResponse;
+          const showIncompleteIcon = isIncomplete && this.hasTriedToSubmit;
           return x `
       <div
         class="question-container ${isDisabled ? 'question-disabled' : ''}"
@@ -43682,6 +43709,15 @@
             : ''}
 
         <div class="question-label">
+          ${showIncompleteIcon
+            ? x `
+                <sl-icon
+                  name="exclamation-circle"
+                  style="color: var(--sl-color-danger-600); margin-right: 0.5rem;"
+                  aria-label="Incomplete question"
+                ></sl-icon>
+              `
+            : ''}
           <span
             >${o$3(EFPTextUtils.convertNewlinesToBreaks(question.label))}</span
           >
@@ -45610,7 +45646,7 @@
           }
       }
       renderItems(items) {
-          return EFPRenderUtils.renderItems(items, x, this.activeContent.title, (item) => this.handleItemClick(item), (items) => this.renderItems(items), (item) => this.getCompletionFromStore(item), (item) => this.getSkippedFromStore(item));
+          return EFPRenderUtils.renderItems(items, x, this.activeContent.title, (item) => this.handleItemClick(item), (items) => this.renderItems(items), (item) => this.getCompletionFromStore(item), (item) => this.getSkippedFromStore(item), (item) => this.getIncompleteFromStore(item));
       }
       // Get skipped status for an item from the store
       getSkippedFromStore(item) {
@@ -45624,6 +45660,42 @@
           catch (error) {
               logger$4.error({
                   message: 'Error checking chapter skipped status',
+                  data: { chapterId: item.chapterId, error: error.message },
+              });
+              return false;
+          }
+      }
+      // Get incomplete status for an item from the store
+      // Returns true if the chapter has any incomplete (not skipped and no response) questions
+      // Only returns true if user has tried to submit
+      getIncompleteFromStore(item) {
+          // Only show incomplete status if user has tried to submit
+          if (!this.hasTriedToSubmit) {
+              return false;
+          }
+          // Only check for chapters (not questions or other items)
+          if (!item.chapterId) {
+              return false;
+          }
+          try {
+              const questions = this.getQuestionsForCurrentChapter(item.chapterId);
+              if (questions.length === 0) {
+                  return false;
+              }
+              // Check if any question is incomplete (not skipped AND has no response)
+              return questions.some((question) => {
+                  var _a, _b;
+                  const entry = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.get(question.id);
+                  const isSkipped = ((_a = entry === null || entry === void 0 ? void 0 : entry.response) === null || _a === void 0 ? void 0 : _a.quartech_chapterskipped) === 100000000;
+                  const hasResponse = ((_b = entry === null || entry === void 0 ? void 0 : entry.response) === null || _b === void 0 ? void 0 : _b.quartech_response) &&
+                      entry.response.quartech_response.trim() !== '';
+                  // Question is incomplete if it's not skipped AND has no response
+                  return !isSkipped && !hasResponse;
+              });
+          }
+          catch (error) {
+              logger$4.error({
+                  message: 'Error checking chapter incomplete status',
                   data: { chapterId: item.chapterId, error: error.message },
               });
               return false;
@@ -46103,8 +46175,8 @@
             let icon;
             let color;
             if (isSkipped) {
-                icon = 'dash-circle-fill';
-                color = isActive ? 'orange' : 'gray';
+                icon = 'skip-forward-circle';
+                color = isActive ? 'orange' : '#d97706'; // yellow color
             }
             else if (isComplete) {
                 icon = 'check-circle';
@@ -46288,6 +46360,9 @@
   __decorate([
       n$4({ type: Boolean, attribute: false })
   ], EFPEntryForm.prototype, "showValidationAlert", void 0);
+  __decorate([
+      n$4({ type: Boolean, attribute: false })
+  ], EFPEntryForm.prototype, "hasTriedToSubmit", void 0);
   __decorate([
       n$4({ type: Array, attribute: false })
   ], EFPEntryForm.prototype, "incompleteChapters", void 0);
@@ -46718,7 +46793,7 @@
       };
     };
     // @ts-ignore
-    POWERPOD.version = '4.5.7';
+    POWERPOD.version = '4.5.8';
     // @ts-ignore
     window.powerpod = POWERPOD;
   }

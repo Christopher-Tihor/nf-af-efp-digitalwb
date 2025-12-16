@@ -274,7 +274,7 @@ The EFP navigation now uses the questionnaire store to determine icon display:
 ```javascript
 // Navigation icons are automatically determined by completion status
 // ✅ Complete chapters/questions → check-circle (green)
-// ✏️ Incomplete chapters/questions → pencil (orange/gray)
+// ✏️ Incomplete chapters/questions → pencil-square (orange/gray)
 // 🎯 Icons now show at ALL levels: top-level parents, subchapters, and section tabs
 
 // In EFPEntryForm.ts

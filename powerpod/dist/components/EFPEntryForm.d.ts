@@ -30,6 +30,7 @@ export declare class EFPEntryForm extends LitElement {
     questionsAndResponsesLoaded: boolean;
     workbookLocked: boolean;
     showValidationAlert: boolean;
+    hasTriedToSubmit: boolean;
     incompleteChapters: Array<{
         id: string;
         name: string;
@@ -109,6 +110,7 @@ export declare class EFPEntryForm extends LitElement {
     private navigateToHierarchyItem;
     private renderItems;
     private getSkippedFromStore;
+    private getIncompleteFromStore;
     updated(changedProps: Map<string, unknown>): void;
     firstUpdated(): void;
     willUpdate(changedProps: Map<string, unknown>): void;

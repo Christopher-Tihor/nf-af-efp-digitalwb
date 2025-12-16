@@ -22,6 +22,7 @@ export interface EFPSectionItem {
   items?: EFPSectionItem[];
   title?: string;
   disableExpand?: boolean; // If true, item will not be expandable even if it has items
+  chapterId?: string; // Chapter ID for checking incomplete questions
 }
 
 export class EFPRenderUtils {
@@ -79,25 +80,30 @@ export class EFPRenderUtils {
     onItemClick: (item: EFPSectionItem) => void,
     renderItems: (items: EFPSectionItem[]) => any,
     getCompletion?: (item: EFPSectionItem) => boolean,
-    getSkipped?: (item: EFPSectionItem) => boolean
+    getSkipped?: (item: EFPSectionItem) => boolean,
+    getIncomplete?: (item: EFPSectionItem) => boolean
   ): any {
     return items.map((item) => {
       const isComplete = getCompletion ? getCompletion(item) : (item.complete || false);
       const isSkipped = getSkipped ? getSkipped(item) : false;
+      const hasIncompleteQuestions = getIncomplete ? getIncomplete(item) : false;
 
-      // Determine icon based on state: skipped > complete > incomplete
+      // Determine icon based on state: skipped > complete > incomplete with unanswered > incomplete
       let iconName: string;
       let iconColor: string;
 
       if (isSkipped) {
-        iconName = 'dash-circle-fill';
-        iconColor = 'var(--sl-color-neutral-500)';
+        iconName = 'skip-forward-circle';
+        iconColor = 'var(--sl-color-primary-600)'; // blue - intentional action
       } else if (isComplete) {
         iconName = 'check-circle';
-        iconColor = 'var(--sl-color-success-600)';
+        iconColor = 'var(--sl-color-success-600)'; // green - completed
+      } else if (hasIncompleteQuestions) {
+        iconName = 'exclamation-circle';
+        iconColor = 'var(--sl-color-danger-600)'; // red - has incomplete questions
       } else {
-        iconName = 'pencil';
-        iconColor = 'var(--sl-color-warning-600)';
+        iconName = 'pencil-square';
+        iconColor = 'var(--sl-color-neutral-600)'; // gray - not started/in progress
       }
 
       // Determine item capabilities based on content
@@ -159,7 +165,7 @@ export class EFPRenderUtils {
               ></sl-icon>
               <span>${item.title || item.label}</span>
             </div>
-            ${EFPRenderUtils.renderItems(item.items || [], html, activeContentTitle, onItemClick, renderItems, getCompletion, getSkipped)}
+            ${EFPRenderUtils.renderItems(item.items || [], html, activeContentTitle, onItemClick, renderItems, getCompletion, getSkipped, getIncomplete)}
           </sl-details>
         `;
       } else if (hasSubitems) {
@@ -173,7 +179,7 @@ export class EFPRenderUtils {
               ></sl-icon>
               <span>${item.title || item.label}</span>
             </div>
-            ${EFPRenderUtils.renderItems(item.items || [], html, activeContentTitle, onItemClick, renderItems, getCompletion, getSkipped)}
+            ${EFPRenderUtils.renderItems(item.items || [], html, activeContentTitle, onItemClick, renderItems, getCompletion, getSkipped, getIncomplete)}
           </sl-details>
         `;
       } else {

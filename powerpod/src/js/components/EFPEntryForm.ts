@@ -72,6 +72,7 @@ export class EFPEntryForm extends LitElement {
     false;
   @property({ type: Boolean, attribute: false }) workbookLocked = false;
   @property({ type: Boolean, attribute: false }) showValidationAlert = false;
+  @property({ type: Boolean, attribute: false }) hasTriedToSubmit = false; // Track if user has tried to navigate to Review & Submit
   @property({ type: Array, attribute: false }) incompleteChapters: Array<{id: string, name: string}> = [];
   @property({ type: Number, attribute: false }) responseUpdateCounter = 0; // Triggers re-render when responses change
   private isNavigating = false; // Flag to prevent tab change interference
@@ -271,6 +272,7 @@ export class EFPEntryForm extends LitElement {
   // Show validation alert with incomplete chapters
   private showIncompleteQuestionsAlert() {
     this.showValidationAlert = true;
+    this.hasTriedToSubmit = true; // Mark that user has tried to submit
 
     logger.info({
       message: 'Showing validation alert for incomplete questions',
@@ -327,6 +329,15 @@ export class EFPEntryForm extends LitElement {
     // Check if this question is disabled (in a skipped chapter)
     const isDisabled = this.isQuestionDisabled(question.id);
 
+    // Check if this question is incomplete (not skipped and no response)
+    // Only show the red icon if user has tried to submit
+    const entry = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.get(question.id);
+    const isSkipped = entry?.response?.quartech_chapterskipped === 100000000;
+    const hasResponse = entry?.response?.quartech_response &&
+                       entry.response.quartech_response.trim() !== '';
+    const isIncomplete = !isSkipped && !hasResponse;
+    const showIncompleteIcon = isIncomplete && this.hasTriedToSubmit;
+
     return html`
       <div
         class="question-container ${isDisabled ? 'question-disabled' : ''}"
@@ -341,6 +352,15 @@ export class EFPEntryForm extends LitElement {
           : ''}
 
         <div class="question-label">
+          ${showIncompleteIcon
+            ? html`
+                <sl-icon
+                  name="exclamation-circle"
+                  style="color: var(--sl-color-danger-600); margin-right: 0.5rem;"
+                  aria-label="Incomplete question"
+                ></sl-icon>
+              `
+            : ''}
           <span
             >${unsafeHTML(
               EFPTextUtils.convertNewlinesToBreaks(question.label)
@@ -2692,7 +2712,8 @@ export class EFPEntryForm extends LitElement {
       (item: EFPSectionItem) => this.handleItemClick(item),
       (items: EFPSectionItem[]) => this.renderItems(items),
       (item: EFPSectionItem) => this.getCompletionFromStore(item),
-      (item: EFPSectionItem) => this.getSkippedFromStore(item)
+      (item: EFPSectionItem) => this.getSkippedFromStore(item),
+      (item: EFPSectionItem) => this.getIncompleteFromStore(item)
     );
   }
 
@@ -2708,6 +2729,45 @@ export class EFPEntryForm extends LitElement {
     } catch (error) {
       logger.error({
         message: 'Error checking chapter skipped status',
+        data: { chapterId: item.chapterId, error: (error as Error).message },
+      });
+      return false;
+    }
+  }
+
+  // Get incomplete status for an item from the store
+  // Returns true if the chapter has any incomplete (not skipped and no response) questions
+  // Only returns true if user has tried to submit
+  private getIncompleteFromStore(item: EFPSectionItem): boolean {
+    // Only show incomplete status if user has tried to submit
+    if (!this.hasTriedToSubmit) {
+      return false;
+    }
+
+    // Only check for chapters (not questions or other items)
+    if (!item.chapterId) {
+      return false;
+    }
+
+    try {
+      const questions = this.getQuestionsForCurrentChapter(item.chapterId);
+      if (questions.length === 0) {
+        return false;
+      }
+
+      // Check if any question is incomplete (not skipped AND has no response)
+      return questions.some((question: any) => {
+        const entry = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.get(question.id);
+        const isSkipped = entry?.response?.quartech_chapterskipped === 100000000;
+        const hasResponse = entry?.response?.quartech_response &&
+                           entry.response.quartech_response.trim() !== '';
+
+        // Question is incomplete if it's not skipped AND has no response
+        return !isSkipped && !hasResponse;
+      });
+    } catch (error) {
+      logger.error({
+        message: 'Error checking chapter incomplete status',
         data: { chapterId: item.chapterId, error: (error as Error).message },
       });
       return false;
@@ -3333,8 +3393,8 @@ export class EFPEntryForm extends LitElement {
               let color: string;
 
               if (isSkipped) {
-                icon = 'dash-circle-fill';
-                color = isActive ? 'orange' : 'gray';
+                icon = 'skip-forward-circle';
+                color = isActive ? 'orange' : '#d97706'; // yellow color
               } else if (isComplete) {
                 icon = 'check-circle';
                 color = isActive ? 'orange' : 'green';

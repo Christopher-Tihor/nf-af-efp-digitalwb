@@ -716,7 +716,7 @@ export function testNavigationIcons() {
 
     console.log('🎯 Testing navigation icon rules:');
     console.log('   ✅ Complete chapters/questions → check-circle (green)');
-    console.log('   ✏️ Incomplete chapters/questions → pencil (orange/gray)');
+    console.log('   ✏️ Incomplete chapters/questions → pencil-square (orange/gray)');
     console.log('   📋 Icons now show on ALL levels: top-level parents, subchapters, and questions');
 
     let testResults = [];
@@ -726,7 +726,7 @@ export function testNavigationIcons() {
       if (Array.isArray(chapterGroup)) {
         chapterGroup.forEach(chapter => {
           const isComplete = chapter.complete;
-          const expectedIcon = isComplete ? 'check-circle' : 'pencil';
+          const expectedIcon = isComplete ? 'check-circle' : 'pencil-square';
           const expectedColor = isComplete ? 'green' : 'orange/gray';
 
           const result = {

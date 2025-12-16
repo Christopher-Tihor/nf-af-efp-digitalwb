@@ -293,15 +293,26 @@ export const efpEntryFormStyles = css`
   .nav-chapter-title {
     font-family: var(--chapter-font);
     font-weight: 600;
-    font-size: 0.95rem;
+    font-size: 1rem;
     color: var(--sl-color-neutral-800);
   }
 
   .nav-subchapter-title {
     font-family: var(--body-font);
     font-weight: 500;
-    font-size: 0.9rem;
+    font-size: 1rem;
     color: var(--sl-color-neutral-700);
+  }
+
+  /* Consistent icon sizing in navigation */
+  .nav sl-icon,
+  .nav-chapter-title sl-icon,
+  .nav-subchapter-title sl-icon,
+  sl-details sl-icon {
+    font-size: 1rem !important;
+    width: 1rem;
+    height: 1rem;
+    flex-shrink: 0;
   }
 
   /* Content area typography */
