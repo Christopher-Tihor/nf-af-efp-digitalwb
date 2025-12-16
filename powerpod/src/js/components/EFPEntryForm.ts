@@ -1365,16 +1365,27 @@ export class EFPEntryForm extends LitElement {
         const questionnaire = getQuestionnaireFromStore();
         if (questionnaire) {
           // Calculate completion based on questionnaire store data
+          // Section is complete if all questions are either answered OR skipped
           let totalQuestions = 0;
-          let answeredQuestions = 0;
+          let completedOrSkippedQuestions = 0;
 
           const countInChapters = (chapters: any[]) => {
             chapters.forEach((chapter: any) => {
               if (chapter.questions) {
-                totalQuestions += chapter.questions.length;
-                answeredQuestions += chapter.questions.filter(
-                  (q: any) => q.complete
-                ).length;
+                chapter.questions.forEach((question: any) => {
+                  totalQuestions++;
+
+                  // Check if question is complete or skipped
+                  const entry = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.get(question.id);
+                  const isSkipped = entry?.response?.quartech_chapterskipped === 100000000;
+                  const hasResponse = entry?.response?.quartech_response &&
+                                     entry.response.quartech_response.trim() !== '';
+
+                  // Question is complete if it's skipped OR has a response
+                  if (isSkipped || hasResponse) {
+                    completedOrSkippedQuestions++;
+                  }
+                });
               }
               if (chapter.subchapters) {
                 countInChapters(chapter.subchapters);
@@ -1386,8 +1397,8 @@ export class EFPEntryForm extends LitElement {
             countInChapters(questionnaire.chapters[0]);
           }
 
-          // Section is complete if all questions are answered
-          return totalQuestions > 0 && answeredQuestions === totalQuestions;
+          // Section is complete if all questions are either answered or skipped
+          return totalQuestions > 0 && completedOrSkippedQuestions === totalQuestions;
         }
       } catch (error) {
         logger.warn({
@@ -3397,7 +3408,7 @@ export class EFPEntryForm extends LitElement {
                 color = isActive ? 'orange' : '#d97706'; // yellow color
               } else if (isComplete) {
                 icon = 'check-circle';
-                color = isActive ? 'orange' : 'green';
+                color = '#22c55e'; // green - always green when completed
               } else {
                 icon = 'pencil';
                 color = isActive ? 'orange' : 'gray';

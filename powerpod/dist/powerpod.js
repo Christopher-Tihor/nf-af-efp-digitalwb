@@ -44591,13 +44591,25 @@
                   const questionnaire = getQuestionnaireFromStore();
                   if (questionnaire) {
                       // Calculate completion based on questionnaire store data
+                      // Section is complete if all questions are either answered OR skipped
                       let totalQuestions = 0;
-                      let answeredQuestions = 0;
+                      let completedOrSkippedQuestions = 0;
                       const countInChapters = (chapters) => {
                           chapters.forEach((chapter) => {
                               if (chapter.questions) {
-                                  totalQuestions += chapter.questions.length;
-                                  answeredQuestions += chapter.questions.filter((q) => q.complete).length;
+                                  chapter.questions.forEach((question) => {
+                                      var _a, _b;
+                                      totalQuestions++;
+                                      // Check if question is complete or skipped
+                                      const entry = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.get(question.id);
+                                      const isSkipped = ((_a = entry === null || entry === void 0 ? void 0 : entry.response) === null || _a === void 0 ? void 0 : _a.quartech_chapterskipped) === 100000000;
+                                      const hasResponse = ((_b = entry === null || entry === void 0 ? void 0 : entry.response) === null || _b === void 0 ? void 0 : _b.quartech_response) &&
+                                          entry.response.quartech_response.trim() !== '';
+                                      // Question is complete if it's skipped OR has a response
+                                      if (isSkipped || hasResponse) {
+                                          completedOrSkippedQuestions++;
+                                      }
+                                  });
                               }
                               if (chapter.subchapters) {
                                   countInChapters(chapter.subchapters);
@@ -44607,8 +44619,8 @@
                       if (questionnaire.chapters && questionnaire.chapters.length > 0) {
                           countInChapters(questionnaire.chapters[0]);
                       }
-                      // Section is complete if all questions are answered
-                      return totalQuestions > 0 && answeredQuestions === totalQuestions;
+                      // Section is complete if all questions are either answered or skipped
+                      return totalQuestions > 0 && completedOrSkippedQuestions === totalQuestions;
                   }
               }
               catch (error) {
@@ -46180,7 +46192,7 @@
             }
             else if (isComplete) {
                 icon = 'check-circle';
-                color = isActive ? 'orange' : 'green';
+                color = '#22c55e'; // green - always green when completed
             }
             else {
                 icon = 'pencil';
