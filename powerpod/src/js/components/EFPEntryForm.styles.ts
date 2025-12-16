@@ -172,6 +172,14 @@ export const efpEntryFormStyles = css`
     line-height: 1.4;
     color: var(--sl-color-neutral-900);
     display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    position: relative;
+  }
+
+  .question-label-text {
+    flex: 1;
+    display: flex;
     align-items: center;
     gap: 0.5rem;
   }
@@ -179,11 +187,30 @@ export const efpEntryFormStyles = css`
   .question-tooltip-icon {
     color: var(--sl-color-neutral-500);
     cursor: help;
-    font-size: 1rem;
+    font-size: 1.2rem !important;
+    width: 1.2rem !important;
+    height: 1.2rem !important;
+    min-width: 1.2rem !important;
+    min-height: 1.2rem !important;
+    flex-shrink: 0;
+    display: inline-block;
+    vertical-align: middle;
   }
 
   .question-tooltip-icon:hover {
     color: var(--sl-color-primary-600);
+  }
+
+  .question-incomplete-icon {
+    color: var(--sl-color-danger-600);
+    font-size: 1.5rem !important;
+    width: 1.5rem !important;
+    height: 1.5rem !important;
+    min-width: 1.5rem !important;
+    min-height: 1.5rem !important;
+    flex-shrink: 0;
+    margin-left: auto;
+    display: inline-block;
   }
 
   .question-text {

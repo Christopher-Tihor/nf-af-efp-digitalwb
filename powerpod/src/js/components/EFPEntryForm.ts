@@ -352,30 +352,32 @@ export class EFPEntryForm extends LitElement {
           : ''}
 
         <div class="question-label">
+          <div class="question-label-text">
+            <span
+              >${unsafeHTML(
+                EFPTextUtils.convertNewlinesToBreaks(question.label)
+              )}</span
+            >
+            ${question.tooltip
+              ? html`
+                  <sl-tooltip placement="top" style="--max-width: 300px;">
+                    <div slot="content">${unsafeHTML(question.tooltip)}</div>
+                    <sl-icon
+                      name="question-circle"
+                      class="question-tooltip-icon"
+                      aria-label="Question help"
+                    ></sl-icon>
+                  </sl-tooltip>
+                `
+              : ''}
+          </div>
           ${showIncompleteIcon
             ? html`
                 <sl-icon
                   name="exclamation-circle"
-                  style="color: var(--sl-color-danger-600); margin-right: 0.5rem;"
+                  class="question-incomplete-icon"
                   aria-label="Incomplete question"
                 ></sl-icon>
-              `
-            : ''}
-          <span
-            >${unsafeHTML(
-              EFPTextUtils.convertNewlinesToBreaks(question.label)
-            )}</span
-          >
-          ${question.tooltip
-            ? html`
-                <sl-tooltip placement="top" style="--max-width: 300px;">
-                  <div slot="content">${unsafeHTML(question.tooltip)}</div>
-                  <sl-icon
-                    name="question-circle"
-                    class="question-tooltip-icon"
-                    aria-label="Question help"
-                  ></sl-icon>
-                </sl-tooltip>
               `
             : ''}
         </div>
