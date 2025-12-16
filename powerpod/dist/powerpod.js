@@ -46430,27 +46430,18 @@
     `;
       }
       render() {
+          var _a;
+          const workbookData = getWorkbookData();
+          const workbookId = (workbookData === null || workbookData === void 0 ? void 0 : workbookData.quartech_digitalworkbookid) || 'N/A';
+          const workbookName = (workbookData === null || workbookData === void 0 ? void 0 : workbookData.quartech_name) || 'N/A';
+          const workbookStatus = (_a = workbookData === null || workbookData === void 0 ? void 0 : workbookData['quartech_workbookstatus@OData.Community.Display.V1.FormattedValue']) !== null && _a !== void 0 ? _a : 'N/A';
           return x `
       <div class="container">
         <!-- Sidebar -->
         <aside class="sidebar">
           <div class="card">
-            <div><strong>EFP Workbook:</strong> Test</div>
-            <div><strong>Status:</strong> In Progress</div>
-            <div>
-              <strong>Questions & Responses:</strong>
-              ${POWERPOD.workbookQuestionsAndResponses.isLoading
-            ? x `<span style="color: var(--sl-color-warning-600);"
-                    >Loading...</span
-                  >`
-            : POWERPOD.workbookQuestionsAndResponses.error
-                ? x `<span style="color: var(--sl-color-danger-600);"
-                    >Error loading</span
-                  >`
-                : x `<span style="color: var(--sl-color-success-600);"
-                    >Loaded</span
-                  >`}
-            </div>
+            <div><strong>EFP Workbook:</strong> ${workbookId} - ${workbookName}</div>
+            <div><strong>Status:</strong> ${workbookStatus}</div>
             ${POWERPOD.workbookQuestionsAndResponses.isLoaded
             ? x `
                   <div>
@@ -46462,16 +46453,18 @@
                 .workbookQuestionsAndResponses.stats.answeredQuestions}
                   </div>
                   <div>
+                    <strong>Skipped:</strong> ${POWERPOD
+                .workbookQuestionsAndResponses.stats.skippedQuestions}
+                  </div>
+                  <div>
                     <strong>Completion:</strong> ${POWERPOD
                 .workbookQuestionsAndResponses.stats
                 .completionPercentage}%
                   </div>
-                  <div>
-                    <strong>Chapters:</strong> ${POWERPOD
-                .workbookQuestionsAndResponses.questionsByChapter.size}
-                  </div>
                 `
-            : ''}
+            : x `
+                  <div><strong>Questions & Responses:</strong> Loading...</div>
+                `}
           </div>
 
           <sl-tab-group
