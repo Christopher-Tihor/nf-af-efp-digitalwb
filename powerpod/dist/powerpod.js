@@ -44246,10 +44246,13 @@
           const chapterId = this.getCurrentChapterId();
           if (!chapterId)
               return false;
-          const questions = this.getQuestionsForCurrentChapter(chapterId);
+          // Exclude questions from children with preventSkipping: Yes
+          // This ensures that chapters with preventSkipping: Yes don't show as checked
+          // even when their parent is skipped
+          const questions = this.getQuestionsForCurrentChapter(chapterId, true);
           if (questions.length === 0)
               return false;
-          // Check if ALL questions have quartech_chapterskipped set to YES (100000000)
+          // Check if ALL questions (excluding those from preventSkipping children) have quartech_chapterskipped set to YES (100000000)
           return questions.every(q => {
               var _a;
               const entry = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.get(q.id);
@@ -44271,10 +44274,11 @@
       isChapterSkippedById(chapterId) {
           if (!chapterId)
               return false;
-          const questions = this.getQuestionsForCurrentChapter(chapterId);
+          // Exclude questions from children with preventSkipping: Yes
+          const questions = this.getQuestionsForCurrentChapter(chapterId, true);
           if (questions.length === 0)
               return false;
-          // Check if ALL questions have quartech_chapterskipped set to YES (100000000)
+          // Check if ALL questions (excluding those from preventSkipping children) have quartech_chapterskipped set to YES (100000000)
           return questions.every(q => {
               var _a;
               const entry = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.get(q.id);
@@ -44346,7 +44350,8 @@
           return null;
       }
       // Get all questions for the current chapter (including subchapters)
-      getQuestionsForCurrentChapter(chapterId) {
+      // excludePreventSkipping: if true, excludes questions from chapters that have preventSkipping: Yes
+      getQuestionsForCurrentChapter(chapterId, excludePreventSkipping = false) {
           const chapter = getChapterFromStore(chapterId);
           if (!chapter)
               return [];
@@ -44355,6 +44360,10 @@
           if (chapter.subchapters) {
               const collectQuestionsFromSubchapters = (subchapters) => {
                   for (const subchapter of subchapters) {
+                      // Skip this subchapter if it has preventSkipping: Yes and we're excluding those
+                      if (excludePreventSkipping && subchapter.preventSkipping === true) {
+                          continue;
+                      }
                       questions = questions.concat(subchapter.questions || []);
                       if (subchapter.subchapters) {
                           collectQuestionsFromSubchapters(subchapter.subchapters);
@@ -44376,11 +44385,14 @@
               });
               return;
           }
-          const questions = this.getQuestionsForCurrentChapter(chapterId);
+          // When skipping (isChecked = true), exclude questions from children with preventSkipping: Yes
+          // When unskipping (isChecked = false), include all questions
+          const excludePreventSkipping = isChecked;
+          const questions = this.getQuestionsForCurrentChapter(chapterId, excludePreventSkipping);
           if (questions.length === 0) {
               logger$4.warn({
                   message: 'Cannot update chapter skipped: no questions found',
-                  data: { chapterId },
+                  data: { chapterId, excludePreventSkipping },
               });
               return;
           }
@@ -44393,9 +44405,21 @@
           }
           // Set quartech_chapterskipped to YES (100000000) if checked, NO (100000001) if unchecked
           const chapterSkippedValue = isChecked ? 100000000 : 100000001;
+          // Log information about excluded children (if any)
+          if (excludePreventSkipping) {
+              getChapterFromStore(chapterId);
+              const allQuestions = this.getQuestionsForCurrentChapter(chapterId, false);
+              const excludedCount = allQuestions.length - questions.length;
+              if (excludedCount > 0) {
+                  logger$4.info({
+                      message: `Skipping chapter: excluding ${excludedCount} questions from children with preventSkipping: Yes`,
+                      data: { chapterId, totalQuestions: allQuestions.length, questionsToSkip: questions.length, excludedQuestions: excludedCount },
+                  });
+              }
+          }
           logger$4.info({
               message: `Updating chapter skipped status for ${questions.length} questions`,
-              data: { chapterId, isChecked, chapterSkippedValue, questionCount: questions.length },
+              data: { chapterId, isChecked, chapterSkippedValue, questionCount: questions.length, excludePreventSkipping },
           });
           // STEP 1: Optimistically update in-memory data and questionnaire store FIRST
           // This makes the UI respond instantly without waiting for API calls
