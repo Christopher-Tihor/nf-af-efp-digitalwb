@@ -67,6 +67,7 @@ export declare class EFPEntryForm extends LitElement {
     private isChapterSkipped;
     private isQuestionDisabled;
     private isChapterSkippedById;
+    private isSkippingPrevented;
     private getCurrentChapterId;
     private getQuestionsForCurrentChapter;
     private handleChapterSkippedChange;

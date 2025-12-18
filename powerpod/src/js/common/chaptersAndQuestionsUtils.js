@@ -317,6 +317,8 @@ export function getChaptersWithNestedQuestionsAndSubchapters() {
     description: chapter.quartech_description,
     tooltip: chapter.quartech_tooltip,
     imageUrl: chapter.quartech_imageurl,
+    parentChapterId: chapter._quartech_parentchapter_value,
+    preventSkipping: chapter.quartech_preventskipping === 100000000,
     questions: (chapter.questions || []).map(question => ({
       id: question.quartech_workbookquestionid,
       name: question.quartech_name,
@@ -346,6 +348,7 @@ export function getChaptersWithNestedQuestionsAndSubchapters() {
       tooltip: subchapter.quartech_tooltip,
       imageUrl: subchapter.quartech_imageurl,
       parentChapterId: subchapter._quartech_parentchapter_value,
+      preventSkipping: subchapter.quartech_preventskipping === 100000000,
       questions: (subchapter.questions || []).map(question => ({
         id: question.quartech_workbookquestionid,
         name: question.quartech_name,
@@ -376,6 +379,7 @@ export function getChaptersWithNestedQuestionsAndSubchapters() {
         tooltip: subSubchapter.quartech_tooltip,
         imageUrl: subSubchapter.quartech_imageurl,
         parentChapterId: subSubchapter._quartech_parentchapter_value,
+        preventSkipping: subSubchapter.quartech_preventskipping === 100000000,
         questions: (subSubchapter.questions || []).map(question => ({
           id: question.quartech_workbookquestionid,
           name: question.quartech_name,

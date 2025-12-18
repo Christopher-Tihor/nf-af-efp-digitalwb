@@ -608,12 +608,13 @@ export class EFPEntryForm extends LitElement {
           !currentStep.hideSkipChapterCheckbox) {
 
         const isSkipped = this.isChapterSkipped();
+        const preventSkipping = this.isSkippingPrevented();
 
         return html`
           <div class="section-not-applicable">
             <sl-checkbox
               ?checked=${isSkipped}
-              ?disabled=${this.workbookLocked}
+              ?disabled=${this.workbookLocked || preventSkipping}
               @sl-change=${this.handleChapterSkippedChange}>
               This section does not apply to this EFP.
             </sl-checkbox>
@@ -702,6 +703,55 @@ export class EFPEntryForm extends LitElement {
       const entry = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.get(q.id);
       return entry?.response?.quartech_chapterskipped === 100000000;
     });
+  }
+
+  // Check if skipping is prevented for the current chapter
+  // This cascades: if a parent has preventSkipping: Yes, all children are also prevented from skipping
+  private isSkippingPrevented(): boolean {
+    const currentStep = this.flatSteps[this.currentStepIndex];
+    if (!currentStep) return false;
+
+    // Get the current chapter/subchapter and check its preventSkipping
+    let currentChapter = null;
+    let parentChapterId = null;
+
+    // Determine the current chapter and its parent
+    if (currentStep.subchapterData) {
+      // This is a subchapter or sub-subchapter
+      currentChapter = currentStep.subchapterData;
+      parentChapterId = currentChapter.parentChapterId;
+    } else if (currentStep.chapterData) {
+      // This is a leaf chapter
+      currentChapter = currentStep.chapterData;
+      parentChapterId = currentChapter.parentChapterId;
+    } else if (currentStep.isContainer && currentStep.chapterId) {
+      // This is a container chapter
+      currentChapter = getChapterFromStore(currentStep.chapterId);
+      parentChapterId = currentChapter?.parentChapterId;
+    }
+
+    // Check if the current chapter itself has preventSkipping
+    if (currentChapter?.preventSkipping === true) {
+      return true;
+    }
+
+    // Check if any parent chapter has preventSkipping (cascade effect)
+    if (parentChapterId) {
+      const parentChapter = getChapterFromStore(parentChapterId);
+      if (parentChapter?.preventSkipping === true) {
+        return true;
+      }
+
+      // Check grandparent if parent has a parent (for 3-level hierarchy)
+      if (parentChapter?.parentChapterId) {
+        const grandparentChapter = getChapterFromStore(parentChapter.parentChapterId);
+        if (grandparentChapter?.preventSkipping === true) {
+          return true;
+        }
+      }
+    }
+
+    return false;
   }
 
   // Get the chapter ID for the current step
