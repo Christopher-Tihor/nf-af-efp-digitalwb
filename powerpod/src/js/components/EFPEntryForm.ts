@@ -3411,31 +3411,9 @@ export class EFPEntryForm extends LitElement {
         <!-- Sidebar -->
         <aside class="sidebar">
           <div class="card">
-            <div><strong>EFP Workbook:</strong> ${workbookId} - ${workbookName}</div>
+            <div><strong>Workbook ID:</strong> ${workbookId}</div>
+            <div><strong>Workbook Name:</strong> ${workbookName}</div>
             <div><strong>Status:</strong> ${workbookStatus}</div>
-            ${POWERPOD.workbookQuestionsAndResponses.isLoaded
-              ? html`
-                  <div>
-                    <strong>Total Questions:</strong> ${POWERPOD
-                      .workbookQuestionsAndResponses.stats.totalQuestions}
-                  </div>
-                  <div>
-                    <strong>Answered:</strong> ${POWERPOD
-                      .workbookQuestionsAndResponses.stats.answeredQuestions}
-                  </div>
-                  <div>
-                    <strong>Skipped:</strong> ${POWERPOD
-                      .workbookQuestionsAndResponses.stats.skippedQuestions}
-                  </div>
-                  <div>
-                    <strong>Completion:</strong> ${POWERPOD
-                      .workbookQuestionsAndResponses.stats
-                      .completionPercentage}%
-                  </div>
-                `
-              : html`
-                  <div><strong>Questions & Responses:</strong> Loading...</div>
-                `}
           </div>
 
           <sl-tab-group

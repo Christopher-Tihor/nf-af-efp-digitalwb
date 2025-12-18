@@ -1,5 +1,5 @@
 /*!
-* powerpod 4.5.9
+* powerpod 4.6.0
 * https://github.com/bcgov/nr-af-pods/powerpod
 *
 * @license GPLv3 for open source use only
@@ -46442,31 +46442,9 @@
         <!-- Sidebar -->
         <aside class="sidebar">
           <div class="card">
-            <div><strong>EFP Workbook:</strong> ${workbookId} - ${workbookName}</div>
+            <div><strong>Workbook ID:</strong> ${workbookId}</div>
+            <div><strong>Workbook Name:</strong> ${workbookName}</div>
             <div><strong>Status:</strong> ${workbookStatus}</div>
-            ${POWERPOD.workbookQuestionsAndResponses.isLoaded
-            ? x `
-                  <div>
-                    <strong>Total Questions:</strong> ${POWERPOD
-                .workbookQuestionsAndResponses.stats.totalQuestions}
-                  </div>
-                  <div>
-                    <strong>Answered:</strong> ${POWERPOD
-                .workbookQuestionsAndResponses.stats.answeredQuestions}
-                  </div>
-                  <div>
-                    <strong>Skipped:</strong> ${POWERPOD
-                .workbookQuestionsAndResponses.stats.skippedQuestions}
-                  </div>
-                  <div>
-                    <strong>Completion:</strong> ${POWERPOD
-                .workbookQuestionsAndResponses.stats
-                .completionPercentage}%
-                  </div>
-                `
-            : x `
-                  <div><strong>Questions & Responses:</strong> Loading...</div>
-                `}
           </div>
 
           <sl-tab-group
@@ -47103,7 +47081,7 @@
       };
     };
     // @ts-ignore
-    POWERPOD.version = '4.5.9';
+    POWERPOD.version = '4.6.0';
     // @ts-ignore
     window.powerpod = POWERPOD;
   }
