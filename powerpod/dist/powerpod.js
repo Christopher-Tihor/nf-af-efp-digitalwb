@@ -43282,11 +43282,13 @@
     .sidebar {
       order: 1;
       flex: 0 0 100%;
+      min-height: auto; /* Remove min-height on mobile to eliminate white space */
     }
 
     .main-content {
       order: 2;
       flex: 0 0 100%;
+      min-height: auto; /* Remove min-height on mobile */
     }
   }
 
