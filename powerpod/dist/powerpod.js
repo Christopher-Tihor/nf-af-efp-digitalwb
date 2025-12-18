@@ -46032,6 +46032,36 @@
       renderItems(items) {
           return EFPRenderUtils.renderItems(items, x, this.activeContent.title, (item) => this.handleItemClick(item), (items) => this.renderItems(items), (item) => this.getCompletionFromStore(item), (item) => this.getSkippedFromStore(item), (item) => this.getIncompleteFromStore(item));
       }
+      // Check if there are any incomplete children with preventSkipping: Yes
+      // A child is incomplete if it has any questions that are not skipped and not answered
+      hasIncompletePreventSkippingChildren(subchapters) {
+          for (const subchapter of subchapters) {
+              // Check if this subchapter has preventSkipping: Yes
+              if (subchapter.preventSkipping === true) {
+                  // Check if this subchapter is incomplete
+                  const questions = subchapter.questions || [];
+                  const hasIncompleteQuestions = questions.some((question) => {
+                      var _a, _b;
+                      const entry = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.get(question.id);
+                      const isSkipped = ((_a = entry === null || entry === void 0 ? void 0 : entry.response) === null || _a === void 0 ? void 0 : _a.quartech_chapterskipped) === 100000000;
+                      const hasResponse = ((_b = entry === null || entry === void 0 ? void 0 : entry.response) === null || _b === void 0 ? void 0 : _b.quartech_response) &&
+                          entry.response.quartech_response.trim() !== '';
+                      // Question is incomplete if it's not skipped AND has no response
+                      return !isSkipped && !hasResponse;
+                  });
+                  if (hasIncompleteQuestions) {
+                      return true;
+                  }
+              }
+              // Recursively check sub-subchapters
+              if (subchapter.subchapters) {
+                  if (this.hasIncompletePreventSkippingChildren(subchapter.subchapters)) {
+                      return true;
+                  }
+              }
+          }
+          return false;
+      }
       // Get skipped status for an item from the store
       getSkippedFromStore(item) {
           // Only check for chapters (not questions or other items)
@@ -46039,7 +46069,22 @@
               return false;
           }
           try {
-              return this.isChapterSkippedById(item.chapterId);
+              // First check if the chapter is skipped (excluding preventSkipping children)
+              const isSkipped = this.isChapterSkippedById(item.chapterId);
+              if (!isSkipped) {
+                  return false;
+              }
+              // If skipped, also check if there are any incomplete children with preventSkipping: Yes
+              // A chapter should only show as skipped if all preventSkipping children are completed
+              const chapter = getChapterFromStore(item.chapterId);
+              if (chapter === null || chapter === void 0 ? void 0 : chapter.subchapters) {
+                  const hasIncompletePreventSkippingChildren = this.hasIncompletePreventSkippingChildren(chapter.subchapters);
+                  if (hasIncompletePreventSkippingChildren) {
+                      // Don't show as skipped if there are incomplete mandatory children
+                      return false;
+                  }
+              }
+              return true;
           }
           catch (error) {
               logger$4.error({

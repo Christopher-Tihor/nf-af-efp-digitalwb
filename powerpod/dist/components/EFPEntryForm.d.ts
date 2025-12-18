@@ -112,6 +112,7 @@ export declare class EFPEntryForm extends LitElement {
     private navigateToSection;
     private navigateToHierarchyItem;
     private renderItems;
+    private hasIncompletePreventSkippingChildren;
     private getSkippedFromStore;
     private getIncompleteFromStore;
     updated(changedProps: Map<string, unknown>): void;

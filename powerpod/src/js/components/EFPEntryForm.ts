@@ -2855,6 +2855,40 @@ export class EFPEntryForm extends LitElement {
     );
   }
 
+  // Check if there are any incomplete children with preventSkipping: Yes
+  // A child is incomplete if it has any questions that are not skipped and not answered
+  private hasIncompletePreventSkippingChildren(subchapters: any[]): boolean {
+    for (const subchapter of subchapters) {
+      // Check if this subchapter has preventSkipping: Yes
+      if (subchapter.preventSkipping === true) {
+        // Check if this subchapter is incomplete
+        const questions = subchapter.questions || [];
+        const hasIncompleteQuestions = questions.some((question: any) => {
+          const entry = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.get(question.id);
+          const isSkipped = entry?.response?.quartech_chapterskipped === 100000000;
+          const hasResponse = entry?.response?.quartech_response &&
+                             entry.response.quartech_response.trim() !== '';
+
+          // Question is incomplete if it's not skipped AND has no response
+          return !isSkipped && !hasResponse;
+        });
+
+        if (hasIncompleteQuestions) {
+          return true;
+        }
+      }
+
+      // Recursively check sub-subchapters
+      if (subchapter.subchapters) {
+        if (this.hasIncompletePreventSkippingChildren(subchapter.subchapters)) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
   // Get skipped status for an item from the store
   private getSkippedFromStore(item: EFPSectionItem): boolean {
     // Only check for chapters (not questions or other items)
@@ -2863,7 +2897,25 @@ export class EFPEntryForm extends LitElement {
     }
 
     try {
-      return this.isChapterSkippedById(item.chapterId);
+      // First check if the chapter is skipped (excluding preventSkipping children)
+      const isSkipped = this.isChapterSkippedById(item.chapterId);
+
+      if (!isSkipped) {
+        return false;
+      }
+
+      // If skipped, also check if there are any incomplete children with preventSkipping: Yes
+      // A chapter should only show as skipped if all preventSkipping children are completed
+      const chapter = getChapterFromStore(item.chapterId);
+      if (chapter?.subchapters) {
+        const hasIncompletePreventSkippingChildren = this.hasIncompletePreventSkippingChildren(chapter.subchapters);
+        if (hasIncompletePreventSkippingChildren) {
+          // Don't show as skipped if there are incomplete mandatory children
+          return false;
+        }
+      }
+
+      return true;
     } catch (error) {
       logger.error({
         message: 'Error checking chapter skipped status',
