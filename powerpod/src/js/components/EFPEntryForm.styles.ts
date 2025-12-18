@@ -30,7 +30,7 @@ export const efpEntryFormStyles = css`
   .container {
     display: flex;
     flex-direction: row;
-    flex-wrap: wrap;
+    flex-wrap: nowrap; /* Prevent wrapping to keep sidebar and content side-by-side */
     min-height: 100vh;
     height: auto;
     font-family: var(--body-font);
@@ -64,16 +64,23 @@ export const efpEntryFormStyles = css`
     border-right: 1px solid var(--sl-color-neutral-200);
     font-family: var(--body-font);
     min-height: 100vh;
+    min-width: 0; /* Allow flex item to shrink below content size */
   }
 
   .main-content {
-    flex: 1;
+    flex: 1 1 74%; /* Grow, shrink, and set base width to 74% */
     padding: 1rem;
     font-family: var(--body-font);
     min-height: 100vh;
+    min-width: 0; /* Critical: allows flex item to shrink below content size */
+    overflow-x: auto; /* Allow horizontal scrolling if content is too wide */
   }
 
   @media (max-width: 992px) {
+    .container {
+      flex-wrap: wrap; /* Allow wrapping on mobile to stack vertically */
+    }
+
     .sidebar {
       order: 1;
       flex: 0 0 100%;
@@ -92,6 +99,9 @@ export const efpEntryFormStyles = css`
     margin-bottom: 1rem;
     background-color: var(--sl-color-neutral-0);
     font-family: var(--body-font);
+    min-width: 0; /* Allow card to shrink */
+    overflow-wrap: break-word; /* Break long words if needed */
+    word-wrap: break-word; /* Legacy support */
   }
 
   .card-with-lock {
@@ -414,6 +424,20 @@ export const efpEntryFormStyles = css`
   .main-content span,
   .main-content div {
     font-family: inherit !important;
+  }
+
+  /* Ensure all content within main-content respects width constraints */
+  .main-content > * {
+    min-width: 0; /* Allow children to shrink */
+    max-width: 100%; /* Don't exceed parent width */
+  }
+
+  /* Ensure paragraphs and text elements wrap properly */
+  .main-content p,
+  .main-content div,
+  .main-content span {
+    overflow-wrap: break-word;
+    word-wrap: break-word;
   }
 
   /* Multiline text container and status indicator */

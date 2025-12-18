@@ -1,5 +1,5 @@
 /*!
-* powerpod 4.6.0
+* powerpod 4.6.1
 * https://github.com/bcgov/nr-af-pods/powerpod
 *
 * @license GPLv3 for open source use only
@@ -42385,12 +42385,14 @@
 
       .table-container {
         overflow-x: auto;
+        max-width: 100%;
       }
 
       table {
         width: 100%;
         border-collapse: collapse;
         background: white;
+        table-layout: auto; /* Allow table to size based on content */
       }
 
       thead {
@@ -42408,6 +42410,10 @@
       td {
         padding: 0.75rem;
         border-bottom: 1px solid #dee2e6;
+        max-width: 300px; /* Constrain cell width */
+        overflow-wrap: break-word; /* Break long words */
+        word-wrap: break-word; /* Legacy support */
+        word-break: break-word; /* Additional breaking support */
       }
 
       tbody tr:hover {
@@ -43222,7 +43228,7 @@
   .container {
     display: flex;
     flex-direction: row;
-    flex-wrap: wrap;
+    flex-wrap: nowrap; /* Prevent wrapping to keep sidebar and content side-by-side */
     min-height: 100vh;
     height: auto;
     font-family: var(--body-font);
@@ -43256,16 +43262,23 @@
     border-right: 1px solid var(--sl-color-neutral-200);
     font-family: var(--body-font);
     min-height: 100vh;
+    min-width: 0; /* Allow flex item to shrink below content size */
   }
 
   .main-content {
-    flex: 1;
+    flex: 1 1 74%; /* Grow, shrink, and set base width to 74% */
     padding: 1rem;
     font-family: var(--body-font);
     min-height: 100vh;
+    min-width: 0; /* Critical: allows flex item to shrink below content size */
+    overflow-x: auto; /* Allow horizontal scrolling if content is too wide */
   }
 
   @media (max-width: 992px) {
+    .container {
+      flex-wrap: wrap; /* Allow wrapping on mobile to stack vertically */
+    }
+
     .sidebar {
       order: 1;
       flex: 0 0 100%;
@@ -43284,6 +43297,9 @@
     margin-bottom: 1rem;
     background-color: var(--sl-color-neutral-0);
     font-family: var(--body-font);
+    min-width: 0; /* Allow card to shrink */
+    overflow-wrap: break-word; /* Break long words if needed */
+    word-wrap: break-word; /* Legacy support */
   }
 
   .card-with-lock {
@@ -43606,6 +43622,20 @@
   .main-content span,
   .main-content div {
     font-family: inherit !important;
+  }
+
+  /* Ensure all content within main-content respects width constraints */
+  .main-content > * {
+    min-width: 0; /* Allow children to shrink */
+    max-width: 100%; /* Don't exceed parent width */
+  }
+
+  /* Ensure paragraphs and text elements wrap properly */
+  .main-content p,
+  .main-content div,
+  .main-content span {
+    overflow-wrap: break-word;
+    word-wrap: break-word;
   }
 
   /* Multiline text container and status indicator */
@@ -47200,7 +47230,7 @@
       };
     };
     // @ts-ignore
-    POWERPOD.version = '4.6.0';
+    POWERPOD.version = '4.6.1';
     // @ts-ignore
     window.powerpod = POWERPOD;
   }

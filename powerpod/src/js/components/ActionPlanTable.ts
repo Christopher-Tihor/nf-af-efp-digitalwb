@@ -75,12 +75,14 @@ class ActionPlanTable extends LitElement {
 
       .table-container {
         overflow-x: auto;
+        max-width: 100%;
       }
 
       table {
         width: 100%;
         border-collapse: collapse;
         background: white;
+        table-layout: auto; /* Allow table to size based on content */
       }
 
       thead {
@@ -98,6 +100,10 @@ class ActionPlanTable extends LitElement {
       td {
         padding: 0.75rem;
         border-bottom: 1px solid #dee2e6;
+        max-width: 300px; /* Constrain cell width */
+        overflow-wrap: break-word; /* Break long words */
+        word-wrap: break-word; /* Legacy support */
+        word-break: break-word; /* Additional breaking support */
       }
 
       tbody tr:hover {
