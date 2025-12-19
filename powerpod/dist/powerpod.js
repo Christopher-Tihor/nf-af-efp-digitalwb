@@ -1,5 +1,5 @@
 /*!
-* powerpod 4.6.2
+* powerpod 4.6.3
 * https://github.com/bcgov/nr-af-pods/powerpod
 *
 * @license GPLv3 for open source use only
@@ -42918,6 +42918,12 @@
                       if (item.chapterId) {
                           containerStep.chapterId = item.chapterId;
                       }
+                      if (item.chapterData) {
+                          containerStep.chapterData = item.chapterData;
+                      }
+                      if (item.subchapterData) {
+                          containerStep.subchapterData = item.subchapterData;
+                      }
                       if (item.hideSkipChapterCheckbox) {
                           containerStep.hideSkipChapterCheckbox = item.hideSkipChapterCheckbox;
                       }
@@ -43999,35 +44005,45 @@
           // Check all questions in all chapters
           let hasUnansweredQuestions = false;
           const incompleteChaptersList = [];
-          const checkChapters = (chapters, parentName = '') => {
+          const checkChapters = (chapters, parentChapterName = '') => {
               chapters.forEach((chapter) => {
-                  let chapterHasUnanswered = false;
+                  const incompleteQuestions = [];
                   // Check questions in this chapter
                   if (chapter.questions && chapter.questions.length > 0) {
                       chapter.questions.forEach((question) => {
                           var _a, _b;
                           const entry = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.get(question.id);
                           const isSkipped = ((_a = entry === null || entry === void 0 ? void 0 : entry.response) === null || _a === void 0 ? void 0 : _a.quartech_chapterskipped) === 100000000;
-                          const hasResponse = ((_b = entry === null || entry === void 0 ? void 0 : entry.response) === null || _b === void 0 ? void 0 : _b.quartech_response) &&
-                              entry.response.quartech_response.trim() !== '';
+                          const responseValue = (_b = entry === null || entry === void 0 ? void 0 : entry.response) === null || _b === void 0 ? void 0 : _b.quartech_response;
+                          const hasResponse = responseValue && responseValue.trim() !== '';
                           // Question is incomplete if it's not skipped AND has no response
                           if (!isSkipped && !hasResponse) {
                               hasUnansweredQuestions = true;
-                              chapterHasUnanswered = true;
+                              const questionName = question.quartech_name || question.name || 'Unknown Question';
+                              incompleteQuestions.push({
+                                  id: question.id,
+                                  name: questionName,
+                                  isSkipped,
+                                  hasResponse: !!hasResponse,
+                                  responseValue: responseValue || undefined,
+                              });
                           }
                       });
                   }
                   // If this chapter has unanswered questions, add it to the list
-                  if (chapterHasUnanswered) {
+                  if (incompleteQuestions.length > 0) {
                       const chapterName = chapter.name || chapter.quartech_name || 'Unknown Chapter';
                       incompleteChaptersList.push({
                           id: chapter.id,
-                          name: chapterName
+                          name: chapterName,
+                          parentChapterName: parentChapterName || undefined,
+                          incompleteQuestions,
                       });
                   }
                   // Recursively check subchapters
                   if (chapter.subchapters && chapter.subchapters.length > 0) {
-                      checkChapters(chapter.subchapters, chapter.name || '');
+                      const currentChapterName = chapter.name || chapter.quartech_name || '';
+                      checkChapters(chapter.subchapters, currentChapterName);
                   }
               });
           };
@@ -44042,12 +44058,38 @@
       showIncompleteQuestionsAlert() {
           this.showValidationAlert = true;
           this.hasTriedToSubmit = true; // Mark that user has tried to submit
+          // Build detailed logging info
+          const totalIncompleteQuestions = this.incompleteChapters.reduce((sum, chapter) => { var _a; return sum + ((_a = chapter.incompleteQuestions) === null || _a === void 0 ? void 0 : _a.length) || 0; }, 0);
+          // Log summary
           logger$4.info({
               message: 'Showing validation alert for incomplete questions',
               data: {
                   incompleteChaptersCount: this.incompleteChapters.length,
-                  incompleteChapters: this.incompleteChapters
+                  totalIncompleteQuestions,
               },
+          });
+          // Log detailed breakdown per chapter
+          this.incompleteChapters.forEach((chapter) => {
+              var _a, _b;
+              const parentInfo = chapter.parentChapterName
+                  ? ` (under "${chapter.parentChapterName}")`
+                  : '';
+              logger$4.info({
+                  message: `📋 Incomplete chapter: "${chapter.name}"${parentInfo}`,
+                  data: {
+                      chapterId: chapter.id,
+                      chapterName: chapter.name,
+                      parentChapterName: chapter.parentChapterName,
+                      incompleteQuestionCount: ((_a = chapter.incompleteQuestions) === null || _a === void 0 ? void 0 : _a.length) || 0,
+                      incompleteQuestions: (_b = chapter.incompleteQuestions) === null || _b === void 0 ? void 0 : _b.map((q) => ({
+                          id: q.id,
+                          name: q.name,
+                          isSkipped: q.isSkipped,
+                          hasResponse: q.hasResponse,
+                          responseValue: q.responseValue,
+                      })),
+                  },
+              });
           });
           // Open the dialog
           this.updateComplete.then(() => {
@@ -44756,6 +44798,9 @@
             </div>
           `
             : ''}
+      ${(chapter === null || chapter === void 0 ? void 0 : chapter.questions)
+            ? chapter.questions.map((question) => this.renderQuestion(question))
+            : ''}
     `;
       }
       renderMainContent() {
@@ -44793,6 +44838,7 @@
                   complete: chapter.complete || false, // Use completion from store
                   isContainer: true,
                   chapterId: chapter.id, // Store chapter ID for completion lookup
+                  chapterData: chapter, // Store chapter data for rendering questions when container is clicked
                   items: [],
               };
               // Add all subchapters as direct clickable items under the main chapter
@@ -45348,7 +45394,7 @@
       }
       // Find the next required step (earliest unanswered, non-skipped question)
       findNextRequiredStep() {
-          var _a, _b, _c;
+          var _a, _b, _c, _d, _e;
           if (!POWERPOD.workbookQuestionsAndResponses.isLoaded) {
               logger$4.warn({
                   message: 'Cannot find next required step: workbook questions and responses not loaded',
@@ -45371,14 +45417,21 @@
               if (step.sectionIndex !== 0) {
                   continue;
               }
-              // Skip container steps
-              if (step.isContainer || step.label.startsWith('Section ')) {
+              // Skip section headers
+              if (step.label.startsWith('Section ')) {
                   continue;
+              }
+              // For container steps, only skip if they don't have their own questions
+              if (step.isContainer) {
+                  const hasOwnQuestions = ((_c = (_b = step.chapterData) === null || _b === void 0 ? void 0 : _b.questions) === null || _c === void 0 ? void 0 : _c.length) > 0;
+                  if (!hasOwnQuestions) {
+                      continue;
+                  }
               }
               // Get the chapter ID for this step
               const chapterId = step.chapterId ||
-                  ((_b = step.chapterData) === null || _b === void 0 ? void 0 : _b.id) ||
-                  ((_c = step.subchapterData) === null || _c === void 0 ? void 0 : _c.id);
+                  ((_d = step.chapterData) === null || _d === void 0 ? void 0 : _d.id) ||
+                  ((_e = step.subchapterData) === null || _e === void 0 ? void 0 : _e.id);
               if (!chapterId) {
                   continue;
               }
@@ -47351,7 +47404,7 @@
       };
     };
     // @ts-ignore
-    POWERPOD.version = '4.6.2';
+    POWERPOD.version = '4.6.3';
     // @ts-ignore
     window.powerpod = POWERPOD;
   }

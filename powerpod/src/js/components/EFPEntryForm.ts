@@ -73,7 +73,18 @@ export class EFPEntryForm extends LitElement {
   @property({ type: Boolean, attribute: false }) workbookLocked = false;
   @property({ type: Boolean, attribute: false }) showValidationAlert = false;
   @property({ type: Boolean, attribute: false }) hasTriedToSubmit = false; // Track if user has tried to navigate to Review & Submit
-  @property({ type: Array, attribute: false }) incompleteChapters: Array<{id: string, name: string}> = [];
+  @property({ type: Array, attribute: false }) incompleteChapters: Array<{
+    id: string;
+    name: string;
+    parentChapterName?: string;
+    incompleteQuestions: Array<{
+      id: string;
+      name: string;
+      isSkipped: boolean;
+      hasResponse: boolean;
+      responseValue?: string;
+    }>;
+  }> = [];
   @property({ type: Number, attribute: false }) responseUpdateCounter = 0; // Triggers re-render when responses change
   @property({ type: Number, attribute: false }) currentCompletionPercentage = 0; // Local copy of completion percentage for reactive rendering
   private isNavigating = false; // Flag to prevent tab change interference
@@ -260,40 +271,67 @@ export class EFPEntryForm extends LitElement {
 
     // Check all questions in all chapters
     let hasUnansweredQuestions = false;
-    const incompleteChaptersList: Array<{id: string, name: string}> = [];
+    const incompleteChaptersList: Array<{
+      id: string;
+      name: string;
+      parentChapterName?: string;
+      incompleteQuestions: Array<{
+        id: string;
+        name: string;
+        isSkipped: boolean;
+        hasResponse: boolean;
+        responseValue?: string;
+      }>;
+    }> = [];
 
-    const checkChapters = (chapters: any[], parentName: string = '') => {
+    const checkChapters = (chapters: any[], parentChapterName: string = '') => {
       chapters.forEach((chapter: any) => {
-        let chapterHasUnanswered = false;
+        const incompleteQuestions: Array<{
+          id: string;
+          name: string;
+          isSkipped: boolean;
+          hasResponse: boolean;
+          responseValue?: string;
+        }> = [];
 
         // Check questions in this chapter
         if (chapter.questions && chapter.questions.length > 0) {
           chapter.questions.forEach((question: any) => {
             const entry = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.get(question.id);
             const isSkipped = entry?.response?.quartech_chapterskipped === 100000000;
-            const hasResponse = entry?.response?.quartech_response &&
-                               entry.response.quartech_response.trim() !== '';
+            const responseValue = entry?.response?.quartech_response;
+            const hasResponse = responseValue && responseValue.trim() !== '';
 
             // Question is incomplete if it's not skipped AND has no response
             if (!isSkipped && !hasResponse) {
               hasUnansweredQuestions = true;
-              chapterHasUnanswered = true;
+              const questionName = question.quartech_name || question.name || 'Unknown Question';
+              incompleteQuestions.push({
+                id: question.id,
+                name: questionName,
+                isSkipped,
+                hasResponse: !!hasResponse,
+                responseValue: responseValue || undefined,
+              });
             }
           });
         }
 
         // If this chapter has unanswered questions, add it to the list
-        if (chapterHasUnanswered) {
+        if (incompleteQuestions.length > 0) {
           const chapterName = chapter.name || chapter.quartech_name || 'Unknown Chapter';
           incompleteChaptersList.push({
             id: chapter.id,
-            name: chapterName
+            name: chapterName,
+            parentChapterName: parentChapterName || undefined,
+            incompleteQuestions,
           });
         }
 
         // Recursively check subchapters
         if (chapter.subchapters && chapter.subchapters.length > 0) {
-          checkChapters(chapter.subchapters, chapter.name || '');
+          const currentChapterName = chapter.name || chapter.quartech_name || '';
+          checkChapters(chapter.subchapters, currentChapterName);
         }
       });
     };
@@ -313,12 +351,42 @@ export class EFPEntryForm extends LitElement {
     this.showValidationAlert = true;
     this.hasTriedToSubmit = true; // Mark that user has tried to submit
 
+    // Build detailed logging info
+    const totalIncompleteQuestions = this.incompleteChapters.reduce(
+      (sum, chapter) => sum + (chapter as any).incompleteQuestions?.length || 0,
+      0
+    );
+
+    // Log summary
     logger.info({
       message: 'Showing validation alert for incomplete questions',
       data: {
         incompleteChaptersCount: this.incompleteChapters.length,
-        incompleteChapters: this.incompleteChapters
+        totalIncompleteQuestions,
       },
+    });
+
+    // Log detailed breakdown per chapter
+    this.incompleteChapters.forEach((chapter: any) => {
+      const parentInfo = chapter.parentChapterName
+        ? ` (under "${chapter.parentChapterName}")`
+        : '';
+      logger.info({
+        message: `📋 Incomplete chapter: "${chapter.name}"${parentInfo}`,
+        data: {
+          chapterId: chapter.id,
+          chapterName: chapter.name,
+          parentChapterName: chapter.parentChapterName,
+          incompleteQuestionCount: chapter.incompleteQuestions?.length || 0,
+          incompleteQuestions: chapter.incompleteQuestions?.map((q: any) => ({
+            id: q.id,
+            name: q.name,
+            isSkipped: q.isSkipped,
+            hasResponse: q.hasResponse,
+            responseValue: q.responseValue,
+          })),
+        },
+      });
     });
 
     // Open the dialog
@@ -1115,6 +1183,11 @@ export class EFPEntryForm extends LitElement {
             </div>
           `
         : ''}
+      ${chapter?.questions
+        ? chapter.questions.map((question: any) =>
+            this.renderQuestion(question)
+          )
+        : ''}
     `;
   }
 
@@ -1167,6 +1240,7 @@ export class EFPEntryForm extends LitElement {
         complete: chapter.complete || false, // Use completion from store
         isContainer: true,
         chapterId: chapter.id, // Store chapter ID for completion lookup
+        chapterData: chapter, // Store chapter data for rendering questions when container is clicked
         items: [],
       };
 
@@ -1852,9 +1926,17 @@ export class EFPEntryForm extends LitElement {
         continue;
       }
 
-      // Skip container steps
-      if (step.isContainer || step.label.startsWith('Section ')) {
+      // Skip section headers
+      if (step.label.startsWith('Section ')) {
         continue;
+      }
+
+      // For container steps, only skip if they don't have their own questions
+      if (step.isContainer) {
+        const hasOwnQuestions = step.chapterData?.questions?.length > 0;
+        if (!hasOwnQuestions) {
+          continue;
+        }
       }
 
       // Get the chapter ID for this step

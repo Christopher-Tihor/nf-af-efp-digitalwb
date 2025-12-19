@@ -176,6 +176,14 @@ export class EFPNavigationUtils {
             containerStep.chapterId = item.chapterId;
           }
 
+          if (item.chapterData) {
+            containerStep.chapterData = item.chapterData;
+          }
+
+          if (item.subchapterData) {
+            containerStep.subchapterData = item.subchapterData;
+          }
+
           if (item.hideSkipChapterCheckbox) {
             containerStep.hideSkipChapterCheckbox = item.hideSkipChapterCheckbox;
           }

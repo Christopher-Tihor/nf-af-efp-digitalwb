@@ -34,6 +34,14 @@ export declare class EFPEntryForm extends LitElement {
     incompleteChapters: Array<{
         id: string;
         name: string;
+        parentChapterName?: string;
+        incompleteQuestions: Array<{
+            id: string;
+            name: string;
+            isSkipped: boolean;
+            hasResponse: boolean;
+            responseValue?: string;
+        }>;
     }>;
     responseUpdateCounter: number;
     currentCompletionPercentage: number;
