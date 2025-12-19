@@ -42,6 +42,9 @@ export declare class EFPEntryForm extends LitElement {
     tabGroupEl: HTMLElement & {
         show: (tabName: string) => void;
     };
+    actionPlanTableEl: HTMLElement & {
+        openCreateDialogWithSelection: (chapterId: string, questionId: string) => void;
+    };
     private responseSaveDebounceTimers;
     private pendingResponseValues;
     private pendingMultiselectValues;
@@ -93,6 +96,7 @@ export declare class EFPEntryForm extends LitElement {
     private get isContinueButtonDisabled();
     private handleSectionChange;
     private handleRatingChanged;
+    private handleAddNoteToActionPlan;
     private handleMultiselectChange;
     private saveDebouncedResponse;
     private saveMultiselectResponse;

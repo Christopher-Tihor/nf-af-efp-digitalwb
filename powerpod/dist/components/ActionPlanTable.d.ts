@@ -19,6 +19,7 @@ type ActionPlan = {
 };
 declare class ActionPlanTable extends LitElement {
     actionPlans: ActionPlan[];
+    hideTable: boolean;
     private loading;
     private error;
     private selectedChapterId;
@@ -46,6 +47,13 @@ declare class ActionPlanTable extends LitElement {
     private handleQuestionChange;
     private handleActionChange;
     private openCreateDialog;
+    /**
+     * Public method to open the create dialog with pre-selected chapter and question.
+     * This can be called externally (e.g., from a button next to a question).
+     * @param chapterId - The chapter ID to pre-select
+     * @param questionId - The question ID to pre-select
+     */
+    openCreateDialogWithSelection(chapterId: string, questionId: string): void;
     private closeCreateDialog;
     private openEditDialog;
     private closeEditDialog;

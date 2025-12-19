@@ -19,7 +19,7 @@ import './RatingQuestion';
 import './EFPBreadcrumbs';
 import './WorkbookSignOffButtons';
 import './ActionPlanTable';
-import WorkbookResponseHelper from '../common/workbookResponseHelper.js';
+import WorkbookResponseHelper, { getChapterIdForQuestion } from '../common/workbookResponseHelper.js';
 import { getWorkbookId, getWorkbookData } from '../common/workbookUtils.js';
 import { POWERPOD, YES_VALUE } from '../common/constants.js';
 import { Logger } from '../common/logger.js';
@@ -84,6 +84,10 @@ export class EFPEntryForm extends LitElement {
   };
   @query('sl-tab-group') tabGroupEl!: HTMLElement & {
     show: (tabName: string) => void;
+  };
+
+  @query('#global-action-plan-table') actionPlanTableEl!: HTMLElement & {
+    openCreateDialogWithSelection: (chapterId: string, questionId: string) => void;
   };
 
   // Debounce timers for all response saves (questionId -> timer)
@@ -427,6 +431,17 @@ export class EFPEntryForm extends LitElement {
 
         <div class="question-response">
           ${this.renderQuestionInput(question, questionTypeName, isDisabled)}
+        </div>
+
+        <div class="question-action-plan-button">
+          <button
+            class="add-note-button"
+            @click=${() => this.handleAddNoteToActionPlan(question.id)}
+            ?disabled=${isDisabled}
+          >
+            <sl-icon name="journal-plus" aria-hidden="true"></sl-icon>
+            <span>Add Note to Action Plan</span>
+          </button>
         </div>
       </div>
     `;
@@ -2112,6 +2127,26 @@ export class EFPEntryForm extends LitElement {
     }
   }
 
+  // Handler for "Add Note to Action Plan" button
+  private handleAddNoteToActionPlan(questionId: string) {
+    const chapterId = getChapterIdForQuestion(questionId);
+
+    logger.info({
+      message: 'Opening Action Plan dialog for question',
+      data: { questionId, chapterId },
+    });
+
+    // Use the query-selected action-plan-table component
+    if (this.actionPlanTableEl && typeof this.actionPlanTableEl.openCreateDialogWithSelection === 'function') {
+      this.actionPlanTableEl.openCreateDialogWithSelection(chapterId || '', questionId);
+    } else {
+      logger.warn({
+        message: 'Could not find action-plan-table component or openCreateDialogWithSelection method',
+        data: { questionId, chapterId },
+      });
+    }
+  }
+
   // Multi-select list interaction event handler
   private handleMultiselectChange(
     questionId: string,
@@ -3712,6 +3747,12 @@ export class EFPEntryForm extends LitElement {
             @continue-clicked=${this.handleNavigationContinue}
           ></navigation-buttons>
         </main>
+
+        <!-- Global Action Plan Table (hidden, used for creating action plans from questions) -->
+        <action-plan-table
+          id="global-action-plan-table"
+          hide-table
+        ></action-plan-table>
       </div>
     `;
   }

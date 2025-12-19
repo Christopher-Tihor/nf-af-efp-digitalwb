@@ -330,6 +330,47 @@ export const efpEntryFormStyles = css`
     font-family: var(--body-font);
   }
 
+  /* Add Note to Action Plan button */
+  .question-action-plan-button {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 0.75rem;
+  }
+
+  .add-note-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background-color: #1a1a1a;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-family: var(--body-font);
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+  }
+
+  .add-note-button:hover:not(:disabled) {
+    background-color: #333;
+    transform: translateY(-1px);
+  }
+
+  .add-note-button:active:not(:disabled) {
+    transform: translateY(0);
+  }
+
+  .add-note-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .add-note-button sl-icon {
+    font-size: 1.125rem;
+  }
+
   /* Navigation styling */
   .nav-chapter-title {
     font-family: var(--chapter-font);

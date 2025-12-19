@@ -1,4 +1,10 @@
 /**
+ * Get chapterId for a given questionId
+ * @param {string} questionId - The question ID
+ * @returns {string|null} The chapter ID or null if not found
+ */
+export function getChapterIdForQuestion(questionId: string): string | null;
+/**
  * Fetch all responses for a specific workbook
  * @param {string} workbookId - The workbook ID
  * @param {Object} options - Additional fetch options

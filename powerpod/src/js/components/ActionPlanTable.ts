@@ -33,6 +33,7 @@ type ActionPlan = {
 @customElement('action-plan-table')
 class ActionPlanTable extends LitElement {
   @property({ type: Array }) actionPlans: ActionPlan[] = [];
+  @property({ type: Boolean, attribute: 'hide-table' }) hideTable = false;
   @state() private loading = true;
   @state() private error: string | null = null;
   @state() private selectedChapterId: string = '';
@@ -376,6 +377,45 @@ class ActionPlanTable extends LitElement {
     this.dialog?.show();
   }
 
+  /**
+   * Public method to open the create dialog with pre-selected chapter and question.
+   * This can be called externally (e.g., from a button next to a question).
+   * @param chapterId - The chapter ID to pre-select
+   * @param questionId - The question ID to pre-select
+   */
+  public openCreateDialogWithSelection(chapterId: string, questionId: string) {
+    // Ensure chapters are loaded before showing dialog
+    this.loadChaptersAndQuestions();
+
+    // Set the pre-selected values
+    this.selectedChapterId = chapterId || '';
+    this.selectedQuestionId = questionId || '';
+    this.actionDescription = '';
+
+    // Load questions based on selected chapter
+    if (this.selectedChapterId) {
+      const chapter = this.chapters.find(c => c.id === this.selectedChapterId);
+      this.questions = chapter?.questions || [];
+      this.questionOptions = this.questions.map(question => ({
+        value: question.id,
+        label: this.stripHtmlAndDecode(question.label || question.name)
+      }));
+    } else {
+      this.loadAllQuestions();
+    }
+
+    logger.info({
+      fn: 'openCreateDialogWithSelection',
+      message: 'Opening create dialog with pre-selected values',
+      data: { chapterId: this.selectedChapterId, questionId: this.selectedQuestionId },
+    });
+
+    // Force update to ensure the selects show correct values
+    this.requestUpdate();
+
+    this.dialog?.show();
+  }
+
   private closeCreateDialog() {
     this.dialog?.hide();
   }
@@ -613,7 +653,7 @@ class ActionPlanTable extends LitElement {
 
   render() {
     return html`
-      <div class="action-plan-container">
+      <div class="action-plan-container" style="${this.hideTable ? 'display: none;' : ''}">
         <div class="header-row">
           <h3>Action Plans</h3>
           <sl-button variant="primary" @click=${this.openCreateDialog}>
@@ -667,6 +707,7 @@ class ActionPlanTable extends LitElement {
                 </table>
               </div>
             `}
+      </div>
 
         <!-- Create Action Plan Dialog -->
         <sl-dialog id="create-dialog" label="Create Action Plan">
@@ -802,7 +843,6 @@ class ActionPlanTable extends LitElement {
             </sl-button>
           </div>
         </sl-dialog>
-      </div>
     `;
   }
 }

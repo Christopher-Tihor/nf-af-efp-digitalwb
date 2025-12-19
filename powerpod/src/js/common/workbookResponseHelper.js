@@ -11,7 +11,7 @@ const logger = Logger('common/workbookResponseHelper');
  * @param {string} questionId - The question ID
  * @returns {string|null} The chapter ID or null if not found
  */
-function getChapterIdForQuestion(questionId) {
+export function getChapterIdForQuestion(questionId) {
   // First try to get from workbookQuestionsAndResponses memory (most reliable)
   if (POWERPOD.workbookQuestionsAndResponses.isLoaded) {
     const entry = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.get(questionId);
