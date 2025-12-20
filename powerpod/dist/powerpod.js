@@ -1,5 +1,5 @@
 /*!
-* powerpod 4.6.3
+* powerpod 4.6.4
 * https://github.com/bcgov/nr-af-pods/powerpod
 *
 * @license GPLv3 for open source use only
@@ -44377,6 +44377,11 @@
           if (!this.workbookLocked) {
               return '';
           }
+          // Hide lock icon for My Action Plan chapter (it should remain editable)
+          const currentStep = this.flatSteps[this.currentStepIndex];
+          if ((currentStep === null || currentStep === void 0 ? void 0 : currentStep.label) === 'My Action Plan') {
+              return '';
+          }
           // Determine the tooltip message based on which sign-off exists
           const workbookData = getWorkbookData();
           const YES_INT = parseInt(YES_VALUE, 10);
@@ -47404,7 +47409,7 @@
       };
     };
     // @ts-ignore
-    POWERPOD.version = '4.6.3';
+    POWERPOD.version = '4.6.4';
     // @ts-ignore
     window.powerpod = POWERPOD;
   }

@@ -714,6 +714,12 @@ export class EFPEntryForm extends LitElement {
       return '';
     }
 
+    // Hide lock icon for My Action Plan chapter (it should remain editable)
+    const currentStep = this.flatSteps[this.currentStepIndex];
+    if (currentStep?.label === 'My Action Plan') {
+      return '';
+    }
+
     // Determine the tooltip message based on which sign-off exists
     const workbookData = getWorkbookData();
     const YES_INT = parseInt(YES_VALUE, 10);
