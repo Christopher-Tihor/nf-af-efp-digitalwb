@@ -693,14 +693,32 @@ export class EFPEntryForm extends LitElement {
         const isSkipped = this.isChapterSkipped();
         const preventSkipping = this.isSkippingPrevented();
 
+        // Build tooltip content based on disabled reason
+        const isDisabled = this.workbookLocked || preventSkipping;
+        let tooltipContent = '';
+        if (preventSkipping && !this.workbookLocked) {
+          tooltipContent = 'This section is mandatory and cannot be skipped.';
+        }
+
+        const checkbox = html`
+          <sl-checkbox
+            ?checked=${isSkipped}
+            ?disabled=${isDisabled}
+            @sl-change=${this.handleChapterSkippedChange}>
+            This section does not apply to this EFP.
+          </sl-checkbox>
+        `;
+
         return html`
           <div class="section-not-applicable">
-            <sl-checkbox
-              ?checked=${isSkipped}
-              ?disabled=${this.workbookLocked || preventSkipping}
-              @sl-change=${this.handleChapterSkippedChange}>
-              This section does not apply to this EFP.
-            </sl-checkbox>
+            ${preventSkipping && !this.workbookLocked
+              ? html`
+                <sl-tooltip content="${tooltipContent}">
+                  ${checkbox}
+                </sl-tooltip>
+              `
+              : checkbox
+            }
           </div>
         `;
       }

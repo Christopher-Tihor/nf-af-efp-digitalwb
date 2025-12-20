@@ -1,5 +1,5 @@
 /*!
-* powerpod 4.6.4
+* powerpod 4.6.5
 * https://github.com/bcgov/nr-af-pods/powerpod
 *
 * @license GPLv3 for open source use only
@@ -44358,14 +44358,29 @@
                   !currentStep.hideSkipChapterCheckbox) {
                   const isSkipped = this.isChapterSkipped();
                   const preventSkipping = this.isSkippingPrevented();
+                  // Build tooltip content based on disabled reason
+                  const isDisabled = this.workbookLocked || preventSkipping;
+                  let tooltipContent = '';
+                  if (preventSkipping && !this.workbookLocked) {
+                      tooltipContent = 'This section is mandatory and cannot be skipped.';
+                  }
+                  const checkbox = x `
+          <sl-checkbox
+            ?checked=${isSkipped}
+            ?disabled=${isDisabled}
+            @sl-change=${this.handleChapterSkippedChange}>
+            This section does not apply to this EFP.
+          </sl-checkbox>
+        `;
                   return x `
           <div class="section-not-applicable">
-            <sl-checkbox
-              ?checked=${isSkipped}
-              ?disabled=${this.workbookLocked || preventSkipping}
-              @sl-change=${this.handleChapterSkippedChange}>
-              This section does not apply to this EFP.
-            </sl-checkbox>
+            ${preventSkipping && !this.workbookLocked
+                    ? x `
+                <sl-tooltip content="${tooltipContent}">
+                  ${checkbox}
+                </sl-tooltip>
+              `
+                    : checkbox}
           </div>
         `;
               }
@@ -47409,7 +47424,7 @@
       };
     };
     // @ts-ignore
-    POWERPOD.version = '4.6.4';
+    POWERPOD.version = '4.6.5';
     // @ts-ignore
     window.powerpod = POWERPOD;
   }
