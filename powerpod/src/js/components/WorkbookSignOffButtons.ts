@@ -246,7 +246,32 @@ export class WorkbookSignOffButtons extends LitElement {
     super.connectedCallback();
     this.loadSignOffData();
     this.checkUserRoles();
+
+    // Listen for workbook data refresh events
+    this.addEventListener('workbook-data-refreshed', this.handleWorkbookDataRefreshed as EventListener);
   }
+
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    // Remove event listener
+    this.removeEventListener('workbook-data-refreshed', this.handleWorkbookDataRefreshed as EventListener);
+  }
+
+  // Handle workbook data refreshed event
+  private handleWorkbookDataRefreshed = (event: Event) => {
+    const customEvent = event as CustomEvent;
+    logger.info({
+      fn: 'handleWorkbookDataRefreshed',
+      message: 'Workbook data refreshed, reloading sign-off data',
+      data: customEvent.detail,
+    });
+
+    // Reload sign-off data to pick up updated workbook status
+    this.loadSignOffData();
+
+    // Trigger re-render to update button states
+    this.requestUpdate();
+  };
 
   private checkUserRoles() {
     // Check if debug role override is active

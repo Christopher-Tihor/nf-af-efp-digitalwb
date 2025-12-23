@@ -39247,11 +39247,31 @@
           this.showPAButton = false;
           this.showProducerButton = false;
           this.workbookStatus = null;
+          // Handle workbook data refreshed event
+          this.handleWorkbookDataRefreshed = (event) => {
+              const customEvent = event;
+              logger$8.info({
+                  fn: 'handleWorkbookDataRefreshed',
+                  message: 'Workbook data refreshed, reloading sign-off data',
+                  data: customEvent.detail,
+              });
+              // Reload sign-off data to pick up updated workbook status
+              this.loadSignOffData();
+              // Trigger re-render to update button states
+              this.requestUpdate();
+          };
       }
       connectedCallback() {
           super.connectedCallback();
           this.loadSignOffData();
           this.checkUserRoles();
+          // Listen for workbook data refresh events
+          this.addEventListener('workbook-data-refreshed', this.handleWorkbookDataRefreshed);
+      }
+      disconnectedCallback() {
+          super.disconnectedCallback();
+          // Remove event listener
+          this.removeEventListener('workbook-data-refreshed', this.handleWorkbookDataRefreshed);
       }
       checkUserRoles() {
           // Check if debug role override is active
@@ -44176,11 +44196,14 @@
               });
           };
           // Handle sign-off changed event
-          this.handleSignOffChanged = (event) => {
+          this.handleSignOffChanged = async (event) => {
+              const customEvent = event;
               logger$4.info({
-                  message: 'Sign-off changed, updating workbook lock status',
-                  data: event.detail,
+                  message: 'Sign-off changed, updating workbook lock status and refreshing workbook data',
+                  data: customEvent.detail,
               });
+              // Refresh workbook data from API to get updated status
+              await this.refreshWorkbookData();
               // Update workbook lock status when sign-off changes
               this.updateWorkbookLockStatus();
           };
@@ -44277,6 +44300,57 @@
               message: 'Updated workbook lock status',
               data: { workbookLocked: isLocked },
           });
+      }
+      // Refresh workbook data from API to get updated status
+      async refreshWorkbookData() {
+          const workbookId = getWorkbookId();
+          if (!workbookId) {
+              logger$4.warn({
+                  message: 'Cannot refresh workbook data: no workbook ID found',
+              });
+              return;
+          }
+          try {
+              logger$4.info({
+                  message: 'Refreshing workbook data from API (bypassing cache)',
+                  data: { workbookId },
+              });
+              // Use skipCache: true to bypass the cache and get fresh data from the API
+              const response = await getWorkbookDataById({ id: workbookId, skipCache: true });
+              const updatedWorkbookData = response.data;
+              // Update the cached workbook data in POWERPOD
+              // @ts-ignore
+              if (POWERPOD.workbook) {
+                  // @ts-ignore
+                  POWERPOD.workbook.data = updatedWorkbookData;
+                  logger$4.info({
+                      message: 'Successfully refreshed workbook data',
+                      data: {
+                          workbookId,
+                          status: updatedWorkbookData === null || updatedWorkbookData === void 0 ? void 0 : updatedWorkbookData['quartech_workbookstatus@OData.Community.Display.V1.FormattedValue'],
+                          paSigned: updatedWorkbookData === null || updatedWorkbookData === void 0 ? void 0 : updatedWorkbookData.quartech_pasigned,
+                          producerSigned: updatedWorkbookData === null || updatedWorkbookData === void 0 ? void 0 : updatedWorkbookData.quartech_producersigned,
+                      },
+                  });
+              }
+              // Trigger a re-render to update the UI with the new status
+              this.requestUpdate();
+              // Dispatch event to notify WorkbookSignOffButtons to refresh its data
+              this.dispatchEvent(new CustomEvent('workbook-data-refreshed', {
+                  bubbles: true,
+                  composed: true,
+                  detail: {
+                      workbookId,
+                      status: updatedWorkbookData === null || updatedWorkbookData === void 0 ? void 0 : updatedWorkbookData.quartech_workbookstatus,
+                  },
+              }));
+          }
+          catch (error) {
+              logger$4.error({
+                  message: 'Failed to refresh workbook data',
+                  data: { workbookId, error: error.message },
+              });
+          }
       }
       // Check if all non-skipped questions in My Workbook are answered
       canAccessReviewAndSubmit() {

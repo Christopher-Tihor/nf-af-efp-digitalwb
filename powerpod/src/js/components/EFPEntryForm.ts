@@ -22,6 +22,7 @@ import './WorkbookSignOffButtons';
 import './ActionPlanTable';
 import WorkbookResponseHelper, { getChapterIdForQuestion } from '../common/workbookResponseHelper.js';
 import { getWorkbookId, getWorkbookData } from '../common/workbookUtils.js';
+import { getWorkbookDataById } from '../common/fetch.js';
 import { POWERPOD, YES_VALUE } from '../common/constants.js';
 import { Logger } from '../common/logger.js';
 import store from '../store/index.js';
@@ -194,11 +195,15 @@ export class EFPEntryForm extends LitElement {
   }
 
   // Handle sign-off changed event
-  private handleSignOffChanged = (event: CustomEvent) => {
+  private handleSignOffChanged = async (event: Event) => {
+    const customEvent = event as CustomEvent;
     logger.info({
-      message: 'Sign-off changed, updating workbook lock status',
-      data: event.detail,
+      message: 'Sign-off changed, updating workbook lock status and refreshing workbook data',
+      data: customEvent.detail,
     });
+
+    // Refresh workbook data from API to get updated status
+    await this.refreshWorkbookData();
 
     // Update workbook lock status when sign-off changes
     this.updateWorkbookLockStatus();
@@ -275,6 +280,62 @@ export class EFPEntryForm extends LitElement {
       message: 'Updated workbook lock status',
       data: { workbookLocked: isLocked },
     });
+  }
+
+  // Refresh workbook data from API to get updated status
+  private async refreshWorkbookData() {
+    const workbookId = getWorkbookId();
+    if (!workbookId) {
+      logger.warn({
+        message: 'Cannot refresh workbook data: no workbook ID found',
+      });
+      return;
+    }
+
+    try {
+      logger.info({
+        message: 'Refreshing workbook data from API (bypassing cache)',
+        data: { workbookId },
+      });
+
+      // Use skipCache: true to bypass the cache and get fresh data from the API
+      const response = await getWorkbookDataById({ id: workbookId, skipCache: true });
+      const updatedWorkbookData = response.data;
+
+      // Update the cached workbook data in POWERPOD
+      // @ts-ignore
+      if (POWERPOD.workbook) {
+        // @ts-ignore
+        POWERPOD.workbook.data = updatedWorkbookData;
+        logger.info({
+          message: 'Successfully refreshed workbook data',
+          data: {
+            workbookId,
+            status: updatedWorkbookData?.['quartech_workbookstatus@OData.Community.Display.V1.FormattedValue'],
+            paSigned: updatedWorkbookData?.quartech_pasigned,
+            producerSigned: updatedWorkbookData?.quartech_producersigned,
+          },
+        });
+      }
+
+      // Trigger a re-render to update the UI with the new status
+      this.requestUpdate();
+
+      // Dispatch event to notify WorkbookSignOffButtons to refresh its data
+      this.dispatchEvent(new CustomEvent('workbook-data-refreshed', {
+        bubbles: true,
+        composed: true,
+        detail: {
+          workbookId,
+          status: updatedWorkbookData?.quartech_workbookstatus,
+        },
+      }));
+    } catch (error) {
+      logger.error({
+        message: 'Failed to refresh workbook data',
+        data: { workbookId, error: (error as Error).message },
+      });
+    }
   }
 
   // Check if all non-skipped questions in My Workbook are answered

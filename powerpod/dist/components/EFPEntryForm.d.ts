@@ -71,6 +71,7 @@ export declare class EFPEntryForm extends LitElement {
     private setupQuestionnaireStoreWatcher;
     private isWorkbookLocked;
     private updateWorkbookLockStatus;
+    private refreshWorkbookData;
     private canAccessReviewAndSubmit;
     private showIncompleteQuestionsAlert;
     private hideValidationAlert;

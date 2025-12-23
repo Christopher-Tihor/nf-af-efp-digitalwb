@@ -40,6 +40,8 @@ export declare class WorkbookSignOffButtons extends LitElement {
     private workbookStatus;
     static styles: import("lit").CSSResult;
     connectedCallback(): void;
+    disconnectedCallback(): void;
+    private handleWorkbookDataRefreshed;
     private checkUserRoles;
     private loadSignOffData;
     /**
