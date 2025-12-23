@@ -3,6 +3,7 @@ import '@shoelace-style/shoelace/dist/components/dialog/dialog.js';
 import '@shoelace-style/shoelace/dist/components/textarea/textarea.js';
 import '@shoelace-style/shoelace/dist/components/alert/alert.js';
 import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
+import '@shoelace-style/shoelace/dist/components/badge/badge.js';
 import { LitElement } from 'lit';
 import './SearchableDropdown.js';
 type ActionPlan = {
@@ -34,9 +35,11 @@ declare class ActionPlanTable extends LitElement {
     private deleting;
     private editingPlan;
     private deletingPlan;
+    private viewingQuestionId;
     dialog: any;
     editDialog: any;
     deleteDialog: any;
+    viewActionsDialog: any;
     static styles: import("lit").CSSResult[];
     connectedCallback(): void;
     disconnectedCallback(): void;
@@ -66,6 +69,27 @@ declare class ActionPlanTable extends LitElement {
     private getChapterName;
     private getQuestionLabel;
     private formatDate;
+    /**
+     * Public method to get the count of action plans for a specific question.
+     * This can be called externally (e.g., from EFPEntryForm) to check if a question has action plans.
+     * @param questionId - The question ID to check
+     * @returns The count of action plans associated with this question
+     */
+    getActionPlanCountForQuestion(questionId: string): number;
+    /**
+     * Public method to get action plans for a specific question.
+     * This can be called externally to retrieve the actual action plans.
+     * @param questionId - The question ID to check
+     * @returns Array of action plans associated with this question
+     */
+    getActionPlansForQuestion(questionId: string): ActionPlan[];
+    /**
+     * Public method to open a dialog showing existing action plans for a question.
+     * This can be called externally (e.g., from the "View Existing Actions" button).
+     * @param questionId - The question ID to view action plans for
+     */
+    openViewActionsDialog(questionId: string): void;
+    private closeViewActionsDialog;
     render(): import("lit-html").TemplateResult<1>;
 }
 export default ActionPlanTable;

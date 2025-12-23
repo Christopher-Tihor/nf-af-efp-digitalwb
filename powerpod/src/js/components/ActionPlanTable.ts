@@ -5,6 +5,7 @@ import '@shoelace-style/shoelace/dist/components/dialog/dialog.js';
 import '@shoelace-style/shoelace/dist/components/textarea/textarea.js';
 import '@shoelace-style/shoelace/dist/components/alert/alert.js';
 import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
+import '@shoelace-style/shoelace/dist/components/badge/badge.js';
 import { LitElement, css, html, unsafeCSS } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { Logger } from '../common/logger';
@@ -48,10 +49,12 @@ class ActionPlanTable extends LitElement {
   @state() private deleting = false;
   @state() private editingPlan: ActionPlan | null = null;
   @state() private deletingPlan: ActionPlan | null = null;
+  @state() private viewingQuestionId: string | null = null;
 
   @query('#create-dialog') dialog!: any;
   @query('#edit-dialog') editDialog!: any;
   @query('#delete-dialog') deleteDialog!: any;
+  @query('#view-actions-dialog') viewActionsDialog!: any;
 
   static styles = [
     css`
@@ -235,6 +238,13 @@ class ActionPlanTable extends LitElement {
         message: 'Action plans loaded successfully',
         data: { count: this.actionPlans.length },
       });
+
+      // Dispatch event to notify other components that action plans have been updated
+      this.dispatchEvent(new CustomEvent('action-plans-updated', {
+        bubbles: true,
+        composed: true,
+        detail: { count: this.actionPlans.length }
+      }));
     } catch (err) {
       this.error = err instanceof Error ? err.message : 'Failed to load action plans';
       logger.error({
@@ -421,6 +431,11 @@ class ActionPlanTable extends LitElement {
   }
 
   private openEditDialog(plan: ActionPlan) {
+    // Close the view actions dialog if it's open
+    if (this.viewActionsDialog) {
+      this.closeViewActionsDialog();
+    }
+
     // Ensure chapters are loaded before showing dialog
     this.loadChaptersAndQuestions();
 
@@ -508,6 +523,11 @@ class ActionPlanTable extends LitElement {
   }
 
   private openDeleteDialog(plan: ActionPlan) {
+    // Close the view actions dialog if it's open
+    if (this.viewActionsDialog) {
+      this.closeViewActionsDialog();
+    }
+
     this.deletingPlan = plan;
     this.deleteDialog?.show();
   }
@@ -649,6 +669,54 @@ class ActionPlanTable extends LitElement {
     } catch {
       return dateString;
     }
+  }
+
+  /**
+   * Public method to get the count of action plans for a specific question.
+   * This can be called externally (e.g., from EFPEntryForm) to check if a question has action plans.
+   * @param questionId - The question ID to check
+   * @returns The count of action plans associated with this question
+   */
+  public getActionPlanCountForQuestion(questionId: string): number {
+    if (!questionId) return 0;
+    return this.actionPlans.filter(
+      (plan) => plan._quartech_workbookquestion_value === questionId
+    ).length;
+  }
+
+  /**
+   * Public method to get action plans for a specific question.
+   * This can be called externally to retrieve the actual action plans.
+   * @param questionId - The question ID to check
+   * @returns Array of action plans associated with this question
+   */
+  public getActionPlansForQuestion(questionId: string): ActionPlan[] {
+    if (!questionId) return [];
+    return this.actionPlans.filter(
+      (plan) => plan._quartech_workbookquestion_value === questionId
+    );
+  }
+
+  /**
+   * Public method to open a dialog showing existing action plans for a question.
+   * This can be called externally (e.g., from the "View Existing Actions" button).
+   * @param questionId - The question ID to view action plans for
+   */
+  public openViewActionsDialog(questionId: string) {
+    this.viewingQuestionId = questionId;
+
+    logger.info({
+      fn: 'openViewActionsDialog',
+      message: 'Opening view actions dialog',
+      data: { questionId, count: this.getActionPlanCountForQuestion(questionId) },
+    });
+
+    this.viewActionsDialog?.show();
+  }
+
+  private closeViewActionsDialog() {
+    this.viewActionsDialog?.hide();
+    this.viewingQuestionId = null;
   }
 
   render() {
@@ -840,6 +908,57 @@ class ActionPlanTable extends LitElement {
               ?loading=${this.deleting}
             >
               Delete
+            </sl-button>
+          </div>
+        </sl-dialog>
+
+        <!-- View Existing Actions Dialog -->
+        <sl-dialog id="view-actions-dialog" label="Existing Action Plans">
+          ${this.viewingQuestionId ? html`
+            <div style="margin-bottom: 1rem;">
+              <strong>Question:</strong> ${this.getQuestionLabel(this.viewingQuestionId)}
+            </div>
+
+            ${this.getActionPlansForQuestion(this.viewingQuestionId).length === 0
+              ? html`<div class="empty-message">No action plans found for this question.</div>`
+              : html`
+                  <div class="table-container">
+                    <table class="table table-striped">
+                      <thead>
+                        <tr>
+                          <th>Action</th>
+                          <th>Created On</th>
+                          <th>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        ${this.getActionPlansForQuestion(this.viewingQuestionId).map(
+                          (plan) => html`
+                            <tr>
+                              <td>${plan.quartech_action}</td>
+                              <td>${this.formatDate(plan.createdon, plan['createdon@OData.Community.Display.V1.FormattedValue'])}</td>
+                              <td>
+                                <div class="action-buttons">
+                                  <sl-button size="small" variant="default" @click=${() => this.openEditDialog(plan)}>
+                                    Edit
+                                  </sl-button>
+                                  <sl-button size="small" variant="danger" @click=${() => this.openDeleteDialog(plan)}>
+                                    Delete
+                                  </sl-button>
+                                </div>
+                              </td>
+                            </tr>
+                          `
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                `}
+          ` : ''}
+
+          <div slot="footer">
+            <sl-button variant="default" @click=${this.closeViewActionsDialog}>
+              Close
             </sl-button>
           </div>
         </sl-dialog>

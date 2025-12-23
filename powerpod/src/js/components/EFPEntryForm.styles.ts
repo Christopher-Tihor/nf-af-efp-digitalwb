@@ -334,16 +334,17 @@ export const efpEntryFormStyles = css`
   .question-action-plan-button {
     display: flex;
     justify-content: flex-end;
+    align-items: center;
+    gap: 0.75rem;
     margin-top: 0.75rem;
   }
 
-  .add-note-button {
+  .add-note-button,
+  .view-actions-button {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
     padding: 0.5rem 1rem;
-    background-color: #1a1a1a;
-    color: white;
     border: none;
     border-radius: 6px;
     font-family: var(--body-font);
@@ -353,22 +354,50 @@ export const efpEntryFormStyles = css`
     transition: background-color 0.2s ease, transform 0.1s ease;
   }
 
+  .add-note-button {
+    background-color: #1a1a1a;
+    color: white;
+  }
+
+  .view-actions-button {
+    background-color: #0066cc;
+    color: white;
+  }
+
   .add-note-button:hover:not(:disabled) {
     background-color: #333;
     transform: translateY(-1px);
   }
 
-  .add-note-button:active:not(:disabled) {
+  .view-actions-button:hover:not(:disabled) {
+    background-color: #0052a3;
+    transform: translateY(-1px);
+  }
+
+  .add-note-button:active:not(:disabled),
+  .view-actions-button:active:not(:disabled) {
     transform: translateY(0);
   }
 
-  .add-note-button:disabled {
+  .add-note-button:disabled,
+  .view-actions-button:disabled {
     opacity: 0.5;
     cursor: not-allowed;
   }
 
-  .add-note-button sl-icon {
+  .add-note-button sl-icon,
+  .view-actions-button sl-icon {
     font-size: 1.125rem;
+  }
+
+  .view-actions-button sl-badge {
+    margin-left: 0.25rem;
+  }
+
+  .view-actions-button sl-badge::part(base) {
+    background-color: white;
+    color: #0066cc;
+    font-weight: 600;
   }
 
   /* Navigation styling */

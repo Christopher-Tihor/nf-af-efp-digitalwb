@@ -11,6 +11,7 @@ import '@shoelace-style/shoelace/dist/components/textarea/textarea.js';
 import '@shoelace-style/shoelace/dist/components/tooltip/tooltip.js';
 import '@shoelace-style/shoelace/dist/components/alert/alert.js';
 import '@shoelace-style/shoelace/dist/components/dialog/dialog.js';
+import '@shoelace-style/shoelace/dist/components/badge/badge.js';
 
 import { LitElement, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
@@ -99,6 +100,9 @@ export class EFPEntryForm extends LitElement {
 
   @query('#global-action-plan-table') actionPlanTableEl!: HTMLElement & {
     openCreateDialogWithSelection: (chapterId: string, questionId: string) => void;
+    getActionPlanCountForQuestion: (questionId: string) => number;
+    getActionPlansForQuestion: (questionId: string) => any[];
+    openViewActionsDialog: (questionId: string) => void;
   };
 
   // Debounce timers for all response saves (questionId -> timer)
@@ -127,6 +131,9 @@ export class EFPEntryForm extends LitElement {
 
     // Check and update workbook lock status
     this.updateWorkbookLockStatus();
+
+    // Listen for action plan updates to refresh badge counts
+    this.addEventListener('action-plans-updated', this.handleActionPlansUpdated as EventListener);
 
     // Listen for sign-off changes to update lock status
     this.addEventListener('sign-off-changed', this.handleSignOffChanged as EventListener);
@@ -169,6 +176,7 @@ export class EFPEntryForm extends LitElement {
     super.disconnectedCallback();
 
     // Remove event listeners
+    this.removeEventListener('action-plans-updated', this.handleActionPlansUpdated as EventListener);
     this.removeEventListener('sign-off-changed', this.handleSignOffChanged as EventListener);
     this.removeEventListener('workbook-stats-updated', this.handleStatsUpdated as EventListener);
 
@@ -194,6 +202,18 @@ export class EFPEntryForm extends LitElement {
 
     // Update workbook lock status when sign-off changes
     this.updateWorkbookLockStatus();
+  };
+
+  // Handle action plans updated event
+  private handleActionPlansUpdated = (event: Event) => {
+    const customEvent = event as CustomEvent;
+    logger.info({
+      message: 'Action plans updated, triggering re-render to update badge counts',
+      data: customEvent.detail,
+    });
+
+    // Trigger a re-render to update badge counts
+    this.requestUpdate();
   };
 
   // Update the reactive property based on store status
@@ -501,16 +521,39 @@ export class EFPEntryForm extends LitElement {
           ${this.renderQuestionInput(question, questionTypeName, isDisabled)}
         </div>
 
-        <div class="question-action-plan-button">
-          <button
-            class="add-note-button"
-            @click=${() => this.handleAddNoteToActionPlan(question.id)}
-            ?disabled=${isDisabled}
-          >
-            <sl-icon name="journal-plus" aria-hidden="true"></sl-icon>
-            <span>Add Note to Action Plan</span>
-          </button>
-        </div>
+        ${this.renderActionPlanButtons(question.id, isDisabled)}
+      </div>
+    `;
+  }
+
+  // Render action plan buttons based on whether action plans exist for this question
+  private renderActionPlanButtons(questionId: string, isDisabled: boolean) {
+    const actionPlanCount = this.getActionPlanCount(questionId);
+    const hasActionPlans = actionPlanCount > 0;
+
+    return html`
+      <div class="question-action-plan-button">
+        ${hasActionPlans
+          ? html`
+              <button
+                class="view-actions-button"
+                @click=${() => this.handleViewExistingActions(questionId)}
+                ?disabled=${isDisabled}
+              >
+                <sl-icon name="eye" aria-hidden="true"></sl-icon>
+                <span>View Existing Actions</span>
+                <sl-badge variant="primary" pill>${actionPlanCount}</sl-badge>
+              </button>
+            `
+          : ''}
+        <button
+          class="add-note-button"
+          @click=${() => this.handleAddNoteToActionPlan(questionId)}
+          ?disabled=${isDisabled}
+        >
+          <sl-icon name="journal-plus" aria-hidden="true"></sl-icon>
+          <span>Add Note to Action Plan</span>
+        </button>
       </div>
     `;
   }
@@ -2233,6 +2276,14 @@ export class EFPEntryForm extends LitElement {
     }
   }
 
+  // Helper to get action plan count for a question
+  private getActionPlanCount(questionId: string): number {
+    if (!this.actionPlanTableEl || typeof this.actionPlanTableEl.getActionPlanCountForQuestion !== 'function') {
+      return 0;
+    }
+    return this.actionPlanTableEl.getActionPlanCountForQuestion(questionId);
+  }
+
   // Handler for "Add Note to Action Plan" button
   private handleAddNoteToActionPlan(questionId: string) {
     const chapterId = getChapterIdForQuestion(questionId);
@@ -2249,6 +2300,24 @@ export class EFPEntryForm extends LitElement {
       logger.warn({
         message: 'Could not find action-plan-table component or openCreateDialogWithSelection method',
         data: { questionId, chapterId },
+      });
+    }
+  }
+
+  // Handler for "View Existing Actions" button
+  private handleViewExistingActions(questionId: string) {
+    logger.info({
+      message: 'Viewing existing action plans for question',
+      data: { questionId },
+    });
+
+    // Use the query-selected action-plan-table component to open the view dialog
+    if (this.actionPlanTableEl && typeof this.actionPlanTableEl.openViewActionsDialog === 'function') {
+      this.actionPlanTableEl.openViewActionsDialog(questionId);
+    } else {
+      logger.warn({
+        message: 'Could not find action-plan-table component or openViewActionsDialog method',
+        data: { questionId },
       });
     }
   }

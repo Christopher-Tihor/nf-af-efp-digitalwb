@@ -1,5 +1,5 @@
 /*!
-* powerpod 4.6.5
+* powerpod 4.6.6
 * https://github.com/bcgov/nr-af-pods/powerpod
 *
 * @license GPLv3 for open source use only
@@ -38273,6 +38273,139 @@
 
   SlDialog.define("sl-dialog");
 
+  // src/components/badge/badge.styles.ts
+  var badge_styles_default = i$4`
+  :host {
+    display: inline-flex;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: max(12px, 0.75em);
+    font-weight: var(--sl-font-weight-semibold);
+    letter-spacing: var(--sl-letter-spacing-normal);
+    line-height: 1;
+    border-radius: var(--sl-border-radius-small);
+    border: solid 1px var(--sl-color-neutral-0);
+    white-space: nowrap;
+    padding: 0.35em 0.6em;
+    user-select: none;
+    -webkit-user-select: none;
+    cursor: inherit;
+  }
+
+  /* Variant modifiers */
+  .badge--primary {
+    background-color: var(--sl-color-primary-600);
+    color: var(--sl-color-neutral-0);
+  }
+
+  .badge--success {
+    background-color: var(--sl-color-success-600);
+    color: var(--sl-color-neutral-0);
+  }
+
+  .badge--neutral {
+    background-color: var(--sl-color-neutral-600);
+    color: var(--sl-color-neutral-0);
+  }
+
+  .badge--warning {
+    background-color: var(--sl-color-warning-600);
+    color: var(--sl-color-neutral-0);
+  }
+
+  .badge--danger {
+    background-color: var(--sl-color-danger-600);
+    color: var(--sl-color-neutral-0);
+  }
+
+  /* Pill modifier */
+  .badge--pill {
+    border-radius: var(--sl-border-radius-pill);
+  }
+
+  /* Pulse modifier */
+  .badge--pulse {
+    animation: pulse 1.5s infinite;
+  }
+
+  .badge--pulse.badge--primary {
+    --pulse-color: var(--sl-color-primary-600);
+  }
+
+  .badge--pulse.badge--success {
+    --pulse-color: var(--sl-color-success-600);
+  }
+
+  .badge--pulse.badge--neutral {
+    --pulse-color: var(--sl-color-neutral-600);
+  }
+
+  .badge--pulse.badge--warning {
+    --pulse-color: var(--sl-color-warning-600);
+  }
+
+  .badge--pulse.badge--danger {
+    --pulse-color: var(--sl-color-danger-600);
+  }
+
+  @keyframes pulse {
+    0% {
+      box-shadow: 0 0 0 0 var(--pulse-color);
+    }
+    70% {
+      box-shadow: 0 0 0 0.5rem transparent;
+    }
+    100% {
+      box-shadow: 0 0 0 0 transparent;
+    }
+  }
+`;
+
+  var SlBadge = class extends ShoelaceElement {
+    constructor() {
+      super(...arguments);
+      this.variant = "primary";
+      this.pill = false;
+      this.pulse = false;
+    }
+    render() {
+      return x`
+      <span
+        part="base"
+        class=${e$4({
+      badge: true,
+      "badge--primary": this.variant === "primary",
+      "badge--success": this.variant === "success",
+      "badge--neutral": this.variant === "neutral",
+      "badge--warning": this.variant === "warning",
+      "badge--danger": this.variant === "danger",
+      "badge--pill": this.pill,
+      "badge--pulse": this.pulse
+    })}
+        role="status"
+      >
+        <slot></slot>
+      </span>
+    `;
+    }
+  };
+  SlBadge.styles = [component_styles_default, badge_styles_default];
+  __decorateClass([
+    n$4({ reflect: true })
+  ], SlBadge.prototype, "variant", 2);
+  __decorateClass([
+    n$4({ type: Boolean, reflect: true })
+  ], SlBadge.prototype, "pill", 2);
+  __decorateClass([
+    n$4({ type: Boolean, reflect: true })
+  ], SlBadge.prototype, "pulse", 2);
+
+  SlBadge.define("sl-badge");
+
   let NavigationButtons = class NavigationButtons extends s$2 {
       constructor() {
           super(...arguments);
@@ -41782,6 +41915,7 @@
           this.deleting = false;
           this.editingPlan = null;
           this.deletingPlan = null;
+          this.viewingQuestionId = null;
       }
       connectedCallback() {
           super.connectedCallback();
@@ -41829,6 +41963,12 @@
                   message: 'Action plans loaded successfully',
                   data: { count: this.actionPlans.length },
               });
+              // Dispatch event to notify other components that action plans have been updated
+              this.dispatchEvent(new CustomEvent('action-plans-updated', {
+                  bubbles: true,
+                  composed: true,
+                  detail: { count: this.actionPlans.length }
+              }));
           }
           catch (err) {
               this.error = err instanceof Error ? err.message : 'Failed to load action plans';
@@ -41999,6 +42139,10 @@
       }
       openEditDialog(plan) {
           var _a;
+          // Close the view actions dialog if it's open
+          if (this.viewActionsDialog) {
+              this.closeViewActionsDialog();
+          }
           // Ensure chapters are loaded before showing dialog
           this.loadChaptersAndQuestions();
           // Set form state from the plan being edited
@@ -42077,6 +42221,10 @@
       }
       openDeleteDialog(plan) {
           var _a;
+          // Close the view actions dialog if it's open
+          if (this.viewActionsDialog) {
+              this.closeViewActionsDialog();
+          }
           this.deletingPlan = plan;
           (_a = this.deleteDialog) === null || _a === void 0 ? void 0 : _a.show();
       }
@@ -42205,6 +42353,48 @@
           catch (_a) {
               return dateString;
           }
+      }
+      /**
+       * Public method to get the count of action plans for a specific question.
+       * This can be called externally (e.g., from EFPEntryForm) to check if a question has action plans.
+       * @param questionId - The question ID to check
+       * @returns The count of action plans associated with this question
+       */
+      getActionPlanCountForQuestion(questionId) {
+          if (!questionId)
+              return 0;
+          return this.actionPlans.filter((plan) => plan._quartech_workbookquestion_value === questionId).length;
+      }
+      /**
+       * Public method to get action plans for a specific question.
+       * This can be called externally to retrieve the actual action plans.
+       * @param questionId - The question ID to check
+       * @returns Array of action plans associated with this question
+       */
+      getActionPlansForQuestion(questionId) {
+          if (!questionId)
+              return [];
+          return this.actionPlans.filter((plan) => plan._quartech_workbookquestion_value === questionId);
+      }
+      /**
+       * Public method to open a dialog showing existing action plans for a question.
+       * This can be called externally (e.g., from the "View Existing Actions" button).
+       * @param questionId - The question ID to view action plans for
+       */
+      openViewActionsDialog(questionId) {
+          var _a;
+          this.viewingQuestionId = questionId;
+          logger$7.info({
+              fn: 'openViewActionsDialog',
+              message: 'Opening view actions dialog',
+              data: { questionId, count: this.getActionPlanCountForQuestion(questionId) },
+          });
+          (_a = this.viewActionsDialog) === null || _a === void 0 ? void 0 : _a.show();
+      }
+      closeViewActionsDialog() {
+          var _a;
+          (_a = this.viewActionsDialog) === null || _a === void 0 ? void 0 : _a.hide();
+          this.viewingQuestionId = null;
       }
       render() {
           return x `
@@ -42396,6 +42586,55 @@
             </sl-button>
           </div>
         </sl-dialog>
+
+        <!-- View Existing Actions Dialog -->
+        <sl-dialog id="view-actions-dialog" label="Existing Action Plans">
+          ${this.viewingQuestionId ? x `
+            <div style="margin-bottom: 1rem;">
+              <strong>Question:</strong> ${this.getQuestionLabel(this.viewingQuestionId)}
+            </div>
+
+            ${this.getActionPlansForQuestion(this.viewingQuestionId).length === 0
+            ? x `<div class="empty-message">No action plans found for this question.</div>`
+            : x `
+                  <div class="table-container">
+                    <table class="table table-striped">
+                      <thead>
+                        <tr>
+                          <th>Action</th>
+                          <th>Created On</th>
+                          <th>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        ${this.getActionPlansForQuestion(this.viewingQuestionId).map((plan) => x `
+                            <tr>
+                              <td>${plan.quartech_action}</td>
+                              <td>${this.formatDate(plan.createdon, plan['createdon@OData.Community.Display.V1.FormattedValue'])}</td>
+                              <td>
+                                <div class="action-buttons">
+                                  <sl-button size="small" variant="default" @click=${() => this.openEditDialog(plan)}>
+                                    Edit
+                                  </sl-button>
+                                  <sl-button size="small" variant="danger" @click=${() => this.openDeleteDialog(plan)}>
+                                    Delete
+                                  </sl-button>
+                                </div>
+                              </td>
+                            </tr>
+                          `)}
+                      </tbody>
+                    </table>
+                  </div>
+                `}
+          ` : ''}
+
+          <div slot="footer">
+            <sl-button variant="default" @click=${this.closeViewActionsDialog}>
+              Close
+            </sl-button>
+          </div>
+        </sl-dialog>
     `;
       }
   };
@@ -42574,6 +42813,9 @@
       r$1()
   ], ActionPlanTable.prototype, "deletingPlan", void 0);
   __decorate([
+      r$1()
+  ], ActionPlanTable.prototype, "viewingQuestionId", void 0);
+  __decorate([
       e$6('#create-dialog')
   ], ActionPlanTable.prototype, "dialog", void 0);
   __decorate([
@@ -42582,6 +42824,9 @@
   __decorate([
       e$6('#delete-dialog')
   ], ActionPlanTable.prototype, "deleteDialog", void 0);
+  __decorate([
+      e$6('#view-actions-dialog')
+  ], ActionPlanTable.prototype, "viewActionsDialog", void 0);
   ActionPlanTable = __decorate([
       t$1('action-plan-table')
   ], ActionPlanTable);
@@ -43578,16 +43823,17 @@
   .question-action-plan-button {
     display: flex;
     justify-content: flex-end;
+    align-items: center;
+    gap: 0.75rem;
     margin-top: 0.75rem;
   }
 
-  .add-note-button {
+  .add-note-button,
+  .view-actions-button {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
     padding: 0.5rem 1rem;
-    background-color: #1a1a1a;
-    color: white;
     border: none;
     border-radius: 6px;
     font-family: var(--body-font);
@@ -43597,22 +43843,50 @@
     transition: background-color 0.2s ease, transform 0.1s ease;
   }
 
+  .add-note-button {
+    background-color: #1a1a1a;
+    color: white;
+  }
+
+  .view-actions-button {
+    background-color: #0066cc;
+    color: white;
+  }
+
   .add-note-button:hover:not(:disabled) {
     background-color: #333;
     transform: translateY(-1px);
   }
 
-  .add-note-button:active:not(:disabled) {
+  .view-actions-button:hover:not(:disabled) {
+    background-color: #0052a3;
+    transform: translateY(-1px);
+  }
+
+  .add-note-button:active:not(:disabled),
+  .view-actions-button:active:not(:disabled) {
     transform: translateY(0);
   }
 
-  .add-note-button:disabled {
+  .add-note-button:disabled,
+  .view-actions-button:disabled {
     opacity: 0.5;
     cursor: not-allowed;
   }
 
-  .add-note-button sl-icon {
+  .add-note-button sl-icon,
+  .view-actions-button sl-icon {
     font-size: 1.125rem;
+  }
+
+  .view-actions-button sl-badge {
+    margin-left: 0.25rem;
+  }
+
+  .view-actions-button sl-badge::part(base) {
+    background-color: white;
+    color: #0066cc;
+    font-weight: 600;
   }
 
   /* Navigation styling */
@@ -43910,6 +44184,16 @@
               // Update workbook lock status when sign-off changes
               this.updateWorkbookLockStatus();
           };
+          // Handle action plans updated event
+          this.handleActionPlansUpdated = (event) => {
+              const customEvent = event;
+              logger$4.info({
+                  message: 'Action plans updated, triggering re-render to update badge counts',
+                  data: customEvent.detail,
+              });
+              // Trigger a re-render to update badge counts
+              this.requestUpdate();
+          };
       }
       connectedCallback() {
           super.connectedCallback();
@@ -43920,6 +44204,8 @@
           this.setupQuestionnaireStoreWatcher();
           // Check and update workbook lock status
           this.updateWorkbookLockStatus();
+          // Listen for action plan updates to refresh badge counts
+          this.addEventListener('action-plans-updated', this.handleActionPlansUpdated);
           // Listen for sign-off changes to update lock status
           this.addEventListener('sign-off-changed', this.handleSignOffChanged);
           // Listen for workbook stats updates to trigger re-render of progress bar
@@ -43928,6 +44214,7 @@
       disconnectedCallback() {
           super.disconnectedCallback();
           // Remove event listeners
+          this.removeEventListener('action-plans-updated', this.handleActionPlansUpdated);
           this.removeEventListener('sign-off-changed', this.handleSignOffChanged);
           this.removeEventListener('workbook-stats-updated', this.handleStatsUpdated);
           // Clear all pending debounce timers
@@ -44193,16 +44480,37 @@
           ${this.renderQuestionInput(question, questionTypeName, isDisabled)}
         </div>
 
-        <div class="question-action-plan-button">
-          <button
-            class="add-note-button"
-            @click=${() => this.handleAddNoteToActionPlan(question.id)}
-            ?disabled=${isDisabled}
-          >
-            <sl-icon name="journal-plus" aria-hidden="true"></sl-icon>
-            <span>Add Note to Action Plan</span>
-          </button>
-        </div>
+        ${this.renderActionPlanButtons(question.id, isDisabled)}
+      </div>
+    `;
+      }
+      // Render action plan buttons based on whether action plans exist for this question
+      renderActionPlanButtons(questionId, isDisabled) {
+          const actionPlanCount = this.getActionPlanCount(questionId);
+          const hasActionPlans = actionPlanCount > 0;
+          return x `
+      <div class="question-action-plan-button">
+        ${hasActionPlans
+            ? x `
+              <button
+                class="view-actions-button"
+                @click=${() => this.handleViewExistingActions(questionId)}
+                ?disabled=${isDisabled}
+              >
+                <sl-icon name="eye" aria-hidden="true"></sl-icon>
+                <span>View Existing Actions</span>
+                <sl-badge variant="primary" pill>${actionPlanCount}</sl-badge>
+              </button>
+            `
+            : ''}
+        <button
+          class="add-note-button"
+          @click=${() => this.handleAddNoteToActionPlan(questionId)}
+          ?disabled=${isDisabled}
+        >
+          <sl-icon name="journal-plus" aria-hidden="true"></sl-icon>
+          <span>Add Note to Action Plan</span>
+        </button>
       </div>
     `;
       }
@@ -45668,6 +45976,13 @@
               });
           }
       }
+      // Helper to get action plan count for a question
+      getActionPlanCount(questionId) {
+          if (!this.actionPlanTableEl || typeof this.actionPlanTableEl.getActionPlanCountForQuestion !== 'function') {
+              return 0;
+          }
+          return this.actionPlanTableEl.getActionPlanCountForQuestion(questionId);
+      }
       // Handler for "Add Note to Action Plan" button
       handleAddNoteToActionPlan(questionId) {
           const chapterId = getChapterIdForQuestion(questionId);
@@ -45683,6 +45998,23 @@
               logger$4.warn({
                   message: 'Could not find action-plan-table component or openCreateDialogWithSelection method',
                   data: { questionId, chapterId },
+              });
+          }
+      }
+      // Handler for "View Existing Actions" button
+      handleViewExistingActions(questionId) {
+          logger$4.info({
+              message: 'Viewing existing action plans for question',
+              data: { questionId },
+          });
+          // Use the query-selected action-plan-table component to open the view dialog
+          if (this.actionPlanTableEl && typeof this.actionPlanTableEl.openViewActionsDialog === 'function') {
+              this.actionPlanTableEl.openViewActionsDialog(questionId);
+          }
+          else {
+              logger$4.warn({
+                  message: 'Could not find action-plan-table component or openViewActionsDialog method',
+                  data: { questionId },
               });
           }
       }
@@ -47424,7 +47756,7 @@
       };
     };
     // @ts-ignore
-    POWERPOD.version = '4.6.5';
+    POWERPOD.version = '4.6.6';
     // @ts-ignore
     window.powerpod = POWERPOD;
   }

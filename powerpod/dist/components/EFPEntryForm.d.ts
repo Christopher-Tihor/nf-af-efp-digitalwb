@@ -10,6 +10,7 @@ import '@shoelace-style/shoelace/dist/components/textarea/textarea.js';
 import '@shoelace-style/shoelace/dist/components/tooltip/tooltip.js';
 import '@shoelace-style/shoelace/dist/components/alert/alert.js';
 import '@shoelace-style/shoelace/dist/components/dialog/dialog.js';
+import '@shoelace-style/shoelace/dist/components/badge/badge.js';
 import { LitElement } from 'lit';
 import './NavigationButtons';
 import './RatingQuestion';
@@ -52,6 +53,9 @@ export declare class EFPEntryForm extends LitElement {
     };
     actionPlanTableEl: HTMLElement & {
         openCreateDialogWithSelection: (chapterId: string, questionId: string) => void;
+        getActionPlanCountForQuestion: (questionId: string) => number;
+        getActionPlansForQuestion: (questionId: string) => any[];
+        openViewActionsDialog: (questionId: string) => void;
     };
     private responseSaveDebounceTimers;
     private pendingResponseValues;
@@ -62,6 +66,7 @@ export declare class EFPEntryForm extends LitElement {
     private handleStatsUpdated;
     disconnectedCallback(): void;
     private handleSignOffChanged;
+    private handleActionPlansUpdated;
     private updateQuestionnaireStoreStatus;
     private setupQuestionnaireStoreWatcher;
     private isWorkbookLocked;
@@ -72,6 +77,7 @@ export declare class EFPEntryForm extends LitElement {
     static styles: import("lit").CSSResult;
     private get sections();
     private renderQuestion;
+    private renderActionPlanButtons;
     private renderQuestionInput;
     private renderSectionNotApplicableCheckbox;
     private renderLockIcon;
@@ -104,7 +110,9 @@ export declare class EFPEntryForm extends LitElement {
     private get isContinueButtonDisabled();
     private handleSectionChange;
     private handleRatingChanged;
+    private getActionPlanCount;
     private handleAddNoteToActionPlan;
+    private handleViewExistingActions;
     private handleMultiselectChange;
     private saveDebouncedResponse;
     private saveMultiselectResponse;
