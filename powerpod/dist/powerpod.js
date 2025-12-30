@@ -1,5 +1,5 @@
 /*!
-* powerpod 4.6.6
+* powerpod 4.6.7
 * https://github.com/bcgov/nr-af-pods/powerpod
 *
 * @license GPLv3 for open source use only
@@ -885,10 +885,10 @@
     }
   };
 
-  var logger$V = Logger('store/mutations');
+  var logger$12 = Logger('store/mutations');
   var mutations = {
     setFieldData: function setFieldData(state, payload) {
-      logger$V.info({
+      logger$12.info({
         fn: this.setFieldData,
         message: 'Updated field config in state',
         data: {
@@ -900,7 +900,7 @@
       return state;
     },
     addFieldData: function addFieldData(state, payload) {
-      logger$V.info({
+      logger$12.info({
         fn: this.addFieldData,
         message: 'Add field data to state',
         data: {
@@ -917,7 +917,7 @@
       return state;
     },
     setQuestionnaireData: function setQuestionnaireData(state, payload) {
-      logger$V.info({
+      logger$12.info({
         fn: this.setQuestionnaireData,
         message: 'Updated questionnaire data in state',
         data: {
@@ -929,7 +929,7 @@
       return state;
     },
     updateQuestionnaireChapter: function updateQuestionnaireChapter(state, payload) {
-      logger$V.info({
+      logger$12.info({
         fn: this.updateQuestionnaireChapter,
         message: 'Update questionnaire chapter in state',
         data: {
@@ -968,7 +968,7 @@
       return state;
     },
     updateQuestionnaireQuestion: function updateQuestionnaireQuestion(state, payload) {
-      logger$V.info({
+      logger$12.info({
         fn: this.updateQuestionnaireQuestion,
         message: 'Update questionnaire question in state',
         data: {
@@ -1029,7 +1029,7 @@
     },
     setValidationError: function setValidationError(state, payload) {
       if (state.validationError === payload) {
-        logger$V.warn({
+        logger$12.warn({
           fn: this.setValidationError,
           message: 'Previous validationError state matches payload, no need to update',
           data: {
@@ -1045,7 +1045,7 @@
     },
     addValidationError: function addValidationError(state, payload) {
       if (state.validationError.includes(payload)) {
-        logger$V.warn({
+        logger$12.warn({
           fn: this.addValidationError,
           message: 'Added validationError message already included in currently displayed message',
           data: {
@@ -1062,7 +1062,7 @@
     },
     removeValidationError: function removeValidationError(state, payload) {
       if (!state.validationError.includes(payload)) {
-        logger$V.error({
+        logger$12.error({
           fn: this.addValidationError,
           message: 'Requested validationError paylaod does not exist in current state',
           data: {
@@ -1078,7 +1078,7 @@
       return state;
     },
     addToFieldOrder: function addToFieldOrder(state, payload) {
-      logger$V.info({
+      logger$12.info({
         fn: this.addToFieldOrder,
         message: 'Add field to fieldOrder array',
         data: {
@@ -1092,7 +1092,7 @@
       return state;
     },
     setPortalPageData: function setPortalPageData(state, payload) {
-      logger$V.info({
+      logger$12.info({
         fn: this.setPortalPageData,
         message: 'Set portal page data in state',
         data: {
@@ -1107,7 +1107,7 @@
       return state;
     },
     setUserRoles: function setUserRoles(state, payload) {
-      logger$V.info({
+      logger$12.info({
         fn: this.setUserRoles,
         message: 'Set user roles in state',
         data: {
@@ -1119,7 +1119,7 @@
       return state;
     },
     setWorkbookLocked: function setWorkbookLocked(state, payload) {
-      logger$V.info({
+      logger$12.info({
         fn: this.setWorkbookLocked,
         message: 'Set workbook locked status in state',
         data: {
@@ -1442,7 +1442,7 @@
     return validationErrorHtml;
   }
 
-  const logger$U = Logger('common/dynamics');
+  const logger$11 = Logger('common/dynamics');
   POWERPOD.dynamics = {
       getCurrentUser,
       getRequestVerificationToken,
@@ -1450,21 +1450,21 @@
   };
   function getCurrentUser() {
       var _a, _b, _c;
-      logger$U.info({
+      logger$11.info({
           fn: getCurrentUser,
           message: 'Start getting current user',
       });
       // @ts-ignore
       const { User } = (_b = (_a = win === null || win === void 0 ? void 0 : win.Microsoft) === null || _a === void 0 ? void 0 : _a.Dynamic365) === null || _b === void 0 ? void 0 : _b.Portal;
       if (!User) {
-          logger$U.error({
+          logger$11.error({
               fn: getCurrentUser,
               message: 'Could not get current user',
               // @ts-ignore
               data: { dynamic365: (_c = win === null || win === void 0 ? void 0 : win.Microsoft) === null || _c === void 0 ? void 0 : _c.Dynamic365 },
           });
       }
-      logger$U.info({
+      logger$11.info({
           fn: getCurrentUser,
           message: 'Successfully retrieved current user data',
           data: { currentUser: User },
@@ -1474,20 +1474,20 @@
   async function preloadRequestVerificationToken() {
       let requestVerificationToken = $('input[name=__RequestVerificationToken]').val();
       if (requestVerificationToken) {
-          logger$U.info({
+          logger$11.info({
               fn: preloadRequestVerificationToken,
               message: `No need to preload token, exists already, __RequestVerificationToken: ${requestVerificationToken}`,
           });
           saveBrowserInfo(BrowserInformationAction.Load);
           return;
       }
-      logger$U.info({
+      logger$11.info({
           fn: preloadRequestVerificationToken,
           message: 'Could not find input[name=__RequestVerificationToken], attempt finding antiforgerytoken div',
       });
       const tokenUrlDiv = document.getElementById('antiforgerytoken');
       if (!tokenUrlDiv) {
-          logger$U.error({
+          logger$11.error({
               fn: preloadRequestVerificationToken,
               message: 'Could not find antiforgerytoken, failed to find verificationtoken',
           });
@@ -1495,7 +1495,7 @@
       }
       const tokenUrl = tokenUrlDiv.getAttribute('data-url');
       if (!tokenUrl) {
-          logger$U.error({
+          logger$11.error({
               fn: preloadRequestVerificationToken,
               message: 'Could not find antiforgerytoken URL, failed to find verificationtoken',
           });
@@ -1511,7 +1511,7 @@
       const inputElement = tempDiv.querySelector('input');
       const token = inputElement === null || inputElement === void 0 ? void 0 : inputElement.getAttribute('value');
       if (!token) {
-          logger$U.error({
+          logger$11.error({
               fn: preloadRequestVerificationToken,
               message: 'Failed to load verification token from antiforgery url',
           });
@@ -1521,7 +1521,7 @@
       // set DOM HTML content for easy/immediate fetching later
       tokenUrlDiv.innerHTML = `<input name="__RequestVerificationToken" type="hidden" value="${requestVerificationToken}">`;
       saveBrowserInfo(BrowserInformationAction.Load);
-      logger$U.info({
+      logger$11.info({
           fn: preloadRequestVerificationToken,
           message: `Successfully created token input element with __RequestVerificationToken: ${requestVerificationToken}`,
       });
@@ -1529,12 +1529,12 @@
   function getRequestVerificationToken() {
       let requestVerificationToken = $('input[name=__RequestVerificationToken]').val();
       if (!requestVerificationToken) {
-          logger$U.error({
+          logger$11.error({
               fn: getRequestVerificationToken,
               message: 'Could not find input[name=__RequestVerificationToken]',
           });
       }
-      logger$U.info({
+      logger$11.info({
           fn: getRequestVerificationToken,
           message: `Successfully found __RequestVerificationToken: ${requestVerificationToken}`,
       });
@@ -1574,7 +1574,7 @@
     _excluded31 = ["workbookId", "chapterId", "questionId", "action"],
     _excluded32 = ["actionPlanId", "action", "chapterId", "questionId"],
     _excluded33 = ["actionPlanId"];
-  var logger$T = Logger('common/fetch');
+  var logger$10 = Logger('common/fetch');
   var ENDPOINT_URL = {
     get_env_vars_data: "/_api/environmentvariabledefinitions?$filter=contains(schemaname,'quartech_')&$select=schemaname,environmentvariabledefinitionid&$expand=environmentvariabledefinition_environmentvariablevalue($select=value)",
     get_application_form_data: function get_application_form_data(programId) {
@@ -1731,13 +1731,13 @@
   var _setReqVerificationHeaderToken = function setReqVerificationHeaderToken(XMLHttpRequest) {
     var requestVerificationToken = getRequestVerificationToken();
     if (!requestVerificationToken) {
-      logger$T.warn({
+      logger$10.warn({
         fn: _setReqVerificationHeaderToken,
         message: 'Failed to set request verification token header'
       });
     }
     XMLHttpRequest.setRequestHeader('__RequestVerificationToken', requestVerificationToken);
-    logger$T.info({
+    logger$10.info({
       fn: _setReqVerificationHeaderToken,
       message: "Successfully set header __RequestVerificationToken=".concat(requestVerificationToken)
     });
@@ -1766,7 +1766,7 @@
             if (window.location.hostname === 'localhost') {
               url = 'https://af-pods-dev.powerappsportals.com' + endpointUrl;
             }
-            logger$T.info({
+            logger$10.info({
               fn: fetch$1,
               message: 'Starting fetch request...',
               data: _objectSpread2(_objectSpread2({}, params), {}, {
@@ -1780,7 +1780,7 @@
               break;
             }
             _POWERPOD$fetch$CACHE = POWERPOD.fetch.CACHED_RESULTS[reqHash], _data = _POWERPOD$fetch$CACHE.data, textStatus = _POWERPOD$fetch$CACHE.textStatus, jqXHR = _POWERPOD$fetch$CACHE.jqXHR;
-            logger$T.info({
+            logger$10.info({
               fn: fetch$1,
               message: "returning cached data for url: ".concat(url),
               data: {
@@ -1817,7 +1817,7 @@
                 if (_beforeSend && typeof _beforeSend === 'function') _beforeSend(XMLHttpRequest);
               },
               success: function success(data, textStatus, jqXHR) {
-                logger$T.info({
+                logger$10.info({
                   fn: fetch$1,
                   message: 'success handler called',
                   data: {
@@ -1832,7 +1832,7 @@
                   jqXHR: jqXHR
                 };
                 if (returnData) {
-                  logger$T.info({
+                  logger$10.info({
                     fn: fetch$1,
                     message: "skipping onSuccess handler call: ".concat(url),
                     data: {
@@ -1847,7 +1847,7 @@
                 }
               },
               error: function error(jqXHR, textStatus, errorThrown) {
-                logger$T.error({
+                logger$10.error({
                   fn: fetch$1,
                   message: "Error handler called for url: ".concat(url),
                   data: {
@@ -1862,7 +1862,7 @@
               }
             }).then(function (data, textStatus, jqXHR) {
               if (returnData) {
-                logger$T.info({
+                logger$10.info({
                   fn: fetch$1,
                   message: "returning data for url: ".concat(url),
                   data: {
@@ -1956,7 +1956,7 @@
               _context4.next = 4;
               break;
             }
-            logger$T.error({
+            logger$10.error({
               fn: getClaimFormData,
               message: 'Missing required params',
               data: {
@@ -2164,7 +2164,7 @@
         while (1) switch (_context12.prev = _context12.next) {
           case 0:
             formId = _ref11.formId, subject = _ref11.subject, filename = _ref11.filename, documentbody = _ref11.documentbody, mimetype = _ref11.mimetype, formType = _ref11.formType, options = _objectWithoutProperties(_ref11, _excluded9);
-            logger$T.info({
+            logger$10.info({
               fn: postDocumentData,
               message: "postDocumentData called with payload:",
               data: _objectSpread2({
@@ -2192,7 +2192,7 @@
             };
             return _context12.abrupt("break", 12);
           case 12:
-            logger$T.info({
+            logger$10.info({
               fn: postDocumentData,
               message: "postDocumentData called with objecttypecode: ".concat(objecttypecode, ", objecttypecode_databind: ").concat(JSON.stringify(objecttypecode_databind)),
               data: _objectSpread2({
@@ -2792,7 +2792,7 @@
               _context33.next = 4;
               break;
             }
-            logger$T.error({
+            logger$10.error({
               fn: getWorkbookResponsesByWorkbook,
               message: 'Missing required workbookId parameter',
               data: {
@@ -2848,7 +2848,7 @@
               _context34.next = 4;
               break;
             }
-            logger$T.error({
+            logger$10.error({
               fn: getWorkbookResponsesByWorkbookAndQuestion,
               message: 'Missing required parameters',
               data: {
@@ -2905,7 +2905,7 @@
               _context35.next = 4;
               break;
             }
-            logger$T.error({
+            logger$10.error({
               fn: postWorkbookResponseData,
               message: 'Missing required parameters',
               data: {
@@ -2916,7 +2916,7 @@
             });
             throw new Error('workbookId, questionId, and response are required');
           case 4:
-            logger$T.info({
+            logger$10.info({
               fn: postWorkbookResponseData,
               message: 'Creating workbook response',
               data: {
@@ -2976,7 +2976,7 @@
               _context36.next = 4;
               break;
             }
-            logger$T.error({
+            logger$10.error({
               fn: patchWorkbookResponseData,
               message: 'Missing required id parameter',
               data: {
@@ -2998,7 +2998,7 @@
               _context36.next = 12;
               break;
             }
-            logger$T.warn({
+            logger$10.warn({
               fn: patchWorkbookResponseData,
               message: 'No data to update',
               data: {
@@ -3012,7 +3012,7 @@
               data: null
             }));
           case 12:
-            logger$T.info({
+            logger$10.info({
               fn: patchWorkbookResponseData,
               message: 'Updating workbook response',
               data: {
@@ -3052,7 +3052,7 @@
               _context37.next = 4;
               break;
             }
-            logger$T.error({
+            logger$10.error({
               fn: deleteWorkbookResponseData,
               message: 'Missing required id parameter',
               data: {
@@ -3061,7 +3061,7 @@
             });
             throw new Error('id is required');
           case 4:
-            logger$T.info({
+            logger$10.info({
               fn: deleteWorkbookResponseData,
               message: 'Deleting workbook response',
               data: {
@@ -3155,7 +3155,7 @@
               _context40.next = 4;
               break;
             }
-            logger$T.error({
+            logger$10.error({
               fn: postActionPlanData,
               message: 'Missing required parameters',
               data: {
@@ -3167,7 +3167,7 @@
             });
             throw new Error('workbookId and action are required');
           case 4:
-            logger$T.info({
+            logger$10.info({
               fn: postActionPlanData,
               message: 'Creating action plan',
               data: {
@@ -3221,7 +3221,7 @@
               _context41.next = 4;
               break;
             }
-            logger$T.error({
+            logger$10.error({
               fn: patchActionPlanData,
               message: 'Missing required parameters',
               data: {
@@ -3233,7 +3233,7 @@
             });
             throw new Error('actionPlanId and action are required');
           case 4:
-            logger$T.info({
+            logger$10.info({
               fn: patchActionPlanData,
               message: 'Updating action plan',
               data: {
@@ -3286,7 +3286,7 @@
               _context42.next = 4;
               break;
             }
-            logger$T.error({
+            logger$10.error({
               fn: deleteActionPlanData,
               message: 'Missing required parameter',
               data: {
@@ -3295,7 +3295,7 @@
             });
             throw new Error('actionPlanId is required');
           case 4:
-            logger$T.info({
+            logger$10.info({
               fn: deleteActionPlanData,
               message: 'Deleting action plan',
               data: {
@@ -3320,7 +3320,7 @@
     return _deleteActionPlanData.apply(this, arguments);
   }
 
-  const logger$S = Logger('common/env');
+  const logger$$ = Logger('common/env');
   POWERPOD.env = {
       getEnvVars,
       getEnv,
@@ -3329,14 +3329,14 @@
       const { host } = window.location;
       const env = Object.keys(Hosts).find((key) => Hosts[key].includes(host));
       if (!env) {
-          logger$S.error({
+          logger$$.error({
               fn: getEnv,
               message: 'Unable to determine current env',
               data: { host, Hosts },
           });
           return;
       }
-      logger$S.info({
+      logger$$.info({
           fn: getEnv,
           message: `successfully determined current env: ${env}`,
       });
@@ -3346,7 +3346,7 @@
       const { data } = await getEnvVarsData();
       if (data) {
           const res = processEnvVarsData(data);
-          logger$S.info({
+          logger$$.info({
               fn: getEnvVars,
               message: 'successfully extracted env vars:',
               data: res,
@@ -3354,7 +3354,7 @@
           return Promise.resolve(res);
       }
       let errorMsg = 'failed to extract env vars from data';
-      logger$S.warn({
+      logger$$.warn({
           fn: getEnvVars,
           message: errorMsg,
           data,
@@ -3415,7 +3415,7 @@
   // Claim TFCR:
   // import localConfigJson from '../../../../assets/claim/json/quartech_applicantportalclaimformjson_tfcr.json';
 
-  var logger$R = Logger('common/config');
+  var logger$_ = Logger('common/config');
   POWERPOD.config = {
     getGlobalConfigData: getGlobalConfigData,
     getClaimConfigData: getClaimConfigData,
@@ -3424,7 +3424,7 @@
   function getGlobalConfigData() {
     var _JSON$parse;
     var path = window.location.pathname;
-    logger$R.info({
+    logger$_.info({
       fn: getGlobalConfigData,
       message: 'checking path to determine if we should use localhost or hosted data',
       data: {
@@ -3448,7 +3448,7 @@
     var programData = localStorage.getItem('programData');
     var configDataJSON = (_JSON$parse = JSON.parse(programData)) === null || _JSON$parse === void 0 || (_JSON$parse = _JSON$parse.quartech_ApplicantPortalConfig) === null || _JSON$parse === void 0 ? void 0 : _JSON$parse.quartech_configdata;
     if (!configDataJSON) {
-      logger$R.error({
+      logger$_.error({
         fn: getGlobalConfigData,
         message: 'Could not find config data json, check global JSON config data',
         data: {
@@ -3459,7 +3459,7 @@
       return;
     }
     var podsConfigData = JSON.parse(configDataJSON);
-    logger$R.info({
+    logger$_.info({
       fn: getApplicationConfigData,
       message: 'successfully fetched global config data from storage',
       data: podsConfigData
@@ -3469,7 +3469,7 @@
   function getClaimConfigData() {
     var _JSON$parse2;
     var path = window.location.pathname;
-    logger$R.info({
+    logger$_.info({
       fn: getClaimConfigData,
       message: 'checking path to determine if we should use localhost or hosted data',
       data: {
@@ -3490,7 +3490,7 @@
     var programData = localStorage.getItem('programData');
     var configDataJSON = (_JSON$parse2 = JSON.parse(programData)) === null || _JSON$parse2 === void 0 ? void 0 : _JSON$parse2.quartech_applicantportalclaimformjson;
     if (!configDataJSON) {
-      logger$R.error({
+      logger$_.error({
         fn: getClaimConfigData,
         message: 'Failed to get Claim config data, check quartech_applicantportalclaimformjson for the program in MS Dynamics.',
         data: {
@@ -3501,7 +3501,7 @@
       return;
     }
     var podsConfigData = JSON.parse(configDataJSON);
-    logger$R.info({
+    logger$_.info({
       fn: getApplicationConfigData,
       message: 'successfully fetched claim config data from storage',
       data: podsConfigData
@@ -3511,7 +3511,7 @@
   function getApplicationConfigData(programId) {
     var _JSON$parse3;
     var path = window.location.pathname;
-    logger$R.info({
+    logger$_.info({
       fn: getApplicationConfigData,
       message: 'checking path to determine if we should use localhost or hosted data',
       data: {
@@ -3531,7 +3531,7 @@
     // UNCOMMENT THIS IF YOU WANT TO FORCE TO USE LOCAL JSON CONFIG
 
     var programData = localStorage.getItem('programData');
-    logger$R.info({
+    logger$_.info({
       fn: getApplicationConfigData,
       message: "got applicationConfigData from storage, programData",
       data: {
@@ -3539,7 +3539,7 @@
       }
     });
     var configDataJSON = (_JSON$parse3 = JSON.parse(programData)) === null || _JSON$parse3 === void 0 ? void 0 : _JSON$parse3.quartech_applicantportalapplicationformconfigjson;
-    logger$R.info({
+    logger$_.info({
       fn: getApplicationConfigData,
       message: "got applicationConfigData from storage, configDataJSON",
       data: {
@@ -3548,7 +3548,7 @@
       }
     });
     var podsConfigData = JSON.parse(configDataJSON);
-    logger$R.info({
+    logger$_.info({
       fn: getApplicationConfigData,
       message: "got applicationConfigData from storage, podsConfigData",
       data: {
@@ -3557,7 +3557,7 @@
         podsConfigData: podsConfigData
       }
     });
-    logger$R.info({
+    logger$_.info({
       fn: getApplicationConfigData,
       message: 'successfully fetched application config data from storage',
       data: podsConfigData
@@ -3565,7 +3565,7 @@
     return podsConfigData;
   }
 
-  var logger$Q = Logger('application/steps/deliverablesBudget');
+  var logger$Z = Logger('application/steps/deliverablesBudget');
   function customizeDeliverablesBudgetStep() {
     var _deliverablesBudgetTa;
     configureFields();
@@ -3664,7 +3664,7 @@
   function getCurrencyFieldValue(valueElementId) {
     var valueElement = $("#".concat(valueElementId));
     if (!valueElement) {
-      logger$Q.error({
+      logger$Z.error({
         fn: getCurrencyFieldValue,
         message: "Unable to find element for valueElementId: ".concat(valueElementId)
       });
@@ -3743,7 +3743,7 @@
   }
   function calculateEstimatedActivityBudget() {
     var _document$getElementB;
-    logger$Q.info({
+    logger$Z.info({
       fn: calculateEstimatedActivityBudget,
       message: "Calculating estimated activity budget..."
     });
@@ -3785,18 +3785,18 @@
     var estimatedNumberOfAttendeesId = 'quartech_estimatednumberofattendees';
     var estimatedNumberOfAttendees = ((_document$getElementB = document.getElementById(estimatedNumberOfAttendeesId)) === null || _document$getElementB === void 0 ? void 0 : _document$getElementB.value) || 1;
     var estimatedNumberOfAttendeesVal = parseFloat(estimatedNumberOfAttendees) || 1;
-    logger$Q.info({
+    logger$Z.info({
       fn: calculateEstimatedActivityBudget,
       message: "estimatedNumberOfAttendees: ".concat(estimatedNumberOfAttendees, ", estimatedNumberOfAttendeesVal: ").concat(estimatedNumberOfAttendeesVal)
     });
     var estimatedCostPerAttendeeId = 'quartech_estimatedcostperattendee';
     var estimatedCostPerAttendee = totalActivityCost / estimatedNumberOfAttendeesVal;
-    logger$Q.info({
+    logger$Z.info({
       fn: calculateEstimatedActivityBudget,
       message: "estimatedCostPerAttendee: ".concat(estimatedCostPerAttendee)
     });
     var estimatedCostPerAttendeeWithCurrencyFormat = CURRENCY_FORMAT.format(estimatedCostPerAttendee);
-    logger$Q.info({
+    logger$Z.info({
       fn: calculateEstimatedActivityBudget,
       message: "estimatedCostPerAttendeeWithCurrencyFormat: ".concat(estimatedCostPerAttendeeWithCurrencyFormat)
     });
@@ -3824,7 +3824,7 @@
     // validateStepFields();
   }
 
-  var logger$P = Logger('common/currency');
+  var logger$Y = Logger('common/currency');
   function formatCurrencyOnBlur(inputValue, allowNegatives) {
     // Remove any non-numeric characters except for decimals and negative signs
     var cleanedValue = inputValue.replace(/[^0-9.-]/g, '');
@@ -3863,7 +3863,7 @@
       initialValue = _ref$initialValue === void 0 ? undefined : _ref$initialValue,
       _ref$allowNegatives = _ref.allowNegatives,
       allowNegatives = _ref$allowNegatives === void 0 ? false : _ref$allowNegatives;
-    logger$P.info({
+    logger$Y.info({
       fn: customizeCurrencyInput,
       message: "customizeCurrencyInput called with the following params",
       data: {
@@ -3893,12 +3893,12 @@
       var inputValue = inputCtr.val();
       var pressedKeyCode = event.which; // pressed key on the keyboard.
 
-      logger$P.info({
+      logger$Y.info({
         fn: customizeCurrencyInput,
         message: "KEYDOWN ACTION: Detected pressedKeyCode: ".concat(pressedKeyCode)
       });
       if (pressedKeyCode <= 40 && pressedKeyCode >= 37) {
-        logger$P.info({
+        logger$Y.info({
           fn: customizeCurrencyInput,
           message: 'KEYDOWN ACTION: Arrow keys pressed, allowing default event behaviour'
         });
@@ -3945,7 +3945,7 @@
         }
         var isDecimalPlace = false;
         // @ts-ignore
-        logger$P.info({
+        logger$Y.info({
           fn: customizeCurrencyInput,
           message: 'DELETE ACTION: Attempting to detect if decimal place',
           data: {
@@ -3960,7 +3960,7 @@
         // @ts-ignore
         if (isDecimalPlace && currentInputCursor !== inputValue.length) {
           var _document$getElementB5;
-          logger$P.info({
+          logger$Y.info({
             fn: customizeCurrencyInput,
             message: 'DELETE ACTION: Decimal place input detected',
             data: {
@@ -3977,7 +3977,7 @@
           // @ts-ignore
           ) === null || _document$getElementB5 === void 0 || _document$getElementB5.setSelectionRange(currentInputCursor + 1, currentInputCursor + 1);
           event.preventDefault();
-          logger$P.info({
+          logger$Y.info({
             fn: customizeCurrencyInput,
             message: 'DELETE ACTION: Decimal place value updated',
             data: {
@@ -4111,7 +4111,7 @@
         currentInputCursor >= inputValue.length - 2 // || adding number after decimal place
         /*             inputValue.length <= totalMaxDigits */) {
           var _document$getElementB10;
-          logger$P.info({
+          logger$Y.info({
             fn: customizeCurrencyInput,
             message: 'KEYDOWN ACTION: Decimal input detected',
             data: {
@@ -4131,7 +4131,7 @@
           // }
           event.preventDefault();
           event.stopImmediatePropagation();
-          logger$P.info({
+          logger$Y.info({
             fn: customizeCurrencyInput,
             message: 'KEYDOWN ACTION: Decimal input detected... set new value',
             data: {
@@ -4168,7 +4168,7 @@
     if (isNaN(cleanDecimalValue)) cleanDecimalValue = 0.0;
     var newAmountWithCurrencyFormat = CURRENCY_FORMAT.format(cleanDecimalValue);
     if (newAmountWithCurrencyFormat) {
-      logger$P.info({
+      logger$Y.info({
         fn: handleNewValueEntered,
         message: "newAmountWithCurrencyFormat: ".concat(newAmountWithCurrencyFormat)
       });
@@ -4209,7 +4209,7 @@
     inputCtr.data('val', inputCtr.val());
   }
 
-  var logger$O = Logger('common/scripts');
+  var logger$X = Logger('common/scripts');
   POWERPOD.useScript = useScript;
   var Scripts = {
     jquerymask: 'jquerymask',
@@ -4283,12 +4283,12 @@
     if (isScriptAdded(id)) {
       // If script already loaded successfully, trigger the callback function
       if (isScriptFullyLoaded(id)) {
-        logger$O.warn({
+        logger$X.warn({
           fn: useScript,
           message: "Script already loaded. Skipping: ".concat(id)
         });
         if (onload) {
-          logger$O.warn({
+          logger$X.warn({
             fn: useScript,
             message: "Script already loaded. Calling onload for: ".concat(id)
           });
@@ -4298,14 +4298,14 @@
       }
       if (onload) {
         var _script$callstack, _script$callstack2;
-        logger$O.warn({
+        logger$X.warn({
           fn: useScript,
           message: "Script still loading, adding to call stack: ".concat(id),
           data: script
         });
         script.callstack = _objectSpread2(_objectSpread2({}, script.callstack ? script.callstack : {}), {}, _defineProperty({}, id, [].concat(_toConsumableArray((_script$callstack = script.callstack) !== null && _script$callstack !== void 0 && _script$callstack[id] ? (_script$callstack2 = script.callstack) === null || _script$callstack2 === void 0 ? void 0 : _script$callstack2[id] : []), [onload])));
       } else {
-        logger$O.warn({
+        logger$X.warn({
           fn: useScript,
           message: "Script still loading: ".concat(id)
         });
@@ -4323,7 +4323,7 @@
     }
     scriptEl.onload = function () {
       var _script$callstack3;
-      logger$O.info({
+      logger$X.info({
         fn: useScript,
         message: "script onload successfully called ".concat(id),
         data: script
@@ -4338,7 +4338,7 @@
       }
     };
     scriptEl.onerror = function () {
-      logger$O.error({
+      logger$X.error({
         fn: useScript,
         message: "Failed to load: ".concat(id)
       });
@@ -4348,7 +4348,7 @@
     };
   }
 
-  var logger$N = Logger('common/masking');
+  var logger$W = Logger('common/masking');
 
   // supported masking types
   var FieldMaskType = {
@@ -4366,12 +4366,12 @@
     PhoneNumber: '(000) 000-0000'
   };
   function maskInput(fieldName, type) {
-    logger$N.info({
+    logger$W.info({
       fn: maskInput,
       message: "applying mask input to fieldName: ".concat(fieldName, " of type: ").concat(type)
     });
     if (!Object.keys(FieldMaskType).includes(type)) {
-      logger$N.error({
+      logger$W.error({
         fn: maskInput,
         message: "unsupported mask, cannot mask input for fieldName: ".concat(fieldName, " and type: ").concat(type)
       });
@@ -4408,20 +4408,20 @@
           });
           break;
         default:
-          logger$N.error({
+          logger$W.error({
             fn: maskInput,
             message: "did NOT apply masking to fieldName: ".concat(fieldName, " of type: ").concat(type)
           });
           return;
       }
-      logger$N.info({
+      logger$W.info({
         fn: maskInput,
         message: "successfully applied mask input to fieldName: ".concat(fieldName, " of type: ").concat(type)
       });
     });
   }
 
-  var logger$M = Logger('common/tooltip');
+  var logger$V = Logger('common/tooltip');
   function setupTooltip(field) {
     var name = field.name,
       tooltipText = field.tooltipText,
@@ -4435,7 +4435,7 @@
         tooltipTargetElement = tooltipTargetElement.parent();
       }
       if (!tooltipTargetElement) {
-        logger$M.error({
+        logger$V.error({
           fn: setupTooltip,
           message: 'Could not find tooltipTargetElement',
           data: {
@@ -4443,7 +4443,7 @@
           }
         });
       }
-      logger$M.info({
+      logger$V.info({
         fn: setupTooltip,
         message: "Start configuring tooltip for fieldName: ".concat(name),
         data: {
@@ -4482,14 +4482,14 @@
     }
   }
 
-  var logger$L = Logger('common/fieldConditionalLogic');
+  var logger$U = Logger('common/fieldConditionalLogic');
   POWERPOD.fieldConditionalLogic = {
     setFieldVisibility: setFieldVisibility
   };
   function assignDependentFields(fieldConfig) {
     var name = fieldConfig.name,
       visibleIf = fieldConfig.visibleIf;
-    logger$L.info({
+    logger$U.info({
       fn: assignDependentFields,
       message: "starting to set dependent fields for name: ".concat(name),
       data: {
@@ -4497,7 +4497,7 @@
       }
     });
     if (!visibleIf) {
-      logger$L.warn({
+      logger$U.warn({
         fn: assignDependentFields,
         message: "could not find visibleIf configuration for field with name: ".concat(name),
         data: {
@@ -4510,7 +4510,7 @@
     fieldNames.forEach(function (controlFieldName) {
       var controlFieldConfig = getFieldConfig(controlFieldName);
       if (!controlFieldConfig) {
-        logger$L.warn({
+        logger$U.warn({
           fn: assignDependentFields,
           message: "control field config not found for: ".concat(controlFieldName),
           data: {
@@ -4550,7 +4550,7 @@
       fieldConfig = params.fieldConfig,
       controlFieldName = params.controlFieldName;
     if (controlFieldConfig.dependentFields && Array.isArray(controlFieldConfig.dependentFields) && (_controlFieldConfig$d = controlFieldConfig.dependentFields) !== null && _controlFieldConfig$d !== void 0 && _controlFieldConfig$d.includes(name)) {
-      logger$L.info({
+      logger$U.info({
         fn: checkControlDependentFields,
         message: "dependent field name: ".concat(name, " already assigned to controlFieldName: ").concat(controlFieldName),
         data: {
@@ -4570,7 +4570,7 @@
   function setFieldVisibility(name) {
     var visibleIf = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
     var condition = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : undefined;
-    logger$L.info({
+    logger$U.info({
       fn: setFieldVisibility,
       message: "starting to set field visibility for name: ".concat(name)
     });
@@ -4585,7 +4585,7 @@
     }
     var matchesCondition = false;
     if (!visibleIf) {
-      logger$L.warn({
+      logger$U.warn({
         fn: setFieldVisibility,
         message: "no visibleIf config found for field: ".concat(name),
         data: {
@@ -4833,7 +4833,7 @@
       comparison: comparison,
       value: value
     };
-    logger$L.info({
+    logger$U.info({
       fn: checkVisibleIfComparison,
       message: "for name: ".concat(name, ", doing a comparison: ").concat(comparison, ", controlValue: ").concat(controlValue),
       data: {
@@ -4841,7 +4841,7 @@
       }
     });
     if (controlValue === '') {
-      logger$L.info({
+      logger$U.info({
         fn: checkVisibleIfComparison,
         message: "for name: ".concat(name, ", cannot compare an empty value, DOES NOT match visibleIf condition"),
         data: {
@@ -4856,7 +4856,7 @@
       operator: comparison,
       forceRequired: true
     });
-    logger$L.info({
+    logger$U.info({
       fn: checkVisibleIfComparison,
       message: "for name: ".concat(name, ", comparison: ").concat(comparison, " returned numericValidationResult: ").concat(getNumericValidationError, ", controlValue: ").concat(controlValue),
       data: {
@@ -4881,7 +4881,7 @@
       selectedValueIn: selectedValueIn
     };
     if (controlValue === selectedValue || controlValue === "".concat(selectedValue) || selectedValueIn !== null && selectedValueIn !== void 0 && selectedValueIn.includes(controlValue) || controlValue !== null && controlValue !== void 0 && controlValue.includes && controlValue !== null && controlValue !== void 0 && controlValue.includes(selectedValue) || Number(controlValue) && selectedValueIn !== null && selectedValueIn !== void 0 && selectedValueIn.includes(Number(controlValue))) {
-      logger$L.info({
+      logger$U.info({
         fn: checkVisibleIfCondition,
         message: "for name: ".concat(name, ", FOUND matching condition"),
         data: {
@@ -4895,7 +4895,7 @@
       var _POWERPOD$state;
       var loadingAllFieldConfig = POWERPOD.configuringFields;
       var loadingFieldConfig = (_POWERPOD$state = POWERPOD.state) === null || _POWERPOD$state === void 0 || (_POWERPOD$state = _POWERPOD$state.fields) === null || _POWERPOD$state === void 0 || (_POWERPOD$state = _POWERPOD$state[name]) === null || _POWERPOD$state === void 0 ? void 0 : _POWERPOD$state.loading;
-      logger$L.info({
+      logger$U.info({
         fn: checkVisibleIfCondition,
         message: "for name: ".concat(name, ", found did NOT find matching condition"),
         data: {
@@ -4945,7 +4945,7 @@
         return evaluateVisibilityConditions(subCond, name);
       });
     }
-    logger$L.warn({
+    logger$U.warn({
       fn: evaluateVisibilityConditions,
       message: 'Invalid visibleIf structure',
       data: {
@@ -4956,7 +4956,7 @@
     return false;
   }
 
-  const logger$K = Logger('common/components');
+  const logger$T = Logger('common/components');
   POWERPOD.components = {
       renderCustomComponent,
   };
@@ -4972,13 +4972,13 @@
       const { fieldId, customElementTag, attributes = {}, customEvent, customEventHandler = () => { }, mappedValueKey, // internal element property that should map to the dynamics field, e.g. in this case "rows" maps to quartech_eligibleexpenses
       initValuesFn, // additional function to load initial values
       customSetupFn, } = params;
-      logger$K.info({
+      logger$T.info({
           fn: renderCustomComponent,
           message: `Start adding custom component: ${customElementTag}`,
           data: { params },
       });
       if (!$(`#${fieldId}`)) {
-          logger$K.error({
+          logger$T.error({
               fn: renderCustomComponent,
               message: `Failed to add custom element, could not find fieldId: ${fieldId}`,
           });
@@ -5000,14 +5000,14 @@
       // hide dynamics field
       $(`#${fieldId}`).css({ display: 'none' });
       customElement.addEventListener(customEvent, (event) => {
-          logger$K.info({
+          logger$T.info({
               fn: renderCustomComponent,
               message: `Detected event from custom element: ${customElementTag}`,
               data: { event, customElement, params },
           });
           customEventHandler(event, customElement);
       });
-      logger$K.info({
+      logger$T.info({
           fn: renderCustomComponent,
           message: `Successfully added custom component: ${customElementTag}`,
           data: { params },
@@ -5019,13 +5019,13 @@
           tr,
           raw: true,
       });
-      logger$K.info({
+      logger$T.info({
           fn: renderCustomComponent,
           message: `For fieldId: ${fieldId}, found existingValue: ${existingValue}`,
           data: { params, existingValue, tr },
       });
       if (existingValue !== null && existingValue !== '[]') {
-          logger$K.info({
+          logger$T.info({
               fn: renderCustomComponent,
               message: `Setting existing value for mappedValueKey: ${mappedValueKey} to existingValue: ${existingValue}`,
               data: { params },
@@ -5039,7 +5039,7 @@
           customSetupFn();
       }
       const id = customElement.getAttribute('id');
-      logger$K.info({
+      logger$T.info({
           fn: renderCustomComponent,
           message: `Looking for id for fieldId: ${fieldId}`,
           data: { customElement, id },
@@ -10079,7 +10079,7 @@
     return formattedDate;
   }
 
-  var logger$J = Logger('common/contacts');
+  var logger$S = Logger('common/contacts');
   POWERPOD.contacts = {
     getContactName: getContactName
   };
@@ -10104,7 +10104,7 @@
               _context.next = 7;
               break;
             }
-            logger$J.error({
+            logger$S.error({
               fn: getContactName,
               message: 'Failed to get contact'
             });
@@ -10115,13 +10115,13 @@
               _context.next = 11;
               break;
             }
-            logger$J.error({
+            logger$S.error({
               fn: getContactName,
               message: 'Failed to get contact name'
             });
             return _context.abrupt("return");
           case 11:
-            logger$J.info({
+            logger$S.info({
               fn: getContactName,
               message: "Successfully retrieved fullname: ".concat(fullname)
             });
@@ -10155,7 +10155,7 @@
     });
   }
 
-  const logger$I = Logger('common/documents');
+  const logger$R = Logger('common/documents');
   POWERPOD.docUtils = {
       getFilenamesFromDocData,
       getFilenamesFromFieldData,
@@ -10186,7 +10186,7 @@
   function getFilenamesFromDocData(data, fieldName = 'ALL FIELDS') {
       const { value } = data;
       const filenames = value.map((item) => item.filename);
-      logger$I.info({
+      logger$R.info({
           fn: getFilenamesFromDocData,
           message: `Returning filenames string from documents data for fieldName: ${fieldName}`,
           data: { data, filenames },
@@ -10210,7 +10210,7 @@
       if (fileName && !fileNames.includes(fileName)) {
           fileNames.push(fileName);
       }
-      logger$I.info({
+      logger$R.info({
           fn: getFilenamesFromFieldData,
           message: `Returning filename list from upload field content for fieldName: ${fieldName}`,
           data: { fileNames },
@@ -10288,7 +10288,7 @@
               const startIndex = fileString.lastIndexOf('(', endIndex); // Find the preceding opening parenthesis
               if (startIndex !== -1 && endIndex !== -1 && endIndex > startIndex) {
                   const filename = fileString.substring(0, startIndex).trim(); // Extract filename
-                  logger$I.info({
+                  logger$R.info({
                       fn: readFileInputStr,
                       message: `Found filename: ${filename}`,
                   });
@@ -10299,7 +10299,7 @@
               }
           }
       });
-      logger$I.info({
+      logger$R.info({
           fn: readFileInputStr,
           message: `Found ${(_a = matchingDocs === null || matchingDocs === void 0 ? void 0 : matchingDocs.length) !== null && _a !== void 0 ? _a : 0} matching docs`,
           data: { fileInputStr, docs, matchingDocs },
@@ -10307,7 +10307,7 @@
       return matchingDocs;
   }
   function generateFileInputStr(docs) {
-      logger$I.info({
+      logger$R.info({
           fn: generateFileInputStr,
           message: 'Start generating file input str',
           data: { docs },
@@ -10316,7 +10316,7 @@
       docs.forEach((doc) => {
           const { filename, fileId, filesize, status } = doc;
           if (status !== 'uploaded') {
-              logger$I.warn({
+              logger$R.warn({
                   fn: generateFileInputStr,
                   message: `File not uploaded yet, filename: ${filename}`,
                   data: { doc },
@@ -10330,7 +10330,7 @@
           }
           inputStr += fileStr + '\n';
       });
-      logger$I.info({
+      logger$R.info({
           fn: generateFileInputStr,
           message: 'Successfully generated file input str',
           data: { docs, inputStr },
@@ -10342,7 +10342,7 @@
       const filename = convertExtensionToLowerCase(name);
       const { contactId } = getCurrentUser();
       if (!contactId) {
-          logger$I.error({
+          logger$R.error({
               fn: generateDocumentSubject,
               message: 'Could not find contactId for user',
           });
@@ -10353,7 +10353,7 @@
           fullname = await getContactName(contactId);
       }
       if (!fullname) {
-          logger$I.error({
+          logger$R.error({
               fn: generateDocumentSubject,
               message: 'Could not find fullname for user',
           });
@@ -10379,7 +10379,7 @@
   }
   async function postDocument(file, fieldName) {
       var _a;
-      logger$I.info({
+      logger$R.info({
           fn: postDocument,
           message: `Start uploading file for fieldName: ${fieldName}`,
           data: { file, fieldName },
@@ -10390,7 +10390,7 @@
       const { subject, fileId } = await generateDocumentSubject(file, fieldName);
       const formId = getFormId();
       if (!(documentbody === null || documentbody === void 0 ? void 0 : documentbody.length) || !(subject === null || subject === void 0 ? void 0 : subject.length) || !(formId === null || formId === void 0 ? void 0 : formId.length)) {
-          logger$I.error({
+          logger$R.error({
               fn: postDocument,
               message: `Failed to postDocument for fieldName: ${fieldName}`,
               data: { file, fieldName, documentbody, subject, formId },
@@ -10406,35 +10406,35 @@
           mimetype: type,
           formType,
       };
-      logger$I.info({
+      logger$R.info({
           fn: postDocument,
           message: `Posting document for fieldName: ${fieldName}`,
           data: { payload, file, fieldName, formType },
       });
       const response = await postDocumentData(payload);
       if (!response || ((_a = response.jqXHR) === null || _a === void 0 ? void 0 : _a.status) !== 204) {
-          logger$I.error({
+          logger$R.error({
               fn: postDocument,
               message: 'Failed to post document',
               data: { payload, response, file, fieldName },
           });
           return;
       }
-      logger$I.info({
+      logger$R.info({
           fn: postDocument,
           message: 'Successfully posted document',
           data: { payload, response, file, fieldName },
       });
   }
   function processDocumentsData(data) {
-      logger$I.info({
+      logger$R.info({
           fn: processDocumentsData,
           message: 'Start processing retrieved documents data',
           data: { data },
       });
       const { value: documentsDataArray } = data;
       const documents = documentsDataArray.map((docData) => mapDataToUploadedDoc(docData));
-      logger$I.info({
+      logger$R.info({
           fn: processDocumentsData,
           message: 'Successfully parsed documents data',
           data: { documents },
@@ -10443,7 +10443,7 @@
   }
   async function deleteDocuments(formId, documents = []) {
       if (!documents || !documents.length) {
-          logger$I.warn({
+          logger$R.warn({
               fn: deleteDocuments,
               message: 'No documents found to delete',
               data: { formId },
@@ -10451,7 +10451,7 @@
           return;
       }
       const startTime = Date.now();
-      logger$I.info({
+      logger$R.info({
           fn: deleteDocuments,
           message: `Start deleting all documents for formId: ${formId}`,
           data: { formId, documents },
@@ -10460,7 +10460,7 @@
           var _a;
           const { annotationid: annotationId } = doc;
           const startTime = Date.now();
-          logger$I.info({
+          logger$R.info({
               fn: deleteDocuments,
               message: `Start deleting document for for annotationId: ${annotationId}`,
               data: { formId, doc },
@@ -10470,7 +10470,7 @@
               returnData: true,
           });
           if (!response || ((_a = response.jqXHR) === null || _a === void 0 ? void 0 : _a.status) !== 204) {
-              logger$I.error({
+              logger$R.error({
                   fn: deleteDocuments,
                   message: `Failed to delete document for annotationId: ${annotationId}`,
                   data: { response, doc, formId, annotationId },
@@ -10478,14 +10478,14 @@
               return;
           }
           const elapsedTime = Date.now() - startTime;
-          logger$I.info({
+          logger$R.info({
               fn: deleteDocuments,
               message: `Successfully deleted document for annotationId: ${annotationId}, took ${elapsedTime} ms`,
               data: { response, doc, formId, annotationId },
           });
       });
       const elapsedTime = Date.now() - startTime;
-      logger$I.info({
+      logger$R.info({
           fn: deleteDocuments,
           message: `Successfully deleted all documents for formId: ${formId}, took ${elapsedTime} ms`,
           data: { formId, documents },
@@ -10493,7 +10493,7 @@
   }
   function validateFileUpload(file) {
       var _a;
-      logger$I.info({
+      logger$R.info({
           fn: validateFileUpload,
           message: 'Validating file upload file',
           data: { file },
@@ -10528,7 +10528,7 @@
       var _a;
       const allowedDocumentsTooltipText = (_a = getGlobalConfigData()) === null || _a === void 0 ? void 0 : _a.AllowedDocumentsTooltipText;
       if (!allowedDocumentsTooltipText) {
-          logger$I.error({
+          logger$R.error({
               fn: addDocumentsStepText,
               message: 'Failed to fetch AllowedDocumentsTooltipText',
           });
@@ -10588,7 +10588,7 @@
       return inputString.trim();
   }
 
-  const logger$H = Logger('components/fileUpload');
+  const logger$Q = Logger('components/fileUpload');
   let FileUpload = class FileUpload extends s$2 {
       constructor() {
           super(...arguments);
@@ -10610,7 +10610,7 @@
           this.getDocuments(true);
       }
       setupTooltip(element, tooltipText) {
-          logger$H.info({
+          logger$Q.info({
               fn: 'FileUpload.setupTooltip',
               message: `Start configuring tooltip for element`,
               data: { element, tooltipText },
@@ -10647,7 +10647,7 @@
           });
       }
       firstUpdated(props) {
-          logger$H.info({
+          logger$Q.info({
               fn: 'FileUpload.firstUpdated',
               message: `this.tooltiptext: ${this.tooltiptext}`,
               data: {
@@ -10660,7 +10660,7 @@
               this.tooltiptext !== 'undefined' &&
               this.fileUploadElement) {
               const $fileUploadElement = $(this.fileUploadElement);
-              logger$H.info({
+              logger$Q.info({
                   fn: 'FileUpload.firstUpdated',
                   message: `$fileUploadElement:`,
                   data: {
@@ -10693,7 +10693,7 @@
           }
       }
       async getDocuments(emitEvent = false) {
-          logger$H.info({
+          logger$Q.info({
               fn: 'getDocuments',
               message: 'Calling getDocuments task',
               data: { fileInputStr: this.fileInputStr },
@@ -10708,7 +10708,7 @@
               this.emitEvent();
       }
       async getDocument(fileId) {
-          logger$H.info({
+          logger$Q.info({
               fn: 'getDocument',
               message: 'Calling getDocument task',
               data: { fileId },
@@ -10721,7 +10721,7 @@
               const allDocs = processDocumentsData(data);
               const doc = allDocs.find((doc) => doc.subject.includes(fileId));
               if (!doc) {
-                  logger$H.error({
+                  logger$Q.error({
                       fn: 'getDocument',
                       message: `Could not find doc to delete by fileId: ${fileId}`,
                   });
@@ -10730,7 +10730,7 @@
               return doc;
           }
           catch (e) {
-              logger$H.error({
+              logger$Q.error({
                   fn: 'getDocument',
                   message: 'getDocument task failed',
                   data: { e, fileId },
@@ -10759,7 +10759,7 @@
           this.handleFiles(files);
       }
       handleFileSelect(e) {
-          logger$H.info({
+          logger$Q.info({
               fn: 'handleFileSelect',
               message: 'Start handling file select',
               data: { e },
@@ -10778,7 +10778,7 @@
       }
       async uploadFile(file, fieldName) {
           var _a;
-          logger$H.info({
+          logger$Q.info({
               fn: 'uploadFile',
               message: `Start uploading file for fieldName: ${fieldName}`,
               data: { file, fieldName },
@@ -10798,7 +10798,7 @@
               formType: this.formType,
           }) - 1;
           this.emitEvent();
-          logger$H.info({
+          logger$Q.info({
               fn: 'uploadFile',
               message: `Added pending file to docs array for fieldName: ${fieldName}`,
               data: { file, fieldName, docs: this.docs, docIndex },
@@ -10808,7 +10808,7 @@
               const { subject, fileId } = await generateDocumentSubject(file, this.fieldName);
               const formId = getFormId();
               if (!(documentbody === null || documentbody === void 0 ? void 0 : documentbody.length) || !(subject === null || subject === void 0 ? void 0 : subject.length) || !(formId === null || formId === void 0 ? void 0 : formId.length)) {
-                  logger$H.error({
+                  logger$Q.error({
                       fn: 'uploadFile',
                       message: `Failed to postDocument for fieldName: ${fieldName}`,
                       data: {
@@ -10829,7 +10829,7 @@
                   documentbody,
                   mimetype: type,
               };
-              logger$H.info({
+              logger$Q.info({
                   fn: this.uploadFile,
                   message: `Posting document for fieldName: ${fieldName}`,
                   data: { payload, file, fieldName, formType },
@@ -10848,7 +10848,7 @@
                   timeout: 120 * 1000, // for file uploads allow 120 seconds
               });
               if (!response || ((_a = response.jqXHR) === null || _a === void 0 ? void 0 : _a.status) !== 204) {
-                  logger$H.error({
+                  logger$Q.error({
                       fn: this.uploadFile,
                       message: 'Failed to post document',
                       data: { payload, response, file, fieldName },
@@ -10858,7 +10858,7 @@
                   return;
               }
               this.docs[docIndex].status = 'uploaded';
-              logger$H.info({
+              logger$Q.info({
                   fn: 'uploadFile',
                   message: 'Successfully posted document',
                   data: {
@@ -10872,7 +10872,7 @@
               this.emitEvent();
           }
           catch (e) {
-              logger$H.error({
+              logger$Q.error({
                   fn: 'uploadFile',
                   message: 'File upload encountered an error',
                   data: { e },
@@ -10883,7 +10883,7 @@
       }
       async deleteDocument(doc, docIndex) {
           var _a;
-          logger$H.info({
+          logger$Q.info({
               fn: 'deleteDocument',
               message: `Start deleting document...`,
               data: { doc, docIndex },
@@ -10900,14 +10900,14 @@
               }
               if (!annotationId) {
                   let errorMsg = 'Could not find annotationid, likely file does not exist in dynamics';
-                  logger$H.error({
+                  logger$Q.error({
                       fn: 'deleteDocument',
                       message: errorMsg,
                       data: { doc, docIndex, fileId },
                   });
                   throw new Error(errorMsg);
               }
-              logger$H.info({
+              logger$Q.info({
                   fn: 'deleteDocument',
                   message: `Start deleting document for for annotationId: ${annotationId}`,
                   data: { doc },
@@ -10918,21 +10918,21 @@
               });
               // purposely do not "return" on fail, remove file from list of user's file, even if hard delete fails
               if (!response || ((_a = response.jqXHR) === null || _a === void 0 ? void 0 : _a.status) !== 204) {
-                  logger$H.error({
+                  logger$Q.error({
                       fn: 'deleteDocument',
                       message: `Failed to delete document for annotationId: ${annotationId}`,
                       data: { response, doc, annotationId },
                   });
               }
               const elapsedTime = Date.now() - startTime;
-              logger$H.info({
+              logger$Q.info({
                   fn: 'deleteDocument',
                   message: `Done deleting document for annotationId: ${annotationId}, took ${elapsedTime} ms`,
                   data: { response, doc, annotationId },
               });
           }
           catch (e) {
-              logger$H.error({
+              logger$Q.error({
                   fn: 'deleteDocument',
                   message: 'File delete encountered an error, remove document anyway',
                   data: { e },
@@ -11524,11 +11524,11 @@
     updateSMEDesignationExplanationFieldLabelForKTTP2: updateSMEDesignationExplanationFieldLabelForKTTP2,
     calculateTotalRequestedAmountForKTTP: calculateTotalRequestedAmountForKTTP
   };
-  var logger$G = Logger('common/onChangeHandlers');
+  var logger$P = Logger('common/onChangeHandlers');
   function setOnChangeHandler(fieldName, elemType, onChangeHandlerName) {
     var onChangeHandler = POWERPOD.onChangeHandlers[onChangeHandlerName];
     if (!onChangeHandler || typeof onChangeHandler !== 'function') {
-      logger$G.error({
+      logger$P.error({
         fn: setOnChangeHandler,
         message: "Could not set onChangeHandler for fieldName: ".concat(fieldName, " with onChangeHandlerName: ").concat(onChangeHandlerName)
       });
@@ -11538,7 +11538,7 @@
       case HtmlElementType.FileInput:
         var textareaField = $("#".concat(fieldName));
         var attachFileField = $("input[id=".concat(fieldName, "_AttachFile]"));
-        logger$G.info({
+        logger$P.info({
           fn: setOnChangeHandler,
           message: "observe changes on file input element, setOnChangeHandler: ".concat(fieldName),
           data: {
@@ -11556,12 +11556,12 @@
         });
         break;
       case HtmlElementType.DatePicker:
-        logger$G.info({
+        logger$P.info({
           fn: setOnChangeHandler,
           message: "Configuring onChangeHandler for datepicker element, setOnChangeHandler: ".concat(fieldName)
         });
         var datePickerElement = $("input[id=".concat(fieldName, "_datepicker_description]")).parent()[0];
-        logger$G.info({
+        logger$P.info({
           fn: setOnChangeHandler,
           message: "observe changes on datepicker element, setOnChangeHandler: ".concat(fieldName),
           data: {
@@ -11575,20 +11575,20 @@
         break;
       case HtmlElementType.SingleOptionSet:
       case HtmlElementType.MultiOptionSet:
-        logger$G.info({
+        logger$P.info({
           fn: setOnChangeHandler,
           message: "Configuring onChangeHandler for Single/MultiOptionSet, setOnChangeHandler: ".concat(fieldName)
         });
         $("input[id*='".concat(fieldName, "']")).on('change', function () {
           onChangeHandler();
-          logger$G.info({
+          logger$P.info({
             fn: setOnChangeHandler,
             message: 'Q3 updated... validateRequiredFields...'
           });
         });
         break;
       case HtmlElementType.DropdownSelect:
-        logger$G.info({
+        logger$P.info({
           fn: setOnChangeHandler,
           message: "Configuring onChangeHandler for DropdownSelect, setOnChangeHandler: ".concat(fieldName)
         });
@@ -11598,7 +11598,7 @@
         break;
       default:
         // HtmlElementTypeEnum.Input
-        logger$G.info({
+        logger$P.info({
           fn: setOnChangeHandler,
           message: "Configuring onChangeHandler for default input, setOnChangeHandler: ".concat(fieldName)
         });
@@ -11607,7 +11607,7 @@
         });
         break;
     }
-    logger$G.info({
+    logger$P.info({
       fn: setOnChangeHandler,
       message: "Successfully set onChangeHandler for fieldName: ".concat(fieldName, ", elemType: ").concat(elemType, ", onChangeHandlerName: ").concat(onChangeHandlerName)
     });
@@ -11620,7 +11620,7 @@
     var _document$getElementB, _document$getElementB2;
     var totalSumOfReportedExpenses = ((_document$getElementB = document.getElementById('quartech_totalsumofreportedexpenses')) === null || _document$getElementB === void 0 ? void 0 : _document$getElementB.value) || 0;
     var costShareContribution = ((_document$getElementB2 = document.getElementById('quartech_costsharecontributioncashorinkind')) === null || _document$getElementB2 === void 0 ? void 0 : _document$getElementB2.value) || 0;
-    logger$G.info({
+    logger$P.info({
       fn: calculateTotalRequestedAmountForKTTP,
       message: "calculateTotalRequestedAmount returned the following data",
       data: {
@@ -11632,7 +11632,7 @@
     var totalExpenses = parseFloat(sanitizedTotalSumOfExpenses) || 0;
     var sanitizedCostShareContribution = typeof costShareContribution === 'string' ? costShareContribution.replace(',', '') : String(costShareContribution).replace(',', '');
     var contribution = parseFloat(sanitizedCostShareContribution) || 0;
-    logger$G.info({
+    logger$P.info({
       fn: calculateTotalRequestedAmountForKTTP,
       message: "calculateTotalRequestedAmount returned ".concat(totalExpenses, " for totalExpenses and ").concat(contribution, " for contribution")
     });
@@ -11645,14 +11645,14 @@
       name: 'quartech_totalfees',
       value: formattedResult
     });
-    logger$G.info({
+    logger$P.info({
       fn: calculateTotalRequestedAmountForKTTP,
       message: "Successfuly set field tag: quartech_totalfees to value: ".concat(result)
     });
   }
   function calculateTFCRBudgets() {
     var _document$getElementB3, _document$getElementB4, _document$getElementB5, _document$getElementB6, _document$getElementB7;
-    logger$G.info({
+    logger$P.info({
       fn: calculateTFCRBudgets,
       message: "calculateTFCRBudgets called, start calculating..."
     });
@@ -11663,7 +11663,7 @@
     var equipment = ((_document$getElementB5 = document.getElementById('quartech_facilityequipmenttechnologyrental')) === null || _document$getElementB5 === void 0 ? void 0 : _document$getElementB5.value) || 0;
     var materials = ((_document$getElementB6 = document.getElementById('quartech_materials')) === null || _document$getElementB6 === void 0 ? void 0 : _document$getElementB6.value) || 0;
     var other = ((_document$getElementB7 = document.getElementById('quartech_othercost')) === null || _document$getElementB7 === void 0 ? void 0 : _document$getElementB7.value) || 0;
-    logger$G.info({
+    logger$P.info({
       fn: calculateTFCRBudgets,
       message: "calculateTFCRBudgets returned the following values",
       data: {
@@ -11681,7 +11681,7 @@
     var equipmentCost = parseFloat(equipment.replaceAll(',', '')) || 0;
     var materialsCost = parseFloat(materials.replaceAll(',', '')) || 0;
     var otherCost = parseFloat(other.replaceAll(',', '')) || 0;
-    logger$G.info({
+    logger$P.info({
       fn: calculateTFCRBudgets,
       message: "calculateAndPopulateRequestedClaimAmountForVLB returned the following for expenses",
       data: {
@@ -11702,7 +11702,7 @@
       name: 'quartech_estimatedbudgettotalactivitycost',
       value: formattedTotalProposedBudgetCost
     });
-    logger$G.info({
+    logger$P.info({
       fn: calculateTFCRBudgets,
       message: "Successfuly set field tag: quartech_estimatedbudgettotalactivitycost to value: ".concat(formattedTotalProposedBudgetCost)
     });
@@ -11720,7 +11720,7 @@
       name: 'quartech_totalfundingrequiredfromtheprogram',
       value: formattedfinalTotalFundingRequired
     });
-    logger$G.info({
+    logger$P.info({
       fn: calculateTFCRBudgets,
       message: "Successfuly set field tag: quartech_totalfundingrequiredfromtheprogram to value: ".concat(formattedfinalTotalFundingRequired)
     });
@@ -11732,7 +11732,7 @@
   }
   function checkAndSetTFCCRFEligbilityNotice() {
     var _document$getElementB8, _document$getElementB9, _document$getElementB10, _document$getElementB11, _document$getElementB12, _document$getElementB13, _document$getElementB14;
-    logger$G.info({
+    logger$P.info({
       fn: checkAndSetTFCCRFEligbilityNotice,
       message: "checkAndSetTFCCRFEligbilityNotice called, start calculating..."
     });
@@ -11743,7 +11743,7 @@
     var taxReturnNotRequired = (_document$getElementB12 = document.getElementById('quartech_taxreturnnotrequired')) === null || _document$getElementB12 === void 0 ? void 0 : _document$getElementB12.value;
     var ownerOrLesseeOfTheLand = (_document$getElementB13 = document.getElementById('quartech_areyouanownerorlesseeoftheland')) === null || _document$getElementB13 === void 0 ? void 0 : _document$getElementB13.value;
     var notResearchStationOrGovernmentFundedAgency = (_document$getElementB14 = document.getElementById('quartech_notresearchstationorgovernmentfundedagency')) === null || _document$getElementB14 === void 0 ? void 0 : _document$getElementB14.value;
-    logger$G.info({
+    logger$P.info({
       fn: checkAndSetTFCCRFEligbilityNotice,
       message: "founds the following values...",
       data: {
@@ -11764,7 +11764,7 @@
     var areAllValuesYes = existingTreeFruit === YES_VALUE && treeFruitDensityEligibility === YES_VALUE && taxableEntity === YES_VALUE && (fileFarmIncomeTaxUnderTaxActInBC === YES_VALUE || fileFarmIncomeTaxUnderTaxActInBC === NO_VALUE && taxReturnNotRequired === YES_VALUE) && ownerOrLesseeOfTheLand === YES_VALUE && notResearchStationOrGovernmentFundedAgency === YES_VALUE;
     var noticeElement = document.getElementById('doesNotMeetTFCCRFEligibilityRequirements');
     if (!noticeElement) {
-      logger$G.warn({
+      logger$P.warn({
         fn: checkAndSetTFCCRFEligbilityNotice,
         message: "Could not fetch noticeElement by id doesNotMeetTFCCRFEligibilityRequirements"
       });
@@ -11811,7 +11811,7 @@
   }
   function checkAndSetTFCREligbilityNotice() {
     var _document$getElementB15, _document$getElementB16, _document$getElementB17, _document$getElementB18, _document$getElementB19;
-    logger$G.info({
+    logger$P.info({
       fn: checkAndSetTFCREligbilityNotice,
       message: "checkAndSetTFCREligbilityNotice called, start calculating..."
     });
@@ -11820,7 +11820,7 @@
     var taxableEntity = (_document$getElementB17 = document.getElementById('quartech_areyouataxableentity')) === null || _document$getElementB17 === void 0 ? void 0 : _document$getElementB17.value;
     var fileFarmIncomeTaxUnderTaxActInBC = (_document$getElementB18 = document.getElementById('quartech_doyoufilefarmincometaxundertaxactinbc')) === null || _document$getElementB18 === void 0 ? void 0 : _document$getElementB18.value;
     var commitToMaintainingTheProperty = (_document$getElementB19 = document.getElementById('quartech_doyoucommittomaintainingtheproperty')) === null || _document$getElementB19 === void 0 ? void 0 : _document$getElementB19.value;
-    logger$G.info({
+    logger$P.info({
       fn: checkAndSetTFCREligbilityNotice,
       message: "founds the following values...",
       data: {
@@ -11837,7 +11837,7 @@
     var areAllValuesYes = existingTreeFruit === YES_VALUE && ownerOrLesseeOfTheLand === YES_VALUE && taxableEntity === YES_VALUE && fileFarmIncomeTaxUnderTaxActInBC === YES_VALUE && commitToMaintainingTheProperty === YES_VALUE;
     var noticeElement = document.getElementById('doesNotMeetTFCREligibilityRequirements');
     if (!noticeElement) {
-      logger$G.error({
+      logger$P.error({
         fn: checkAndSetTFCREligbilityNotice,
         message: "Could not fetch noticeElement by id doesNotMeetTFCREligibilityRequirements"
       });
@@ -11880,7 +11880,7 @@
   }
   function calculateAndPopulateRequestedClaimAmountForVLB() {
     var _document$getElementB20, _document$getElementB21, _document$getElementB22, _document$getElementB23;
-    logger$G.info({
+    logger$P.info({
       fn: calculateAndPopulateRequestedClaimAmountForVLB,
       message: "calculateAndPopulateRequestedClaimAmountForVLB called, start calculating..."
     });
@@ -11889,7 +11889,7 @@
     var totalDaysAsAnRVT = ((_document$getElementB21 = document.getElementById('quartech_numberoffulldaysworkedasanrvt')) === null || _document$getElementB21 === void 0 ? void 0 : _document$getElementB21.value) || 0;
     var totalDaysAsTelemedicineSupport = ((_document$getElementB22 = document.getElementById('quartech_numberofdaysprovidingtelemedicinesupport')) === null || _document$getElementB22 === void 0 ? void 0 : _document$getElementB22.value) || 0;
     var totalExpensesForCVBCAndBCVTA = ((_document$getElementB23 = document.getElementById('quartech_totalsumofreportedexpenses')) === null || _document$getElementB23 === void 0 ? void 0 : _document$getElementB23.value) || 0;
-    logger$G.info({
+    logger$P.info({
       fn: calculateAndPopulateRequestedClaimAmountForVLB,
       message: "calculateAndPopulateRequestedClaimAmountForVLB returned ".concat(totalExpensesForCVBCAndBCVTA, " for totalExpensesForCVBCAndBCVTA")
     });
@@ -11900,7 +11900,7 @@
     var telemedicineDays = parseFloat(totalDaysAsTelemedicineSupport) || 0;
     var sanitizedtotalExpensesForCVBCAndBCVTA = typeof totalExpensesForCVBCAndBCVTA === 'string' ? totalExpensesForCVBCAndBCVTA.replace(',', '') : String(totalExpensesForCVBCAndBCVTA).replace(',', '');
     var expenses = parseFloat(sanitizedtotalExpensesForCVBCAndBCVTA) || 0;
-    logger$G.info({
+    logger$P.info({
       fn: calculateAndPopulateRequestedClaimAmountForVLB,
       message: "calculateAndPopulateRequestedClaimAmountForVLB returned ".concat(expenses, " for expenses")
     });
@@ -11914,21 +11914,21 @@
       name: 'quartech_totalfees',
       value: formattedResult
     });
-    logger$G.info({
+    logger$P.info({
       fn: calculateAndPopulateRequestedClaimAmountForVLB,
       message: "Successfuly set field tag: quartech_totalfees to value: ".concat(result)
     });
   }
   function calculateAndPopulateRequestedClaimAmountForTFCR() {
     var _document$getElementB24, _document$getElementB25;
-    logger$G.info({
+    logger$P.info({
       fn: calculateAndPopulateRequestedClaimAmountForTFCR,
       message: "calculateAndPopulateRequestedClaimAmountForTFCR called, start calculating..."
     });
     // Get input values from the elements
     var approvedAmountForTFCR = ((_document$getElementB24 = document.getElementById('quartech_authorizedclaimedamount')) === null || _document$getElementB24 === void 0 ? void 0 : _document$getElementB24.value) || 0;
     var sumOfTotalExpensesForTFCR = ((_document$getElementB25 = document.getElementById('quartech_totalsumofreportedexpenses')) === null || _document$getElementB25 === void 0 ? void 0 : _document$getElementB25.value) || 0;
-    logger$G.info({
+    logger$P.info({
       fn: calculateAndPopulateRequestedClaimAmountForTFCR,
       message: "calculateAndPopulateRequestedClaimAmountForTFCR returned ".concat(sumOfTotalExpensesForTFCR, " for totalExpensesForCVBCAndBCVTA")
     });
@@ -11936,7 +11936,7 @@
     // Convert input values to numbers (fallback to 0 if invalid)
     var sumOfTotalExpenses = parseFloat(sumOfTotalExpensesForTFCR.replace(',', '')) || 0;
     var approvedAmount = parseFloat(approvedAmountForTFCR.replace(',', '')) || 0;
-    logger$G.info({
+    logger$P.info({
       fn: calculateAndPopulateRequestedClaimAmountForTFCR,
       message: "calculateAndPopulateRequestedClaimAmountForTFCR returned ".concat(sumOfTotalExpenses, " for expenses, and approvedAmount: ").concat(approvedAmount)
     });
@@ -11950,7 +11950,7 @@
       name: 'quartech_totalfees',
       value: formattedResult
     });
-    logger$G.info({
+    logger$P.info({
       fn: calculateAndPopulateRequestedClaimAmountForTFCR,
       message: "Successfuly set field tag: quartech_totalfees to value: ".concat(result)
     });
@@ -11958,14 +11958,14 @@
   function setBusinessOrPersonalAddressLabels() {
     var noCraNumberCheckbox = document.getElementById('quartech_nocragstnumber');
     if (!noCraNumberCheckbox) {
-      logger$G.error({
+      logger$P.error({
         fn: setBusinessOrPersonalAddressLabels,
         message: "Could not find element by id 'quartech_nocragstnumber'"
       });
       return;
     }
     var noCraNumberCheckboxChecked = noCraNumberCheckbox.checked;
-    logger$G.info({
+    logger$P.info({
       fn: setBusinessOrPersonalAddressLabels,
       message: "Successfully found quartech_nocragstnumber with checked: ".concat(noCraNumberCheckboxChecked)
     });
@@ -11990,7 +11990,7 @@
         setFieldNameLabel(fName, businessAddressFieldLabels[index]);
       });
     }
-    logger$G.info({
+    logger$P.info({
       fn: setBusinessOrPersonalAddressLabels,
       message: "Successfully set labels for address fields based on quartech_nocragstnumber"
     });
@@ -12001,14 +12001,14 @@
   function setBusinessOrPersonalStateForVLB() {
     var noCraNumberCheckbox = document.getElementById('quartech_nocragstnumber');
     if (!noCraNumberCheckbox) {
-      logger$G.error({
+      logger$P.error({
         fn: setBusinessOrPersonalStateForVLB,
         message: "Could not find element by id 'quartech_nocragstnumber'"
       });
       return;
     }
     var noCraNumberCheckboxChecked = noCraNumberCheckbox.checked;
-    logger$G.info({
+    logger$P.info({
       fn: setBusinessOrPersonalStateForVLB,
       message: "Successfully found quartech_nocragstnumber with checked: ".concat(noCraNumberCheckboxChecked)
     });
@@ -12049,7 +12049,7 @@
         setFieldNameLabel(fName, businessAddressFieldLabels[index]);
       });
       var isScriptLoaded = isScriptFullyLoaded('jquerymask');
-      logger$G.info({
+      logger$P.info({
         fn: setBusinessOrPersonalStateForVLB,
         message: "Decide whether to empty fields: quartech_businessphonenumber, quartech_businessemailaddress, quartech_city, isScriptLoaded: ".concat(isScriptLoaded)
       });
@@ -12068,7 +12068,7 @@
         });
         copyFromFieldAToFieldB('quartech_businesscity', 'quartech_city');
       } else {
-        logger$G.info({
+        logger$P.info({
           fn: setBusinessOrPersonalStateForVLB,
           message: "Skip emptying fields since scripts are still loading... quartech_businessphonenumber, quartech_businessemailaddress, quartech_city, isScriptLoaded: ".concat(isScriptLoaded)
         });
@@ -12076,7 +12076,7 @@
       showFieldRow('quartech_businessphonenumber');
       showFieldRow('quartech_businessemailaddress');
     }
-    logger$G.info({
+    logger$P.info({
       fn: setBusinessOrPersonalStateForVLB,
       message: "Successfully set labels for address fields based on quartech_nocragstnumber"
     });
@@ -12088,7 +12088,7 @@
   function populatePhoneNumberEmailAndCityOnChangeVLB() {
     var noCraNumberCheckbox = document.getElementById('quartech_nocragstnumber');
     if (!noCraNumberCheckbox) {
-      logger$G.error({
+      logger$P.error({
         fn: populatePhoneNumberEmailAndCityOnChangeVLB,
         message: "Could not find element by id 'quartech_nocragstnumber'"
       });
@@ -12097,7 +12097,7 @@
     var isIndividual = noCraNumberCheckbox.checked;
     if (!isIndividual) {
       copyFromFieldAToFieldB('quartech_businesscity', 'quartech_city');
-      logger$G.info({
+      logger$P.info({
         fn: populatePhoneNumberEmailAndCityOnChangeVLB,
         message: "\"I do not have a Canada Revenue Agency (CRA) Business Number\" is not checked, isIndividual: ".concat(isIndividual)
       });
@@ -12111,7 +12111,7 @@
 
     // Note: in this case Business City field label is actually just "City" since it's for a person NOT a business
     copyFromFieldAToFieldB('quartech_businesscity', 'quartech_city');
-    logger$G.info({
+    logger$P.info({
       fn: populatePhoneNumberEmailAndCityOnChangeVLB,
       message: "Successfully ran onChangeHandler populateBusinessPhoneNumberOnChange, isIndividual: ".concat(isIndividual, ",")
     });
@@ -12130,7 +12130,7 @@
         }
       }
     });
-    logger$G.info({
+    logger$P.info({
       fn: populateTotalPercent,
       message: "Setting total percent to total: ".concat(total)
     });
@@ -12140,7 +12140,7 @@
       value: "".concat(total)
     });
     var fieldConfig = getFieldConfig('quartech_totalpercentageofpracticeserved');
-    logger$G.info({
+    logger$P.info({
       fn: populateTotalPercent,
       message: "Got fieldConfig for quartech_totalpercentageofpracticeserved:",
       data: {
@@ -12159,7 +12159,7 @@
     var legalBusinessOrgNameTag = 'quartech_legalbusinessororganizationname';
     var legalBusinessOrgNameTagElement = document.querySelector("#".concat(legalBusinessOrgNameTag));
     if (!legalBusinessOrgNameTagElement) {
-      logger$G.error({
+      logger$P.error({
         fn: populateBusinessNameOnChangeFirstOrLastNameVLB,
         message: "Could not find Legal Business or Organization Name field tag: ".concat(legalBusinessOrgNameTag)
       });
@@ -12167,7 +12167,7 @@
     }
     var tr = legalBusinessOrgNameTagElement.closest('tr');
     if (!isHiddenRow(tr)) {
-      logger$G.info({
+      logger$P.info({
         fn: populateBusinessNameOnChangeFirstOrLastNameVLB,
         message: "Only populate when hidden. Legal Business or Organization Name field tag: ".concat(legalBusinessOrgNameTag),
         data: {
@@ -12192,14 +12192,14 @@
       name: legalBusinessOrgNameTag,
       value: newValue
     });
-    logger$G.info({
+    logger$P.info({
       fn: populateBusinessNameOnChangeFirstOrLastNameVLB,
       message: "Successfuly set field tag: quartech_legalbusinessororganizationname to value: ".concat(newValue)
     });
   }
   function displayOrHideAdministrationCostsNoticeForKTTP() {
     var _document$getElementB30, _document$getElementB31;
-    logger$G.info({
+    logger$P.info({
       fn: displayOrHideAdministrationCostsNoticeForKTTP,
       message: "displayOrHideAdministrationCostsNoticeForKTTP called, start calculating..."
     });
@@ -12207,7 +12207,7 @@
     // Get input values from the elements
     var administration = ((_document$getElementB30 = document.getElementById('quartech_administrationcosts')) === null || _document$getElementB30 === void 0 ? void 0 : _document$getElementB30.value) || 0;
     var totalFundingRequested = ((_document$getElementB31 = document.getElementById('quartech_totalfundingrequiredfromtheprogram')) === null || _document$getElementB31 === void 0 ? void 0 : _document$getElementB31.value) || 0;
-    logger$G.info({
+    logger$P.info({
       fn: displayOrHideAdministrationCostsNoticeForKTTP,
       message: "displayOrHideAdministrationCostsNoticeForKTTP returned the following values",
       data: {
@@ -12216,7 +12216,7 @@
       }
     });
     if (!administration || !administration.replaceAll || !totalFundingRequested || !totalFundingRequested.replaceAll) {
-      logger$G.warn({
+      logger$P.warn({
         fn: displayOrHideAdministrationCostsNoticeForKTTP,
         message: "Could not retrieve administration or totalFundingRequested field values",
         data: {
@@ -12230,7 +12230,7 @@
     // Convert input values to numbers (fallback to 0 if invalid)
     var administrationCost = parseFloat(administration === null || administration === void 0 ? void 0 : administration.replaceAll(',', '')) || 0;
     var totalFundingRequestedCost = parseFloat(totalFundingRequested === null || totalFundingRequested === void 0 ? void 0 : totalFundingRequested.replaceAll(',', '')) || 0;
-    logger$G.info({
+    logger$P.info({
       fn: displayOrHideAdministrationCostsNoticeForKTTP,
       message: "displayOrHideAdministrationCostsNoticeForKTTP returned the following for expenses",
       data: {
@@ -12244,13 +12244,13 @@
     if (administrationCost > totalFundingRequestedCost * 0.1) {
       isAdministrationCostGreaterThan10PercentOfFundingRequired = true;
     }
-    logger$G.info({
+    logger$P.info({
       fn: displayOrHideAdministrationCostsNoticeForKTTP,
       message: "displayOrHideAdministrationCostsNoticeForKTTP isAdministrationCostGreaterThan10PercentOfFundingRequired: ".concat(isAdministrationCostGreaterThan10PercentOfFundingRequired)
     });
     var noticeElement = document.getElementById('doesNotMeetAdministrativeCostRequirementsNotice');
     if (!noticeElement) {
-      logger$G.error({
+      logger$P.error({
         fn: displayOrHideAdministrationCostsNoticeForKTTP,
         message: "Could not fetch noticeElement by id doesNotMeetAdministrativeCostRequirementsNotice"
       });
@@ -12267,7 +12267,7 @@
     }
   }
   function updateSMEDesignationExplanationFieldLabelForKTTP1() {
-    logger$G.info({
+    logger$P.info({
       fn: updateSMEDesignationExplanationFieldLabelForKTTP1,
       message: "updateSMEDesignationExplanationFieldLabelForKTTP1 called, start determing label to show..."
     });
@@ -12285,7 +12285,7 @@
     }
   }
   function updateSMEDesignationExplanationFieldLabelForKTTP2() {
-    logger$G.info({
+    logger$P.info({
       fn: updateSMEDesignationExplanationFieldLabelForKTTP2,
       message: "updateSMEDesignationExplanationFieldLabelForKTTP2 called, start determing label to show..."
     });
@@ -12309,10 +12309,10 @@
     customFieldEventHandler: customFieldEventHandler,
     handleIsBusinessContactInfoDropdownChangeHandler: handleIsBusinessContactInfoDropdownChangeHandler
   };
-  var logger$F = Logger('common/customEventHandlers');
+  var logger$O = Logger('common/customEventHandlers');
   function genericEventHandler(name) {
     return function (event, customElement) {
-      logger$F.info({
+      logger$O.info({
         fn: genericEventHandler,
         message: "Detected generic event handler for name: ".concat(name),
         data: {
@@ -12322,7 +12322,7 @@
         }
       });
       var value = event.detail.value;
-      logger$F.info({
+      logger$O.info({
         fn: hasCraNumberCheckboxEventHandler,
         message: "Setting attribute for name: ".concat(name, ", inputvalue: ").concat(value),
         data: {
@@ -12340,7 +12340,7 @@
   }
   function customFieldEventHandler(name) {
     return function (event, customElement) {
-      logger$F.info({
+      logger$O.info({
         fn: customFieldEventHandler,
         message: "Detected generic event handler for name: ".concat(name),
         data: {
@@ -12350,7 +12350,7 @@
         }
       });
       var value = event.detail.value;
-      logger$F.info({
+      logger$O.info({
         fn: customFieldEventHandler,
         message: "Setting attribute for name: ".concat(name, ", inputvalue: ").concat(value),
         data: {
@@ -12367,7 +12367,7 @@
   }
   function hasCraNumberCheckboxEventHandler(name) {
     return function (event, customElement) {
-      logger$F.info({
+      logger$O.info({
         fn: hasCraNumberCheckboxEventHandler,
         message: "Detected custom event handler for name: ".concat(name),
         data: {
@@ -12377,7 +12377,7 @@
         }
       });
       var checked = event.detail.value;
-      logger$F.info({
+      logger$O.info({
         fn: hasCraNumberCheckboxEventHandler,
         message: "Setting attribute for name: ".concat(name, ", checked: ").concat(checked),
         data: {
@@ -12403,7 +12403,7 @@
         return _regeneratorRuntime().wrap(function _callee$(_context) {
           while (1) switch (_context.prev = _context.next) {
             case 0:
-              logger$F.info({
+              logger$O.info({
                 fn: handleIsBusinessContactInfoDropdownChangeHandler,
                 message: "Detected generic event handler for name: ".concat(name),
                 data: {
@@ -12413,7 +12413,7 @@
                 }
               });
               value = event.detail.value;
-              logger$F.info({
+              logger$O.info({
                 fn: handleIsBusinessContactInfoDropdownChangeHandler,
                 message: "Setting attribute for name: ".concat(name, ", inputvalue: ").concat(value),
                 data: {
@@ -12438,13 +12438,13 @@
             case 8:
               applicationDataRes = _context.sent;
               if (!(applicationDataRes !== null && applicationDataRes !== void 0 && (_applicationDataRes$d = applicationDataRes.data) !== null && _applicationDataRes$d !== void 0 && (_applicationDataRes$d = _applicationDataRes$d.value) !== null && _applicationDataRes$d !== void 0 && _applicationDataRes$d[0])) {
-                logger$F.error({
+                logger$O.error({
                   fn: handleIsBusinessContactInfoDropdownChangeHandler,
                   message: "Could not get application data result to determine whether individual or business"
                 });
               }
               _applicationDataRes$d2 = applicationDataRes === null || applicationDataRes === void 0 || (_applicationDataRes$d3 = applicationDataRes.data) === null || _applicationDataRes$d3 === void 0 || (_applicationDataRes$d3 = _applicationDataRes$d3.value) === null || _applicationDataRes$d3 === void 0 ? void 0 : _applicationDataRes$d3[0], quartech_businesssuitenumberoptional = _applicationDataRes$d2.quartech_businesssuitenumberoptional, quartech_businessstreetnumber = _applicationDataRes$d2.quartech_businessstreetnumber, quartech_businessstreet = _applicationDataRes$d2.quartech_businessstreet, quartech_businesscity = _applicationDataRes$d2.quartech_businesscity, quartech_businessprovinceterritory = _applicationDataRes$d2.quartech_businessprovinceterritory, quartech_businesspostalcode = _applicationDataRes$d2.quartech_businesspostalcode, quartech_email = _applicationDataRes$d2.quartech_email;
-              logger$F.info({
+              logger$O.info({
                 fn: handleIsBusinessContactInfoDropdownChangeHandler,
                 message: "received the following data",
                 data: {
@@ -12507,10 +12507,10 @@
   POWERPOD.initValuesFns = {
     initCraNumberCheckbox: initCraNumberCheckbox
   };
-  var logger$E = Logger('common/initValuesFn');
+  var logger$N = Logger('common/initValuesFn');
   function initCraNumberCheckbox(mappedValueKey, existingValue, customElement) {
     customElement.setAttribute("".concat(mappedValueKey), !existingValue);
-    logger$E.info({
+    logger$N.info({
       fn: initCraNumberCheckbox,
       message: "Successfully set custom Checkbox value for mappedValueKey: ".concat(mappedValueKey, ", existingValue: ").concat(existingValue, ", final value: ").concat(!existingValue),
       data: {
@@ -12521,7 +12521,7 @@
     });
   }
 
-  var logger$D = Logger('common/fieldConfiguration');
+  var logger$M = Logger('common/fieldConfiguration');
   POWERPOD.fieldConfiguration = {
     updateFieldValue: updateFieldValue
   };
@@ -12566,7 +12566,7 @@
       reorderField = _field$reorderField === void 0 ? {} : _field$reorderField,
       hideNumberInputArrows = field.hideNumberInputArrows;
     var elementType = field.elementType;
-    logger$D.info({
+    logger$M.info({
       fn: configureField,
       message: "setting field definition for field name: ".concat(name),
       data: {
@@ -12574,7 +12574,7 @@
       }
     });
     if (!$("#".concat(name))) {
-      logger$D.error({
+      logger$M.error({
         fn: configureField,
         message: "could not find existing element for field name: ".concat(name)
       });
@@ -12606,7 +12606,7 @@
         doNotBlank: doNotBlank,
         hideOrShowAdditionalTextWithFieldVisibility: hideOrShowAdditionalTextWithFieldVisibility
       });
-      logger$D.info({
+      logger$M.info({
         fn: configureField,
         message: "aborting field config for fieldName: ".concat(name, ", since it is hidden")
       });
@@ -12631,7 +12631,7 @@
     }
     if (label) {
       var _$;
-      logger$D.info({
+      logger$M.info({
         fn: configureField,
         message: "Found field label configuration for name: ".concat(name, ", label: ").concat(label, ", existingLabel: ").concat((_$ = $("#".concat(name, "_label"))) === null || _$ === void 0 ? void 0 : _$.html())
       });
@@ -12641,7 +12641,7 @@
         name: name,
         label: updatedLabel
       });
-      logger$D.info({
+      logger$M.info({
         fn: configureField,
         message: "Successfully set field label for name: ".concat(name, ", label: ").concat(updatedLabel, ", selector: ", "#".concat(name, "_label")),
         data: {
@@ -12661,7 +12661,7 @@
       setOnChangeHandler(name, elementType, onChangeHandler);
     }
     if (hasUpperCase(name)) {
-      logger$D.warn({
+      logger$M.warn({
         fn: configureField,
         message: "Warning! Field name: ".concat(name, " contains an uppercase letter, please confirm if it was intentional or not.")
       });
@@ -12739,7 +12739,7 @@
     } else if (format === 'numbersOnly') {
       var input = document.getElementById(name);
       if (!input) {
-        logger$D.error({
+        logger$M.error({
           fn: configureField,
           message: "could not find input element for numbersOnly config"
         });
@@ -12777,7 +12777,7 @@
       boldLabelText(name);
     }
     if (customComponent && customComponent.customElementTag) {
-      logger$D.info({
+      logger$M.info({
         fn: configureField,
         message: "Start configuring custom component for field name: ".concat(name),
         data: {
@@ -12806,7 +12806,7 @@
         initValuesFn: customInitValuesFn,
         attributes: customComponent.attributes
       };
-      logger$D.info({
+      logger$M.info({
         fn: configureField,
         message: "Rendering custom component",
         data: {
@@ -12819,7 +12819,7 @@
       var _$3;
       var defaultFileTypes = '.csv,.doc,.docx,.odt,.pdf,.xls,.xlsx,.ods,.gif,.jpeg,.jpg,.png,.svg,.tif';
       (_$3 = $("#".concat(name, "_AttachFile"))) === null || _$3 === void 0 || _$3.attr('accept', fileTypes !== null && fileTypes !== void 0 ? fileTypes : defaultFileTypes);
-      logger$D.info({
+      logger$M.info({
         fn: configureField,
         message: "Start configuring custom component for FileInput"
       });
@@ -12832,7 +12832,7 @@
         },
         customEvent: 'onChangeFileUpload',
         customEventHandler: function customEventHandler(event, customElement) {
-          logger$D.info({
+          logger$M.info({
             fn: configureField,
             message: 'onChangeFileUpload event listener triggered',
             data: {
@@ -12876,7 +12876,7 @@
       name: name,
       loading: false
     });
-    logger$D.info({
+    logger$M.info({
       fn: configureField,
       message: "DONE configuring field: ".concat(name, ", setting POWERPOD.state.field['").concat(name, "'].loading = false")
     });
@@ -12885,7 +12885,7 @@
   }
   function configureFields() {
     var stepName = getCurrentStep();
-    logger$D.info({
+    logger$M.info({
       fn: configureFields,
       message: "configuring fields for step: ".concat(stepName, "...")
     });
@@ -12899,7 +12899,7 @@
     // Exit early if Success step
     if (stepName === FormStep.Success) return;
     if (!fields) return;
-    logger$D.info({
+    logger$M.info({
       fn: configureFields,
       message: 'configuring fields...',
       data: {
@@ -12916,7 +12916,7 @@
 
     generateFormJson(true);
     POWERPOD.configuringFields = false;
-    logger$D.info({
+    logger$M.info({
       fn: configureFields,
       message: "DONE configuring fields, setting POWERPOD.configuringFields = false"
     });
@@ -12924,18 +12924,18 @@
   function setupCanadaPostAddressComplete(fields) {
     var env = getEnv();
     if (window.debug_canadapost) {
-      logger$D.warn({
+      logger$M.warn({
         fn: setupCanadaPostAddressComplete,
         message: "Forcibly enabling Canada Post Address Complete using debug_canadapost flag, env: ".concat(env)
       });
     } else if (env !== Environment.PROD) {
-      logger$D.warn({
+      logger$M.warn({
         fn: setupCanadaPostAddressComplete,
         message: "Skipping Canada Post since env detected is not prod, but is env: ".concat(env)
       });
       return;
     }
-    logger$D.info({
+    logger$M.info({
       fn: setupCanadaPostAddressComplete,
       message: "Start setting up Canada Post Address Complete..."
     });
@@ -12947,7 +12947,7 @@
     var allCpFieldsPresent = cpFieldNames === null || cpFieldNames === void 0 ? void 0 : cpFieldNames.every(function (val) {
       return fieldKeys.includes(val);
     });
-    logger$D.info({
+    logger$M.info({
       fn: setupCanadaPostAddressComplete,
       message: "Checked if all Canada Post addresscomplete fields exist in fields data: allCpFieldsPresent: ".concat(allCpFieldsPresent),
       data: {
@@ -12957,14 +12957,14 @@
       }
     });
     if (allCpFieldsPresent) {
-      logger$D.info({
+      logger$M.info({
         fn: setupCanadaPostAddressComplete,
         message: "Start setting up Canada Post Address Complete... found all fields! Continue configuration..."
       });
       useScript('canadapost', function () {
         // @ts-ignore
         var pca = window.pca;
-        logger$D.info({
+        logger$M.info({
           fn: setupCanadaPostAddressComplete,
           message: 'Starting to setup Canada Post Address Complete',
           data: {
@@ -13001,14 +13001,14 @@
         scriptEl.setAttribute('type', 'text/javascript');
         scriptEl.innerHTML = "\n          var fields = ".concat(JSON.stringify(fieldConfig), ",\n          options = ").concat(JSON.stringify(options), ",\n          control = new pca.Address(fields, options);\n        ");
         doc.head.appendChild(scriptEl);
-        logger$D.info({
+        logger$M.info({
           fn: setupCanadaPostAddressComplete,
           message: 'Successfully configured Canada Post Address Complete'
         });
       });
       return;
     }
-    logger$D.info({
+    logger$M.info({
       fn: setupCanadaPostAddressComplete,
       message: 'Canadapost addresscomplete fields not found, no need to load script'
     });
@@ -13028,7 +13028,7 @@
       skipValidation: skipValidation,
       origin: origin
     };
-    logger$D.info({
+    logger$M.info({
       fn: updateFieldValue,
       message: "updateFieldValue called for name: ".concat(name, ", origin: ").concat(origin, ", is still configuringFields: ").concat(POWERPOD.configuringFields, ", loading: ").concat(POWERPOD.loading),
       data: params
@@ -13069,7 +13069,7 @@
       //     break;
       // }
       if (value === null || value === undefined) {
-        logger$D.warn({
+        logger$M.warn({
           fn: updateFieldValue,
           message: "nothing to save for name: ".concat(name, ", value: ").concat(value, ", format: ").concat(format),
           data: {
@@ -13097,7 +13097,7 @@
       }
     }
     if (!(fieldConfig !== null && fieldConfig !== void 0 && (_fieldConfig$customCo = fieldConfig.customComponent) !== null && _fieldConfig$customCo !== void 0 && _fieldConfig$customCo.customEventHandler) && fieldConfig.value === value) {
-      logger$D.info({
+      logger$M.info({
         fn: updateFieldValue,
         message: "No need to update state or validate new value as it is the same for name: ".concat(name),
         data: {
@@ -13113,7 +13113,7 @@
     if (elementType && elementType === HtmlElementType.DatePicker) {
       var datePickerElement = document.getElementById(name);
       if (!datePickerElement) {
-        logger$D.warn({
+        logger$M.warn({
           fn: updateFieldValue,
           message: "Could not find DatePicker element for name: ".concat(name)
         });
@@ -13124,7 +13124,7 @@
           controlId: name
         }); // returns in display value like M/D/YYY
         var formattedDate = (_formatDateToISOStrin = formatDateToISOString(dateValue)) !== null && _formatDateToISOStrin !== void 0 ? _formatDateToISOStrin : '';
-        logger$D.info({
+        logger$M.info({
           fn: updateFieldValue,
           message: "updateFieldValue called on DatePicker element of name: ".concat(name, ", with value: ").concat(formattedDate)
         });
@@ -13132,7 +13132,7 @@
         datePickerElement.value = formattedDate;
       }
     }
-    logger$D.info({
+    logger$M.info({
       fn: updateFieldValue,
       message: "Saving field data for name: ".concat(name, " and value: ").concat(value, ", format: ").concat(format),
       data: {
@@ -13159,14 +13159,14 @@
     });
   }
   function setDirtyField(name) {
-    logger$D.info({
+    logger$M.info({
       fn: setDirtyField,
       message: "set dirty field for name: ".concat(name)
     });
     var fieldConfig = getFieldConfig(name);
     // If field has never been touched before, always validate
     if (fieldConfig.touched === false) {
-      logger$D.info({
+      logger$M.info({
         fn: setDirtyField,
         message: "Setting dirty field name: ".concat(name, " to dirty status, touched: true")
       });
@@ -13182,19 +13182,19 @@
     var name = _ref2.name,
       _ref2$origin = _ref2.origin,
       origin = _ref2$origin === void 0 ? '' : _ref2$origin;
-    logger$D.info({
+    logger$M.info({
       fn: validateNeededFields,
       message: "called for name: ".concat(name, " from origin: ").concat(origin)
     });
     if (POWERPOD.configuringFields) {
-      logger$D.warn({
+      logger$M.warn({
         fn: validateNeededFields,
         message: "Still configuring fields, DO NOT validate yet"
       });
       return;
     }
     if (!((_POWERPOD$state$field = POWERPOD.state.fieldOrder) !== null && _POWERPOD$state$field !== void 0 && _POWERPOD$state$field.length)) {
-      logger$D.error({
+      logger$M.error({
         fn: validateNeededFields,
         message: "No fields found in powerpod.state.fieldOrder, unable to validate"
       });
@@ -13211,7 +13211,7 @@
     var fieldsToRevalidate = Object.keys(fieldsToSetDirty).map(function (key) {
       return fieldsToSetDirty[key].name;
     });
-    logger$D.info({
+    logger$M.info({
       fn: validateNeededFields,
       message: "for name: ".concat(name, ", validating the following fields: ").concat(JSON.stringify(fieldsToRevalidate)),
       data: {
@@ -13233,7 +13233,7 @@
     // set appropriate observer/on change listener depending on field type
     var fieldConfig = getFieldConfig(name);
     var elementType = fieldConfig.elementType;
-    logger$D.info({
+    logger$M.info({
       fn: setFieldObserver,
       message: "Watching for value changes on name: ".concat(name, ", elementType: ").concat(elementType, ", format: ").concat(format)
     });
@@ -13241,7 +13241,7 @@
       case HtmlElementType.SignatureControl:
         var canvas = document.querySelector('.drawCanvas');
         if (!canvas) {
-          logger$D.error({
+          logger$M.error({
             fn: setFieldObserver,
             message: "Could not find signature canvas"
           });
@@ -13294,7 +13294,7 @@
         var inputElementParent = inputElement.parent()[0];
         var datePickerElement = $("input[id=".concat(name, "_datepicker_description]"));
         var datePickerParentElement = datePickerElement.parent()[0];
-        logger$D.info({
+        logger$M.info({
           fn: setFieldObserver,
           message: 'datePickerElement:',
           data: {
@@ -13369,7 +13369,7 @@
       case HtmlElementType.SingleOptionSet:
       case HtmlElementType.MultiOptionSet:
         var inputElements = $("input[id*='".concat(name, "']")).parent();
-        logger$D.info({
+        logger$M.info({
           fn: setFieldObserver,
           message: "setting name: ".concat(name, " elementType: ").concat(HtmlElementType.MultiOptionSet, " observer"),
           data: {
@@ -13424,7 +13424,7 @@
   function setRequiredField(fieldName) {
     var elemType = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : HtmlElementType.Input;
     var validationErrorMessage = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 'Required field';
-    logger$D.info({
+    logger$M.info({
       fn: setRequiredField,
       message: "Start configuring required fieldName: ".concat(fieldName, ", elemType: ").concat(elemType),
       data: {
@@ -13441,7 +13441,7 @@
       case HtmlElementType.FileInput:
         var textareaField = $("#".concat(fieldName));
         var attachFileField = $("input[id=".concat(fieldName, "_AttachFile]"));
-        logger$D.info({
+        logger$M.info({
           fn: setRequiredField,
           message: 'observe changes on file input element',
           data: {
@@ -13452,7 +13452,7 @@
         });
         break;
       case HtmlElementType.DatePicker:
-        logger$D.info({
+        logger$M.info({
           fn: setRequiredField,
           message: "Configuring required datepicker element for fieldName: ".concat(fieldName)
         });
@@ -13472,20 +13472,20 @@
   }
 
   // @ts-nocheck
-  var logger$C = Logger('common/tabs');
+  var logger$L = Logger('common/tabs');
   POWERPOD.tabs = {
     setTabName: setTabName,
     getTabElement: getTabElement
   };
   function hideTabs(hiddenTabs) {
     if (!hiddenTabs || !hiddenTabs.length) {
-      logger$C.warn({
+      logger$L.warn({
         fn: hideTabs,
         message: 'Hide tabs called with empty data'
       });
     }
     if (hiddenTabs && !Array.isArray(hiddenTabs)) {
-      logger$C.error({
+      logger$L.error({
         fn: hideTabs,
         message: "check syntax for hiddenSteps in JSON",
         data: {
@@ -13494,7 +13494,7 @@
       });
       return;
     }
-    logger$C.info({
+    logger$L.info({
       fn: hideTabs,
       message: 'Attempting to hide tabs...',
       data: {
@@ -13510,7 +13510,7 @@
       });
       if (tabElement && tabElement.style) {
         tabElement.style.display = 'none';
-        logger$C.info({
+        logger$L.info({
           fn: hideTabs,
           message: "Successfully hid tab for given name: ".concat(name, ", displayName: ").concat(displayName)
         });
@@ -13523,7 +13523,7 @@
     var displayName = _ref2.displayName,
       name = _ref2.name;
     if (!displayName && !name) {
-      logger$C.error({
+      logger$L.error({
         fn: getTabElement,
         message: 'Need at least one param displayName or name to find tab element'
       });
@@ -13534,7 +13534,7 @@
         return tabNames.includes(name);
       });
       if (!formStepIndex) {
-        logger$C.error({
+        logger$L.error({
           fn: getTabElement,
           message: "Could not find form step index for name: ".concat(name)
         });
@@ -13544,7 +13544,7 @@
       displayName = TabDisplayNames[formStep];
     }
     if (!displayName) {
-      logger$C.error({
+      logger$L.error({
         fn: getTabElement,
         message: "Unable to find display name for tab name: ".concat(name)
       });
@@ -13572,7 +13572,7 @@
       });
     }
     if (!tabElement || !tabElement.length) {
-      logger$C.warn({
+      logger$L.warn({
         fn: getTabElement,
         message: 'Could not find tab element',
         data: {
@@ -13583,7 +13583,7 @@
       return;
     }
     if (tabElement.length !== 1) {
-      logger$C.error({
+      logger$L.error({
         fn: setTabName,
         message: 'Matched multiple elements for one given tab',
         data: {
@@ -13597,14 +13597,14 @@
   }
   function setTabName(name, displayName) {
     if (!name || !displayName) {
-      logger$C.warn({
+      logger$L.warn({
         fn: setTabName,
         message: 'Missing required params of name or displayName'
       });
       return;
     }
     if (!Object.values(FormStep).includes(name)) {
-      logger$C.warn({
+      logger$L.warn({
         fn: setTabName,
         message: "Invalid section name passed, name: ".concat(name, ", displayName: ").concat(displayName)
       });
@@ -13612,7 +13612,7 @@
     }
     var initialTabDisplayName = TabDisplayNames[name];
     if (!initialTabDisplayName) {
-      logger$C.warn({
+      logger$L.warn({
         fn: setTabName,
         message: 'Could not find original tab display name'
       });
@@ -13624,7 +13624,7 @@
     if (tabElement) {
       tabElement.firstChild.nodeValue = displayName; // Replace 'New Text' with your desired text
       tabElement.setAttribute('originalDisplayName', initialTabDisplayName);
-      logger$C.info({
+      logger$L.info({
         fn: setTabName,
         message: "Successfully updated tab name from ".concat(name, " to ").concat(displayName)
       });
@@ -13632,7 +13632,7 @@
   }
   function setHeadings(sectionName, headings) {
     if (!sectionName || !headings || !(headings !== null && headings !== void 0 && headings.length)) {
-      logger$C.error({
+      logger$L.error({
         fn: setHeadings,
         message: 'Missing required sectionName or headings',
         data: {
@@ -13646,7 +13646,7 @@
       var name = heading.name,
         displayName = heading.displayName;
       if (!name || !displayName) {
-        logger$C.error({
+        logger$L.error({
           fn: setHeadings,
           message: 'Failed to set heading, missing params',
           data: {
@@ -13664,7 +13664,7 @@
       return $(this).text().includes(name);
     });
     if (!headerElements || !headerElements.length) {
-      logger$C.warn({
+      logger$L.warn({
         fn: setTabName,
         message: 'Could not find header element to rename',
         data: {
@@ -13675,7 +13675,7 @@
       return;
     }
     if (headerElements.length > 1) {
-      logger$C.error({
+      logger$L.error({
         fn: setHeadingName,
         message: 'Matched more than one heading, could not update header',
         data: {
@@ -13687,16 +13687,16 @@
       return;
     }
     headerElements[0].innerHTML = displayName;
-    logger$C.info({
+    logger$L.info({
       fn: setTabName,
       message: "Successfully updated header from ".concat(name, " to ").concat(displayName)
     });
   }
 
   // @ts-nocheck
-  var logger$B = Logger('common/sections');
+  var logger$K = Logger('common/sections');
   function configureSections(sections, globalSections) {
-    logger$B.info({
+    logger$K.info({
       fn: configureSections,
       message: "configureSections called with:",
       data: {
@@ -13705,7 +13705,7 @@
       }
     });
     if (!sections || !sections.length) {
-      logger$B.warn({
+      logger$K.warn({
         fn: configureSections,
         message: 'Configure sections called with empty data'
       });
@@ -13728,7 +13728,7 @@
       //     data: { section },
       //   });
       // }
-      logger$B.info({
+      logger$K.info({
         fn: configureSubsections,
         message: "Start configuring section for section.name: ".concat(section.name, "..."),
         data: {
@@ -13745,7 +13745,7 @@
         _section$hideHeaderDe = section.hideHeaderDescription,
         hideHeaderDescription = _section$hideHeaderDe === void 0 ? false : _section$hideHeaderDe;
       if (!sectionName) {
-        logger$B.error({
+        logger$K.error({
           fn: configureSections,
           message: 'Could not find section name'
         });
@@ -13769,7 +13769,7 @@
       if (hideHeaderDescription) {
         hidePageDescription(hideHeaderDescription, sectionName);
       }
-      logger$B.info({
+      logger$K.info({
         fn: configureSections,
         message: "Successfully configured section for sectionName: ".concat(sectionName),
         data: {
@@ -13783,7 +13783,7 @@
     var currentStep = getCurrentStep();
     var pageDescriptionElement = document.querySelector('p#page-description');
     if (sectionName && currentStep !== sectionName) {
-      logger$B.warn({
+      logger$K.warn({
         fn: hidePageDescription,
         message: "Skip setting pageDescriptionElement for nonactive step sectionName: ".concat(sectionName)
       });
@@ -13795,12 +13795,12 @@
       } else {
         pageDescriptionElement.style.display = '';
       }
-      logger$B.info({
+      logger$K.info({
         fn: hidePageDescription,
         message: "Successfully set pageDescriptionElement to hideHeaderDescription: ".concat(hideHeaderDescription, " for sectionName: ").concat(sectionName)
       });
     } else {
-      logger$B.error({
+      logger$K.error({
         fn: hidePageDescription,
         message: "Failed to find pageDescriptionElement for configuring visibility"
       });
@@ -13808,7 +13808,7 @@
   }
   function configureSubsections(sectionName, subsections) {
     if (!subsections || !subsections.length) {
-      logger$B.error({
+      logger$K.error({
         fn: configureSubsections,
         message: 'Configure subsections called with empty data'
       });
@@ -13816,13 +13816,13 @@
     }
     var currentStep = getCurrentStep();
     if (currentStep !== sectionName) {
-      logger$B.warn({
+      logger$K.warn({
         fn: configureSubsections,
         message: "Skip configuring subsections for nonactive step sectionName: ".concat(sectionName)
       });
       return;
     }
-    logger$B.info({
+    logger$K.info({
       fn: configureSubsections,
       message: "Start configuring subsections currentStep: ".concat(currentStep, " for sectionName: ").concat(sectionName, "... ").concat(JSON.stringify(subsections)),
       data: {
@@ -13839,7 +13839,7 @@
         additionalTextAboveSubsection = subsection.additionalTextAboveSubsection,
         additionalTextBelowSubsection = subsection.additionalTextBelowSubsection;
       if (!name) {
-        logger$B.error({
+        logger$K.error({
           fn: configureSections,
           message: 'Could not find section name'
         });
@@ -13847,7 +13847,7 @@
       }
       var sectionElement = $("fieldset[aria-label=\"".concat(name, "\"]"));
       if (!sectionElement) {
-        logger$B.warn({
+        logger$K.warn({
           fn: configureSubsections,
           message: "Could not find sectionElement for name: ".concat(name)
         });
@@ -13865,7 +13865,7 @@
       if (newLabel) {
         var fieldset = document.querySelector("fieldset[aria-label=\"".concat(name, "\"]"));
         if (!fieldset) {
-          logger$B.error({
+          logger$K.error({
             fn: configureSubsections,
             message: "Failed to find fieldset for name: ".concat(name, ", newLabel: ").concat(newLabel)
           });
@@ -13874,7 +13874,7 @@
         fieldset.setAttribute('aria-label', newLabel);
         var h3Tag = fieldset.querySelector('h3');
         if (!h3Tag) {
-          logger$B.error({
+          logger$K.error({
             fn: configureSubsections,
             message: "Failed to find h3Tag for name: ".concat(name, ", newLabel: ").concat(newLabel)
           });
@@ -13888,7 +13888,7 @@
       if (additionalTextBelowSubsection && subsectionAriaLabel) {
         addTextBelowSubsection(subsectionAriaLabel, additionalTextBelowSubsection);
       }
-      logger$B.info({
+      logger$K.info({
         fn: configureSubsections,
         message: "Successfully configured sectionName: ".concat(sectionName, " subsection for subsection: ").concat(name),
         data: {
@@ -14055,7 +14055,7 @@
     $('#quartech_declarationandconsent_label').text('I / We agree to the above statement.');
   }
 
-  var logger$A = Logger('common/form');
+  var logger$J = Logger('common/form');
   POWERPOD.form = {
     generateFormJson: generateFormJson,
     getFormId: getFormId,
@@ -14065,7 +14065,7 @@
     var params = new URLSearchParams(doc.location.search);
     var formId = params.get('id');
     if (!formId) {
-      logger$A.info({
+      logger$J.info({
         fn: getFormIdFromURLParams,
         message: 'Form id not found in URL params'
       });
@@ -14081,7 +14081,7 @@
     if ((_POWERPOD$form = POWERPOD.form) !== null && _POWERPOD$form !== void 0 && _POWERPOD$form.id) {
       var _POWERPOD$form2;
       var _formId = (_POWERPOD$form2 = POWERPOD.form) === null || _POWERPOD$form2 === void 0 ? void 0 : _POWERPOD$form2.id;
-      logger$A.info({
+      logger$J.info({
         fn: getFormId,
         message: "Cached form submission id found, returning ".concat(_formId)
       });
@@ -14091,21 +14091,21 @@
     var formId = params.get('id');
     var formElement;
     if (formId) {
-      logger$A.info({
+      logger$J.info({
         fn: getFormId,
         message: "Successfully retrieved form submission id from url params: ".concat(formId)
       });
       POWERPOD.form.id = formId;
       return formId;
     }
-    logger$A.info({
+    logger$J.info({
       fn: getFormId,
       message: 'Could not find current form submission id from url params, try DOM element containing the value...'
     });
     // Get the element by ID
     formElement = document.getElementById('EntityFormView_EntityID');
     if (!formElement) {
-      logger$A.error({
+      logger$J.error({
         fn: getFormId,
         message: 'Unable to find "EntityFormView_EntityID" element, unable to retrieve app/claim submission id!'
       });
@@ -14115,7 +14115,7 @@
     // Get the value of the 'value' attribute
     formId = formElement.value;
     if (formId) {
-      logger$A.info({
+      logger$J.info({
         fn: getFormId,
         message: "Successfully retrieved form submission id from \"EntityFormView_EntityID\" element: ".concat(formId)
       });
@@ -14163,7 +14163,7 @@
     //   formId = match ? match[1] : null;
     // }
 
-    logger$A.error({
+    logger$J.error({
       fn: getFormId,
       message: 'Unable to retrieve form submission id from either url or form element',
       data: {
@@ -14176,7 +14176,7 @@
   function addFormDataOnClickHandler() {
     var nextButton = document.getElementById('NextButton');
     if (!(nextButton !== null && nextButton !== void 0 && nextButton.onclick)) {
-      logger$A.error({
+      logger$J.error({
         fn: addFormDataOnClickHandler,
         message: "Error getting existing next btn on click handler",
         data: {
@@ -14192,7 +14192,7 @@
       saveBrowserInfo(BrowserInformationAction.Next);
       formDataOnClickHandler(event, nextFn);
     });
-    logger$A.info({
+    logger$J.info({
       fn: addFormDataOnClickHandler,
       message: 'Successfully configured next button onclick handler for form data'
     });
@@ -14204,13 +14204,13 @@
     if (generateFormJson()) {
       nextFn();
     } else {
-      logger$A.error({
+      logger$J.error({
         fn: formDataOnClickHandler,
         message: 'Failed to generate form json data!'
       });
     }
     var elapsedTime = Date.now() - startTime;
-    logger$A.info({
+    logger$J.info({
       fn: formDataOnClickHandler,
       message: "Generating form data json took ".concat(elapsedTime, " ms")
     });
@@ -14220,7 +14220,7 @@
     var containerElement = document.querySelector('#EntityFormView');
     var wordTemplateDataElement = containerElement.querySelectorAll('textarea[id*="quartech_wordtemplatedata"]');
     if (!setFieldOrder && (!wordTemplateDataElement || !wordTemplateDataElement.length)) {
-      logger$A.info({
+      logger$J.info({
         fn: generateFormJson,
         message: 'No need to generate form json if no word template field exists'
       });
@@ -14229,7 +14229,7 @@
     var fieldsetArr = containerElement === null || containerElement === void 0 ? void 0 : containerElement.querySelectorAll('fieldset');
     var tabDivElement = containerElement === null || containerElement === void 0 ? void 0 : containerElement.querySelector('.tab');
     if (!containerElement || !fieldsetArr || !(fieldsetArr !== null && fieldsetArr !== void 0 && fieldsetArr.length) || !tabDivElement) {
-      logger$A.error({
+      logger$J.error({
         fn: generateFormJson,
         message: 'Unable to generate form JSON, could not find required elements'
       });
@@ -14238,7 +14238,7 @@
     var tabDataName = tabDivElement.getAttribute('data-name'); // e.g. "applicantInfoTab"
 
     if (!tabDataName) {
-      logger$A.error({
+      logger$J.error({
         fn: generateFormJson,
         message: 'Failed to get tab data-name',
         data: {
@@ -14247,7 +14247,7 @@
       });
       return false;
     }
-    logger$A.info({
+    logger$J.info({
       fn: generateFormJson,
       message: "Processing fieldSet array for tabDataName: ".concat(tabDataName)
     });
@@ -14268,14 +14268,14 @@
       var sectionId = tableElement === null || tableElement === void 0 ? void 0 : tableElement.getAttribute('data-name'); // e.g. "applicationInfoSection"
 
       if (sectionId && sectionId.toLowerCase().includes('codingsection')) {
-        logger$A.info({
+        logger$J.info({
           fn: generateFormJson,
           message: 'Skipping coding section...'
         });
         return;
       }
       if (((_fieldset$style = fieldset.style) === null || _fieldset$style === void 0 ? void 0 : _fieldset$style.display) === 'none') {
-        logger$A.info({
+        logger$J.info({
           fn: generateFormJson,
           message: 'Skipping hidden section...',
           data: {
@@ -14287,7 +14287,7 @@
       var trArray = tableElement === null || tableElement === void 0 ? void 0 : tableElement.querySelectorAll('tbody > tr');
       var currentStep = getCurrentStep();
       if ((!sectionId || !displayName || !trArray || !trArray.length) && currentStep !== FormStep.DeclarationAndConsent) {
-        logger$A.error({
+        logger$J.error({
           fn: generateFormJson,
           message: 'Unable to generate form JSON, could not find required section elements',
           data: {
@@ -14295,7 +14295,7 @@
           }
         });
       }
-      logger$A.info({
+      logger$J.info({
         fn: generateFormJson,
         message: "Processing tr array for sectionId: ".concat(sectionId, ", displayName: ").concat(displayName)
       });
@@ -14316,7 +14316,7 @@
           tr: tr
         });
         if (controlType === HtmlElementType.NotesControl) {
-          logger$A.info({
+          logger$J.info({
             fn: generateFormJson,
             message: 'Skipping notes control element',
             data: {
@@ -14347,7 +14347,7 @@
 
         // exit early if the intention is just to set the field order
         if (controlId && setFieldOrder) {
-          logger$A.info({
+          logger$J.info({
             fn: generateFormJson,
             message: "addToFieldOrder controlId: ".concat(controlId)
           });
@@ -14355,7 +14355,7 @@
           return;
         }
         if (skipWordTemplateGeneration) {
-          logger$A.info({
+          logger$J.info({
             fn: generateFormJson,
             message: "Skipping row since skipWordTemplateGeneration is set for controlId: ".concat(controlId),
             data: {
@@ -14366,7 +14366,7 @@
         }
         if (isHiddenRow(tr)) {
           if (!forceGenerateWordTemplateData) {
-            logger$A.info({
+            logger$J.info({
               fn: generateFormJson,
               message: "Skipping hidden row, controlId: ".concat(controlId),
               data: {
@@ -14375,7 +14375,7 @@
             });
             return;
           }
-          logger$A.info({
+          logger$J.info({
             fn: generateFormJson,
             message: "Hidden row, but forceGenerateWordTemplateData set to true for controlId: ".concat(controlId),
             data: {
@@ -14384,7 +14384,7 @@
           });
         }
         if (isEmptyRow(tr)) {
-          logger$A.info({
+          logger$J.info({
             fn: generateFormJson,
             message: "Skipping empty row, controlId: ".concat(controlId),
             data: {
@@ -14394,7 +14394,7 @@
           return;
         }
         if (controlId !== null && controlId !== void 0 && controlId.includes('subgrid_')) {
-          logger$A.info({
+          logger$J.info({
             fn: generateFormJson,
             message: "Skipping subgrid, controlId: ".concat(controlId),
             data: {
@@ -14404,7 +14404,7 @@
           return;
         }
         var questionText = getInfoValue(tr);
-        logger$A.info({
+        logger$J.info({
           fn: generateFormJson,
           message: "For controlId: ".concat(controlId, ", with controlType: ").concat(controlType, "; found questionText: ").concat(questionText, ", try finding answerText next..."),
           data: {
@@ -14416,7 +14416,7 @@
           controlId: controlId,
           forTemplateGeneration: true
         });
-        logger$A.info({
+        logger$J.info({
           fn: generateFormJson,
           message: "Converting controlId: ".concat(controlId, " form row to JSON..."),
           data: {
@@ -14426,7 +14426,7 @@
           }
         });
         if (!answerText || answerText === 'undefined') {
-          logger$A.warn({
+          logger$J.warn({
             fn: generateFormJson,
             message: "answerText for controlId: ".concat(controlId, " was missing or undefined, answerText: ").concat(answerText, ", setting it to an empty string")
           });
@@ -14437,7 +14437,7 @@
           questionText = (_POWERPOD$state4 = POWERPOD.state) === null || _POWERPOD$state4 === void 0 || (_POWERPOD$state4 = _POWERPOD$state4.fields) === null || _POWERPOD$state4 === void 0 || (_POWERPOD$state4 = _POWERPOD$state4[controlId]) === null || _POWERPOD$state4 === void 0 ? void 0 : _POWERPOD$state4.label;
         }
         if (!questionText || questionText === ' ') {
-          logger$A.warn({
+          logger$J.warn({
             fn: generateFormJson,
             message: "Could not find question text for controlId: ".concat(controlId, ", controlType: ").concat(controlType),
             data: {
@@ -14447,7 +14447,7 @@
           return; // skip this forEach loop
         }
         if (questionText.toLowerCase().includes('eligible expenses')) {
-          logger$A.info({
+          logger$J.info({
             fn: generateFormJson,
             message: 'Skipping Eligible Expenses question/answer',
             data: {
@@ -14464,7 +14464,7 @@
           var answerObj = JSON.parse(answerText);
           sectionToAppend = answerObj;
           appendSection = true;
-          logger$A.info({
+          logger$J.info({
             fn: generateFormJson,
             message: "For quartech_practiceswherelocumservicesweredelivered skipping adding to original object, instead append at the end",
             data: {
@@ -14477,7 +14477,7 @@
           var _answerObj = JSON.parse(answerText);
           sectionToAppend = _answerObj;
           appendSection = true;
-          logger$A.info({
+          logger$J.info({
             fn: generateFormJson,
             message: "For quartech_expensereceipts skipping adding to original object, instead append at the end",
             data: {
@@ -14491,7 +14491,7 @@
       });
     });
     if (appendSection && sectionToAppend) {
-      logger$A.info({
+      logger$J.info({
         fn: generateFormJson,
         message: "attempting to appendSection...",
         data: {
@@ -14501,7 +14501,7 @@
         }
       });
       formJsonObj = _objectSpread2(_objectSpread2({}, formJsonObj), sectionToAppend);
-      logger$A.info({
+      logger$J.info({
         fn: generateFormJson,
         message: "successfully appended Section to formJsonObj...",
         data: {
@@ -14512,7 +14512,7 @@
       });
     }
     if (setFieldOrder) {
-      logger$A.info({
+      logger$J.info({
         fn: generateFormJson,
         message: "Successfully generated field order state array, exiting...",
         data: {
@@ -14521,7 +14521,7 @@
       });
       return;
     }
-    logger$A.info({
+    logger$J.info({
       fn: generateFormJson,
       message: 'Setting word template field data: \n' + "".concat(JSON.stringify(formJsonObj)),
       data: {
@@ -14607,7 +14607,7 @@
             formId = getFormId();
             formType = getFormType();
             currentStep = getCurrentStep();
-            logger$A.info({
+            logger$J.info({
               fn: augmentFormDataForBUG6998,
               message: "start to getApplicationData: ".concat(formType),
               data: {
@@ -14626,7 +14626,7 @@
           case 9:
             _yield$getProgramId = _context.sent;
             programId = _yield$getProgramId.programId;
-            logger$A.info({
+            logger$J.info({
               fn: augmentFormDataForBUG6998,
               message: "start to getApplicationData: ".concat(formType),
               data: {
@@ -14644,7 +14644,7 @@
               _context.next = 29;
               break;
             }
-            logger$A.info({
+            logger$J.info({
               fn: augmentFormDataForBUG6998,
               message: "start to getApplicationData: ".concat(formType),
               data: {
@@ -14663,13 +14663,13 @@
           case 17:
             applicationDataRes = _context.sent;
             if (!(applicationDataRes !== null && applicationDataRes !== void 0 && (_applicationDataRes$d = applicationDataRes.data) !== null && _applicationDataRes$d !== void 0 && (_applicationDataRes$d = _applicationDataRes$d.value) !== null && _applicationDataRes$d !== void 0 && _applicationDataRes$d[0])) {
-              logger$A.error({
+              logger$J.error({
                 fn: augmentFormDataForBUG6998,
                 message: "Could not get application data result"
               });
             }
             _applicationDataRes$d2 = applicationDataRes === null || applicationDataRes === void 0 || (_applicationDataRes$d3 = applicationDataRes.data) === null || _applicationDataRes$d3 === void 0 || (_applicationDataRes$d3 = _applicationDataRes$d3.value) === null || _applicationDataRes$d3 === void 0 ? void 0 : _applicationDataRes$d3[0], quartech_originalsource = _applicationDataRes$d2.quartech_originalsource;
-            logger$A.info({
+            logger$J.info({
               fn: augmentFormDataForBUG6998,
               message: "successfully fetched application data and found quartech_originalsource: ".concat(quartech_originalsource),
               data: {
@@ -14680,7 +14680,7 @@
             });
             if (quartech_originalsource === 255550001) ; else {
               payload.quartech_originalsource = 255550002;
-              logger$A.info({
+              logger$J.info({
                 fn: augmentFormDataForBUG6998,
                 message: "successfully updated payload with payload.quartech_originalsource: ".concat(payload.quartech_originalsource),
                 data: {
@@ -14696,7 +14696,7 @@
           case 24:
             _context.prev = 24;
             _context.t0 = _context["catch"](14);
-            logger$A.error({
+            logger$J.error({
               fn: augmentFormDataForBUG6998,
               message: "failed to getApplicationData: ".concat(formType),
               data: {
@@ -14714,7 +14714,7 @@
           case 29:
             payload.quartech_originalsource = 255550002;
           case 30:
-            logger$A.info({
+            logger$J.info({
               fn: augmentFormDataForBUG6998,
               message: "payload.quartech_originalsource: ".concat(payload.quartech_originalsource),
               data: {
@@ -14756,7 +14756,7 @@
           case 42:
             _context.sent;
           case 43:
-            logger$A.info({
+            logger$J.info({
               fn: augmentFormDataForBUG6998,
               message: 'successfully patched form data with payload',
               data: {
@@ -14770,7 +14770,7 @@
           case 46:
             _context.prev = 46;
             _context.t1 = _context["catch"](32);
-            logger$A.error({
+            logger$J.error({
               fn: augmentFormDataForBUG6998,
               message: "failed to patch form data for formType: ".concat(formType),
               data: {
@@ -14791,7 +14791,7 @@
     return _augmentFormDataForBUG.apply(this, arguments);
   }
 
-  var logger$z = Logger('common/application');
+  var logger$I = Logger('common/application');
   POWERPOD.applicationUtils = {
     getFormType: getFormType,
     getExistingDraftApplicationId: getExistingDraftApplicationId,
@@ -14802,7 +14802,7 @@
     if (ClaimPaths.some(function (claimPath) {
       return path.includes(claimPath);
     })) {
-      logger$z.info({
+      logger$I.info({
         fn: getFormType,
         message: "auto-detected ".concat(Form.Claim, " form")
       });
@@ -14810,13 +14810,13 @@
     } else if (ApplicationPaths.some(function (appPath) {
       return path.includes(appPath);
     })) {
-      logger$z.info({
+      logger$I.info({
         fn: getFormType,
         message: "auto-detected ".concat(Form.Application, " form")
       });
       return Form.Application;
     } else {
-      logger$z.warn({
+      logger$I.warn({
         fn: getFormType,
         message: "Unable to autodetect form type, path: ".concat(path)
       });
@@ -14867,7 +14867,7 @@
               _context.next = 4;
               break;
             }
-            logger$z.info({
+            logger$I.info({
               fn: getExistingDraftApplicationId,
               message: 'No need to load drafts if specific form id passed by params'
             });
@@ -14878,13 +14878,13 @@
               _context.next = 8;
               break;
             }
-            logger$z.info({
+            logger$I.info({
               fn: getExistingDraftApplicationId,
               message: 'No programId found in URL params, no need to load existing drafts'
             });
             return _context.abrupt("return");
           case 8:
-            logger$z.info({
+            logger$I.info({
               fn: getExistingDraftApplicationId,
               message: "Querying for any existing draft applications for programId: ".concat(programId)
             });
@@ -14907,7 +14907,7 @@
               _context.next = 30;
               break;
             }
-            logger$z.info({
+            logger$I.info({
               fn: getExistingDraftApplicationId,
               message: "No existing draft application found for programid: ".concat(programId, ", create a new application record"),
               data: {
@@ -14918,7 +14918,7 @@
             _getCurrentUser = getCurrentUser(), contactId = _getCurrentUser.contactId;
             quartech_nocragstnumber = null;
             if (programId === ProgramIds.VLB) {
-              logger$z.info({
+              logger$I.info({
                 fn: getExistingDraftApplicationId,
                 message: "Detected VLB program id, starting app with quartech_nocragstnumber = true;"
               });
@@ -14939,7 +14939,7 @@
               _context.next = 28;
               break;
             }
-            logger$z.error({
+            logger$I.error({
               fn: getExistingDraftApplicationId,
               message: 'Failed to create new application',
               data: {
@@ -14949,7 +14949,7 @@
             });
             return _context.abrupt("return");
           case 28:
-            logger$z.info({
+            logger$I.info({
               fn: getExistingDraftApplicationId,
               message: "Successfully created new draft application found for programid: ".concat(programId, ", with id: ").concat(uuid),
               data: {
@@ -14964,7 +14964,7 @@
               break;
             }
             if (((_res$data5 = res.data) === null || _res$data5 === void 0 || (_res$data5 = _res$data5.value) === null || _res$data5 === void 0 ? void 0 : _res$data5.length) > 1) {
-              logger$z.warn({
+              logger$I.warn({
                 fn: getExistingDraftApplicationId,
                 message: "More than one draft application exists for programid: ".concat(programId),
                 data: {
@@ -14975,7 +14975,7 @@
             existingDraftApplications = res.data.value;
             existingDraft = existingDraftApplications[0];
             id = existingDraft.msgov_businessgrantapplicationid;
-            logger$z.info({
+            logger$I.info({
               fn: getExistingDraftApplicationId,
               message: "Found existing draft application for programid: ".concat(programId, " with id: ").concat(id)
             });
@@ -14987,7 +14987,7 @@
           case 40:
             _context.prev = 40;
             _context.t0 = _context["catch"](11);
-            logger$z.error({
+            logger$I.error({
               fn: getExistingDraftApplicationId,
               message: "Error getting draft applications for programid: ".concat(programId),
               data: {
@@ -14996,7 +14996,7 @@
             });
             return _context.abrupt("return");
           case 44:
-            logger$z.error({
+            logger$I.error({
               fn: getExistingDraftApplicationId,
               message: "Some issue occured trying to get existing draft applications for programid: ".concat(programId)
             });
@@ -15010,7 +15010,7 @@
     return _getExistingDraftApplicationId.apply(this, arguments);
   }
 
-  const logger$y = Logger('common/program');
+  const logger$H = Logger('common/program');
   POWERPOD.program = {
       programId: null,
       getProgramId,
@@ -15021,13 +15021,13 @@
       const params = new URLSearchParams(doc.location.search);
       const programIdParam = params.get('programid');
       if (!programIdParam) {
-          logger$y.info({
+          logger$H.info({
               fn: getProgramIdFromUrlParams,
               message: 'No programId found in URL params',
           });
           return;
       }
-      logger$y.info({
+      logger$H.info({
           fn: getProgramIdFromUrlParams,
           message: `Success! Found program id in URL path ${programIdParam}`,
           data: {
@@ -15046,14 +15046,14 @@
       if ((_a = POWERPOD.program) === null || _a === void 0 ? void 0 : _a.programId) {
           const programId = (_b = POWERPOD.program) === null || _b === void 0 ? void 0 : _b.programId;
           const formId = (_d = (_c = POWERPOD.form) === null || _c === void 0 ? void 0 : _c.id) !== null && _d !== void 0 ? _d : null;
-          logger$y.info({
+          logger$H.info({
               fn: getProgramId,
               message: `Cached programId found, returning ${programId}`,
           });
           return { programId, formId };
       }
       // Try and get it from URL path
-      logger$y.info({
+      logger$H.info({
           fn: getProgramId,
           message: 'attempting to get program id from URL path',
           data: {
@@ -15063,7 +15063,7 @@
       const params = new URLSearchParams(doc.location.search);
       const programIdParam = params.get('programid');
       if (programIdParam) {
-          logger$y.info({
+          logger$H.info({
               fn: getProgramId,
               message: `Success! Found program id in URL path ${programIdParam}`,
               data: {
@@ -15075,7 +15075,7 @@
       const hiddenProgramElement = $('#quartech_program');
       const programIdHiddenValue = hiddenProgramElement === null || hiddenProgramElement === void 0 ? void 0 : hiddenProgramElement.val();
       if (programIdHiddenValue) {
-          logger$y.info({
+          logger$H.info({
               fn: getProgramId,
               message: `Success! Found program id in hidden #quartech_program element ${programIdHiddenValue}`,
               data: {
@@ -15086,7 +15086,7 @@
           });
       }
       else {
-          logger$y.warn({
+          logger$H.warn({
               fn: getProgramId,
               message: `Could not find program id in hidden #quartech_program element ${programIdHiddenValue}`,
               data: {
@@ -15100,7 +15100,7 @@
           programIdParam &&
           programIdHiddenValue != programIdParam) ||
           (programIdHiddenValue == undefined && programIdParam)) {
-          logger$y.warn({
+          logger$H.warn({
               fn: getProgramId,
               message: `Program id in URL path differs from program id found in element, checking for existing draft applications with programid: ${programIdParam}`,
               data: {
@@ -15111,7 +15111,7 @@
           });
           const existingDraftApplicationId = await getExistingDraftApplicationId();
           if (existingDraftApplicationId && existingDraftApplicationId.length > 0) {
-              logger$y.info({
+              logger$H.info({
                   fn: getProgramId,
                   message: `Appending existing app id to URL, existingDraftApplicationId: ${existingDraftApplicationId}, for programid: ${programIdParam}`,
               });
@@ -15165,7 +15165,7 @@
       // const existingDraftApplicationId =
       let programId = programIdHiddenValue || programIdParam;
       if (!programId) {
-          logger$y.warn({
+          logger$H.warn({
               fn: getProgramId,
               message: `Could not find program id in either coding section or url params. ` +
                   `As a last resort, pull programId from config data`,
@@ -15174,13 +15174,13 @@
           programId = config.programId;
       }
       if (!programId) {
-          logger$y.error({
+          logger$H.error({
               fn: getProgramId,
               message: 'Could not find program id in either coding section or url params. ' +
                   'Check that HTML content and/or config programId is present in Portal Management.',
           });
       }
-      logger$y.info({
+      logger$H.info({
           fn: getProgramId,
           message: `No mismatch or drafts to look up, succesfully found programid: ${programId}`,
       });
@@ -15193,7 +15193,7 @@
       const programData = localStorage.getItem('programData');
       const programAbbreviation = (_a = JSON.parse(programData)) === null || _a === void 0 ? void 0 : _a.quartech_programabbreviation;
       if (!programAbbreviation) {
-          logger$y.error({
+          logger$H.error({
               fn: getProgramAbbreviation,
               message: 'Failed to get program abbreviation',
           });
@@ -15205,7 +15205,7 @@
       var _a, _b, _c;
       let activeStep = FormStep.Unknown;
       if ((_b = (_a = window === null || window === void 0 ? void 0 : window.location) === null || _a === void 0 ? void 0 : _a.search) === null || _b === void 0 ? void 0 : _b.includes('&msg=success')) {
-          logger$y.info({
+          logger$H.info({
               fn: getCurrentStep,
               message: `Determined that current step is Success page step`,
               data: {
@@ -15217,14 +15217,14 @@
       }
       const activeTabName = htmlDecode($('div > ol > li.list-group-item.active').html());
       if (!activeTabName || activeTabName.length === 0) {
-          logger$y.error({
+          logger$H.error({
               fn: getCurrentStep,
               message: 'Failed to get activeTabName',
               data: { activeTabName },
           });
           return activeStep;
       }
-      logger$y.info({
+      logger$H.info({
           fn: getCurrentStep,
           message: `Trying to find formStep for activeTabName: ${activeTabName}`,
           data: {
@@ -15237,7 +15237,7 @@
               return (tabDisplayName === activeTabName ||
                   tabDisplayName.includes(activeTabName));
           })) !== null && _c !== void 0 ? _c : activeStep;
-      logger$y.info({
+      logger$H.info({
           fn: getCurrentStep,
           message: `Validating current step ${activeStep}`,
           data: {
@@ -15249,14 +15249,14 @@
       if (activeStep &&
           activeStep !== FormStep.Unknown &&
           Object.values(FormStep).includes(activeStep)) {
-          logger$y.info({
+          logger$H.info({
               fn: getCurrentStep,
               message: `Successfully found current step ${activeStep}`,
           });
           return activeStep;
       }
       if (!activeStep || activeStep === FormStep.Unknown) {
-          logger$y.error({
+          logger$H.error({
               fn: getCurrentStep,
               message: 'Unable to determine current step',
               data: { activeStep, activeTabName, TabDisplayNames, FormStep },
@@ -15275,7 +15275,7 @@
     getFieldsBySectionClaim: getFieldsBySectionClaim,
     getFieldConfig: getFieldConfig
   };
-  var logger$x = Logger('common/fields');
+  var logger$G = Logger('common/fields');
 
   // To be used with new global & application level configs
   function getFieldsBySectionApplication(stepName) {
@@ -15296,7 +15296,7 @@
 
     if (!forceRefresh) {
       if (POWERPOD.loadingFieldsIntoState === false) {
-        logger$x.info({
+        logger$G.info({
           fn: getFieldsBySectionApplication,
           message: "returning cached state for fields",
           data: {
@@ -15306,24 +15306,24 @@
         return POWERPOD.state.fields;
       }
     }
-    logger$x.info({
+    logger$G.info({
       fn: getFieldsBySectionApplication,
       message: "start building initial fields state loading: ".concat(POWERPOD.loadingFieldsIntoState)
     });
     var globalConfigData = getGlobalFieldsConfig();
-    logger$x.info({
+    logger$G.info({
       fn: getFieldsBySectionApplication,
       message: 'globalConfigData:',
       data: globalConfigData
     });
     var applicationConfigData = getApplicationConfigData();
-    logger$x.info({
+    logger$G.info({
       fn: getFieldsBySectionApplication,
       message: 'applicationConfigData:',
       data: applicationConfigData
     });
     var globalSections = globalConfigData === null || globalConfigData === void 0 ? void 0 : globalConfigData.sections;
-    logger$x.info({
+    logger$G.info({
       fn: getFieldsBySectionApplication,
       message: "globalSections data:",
       data: {
@@ -15331,7 +15331,7 @@
       }
     });
     var applicationSections = applicationConfigData === null || applicationConfigData === void 0 ? void 0 : applicationConfigData.sections;
-    logger$x.info({
+    logger$G.info({
       fn: getFieldsBySectionApplication,
       message: "applicationSections data:",
       data: {
@@ -15353,7 +15353,7 @@
     var applicationSection = applicationSections === null || applicationSections === void 0 ? void 0 : applicationSections.find(function (s) {
       return s.name === stepName;
     });
-    logger$x.info({
+    logger$G.info({
       fn: getFieldsBySectionApplication,
       message: "found applicationSection data for stepName: ".concat(stepName),
       data: {
@@ -15364,7 +15364,7 @@
     var globalSection = globalSections.find(function (s) {
       return s.name === stepName;
     });
-    logger$x.info({
+    logger$G.info({
       fn: getFieldsBySectionApplication,
       message: "found globalSection data for stepName: ".concat(stepName),
       data: {
@@ -15374,7 +15374,7 @@
     });
     var fields = [];
     if (!applicationSection && !globalSection) {
-      logger$x.warn({
+      logger$G.warn({
         fn: getFieldsBySectionApplication,
         message: "no configuration section found by sectionName: ".concat(stepName),
         data: {
@@ -15387,7 +15387,7 @@
       return;
     }
     if (!applicationSection || !((_applicationSection$f = applicationSection.fields) !== null && _applicationSection$f !== void 0 && _applicationSection$f.length)) {
-      logger$x.warn({
+      logger$G.warn({
         fn: getFieldsBySectionApplication,
         message: "no applicationSection section found by sectionName: ".concat(stepName),
         data: {
@@ -15402,7 +15402,7 @@
       (_fields = fields).push.apply(_fields, _toConsumableArray(applicationSection.fields));
     }
     if (!globalSection || !((_globalSection$fields = globalSection.fields) !== null && _globalSection$fields !== void 0 && _globalSection$fields.length)) {
-      logger$x.warn({
+      logger$G.warn({
         fn: getFieldsBySectionApplication,
         message: "no globalSection section found by sectionName: ".concat(stepName),
         data: {
@@ -15421,7 +15421,7 @@
       localStorage.removeItem("fieldsData-".concat(programName, "-").concat(stepName), JSON.stringify(fields));
     }
     localStorage.setItem("fieldsData-".concat(programName, "-").concat(stepName), JSON.stringify(fields));
-    logger$x.info({
+    logger$G.info({
       fn: getFieldsBySectionApplication,
       message: "Start configuring fields for ".concat(programName, "-").concat(stepName, " with data:"),
       data: {
@@ -15430,14 +15430,14 @@
     });
     fields.forEach(function (s) {
       if (s.type && s.type === 'customField' && s.reorderField.position && (s.reorderField.fieldName || s.reorderField.sectionDataName)) {
-        logger$x.info({
+        logger$G.info({
           fn: getFieldsBySectionApplication,
           message: "Adding custom field, s.name: ".concat(s.name, ", s.label: ").concat(s.label, ", s.reorderField.fieldName: ").concat(s.reorderField.fieldName, ", s.reorderField.position: ").concat(s.reorderField.position)
         });
         addCustomField(s.name, s.label, s.reorderField.fieldName, s.reorderField.sectionDataName, s.reorderField.position);
       }
       if (document.getElementById(s.name) === null) {
-        logger$x.warn({
+        logger$G.warn({
           fn: getFieldsBySectionApplication,
           message: "Skipping non-exist field configured in JSON s.name: ".concat(s.name)
         });
@@ -15451,13 +15451,13 @@
       }
       // If elementType is not given, fill it out for future reference
       if (!s.elementType) {
-        logger$x.info({
+        logger$G.info({
           fn: getFieldsBySectionApplication,
           message: "Field elementType not set, try to determine it using getControlType func for s.name: ".concat(s.name)
         });
         var fieldRow = getFieldRow(s.name);
         if (!fieldRow) {
-          logger$x.error({
+          logger$G.error({
             fn: getFieldsBySectionApplication,
             message: "could not find fieldRow for fieldName: ".concat(s.name)
           });
@@ -15475,7 +15475,7 @@
         revalidate: true
       }));
       if (s.relocateField) {
-        logger$x.info({
+        logger$G.info({
           fn: getFieldsBySectionApplication,
           message: "relocating field name: ".concat(s.name)
         });
@@ -15497,7 +15497,7 @@
       // }
     });
     POWERPOD.loadingFieldsIntoState = false;
-    logger$x.info({
+    logger$G.info({
       fn: getFieldsBySectionApplication,
       message: 'done loading intial field state, fieldsData:',
       data: {
@@ -15524,7 +15524,7 @@
 
     if (!forceRefresh) {
       if (POWERPOD.loadingFieldsIntoState === false) {
-        logger$x.info({
+        logger$G.info({
           fn: getFieldsBySectionApplication,
           message: "returning cached state for fields",
           data: {
@@ -15534,7 +15534,7 @@
         return POWERPOD.state.fields;
       }
     }
-    logger$x.info({
+    logger$G.info({
       fn: getFieldsBySectionApplication,
       message: "call getClaimConfigData() to get fields data",
       data: {
@@ -15542,7 +15542,7 @@
       }
     });
     var claimConfigData = getClaimConfigData();
-    logger$x.info({
+    logger$G.info({
       fn: getFieldsBySectionClaim,
       message: 'claimConfigData:',
       data: claimConfigData
@@ -15560,7 +15560,7 @@
       return s.name === stepName;
     });
     if (!claimSection || !(claimSection !== null && claimSection !== void 0 && (_claimSection$fields = claimSection.fields) !== null && _claimSection$fields !== void 0 && _claimSection$fields.length)) {
-      logger$x.warn({
+      logger$G.warn({
         fn: getFieldsBySectionClaim,
         message: "no configuration section found by sectionName: ".concat(stepName),
         data: {
@@ -15574,13 +15574,13 @@
     var fields = claimSection.fields;
     fields.forEach(function (s) {
       if (document.getElementById(s.name) === null) {
-        logger$x.warn({
+        logger$G.warn({
           fn: getFieldsBySectionClaim,
           message: "Skipping non-exist field configured in JSON s.name: ".concat(s.name)
         });
         return;
       }
-      logger$x.info({
+      logger$G.info({
         fn: getFieldsBySectionClaim,
         message: "Getting field with fieldName: ".concat(s.name, "..."),
         data: {
@@ -15598,13 +15598,13 @@
       }
       // If elementType is not given, fill it out for future reference
       if (!s.elementType) {
-        logger$x.info({
+        logger$G.info({
           fn: getFieldsBySectionClaim,
           message: "Field elementType not set, try to determine it using getControlType func for s.name: ".concat(s.name)
         });
         var fieldRow = getFieldRow(s.name);
         if (!fieldRow) {
-          logger$x.error({
+          logger$G.error({
             fn: getFieldsBySectionClaim,
             message: "could not find fieldRow for fieldName: ".concat(s.name)
           });
@@ -15621,7 +15621,7 @@
         revalidate: true
       }));
       if (s.relocateField) {
-        logger$x.info({
+        logger$G.info({
           fn: getFieldsBySectionClaim,
           message: "relocating field name: ".concat(s.name)
         });
@@ -15634,7 +15634,7 @@
       //   });
       //   return;
       // }
-      logger$x.info({
+      logger$G.info({
         fn: getFieldsBySectionClaim,
         message: "showing field name: ".concat(s.name, ", for programName: ").concat(programName, ", stepName: ").concat(stepName)
       });
@@ -15647,7 +15647,7 @@
     //   JSON.stringify(fields)
     // );
 
-    logger$x.info({
+    logger$G.info({
       fn: getFieldsBySectionClaim,
       message: 'done loading intial field state, fieldsData:',
       data: {
@@ -15658,7 +15658,7 @@
   }
   function getGlobalFieldsConfig() {
     var _getGlobalConfigData;
-    logger$x.info({
+    logger$G.info({
       fn: getGlobalConfigData,
       data: getGlobalConfigData()
     });
@@ -15690,13 +15690,13 @@
     // }
 
     if (!fieldConfig) {
-      logger$x.error({
+      logger$G.error({
         fn: getFieldConfig,
         message: "Could not find fieldConfig for fieldName: ".concat(fieldName)
       });
       return;
     }
-    logger$x.info({
+    logger$G.info({
       fn: getFieldConfig,
       message: "Retrieved field config for name: ".concat(fieldName),
       data: {
@@ -15707,7 +15707,7 @@
   }
 
   // @ts-ignore
-  var logger$w = Logger('common/validation');
+  var logger$F = Logger('common/validation');
   POWERPOD.fieldValidation = {
     validateRequiredFields: validateRequiredFields,
     validateStepFields: validateStepFields,
@@ -15726,7 +15726,7 @@
   function validateStepField(fieldName) {
     var _fieldErrorHtml;
     var fieldConfig = getFieldConfig(fieldName);
-    logger$w.info({
+    logger$F.info({
       // @ts-ignore
       fn: validateStepField,
       message: "validateStepField called for fieldName: ".concat(fieldName),
@@ -15736,7 +15736,7 @@
       }
     });
     if (!fieldConfig) {
-      logger$w.error({
+      logger$F.error({
         // @ts-ignore
         fn: validateStepField,
         message: "failed to find fieldName: ".concat(fieldName, " in state")
@@ -15745,7 +15745,7 @@
     }
     if (fieldConfig.hidden) {
       var _fieldConfig$error;
-      logger$w.warn({
+      logger$F.warn({
         // @ts-ignore
         fn: validateStepField,
         message: "skip validating HIDDEN fieldName: ".concat(fieldName),
@@ -15764,7 +15764,7 @@
       }
       return;
     }
-    logger$w.info({
+    logger$F.info({
       // @ts-ignore
       fn: validateStepField,
       message: "start validating fieldName: ".concat(fieldName),
@@ -15781,7 +15781,7 @@
       errorMessage = fieldConfig.errorMessage;
     var needsValidation = required || validation || format;
     if (!needsValidation) {
-      logger$w.warn({
+      logger$F.warn({
         // @ts-ignore
         fn: validateStepField,
         message: "no validation options configured, skip validating fieldName: ".concat(fieldName),
@@ -15860,7 +15860,7 @@
         postfix = validation.postfix,
         overrideDisplayValue = validation.overrideDisplayValue;
       var _errorMsg4 = validateFieldLength(name, _value2, _comparison3, forceRequired, postfix, overrideDisplayValue);
-      logger$w.info({
+      logger$F.info({
         // @ts-ignore
         fn: validateStepField,
         message: 'Generate length validation error html...'
@@ -15868,7 +15868,7 @@
       // Display instant feedback on field input
       if (_errorMsg4 && _errorMsg4.length > 0) {
         errorMsgs.push(_errorMsg4);
-        logger$w.info({
+        logger$F.info({
           // @ts-ignore
           fn: validateStepField,
           message: 'Done generating length validation error html...'
@@ -15877,7 +15877,7 @@
     }
     if ((validation === null || validation === void 0 ? void 0 : validation.type) === 'signature') {
       var _errorMsg5 = validateSignatureField(name);
-      logger$w.info({
+      logger$F.info({
         // @ts-ignore
         fn: validateStepField,
         message: 'Generate signature validation error html...'
@@ -15885,7 +15885,7 @@
       // Display instant feedback on field input
       if (_errorMsg5 && _errorMsg5.length > 0) {
         errorMsgs.push(_errorMsg5);
-        logger$w.info({
+        logger$F.info({
           // @ts-ignore
           fn: validateStepField,
           message: 'Done generating signature validation error html...'
@@ -15894,7 +15894,7 @@
     }
     if (format === 'email') {
       var _errorMsg6 = validateEmailAddressField(name);
-      logger$w.info({
+      logger$F.info({
         // @ts-ignore
         fn: validateStepField,
         message: 'Generate email validation error html...'
@@ -15902,7 +15902,7 @@
       // Display instant feedback on field input
       if (_errorMsg6 && _errorMsg6.length > 0) {
         errorMsgs.push(_errorMsg6);
-        logger$w.info({
+        logger$F.info({
           // @ts-ignore
           fn: validateStepField,
           message: 'Done generating email validation error html...'
@@ -15911,7 +15911,7 @@
     }
     var errorMessageElement = getFieldErrorDiv(fieldName);
     if (!errorMessageElement) {
-      logger$w.error({
+      logger$F.error({
         // @ts-ignore
         fn: validateStepField,
         message: "Failed to find field error div, fieldName: ".concat(fieldName)
@@ -15922,7 +15922,7 @@
 
     // NO ERROR FOUND:
     if (!((_fieldErrorHtml = fieldErrorHtml) !== null && _fieldErrorHtml !== void 0 && _fieldErrorHtml.length)) {
-      logger$w.info({
+      logger$F.info({
         // @ts-ignore
         fn: validateStepField,
         message: "Did NOT find error message for field: ".concat(name)
@@ -15948,7 +15948,7 @@
     } else {
       var _errorMsgs$join;
       // IF THERE ARE ERRORS:
-      logger$w.info({
+      logger$F.info({
         // @ts-ignore
         fn: validateStepField,
         message: "Found error message for field: ".concat(name, ", fieldErrorHtml: ").concat(fieldErrorHtml)
@@ -15956,7 +15956,7 @@
 
       // only show error message ON FIELD if field has been touched
       if (fieldConfig.touched) {
-        logger$w.info({
+        logger$F.info({
           // @ts-ignore
           fn: validateStepField,
           message: "Field has been touched name: ".concat(name, ", show error message on field: ").concat(name, ", fieldErrorHtml: ").concat(fieldErrorHtml)
@@ -15974,7 +15974,7 @@
         }
       } else {
         // if FIELD NOT TOUCHED
-        logger$w.warn({
+        logger$F.warn({
           // @ts-ignore
           fn: validateStepField,
           message: "Field NOT touched yet name: ".concat(name, ", skip showing error message on field: ").concat(name, ", fieldErrorHtml: ").concat(fieldErrorHtml)
@@ -16017,7 +16017,7 @@
       fields = getFieldsBySectionClaim(stepName);
     }
     if (!fields) return '';
-    logger$w.info({
+    logger$F.info({
       // @ts-ignore
       fn: validateStepFields,
       message: 'loop through fields to get validation errors',
@@ -16035,7 +16035,7 @@
     //   validateStepField(fields[i].name);
     // }
 
-    logger$w.info({
+    logger$F.info({
       // @ts-ignore
       fn: validateStepFields,
       message: 'Go through dynamic fields to generate validation error html'
@@ -16069,7 +16069,7 @@
       }
       validationErrorHtml = validationErrorHtml.concat(errorMsg);
       fieldErrorHtml = fieldErrorHtml.concat(errorMsg);
-      logger$w.info({
+      logger$F.info({
         // @ts-ignore
         fn: validateStepFields,
         message: "Found error for field: ".concat(fieldId, ", errorMsg: ").concat(fieldErrorHtml)
@@ -16094,7 +16094,7 @@
       }
     }
     if (returnString) {
-      logger$w.info({
+      logger$F.info({
         // @ts-ignore
         fn: validateStepFields,
         message: 'returning string',
@@ -16163,7 +16163,7 @@
       elemType = _ref$elemType === void 0 ? HtmlElementType.Input : _ref$elemType,
       _ref$errorMessage = _ref.errorMessage,
       errorMessage = _ref$errorMessage === void 0 ? 'Please enter a value, this field is required.' : _ref$errorMessage;
-    logger$w.info({
+    logger$F.info({
       // @ts-ignore
       fn: validateRequiredField,
       message: "Start validating required fieldName: ".concat(fieldName, " of elemType: ").concat(elemType)
@@ -16194,7 +16194,7 @@
         raw: true
       });
     }
-    logger$w.info({
+    logger$F.info({
       // @ts-ignore
       fn: validateRequiredField,
       message: "Required field fieldName: ".concat(fieldName, ", elemType: ").concat(elemType, " isEmptyField: ").concat(!value || !value.length, ", value: ").concat(value)
@@ -16206,7 +16206,7 @@
       isEmpty = isValueEmpty(value, elemType);
     }
     if (isEmpty) {
-      logger$w.info({
+      logger$F.info({
         // @ts-ignore
         fn: validateRequiredField,
         message: "Required field fieldName: ".concat(fieldName, " is empty! Set validation error message")
@@ -16276,7 +16276,7 @@
     var element = document.querySelector("#".concat(fieldName));
     var comparisonElement = document.querySelector("#".concat(comparisonFieldName));
     if (!element || !comparisonElement) {
-      logger$w.error({
+      logger$F.error({
         // @ts-ignore
         fn: validateDateFieldValue,
         message: "Failed to find element for date field validation",
@@ -16307,7 +16307,7 @@
       console.error('Invalid date format');
       return false;
     }
-    logger$w.info({
+    logger$F.info({
       // @ts-ignore
       fn: validateDateFieldValue,
       message: "After cleaning values:",
@@ -16359,7 +16359,7 @@
         break;
       default:
         finalMessage = 'Invalid operator';
-        logger$w.error({
+        logger$F.error({
           // @ts-ignore
           fn: validateDateFieldValue,
           message: "Invalid operator"
@@ -16369,7 +16369,7 @@
     if ((errorMessage === null || errorMessage === void 0 ? void 0 : errorMessage.length) > 0 && ((_finalMessage = finalMessage) === null || _finalMessage === void 0 ? void 0 : _finalMessage.length) > 0) {
       finalMessage = errorMessage;
     }
-    logger$w.info({
+    logger$F.info({
       // @ts-ignore
       fn: validateDateFieldValue,
       message: "Returning error message: ".concat(((_finalMessage2 = finalMessage) === null || _finalMessage2 === void 0 ? void 0 : _finalMessage2.length) > 0 ? finalMessage : 'VALIDATION PASSED'),
@@ -16399,7 +16399,7 @@
     };
     var element = document.querySelector("#".concat(fieldName));
     if (!element) {
-      logger$w.error({
+      logger$F.error({
         // @ts-ignore
         fn: validateNumericFieldValue,
         message: "failed to find element for numeric field validation",
@@ -16411,7 +16411,7 @@
 
     // @ts-ignore
     if (element.value === '' && !forceRequired) {
-      logger$w.info({
+      logger$F.info({
         // @ts-ignore
         fn: validateNumericFieldValue,
         message: "element control value is empty, but it is not required, so skip numeric validation",
@@ -16423,7 +16423,7 @@
     var value = parseFloat(
     // @ts-ignore
     element.value.replace(/,/g, '').replace('$', '').replace('%', ''));
-    logger$w.info({
+    logger$F.info({
       // @ts-ignore
       fn: validateNumericFieldValue,
       message: "After cleaning value: ".concat(value)
@@ -16463,7 +16463,7 @@
         break;
       default:
         finalMessage = 'Invalid operator';
-        logger$w.error({
+        logger$F.error({
           // @ts-ignore
           fn: validateNumericFieldValue,
           message: "Invalid operator"
@@ -16473,7 +16473,7 @@
     if ((errorMessage === null || errorMessage === void 0 ? void 0 : errorMessage.length) > 0 && ((_finalMessage3 = finalMessage) === null || _finalMessage3 === void 0 ? void 0 : _finalMessage3.length) > 0) {
       finalMessage = errorMessage;
     }
-    logger$w.info({
+    logger$F.info({
       // @ts-ignore
       fn: validateNumericFieldValue,
       message: "returning error message: ".concat(((_finalMessage4 = finalMessage) === null || _finalMessage4 === void 0 ? void 0 : _finalMessage4.length) > 0 ? finalMessage : 'VALIDATION PASSED'),
@@ -16525,7 +16525,7 @@
         break;
       default:
         finalMessage = 'Invalid operator';
-        logger$w.error({
+        logger$F.error({
           // @ts-ignore
           fn: validateNumericFieldValue,
           message: "Invalid operator"
@@ -16581,7 +16581,7 @@
   function validateEmailAddressField(fieldName) {
     var fieldElement = document.querySelector("#".concat(fieldName));
     if (!fieldElement) {
-      logger$w.error({
+      logger$F.error({
         // @ts-ignore
         fn: validateEmailAddressField,
         message: "Could not find fieldElement for fieldName: ".concat(fieldName)
@@ -16611,7 +16611,7 @@
   function displayActiveFieldErrors() {
     // @ts-ignore
     var fields = POWERPOD.state.fields;
-    logger$w.info({
+    logger$F.info({
       // @ts-ignore
       fn: displayActiveFieldErrors,
       message: "checking field state for active errors on fields...",
@@ -16624,7 +16624,7 @@
       return f.error && !f.hidden && (f.visible != undefined || f.visible != null) && f.visible;
     });
     if (!fieldsWithErrors || fieldsWithErrors.length === 0) {
-      logger$w.info({
+      logger$F.info({
         // @ts-ignore
         fn: displayActiveFieldErrors,
         message: "No active errors on any fields to display"
@@ -16637,7 +16637,7 @@
       var errorWithLabelText = "<span>\"".concat(field.label, "\":</span> <span style=\"color: red;\">").concat(field.error, "</span>");
       validationErrorHtml = validationErrorHtml.concat("<div>".concat(errorWithLabelText, "</div>"));
     });
-    logger$w.info({
+    logger$F.info({
       // @ts-ignore
       fn: displayActiveFieldErrors,
       message: "found fields with errors...",
@@ -16653,7 +16653,7 @@
   // @ts-ignore
   function displayValidationErrors(validationErrorHtml) {
     var validationErrorsDiv = $('#error_messages_div');
-    logger$w.info({
+    logger$F.info({
       // @ts-ignore
       fn: displayValidationErrors,
       message: 'displaying validation errors',
@@ -16687,7 +16687,7 @@
       validationErrorsDiv.style = 'display:block;';
       // @ts-ignore
       if (window.debug_pp) {
-        logger$w.warn({
+        logger$F.warn({
           // @ts-ignore
           fn: displayValidationErrors,
           message: "Debugging mode enabled, not disabling next button"
@@ -16836,7 +16836,7 @@
     var sigFilled = isSignatureFilled();
     var _getFieldConfig = getFieldConfig(name),
       signatureSaved = _getFieldConfig.signatureSaved;
-    logger$w.info({
+    logger$F.info({
       fn: validateSignatureField,
       message: "validateSignatureField for name: ".concat(name, ", sigFilled: ").concat(sigFilled, ", signatureSaved: ").concat(signatureSaved)
     });
@@ -16847,7 +16847,7 @@
     }
   }
 
-  var logger$v = Logger('common/html');
+  var logger$E = Logger('common/html');
   POWERPOD.html = {
     setFieldNameLabel: setFieldNameLabel,
     redirectToFormId: redirectToFormId,
@@ -16914,7 +16914,7 @@
     // Append the new parameter to the URL
     currentUrl.search = '';
     currentUrl.searchParams.set('id', id);
-    logger$v.info({
+    logger$E.info({
       fn: redirectToFormId,
       message: "Redirecting to form with id: ".concat(id)
     });
@@ -16930,7 +16930,7 @@
     if (controlId && (_POWERPOD$state = POWERPOD.state) !== null && _POWERPOD$state !== void 0 && (_POWERPOD$state = _POWERPOD$state.fields) !== null && _POWERPOD$state !== void 0 && (_POWERPOD$state = _POWERPOD$state[controlId]) !== null && _POWERPOD$state !== void 0 && _POWERPOD$state.elementType && ((_POWERPOD$state2 = POWERPOD.state) === null || _POWERPOD$state2 === void 0 || (_POWERPOD$state2 = _POWERPOD$state2.fields) === null || _POWERPOD$state2 === void 0 || (_POWERPOD$state2 = _POWERPOD$state2[controlId]) === null || _POWERPOD$state2 === void 0 ? void 0 : _POWERPOD$state2.elementType) !== 'Unknown') {
       return POWERPOD.state.fields[controlId].elementType;
     }
-    logger$v.info({
+    logger$E.info({
       fn: getControlType,
       message: "Control/element type not found in state, start determining type...",
       data: {
@@ -16944,7 +16944,7 @@
     if (!control) {
       // exit early for notescontrol file upload
       if (tr.querySelector('#notescontrol')) {
-        logger$v.info({
+        logger$E.info({
           fn: getControlType,
           message: 'Found notes control control type',
           data: {
@@ -16953,7 +16953,7 @@
         });
         return HtmlElementType.NotesControl;
       } else {
-        logger$v.warn({
+        logger$E.warn({
           fn: getControlType,
           message: 'Could not find form control element, might be an empty row',
           data: {
@@ -16971,7 +16971,7 @@
     if (!skipState && control !== null && control !== void 0 && control.id && (_POWERPOD$state3 = POWERPOD.state) !== null && _POWERPOD$state3 !== void 0 && (_POWERPOD$state3 = _POWERPOD$state3.fields[controlId]) !== null && _POWERPOD$state3 !== void 0 && _POWERPOD$state3.elementType && ((_POWERPOD$state4 = POWERPOD.state) === null || _POWERPOD$state4 === void 0 || (_POWERPOD$state4 = _POWERPOD$state4.fields[controlId]) === null || _POWERPOD$state4 === void 0 ? void 0 : _POWERPOD$state4.elementType) !== 'Unknown') {
       var _POWERPOD$state5;
       controlType = (_POWERPOD$state5 = POWERPOD.state) === null || _POWERPOD$state5 === void 0 || (_POWERPOD$state5 = _POWERPOD$state5.fields[controlId]) === null || _POWERPOD$state5 === void 0 ? void 0 : _POWERPOD$state5.elementType;
-      logger$v.info({
+      logger$E.info({
         fn: getControlType,
         message: "Successfully found control type from STATE for controlId: ".concat(controlId, ", found elementType: ").concat(controlType),
         data: {
@@ -17002,7 +17002,7 @@
       controlType = HtmlElementType.MultiOptionSet;
     }
     if (!controlType) {
-      logger$v.error({
+      logger$E.error({
         fn: getControlType,
         message: 'Could not determine control type',
         data: {
@@ -17014,7 +17014,7 @@
       });
       return HtmlElementType.Unknown;
     }
-    logger$v.info({
+    logger$E.info({
       fn: getControlType,
       message: "Successfully found control type for controlId: ".concat(controlId, ", found elementType: ").concat(controlType),
       data: {
@@ -17046,7 +17046,7 @@
     if (controlType === HtmlElementType.MultiSelectPicklist || controlType === HtmlElementType.DatePicker) {
       var labelElement = tr.querySelector('label.field-label');
       if (!labelElement) {
-        logger$v.error({
+        logger$E.error({
           fn: getControlId,
           message: "Failed to get label element for control, controlType: ".concat(controlType),
           data: {
@@ -17063,7 +17063,7 @@
       id = questionDiv === null || questionDiv === void 0 || (_questionDiv$querySel = questionDiv.querySelector('label')) === null || _questionDiv$querySel === void 0 ? void 0 : _questionDiv$querySel.getAttribute('for');
     }
     if (!id) {
-      logger$v.warn({
+      logger$E.warn({
         fn: getControlId,
         message: "Failed to get id for control, might be an empty row controlType: ".concat(controlType),
         data: {
@@ -17098,7 +17098,7 @@
       tr: tr,
       controlId: controlId
     });
-    logger$v.info({
+    logger$E.info({
       fn: getControlValue,
       message: "Attempting to get control value for controlId: ".concat(controlId, " type: ").concat(elementType, ", raw: ").concat(raw),
       data: {
@@ -17141,7 +17141,7 @@
       var _value2 = controlDiv === null || controlDiv === void 0 || (_controlDiv$querySele4 = controlDiv.querySelector('div > .datetimepicker > input')) === null || _controlDiv$querySele4 === void 0 ? void 0 : _controlDiv$querySele4.value;
       if (_value2 !== null && _value2 !== void 0 && _value2.length) {
         var _convertDateToISO;
-        logger$v.info({
+        logger$E.info({
           fn: getControlValue,
           message: "Attempting to convert date raw value to ISO format, value: ".concat(_value2)
         });
@@ -17158,7 +17158,7 @@
     } else if (elementType === HtmlElementType.DropdownSelect) {
       var selectElement = controlDiv === null || controlDiv === void 0 ? void 0 : controlDiv.querySelector('select');
       if (!selectElement) {
-        logger$v.error({
+        logger$E.error({
           fn: getControlValue,
           message: "Could not found selectElement for controlId: ".concat(controlId),
           data: {
@@ -17178,7 +17178,7 @@
     } else if (elementType === HtmlElementType.Checkbox) {
       var _controlDiv$querySele6;
       var _checked = controlDiv === null || controlDiv === void 0 || (_controlDiv$querySele6 = controlDiv.querySelector('input')) === null || _controlDiv$querySele6 === void 0 ? void 0 : _controlDiv$querySele6.checked;
-      logger$v.info({
+      logger$E.info({
         fn: getControlValue,
         message: "Found control value for type: ".concat(elementType, ", raw: ").concat(raw, ", checked: ").concat(_checked),
         data: {
@@ -17199,7 +17199,7 @@
       rawValue = (_document = document) === null || _document === void 0 || (_document = _document.getElementById(controlId)) === null || _document === void 0 ? void 0 : _document.value;
       verboseValue = controlDiv === null || controlDiv === void 0 || (_controlDiv$querySele7 = controlDiv.querySelector('input')) === null || _controlDiv$querySele7 === void 0 ? void 0 : _controlDiv$querySele7.value;
     }
-    logger$v.info({
+    logger$E.info({
       fn: getControlValue,
       message: "For controlId: ".concat(controlId, ", raw: ").concat(raw, ", forTemplateGeneration: ").concat(forTemplateGeneration, " found rawValue: ").concat(rawValue, " verboseValue: ").concat(verboseValue),
       data: {
@@ -17228,13 +17228,13 @@
     var _originalSelectElemen;
     var originalSelectElementForMSOS = getOriginalMsosElement(controlId);
     if (!originalSelectElementForMSOS) {
-      logger$v.warn({
+      logger$E.warn({
         fn: newGetOriginalMultiOptionSetElementValue,
         message: "Could not find original msos element for controlId: ".concat(controlId, ", attempt to fallback to getMultiOptionSetElementValue")
       });
       var _valueStr = getMultiOptionSetElementValue(controlId, raw);
       if (!_valueStr) {
-        logger$v.error({
+        logger$E.error({
           fn: newGetOriginalMultiOptionSetElementValue,
           message: "Fallback to getMultiOptionSetElementValue also failed..."
         });
@@ -17245,7 +17245,7 @@
     var selectionContainer = // @ts-ignore
     originalSelectElementForMSOS === null || originalSelectElementForMSOS === void 0 || (_originalSelectElemen = originalSelectElementForMSOS.multiSelectOptionSet()) === null || _originalSelectElemen === void 0 ? void 0 : _originalSelectElemen.$selection;
     if (!selectionContainer) {
-      logger$v.error({
+      logger$E.error({
         fn: newGetOriginalMultiOptionSetElementValue,
         message: "Could not find msos selectionContainer for controlId: ".concat(controlId)
       });
@@ -17254,7 +17254,7 @@
     var selectedItems = selectionContainer === null || selectionContainer === void 0 ? void 0 : selectionContainer.find('li[aria-selected="true"]');
     var inputElements = selectedItems === null || selectedItems === void 0 ? void 0 : selectedItems.find('input');
     if (!selectedItems && !selectedItems.length && !inputElements && !inputElements.length) {
-      logger$v.warn({
+      logger$E.warn({
         fn: newGetOriginalMultiOptionSetElementValue,
         message: "Could not find any selectedItems or inputElements for controlId: ".concat(controlId)
       });
@@ -17274,7 +17274,7 @@
       }
     }
     var valueStr = valueStrArray.join(', ');
-    logger$v.info({
+    logger$E.info({
       fn: newGetOriginalMultiOptionSetElementValue,
       message: "For controlId: ".concat(controlId, " found valueStr: ").concat(valueStr)
     });
@@ -17284,14 +17284,14 @@
     var _inputElement$value;
     var inputElement = document.getElementById(controlId);
     if (!inputElement) {
-      logger$v.error({
+      logger$E.error({
         fn: getMultiOptionSetElementValue,
         message: "Could not find input element for MultiOptionSet element controlId: ".concat(controlId)
       });
       return;
     }
     if (inputElement.value === undefined || ((_inputElement$value = inputElement.value) === null || _inputElement$value === void 0 ? void 0 : _inputElement$value.length) <= 0) {
-      logger$v.warn({
+      logger$E.warn({
         fn: getMultiOptionSetElementValue,
         message: "MultiOptionSet value empty for controlId: ".concat(controlId)
       });
@@ -17313,7 +17313,7 @@
       });
     }
     var valueStr = valueStrArray.join(', ');
-    logger$v.info({
+    logger$E.info({
       fn: getMultiOptionSetElementValue,
       message: "For controlId: ".concat(controlId, " found valueStr: ").concat(valueStr),
       data: {
@@ -17325,7 +17325,7 @@
   }
   function listenForIframeReadyStateChanges(iframe, fn) {
     if (fn && (iframe.contentDocument.readyState === 'interactive' || iframe.contentDocument.readyState === 'complete')) {
-      logger$v.info({
+      logger$E.info({
         fn: listenForIframeReadyStateChanges,
         message: 'iframe is now interactive or complete readyState'
       });
@@ -17333,14 +17333,14 @@
     }
     iframe.contentDocument.addEventListener('readystatechange', function () {
       var _iframe$contentDocume;
-      logger$v.info({
+      logger$E.info({
         fn: listenForIframeReadyStateChanges,
         message: "iframe onReadyState changed: ".concat((_iframe$contentDocume = iframe.contentDocument) === null || _iframe$contentDocume === void 0 ? void 0 : _iframe$contentDocume.readyState)
       });
     });
   }
   function onDocumentReadyState(fn) {
-    logger$v.info({
+    logger$E.info({
       fn: onDocumentReadyState,
       message: "checking document readyState: ".concat(doc.readyState)
     });
@@ -17349,7 +17349,7 @@
     } else {
       doc.addEventListener('readystatechange', function () {
         if (doc.readyState === 'complete') {
-          logger$v.info({
+          logger$E.info({
             fn: onDocumentReadyState,
             message: 'document ready!'
           });
@@ -17378,7 +17378,7 @@
         fieldLabelElement = document.getElementById(fieldName);
       }
       if (!fieldLabelElement) {
-        logger$v.error({
+        logger$E.error({
           fn: getFieldRow,
           message: "could not find fieldLabelElement for fieldName: ".concat(fieldName)
         });
@@ -17387,7 +17387,7 @@
     }
     var fieldRow = fieldLabelElement.closest('tr');
     if (!fieldRow) {
-      logger$v.error({
+      logger$E.error({
         fn: getFieldRow,
         message: "could not find fieldRow for fieldName: ".concat(fieldName)
       });
@@ -17400,13 +17400,13 @@
     var fieldName = _ref3.fieldName,
       _ref3$doNotBlank = _ref3.doNotBlank,
       doNotBlank = _ref3$doNotBlank === void 0 ? false : _ref3$doNotBlank;
-    logger$v.info({
+    logger$E.info({
       fn: hideFieldRow,
       message: "hideFieldRow called for fieldName: ".concat(fieldName, ", doNotBlank: ").concat(doNotBlank)
     });
     var fieldRow = getFieldRow(fieldName);
     if (!fieldRow) {
-      logger$v.error({
+      logger$E.error({
         fn: hideFieldRow,
         message: "could not find fieldRow for fieldName: ".concat(fieldName)
       });
@@ -17447,7 +17447,7 @@
       // touched: false,
     });
     displayActiveFieldErrors();
-    logger$v.info({
+    logger$E.info({
       fn: hideFieldRow,
       message: "successfully ran hideFieldRow for fieldName: ".concat(fieldName, ", doNotBlank: ").concat(doNotBlank),
       data: {
@@ -17457,13 +17457,13 @@
   }
   function showFieldRow(fieldName) {
     var _$2, _powerpod2, _nearestFieldSet$styl;
-    logger$v.info({
+    logger$E.info({
       fn: showFieldRow,
       message: "showFieldRow called for fieldName: ".concat(fieldName)
     });
     var fieldRow = getFieldRow(fieldName);
     if (!fieldRow) {
-      logger$v.error({
+      logger$E.error({
         fn: showFieldRow,
         message: "could not find fieldRow for fieldName: ".concat(fieldName)
       });
@@ -17498,7 +17498,7 @@
     // Ensure the nearest fieldset is visible
     var nearestFieldSet = fieldRow.closest('fieldset');
     if (!nearestFieldSet) {
-      logger$v.error({
+      logger$E.error({
         fn: showFieldRow,
         message: "could not find nearestFieldSet to fieldName: ".concat(fieldName)
       });
@@ -17513,7 +17513,7 @@
       revalidate: true
     });
     validateStepField(fieldName);
-    logger$v.info({
+    logger$E.info({
       fn: showFieldRow,
       message: "successfully ran showFieldRow for fieldName: ".concat(fieldName),
       data: {
@@ -17526,7 +17526,7 @@
     var topOrBottom = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 'top';
     var tabDiv = document.querySelector("div[data-name='".concat(tabDataName, "']"));
     if (!tabDiv) {
-      logger$v.error({
+      logger$E.error({
         fn: addHtmlToTabDiv,
         message: "Unable to add to tab div of tabDataName: ".concat(tabDataName, ", could not find tab div")
       });
@@ -17569,7 +17569,7 @@
     var topOrBottom = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 'top';
     var subsectionFieldset = document.querySelector("fieldset[aria-label='".concat(subsectionAriaLabel, "']"));
     if (!subsectionFieldset || !subsectionFieldset.parentNode) {
-      logger$v.warn({
+      logger$E.warn({
         fn: addHtmlToSubsection,
         message: "Unable to add to subsection of fieldset aria-label: ".concat(subsectionAriaLabel, ", could not find section. Could be configuring non-active section.")
       });
@@ -17646,7 +17646,7 @@
     var type = arguments.length > 3 ? arguments[3] : undefined;
     var sectionTable = document.querySelector("div[data-name='".concat(tableDataName, "'] > .tab-column > div"));
     if (!sectionTable) {
-      logger$v.warn({
+      logger$E.warn({
         fn: addHtmlToSection,
         message: "Unable to add to section of tableDataName: ".concat(tableDataName, ", could not find section. Could be configuring non-active section.")
       });
@@ -17688,7 +17688,7 @@
   }
   function addCustomField(customFieldName, customFieldLabel, existingFieldName, sectionDataName) {
     var beforeOrAfter = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : 'before';
-    logger$v.info({
+    logger$E.info({
       fn: addCustomField,
       message: "addCustomField or addCustomField was specified, adding...",
       data: {
@@ -17704,18 +17704,18 @@
       if (!tr) return;
       if (beforeOrAfter === 'before') {
         $(htmlContentToAdd).insertBefore(tr);
-        logger$v.info({
+        logger$E.info({
           fn: addCustomField,
           message: "Added customFieldName: ".concat(customFieldName, " before existingFieldName: ").concat(existingFieldName)
         });
       } else if (beforeOrAfter === 'after') {
         $(htmlContentToAdd).insertAfter(tr);
-        logger$v.info({
+        logger$E.info({
           fn: addCustomField,
           message: "Added customFieldName: ".concat(customFieldName, " after existingFieldName: ").concat(existingFieldName)
         });
       }
-      logger$v.info({
+      logger$E.info({
         fn: addCustomField,
         message: "Successfully added custom field html for customFieldName: ".concat(customFieldName, ", customFieldLabel: ").concat(customFieldLabel, ", existingFieldName: ").concat(existingFieldName, ", beforeOrAfter: ").concat(beforeOrAfter),
         data: {
@@ -17725,7 +17725,7 @@
       });
     } else if (sectionDataName) {
       addHtmlToSection(sectionDataName, "\n        <table role=\"presentation\" class=\"section\">\n          <tbody>\n            ".concat(htmlContentToAdd, "\n          </tbody>\n        </table>\n      "), beforeOrAfter === 'before' ? 'top' : 'bottom', 'customField');
-      logger$v.info({
+      logger$E.info({
         fn: addCustomField,
         message: "adding customField to section: ".concat(sectionDataName, ", customFieldName: ").concat(customFieldName)
       });
@@ -17733,7 +17733,7 @@
   }
   function addHtmlToField(fieldName, htmlContentToAdd) {
     var topOrBottom = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 'top';
-    logger$v.info({
+    logger$E.info({
       fn: addHtmlToField,
       message: "additionalTextAboveField or additionalTextBelowField was specified, adding... fieldName: ".concat(fieldName, ", htmlContentToAdd: ").concat(htmlContentToAdd, ", topOrBottom: ").concat(topOrBottom)
     });
@@ -17756,7 +17756,7 @@
         return existingContent === newContent;
       });
       if (isAlreadyAdded) {
-        logger$v.info({
+        logger$E.info({
           fn: addHtmlToField,
           message: "HTML content is already added for fieldName: ".concat(fieldName)
         });
@@ -17771,7 +17771,7 @@
     }
     var newTrElement = $("tr[data-uuid=\"".concat(uuid, "\"]"));
     if (!newTrElement || !(newTrElement !== null && newTrElement !== void 0 && newTrElement.length)) {
-      logger$v.error({
+      logger$E.error({
         fn: addHtmlToField,
         message: 'Failed to create new row'
       });
@@ -17798,7 +17798,7 @@
   function observeChanges(element, customFunc) {
     var disableInitialCall = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
     var id = (element === null || element === void 0 ? void 0 : element.id) || '';
-    logger$v.info({
+    logger$E.info({
       fn: observeChanges,
       message: 'observing changes...',
       data: {
@@ -17808,7 +17808,7 @@
       }
     });
     if (!element) {
-      logger$v.error({
+      logger$E.error({
         fn: observeChanges,
         message: 'failed to observe changes, null element',
         data: {
@@ -17822,7 +17822,7 @@
 
     // watch for changes
     var observer = new MutationObserver(function (mutations, observer) {
-      logger$v.info({
+      logger$E.info({
         fn: observeChanges,
         message: 'Change observed... testing',
         data: {
@@ -17843,7 +17843,7 @@
         characterData: true,
         subtree: true
       });
-      logger$v.info({
+      logger$E.info({
         fn: observeChanges,
         message: 'Successfully assigned observer to element',
         data: {
@@ -17861,7 +17861,7 @@
       }
       return observer;
     }
-    logger$v.error({
+    logger$E.error({
       fn: observeChanges,
       message: "Unable to assign observer for some reason",
       data: {
@@ -17874,7 +17874,7 @@
     return false;
   }
   function observeIframeChanges(funcToExecute, fieldNameToPass, fieldNameToObserve) {
-    logger$v.info({
+    logger$E.info({
       fn: observeIframeChanges,
       message: 'observing iframe changes...',
       data: {
@@ -17961,7 +17961,7 @@
       elementType = _ref4$elementType === void 0 ? null : _ref4$elementType,
       _ref4$skipValidation = _ref4.skipValidation,
       skipValidation = _ref4$skipValidation === void 0 ? false : _ref4$skipValidation;
-    logger$v.info({
+    logger$E.info({
       fn: setFieldValue,
       message: "Setting field value for name: ".concat(name, ", value: ").concat(value, ", elementType: ").concat(elementType, ", skipValidation: ").concat(skipValidation)
     });
@@ -17980,7 +17980,7 @@
       skipValidation: skipValidation,
       origin: setFieldValue.name
     };
-    logger$v.info({
+    logger$E.info({
       fn: setFieldValue,
       message: "Dispatching change event for field name: ".concat(name, ", value: ").concat(value, ", elementType: ").concat(elementType, ", skipValidation: ").concat(skipValidation),
       data: {
@@ -17997,14 +17997,14 @@
       destinationFieldName = _field$relocateField.destinationFieldName,
       relativePosition = _field$relocateField.relativePosition;
     if (!originFieldName || !destinationFieldName || !relativePosition) {
-      logger$v.error({
+      logger$E.error({
         fn: relocateField,
         message: "Missing a required parameter to relocate field",
         data: field
       });
       return;
     }
-    logger$v.info({
+    logger$E.info({
       fn: relocateField,
       message: "Starting moving originFieldName: ".concat(originFieldName, " ").concat(relativePosition, " destinationFieldName: ").concat(destinationFieldName)
     });
@@ -18014,7 +18014,7 @@
     var moveToElement = document.getElementById(destinationFieldName);
     var moveToRow = moveToElement === null || moveToElement === void 0 ? void 0 : moveToElement.closest('tr');
     if (!moveToRow) {
-      logger$v.error({
+      logger$E.error({
         fn: relocateField,
         message: "Unable to find nearest row to destinationFieldName: ".concat(destinationFieldName),
         data: {
@@ -18033,14 +18033,14 @@
 
     // cleanup original row
     rowToMove.remove();
-    logger$v.info({
+    logger$E.info({
       fn: relocateField,
       message: "Successfully moved originFieldName: ".concat(originFieldName, " to ").concat(relativePosition, " destinationFieldName: ").concat(destinationFieldName)
     });
   }
   function combineElementsIntoOneRowNew(name) {
     var _tableElement$find;
-    logger$v.info({
+    logger$E.info({
       fn: combineElementsIntoOneRowNew,
       message: "Combining elements into one row for name: ".concat(name)
     });
@@ -18049,7 +18049,7 @@
     var inputTd = inputElement.closest('td');
     var labelTd = labelElement.closest('td');
     if (!inputTd.is(labelTd)) {
-      logger$v.warn({
+      logger$E.warn({
         fn: combineElementsIntoOneRowNew,
         message: "Skipping... elements must've already been combined, since label and input are in different cells",
         data: {
@@ -18081,7 +18081,7 @@
   }
   function disableSingleLine(name) {
     var elementType = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '';
-    logger$v.info({
+    logger$E.info({
       fn: disableSingleLine,
       message: "Disable single line for name: ".concat(name, ", elementType: ").concat(elementType)
     });
@@ -18092,7 +18092,7 @@
       inputElement = $("#".concat(name));
     }
     if (!inputElement) {
-      logger$v.error({
+      logger$E.error({
         fn: disableSingleLine,
         message: "Failed to disable single line, could not find input element for name: ".concat(name, ", elementType: ").concat(HtmlElementType)
       });
@@ -18100,7 +18100,7 @@
     }
     var inputTd = inputElement.closest('td');
     if (!inputTd) {
-      logger$v.error({
+      logger$E.error({
         fn: disableSingleLine,
         message: "Failed to disable single line, could not find input td element for name: ".concat(name, ", elementType: ").concat(HtmlElementType)
       });
@@ -18157,12 +18157,12 @@
   function hideFieldsAndSections() {
     var hidden = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : true;
     if (!hidden) {
-      logger$v.info({
+      logger$E.info({
         fn: hideFieldsAndSections,
         message: 'Unhiding fields and sections'
       });
     } else {
-      logger$v.info({
+      logger$E.info({
         fn: hideFieldsAndSections,
         message: 'Hiding fields and sections'
       });
@@ -18177,7 +18177,7 @@
     var _doc$getElementById;
     var label = (_doc$getElementById = doc.getElementById("".concat(fieldName, "_label"))) === null || _doc$getElementById === void 0 ? void 0 : _doc$getElementById.textContent;
     if (!label) {
-      logger$v.error({
+      logger$E.error({
         fn: getFieldNameLabel,
         message: "Could not find label text for fieldName: ".concat(fieldName)
       });
@@ -18188,7 +18188,7 @@
     var _label$replace, _$3;
     var labelElement = $("#".concat(fieldName, "_label"));
     if (!labelElement) {
-      logger$v.error({
+      logger$E.error({
         fn: setFieldNameLabel,
         message: "Could not find field label for fieldName: ".concat(fieldName, " label element")
       });
@@ -18196,7 +18196,7 @@
     }
     var newLabel = (_label$replace = label.replace(/\n/g, '<br/>')) !== null && _label$replace !== void 0 ? _label$replace : label;
     (_$3 = $("#".concat(fieldName, "_label"))) === null || _$3 === void 0 || _$3.html(newLabel);
-    logger$v.info({
+    logger$E.info({
       fn: setFieldNameLabel,
       message: "Successfully set field label for fieldName: ".concat(fieldName, " to ").concat(label)
     });
@@ -18209,13 +18209,13 @@
   function copyFromFieldAToFieldB(fromFieldNameA, toFieldNameB) {
     var fromFieldNameAElement = document.getElementById(fromFieldNameA);
     if (!fromFieldNameAElement) {
-      logger$v.error({
+      logger$E.error({
         fn: copyFromFieldAToFieldB,
         message: "could not find element forfromFieldNameA: ".concat(fromFieldNameA)
       });
       return;
     }
-    logger$v.info({
+    logger$E.info({
       fn: copyFromFieldAToFieldB,
       message: "Start copying value ".concat((fromFieldNameAElement === null || fromFieldNameAElement === void 0 ? void 0 : fromFieldNameAElement.value) || '', " from ").concat(fromFieldNameA, " to ").concat(toFieldNameB)
     });
@@ -18225,7 +18225,7 @@
       name: toFieldNameB,
       value: (fromFieldNameAElement === null || fromFieldNameAElement === void 0 ? void 0 : fromFieldNameAElement.value) || ''
     });
-    logger$v.info({
+    logger$E.info({
       fn: copyFromFieldAToFieldB,
       message: "Successfully copied value ".concat((fromFieldNameAElement === null || fromFieldNameAElement === void 0 ? void 0 : fromFieldNameAElement.value) || '', " from ").concat(fromFieldNameA, " to ").concat(toFieldNameB)
     });
@@ -18246,7 +18246,7 @@
     var _$4;
     var infoDiv = (_$4 = $("#".concat(name, "_label"))) === null || _$4 === void 0 || (_$4 = _$4.closest('td')) === null || _$4 === void 0 ? void 0 : _$4.find('div.info');
     if (!infoDiv) {
-      logger$v.error({
+      logger$E.error({
         fn: getFieldInfoDiv,
         message: "Could not find info div for field name: ".concat(name)
       });
@@ -18258,7 +18258,7 @@
     var _$5;
     var originalSelectElementForMSOS = (_$5 = $("#".concat(name, "_0"))) !== null && _$5 !== void 0 && _$5.length ? $("#".concat(name, "_0")) : $("#".concat(name, "_i"));
     if (!originalSelectElementForMSOS || !originalSelectElementForMSOS.length) {
-      logger$v.error({
+      logger$E.error({
         fn: getOriginalMsosElement,
         message: "Could not get original select control element for fieldName: ".concat(name, " for Msos, see initializeMsosLibrary, MultiSelectOptionSet libraries, https://pbauerochse.github.io/searchable-option-list/")
       });
@@ -18274,7 +18274,7 @@
 
     // @ts-ignore
     if (!(originalSelectElementForMSOS !== null && originalSelectElementForMSOS !== void 0 && originalSelectElementForMSOS.multiSelectOptionSet())) {
-      logger$v.error({
+      logger$E.error({
         fn: setMultiSelectValues,
         message: "Could not get multiSelectOptionSet() object form original select control element for Msos, see initializeMsosLibrary, MultiSelectOptionSet libraries, https://pbauerochse.github.io/searchable-option-list/"
       });
@@ -18300,7 +18300,7 @@
       control === null || control === void 0 || control.insertAdjacentElement('afterend', div);
       errorMessageElement = document.querySelector("#".concat(fieldName, "_error_message"));
       if (!errorMessageElement) {
-        logger$v.error({
+        logger$E.error({
           fn: getFieldErrorDiv,
           message: "Failed to find field error div, fieldName: ".concat(fieldName)
         });
@@ -18310,7 +18310,7 @@
     return errorMessageElement;
   }
   function setFieldValueToEmptyState(fieldName) {
-    logger$v.info({
+    logger$E.info({
       fn: setFieldValueToEmptyState,
       message: "setting fieldName: ".concat(fieldName, " value to empty")
     });
@@ -18340,13 +18340,13 @@
       }
     });
     if (!matchingElement) {
-      logger$v.error({
+      logger$E.error({
         fn: renameSectionLabel,
         message: "Failed to find fieldset for name: ".concat(name, ", type: ").concat(type, ", newLabel: ").concat(newLabel)
       });
       return;
     }
-    logger$v.info({
+    logger$E.info({
       fn: renameSectionLabel,
       message: "Succesfully renamed section name: ".concat(name, ", to newLabel: ").concat(newLabel)
     });
@@ -18366,7 +18366,7 @@
         }
       });
     } else {
-      logger$v.warn({
+      logger$E.warn({
         fn: removeDropdownOptions,
         message: "No dropdown found with name or id: ".concat(name),
         data: {
@@ -18379,14 +18379,14 @@
   function moveTableRow(rowIdToMove, referenceRowId) {
     var _document$getElementB, _document$getElementB2;
     var position = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 'after';
-    logger$v.info({
+    logger$E.info({
       fn: moveTableRow,
       message: "moveTableRow called with rowIdToMove: ".concat(rowIdToMove, ", referenceRowId: ").concat(referenceRowId, ", position: ").concat(position)
     });
     var rowToMove = (_document$getElementB = document.getElementById(rowIdToMove)) === null || _document$getElementB === void 0 ? void 0 : _document$getElementB.closest('tr');
     var referenceRow = (_document$getElementB2 = document.getElementById(referenceRowId)) === null || _document$getElementB2 === void 0 ? void 0 : _document$getElementB2.closest('tr');
     if (!rowToMove || !referenceRow) {
-      logger$v.error({
+      logger$E.error({
         fn: moveTableRow,
         message: 'One or both of the specified rows were not found.'
       });
@@ -18425,7 +18425,7 @@
   function isSignatureFilled() {
     var canvas = document.querySelector('.drawCanvas');
     if (!canvas) {
-      logger$v.error({
+      logger$E.error({
         fn: isSignatureFilled,
         message: "Could not find signature canvas"
       });
@@ -18434,7 +18434,7 @@
     // @ts-ignore
     var ctx = canvas.getContext('2d');
     if (!ctx || !canvas.width || !canvas.height) {
-      logger$v.error({
+      logger$E.error({
         fn: isSignatureFilled,
         message: "Could not get context, canvas width or height",
         data: {
@@ -18459,7 +18459,7 @@
     return false; // Canvas is empty
   }
 
-  var logger$u = Logger('common/utils');
+  var logger$D = Logger('common/utils');
   POWERPOD.utils = {
     enableDebugging: enableDebugging,
     disableDebugging: disableDebugging,
@@ -18490,7 +18490,7 @@
       JSON.parse(jsonString);
       return true; // JSON is valid
     } catch (e) {
-      logger$u.error({
+      logger$D.error({
         fn: isValidJSON,
         message: "Invalid JSON for jsonString: ".concat(jsonString)
       });
@@ -18526,7 +18526,7 @@
 
   // Merges two arrays of objects joining on a given prop, e.g. "name"
   function mergeFieldArrays(a, b, prop) {
-    logger$u.info({
+    logger$D.info({
       fn: mergeFieldArrays,
       message: "mergeFieldArrays with the following data:",
       data: {
@@ -18551,7 +18551,7 @@
     }
     var result = prop ? Object.values(mergedObj) : mergedObj;
     // Check if the result should be an array or object
-    logger$u.info({
+    logger$D.info({
       fn: mergeFieldArrays,
       message: "mergeFieldArrays done with result:",
       data: {
@@ -18651,7 +18651,7 @@
               _context.next = 5;
               break;
             }
-            logger$u.error({
+            logger$D.error({
               fn: saveBrowserInfo,
               message: 'Failed to get browser info'
             });
@@ -18701,7 +18701,7 @@
           case 21:
             _context.sent;
           case 22:
-            logger$u.info({
+            logger$D.info({
               fn: saveBrowserInfo,
               message: "successfully patched form data with browser information payload: ".concat(JSON.stringify(payload)),
               data: {
@@ -18715,7 +18715,7 @@
           case 25:
             _context.prev = 25;
             _context.t0 = _context["catch"](8);
-            logger$u.error({
+            logger$D.error({
               fn: saveBrowserInfo,
               message: "failed to patch form data with browser info for formType: ".concat(formType, ", payload: ").concat(JSON.stringify(payload)),
               data: {
@@ -18779,7 +18779,7 @@
     return originals;
   }
 
-  var logger$t = Logger('common/loading');
+  var logger$C = Logger('common/loading');
 
   /**
    * Hides the loading animation by removing the div and the styling element.
@@ -18789,12 +18789,12 @@
    * @function
    */
   function hideLoadingAnimation() {
-    logger$t.info({
+    logger$C.info({
       fn: hideLoadingAnimation,
       message: 'attempting to hide loading animation...'
     });
     if (POWERPOD.doNotUnhideLoader) {
-      logger$t.info({
+      logger$C.info({
         fn: hideLoadingAnimation,
         message: 'abort unhiding due to POWERPOD.doNotUnhideLoader flag set to true'
       });
@@ -18804,13 +18804,13 @@
     var loader = doc.getElementById('loader');
     if (loader) {
       var _loader$parentNode;
-      logger$t.info({
+      logger$C.info({
         fn: hideLoadingAnimation,
         message: 'loader found & finished loading, removing element'
       });
       (_loader$parentNode = loader.parentNode) === null || _loader$parentNode === void 0 || _loader$parentNode.removeChild(loader);
     } else {
-      logger$t.warn({
+      logger$C.warn({
         fn: hideLoadingAnimation,
         message: 'loader not found!'
       });
@@ -18818,21 +18818,21 @@
     var loaderStyle = doc.getElementById('loader-style');
     if (loaderStyle) {
       var _loaderStyle$parentNo;
-      logger$t.info({
+      logger$C.info({
         fn: hideLoadingAnimation,
         message: 'loaderStyle found & finished loading, removing element'
       });
       (_loaderStyle$parentNo = loaderStyle.parentNode) === null || _loaderStyle$parentNo === void 0 || _loaderStyle$parentNo.removeChild(loaderStyle);
       window.scrollTo(0, 0);
     } else {
-      logger$t.warn({
+      logger$C.warn({
         fn: hideLoadingAnimation,
         message: 'loaderStyle not found!'
       });
     }
   }
 
-  var logger$s = Logger('common/fieldConditionalLogicLegacy');
+  var logger$B = Logger('common/fieldConditionalLogicLegacy');
   function shouldRequireDependentField(_ref) {
     var _POWERPOD$state;
     var shouldBeRequired = _ref.shouldBeRequired,
@@ -18845,7 +18845,7 @@
     var requiredFieldRow = requiredFieldLabelElement === null || requiredFieldLabelElement === void 0 ? void 0 : requiredFieldLabelElement.closest('tr');
     var requiredFieldInputElement = document.querySelector("#".concat(requiredFieldTag));
     if (!requiredFieldLabelElement || !requiredFieldRow || !requiredFieldInputElement) {
-      logger$s.error({
+      logger$B.error({
         fn: shouldRequireDependentField,
         message: 'Failed to find required elements',
         data: {
@@ -18861,7 +18861,7 @@
     var loadingAllFieldConfig = POWERPOD.configuringFields;
     var loadingFieldConfig = (_POWERPOD$state = POWERPOD.state) === null || _POWERPOD$state === void 0 || (_POWERPOD$state = _POWERPOD$state.fields) === null || _POWERPOD$state === void 0 || (_POWERPOD$state = _POWERPOD$state[requiredFieldTag]) === null || _POWERPOD$state === void 0 ? void 0 : _POWERPOD$state.loading;
     if (shouldBeRequired) {
-      logger$s.info({
+      logger$B.info({
         fn: shouldRequireDependentField,
         message: "Setting dynamic field to visible requiredFieldTag: ".concat(requiredFieldTag, ", loadingAllFieldConfig: ").concat(loadingAllFieldConfig, ", loadingFieldConfig: ").concat(loadingFieldConfig)
       });
@@ -18891,7 +18891,7 @@
           var _fieldConfig$visibleI2 = fieldConfig.visibleIf.valueIfVisible,
             type = _fieldConfig$visibleI2.type,
             value = _fieldConfig$visibleI2.value;
-          logger$s.info({
+          logger$B.info({
             fn: shouldRequireDependentField,
             message: "visibleIf.valueIfVisible has been configured for fieldName: ".concat(requiredFieldTag, ", start setup with values:"),
             data: {
@@ -18899,7 +18899,7 @@
             }
           });
           if (type === 'raw' && (value !== undefined || value !== null)) {
-            logger$s.info({
+            logger$B.info({
               fn: shouldRequireDependentField,
               message: "visibleIf.valueIfVisible has been configured, setting value: ".concat(value, " for fieldName: ").concat(requiredFieldTag)
             });
@@ -18907,7 +18907,7 @@
           } else if (type === 'function') {
             var valueGeneratorFunction = POWERPOD.valueGeneration[value];
             if (!valueGeneratorFunction || typeof valueGeneratorFunction !== 'function') {
-              logger$s.error({
+              logger$B.error({
                 fn: shouldRequireDependentField,
                 message: "for fieldName: ".concat(requiredFieldTag, " could not find valueGeneration function for value: ").concat(value)
               });
@@ -18915,13 +18915,13 @@
             }
             var newValue = valueGeneratorFunction();
             if (newValue == undefined) {
-              logger$s.info({
+              logger$B.info({
                 fn: shouldRequireDependentField,
                 message: "visibleIf.valueIfVisible has been configured, valueGenerator: ".concat(value, " returned undefined, skipping setting value for fieldName: ").concat(requiredFieldTag)
               });
               return;
             }
-            logger$s.info({
+            logger$B.info({
               fn: shouldRequireDependentField,
               message: "visibleIf.valueIfVisible has been configured, valueGenerator: ".concat(value, " returned and setting value: ").concat(newValue, " for fieldName: ").concat(requiredFieldTag)
             });
@@ -18938,7 +18938,7 @@
       }
     } else {
       var _fieldConfig$visibleI3;
-      logger$s.info({
+      logger$B.info({
         fn: shouldRequireDependentField,
         message: "Setting dynamic field to hidden requiredFieldTag: ".concat(requiredFieldTag, ", fieldConfig: ").concat(JSON.stringify(fieldConfig)),
         data: {
@@ -18974,7 +18974,7 @@
           _type = _fieldConfig$visibleI4.type,
           fieldNames = _fieldConfig$visibleI4.fieldNames;
           _fieldConfig$visibleI4.value;
-        logger$s.info({
+        logger$B.info({
           fn: shouldRequireDependentField,
           message: "visibleIf.valueIfHidden has been configured for fieldName: ".concat(requiredFieldTag, ", start setup with values:"),
           data: {
@@ -18989,7 +18989,7 @@
             fieldValues.push(inputValue);
           });
           var _newValue = fieldValues.join(' ');
-          logger$s.info({
+          logger$B.info({
             fn: shouldRequireDependentField,
             message: "visibleIf.valueIfHidden has been configured, setting value: ".concat(_newValue, " for fieldName: ").concat(requiredFieldTag)
           });
@@ -19015,7 +19015,7 @@
       customFunc = _ref2.customFunc;
     var dependentOnElement = document.querySelector("#".concat(dependentOnElementTag));
     if (!dependentOnElement) {
-      logger$s.error({
+      logger$B.error({
         fn: initOnChange_DependentRequiredField,
         message: "Could not find field for dependentOnElementTag: ".concat(dependentOnElementTag)
       });
@@ -19065,7 +19065,7 @@
       customFunc = _ref3.customFunc;
     var dependentOnElement = document.querySelector("#".concat(dependentOnElementTag));
     if (!dependentOnElement) {
-      logger$s.error({
+      logger$B.error({
         fn: setupDependentRequiredField,
         message: "requiredFieldTag: ".concat(requiredFieldTag, ", could not find field for dependentOnElementTag: ").concat(dependentOnElementTag)
       });
@@ -19078,12 +19078,12 @@
       tr: tr,
       raw: true
     });
-    logger$s.info({
+    logger$B.info({
       fn: setupDependentRequiredField,
       message: "requiredFieldTag: ".concat(requiredFieldTag, ", setting up dependent field dependentOnElementTag: ").concat(dependentOnElementTag, " with value: ").concat(input !== null && input !== void 0 ? input : '')
     });
     if (overrideTruthyClause != undefined) {
-      logger$s.info({
+      logger$B.info({
         fn: setupDependentRequiredField,
         message: "requiredFieldTag: ".concat(requiredFieldTag, ", overriding truthy clause overrideTruthyClause: ").concat(overrideTruthyClause),
         data: {
@@ -19112,7 +19112,7 @@
       }
     } else {
       if (input === dependentOnValue || input === "".concat(dependentOnValue) || dependentOnValueArray.includes(input) || input !== null && input !== void 0 && input.includes(dependentOnValue) || Number(input) && dependentOnValueArray.includes(Number(input))) {
-        logger$s.info({
+        logger$B.info({
           fn: setupDependentRequiredField,
           message: "requiredFieldTag: ".concat(requiredFieldTag, ", value matches visibleIf condition, dependentOnElementTag: ").concat(dependentOnElementTag),
           data: {
@@ -19132,7 +19132,7 @@
           customFunc: customFunc
         });
       } else {
-        logger$s.info({
+        logger$B.info({
           fn: setupDependentRequiredField,
           message: "requiredFieldTag: ".concat(requiredFieldTag, ", value DOES NOT match visibleIf condition"),
           data: {
@@ -19155,7 +19155,7 @@
     }
   }
 
-  const logger$r = Logger('common/commodities');
+  const logger$A = Logger('common/commodities');
   POWERPOD.commodities = {
       getCommodities,
       processCommoditiesData,
@@ -19163,12 +19163,12 @@
   async function getCommodities() {
       const { data } = await getCommoditiesData();
       if (data) {
-          logger$r.info({
+          logger$A.info({
               fn: getCommodities,
               message: 'successfully extracted commodity options',
           });
           const res = processCommoditiesData(data);
-          logger$r.info({
+          logger$A.info({
               fn: getCommodities,
               message: 'successfully extracted commodities:',
               data: res,
@@ -19176,7 +19176,7 @@
           return Promise.resolve(res);
       }
       let errorMsg = 'failed to extract commodities from data';
-      logger$r.warn({
+      logger$A.warn({
           fn: getCommodities,
           message: errorMsg,
           data,
@@ -19210,7 +19210,7 @@
       return res;
   }
 
-  var logger$q = Logger('application/steps/applicantInfo');
+  var logger$z = Logger('application/steps/applicantInfo');
   function customizeApplicantInfoStep$1() {
     setupApplicantInfoStepFields();
     initOnChange_PreviouslyReceivedKttpFunding();
@@ -19258,13 +19258,13 @@
     var selectOptionControl = $('#quartech_hasthisorganizationreceivedkttpfundingin');
     var selectedValue = selectOptionControl.val();
     hideShow_for_PreviouslyReceivedKttpFunding(selectedValue);
-    logger$q.info({
+    logger$z.info({
       fn: initOnChange_PreviouslyReceivedKttpFunding,
       message: 'initOnChange_PreviouslyReceivedKttpFunding called.'
     });
     selectOptionControl.on('change', function () {
       var selectedValue = $(this).val();
-      logger$q.info({
+      logger$z.info({
         fn: initOnChange_PreviouslyReceivedKttpFunding,
         message: "Selected Value: ".concat(selectedValue)
       });
@@ -19283,13 +19283,13 @@
     var organizationReceivedFundingFromBC_SelectCtr = $('#quartech_hasthisorganizationreceivedfundingfrmother');
     var selectedValue = organizationReceivedFundingFromBC_SelectCtr.val();
     hideShow_for_OrganizationReceivedFundingFromBC(selectedValue);
-    logger$q.info({
+    logger$z.info({
       fn: initOnChange_OrganizationReceivedFundingFromBC,
       message: 'initOnChange_OrganizationReceivedFundingFromBC called.'
     });
     organizationReceivedFundingFromBC_SelectCtr.on('change', function () {
       var selectedValue = $(this).val();
-      logger$q.info({
+      logger$z.info({
         fn: initOnChange_OrganizationReceivedFundingFromBC,
         message: "Selected Value: ".concat(selectedValue)
       });
@@ -19308,13 +19308,13 @@
     var collaboratingWithOtherOrgsControl = $('#quartech_areyoucollaboratingwithanyotherorg');
     var selectedValue = collaboratingWithOtherOrgsControl.val();
     hideShow_for_CollaboratingWithOtherOrgsControl(selectedValue);
-    logger$q.info({
+    logger$z.info({
       fn: initOnChange_IsCollaboratingWithOtherOrganizationQuestion,
       message: 'initOnChange_IsCollaboratingWithOtherOrganizationQuestion called.'
     });
     collaboratingWithOtherOrgsControl.on('change', function () {
       var selectedValue = $(this).val();
-      logger$q.info({
+      logger$z.info({
         fn: initOnChange_IsCollaboratingWithOtherOrganizationQuestion,
         message: "Selected Value: ".concat(selectedValue)
       });
@@ -19337,13 +19337,13 @@
     var selectOptionControl = $('#quartech_doestheactivitytakeplaceovermultipleday');
     var selectedValue = selectOptionControl.val();
     hideShow_for_ActivityOverMultipleDays(selectedValue);
-    logger$q.info({
+    logger$z.info({
       fn: initOnChange_ActivityOverMultipleDays,
       message: 'initOnChange_ActivityOverMultipleDays called.'
     });
     selectOptionControl.on('change', function () {
       var selectedValue = $(this).val();
-      logger$q.info({
+      logger$z.info({
         fn: initOnChange_ActivityOverMultipleDays,
         message: "Selected Value: ".concat(selectedValue)
       });
@@ -19364,13 +19364,13 @@
     var selectOptionControl = $('#quartech_theprocessoflearningandprocessingknowledge');
     var selectedValue = selectOptionControl.val();
     hideShow_for_AdaptedEventForAdultLearning(selectedValue);
-    logger$q.info({
+    logger$z.info({
       fn: initOnChange_AdaptedEventForAdultLearning,
       message: 'initOnChange_AdaptedEventForAdultLearning called.'
     });
     selectOptionControl.on('change', function () {
       var selectedValue = $(this).val();
-      logger$q.info({
+      logger$z.info({
         fn: initOnChange_AdaptedEventForAdultLearning,
         message: "Selected Value: ".concat(selectedValue)
       });
@@ -19422,7 +19422,7 @@
       });
       getTopicCredentials(topic || null);
     }).fail(function (e) {
-      logger$q.error({
+      logger$z.error({
         fn: getTopic,
         message: 'Unable to get topic',
         data: e
@@ -19443,7 +19443,7 @@
       });
       updateBusinessNumberField(topic, latestValidCredentials);
     }).fail(function (e) {
-      logger$q.error({
+      logger$z.error({
         fn: getTopicCredentials,
         message: 'Unable to get topic credentials',
         data: e
@@ -19564,7 +19564,7 @@
     if (businessOverviewFieldSetElement) businessOverviewFieldSetElement.css('display', 'none');
   }
   function initCommoditiesMultiSelect() {
-    logger$q.info({
+    logger$z.info({
       fn: initCommoditiesMultiSelect,
       message: 'start initializing commodities multiselect'
     });
@@ -19581,7 +19581,7 @@
     var commodityFieldId = 'quartech_organizationsectororcommodity';
     if (!$("#".concat(commodityFieldId))) return;
     var commoditiesGroupedByCategoryKey = processCommoditiesData(commoditiesJson);
-    logger$q.info({
+    logger$z.info({
       fn: addCommodityMultiSelect,
       message: "got processed commodities data:",
       data: commoditiesGroupedByCategoryKey
@@ -19605,7 +19605,7 @@
     useScript('chosen', setupChosen$1);
   }
   function setupChosen$1() {
-    logger$q.info({
+    logger$z.info({
       fn: setupChosen$1,
       message: 'setting up chosen...'
     });
@@ -19651,7 +19651,7 @@
         value: stringToPassToFieldInput
       });
     });
-    logger$q.info({
+    logger$z.info({
       fn: setupChosen$1,
       message: 'successfully setup chosen...'
     });
@@ -19676,7 +19676,7 @@
       return res;
   }
 
-  var logger$p = Logger('application/steps/project');
+  var logger$y = Logger('application/steps/project');
   function customizeProjectStep(programData) {
     setProjectStepRequiredFields();
     customizeActivityTypesDropDownList(programData);
@@ -19749,7 +19749,7 @@
     ];
     var container = document.querySelector('#subgrid_ProjectStep_New_TF_Inventory');
     if (!container) {
-      logger$p.error({
+      logger$y.error({
         fn: setNewTFInventoryColWidths,
         message: "TF Inventory subgrid not found."
       });
@@ -19757,7 +19757,7 @@
     }
     var headerRow = container.querySelector('tr');
     if (!headerRow) {
-      logger$p.error({
+      logger$y.error({
         fn: setNewTFInventoryColWidths,
         message: "No header row found in subgrid."
       });
@@ -19793,7 +19793,7 @@
     ];
     var container = document.querySelector('#subgrid_ProjectStep_Import_TF_Inventory');
     if (!container) {
-      logger$p.error({
+      logger$y.error({
         fn: setNewTFInventoryColWidths,
         message: "TF Inventory subgrid not found."
       });
@@ -19801,7 +19801,7 @@
     }
     var headerRow = container.querySelector('tr');
     if (!headerRow) {
-      logger$p.error({
+      logger$y.error({
         fn: setNewTFInventoryColWidths,
         message: "No header row found in subgrid."
       });
@@ -19838,13 +19838,13 @@
     var q2Control = $('#quartech_willthisactivitybeopentotheentirepublic');
     var selectedValue = q2Control.val();
     hideShow_WhyActiviyNotOpenToPublic(selectedValue);
-    logger$p.info({
+    logger$y.info({
       fn: initOnChange_ActiviyOpenToPublic,
       message: 'initOnChange_ActiviyOpenToPublic called.'
     });
     q2Control.on('change', function () {
       var selectedValue = $(this).val();
-      logger$p.info({
+      logger$y.info({
         fn: initOnChange_ActiviyOpenToPublic,
         message: "Selected Value: ".concat(selectedValue)
       });
@@ -20048,7 +20048,7 @@
     useScript('chosen', setupChosen);
   }
   function setupChosen() {
-    logger$p.info({
+    logger$y.info({
       fn: setupChosen,
       message: 'setting up chosen...'
     });
@@ -20099,7 +20099,7 @@
       tooltipText: 'Project locations in addition to what you have provided in the question above',
       tooltipTargetElementId: 'additionalLocationControl_chosen'
     });
-    logger$p.info({
+    logger$y.info({
       fn: setupChosen,
       message: 'successfully setup chosen...'
     });
@@ -20191,14 +20191,14 @@
     }
   };
 
-  var logger$o = Logger('common/saveButton');
+  var logger$x = Logger('common/saveButton');
   POWERPOD.saveButton = {
     addSaveButton: addSaveButton
   };
   function addSaveButton() {
     var currentStep = getCurrentStep();
     if (currentStep === FormStep.DeclarationAndConsent) {
-      logger$o.info({
+      logger$x.info({
         fn: addSaveButton,
         message: "Skip adding save button on currentStep: ".concat(currentStep)
       });
@@ -20213,7 +20213,7 @@
     actionsDiv === null || actionsDiv === void 0 || actionsDiv.append(divElement);
     var saveButton = document.getElementById('quartechSaveBtn');
     if (!saveButton) {
-      logger$o.error({
+      logger$x.error({
         fn: addSaveButton,
         message: 'Could not get saveButton after adding it to the DOM'
       });
@@ -20247,13 +20247,13 @@
               _context2.next = 5;
               break;
             }
-            logger$o.error({
+            logger$x.error({
               fn: saveFormData,
               message: 'Could not get saveButton after adding it to the DOM'
             });
             return _context2.abrupt("return");
           case 5:
-            logger$o.info({
+            logger$x.info({
               fn: saveFormData,
               message: 'Start saving form data...',
               data: {
@@ -20264,7 +20264,7 @@
             saveButton.value = 'Saving...';
             formJsonRes = generateFormJson();
             if (!formJsonRes) {
-              logger$o.error({
+              logger$x.error({
                 fn: saveButton,
                 message: "Failed to generateFormJson"
               });
@@ -20273,7 +20273,7 @@
               _context2.next = 13;
               break;
             }
-            logger$o.warn({
+            logger$x.warn({
               fn: saveFormData,
               message: 'No field data to save'
             });
@@ -20284,12 +20284,12 @@
             payload = {};
             fields = Object.keys(fieldsStore);
             fields.forEach(function (field) {
-              logger$o.info({
+              logger$x.info({
                 fn: saveFormData,
                 message: "processing stored data for field: ".concat(field)
               });
               var fieldData = fieldsStore[field];
-              logger$o.info({
+              logger$x.info({
                 fn: saveFormData,
                 message: "found stored data for field: ".concat(field, ", fieldData: ").concat(JSON.stringify(fieldData))
               });
@@ -20301,14 +20301,14 @@
                 dataFormat = fieldData.dataFormat,
                 forceSave = fieldData.forceSave;
               if (elementType === HtmlElementType.MultiSelectPicklist && (!value || !value.length)) {
-                logger$o.warn({
+                logger$x.warn({
                   fn: saveFormData,
                   message: "skipping saving EMPTY data for elementType: ".concat(HtmlElementType.MultiSelectPicklist, " field name: ").concat(field)
                 });
                 return;
               }
               if (!forceSave && (error && error.length || !touched)) {
-                logger$o.warn({
+                logger$x.warn({
                   fn: saveFormData,
                   message: "skipping saving data for field name: ".concat(field)
                 });
@@ -20333,7 +20333,7 @@
                 payload = _objectSpread2(_objectSpread2(_objectSpread2(_objectSpread2({}, value !== undefined && formattedValue === undefined && _defineProperty({}, field, value)), value !== undefined && formattedValue !== undefined && _defineProperty({}, field, formattedValue)), payload), ((_Object$keys2 = Object.keys(customPayload)) === null || _Object$keys2 === void 0 ? void 0 : _Object$keys2.length) && customPayload);
               }
               if (customPayload && Object.keys(customPayload).length > 0) {
-                logger$o.info({
+                logger$x.info({
                   fn: saveFormData,
                   message: "Adding custom payload to form save data payload: ".concat(JSON.stringify(customPayload)),
                   data: {
@@ -20347,7 +20347,7 @@
               _context2.next = 21;
               break;
             }
-            logger$o.warn({
+            logger$x.warn({
               fn: saveFormData,
               message: 'no payload data to save'
             });
@@ -20387,7 +20387,7 @@
           case 36:
             _context2.sent;
           case 37:
-            logger$o.info({
+            logger$x.info({
               fn: saveFormData,
               message: 'successfully patched form data with payload',
               data: {
@@ -20401,7 +20401,7 @@
           case 40:
             _context2.prev = 40;
             _context2.t0 = _context2["catch"](26);
-            logger$o.error({
+            logger$x.error({
               fn: saveFormData,
               message: "failed to patch form data for formType: ".concat(formType),
               data: {
@@ -20425,9 +20425,9 @@
     return _saveFormData.apply(this, arguments);
   }
 
-  var logger$n = Logger('application/steps/demographicInfo');
+  var logger$w = Logger('application/steps/demographicInfo');
   function customizeDemographicInfoStep(programData) {
-    logger$n.info({
+    logger$w.info({
       fn: customizeDemographicInfoStep,
       message: "Start customizing demographic info step, quartech_disabledchefsdemographicinfo: ".concat(programData === null || programData === void 0 ? void 0 : programData.quartech_disabledchefsdemographicinfo)
     });
@@ -20479,7 +20479,7 @@
       return _regeneratorRuntime().wrap(function _callee$(_context) {
         while (1) switch (_context.prev = _context.next) {
           case 0:
-            logger$n.info({
+            logger$w.info({
               fn: addDemographicInfoChefsIframe,
               message: "Start adding chefs iframe... v1.1"
             });
@@ -20500,7 +20500,7 @@
             // Logic has since changed, if there's an ID present, we don't need to do anything.
             // chefsUrl = `https://submit.digital.gov.bc.ca/app/form/success?s=${chefsSubmissionGuid}`;
 
-            logger$n.info({
+            logger$w.info({
               fn: addDemographicInfoChefsIframe,
               message: "Demographic info survey has already been completed, chefsSubmissionGuid: ".concat(chefsSubmissionGuid, ", chefsSubmissionId: ").concat(chefsSubmissionId)
             });
@@ -20535,7 +20535,7 @@
               chefsDemographicDataFormId = quartech_ChefsDemographicDataFormId;
               chefsDemographicDataIndividualsFormId = quartech_ChefsDemographicDataIndividualsFormId;
             }
-            logger$n.info({
+            logger$w.info({
               fn: addDemographicInfoChefsIframe,
               message: "Retrieved params for iframe, chefsDemographicDataFormId: ".concat(chefsDemographicDataFormId, ", chefsDemographicDataIndividualsFormId: ").concat(chefsDemographicDataIndividualsFormId)
             });
@@ -20547,7 +20547,7 @@
           case 25:
             applicationDataRes = _context.sent;
             if (!(applicationDataRes !== null && applicationDataRes !== void 0 && (_applicationDataRes$d = applicationDataRes.data) !== null && _applicationDataRes$d !== void 0 && (_applicationDataRes$d = _applicationDataRes$d.value) !== null && _applicationDataRes$d !== void 0 && _applicationDataRes$d[0])) {
-              logger$n.error({
+              logger$w.error({
                 fn: addDemographicInfoChefsIframe,
                 message: "Could not get application data result to determine whether individual or business"
               });
@@ -20555,7 +20555,7 @@
             _applicationDataRes$d2 = applicationDataRes === null || applicationDataRes === void 0 || (_applicationDataRes$d3 = applicationDataRes.data) === null || _applicationDataRes$d3 === void 0 || (_applicationDataRes$d3 = _applicationDataRes$d3.value) === null || _applicationDataRes$d3 === void 0 ? void 0 : _applicationDataRes$d3[0], quartech_nocragstnumber = _applicationDataRes$d2.quartech_nocragstnumber; // If no CRA number then it's an individual
             if (quartech_nocragstnumber) {
               if (!chefsDemographicDataIndividualsFormId) {
-                logger$n.error({
+                logger$w.error({
                   fn: addDemographicInfoChefsIframe,
                   message: "Bad config: Env Vars should contain the quartech_ChefsDemographicDataFormId element"
                 });
@@ -20564,7 +20564,7 @@
             } else {
               // Otherwise it's a business
               if (!chefsDemographicDataFormId) {
-                logger$n.error({
+                logger$w.error({
                   fn: addDemographicInfoChefsIframe,
                   message: "Bad config: Env Vars should contain the quartech_ChefsDemographicDataFormId element"
                 });
@@ -20579,13 +20579,13 @@
               if (!containSubmissionId) return;
               var submissionPayload = JSON.parse(event.data);
               var chefsSubmissionGuidResult = submissionPayload.submissionId;
-              logger$n.info({
+              logger$w.info({
                 fn: addDemographicInfoChefsIframe,
                 message: 'received chefsSubmissionGuidResult: ' + chefsSubmissionGuidResult
               });
               var chefsSubmissionId = chefsSubmissionGuidResult.substring(0, 8).toUpperCase();
               if (!chefsSubmissionId || !chefsSubmissionGuidResult) {
-                logger$n.error({
+                logger$w.error({
                   fn: addDemographicInfoChefsIframe,
                   message: "Failed to get chefsSubmissionId"
                 });
@@ -20620,10 +20620,10 @@
     return _addDemographicInfoChefsIframe.apply(this, arguments);
   }
 
-  var logger$m = Logger('steps/documents');
+  var logger$v = Logger('steps/documents');
   function customizeDocumentsStep$1() {
     var programAbbreviation = getProgramAbbreviation();
-    logger$m.info({
+    logger$v.info({
       fn: customizeDocumentsStep$1,
       message: "Start customizing documents step"
     });
@@ -20645,7 +20645,7 @@
       return _regeneratorRuntime().wrap(function _callee$(_context) {
         while (1) switch (_context.prev = _context.next) {
           case 0:
-            logger$m.info({
+            logger$v.info({
               fn: customizeDocumentsStepForTFCCRF,
               message: "Start customizing documents step for TFCCRF"
             });
@@ -20657,13 +20657,13 @@
           case 4:
             applicationDataRes = _context.sent;
             if (!(applicationDataRes !== null && applicationDataRes !== void 0 && (_applicationDataRes$d = applicationDataRes.data) !== null && _applicationDataRes$d !== void 0 && (_applicationDataRes$d = _applicationDataRes$d.value) !== null && _applicationDataRes$d !== void 0 && _applicationDataRes$d[0])) {
-              logger$m.error({
+              logger$v.error({
                 fn: customizeDocumentsStepForTFCCRF,
                 message: "Could not get application data result to determine whether individual or business"
               });
             }
             _applicationDataRes$d2 = applicationDataRes === null || applicationDataRes === void 0 || (_applicationDataRes$d3 = applicationDataRes.data) === null || _applicationDataRes$d3 === void 0 || (_applicationDataRes$d3 = _applicationDataRes$d3.value) === null || _applicationDataRes$d3 === void 0 ? void 0 : _applicationDataRes$d3[0], quartech_ownorleaseland = _applicationDataRes$d2.quartech_ownorleaseland, quartech_originalsource = _applicationDataRes$d2.quartech_originalsource, quartech_reportnewtreefruitinventory = _applicationDataRes$d2.quartech_reportnewtreefruitinventory;
-            logger$m.info({
+            logger$v.info({
               fn: customizeDocumentsStepForTFCCRF,
               message: "Found application value quartech_originalsource: ".concat(quartech_originalsource)
             });
@@ -20676,7 +20676,7 @@
                 fieldName: 'quartech_taxdocument'
               });
             }
-            logger$m.info({
+            logger$v.info({
               fn: customizeDocumentsStep$1,
               message: "Found application value quartech_ownorleaseland: ".concat(quartech_ownorleaseland)
             });
@@ -20702,13 +20702,13 @@
                 fieldName: 'quartech_leaseagreement'
               });
             }
-            logger$m.info({
+            logger$v.info({
               fn: customizeDocumentsStepForTFCCRF,
               message: "Found application value quartech_reportnewtreefruitinventory: ".concat(quartech_reportnewtreefruitinventory)
             });
             // Mandatory if quartech_originalsource != Import OR quartech_reportnewtreefruitinventory = YES
             if ([255550000, 255550002].includes(quartech_originalsource) || quartech_reportnewtreefruitinventory === 255550000) {
-              logger$m.info({
+              logger$v.info({
                 fn: customizeDocumentsStepForTFCCRF,
                 message: "Found application value quartech_reportnewtreefruitinventory: ".concat(quartech_reportnewtreefruitinventory, ", setting quartech_uploadasitemap to REQUIRED")
               });
@@ -20722,7 +20722,7 @@
               validateStepFields();
             } else {
               // hideFieldRow({ fieldName: 'quartech_uploadasitemap' });
-              logger$m.info({
+              logger$v.info({
                 fn: customizeDocumentsStepForTFCCRF,
                 message: "Found application value quartech_reportnewtreefruitinventory: ".concat(quartech_reportnewtreefruitinventory, ", setting quartech_uploadasitemap to NOT required")
               });
@@ -20744,16 +20744,16 @@
     return _customizeDocumentsStepForTFCCRF.apply(this, arguments);
   }
 
-  var logger$l = Logger('application/steps/success');
+  var logger$u = Logger('application/steps/success');
   function customizeSuccessStep(programData) {
-    logger$l.info({
+    logger$u.info({
       fn: customizeSuccessStep,
       message: "Start customizing success step..."
     });
     configureFields();
   }
 
-  var logger$k = Logger('application/application');
+  var logger$t = Logger('application/application');
   function initApplication() {
     preloadRequestVerificationToken();
     hideFieldsAndSections();
@@ -20827,7 +20827,7 @@
             formId = fetchedFormId;
             redirect = fetchedRedirect || false;
           case 11:
-            logger$k.info({
+            logger$t.info({
               fn: updatePageForSelectedProgram$1,
               message: "Determining redirect for programId: ".concat(programId, ", found formId: ").concat(formId, ", found redirect: ").concat(redirect)
             });
@@ -20835,7 +20835,7 @@
               _context.next = 16;
               break;
             }
-            logger$k.info({
+            logger$t.info({
               fn: updatePageForSelectedProgram$1,
               message: "Stop updating page,redirect to new formId: ".concat(formId),
               data: {
@@ -20850,7 +20850,7 @@
               _context.next = 20;
               break;
             }
-            logger$k.info({
+            logger$t.info({
               fn: updatePageForSelectedProgram$1,
               message: 'Could not find programid, retry when DOM readyState is comlete',
               data: {
@@ -20869,7 +20869,7 @@
               break;
             }
             hideLoadingAnimation();
-            logger$k.error({
+            logger$t.error({
               fn: updatePageForSelectedProgram$1,
               message: 'Missing programid, or unknown current step',
               data: {
@@ -20879,14 +20879,14 @@
             });
             return _context.abrupt("return");
           case 26:
-            logger$k.info({
+            logger$t.info({
               fn: updatePageForSelectedProgram$1,
               message: "Retrieving Program data for the selected programid querystring: ".concat(programId)
             });
             getApplicationFormData({
               programId: programId,
               beforeSend: function beforeSend() {
-                logger$k.info({
+                logger$t.info({
                   fn: updatePageForSelectedProgram$1,
                   message: 'clear any cached data from previous page loads'
                 });
@@ -20896,13 +20896,13 @@
               },
               onSuccess: function onSuccess(programData, textStatus, xhr) {
                 if (programData) {
-                  logger$k.info({
+                  logger$t.info({
                     fn: updatePageForSelectedProgram$1,
                     message: 'Retrieved Program data:',
                     data: programData
                   });
                   localStorage.setItem('programData', JSON.stringify(programData));
-                  logger$k.info({
+                  logger$t.info({
                     fn: updatePageForSelectedProgram$1,
                     message: 'Update application page with the program data.',
                     data: {
@@ -20945,7 +20945,7 @@
     }
   }
   function updateFormStepForSelectedProgram(programData) {
-    logger$k.info({
+    logger$t.info({
       fn: updateFormStepForSelectedProgram,
       message: 'Begin updating form step for program'
     });
@@ -28059,7 +28059,7 @@
   }
   customElements.define("fa-icon", FaIcon);
 
-  var logger$j = Logger('claim/steps/claimInfoStep');
+  var logger$s = Logger('claim/steps/claimInfoStep');
   function customizeClaimInfoStep() {
     configureFields();
     var programAbbreviation = getProgramAbbreviation();
@@ -28080,7 +28080,7 @@
       // @ts-ignore
       iframe.contentWindow.document;
       var numberOfStudentsApprovedFieldElement = innerDoc === null || innerDoc === void 0 ? void 0 : innerDoc.getElementById('quartech_numberofstudentsapproved');
-      logger$j.info({
+      logger$s.info({
         fn: addVVTSApprovedFundingAmount,
         message: "Change detected...",
         data: {
@@ -28321,7 +28321,7 @@
       },
       customEvent: 'onChangeClaimInfoGridVLBData',
       customEventHandler: function customEventHandler(event, customElement) {
-        logger$j.info({
+        logger$s.info({
           fn: addClaimInfoGrid,
           message: 'onChangeClaimInfoGridVLBData event listener triggered',
           data: {
@@ -28357,7 +28357,7 @@
       //   });
       // },
       initValuesFn: function initValuesFn(mappedValueKey, existingValue, customElement) {
-        logger$j.info({
+        logger$s.info({
           fn: addExpenseReportGrid,
           message: "Running initValuesFn for Expense Report Grid...",
           data: {
@@ -28376,7 +28376,7 @@
         }
       }
     });
-    logger$j.info({
+    logger$s.info({
       fn: addClaimInfoGrid,
       message: 'Successfully added VLB claim info grid'
     });
@@ -28410,7 +28410,7 @@
       },
       customEvent: 'onChangeExpenseReportData',
       customEventHandler: function customEventHandler(event, customElement) {
-        logger$j.info({
+        logger$s.info({
           fn: customizeClaimInfoStep,
           message: 'onChangeExpenseReportData event listener triggered',
           data: {
@@ -28443,7 +28443,7 @@
         verifyTotalSumEqualsRequestedAmount();
       },
       initValuesFn: function initValuesFn(mappedValueKey, existingValue, customElement) {
-        logger$j.info({
+        logger$s.info({
           fn: addExpenseReportGrid,
           message: "Running initValuesFn for Expense Report Grid...",
           data: {
@@ -28462,7 +28462,7 @@
         }
       }
     });
-    logger$j.info({
+    logger$s.info({
       fn: addExpenseReportGrid,
       message: 'Successfully added expense report grid'
     });
@@ -28500,7 +28500,7 @@
       },
       customEvent: 'onChangeExpenseReportData',
       customEventHandler: function customEventHandler(event, customElement) {
-        logger$j.info({
+        logger$s.info({
           fn: customizeClaimInfoStep,
           message: 'onChangeExpenseReportData event listener triggered',
           data: {
@@ -28539,7 +28539,7 @@
         calculateTotalRequestedAmountForKTTP();
       },
       initValuesFn: function initValuesFn(mappedValueKey, existingValue, customElement) {
-        logger$j.info({
+        logger$s.info({
           fn: addExpenseReportGridForKTTP,
           message: "Running initValuesFn for Expense Report Grid...",
           data: {
@@ -28558,7 +28558,7 @@
         }
       }
     });
-    logger$j.info({
+    logger$s.info({
       fn: addExpenseReportGridForKTTP,
       message: 'Successfully added expense report grid'
     });
@@ -28602,7 +28602,7 @@
       },
       customEvent: 'onChangeExpenseInvoicesData',
       customEventHandler: function customEventHandler(event, customElement) {
-        logger$j.info({
+        logger$s.info({
           fn: customizeClaimInfoStep,
           message: 'onChangeExpenseInvoicesData event listener triggered',
           data: {
@@ -28640,7 +28640,7 @@
         verifyTotalSumEqualsRequestedAmount();
       },
       initValuesFn: function initValuesFn(mappedValueKey, existingValue, customElement) {
-        logger$j.info({
+        logger$s.info({
           fn: addExpenseReportGrid,
           message: "Running initValuesFn for Expense Report Grid...",
           data: {
@@ -28659,7 +28659,7 @@
         }
       }
     });
-    logger$j.info({
+    logger$s.info({
       fn: addExpenseReportGrid,
       message: 'Successfully added expense invoices grid'
     });
@@ -28695,7 +28695,7 @@
     $('#quartech_declarationandconsent_label').text('I / We agree to the above statement.');
   }
 
-  var logger$i = Logger('claim/steps/documents');
+  var logger$r = Logger('claim/steps/documents');
   function customizeDocumentsStep() {
     return _customizeDocumentsStep.apply(this, arguments);
   }
@@ -28747,7 +28747,7 @@
       return _regeneratorRuntime().wrap(function _callee2$(_context2) {
         while (1) switch (_context2.prev = _context2.next) {
           case 0:
-            logger$i.info({
+            logger$r.info({
               fn: customizeDocumentsStepForKTTP,
               message: "Start customizing documents step for KTTP"
             });
@@ -28764,13 +28764,13 @@
           case 8:
             claimDataRes = _context2.sent;
             if (!(claimDataRes !== null && claimDataRes !== void 0 && claimDataRes.data)) {
-              logger$i.error({
+              logger$r.error({
                 fn: customizeDocumentsStepForKTTP,
                 message: "Could not get claim data result to determine whether admission fee was required in project results step"
               });
             }
             _claimDataRes$data = claimDataRes === null || claimDataRes === void 0 ? void 0 : claimDataRes.data, quartech_admissionfeerequired = _claimDataRes$data.quartech_admissionfeerequired;
-            logger$i.info({
+            logger$r.info({
               fn: customizeDocumentsStepForKTTP,
               message: "Found claim value quartech_admissionfeerequired: ".concat(quartech_admissionfeerequired)
             });
@@ -28816,7 +28816,7 @@
             // Logic has since changed, if there's an ID present, we don't need to do anything.
             // chefsUrl = `https://submit.digital.gov.bc.ca/app/form/success?s=${chefsSubmissionGuid}`;
 
-            logger$i.info({
+            logger$r.info({
               fn: addChefsVVTSIframe,
               message: "VVTS Chefs already been completed, chefsSubmissionGuid: ".concat(chefsSubmissionGuid, ", chefsSubmissionId: ").concat(chefsSubmissionId)
             });
@@ -28828,7 +28828,7 @@
             _yield$getEnvVars = _context3.sent;
             chefsVVTSFormId = _yield$getEnvVars.quartech_ChefsVVTSFormId;
             if (!chefsVVTSFormId) {
-              logger$i.error({
+              logger$r.error({
                 fn: addSatisfactionSurveyChefsIframe,
                 message: 'Bad config: Applicant Portal Config should contain the quartech_ChefsVVTSFormId element',
                 data: {
@@ -28905,7 +28905,7 @@
             // Logic has since changed, if there's an ID present, we don't need to do anything.
             // chefsUrl = `https://submit.digital.gov.bc.ca/app/form/success?s=${chefsSubmissionGuid}`;
 
-            logger$i.info({
+            logger$r.info({
               fn: addSatisfactionSurveyChefsIframeForABPP,
               message: "Satisfaction survey has already been completed, chefsSubmissionGuid: ".concat(chefsSubmissionGuid, ", chefsSubmissionId: ").concat(chefsSubmissionId)
             });
@@ -28918,7 +28918,7 @@
               chefsABPPSatisfactionSurveyFormId = 'bc502ff8-4c19-4836-9e32-5445dece02c8';
             }
             if (!chefsABPPSatisfactionSurveyFormId) {
-              logger$i.error({
+              logger$r.error({
                 fn: addSatisfactionSurveyChefsIframeForABPP,
                 message: 'Bad config: Could not get the chefsABPPSatisfactionSurveyFormId element',
                 data: {
@@ -28995,7 +28995,7 @@
             // Logic has since changed, if there's an ID present, we don't need to do anything.
             // chefsUrl = `https://submit.digital.gov.bc.ca/app/form/success?s=${chefsSubmissionGuid}`;
 
-            logger$i.info({
+            logger$r.info({
               fn: addSatisfactionSurveyChefsIframe,
               message: "Satisfaction survey has already been completed, chefsSubmissionGuid: ".concat(chefsSubmissionGuid, ", chefsSubmissionId: ").concat(chefsSubmissionId)
             });
@@ -29007,7 +29007,7 @@
             _yield$getEnvVars2 = _context5.sent;
             chefsNefbaSatisfactionSurveyFormId = _yield$getEnvVars2.quartech_ChefsNefbaSatisfactionSurveyFormId;
             if (!chefsNefbaSatisfactionSurveyFormId) {
-              logger$i.error({
+              logger$r.error({
                 fn: addSatisfactionSurveyChefsIframe,
                 message: 'Bad config: Applicant Portal Config should contain the quartech_ChefsNefbaSatisfactionSurveyFormId element',
                 data: {
@@ -29091,7 +29091,7 @@
     }
   }
 
-  var logger$h = Logger('claim/claim');
+  var logger$q = Logger('claim/claim');
   function initClaim() {
     preloadRequestVerificationToken();
     hideFieldsAndSections();
@@ -29116,7 +29116,7 @@
               _context.next = 8;
               break;
             }
-            logger$h.info({
+            logger$q.info({
               fn: updatePageForSelectedProgram,
               message: 'Could not find programid, retry when DOM readyState is comlete',
               data: {
@@ -29135,7 +29135,7 @@
               break;
             }
             hideLoadingAnimation();
-            logger$h.error({
+            logger$q.error({
               fn: updatePageForSelectedProgram,
               message: 'Missing programid, or unknown current step',
               data: {
@@ -29145,14 +29145,14 @@
             });
             return _context.abrupt("return");
           case 14:
-            logger$h.info({
+            logger$q.info({
               fn: updatePageForSelectedProgram,
               message: "Retrieving Program data for the selected programid querystring: ".concat(programId)
             });
             getClaimFormData({
               programId: programId,
               beforeSend: function beforeSend() {
-                logger$h.info({
+                logger$q.info({
                   fn: updatePageForSelectedProgram,
                   message: 'clear any cached data from previous page loads'
                 });
@@ -29162,13 +29162,13 @@
               },
               onSuccess: function onSuccess(programData, textStatus, xhr) {
                 if (programData) {
-                  logger$h.info({
+                  logger$q.info({
                     fn: updatePageForSelectedProgram,
                     message: 'Retrieved Program data:',
                     data: programData
                   });
                   localStorage.setItem('programData', JSON.stringify(programData));
-                  logger$h.info({
+                  logger$q.info({
                     fn: updatePageForSelectedProgram,
                     message: 'Update application page with the program data.'
                   });
@@ -31250,7 +31250,7 @@
       t$1('date-multiselect')
   ], DateMultiSelect);
 
-  const logger$g = Logger('common/typesOfFood');
+  const logger$p = Logger('common/typesOfFood');
   POWERPOD.typesOfFood = {
       getTypesOfFood,
       processTypesOfFoodData,
@@ -31258,12 +31258,12 @@
   async function getTypesOfFood() {
       const { data } = await getTypesOfFoodData();
       if (data) {
-          logger$g.info({
+          logger$p.info({
               fn: getTypesOfFood,
               message: 'successfully extracted types of food options',
           });
           const res = processTypesOfFoodData(data);
-          logger$g.info({
+          logger$p.info({
               fn: getTypesOfFood,
               message: 'successfully extracted types of food:',
               data: res,
@@ -31271,7 +31271,7 @@
           return Promise.resolve(res);
       }
       let errorMsg = 'failed to extract types of food from data';
-      logger$g.warn({
+      logger$p.warn({
           fn: getTypesOfFood,
           message: errorMsg,
           data,
@@ -31291,7 +31291,7 @@
   }
 
   var ClaimInfoGridVLB_1;
-  const logger$f = Logger('components/ClaimInfoGridVLB');
+  const logger$o = Logger('components/ClaimInfoGridVLB');
   let ClaimInfoGridVLB = ClaimInfoGridVLB_1 = class ClaimInfoGridVLB extends s$2 {
       constructor() {
           super(...arguments);
@@ -31420,7 +31420,7 @@
           .options=${this.typesOfFood}
           .selectedOptions=${cellValue}
           @onChangeDropdownMultiselectValues=${(e) => {
-                logger$f.info({
+                logger$o.info({
                     fn: 'ClaimInfoGridVLB',
                     message: `onChangeDropdownMultiselectValues called`,
                     data: {
@@ -32193,7 +32193,7 @@
       t$1('efp-breadcrumbs')
   ], EFPBreadcrumbs);
 
-  var logger$e = Logger('common/workbook');
+  var logger$n = Logger('common/workbook');
   POWERPOD.workbookUtils = {
     getWorkbookId: getWorkbookId,
     loadWorkbookData: loadWorkbookData,
@@ -32216,7 +32216,7 @@
     var params = new URLSearchParams(window.location.search);
     var workbookId = params.get('id');
     if (workbookId) {
-      logger$e.info({
+      logger$n.info({
         fn: getWorkbookId,
         message: "Successfully retrieved workbook id from url params: ".concat(workbookId)
       });
@@ -32227,13 +32227,13 @@
     var workbookElement = document.querySelector('#quartech_workbook');
     if (workbookElement && 'value' in workbookElement && typeof workbookElement.value === 'string') {
       workbookId = workbookElement.value;
-      logger$e.info({
+      logger$n.info({
         fn: getWorkbookId,
         message: "Successfully retrieved workbook id from DOM element: ".concat(workbookId)
       });
       return workbookId;
     }
-    logger$e.warn({
+    logger$n.warn({
       fn: getWorkbookId,
       message: 'Could not find workbook id in URL params or DOM elements'
     });
@@ -32263,14 +32263,14 @@
               _context.next = 3;
               break;
             }
-            logger$e.warn({
+            logger$n.warn({
               fn: loadWorkbookData,
               message: 'No workbook ID provided'
             });
             return _context.abrupt("return", null);
           case 3:
             _context.prev = 3;
-            logger$e.info({
+            logger$n.info({
               fn: loadWorkbookData,
               message: "Fetching workbook data for ID: ".concat(workbookId)
             });
@@ -32281,7 +32281,7 @@
           case 7:
             response = _context.sent;
             workbookData = response.data;
-            logger$e.info({
+            logger$n.info({
               fn: loadWorkbookData,
               message: 'Successfully fetched workbook data',
               data: workbookData
@@ -32298,7 +32298,7 @@
           case 14:
             _context.prev = 14;
             _context.t0 = _context["catch"](3);
-            logger$e.error({
+            logger$n.error({
               fn: loadWorkbookData,
               message: 'Failed to fetch workbook data',
               data: {
@@ -32351,7 +32351,7 @@
     return ((_POWERPOD$workbook4 = POWERPOD.workbook) === null || _POWERPOD$workbook4 === void 0 ? void 0 : _POWERPOD$workbook4.nestedStructure) || null;
   }
 
-  var logger$d = Logger('common/chaptersAndQuestions');
+  var logger$m = Logger('common/chaptersAndQuestions');
   POWERPOD.chaptersAndQuestionsUtils = {
     loadChaptersAndQuestions: loadChaptersAndQuestions,
     getStoredChaptersData: getStoredChaptersData,
@@ -32380,7 +32380,7 @@
         while (1) switch (_context.prev = _context.next) {
           case 0:
             _context.prev = 0;
-            logger$d.info({
+            logger$m.info({
               fn: loadChaptersAndQuestions,
               message: 'Loading chapters and workbook questions data...'
             });
@@ -32395,7 +32395,7 @@
             questionsResponse = _yield$Promise$all2[1];
             chaptersData = chaptersResponse.data;
             questionsData = questionsResponse.data;
-            logger$d.info({
+            logger$m.info({
               fn: loadChaptersAndQuestions,
               message: 'Successfully loaded chapters and workbook questions data',
               data: {
@@ -32420,7 +32420,7 @@
           case 18:
             _context.prev = 18;
             _context.t0 = _context["catch"](0);
-            logger$d.error({
+            logger$m.error({
               fn: loadChaptersAndQuestions,
               message: 'Failed to load chapters and workbook questions data',
               data: {
@@ -32740,7 +32740,7 @@
     });
   }
 
-  var logger$c = Logger('common/questionnaire');
+  var logger$l = Logger('common/questionnaire');
 
   /**
    * Merge response data with questions in the nested chapter structure
@@ -32749,7 +32749,7 @@
    * @returns {Array} Enhanced structure with response data
    */
   function mergeResponsesWithQuestions(nestedChapterStructure, responseData) {
-    logger$c.info({
+    logger$l.info({
       fn: mergeResponsesWithQuestions,
       message: 'Merging response data with questions',
       data: {
@@ -32758,7 +32758,7 @@
       }
     });
     if (!responseData || !responseData.questionsWithResponses) {
-      logger$c.warn({
+      logger$l.warn({
         fn: mergeResponsesWithQuestions,
         message: 'No response data provided, returning original structure'
       });
@@ -32768,7 +32768,7 @@
 
     // Deep clone the structure to avoid mutating the original
     var enhancedStructure = JSON.parse(JSON.stringify(nestedChapterStructure));
-    logger$c.info({
+    logger$l.info({
       fn: mergeResponsesWithQuestions,
       message: 'Starting to merge responses with questions',
       data: {
@@ -32792,7 +32792,7 @@
               // Skipped questions are NOT marked as complete, but they count as "done" for parent chapter completion
               question.complete = !!(question.response && question.response.trim() !== '');
               question.hasResponse = true;
-              logger$c.info({
+              logger$l.info({
                 fn: mergeResponsesWithQuestions,
                 message: "Merged response for question ".concat(question.id),
                 data: {
@@ -32837,7 +32837,7 @@
       });
     };
     _countQuestions(enhancedStructure);
-    logger$c.info({
+    logger$l.info({
       fn: mergeResponsesWithQuestions,
       message: 'Successfully merged response data with questions',
       data: {
@@ -32860,7 +32860,7 @@
     var _POWERPOD$state;
     var forceRefresh = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
     var responseData = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
-    logger$c.info({
+    logger$l.info({
       fn: loadQuestionnaireIntoStore,
       message: 'Loading questionnaire data into store',
       data: {
@@ -32872,7 +32872,7 @@
 
     // Check if already loaded unless forceRefresh is true
     if (!forceRefresh && ((_POWERPOD$state = POWERPOD.state) === null || _POWERPOD$state === void 0 || (_POWERPOD$state = _POWERPOD$state.questionnaire) === null || _POWERPOD$state === void 0 || (_POWERPOD$state = _POWERPOD$state.chapters) === null || _POWERPOD$state === void 0 ? void 0 : _POWERPOD$state.length) > 0) {
-      logger$c.info({
+      logger$l.info({
         fn: loadQuestionnaireIntoStore,
         message: 'Questionnaire data already loaded in store',
         data: {
@@ -32902,12 +32902,12 @@
     // Update completion status based on the new rules
     try {
       updateQuestionnaireCompletion();
-      logger$c.info({
+      logger$l.info({
         fn: loadQuestionnaireIntoStore,
         message: 'Updated questionnaire completion status after loading'
       });
     } catch (error) {
-      logger$c.warn({
+      logger$l.warn({
         fn: loadQuestionnaireIntoStore,
         message: 'Failed to update completion status after loading',
         data: {
@@ -32915,7 +32915,7 @@
         }
       });
     }
-    logger$c.info({
+    logger$l.info({
       fn: loadQuestionnaireIntoStore,
       message: 'Successfully loaded questionnaire data into store',
       data: {
@@ -32932,13 +32932,60 @@
   function getQuestionnaireFromStore() {
     var _POWERPOD$state2;
     if (!((_POWERPOD$state2 = POWERPOD.state) !== null && _POWERPOD$state2 !== void 0 && _POWERPOD$state2.questionnaire)) {
-      logger$c.warn({
+      logger$l.warn({
         fn: getQuestionnaireFromStore,
         message: 'Questionnaire data not found in store'
       });
       return null;
     }
     return POWERPOD.state.questionnaire;
+  }
+
+  /**
+   * Get all chapters from the store (flattened list including subchapters)
+   * @returns {Array} Array of all chapters
+   */
+  function getAllChaptersFromStore() {
+    var questionnaire = getQuestionnaireFromStore();
+    if (!(questionnaire !== null && questionnaire !== void 0 && questionnaire.chapters)) {
+      return [];
+    }
+    var allChapters = [];
+
+    // Recursively collect all chapters and subchapters
+    var _collectChapters = function collectChapters(chapters) {
+      var _iterator = _createForOfIteratorHelper(chapters),
+        _step;
+      try {
+        for (_iterator.s(); !(_step = _iterator.n()).done;) {
+          var chapterGroup = _step.value;
+          if (Array.isArray(chapterGroup)) {
+            var _iterator2 = _createForOfIteratorHelper(chapterGroup),
+              _step2;
+            try {
+              for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
+                var chapter = _step2.value;
+                allChapters.push(chapter);
+                // Recursively collect subchapters
+                if (chapter.subchapters) {
+                  _collectChapters([chapter.subchapters]);
+                }
+              }
+            } catch (err) {
+              _iterator2.e(err);
+            } finally {
+              _iterator2.f();
+            }
+          }
+        }
+      } catch (err) {
+        _iterator.e(err);
+      } finally {
+        _iterator.f();
+      }
+    };
+    _collectChapters(questionnaire.chapters);
+    return allChapters;
   }
 
   /**
@@ -32954,17 +33001,17 @@
 
     // Search through the nested structure
     var _findChapterInArray = function findChapterInArray(chapters) {
-      var _iterator = _createForOfIteratorHelper(chapters),
-        _step;
+      var _iterator3 = _createForOfIteratorHelper(chapters),
+        _step3;
       try {
-        for (_iterator.s(); !(_step = _iterator.n()).done;) {
-          var chapterGroup = _step.value;
+        for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {
+          var chapterGroup = _step3.value;
           if (Array.isArray(chapterGroup)) {
-            var _iterator2 = _createForOfIteratorHelper(chapterGroup),
-              _step2;
+            var _iterator4 = _createForOfIteratorHelper(chapterGroup),
+              _step4;
             try {
-              for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
-                var chapter = _step2.value;
+              for (_iterator4.s(); !(_step4 = _iterator4.n()).done;) {
+                var chapter = _step4.value;
                 if (chapter.id === chapterId) {
                   return chapter;
                 }
@@ -32975,16 +33022,16 @@
                 }
               }
             } catch (err) {
-              _iterator2.e(err);
+              _iterator4.e(err);
             } finally {
-              _iterator2.f();
+              _iterator4.f();
             }
           }
         }
       } catch (err) {
-        _iterator.e(err);
+        _iterator3.e(err);
       } finally {
-        _iterator.f();
+        _iterator3.f();
       }
       return null;
     };
@@ -33004,17 +33051,17 @@
 
     // Search through the nested structure
     var _findQuestionInChapters = function findQuestionInChapters(chapters) {
-      var _iterator3 = _createForOfIteratorHelper(chapters),
-        _step3;
+      var _iterator5 = _createForOfIteratorHelper(chapters),
+        _step5;
       try {
-        for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {
-          var chapterGroup = _step3.value;
+        for (_iterator5.s(); !(_step5 = _iterator5.n()).done;) {
+          var chapterGroup = _step5.value;
           if (Array.isArray(chapterGroup)) {
-            var _iterator4 = _createForOfIteratorHelper(chapterGroup),
-              _step4;
+            var _iterator6 = _createForOfIteratorHelper(chapterGroup),
+              _step6;
             try {
-              for (_iterator4.s(); !(_step4 = _iterator4.n()).done;) {
-                var chapter = _step4.value;
+              for (_iterator6.s(); !(_step6 = _iterator6.n()).done;) {
+                var chapter = _step6.value;
                 // Check questions in main chapter
                 if (chapter.questions) {
                   var question = chapter.questions.find(function (q) {
@@ -33029,16 +33076,16 @@
                 }
               }
             } catch (err) {
-              _iterator4.e(err);
+              _iterator6.e(err);
             } finally {
-              _iterator4.f();
+              _iterator6.f();
             }
           }
         }
       } catch (err) {
-        _iterator3.e(err);
+        _iterator5.e(err);
       } finally {
-        _iterator3.f();
+        _iterator5.f();
       }
       return null;
     };
@@ -33051,7 +33098,7 @@
    * @param {boolean} complete - The completion status
    */
   function updateChapterCompletion(chapterId, complete) {
-    logger$c.info({
+    logger$l.info({
       fn: updateChapterCompletion,
       message: 'Updating chapter completion status',
       data: {
@@ -33080,7 +33127,7 @@
     // Auto-calculate completion if not explicitly provided
     // A question is complete only if it has a non-empty response
     var isComplete = complete !== null ? complete : !!(response && typeof response === 'string' && response.trim() !== '');
-    logger$c.info({
+    logger$l.info({
       fn: updateQuestionResponse,
       message: 'Updating question response',
       data: {
@@ -33117,7 +33164,7 @@
     try {
       updateQuestionnaireCompletion();
     } catch (error) {
-      logger$c.warn({
+      logger$l.warn({
         fn: updateQuestionResponse,
         message: 'Failed to update questionnaire completion after question response change',
         data: {
@@ -33143,20 +33190,20 @@
     // Also collect questions from subchapters
     if (chapter.subchapters) {
       var _collectQuestionsFromSubchapters = function collectQuestionsFromSubchapters(subchapters) {
-        var _iterator5 = _createForOfIteratorHelper(subchapters),
-          _step5;
+        var _iterator7 = _createForOfIteratorHelper(subchapters),
+          _step7;
         try {
-          for (_iterator5.s(); !(_step5 = _iterator5.n()).done;) {
-            var subchapter = _step5.value;
+          for (_iterator7.s(); !(_step7 = _iterator7.n()).done;) {
+            var subchapter = _step7.value;
             questions = questions.concat(subchapter.questions || []);
             if (subchapter.subchapters) {
               _collectQuestionsFromSubchapters(subchapter.subchapters);
             }
           }
         } catch (err) {
-          _iterator5.e(err);
+          _iterator7.e(err);
         } finally {
-          _iterator5.f();
+          _iterator7.f();
         }
       };
       _collectQuestionsFromSubchapters(chapter.subchapters);
@@ -33184,17 +33231,17 @@
     var totalChapters = 0;
     var completedChapters = 0;
     var _countInChapters = function countInChapters(chapters) {
-      var _iterator6 = _createForOfIteratorHelper(chapters),
-        _step6;
+      var _iterator8 = _createForOfIteratorHelper(chapters),
+        _step8;
       try {
-        for (_iterator6.s(); !(_step6 = _iterator6.n()).done;) {
-          var chapterGroup = _step6.value;
+        for (_iterator8.s(); !(_step8 = _iterator8.n()).done;) {
+          var chapterGroup = _step8.value;
           if (Array.isArray(chapterGroup)) {
-            var _iterator7 = _createForOfIteratorHelper(chapterGroup),
-              _step7;
+            var _iterator9 = _createForOfIteratorHelper(chapterGroup),
+              _step9;
             try {
-              for (_iterator7.s(); !(_step7 = _iterator7.n()).done;) {
-                var chapter = _step7.value;
+              for (_iterator9.s(); !(_step9 = _iterator9.n()).done;) {
+                var chapter = _step9.value;
                 totalChapters++;
                 if (chapter.complete) {
                   completedChapters++;
@@ -33214,16 +33261,16 @@
                 }
               }
             } catch (err) {
-              _iterator7.e(err);
+              _iterator9.e(err);
             } finally {
-              _iterator7.f();
+              _iterator9.f();
             }
           }
         }
       } catch (err) {
-        _iterator6.e(err);
+        _iterator8.e(err);
       } finally {
-        _iterator6.f();
+        _iterator8.f();
       }
     };
     _countInChapters(questionnaire.chapters);
@@ -33268,7 +33315,7 @@
         while (1) switch (_context.prev = _context.next) {
           case 0:
             forceRefresh = _args.length > 2 && _args[2] !== undefined ? _args[2] : false;
-            logger$c.info({
+            logger$l.info({
               fn: loadQuestionnaireWithResponses,
               message: 'Loading questionnaire data with responses into store',
               data: {
@@ -33284,7 +33331,7 @@
               _context.next = 14;
               break;
             }
-            logger$c.info({
+            logger$l.info({
               fn: loadQuestionnaireWithResponses,
               message: 'Loading all response data from API for questionnaire integration'
             });
@@ -33299,7 +33346,7 @@
             return loadQuestionsAndResponses(workbookId);
           case 12:
             responseData = _context.sent;
-            logger$c.info({
+            logger$l.info({
               fn: loadQuestionnaireWithResponses,
               message: 'Successfully loaded response data',
               data: {
@@ -33311,7 +33358,7 @@
           case 14:
             // Load questionnaire with response data merged in
             questionnaireData = loadQuestionnaireIntoStore(nestedChapterStructure, forceRefresh, responseData);
-            logger$c.info({
+            logger$l.info({
               fn: loadQuestionnaireWithResponses,
               message: 'Successfully loaded questionnaire with all responses into store',
               data: {
@@ -33324,7 +33371,7 @@
           case 19:
             _context.prev = 19;
             _context.t0 = _context["catch"](2);
-            logger$c.error({
+            logger$l.error({
               fn: loadQuestionnaireWithResponses,
               message: 'Failed to load questionnaire with responses',
               data: {
@@ -33334,7 +33381,7 @@
             });
 
             // Fallback to loading without responses
-            logger$c.info({
+            logger$l.info({
               fn: loadQuestionnaireWithResponses,
               message: 'Falling back to loading questionnaire without responses'
             });
@@ -33362,7 +33409,7 @@
       return _regeneratorRuntime().wrap(function _callee2$(_context2) {
         while (1) switch (_context2.prev = _context2.next) {
           case 0:
-            logger$c.info({
+            logger$l.info({
               fn: refreshQuestionnaireResponses,
               message: 'Refreshing questionnaire responses from latest data',
               data: {
@@ -33375,7 +33422,7 @@
               _context2.next = 6;
               break;
             }
-            logger$c.warn({
+            logger$l.warn({
               fn: refreshQuestionnaireResponses,
               message: 'No questionnaire data loaded, cannot refresh responses'
             });
@@ -33394,7 +33441,7 @@
             responseData = _context2.sent;
             // Reload questionnaire with fresh responses
             loadQuestionnaireIntoStore(originalStructure, true, responseData);
-            logger$c.info({
+            logger$l.info({
               fn: refreshQuestionnaireResponses,
               message: 'Successfully refreshed questionnaire responses'
             });
@@ -33402,7 +33449,7 @@
           case 19:
             _context2.prev = 19;
             _context2.t0 = _context2["catch"](1);
-            logger$c.error({
+            logger$l.error({
               fn: refreshQuestionnaireResponses,
               message: 'Failed to refresh questionnaire responses',
               data: {
@@ -33483,13 +33530,13 @@
    */
   function updateQuestionnaireCompletion() {
     var _questionnaire$chapte;
-    logger$c.info({
+    logger$l.info({
       fn: updateQuestionnaireCompletion,
       message: 'Updating questionnaire completion status based on store rules'
     });
     var questionnaire = getQuestionnaireFromStore();
     if (!(questionnaire !== null && questionnaire !== void 0 && (_questionnaire$chapte = questionnaire.chapters) !== null && _questionnaire$chapte !== void 0 && _questionnaire$chapte.length)) {
-      logger$c.warn({
+      logger$l.warn({
         fn: updateQuestionnaireCompletion,
         message: 'No questionnaire data found, cannot update completion'
       });
@@ -33514,7 +33561,7 @@
           var _chapter$questions, _chapter$subchapters;
           chapter.complete = shouldBeComplete;
           updatedCount++;
-          logger$c.info({
+          logger$l.info({
             fn: updateQuestionnaireCompletion,
             message: "Updated completion for chapter ".concat(chapter.id),
             data: {
@@ -33543,7 +33590,7 @@
         _updateChapterCompletionRecursive(chapterGroup);
       }
     });
-    logger$c.info({
+    logger$l.info({
       fn: updateQuestionnaireCompletion,
       message: "Completion update finished - updated ".concat(updatedCount, " chapters")
     });
@@ -33554,13 +33601,13 @@
       Promise.resolve().then(function () { return workbookResponseHelper; }).then(function (_ref) {
         var updateQuestionsAndResponsesStats = _ref.updateQuestionsAndResponsesStats;
         updateQuestionsAndResponsesStats();
-        logger$c.info({
+        logger$l.info({
           fn: updateQuestionnaireCompletion,
           message: 'Updated workbook stats to sync progress bar'
         });
       });
     } catch (error) {
-      logger$c.warn({
+      logger$l.warn({
         fn: updateQuestionnaireCompletion,
         message: 'Failed to update workbook stats',
         data: {
@@ -33584,6 +33631,7 @@
     __proto__: null,
     loadQuestionnaireIntoStore: loadQuestionnaireIntoStore,
     getQuestionnaireFromStore: getQuestionnaireFromStore,
+    getAllChaptersFromStore: getAllChaptersFromStore,
     getChapterFromStore: getChapterFromStore,
     getQuestionFromStore: getQuestionFromStore,
     updateChapterCompletion: updateChapterCompletion,
@@ -33597,7 +33645,7 @@
     isQuestionnaireLoaded: isQuestionnaireLoaded
   });
 
-  var logger$b = Logger('common/workbookResponseHelper');
+  var logger$k = Logger('common/workbookResponseHelper');
 
   /**
    * Get chapterId for a given questionId
@@ -33676,7 +33724,7 @@
         }
       }
     }
-    logger$b.warn({
+    logger$k.warn({
       fn: 'getChapterIdForQuestion',
       message: "Could not find chapterId for question ".concat(questionId),
       data: {
@@ -33718,7 +33766,7 @@
           case 0:
             options = _args.length > 1 && _args[1] !== undefined ? _args[1] : {};
             _context.prev = 1;
-            logger$b.info({
+            logger$k.info({
               fn: 'getResponsesForWorkbook',
               message: "Fetching responses for workbook: ".concat(workbookId),
               data: {
@@ -33733,7 +33781,7 @@
           case 5:
             result = _context.sent;
             responses = (result === null || result === void 0 || (_result$data = result.data) === null || _result$data === void 0 ? void 0 : _result$data.value) || [];
-            logger$b.info({
+            logger$k.info({
               fn: 'getResponsesForWorkbook',
               message: "Found ".concat(responses.length, " responses for workbook ").concat(workbookId),
               data: {
@@ -33753,7 +33801,7 @@
           case 11:
             _context.prev = 11;
             _context.t0 = _context["catch"](1);
-            logger$b.error({
+            logger$k.error({
               fn: 'getResponsesForWorkbook',
               message: "Failed to fetch responses for workbook ".concat(workbookId),
               data: {
@@ -33796,7 +33844,7 @@
           case 0:
             options = _args2.length > 2 && _args2[2] !== undefined ? _args2[2] : {};
             _context2.prev = 1;
-            logger$b.info({
+            logger$k.info({
               fn: 'getResponsesForWorkbookAndQuestion',
               message: "Fetching responses for workbook: ".concat(workbookId, ", question: ").concat(questionId),
               data: {
@@ -33813,7 +33861,7 @@
           case 5:
             result = _context2.sent;
             responses = (result === null || result === void 0 || (_result$data5 = result.data) === null || _result$data5 === void 0 ? void 0 : _result$data5.value) || [];
-            logger$b.info({
+            logger$k.info({
               fn: 'getResponsesForWorkbookAndQuestion',
               message: "Found ".concat(responses.length, " responses for workbook ").concat(workbookId, ", question ").concat(questionId),
               data: {
@@ -33835,7 +33883,7 @@
           case 11:
             _context2.prev = 11;
             _context2.t0 = _context2["catch"](1);
-            logger$b.error({
+            logger$k.error({
               fn: 'getResponsesForWorkbookAndQuestion',
               message: "Failed to fetch responses for workbook ".concat(workbookId, ", question ").concat(questionId),
               data: {
@@ -33888,7 +33936,7 @@
             _context3.prev = 4;
             // Get chapterId for the question
             chapterId = getChapterIdForQuestion(questionId);
-            logger$b.info({
+            logger$k.info({
               fn: 'createResponse',
               message: "Creating response for workbook: ".concat(workbookId, ", question: ").concat(questionId),
               data: {
@@ -33908,7 +33956,7 @@
               response: response
             }, options));
           case 9:
-            logger$b.info({
+            logger$k.info({
               fn: 'createResponse',
               message: "POST request completed (204 No Content), fetching created response...",
               data: {
@@ -33937,7 +33985,7 @@
               _context3.next = 18;
               break;
             }
-            logger$b.error({
+            logger$k.error({
               fn: 'createResponse',
               message: "Failed to fetch created response",
               data: {
@@ -33949,7 +33997,7 @@
             });
             throw new Error('Failed to retrieve created response ID');
           case 18:
-            logger$b.info({
+            logger$k.info({
               fn: 'createResponse',
               message: "Successfully fetched created response",
               data: {
@@ -33965,12 +34013,12 @@
               try {
                 // Let updateQuestionResponse auto-calculate completion based on response content
                 updateQuestionResponse(questionId, response, null, createdResponse);
-                logger$b.info({
+                logger$k.info({
                   fn: 'createResponse',
                   message: "Updated questionnaire store for question ".concat(questionId)
                 });
               } catch (error) {
-                logger$b.warn({
+                logger$k.warn({
                   fn: 'createResponse',
                   message: "Failed to update questionnaire store for question ".concat(questionId),
                   data: {
@@ -33988,7 +34036,7 @@
           case 23:
             _context3.prev = 23;
             _context3.t0 = _context3["catch"](4);
-            logger$b.error({
+            logger$k.error({
               fn: 'createResponse',
               message: "Failed to create response for workbook ".concat(workbookId, ", question ").concat(questionId),
               data: {
@@ -34071,7 +34119,7 @@
             _iterator4.f();
             return _context4.finish(20);
           case 23:
-            logger$b.info({
+            logger$k.info({
               fn: 'updateResponse',
               message: "Updating response: ".concat(responseId),
               data: {
@@ -34088,7 +34136,7 @@
             }, options));
           case 26:
             result = _context4.sent;
-            logger$b.info({
+            logger$k.info({
               fn: 'updateResponse',
               message: "Successfully updated response ".concat(responseId),
               data: {
@@ -34103,12 +34151,12 @@
                 try {
                   // Let updateQuestionResponse auto-calculate completion based on response content
                   updateQuestionResponse(questionId, response, null, result.data);
-                  logger$b.info({
+                  logger$k.info({
                     fn: 'updateResponse',
                     message: "Updated questionnaire store for question ".concat(questionId)
                   });
                 } catch (error) {
-                  logger$b.warn({
+                  logger$k.warn({
                     fn: 'updateResponse',
                     message: "Failed to update questionnaire store for question ".concat(questionId),
                     data: {
@@ -34126,7 +34174,7 @@
           case 32:
             _context4.prev = 32;
             _context4.t1 = _context4["catch"](2);
-            logger$b.error({
+            logger$k.error({
               fn: 'updateResponse',
               message: "Failed to update response ".concat(responseId),
               data: {
@@ -34169,7 +34217,7 @@
           case 0:
             options = _args5.length > 1 && _args5[1] !== undefined ? _args5[1] : {};
             _context5.prev = 1;
-            logger$b.info({
+            logger$k.info({
               fn: 'deleteResponse',
               message: "Deleting response: ".concat(responseId),
               data: {
@@ -34216,12 +34264,12 @@
             return _context5.finish(21);
           case 24:
             if (questionId) {
-              logger$b.info({
+              logger$k.info({
                 fn: 'deleteResponse',
                 message: "Found question ID ".concat(questionId, " for response ").concat(responseId)
               });
             } else {
-              logger$b.warn({
+              logger$k.warn({
                 fn: 'deleteResponse',
                 message: "Could not find question ID for response ".concat(responseId, " in existing data")
               });
@@ -34231,7 +34279,7 @@
           case 27:
             _context5.prev = 27;
             _context5.t1 = _context5["catch"](5);
-            logger$b.warn({
+            logger$k.warn({
               fn: 'deleteResponse',
               message: "Error finding question ID for response deletion",
               data: {
@@ -34245,7 +34293,7 @@
               id: responseId
             }, options));
           case 32:
-            logger$b.info({
+            logger$k.info({
               fn: 'deleteResponse',
               message: "Successfully deleted response ".concat(responseId),
               data: {
@@ -34257,12 +34305,12 @@
             if (isQuestionnaireLoaded() && questionId) {
               try {
                 updateQuestionResponse(questionId, null, false, null);
-                logger$b.info({
+                logger$k.info({
                   fn: 'deleteResponse',
                   message: "Updated questionnaire store to remove response for question ".concat(questionId)
                 });
               } catch (error) {
-                logger$b.warn({
+                logger$k.warn({
                   fn: 'deleteResponse',
                   message: "Failed to update questionnaire store for deleted question ".concat(questionId),
                   data: {
@@ -34279,7 +34327,7 @@
           case 37:
             _context5.prev = 37;
             _context5.t2 = _context5["catch"](1);
-            logger$b.error({
+            logger$k.error({
               fn: 'deleteResponse',
               message: "Failed to delete response ".concat(responseId),
               data: {
@@ -34327,7 +34375,7 @@
               break;
             }
             latestResponse = result.responses[0];
-            logger$b.info({
+            logger$k.info({
               fn: 'getLatestResponse',
               message: "Found latest response for workbook ".concat(workbookId, ", question ").concat(questionId),
               data: {
@@ -34339,7 +34387,7 @@
             });
             return _context6.abrupt("return", latestResponse);
           case 9:
-            logger$b.info({
+            logger$k.info({
               fn: 'getLatestResponse',
               message: "No responses found for workbook ".concat(workbookId, ", question ").concat(questionId),
               data: {
@@ -34351,7 +34399,7 @@
           case 13:
             _context6.prev = 13;
             _context6.t0 = _context6["catch"](1);
-            logger$b.error({
+            logger$k.error({
               fn: 'getLatestResponse',
               message: "Failed to get latest response for workbook ".concat(workbookId, ", question ").concat(questionId),
               data: {
@@ -34397,7 +34445,7 @@
           case 8:
             _context7.prev = 8;
             _context7.t0 = _context7["catch"](1);
-            logger$b.error({
+            logger$k.error({
               fn: 'hasResponse',
               message: "Failed to check if response exists for workbook ".concat(workbookId, ", question ").concat(questionId),
               data: {
@@ -34465,7 +34513,7 @@
             if (stats.uniqueQuestions > 0) {
               stats.averageResponsesPerQuestion = (stats.totalResponses / stats.uniqueQuestions).toFixed(2);
             }
-            logger$b.info({
+            logger$k.info({
               fn: 'getResponseStats',
               message: "Generated response statistics for workbook ".concat(workbookId),
               data: {
@@ -34477,7 +34525,7 @@
           case 15:
             _context8.prev = 15;
             _context8.t0 = _context8["catch"](1);
-            logger$b.error({
+            logger$k.error({
               fn: 'getResponseStats',
               message: "Failed to get response statistics for workbook ".concat(workbookId),
               data: {
@@ -34513,7 +34561,7 @@
    */
   function getResponseFromMemory(questionId) {
     if (!POWERPOD.workbookResponses.isLoaded) {
-      logger$b.warn({
+      logger$k.warn({
         fn: 'getResponseFromMemory',
         message: 'Workbook responses not loaded in memory',
         data: {
@@ -34538,7 +34586,7 @@
    * Clear workbook responses from memory
    */
   function clearMemory() {
-    logger$b.info({
+    logger$k.info({
       fn: 'clearMemory',
       message: 'Clearing workbook responses from memory'
     });
@@ -34607,7 +34655,7 @@
           case 0:
             options = _args9.length > 1 && _args9[1] !== undefined ? _args9[1] : {};
             _context9.prev = 1;
-            logger$b.info({
+            logger$k.info({
               fn: 'loadQuestionsAndResponses',
               message: "Loading questions and responses for workbook: ".concat(workbookId),
               data: {
@@ -34622,7 +34670,7 @@
               _context9.next = 8;
               break;
             }
-            logger$b.info({
+            logger$k.info({
               fn: 'loadQuestionsAndResponses',
               message: 'Questions and responses already loaded from memory',
               data: {
@@ -34661,7 +34709,7 @@
           case 24:
             _context9.prev = 24;
             _context9.t0 = _context9["catch"](9);
-            logger$b.warn({
+            logger$k.warn({
               fn: 'loadQuestionsAndResponses',
               message: 'Failed to load questions, continuing with responses only',
               data: {
@@ -34785,7 +34833,7 @@
             POWERPOD.workbookQuestionsAndResponses.workbookId = workbookId;
             POWERPOD.workbookQuestionsAndResponses.isLoaded = true;
             POWERPOD.workbookQuestionsAndResponses.lastUpdated = new Date().toISOString();
-            logger$b.info({
+            logger$k.info({
               fn: 'loadQuestionsAndResponses',
               message: "Loaded ".concat(totalQuestions, " questions: ").concat(answeredQuestions, " answered, ").concat(skippedQuestions, " skipped, ").concat(unansweredQuestions, " unanswered (").concat(completionPercentage, "% complete)"),
               data: {
@@ -34803,7 +34851,7 @@
             // Update questionnaire store if it's loaded
             if (isQuestionnaireLoaded()) {
               try {
-                logger$b.info({
+                logger$k.info({
                   fn: 'loadQuestionsAndResponses',
                   message: 'Updating questionnaire store with loaded response data'
                 });
@@ -34815,12 +34863,12 @@
                     updateQuestionResponse(questionId, entry.response.quartech_response, null, entry.response);
                   }
                 });
-                logger$b.info({
+                logger$k.info({
                   fn: 'loadQuestionsAndResponses',
                   message: "Updated questionnaire store with ".concat(answeredQuestions, " responses")
                 });
               } catch (error) {
-                logger$b.warn({
+                logger$k.warn({
                   fn: 'loadQuestionsAndResponses',
                   message: 'Failed to update questionnaire store with response data',
                   data: {
@@ -34833,7 +34881,7 @@
           case 60:
             _context9.prev = 60;
             _context9.t1 = _context9["catch"](1);
-            logger$b.error({
+            logger$k.error({
               fn: 'loadQuestionsAndResponses',
               message: "Failed to load questions and responses for workbook ".concat(workbookId),
               data: {
@@ -34875,7 +34923,7 @@
    */
   function getQuestionAndResponseFromMemory(questionId) {
     if (!POWERPOD.workbookQuestionsAndResponses.isLoaded) {
-      logger$b.warn({
+      logger$k.warn({
         fn: 'getQuestionAndResponseFromMemory',
         message: 'Questions and responses not loaded in memory',
         data: {
@@ -34894,7 +34942,7 @@
    */
   function getChapterQuestionsAndResponsesFromMemory(chapterId) {
     if (!POWERPOD.workbookQuestionsAndResponses.isLoaded) {
-      logger$b.warn({
+      logger$k.warn({
         fn: 'getChapterQuestionsAndResponsesFromMemory',
         message: 'Questions and responses not loaded in memory',
         data: {
@@ -34913,7 +34961,7 @@
    */
   function updateResponseInMemory(questionId, responseData) {
     if (!POWERPOD.workbookQuestionsAndResponses.isLoaded) {
-      logger$b.warn({
+      logger$k.warn({
         fn: 'updateResponseInMemory',
         message: 'Questions and responses not loaded in memory',
         data: {
@@ -34950,7 +34998,7 @@
 
     // Update timestamp
     POWERPOD.workbookQuestionsAndResponses.lastUpdated = new Date().toISOString();
-    logger$b.info({
+    logger$k.info({
       fn: 'updateResponseInMemory',
       message: "Updated response for question ".concat(questionId, " in memory"),
       data: {
@@ -34964,12 +35012,12 @@
       try {
         // Let updateQuestionResponse auto-calculate completion based on response content
         updateQuestionResponse(questionId, responseData.quartech_response, null, responseData);
-        logger$b.info({
+        logger$k.info({
           fn: 'updateResponseInMemory',
           message: "Updated questionnaire store for question ".concat(questionId)
         });
       } catch (error) {
-        logger$b.warn({
+        logger$k.warn({
           fn: 'updateResponseInMemory',
           message: "Failed to update questionnaire store for question ".concat(questionId),
           data: {
@@ -34986,7 +35034,7 @@
    */
   function removeResponseFromMemory(questionId) {
     if (!POWERPOD.workbookQuestionsAndResponses.isLoaded) {
-      logger$b.warn({
+      logger$k.warn({
         fn: 'removeResponseFromMemory',
         message: 'Questions and responses not loaded in memory',
         data: {
@@ -35017,7 +35065,7 @@
 
     // Update timestamp
     POWERPOD.workbookQuestionsAndResponses.lastUpdated = new Date().toISOString();
-    logger$b.info({
+    logger$k.info({
       fn: 'removeResponseFromMemory',
       message: "Removed response for question ".concat(questionId, " from memory"),
       data: {
@@ -35029,12 +35077,12 @@
     if (isQuestionnaireLoaded()) {
       try {
         updateQuestionResponse(questionId, null, false, null);
-        logger$b.info({
+        logger$k.info({
           fn: 'removeResponseFromMemory',
           message: "Removed response from questionnaire store for question ".concat(questionId)
         });
       } catch (error) {
-        logger$b.warn({
+        logger$k.warn({
           fn: 'removeResponseFromMemory',
           message: "Failed to remove response from questionnaire store for question ".concat(questionId),
           data: {
@@ -35053,7 +35101,7 @@
    * A question is considered "skipped" if quartech_chapterskipped === 100000000
    */
   function updateQuestionsAndResponsesStats() {
-    logger$b.info({
+    logger$k.info({
       fn: 'updateQuestionsAndResponsesStats',
       message: '🔄 updateQuestionsAndResponsesStats CALLED'
     });
@@ -35098,7 +35146,7 @@
         } finally {
           _iterator3.f();
         }
-        logger$b.info({
+        logger$k.info({
           fn: 'updateQuestionsAndResponsesStats',
           message: 'Using questionnaire store for completion stats',
           data: {
@@ -35121,7 +35169,7 @@
             }
           }
         });
-        logger$b.info({
+        logger$k.info({
           fn: 'updateQuestionsAndResponsesStats',
           message: 'Using response data for completion stats (questionnaire store not loaded)',
           data: {
@@ -35145,7 +35193,7 @@
           }
         }
       });
-      logger$b.warn({
+      logger$k.warn({
         fn: 'updateQuestionsAndResponsesStats',
         message: 'Failed to use questionnaire store, falling back to response data',
         data: {
@@ -35163,7 +35211,7 @@
     var nonSkippedTotal = totalQuestions - skippedQuestions;
     var unansweredQuestions = totalQuestions - completedQuestions;
     var completionPercentage = totalQuestions > 0 ? Math.round(completedQuestions / totalQuestions * 100) : 0;
-    logger$b.info({
+    logger$k.info({
       fn: 'updateQuestionsAndResponsesStats',
       message: "\uD83E\uDDEE Calculated stats: ".concat(answeredQuestions, " answered + ").concat(skippedQuestions, " skipped = ").concat(completedQuestions, " complete out of ").concat(totalQuestions, " total = ").concat(completionPercentage, "%"),
       data: {
@@ -35204,7 +35252,7 @@
       // Dispatch the event on the EFP entry form element if it exists
       var efpEntryForm = document.querySelector('efp-entry-form');
       if (efpEntryForm) {
-        logger$b.info({
+        logger$k.info({
           fn: 'updateQuestionsAndResponsesStats',
           message: "\uD83D\uDD14 DISPATCHING workbook-stats-updated event with ".concat(completionPercentage, "% complete"),
           data: {
@@ -35218,18 +35266,18 @@
           }
         });
         efpEntryForm.dispatchEvent(event);
-        logger$b.info({
+        logger$k.info({
           fn: 'updateQuestionsAndResponsesStats',
           message: "\u2705 Event dispatched successfully"
         });
       } else {
-        logger$b.warn({
+        logger$k.warn({
           fn: 'updateQuestionsAndResponsesStats',
           message: "\u274C Could not find efp-entry-form element to dispatch event"
         });
       }
     } catch (error) {
-      logger$b.warn({
+      logger$k.warn({
         fn: 'updateQuestionsAndResponsesStats',
         message: 'Failed to dispatch stats update event',
         data: {
@@ -35243,7 +35291,7 @@
    * Clear questions and responses from memory
    */
   function clearQuestionsAndResponsesMemory() {
-    logger$b.info({
+    logger$k.info({
       fn: 'clearQuestionsAndResponsesMemory',
       message: 'Clearing questions and responses from memory'
     });
@@ -35319,7 +35367,7 @@
     'default': WorkbookResponseHelper
   });
 
-  var logger$a = Logger('common/actionPlanHelper');
+  var logger$j = Logger('common/actionPlanHelper');
 
   /**
    * Get all action plans
@@ -35344,7 +35392,7 @@
         while (1) switch (_context.prev = _context.next) {
           case 0:
             _context.prev = 0;
-            logger$a.info({
+            logger$j.info({
               fn: getActionPlans,
               message: 'Fetching all action plans'
             });
@@ -35353,7 +35401,7 @@
           case 4:
             result = _context.sent;
             actionPlans = (result === null || result === void 0 || (_result$data = result.data) === null || _result$data === void 0 ? void 0 : _result$data.value) || [];
-            logger$a.info({
+            logger$j.info({
               fn: getActionPlans,
               message: 'Action plans fetched successfully',
               data: {
@@ -35372,7 +35420,7 @@
           case 10:
             _context.prev = 10;
             _context.t0 = _context["catch"](0);
-            logger$a.error({
+            logger$j.error({
               fn: getActionPlans,
               message: 'Failed to fetch action plans',
               data: {
@@ -35414,7 +35462,7 @@
             }
             throw new Error('workbookId and action are required');
           case 5:
-            logger$a.info({
+            logger$j.info({
               fn: createActionPlan,
               message: 'Creating action plan',
               data: {
@@ -35433,7 +35481,7 @@
             });
           case 8:
             result = _context2.sent;
-            logger$a.info({
+            logger$j.info({
               fn: createActionPlan,
               message: 'Action plan created successfully',
               data: {
@@ -35447,7 +35495,7 @@
           case 13:
             _context2.prev = 13;
             _context2.t0 = _context2["catch"](2);
-            logger$a.error({
+            logger$j.error({
               fn: createActionPlan,
               message: 'Failed to create action plan',
               data: {
@@ -38984,19 +39032,20 @@
       t$1('rating-question')
   ], RatingQuestion);
 
-  var logger$9 = Logger('common/userRoles');
+  var logger$i = Logger('common/userRoles');
 
   /**
    * Parse user roles from the DOM element with id 'pp-user-roles'
-   * The element's textContent contains role names separated by whitespace
-   * Example: '\n    EFP ProducerAdministratorsAuthenticated Users\n  '
-   * 
+   * The element's textContent can be either:
+   * 1. JSON array format: '[{"Name":"EFP Producer"},{"Name":"Administrators"}]'
+   * 2. Concatenated string format: 'EFP ProducerAdministratorsAuthenticated Users'
+   *
    * @returns {string[]} Array of role names
    */
   function parseUserRolesFromDOM() {
     var element = document.getElementById('pp-user-roles');
     if (!element) {
-      logger$9.warn({
+      logger$i.warn({
         fn: parseUserRolesFromDOM,
         message: 'Element with id "pp-user-roles" not found in DOM'
       });
@@ -39004,53 +39053,114 @@
     }
     var textContent = element.textContent || '';
     if (!textContent.trim()) {
-      logger$9.warn({
+      logger$i.warn({
         fn: parseUserRolesFromDOM,
         message: 'Element "pp-user-roles" found but has no text content'
       });
       return [];
     }
-
-    // Split by common role name patterns
-    // Roles are typically concatenated without spaces between them
-    // We need to identify role boundaries by looking for capital letters
-    // Common roles: "EFP Producer", "Administrators", "Authenticated Users"
-
-    // First, trim and normalize whitespace
     var normalized = textContent.trim();
 
-    // Split on capital letters that follow lowercase letters or spaces
-    // This regex looks for positions where a capital letter follows a lowercase letter
-    var roles = [];
-    var currentRole = '';
-    for (var i = 0; i < normalized.length; i++) {
-      var char = normalized[i];
-      var prevChar = i > 0 ? normalized[i - 1] : '';
+    // Try to parse as JSON first (new format from template)
+    if (normalized.startsWith('[') || normalized.startsWith('{')) {
+      try {
+        var parsed = JSON.parse(normalized);
 
-      // Start a new role if we hit a capital letter after a lowercase letter
-      if (char.match(/[A-Z]/) && prevChar.match(/[a-z]/)) {
-        if (currentRole.trim()) {
-          roles.push(currentRole.trim());
+        // Handle array of role objects: [{"Name":"EFP Producer"}]
+        if (Array.isArray(parsed)) {
+          var _roles = parsed.map(function (role) {
+            if (typeof role === 'string') {
+              return role;
+            } else if (role && _typeof(role) === 'object') {
+              // Try common property names
+              return role.Name || role.name || role.RoleName || role.roleName || '';
+            }
+            return '';
+          }).filter(function (role) {
+            return role.trim() !== '';
+          });
+          logger$i.info({
+            fn: parseUserRolesFromDOM,
+            message: 'Parsed user roles from DOM (JSON format)',
+            data: {
+              rawText: textContent,
+              parsedRoles: _roles
+            }
+          });
+          return _roles;
         }
-        currentRole = char;
-      } else if (char.match(/\S/)) {
-        // Add non-whitespace characters to current role
-        currentRole += char;
-      } else if (char.match(/\s/) && currentRole.trim()) {
-        // Whitespace might be part of role name (e.g., "Authenticated Users")
-        // or it might be between roles
-        // Add it tentatively
-        currentRole += char;
+
+        // Handle single role object: {"Name":"EFP Producer"}
+        if (parsed && _typeof(parsed) === 'object') {
+          var roleName = parsed.Name || parsed.name || parsed.RoleName || parsed.roleName || '';
+          var _roles2 = roleName ? [roleName] : [];
+          logger$i.info({
+            fn: parseUserRolesFromDOM,
+            message: 'Parsed user roles from DOM (JSON object format)',
+            data: {
+              rawText: textContent,
+              parsedRoles: _roles2
+            }
+          });
+          return _roles2;
+        }
+      } catch (error) {
+        logger$i.warn({
+          fn: parseUserRolesFromDOM,
+          message: 'Failed to parse roles as JSON, falling back to string parsing',
+          data: {
+            error: error.message,
+            textContent: textContent
+          }
+        });
       }
     }
 
-    // Don't forget the last role
-    if (currentRole.trim()) {
-      roles.push(currentRole.trim());
+    // Fall back to legacy string parsing for concatenated format
+    // Use a list of known roles to extract from the concatenated string
+    var knownRoles = ['EFP Producer', 'EFP Planning Advisor', 'Administrators', 'Authenticated Users', 'Anonymous Users'];
+    var roles = [];
+
+    // Check for each known role in the text
+    for (var _i = 0, _knownRoles = knownRoles; _i < _knownRoles.length; _i++) {
+      var role = _knownRoles[_i];
+      if (normalized.includes(role)) {
+        roles.push(role);
+      }
     }
-    logger$9.info({
+
+    // If no known roles found, try the old parsing logic as a fallback
+    if (roles.length === 0) {
+      var currentRole = '';
+      for (var i = 0; i < normalized.length; i++) {
+        var char = normalized[i];
+        var prevChar = i > 0 ? normalized[i - 1] : '';
+
+        // Start a new role if we hit a capital letter after a lowercase letter
+        if (char.match(/[A-Z]/) && prevChar.match(/[a-z]/)) {
+          if (currentRole.trim()) {
+            roles.push(currentRole.trim());
+          }
+          currentRole = char;
+        } else if (char.match(/\S/)) {
+          // Add non-whitespace characters to current role
+          currentRole += char;
+        } else if (char.match(/\s/) && currentRole.trim()) {
+          // Whitespace might be part of role name (e.g., "Authenticated Users")
+          // or it might be between roles
+          // Add it tentatively
+          currentRole += char;
+        }
+      }
+
+      // Don't forget the last role
+      if (currentRole.trim()) {
+        roles.push(currentRole.trim());
+      }
+    }
+    logger$i.info({
       fn: parseUserRolesFromDOM,
-      message: 'Parsed user roles from DOM',
+      message: 'Parsed user roles from DOM (string format)',
       data: {
         rawText: textContent,
         parsedRoles: roles
@@ -39067,7 +39177,7 @@
     store.dispatch('setUserRoles', {
       roles: roles
     });
-    logger$9.info({
+    logger$i.info({
       fn: loadUserRoles,
       message: 'User roles loaded into state',
       data: {
@@ -39118,7 +39228,7 @@
    *   - resetSignOffRole()            // Restore actual user roles
    *   - getSignOffDebugStatus()       // Display current debug settings
    */
-  const logger$8 = Logger('components/WorkbookSignOffButtons');
+  const logger$h = Logger('components/WorkbookSignOffButtons');
   // Convert string values to integers for API
   const YES_INT = parseInt(YES_VALUE, 10); // 100000000
   const NO_INT = parseInt(NO_VALUE, 10); // 100000001
@@ -39129,7 +39239,7 @@
   // Enable debug mode - allows sign-off in Draft status
   window.enableSignOffDebugging = () => {
       debugModeEnabled = true;
-      logger$8.info({
+      logger$h.info({
           fn: 'enableSignOffDebugging',
           message: '🐛 DEBUG MODE ENABLED: Draft status requirement will be ignored for sign-off',
       });
@@ -39143,7 +39253,7 @@
   // Disable debug mode - restores normal Draft status requirement
   window.disableSignOffDebugging = () => {
       debugModeEnabled = false;
-      logger$8.info({
+      logger$h.info({
           fn: 'disableSignOffDebugging',
           message: '🐛 DEBUG MODE DISABLED: Draft status requirement restored for sign-off',
       });
@@ -39157,7 +39267,7 @@
   // Enable clear sign-off debug mode - allows clearing sign-off even when both have signed
   window.enableClearSignOffDebugging = () => {
       debugClearSignOffEnabled = true;
-      logger$8.info({
+      logger$h.info({
           fn: 'enableClearSignOffDebugging',
           message: '🐛 DEBUG MODE ENABLED: Clear Sign-Off will be enabled even when both PA and Producer have signed',
       });
@@ -39171,7 +39281,7 @@
   // Disable clear sign-off debug mode - restores normal restriction
   window.disableClearSignOffDebugging = () => {
       debugClearSignOffEnabled = false;
-      logger$8.info({
+      logger$h.info({
           fn: 'disableClearSignOffDebugging',
           message: '🐛 DEBUG MODE DISABLED: Clear Sign-Off restriction restored (disabled when both have signed)',
       });
@@ -39185,7 +39295,7 @@
   // Set role override for testing
   window.setSignOffRole = (role) => {
       debugRoleOverride = role;
-      logger$8.info({
+      logger$h.info({
           fn: 'setSignOffRole',
           message: `🐛 DEBUG ROLE OVERRIDE: Set to '${role}'`,
           data: { role },
@@ -39206,7 +39316,7 @@
   // Reset role override - restore actual user roles
   window.resetSignOffRole = () => {
       debugRoleOverride = null;
-      logger$8.info({
+      logger$h.info({
           fn: 'resetSignOffRole',
           message: '🐛 DEBUG ROLE OVERRIDE: Reset to actual user roles',
       });
@@ -39250,7 +39360,7 @@
           // Handle workbook data refreshed event
           this.handleWorkbookDataRefreshed = (event) => {
               const customEvent = event;
-              logger$8.info({
+              logger$h.info({
                   fn: 'handleWorkbookDataRefreshed',
                   message: 'Workbook data refreshed, reloading sign-off data',
                   data: customEvent.detail,
@@ -39294,7 +39404,7 @@
                       this.showProducerButton = false;
                       break;
               }
-              logger$8.info({
+              logger$h.info({
                   fn: 'checkUserRoles',
                   message: '🐛 DEBUG ROLE OVERRIDE: Using debug role settings',
                   data: {
@@ -39308,7 +39418,7 @@
               // Use actual user roles
               this.showPAButton = hasRole('EFP Planning Advisor');
               this.showProducerButton = hasRole('EFP Producer');
-              logger$8.info({
+              logger$h.info({
                   fn: 'checkUserRoles',
                   message: 'Checked user roles for sign-off buttons',
                   data: {
@@ -39327,7 +39437,7 @@
               this.paSigned = workbookData.quartech_pasigned === YES_INT;
               this.producerSigned = workbookData.quartech_producersigned === YES_INT;
               this.workbookStatus = (_a = workbookData.quartech_workbookstatus) !== null && _a !== void 0 ? _a : null;
-              logger$8.info({
+              logger$h.info({
                   fn: 'loadSignOffData',
                   message: 'Loaded sign-off status from workbook data',
                   data: {
@@ -39359,7 +39469,7 @@
           }
           // In debug mode, allow sign-off in Draft status
           if (debugModeEnabled) {
-              logger$8.info({
+              logger$h.info({
                   fn: 'canPASignOff',
                   message: '🐛 DEBUG MODE: Allowing PA sign-off regardless of workbook status',
                   data: { workbookStatus: this.workbookStatus },
@@ -39381,7 +39491,7 @@
       canPACancelSignOff() {
           // In debug mode, allow clearing sign-off even when both have signed
           if (debugClearSignOffEnabled && this.paSigned) {
-              logger$8.info({
+              logger$h.info({
                   fn: 'canPACancelSignOff',
                   message: '🐛 DEBUG MODE: Allowing PA to clear sign-off even when both have signed',
                   data: { paSigned: this.paSigned, producerSigned: this.producerSigned },
@@ -39413,7 +39523,7 @@
           }
           // In debug mode, allow sign-off in Draft status
           if (debugModeEnabled) {
-              logger$8.info({
+              logger$h.info({
                   fn: 'canProducerSignOff',
                   message: '🐛 DEBUG MODE: Allowing Producer sign-off regardless of workbook status',
                   data: { workbookStatus: this.workbookStatus },
@@ -39435,7 +39545,7 @@
       canProducerCancelSignOff() {
           // In debug mode, allow clearing sign-off even when both have signed
           if (debugClearSignOffEnabled && this.producerSigned) {
-              logger$8.info({
+              logger$h.info({
                   fn: 'canProducerCancelSignOff',
                   message: '🐛 DEBUG MODE: Allowing Producer to clear sign-off even when both have signed',
                   data: { paSigned: this.paSigned, producerSigned: this.producerSigned },
@@ -39531,7 +39641,7 @@
       async handleSignOff(roleType, fieldName) {
           const workbookId = getCurrentWorkbookId();
           if (!workbookId) {
-              logger$8.error({
+              logger$h.error({
                   fn: 'handleSignOff',
                   message: 'No workbook ID found',
               });
@@ -39543,7 +39653,7 @@
               // Toggle the sign-off: if currently signed (Yes), set to No; if not signed (No), set to Yes
               const currentlySigned = roleType === 'PA' ? this.paSigned : this.producerSigned;
               const newValue = currentlySigned ? NO_INT : YES_INT;
-              logger$8.info({
+              logger$h.info({
                   fn: 'handleSignOff',
                   message: `${roleType} sign-off button clicked`,
                   data: {
@@ -39571,13 +39681,13 @@
               const workbookData = getWorkbookData();
               if (workbookData) {
                   workbookData[fieldName] = newValue;
-                  logger$8.info({
+                  logger$h.info({
                       fn: 'handleSignOff',
                       message: `Updated cached workbook data for ${fieldName}`,
                       data: { fieldName, newValue },
                   });
               }
-              logger$8.info({
+              logger$h.info({
                   fn: 'handleSignOff',
                   message: `Successfully updated ${roleType} sign-off`,
                   data: { newSigned: !currentlySigned },
@@ -39594,7 +39704,7 @@
               }));
           }
           catch (error) {
-              logger$8.error({
+              logger$h.error({
                   fn: 'handleSignOff',
                   message: `Failed to update ${roleType} sign-off`,
                   data: { error },
@@ -41915,7 +42025,7 @@
       t$1('searchable-dropdown')
   ], SearchableDropdown);
 
-  const logger$7 = Logger('components/ActionPlanTable');
+  const logger$g = Logger('components/ActionPlanTable');
   let ActionPlanTable = class ActionPlanTable extends s$2 {
       constructor() {
           super(...arguments);
@@ -41936,6 +42046,18 @@
           this.editingPlan = null;
           this.deletingPlan = null;
           this.viewingQuestionId = null;
+          // Bound handler for action-plans-updated event from other instances
+          this.handleExternalActionPlansUpdate = (event) => {
+              // Only reload if the event came from a different instance
+              if (event.target !== this) {
+                  logger$g.info({
+                      fn: 'handleExternalActionPlansUpdate',
+                      message: 'Action plans updated by another instance, reloading',
+                  });
+                  // Pass false to prevent dispatching another event (avoid infinite loop)
+                  this.loadActionPlans(false);
+              }
+          };
       }
       connectedCallback() {
           super.connectedCallback();
@@ -41945,7 +42067,7 @@
           store.events.subscribe('stateChange', (state) => {
               var _a, _b;
               if (((_b = (_a = state.questionnaire) === null || _a === void 0 ? void 0 : _a.chapters) === null || _b === void 0 ? void 0 : _b.length) > 0 && this.chapters.length === 0) {
-                  logger$7.info({
+                  logger$g.info({
                       fn: 'connectedCallback',
                       message: 'Questionnaire data loaded in store, updating chapters',
                   });
@@ -41953,12 +42075,15 @@
                   this.requestUpdate();
               }
           });
+          // Listen for action plan updates from other instances to keep data in sync
+          document.addEventListener('action-plans-updated', this.handleExternalActionPlansUpdate);
       }
       disconnectedCallback() {
           super.disconnectedCallback();
-          // Note: PubSub doesn't have unsubscribe, but component cleanup happens automatically
+          // Remove the document-level event listener
+          document.removeEventListener('action-plans-updated', this.handleExternalActionPlansUpdate);
       }
-      async loadActionPlans() {
+      async loadActionPlans(dispatchEvent = true) {
           var _a;
           try {
               this.loading = true;
@@ -41967,10 +42092,10 @@
               if (!workbookId) {
                   throw new Error('No workbook ID found');
               }
-              logger$7.info({
+              logger$g.info({
                   fn: 'loadActionPlans',
                   message: 'Fetching action plans',
-                  data: { workbookId },
+                  data: { workbookId, dispatchEvent },
               });
               const result = await getActionPlansData();
               if (!((_a = result === null || result === void 0 ? void 0 : result.data) === null || _a === void 0 ? void 0 : _a.value)) {
@@ -41978,21 +42103,24 @@
               }
               // Filter action plans for current workbook
               this.actionPlans = result.data.value.filter((plan) => plan._quartech_workbook_value === workbookId);
-              logger$7.info({
+              logger$g.info({
                   fn: 'loadActionPlans',
                   message: 'Action plans loaded successfully',
                   data: { count: this.actionPlans.length },
               });
               // Dispatch event to notify other components that action plans have been updated
-              this.dispatchEvent(new CustomEvent('action-plans-updated', {
-                  bubbles: true,
-                  composed: true,
-                  detail: { count: this.actionPlans.length }
-              }));
+              // Only dispatch if this is a primary load (not triggered by external update)
+              if (dispatchEvent) {
+                  this.dispatchEvent(new CustomEvent('action-plans-updated', {
+                      bubbles: true,
+                      composed: true,
+                      detail: { count: this.actionPlans.length }
+                  }));
+              }
           }
           catch (err) {
               this.error = err instanceof Error ? err.message : 'Failed to load action plans';
-              logger$7.error({
+              logger$g.error({
                   fn: 'loadActionPlans',
                   message: 'Failed to load action plans',
                   data: { error: err },
@@ -42006,7 +42134,7 @@
           try {
               const questionnaire = getQuestionnaireFromStore();
               if (!(questionnaire === null || questionnaire === void 0 ? void 0 : questionnaire.chapters)) {
-                  logger$7.warn({
+                  logger$g.warn({
                       fn: 'loadChaptersAndQuestions',
                       message: 'Questionnaire not loaded yet',
                   });
@@ -42034,14 +42162,14 @@
               }));
               // Load all questions from all chapters for the unfiltered dropdown
               this.loadAllQuestions();
-              logger$7.info({
+              logger$g.info({
                   fn: 'loadChaptersAndQuestions',
                   message: 'Chapters loaded',
                   data: { count: this.chapters.length },
               });
           }
           catch (err) {
-              logger$7.error({
+              logger$g.error({
                   fn: 'loadChaptersAndQuestions',
                   message: 'Failed to load chapters and questions',
                   data: { error: err },
@@ -42062,7 +42190,7 @@
               value: question.id,
               label: this.stripHtmlAndDecode(question.label || question.name)
           }));
-          logger$7.info({
+          logger$g.info({
               fn: 'loadAllQuestions',
               message: 'All questions loaded',
               data: { count: this.questions.length },
@@ -42072,7 +42200,7 @@
           var _a;
           this.selectedChapterId = ((_a = e.detail) === null || _a === void 0 ? void 0 : _a.value) || '';
           this.selectedQuestionId = ''; // Reset question when chapter changes
-          logger$7.info({
+          logger$g.info({
               fn: 'handleChapterChange',
               message: 'Chapter changed',
               data: { selectedChapterId: this.selectedChapterId },
@@ -42094,7 +42222,7 @@
       handleQuestionChange(e) {
           var _a;
           this.selectedQuestionId = ((_a = e.detail) === null || _a === void 0 ? void 0 : _a.value) || '';
-          logger$7.info({
+          logger$g.info({
               fn: 'handleQuestionChange',
               message: 'Question changed',
               data: { selectedQuestionId: this.selectedQuestionId },
@@ -42144,7 +42272,7 @@
           else {
               this.loadAllQuestions();
           }
-          logger$7.info({
+          logger$g.info({
               fn: 'openCreateDialogWithSelection',
               message: 'Opening create dialog with pre-selected values',
               data: { chapterId: this.selectedChapterId, questionId: this.selectedQuestionId },
@@ -42202,7 +42330,7 @@
           }
           try {
               this.editing = true;
-              logger$7.info({
+              logger$g.info({
                   fn: 'handleEditActionPlan',
                   message: 'Updating action plan',
                   data: {
@@ -42218,7 +42346,7 @@
                   questionId: this.selectedQuestionId || null,
                   action: this.actionDescription,
               });
-              logger$7.info({
+              logger$g.info({
                   fn: 'handleEditActionPlan',
                   message: 'Action plan updated successfully',
               });
@@ -42228,7 +42356,7 @@
               this.closeEditDialog();
           }
           catch (err) {
-              logger$7.error({
+              logger$g.error({
                   fn: 'handleEditActionPlan',
                   message: 'Failed to update action plan',
                   data: { error: err },
@@ -42260,7 +42388,7 @@
           }
           try {
               this.deleting = true;
-              logger$7.info({
+              logger$g.info({
                   fn: 'handleDeleteActionPlan',
                   message: 'Deleting action plan',
                   data: {
@@ -42270,7 +42398,7 @@
               await deleteActionPlanData({
                   actionPlanId: this.deletingPlan.quartech_actionplanid,
               });
-              logger$7.info({
+              logger$g.info({
                   fn: 'handleDeleteActionPlan',
                   message: 'Action plan deleted successfully',
               });
@@ -42280,7 +42408,7 @@
               this.closeDeleteDialog();
           }
           catch (err) {
-              logger$7.error({
+              logger$g.error({
                   fn: 'handleDeleteActionPlan',
                   message: 'Failed to delete action plan',
                   data: { error: err },
@@ -42302,7 +42430,7 @@
               if (!workbookId) {
                   throw new Error('No workbook ID found');
               }
-              logger$7.info({
+              logger$g.info({
                   fn: 'handleCreateActionPlan',
                   message: 'Creating action plan',
                   data: {
@@ -42318,7 +42446,7 @@
                   questionId: this.selectedQuestionId || null,
                   action: this.actionDescription,
               });
-              logger$7.info({
+              logger$g.info({
                   fn: 'handleCreateActionPlan',
                   message: 'Action plan created successfully',
               });
@@ -42328,7 +42456,7 @@
               this.closeCreateDialog();
           }
           catch (err) {
-              logger$7.error({
+              logger$g.error({
                   fn: 'handleCreateActionPlan',
                   message: 'Failed to create action plan',
                   data: { error: err },
@@ -42404,7 +42532,7 @@
       openViewActionsDialog(questionId) {
           var _a;
           this.viewingQuestionId = questionId;
-          logger$7.info({
+          logger$g.info({
               fn: 'openViewActionsDialog',
               message: 'Opening view actions dialog',
               data: { questionId, count: this.getActionPlanCountForQuestion(questionId) },
@@ -42851,98 +42979,269 @@
       t$1('action-plan-table')
   ], ActionPlanTable);
 
-  // Create logger instance for EFP event utilities
-  const logger$6 = Logger('components/efp/event-utils');
-  // Utility class for event handling helpers
-  class EFPEventUtils {
-      static handleItemClick(item, flatSteps, onStepChange, onNavigationUpdate) {
-          const index = flatSteps.findIndex((i) => i.label === item.label);
-          logger$6.info({ message: `Navigation click: Looking for "${item.label}", found at index: ${index}` });
-          if (index !== -1) {
-              const sectionIndex = flatSteps[index].sectionIndex;
-              logger$6.info({ message: `Set currentStepIndex to ${index}, currentSectionIndex to ${sectionIndex}` });
-              onStepChange(index, sectionIndex);
-              onNavigationUpdate(item.label);
-          }
-          else {
-              logger$6.warn({ message: `Step "${item.label}" not found in flatSteps. Available steps: ${flatSteps.map(s => s.label).join(', ')}` });
+  /**
+   * ProgressHeader Component
+   *
+   * Displays workbook completion percentage and progress bar
+   */
+  let ProgressHeader = class ProgressHeader extends s$2 {
+      constructor() {
+          super(...arguments);
+          this.completionPercentage = 0;
+      }
+      render() {
+          return x `
+      <div class="card">
+        <strong>${this.completionPercentage}% Complete</strong>
+        <div class="progress-bar-container">
+          <div
+            class="progress-bar-fill"
+            style="width: ${this.completionPercentage}%;"
+          ></div>
+        </div>
+      </div>
+    `;
+      }
+  };
+  ProgressHeader.styles = i$4 `
+    :host {
+      display: block;
+    }
+
+    .card {
+      background: var(--sl-color-neutral-0);
+      border: 1px solid var(--sl-color-neutral-200);
+      border-radius: var(--sl-border-radius-medium);
+      padding: 1rem;
+      margin-top: 0.5rem;
+      margin-bottom: 1rem;
+      box-shadow: var(--sl-shadow-x-small);
+    }
+
+    .card strong {
+      font-weight: 600;
+      color: var(--sl-color-neutral-700);
+      font-size: 1rem;
+    }
+
+    .progress-bar-container {
+      width: 100%;
+      height: 0.75rem;
+      background-color: #e5e7eb;
+      border-radius: 0.375rem;
+      margin-top: 0.5rem;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background-color: #3b82f6;
+      border-radius: 0.375rem;
+      transition: width 0.3s ease;
+    }
+  `;
+  __decorate([
+      n$4({ type: Number })
+  ], ProgressHeader.prototype, "completionPercentage", void 0);
+  ProgressHeader = __decorate([
+      t$1('progress-header')
+  ], ProgressHeader);
+
+  const logger$f = Logger('components/NavigationSidebar');
+  /**
+   * NavigationSidebar Component
+   *
+   * Displays workbook information and section navigation with completion status
+   */
+  let NavigationSidebar = class NavigationSidebar extends s$2 {
+      constructor() {
+          super(...arguments);
+          this.workbookId = 'N/A';
+          this.workbookName = 'N/A';
+          this.workbookStatus = 'N/A';
+          this.sections = [];
+          this.currentSectionIndex = 0;
+          this.sectionCompletion = new Map();
+          this.sectionSkipped = new Map();
+      }
+      updated(changedProps) {
+          var _a, _b;
+          super.updated(changedProps);
+          // Sync tab group with currentSectionIndex when it changes programmatically
+          if (changedProps.has('currentSectionIndex') && this.tabGroupEl) {
+              const activeTab = `section-${this.currentSectionIndex}`;
+              (_b = (_a = this.tabGroupEl).show) === null || _b === void 0 ? void 0 : _b.call(_a, activeTab);
+              logger$f.info({
+                  message: `Tab group synced to section ${this.currentSectionIndex}`,
+              });
           }
       }
-      static handleSectionChange(newSectionIndex, isNavigating, flatSteps, onStepChange, onNavigationUpdate) {
-          logger$6.info({ message: `Section changed to: ${newSectionIndex}, isNavigating: ${isNavigating}` });
-          // If we're in the middle of programmatic navigation, don't interfere
-          if (isNavigating) {
-              logger$6.info({ message: 'Ignoring section change during navigation' });
-              return;
-          }
-          // Find the first CONTENT step in the new section (skip section headers)
-          const stepsInSection = flatSteps.filter(step => step.sectionIndex === newSectionIndex);
-          logger$6.info({ message: `Found ${stepsInSection.length} steps in section ${newSectionIndex}`, data: { steps: stepsInSection.map(s => s.label) } });
-          // Skip the first step if it's just the section header (tab name)
-          // The first step is typically the tab name itself (e.g., "My Workbook", "Review & Submit")
-          // We want to skip that and go to the actual content
-          let firstContentStep = stepsInSection.find(step => !step.label.startsWith('Section ') &&
-              step.content &&
-              step.content.trim() !== '' &&
-              step.content !== step.label &&
-              // Also skip if the label matches common tab names
-              step.label !== 'My Workbook' &&
-              step.label !== 'Review & Submit');
-          // If no content step found, fall back to the first step after the section header
-          if (!firstContentStep && stepsInSection.length > 1) {
-              logger$6.info({ message: 'No content step found, using second step (after header)' });
-              firstContentStep = stepsInSection[1];
-          }
-          // If still no step found, use the first step in the section
-          if (!firstContentStep && stepsInSection.length > 0) {
-              logger$6.info({ message: 'Using first step in section as fallback' });
-              firstContentStep = stepsInSection[0];
-          }
-          if (firstContentStep) {
-              const stepIndex = flatSteps.indexOf(firstContentStep);
-              logger$6.info({ message: `Navigating to first content step: "${firstContentStep.label}" at index ${stepIndex}` });
-              onStepChange(stepIndex, newSectionIndex);
-              onNavigationUpdate(firstContentStep.label);
-          }
-          else {
-              logger$6.warn({ message: `No steps found for section: ${newSectionIndex}` });
-          }
-      }
-      static handleRatingChanged(event, onAnswerUpdate) {
-          var _a;
-          const { questionId, value } = event.detail;
-          logger$6.info({ message: `Question ${questionId} answered with: ${value}` });
-          // Call the optional callback to update answers
-          onAnswerUpdate === null || onAnswerUpdate === void 0 ? void 0 : onAnswerUpdate(questionId, value);
-          // Dispatch a custom event for parent components
-          const answerEvent = new CustomEvent('efp-answer-changed', {
-              detail: { questionId, value },
-              bubbles: true,
-              composed: true
+      handleSectionChange(tabIndex) {
+          logger$f.info({
+              message: `Section tab changed to index ${tabIndex}`,
           });
-          (_a = event.target) === null || _a === void 0 ? void 0 : _a.dispatchEvent(answerEvent);
+          this.dispatchEvent(new CustomEvent('section-change', {
+              detail: { sectionIndex: tabIndex },
+              bubbles: true,
+              composed: true,
+          }));
       }
-      static handleNavigationPrevious(goToPrevious) {
-          goToPrevious();
+      getSectionCompletion(_section, index) {
+          return this.sectionCompletion.get(index) || false;
       }
-      static handleNavigationSkip(event, onSectionChange) {
-          onSectionChange(event.detail.sectionIndex);
+      getSectionSkipped(_section, index) {
+          return this.sectionSkipped.get(index) || false;
       }
-      static handleNavigationContinue(goToNext) {
-          goToNext();
+      render() {
+          return x `
+      <!-- Workbook Info Card -->
+      <div class="card">
+        <div><strong>Workbook ID:</strong> ${this.workbookId}</div>
+        <div><strong>Workbook Name:</strong> ${this.workbookName}</div>
+        <div><strong>Status:</strong> ${this.workbookStatus}</div>
+      </div>
+
+      <!-- Section Tabs -->
+      <sl-tab-group
+        no-scroll-controls
+        @sl-tab-show=${(e) => {
+            const tabIndex = parseInt(e.detail.name.replace('section-', ''));
+            this.handleSectionChange(tabIndex);
+        }}
+      >
+        ${this.sections.map((section, index) => {
+            const isActive = index === this.currentSectionIndex;
+            const isComplete = this.getSectionCompletion(section, index);
+            const isSkipped = this.getSectionSkipped(section, index);
+            // Determine icon based on state: skipped > complete > incomplete
+            let icon;
+            let color;
+            if (isSkipped) {
+                icon = 'skip-forward-circle';
+                color = isActive ? 'orange' : '#d97706'; // yellow color
+            }
+            else if (isComplete) {
+                icon = 'check-circle';
+                color = '#22c55e'; // green - always green when completed
+            }
+            else {
+                icon = 'pencil';
+                color = isActive ? 'orange' : 'gray';
+            }
+            return x `
+            <sl-tab slot="nav" panel="section-${index}">
+              <sl-icon
+                name=${icon}
+                style="color: ${color}; margin-right: 0.5rem;"
+              ></sl-icon>
+              <span style=${isActive ? 'font-weight: bold;' : ''}
+                >${section.tab}</span
+              >
+            </sl-tab>
+          `;
+        })}
+        ${this.sections.map((section, index) => x `
+            <sl-tab-panel name="section-${index}">
+              <div class="card">
+                <strong>${section.title}</strong>
+              </div>
+              <slot name="section-${index}-items"></slot>
+            </sl-tab-panel>
+          `)}
+      </sl-tab-group>
+    `;
       }
-      static createTabShowHandler(onSectionChange) {
-          return (e) => {
-              const tabIndex = parseInt(e.detail.name.replace('section-', ''));
-              onSectionChange(tabIndex);
-          };
-      }
-      static createItemClickHandler(flatSteps, onStepChange, onNavigationUpdate) {
-          return (item) => {
-              EFPEventUtils.handleItemClick(item, flatSteps, onStepChange, onNavigationUpdate);
-          };
-      }
-  }
+  };
+  NavigationSidebar.styles = i$4 `
+    :host {
+      display: block;
+      width: 100%;
+      max-width: 100%;
+      overflow: hidden;
+      box-sizing: border-box;
+    }
+
+    .card {
+      background: var(--sl-color-neutral-0);
+      border: 1px solid var(--sl-color-neutral-200);
+      border-radius: var(--sl-border-radius-medium);
+      padding: 1rem;
+      margin-top: 0.5rem;
+      margin-bottom: 1rem;
+      box-shadow: var(--sl-shadow-x-small);
+    }
+
+    .card div {
+      margin-bottom: 0.5rem;
+    }
+
+    .card div:last-child {
+      margin-bottom: 0;
+    }
+
+    .card strong {
+      font-weight: 600;
+      color: var(--sl-color-neutral-700);
+    }
+
+    sl-tab-group {
+      --indicator-color: var(--sl-color-primary-600);
+      width: 100%;
+      max-width: 100%;
+      overflow: hidden;
+    }
+
+    sl-tab-group::part(nav) {
+      display: flex;
+      justify-content: center;
+    }
+
+    sl-tab::part(base) {
+      padding: 0.75rem 1rem;
+    }
+
+    sl-tab-panel {
+      padding: 0;
+      width: 100%;
+      max-width: 100%;
+      overflow: hidden;
+    }
+
+    /* Ensure slotted content doesn't expand the sidebar */
+    ::slotted(*) {
+      width: 100%;
+      max-width: 100%;
+      overflow: hidden;
+      box-sizing: border-box;
+    }
+  `;
+  __decorate([
+      n$4({ type: String })
+  ], NavigationSidebar.prototype, "workbookId", void 0);
+  __decorate([
+      n$4({ type: String })
+  ], NavigationSidebar.prototype, "workbookName", void 0);
+  __decorate([
+      n$4({ type: String })
+  ], NavigationSidebar.prototype, "workbookStatus", void 0);
+  __decorate([
+      n$4({ type: Array })
+  ], NavigationSidebar.prototype, "sections", void 0);
+  __decorate([
+      n$4({ type: Number })
+  ], NavigationSidebar.prototype, "currentSectionIndex", void 0);
+  __decorate([
+      n$4({ type: Object })
+  ], NavigationSidebar.prototype, "sectionCompletion", void 0);
+  __decorate([
+      n$4({ type: Object })
+  ], NavigationSidebar.prototype, "sectionSkipped", void 0);
+  __decorate([
+      e$6('sl-tab-group')
+  ], NavigationSidebar.prototype, "tabGroupEl", void 0);
+  NavigationSidebar = __decorate([
+      t$1('navigation-sidebar')
+  ], NavigationSidebar);
 
   class EFPTextUtils {
       static formatChapterTitle(chapterOrName) {
@@ -43010,6 +43309,497 @@
       }
   }
 
+  // Question type constants
+  const QUESTION_TYPE_MAP = {
+      100000000: 'Yes/No/NA',
+      100000001: 'Point Rating',
+      100000002: 'Multi-select List',
+      100000003: 'Multiline Text',
+  };
+  /**
+   * Component responsible for rendering individual questions
+   * Handles different question types and their interactions
+   */
+  let QuestionRenderer = class QuestionRenderer extends s$2 {
+      constructor() {
+          super(...arguments);
+          this.question = null;
+          this.isDisabled = false;
+          this.hasTriedToSubmit = false;
+          this.responseService = null;
+          this.actionPlanCount = 0;
+          this.existingResponse = null;
+          // Counter to force re-renders when save status changes
+          this.updateCounter = 0;
+      }
+      // Disable Shadow DOM so this component inherits styles from parent EFPEntryForm
+      createRenderRoot() {
+          return this;
+      }
+      // Get the question type name from the numeric type
+      getQuestionTypeName() {
+          if (!this.question)
+              return 'Unknown';
+          return QUESTION_TYPE_MAP[this.question.questionType] || 'Unknown';
+      }
+      // Check if this question is incomplete
+      isIncomplete() {
+          var _a, _b;
+          if (!this.question)
+              return false;
+          const entry = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.get(this.question.id);
+          const isSkipped = ((_a = entry === null || entry === void 0 ? void 0 : entry.response) === null || _a === void 0 ? void 0 : _a.quartech_chapterskipped) === 100000000;
+          const hasResponse = ((_b = entry === null || entry === void 0 ? void 0 : entry.response) === null || _b === void 0 ? void 0 : _b.quartech_response) &&
+              entry.response.quartech_response.trim() !== '';
+          return !isSkipped && !hasResponse;
+      }
+      // Emit event for rating changes
+      handleRatingChanged(event) {
+          this.dispatchEvent(new CustomEvent('rating-changed', {
+              detail: event.detail,
+              bubbles: true,
+              composed: true,
+          }));
+      }
+      // Emit event for multiselect changes
+      handleMultiselectChange(questionId, option, checked) {
+          this.dispatchEvent(new CustomEvent('multiselect-changed', {
+              detail: { questionId, option, checked },
+              bubbles: true,
+              composed: true,
+          }));
+      }
+      // Emit event for multiline text input
+      handleMultilineTextInput(questionId, value) {
+          this.dispatchEvent(new CustomEvent('multiline-text-input', {
+              detail: { questionId, value },
+              bubbles: true,
+              composed: true,
+          }));
+      }
+      // Emit event for force save
+      handleForceSave(questionId) {
+          this.dispatchEvent(new CustomEvent('force-save', {
+              detail: { questionId },
+              bubbles: true,
+              composed: true,
+          }));
+      }
+      // Emit event for adding note to action plan
+      handleAddNoteToActionPlan() {
+          if (!this.question)
+              return;
+          this.dispatchEvent(new CustomEvent('add-note-to-action-plan', {
+              detail: { questionId: this.question.id },
+              bubbles: true,
+              composed: true,
+          }));
+      }
+      // Emit event for viewing existing actions
+      handleViewExistingActions() {
+          if (!this.question)
+              return;
+          this.dispatchEvent(new CustomEvent('view-existing-actions', {
+              detail: { questionId: this.question.id },
+              bubbles: true,
+              composed: true,
+          }));
+      }
+      // Render action plan buttons
+      renderActionPlanButtons() {
+          const hasActionPlans = this.actionPlanCount > 0;
+          return x `
+      <div class="question-action-plan-button">
+        ${hasActionPlans
+            ? x `
+              <button
+                class="view-actions-button"
+                @click=${this.handleViewExistingActions}
+                ?disabled=${this.isDisabled}
+              >
+                <sl-icon name="eye" aria-hidden="true"></sl-icon>
+                <span>View Existing Actions</span>
+                <sl-badge variant="primary" pill>${this.actionPlanCount}</sl-badge>
+              </button>
+            `
+            : ''}
+        <button
+          class="add-note-button"
+          @click=${this.handleAddNoteToActionPlan}
+          ?disabled=${this.isDisabled}
+        >
+          <sl-icon name="journal-plus" aria-hidden="true"></sl-icon>
+          <span>Add Note to Action Plan</span>
+        </button>
+      </div>
+    `;
+      }
+      // Render the question input based on question type
+      renderQuestionInput() {
+          const questionType = this.getQuestionTypeName();
+          switch (questionType) {
+              case 'Multi-select List':
+                  return this.renderMultiselectInput();
+              case 'Yes/No/NA':
+              case 'Point Rating':
+                  return this.renderRatingInput(questionType);
+              case 'Multiline Text':
+                  return this.renderMultilineTextInput();
+              default:
+                  return this.renderDefaultInput();
+          }
+      }
+      // Render the save status indicator
+      renderSaveStatusIndicator() {
+          var _a, _b;
+          const saveStatus = ((_a = this.responseService) === null || _a === void 0 ? void 0 : _a.getSaveStatus(this.question.id)) || 'saved';
+          // Only show indicator when saving or just saved (not for unsaved questions)
+          if (saveStatus === 'saved' && !((_b = this.existingResponse) === null || _b === void 0 ? void 0 : _b.quartech_response)) {
+              return x ``;
+          }
+          return x `
+      <div class="save-status-indicator">
+        <span
+          class="status-indicator status-${saveStatus}"
+          @click=${() => this.handleForceSave(this.question.id)}
+          role="button"
+          tabindex="0"
+          @keydown=${(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                this.handleForceSave(this.question.id);
+            }
+        }}
+        >
+          ${saveStatus === 'saving'
+            ? '⏳ Saving...'
+            : '✓ Saved'}
+        </span>
+      </div>
+    `;
+      }
+      // Render multiselect list input
+      renderMultiselectInput() {
+          var _a, _b;
+          const optionsString = this.question.multiselectOptions || '';
+          const options = optionsString
+              .split(';')
+              .map((opt) => opt.trim())
+              .filter((opt) => opt.length > 0);
+          // Get selected options - prefer pending value from service over saved response
+          let selectedOptions;
+          const pendingValues = (_a = this.responseService) === null || _a === void 0 ? void 0 : _a.getPendingMultiselectValues(this.question.id);
+          if (pendingValues) {
+              selectedOptions = pendingValues;
+          }
+          else {
+              const selectedOptionsString = ((_b = this.existingResponse) === null || _b === void 0 ? void 0 : _b.quartech_response) || '';
+              const existingSelectedOptions = selectedOptionsString
+                  .split(';')
+                  .map((opt) => opt.trim())
+                  .filter((opt) => opt.length > 0);
+              // Filter to only include valid options
+              selectedOptions = existingSelectedOptions.filter((opt) => options.includes(opt));
+          }
+          return x `
+      <div class="multiselect-list-container">
+        ${options.map((option) => {
+            const isChecked = selectedOptions.includes(option);
+            return x `
+            <div class="multiselect-option">
+              <label
+                style="display: flex; align-items: center; gap: 0.5rem; cursor: ${this.isDisabled ? 'not-allowed' : 'pointer'}; padding: 0.5rem 0; opacity: ${this.isDisabled ? '0.6' : '1'};"
+              >
+                <input
+                  type="checkbox"
+                  .checked=${isChecked}
+                  ?disabled=${this.isDisabled}
+                  @change=${(e) => this.handleMultiselectChange(this.question.id, option, e.target.checked)}
+                  style="transform: scale(1.2);"
+                />
+                <span>${option}</span>
+              </label>
+            </div>
+          `;
+        })}
+        ${this.renderSaveStatusIndicator()}
+      </div>
+    `;
+      }
+      // Render rating input (Yes/No/NA or Point Rating)
+      renderRatingInput(questionType) {
+          var _a;
+          const selectedValue = ((_a = this.existingResponse) === null || _a === void 0 ? void 0 : _a.quartech_response) || '';
+          const ratingMetadata = questionType === 'Point Rating'
+              ? {
+                  rating1OverwriteLabel: this.question.rating1OverwriteLabel,
+                  rating1Description: this.question.rating1Description,
+                  rating2OverwriteLabel: this.question.rating2OverwriteLabel,
+                  rating2Description: this.question.rating2Description,
+                  rating3OverwriteLabel: this.question.rating3OverwriteLabel,
+                  rating3Description: this.question.rating3Description,
+                  rating4OverwriteLabel: this.question.rating4OverwriteLabel,
+                  rating4Description: this.question.rating4Description,
+              }
+              : {};
+          return x `
+      <div class="rating-input-container">
+        <rating-question
+          .questionId=${this.question.id}
+          .questionType=${questionType}
+          .selectedValue=${selectedValue}
+          .ratingMetadata=${ratingMetadata}
+          .disabled=${this.isDisabled}
+          @rating-changed=${this.handleRatingChanged}
+        ></rating-question>
+        ${this.renderSaveStatusIndicator()}
+      </div>
+    `;
+      }
+      // Render multiline text input
+      renderMultilineTextInput() {
+          var _a, _b, _c, _d;
+          const textValue = ((_a = this.existingResponse) === null || _a === void 0 ? void 0 : _a.quartech_response) || '';
+          const saveStatus = ((_b = this.responseService) === null || _b === void 0 ? void 0 : _b.getMultilineTextSaveStatus(this.question.id)) || 'saved';
+          const charCount = (_d = (_c = this.responseService) === null || _c === void 0 ? void 0 : _c.getMultilineTextCharCount(this.question.id)) !== null && _d !== void 0 ? _d : textValue.length;
+          const maxChars = 5000;
+          const isOverLimit = charCount > maxChars;
+          return x `
+      <div class="multiline-text-container">
+        <sl-textarea
+          label="Your response"
+          name="question-${this.question.id}"
+          rows="6"
+          placeholder="Enter your response..."
+          maxlength="${maxChars}"
+          .value=${textValue}
+          ?disabled=${this.isDisabled}
+          @sl-input=${(e) => this.handleMultilineTextInput(this.question.id, e.target.value)}
+        ></sl-textarea>
+        <div class="multiline-text-footer">
+          <div class="character-counter ${isOverLimit ? 'over-limit' : ''}">
+            ${charCount} / ${maxChars} characters
+          </div>
+          <div class="multiline-text-status">
+            <span
+              class="status-indicator status-${saveStatus}"
+              @click=${() => this.handleForceSave(this.question.id)}
+              role="button"
+              tabindex="0"
+              @keydown=${(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                this.handleForceSave(this.question.id);
+            }
+        }}
+            >
+              ${saveStatus === 'draft'
+            ? '📝 Draft (click to save)'
+            : saveStatus === 'saving'
+                ? '⏳ Saving...'
+                : '✓ Saved'}
+            </span>
+          </div>
+        </div>
+      </div>
+    `;
+      }
+      // Render default text input for unknown types
+      renderDefaultInput() {
+          return x `
+      <sl-textarea
+        label="Your response"
+        name="question-${this.question.id}"
+        rows="3"
+        placeholder="Enter your response..."
+        ?disabled=${this.isDisabled}
+      ></sl-textarea>
+    `;
+      }
+      // Main render method
+      render() {
+          if (!this.question) {
+              return x ``;
+          }
+          const showIncompleteIcon = this.isIncomplete() && this.hasTriedToSubmit;
+          return x `
+      <div
+        class="question-container ${this.isDisabled ? 'question-disabled' : ''}"
+        data-question-id="${this.question.id}"
+      >
+        ${this.question.textAboveQuestion
+            ? x `
+              <div class="question-text">
+                ${o$3(this.question.textAboveQuestion)}
+              </div>
+            `
+            : ''}
+
+        <div class="question-label">
+          <div class="question-label-text">
+            <span
+              >${o$3(EFPTextUtils.convertNewlinesToBreaks(this.question.label))}</span
+            >
+            ${this.question.tooltip
+            ? x `
+                  <sl-tooltip placement="top" style="--max-width: 300px;">
+                    <div slot="content">${o$3(this.question.tooltip)}</div>
+                    <sl-icon
+                      name="question-circle"
+                      class="question-tooltip-icon"
+                      aria-label="Question help"
+                    ></sl-icon>
+                  </sl-tooltip>
+                `
+            : ''}
+          </div>
+          ${showIncompleteIcon
+            ? x `
+                <sl-icon
+                  name="exclamation-circle"
+                  class="question-incomplete-icon"
+                  aria-label="Incomplete question"
+                ></sl-icon>
+              `
+            : ''}
+        </div>
+
+        ${this.question.textBelowQuestion
+            ? x `
+              <div class="question-text">
+                ${o$3(this.question.textBelowQuestion)}
+              </div>
+            `
+            : ''}
+
+        <div class="question-response">
+          ${this.renderQuestionInput()}
+        </div>
+
+        ${this.renderActionPlanButtons()}
+      </div>
+    `;
+      }
+  };
+  __decorate([
+      n$4({ type: Object })
+  ], QuestionRenderer.prototype, "question", void 0);
+  __decorate([
+      n$4({ type: Boolean })
+  ], QuestionRenderer.prototype, "isDisabled", void 0);
+  __decorate([
+      n$4({ type: Boolean })
+  ], QuestionRenderer.prototype, "hasTriedToSubmit", void 0);
+  __decorate([
+      n$4({ type: Object })
+  ], QuestionRenderer.prototype, "responseService", void 0);
+  __decorate([
+      n$4({ type: Number })
+  ], QuestionRenderer.prototype, "actionPlanCount", void 0);
+  __decorate([
+      n$4({ type: Object })
+  ], QuestionRenderer.prototype, "existingResponse", void 0);
+  __decorate([
+      n$4({ type: Number })
+  ], QuestionRenderer.prototype, "updateCounter", void 0);
+  QuestionRenderer = __decorate([
+      t$1('question-renderer')
+  ], QuestionRenderer);
+
+  // Create logger instance for EFP event utilities
+  const logger$e = Logger('components/efp/event-utils');
+  // Utility class for event handling helpers
+  class EFPEventUtils {
+      static handleItemClick(item, flatSteps, onStepChange, onNavigationUpdate) {
+          const index = flatSteps.findIndex((i) => i.label === item.label);
+          logger$e.info({ message: `Navigation click: Looking for "${item.label}", found at index: ${index}` });
+          if (index !== -1) {
+              const sectionIndex = flatSteps[index].sectionIndex;
+              logger$e.info({ message: `Set currentStepIndex to ${index}, currentSectionIndex to ${sectionIndex}` });
+              onStepChange(index, sectionIndex);
+              onNavigationUpdate(item.label);
+          }
+          else {
+              logger$e.warn({ message: `Step "${item.label}" not found in flatSteps. Available steps: ${flatSteps.map(s => s.label).join(', ')}` });
+          }
+      }
+      static handleSectionChange(newSectionIndex, isNavigating, flatSteps, onStepChange, onNavigationUpdate) {
+          logger$e.info({ message: `Section changed to: ${newSectionIndex}, isNavigating: ${isNavigating}` });
+          // If we're in the middle of programmatic navigation, don't interfere
+          if (isNavigating) {
+              logger$e.info({ message: 'Ignoring section change during navigation' });
+              return;
+          }
+          // Find the first CONTENT step in the new section (skip section headers)
+          const stepsInSection = flatSteps.filter(step => step.sectionIndex === newSectionIndex);
+          logger$e.info({ message: `Found ${stepsInSection.length} steps in section ${newSectionIndex}`, data: { steps: stepsInSection.map(s => s.label) } });
+          // Skip the first step if it's just the section header (tab name)
+          // The first step is typically the tab name itself (e.g., "My Workbook", "Review & Submit")
+          // We want to skip that and go to the actual content
+          let firstContentStep = stepsInSection.find(step => !step.label.startsWith('Section ') &&
+              step.content &&
+              step.content.trim() !== '' &&
+              step.content !== step.label &&
+              // Also skip if the label matches common tab names
+              step.label !== 'My Workbook' &&
+              step.label !== 'Review & Submit');
+          // If no content step found, fall back to the first step after the section header
+          if (!firstContentStep && stepsInSection.length > 1) {
+              logger$e.info({ message: 'No content step found, using second step (after header)' });
+              firstContentStep = stepsInSection[1];
+          }
+          // If still no step found, use the first step in the section
+          if (!firstContentStep && stepsInSection.length > 0) {
+              logger$e.info({ message: 'Using first step in section as fallback' });
+              firstContentStep = stepsInSection[0];
+          }
+          if (firstContentStep) {
+              const stepIndex = flatSteps.indexOf(firstContentStep);
+              logger$e.info({ message: `Navigating to first content step: "${firstContentStep.label}" at index ${stepIndex}` });
+              onStepChange(stepIndex, newSectionIndex);
+              onNavigationUpdate(firstContentStep.label);
+          }
+          else {
+              logger$e.warn({ message: `No steps found for section: ${newSectionIndex}` });
+          }
+      }
+      static handleRatingChanged(event, onAnswerUpdate) {
+          var _a;
+          const { questionId, value } = event.detail;
+          logger$e.info({ message: `Question ${questionId} answered with: ${value}` });
+          // Call the optional callback to update answers
+          onAnswerUpdate === null || onAnswerUpdate === void 0 ? void 0 : onAnswerUpdate(questionId, value);
+          // Dispatch a custom event for parent components
+          const answerEvent = new CustomEvent('efp-answer-changed', {
+              detail: { questionId, value },
+              bubbles: true,
+              composed: true
+          });
+          (_a = event.target) === null || _a === void 0 ? void 0 : _a.dispatchEvent(answerEvent);
+      }
+      static handleNavigationPrevious(goToPrevious) {
+          goToPrevious();
+      }
+      static handleNavigationSkip(event, onSectionChange) {
+          onSectionChange(event.detail.sectionIndex);
+      }
+      static handleNavigationContinue(goToNext) {
+          goToNext();
+      }
+      static createTabShowHandler(onSectionChange) {
+          return (e) => {
+              const tabIndex = parseInt(e.detail.name.replace('section-', ''));
+              onSectionChange(tabIndex);
+          };
+      }
+      static createItemClickHandler(flatSteps, onStepChange, onNavigationUpdate) {
+          return (item) => {
+              EFPEventUtils.handleItemClick(item, flatSteps, onStepChange, onNavigationUpdate);
+          };
+      }
+  }
+
+  const logger$d = Logger('components/efp/completion-utils');
   class EFPCompletionUtils {
       static calculateOverallCompletion(sections) {
           const allItems = [];
@@ -43044,9 +43834,234 @@
           collect(section.items);
           return leafItems.every((item) => item.complete);
       }
+      /**
+       * Get completion status for an item from the questionnaire store
+       */
+      static getCompletionFromStore(item) {
+          if (!isQuestionnaireLoaded()) {
+              return item.complete || false;
+          }
+          try {
+              // Check if this is a chapter item
+              if (item.chapterId) {
+                  const chapter = getChapterFromStore(item.chapterId);
+                  return (chapter === null || chapter === void 0 ? void 0 : chapter.complete) || false;
+              }
+              // Check if this is a question item
+              if (item.questionId) {
+                  const question = getQuestionFromStore(item.questionId);
+                  return (question === null || question === void 0 ? void 0 : question.complete) || false;
+              }
+              // For nested items (containers), check children completion recursively
+              if ('items' in item && Array.isArray(item.items)) {
+                  return item.items.every((child) => EFPCompletionUtils.getCompletionFromStore(child));
+              }
+              return item.complete || false;
+          }
+          catch (error) {
+              logger$d.warn({
+                  message: `Failed to get completion from questionnaire store: ${String(error)}`,
+              });
+              return item.complete || false;
+          }
+      }
+      /**
+       * Get section completion status from questionnaire store
+       */
+      static getSectionCompletionFromStore(section) {
+          // For My Workbook, use questionnaire store completion
+          if (section.tab === 'My Workbook' && isQuestionnaireLoaded()) {
+              try {
+                  const questionnaire = getQuestionnaireFromStore();
+                  if (questionnaire) {
+                      let totalQuestions = 0;
+                      let completedOrSkippedQuestions = 0;
+                      const countInChapters = (chapters) => {
+                          chapters.forEach((chapter) => {
+                              if (chapter.questions) {
+                                  chapter.questions.forEach((question) => {
+                                      var _a, _b;
+                                      totalQuestions++;
+                                      const entry = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.get(question.id);
+                                      const isSkipped = ((_a = entry === null || entry === void 0 ? void 0 : entry.response) === null || _a === void 0 ? void 0 : _a.quartech_chapterskipped) === 100000000;
+                                      const hasResponse = ((_b = entry === null || entry === void 0 ? void 0 : entry.response) === null || _b === void 0 ? void 0 : _b.quartech_response) &&
+                                          entry.response.quartech_response.trim() !== '';
+                                      if (isSkipped || hasResponse) {
+                                          completedOrSkippedQuestions++;
+                                      }
+                                  });
+                              }
+                              if (chapter.subchapters) {
+                                  countInChapters(chapter.subchapters);
+                              }
+                          });
+                      };
+                      if (questionnaire.chapters && questionnaire.chapters.length > 0) {
+                          countInChapters(questionnaire.chapters[0]);
+                      }
+                      return totalQuestions > 0 && completedOrSkippedQuestions === totalQuestions;
+                  }
+              }
+              catch (error) {
+                  logger$d.warn({
+                      message: `Failed to get section completion from questionnaire store: ${String(error)}`,
+                  });
+              }
+          }
+          return EFPCompletionUtils.isSectionComplete(section);
+      }
+      /**
+       * Get section skipped status from questionnaire store
+       */
+      static getSectionSkippedFromStore(section) {
+          if (section.tab !== 'My Workbook') {
+              return false;
+          }
+          if (!POWERPOD.workbookQuestionsAndResponses.isLoaded) {
+              return false;
+          }
+          try {
+              const questionnaire = getQuestionnaireFromStore();
+              if (!questionnaire) {
+                  return false;
+              }
+              let totalQuestions = 0;
+              let skippedQuestions = 0;
+              const countInChapters = (chapters) => {
+                  chapters.forEach((chapter) => {
+                      if (chapter.questions) {
+                          chapter.questions.forEach((question) => {
+                              var _a;
+                              totalQuestions++;
+                              const entry = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.get(question.id);
+                              if (((_a = entry === null || entry === void 0 ? void 0 : entry.response) === null || _a === void 0 ? void 0 : _a.quartech_chapterskipped) === 100000000) {
+                                  skippedQuestions++;
+                              }
+                          });
+                      }
+                      if (chapter.subchapters) {
+                          countInChapters(chapter.subchapters);
+                      }
+                  });
+              };
+              if (questionnaire.chapters && questionnaire.chapters.length > 0) {
+                  countInChapters(questionnaire.chapters[0]);
+              }
+              return totalQuestions > 0 && skippedQuestions === totalQuestions;
+          }
+          catch (error) {
+              logger$d.warn({
+                  message: `Failed to get section skipped status: ${String(error)}`,
+              });
+              return false;
+          }
+      }
+      /**
+       * Check if a chapter has incomplete questions from preventSkipping children
+       */
+      static hasIncompletePreventSkippingChildren(subchapters) {
+          for (const subchapter of subchapters) {
+              if (subchapter.preventSkipping === true) {
+                  const questions = subchapter.questions || [];
+                  const hasIncompleteQuestions = questions.some((question) => {
+                      var _a, _b;
+                      const entry = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.get(question.id);
+                      const isSkipped = ((_a = entry === null || entry === void 0 ? void 0 : entry.response) === null || _a === void 0 ? void 0 : _a.quartech_chapterskipped) === 100000000;
+                      const hasResponse = ((_b = entry === null || entry === void 0 ? void 0 : entry.response) === null || _b === void 0 ? void 0 : _b.quartech_response) &&
+                          entry.response.quartech_response.trim() !== '';
+                      return !isSkipped && !hasResponse;
+                  });
+                  if (hasIncompleteQuestions) {
+                      return true;
+                  }
+              }
+              if (subchapter.subchapters) {
+                  if (EFPCompletionUtils.hasIncompletePreventSkippingChildren(subchapter.subchapters)) {
+                      return true;
+                  }
+              }
+          }
+          return false;
+      }
+      /**
+       * Check if a chapter is skipped by ID
+       */
+      static isChapterSkippedById(chapterId, getQuestionsForChapter) {
+          if (!chapterId)
+              return false;
+          const questions = getQuestionsForChapter(chapterId, true);
+          if (questions.length === 0)
+              return false;
+          return questions.every(q => {
+              var _a;
+              const entry = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.get(q.id);
+              return ((_a = entry === null || entry === void 0 ? void 0 : entry.response) === null || _a === void 0 ? void 0 : _a.quartech_chapterskipped) === 100000000;
+          });
+      }
+      /**
+       * Get skipped status for an item from the store
+       */
+      static getSkippedFromStore(item, getQuestionsForChapter) {
+          if (!item.chapterId) {
+              return false;
+          }
+          try {
+              const isSkipped = EFPCompletionUtils.isChapterSkippedById(item.chapterId, getQuestionsForChapter);
+              if (!isSkipped) {
+                  return false;
+              }
+              const chapter = getChapterFromStore(item.chapterId);
+              if (chapter === null || chapter === void 0 ? void 0 : chapter.subchapters) {
+                  const hasIncomplete = EFPCompletionUtils.hasIncompletePreventSkippingChildren(chapter.subchapters);
+                  if (hasIncomplete) {
+                      return false;
+                  }
+              }
+              return true;
+          }
+          catch (error) {
+              logger$d.error({
+                  message: 'Error checking chapter skipped status',
+                  data: { chapterId: item.chapterId, error: error.message },
+              });
+              return false;
+          }
+      }
+      /**
+       * Get incomplete status for an item from the store
+       */
+      static getIncompleteFromStore(item, ctx) {
+          if (!ctx.hasTriedToSubmit) {
+              return false;
+          }
+          if (!item.chapterId) {
+              return false;
+          }
+          try {
+              const questions = ctx.getQuestionsForChapter(item.chapterId);
+              if (questions.length === 0) {
+                  return false;
+              }
+              return questions.some((question) => {
+                  var _a, _b;
+                  const entry = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.get(question.id);
+                  const isSkipped = ((_a = entry === null || entry === void 0 ? void 0 : entry.response) === null || _a === void 0 ? void 0 : _a.quartech_chapterskipped) === 100000000;
+                  const hasResponse = ((_b = entry === null || entry === void 0 ? void 0 : entry.response) === null || _b === void 0 ? void 0 : _b.quartech_response) &&
+                      entry.response.quartech_response.trim() !== '';
+                  return !isSkipped && !hasResponse;
+              });
+          }
+          catch (error) {
+              logger$d.error({
+                  message: 'Error checking chapter incomplete status',
+                  data: { chapterId: item.chapterId, error: error.message },
+              });
+              return false;
+          }
+      }
   }
 
-  const logger$5 = Logger('components/efp/navigation-utils');
+  const logger$c = Logger('components/efp/navigation-utils');
   class EFPNavigationUtils {
       static isStepContainer(step, sections) {
           if (!step.content || step.content === '') {
@@ -43101,11 +44116,11 @@
               // Skip containers, section header steps (where label matches section tab), and steps starting with 'Section '
               const isSectionHeader = step.label === sectionTabName;
               if (!isContainer && !isSectionHeader && !step.label.startsWith('Section ')) {
-                  logger$5.info({ message: `Found last selectable step in section ${sectionIndex}: "${step.label}" at index ${index}` });
+                  logger$c.info({ message: `Found last selectable step in section ${sectionIndex}: "${step.label}" at index ${index}` });
                   return { step, index };
               }
           }
-          logger$5.warn({ message: `No selectable steps found in section ${sectionIndex}` });
+          logger$c.warn({ message: `No selectable steps found in section ${sectionIndex}` });
           return null;
       }
       static findFirstSelectableStepInSection(sectionIndex, flatSteps, sections) {
@@ -43124,11 +44139,11 @@
               // Skip containers, section header steps (where label matches section tab), and steps starting with 'Section '
               const isSectionHeader = step.label === sectionTabName;
               if (!isContainer && !isSectionHeader && !step.label.startsWith('Section ')) {
-                  logger$5.info({ message: `Found first selectable step in section ${sectionIndex}: "${step.label}" at index ${index}` });
+                  logger$c.info({ message: `Found first selectable step in section ${sectionIndex}: "${step.label}" at index ${index}` });
                   return { step, index };
               }
           }
-          logger$5.warn({ message: `No selectable steps found in section ${sectionIndex}` });
+          logger$c.warn({ message: `No selectable steps found in section ${sectionIndex}` });
           return null;
       }
       static findContainersForItem(itemLabel, sections) {
@@ -43217,6 +44232,9 @@
                       if (item.hideSkipChapterCheckbox) {
                           stepItem.hideSkipChapterCheckbox = item.hideSkipChapterCheckbox;
                       }
+                      if (item.renderSignOffButtons) {
+                          stepItem.renderSignOffButtons = item.renderSignOffButtons;
+                      }
                       result.push(stepItem);
                   }
               }
@@ -43238,11 +44256,11 @@
               const step = flatSteps[i];
               const isSectionHeader = sectionTabNames.has(step.label);
               if (!EFPNavigationUtils.isStepContainer(step, sections) && !isSectionHeader && !step.label.startsWith('Section ')) {
-                  logger$5.info({ message: `Next selectable step: "${step.label}" at index ${i}` });
+                  logger$c.info({ message: `Next selectable step: "${step.label}" at index ${i}` });
                   return i;
               }
           }
-          logger$5.warn({ message: `No next selectable step after index ${currentIndex}` });
+          logger$c.warn({ message: `No next selectable step after index ${currentIndex}` });
           return null;
       }
       static findPreviousSelectableStep(currentIndex, flatSteps, sections) {
@@ -43252,17 +44270,17 @@
               const step = flatSteps[i];
               const isSectionHeader = sectionTabNames.has(step.label);
               if (!EFPNavigationUtils.isStepContainer(step, sections) && !isSectionHeader && !step.label.startsWith('Section ')) {
-                  logger$5.info({ message: `Previous selectable step: "${step.label}" at index ${i}` });
+                  logger$c.info({ message: `Previous selectable step: "${step.label}" at index ${i}` });
                   return i;
               }
           }
-          logger$5.warn({ message: `No previous selectable step before index ${currentIndex}` });
+          logger$c.warn({ message: `No previous selectable step before index ${currentIndex}` });
           return null;
       }
       static navigateToStep(targetIndex, flatSteps, sections) {
           var _a;
           if (targetIndex < 0 || targetIndex >= flatSteps.length) {
-              logger$5.warn({ message: `navigateToStep: targetIndex ${targetIndex} out of range` });
+              logger$c.warn({ message: `navigateToStep: targetIndex ${targetIndex} out of range` });
               return null;
           }
           let index = targetIndex;
@@ -43271,7 +44289,7 @@
               const tryPrev = EFPNavigationUtils.findPreviousSelectableStep(index, flatSteps, sections);
               index = (_a = (tryNext !== null && tryNext !== void 0 ? tryNext : tryPrev)) !== null && _a !== void 0 ? _a : -1;
               if (index === -1) {
-                  logger$5.warn({ message: `navigateToStep: no selectable step near container at index ${targetIndex}` });
+                  logger$c.warn({ message: `navigateToStep: no selectable step near container at index ${targetIndex}` });
                   return null;
               }
           }
@@ -43280,10 +44298,269 @@
       static navigateToSection(targetSectionIndex, flatSteps, sections) {
           const first = EFPNavigationUtils.findFirstSelectableStepInSection(targetSectionIndex, flatSteps, sections);
           if (!first) {
-              logger$5.warn({ message: `navigateToSection: no selectable step found in section ${targetSectionIndex}` });
+              logger$c.warn({ message: `navigateToSection: no selectable step found in section ${targetSectionIndex}` });
               return null;
           }
           return { stepIndex: first.index, sectionIndex: first.step.sectionIndex };
+      }
+      // ============================================
+      // Navigation Operations (use NavigationContext)
+      // ============================================
+      /**
+       * Resolves the current step index when it's -1 by matching active content title
+       */
+      static resolveCurrentStepIndex(ctx) {
+          if (ctx.currentStepIndex !== -1) {
+              return ctx.currentStepIndex;
+          }
+          logger$c.warn({
+              message: 'currentStepIndex is -1, trying to find current step by activeContent title',
+          });
+          const foundIndex = ctx.flatSteps.findIndex((step) => step.label === ctx.activeContentTitle);
+          if (foundIndex !== -1) {
+              logger$c.info({
+                  message: `Found current step "${ctx.activeContentTitle}" at index ${foundIndex}`,
+              });
+              return foundIndex;
+          }
+          logger$c.error({
+              message: `Could not find current step "${ctx.activeContentTitle}" in flatSteps`,
+          });
+          return -1;
+      }
+      /**
+       * Calculate the next navigation result (for goToNext)
+       */
+      static calculateNextNavigation(ctx) {
+          const resolvedIndex = EFPNavigationUtils.resolveCurrentStepIndex(ctx);
+          if (resolvedIndex === -1) {
+              return { success: false, errorMessage: 'Could not resolve current step' };
+          }
+          const currentStep = ctx.flatSteps[resolvedIndex];
+          let nextIndex = EFPNavigationUtils.findNextSelectableStep(resolvedIndex, ctx.flatSteps, ctx.sections);
+          if (nextIndex == null) {
+              return { success: false, errorMessage: 'No next step available' };
+          }
+          let nextStep = ctx.flatSteps[nextIndex];
+          // When crossing section boundaries, navigate to the first content step in the new section
+          if (currentStep && nextStep.sectionIndex !== currentStep.sectionIndex) {
+              const firstContentStep = EFPNavigationUtils.findFirstSelectableStepInSection(nextStep.sectionIndex, ctx.flatSteps, ctx.sections);
+              if (firstContentStep) {
+                  logger$c.info({
+                      message: `Crossing to section ${nextStep.sectionIndex}, navigating to first content step "${firstContentStep.step.label}"`,
+                  });
+                  nextIndex = firstContentStep.index;
+                  nextStep = firstContentStep.step;
+              }
+          }
+          // Block navigation to "Review & Submit" section if there are incomplete questions
+          if (nextStep.sectionIndex === 1 && !ctx.canAccessReviewAndSubmit) {
+              return { success: false, showIncompleteAlert: true };
+          }
+          // Check if next step has the same label and content as current step (duplicate)
+          const isSameContent = currentStep &&
+              currentStep.label === nextStep.label &&
+              currentStep.content === nextStep.content;
+          if (isSameContent) {
+              logger$c.info({
+                  message: `Skipping duplicate step "${nextStep.label}" at index ${nextIndex}, continuing to next`,
+              });
+              // Skip this duplicate and go to the next step
+              const nextNextIndex = EFPNavigationUtils.findNextSelectableStep(nextIndex, ctx.flatSteps, ctx.sections);
+              if (nextNextIndex != null) {
+                  const nextNextStep = ctx.flatSteps[nextNextIndex];
+                  // Block navigation to "Review & Submit" section if there are incomplete questions
+                  if (nextNextStep.sectionIndex === 1 && !ctx.canAccessReviewAndSubmit) {
+                      return { success: false, showIncompleteAlert: true };
+                  }
+                  return {
+                      success: true,
+                      newStepIndex: nextNextIndex,
+                      newSectionIndex: nextNextStep.sectionIndex,
+                      newActiveContent: { title: nextNextStep.label, content: nextNextStep.content },
+                      scrollToTop: true,
+                  };
+              }
+              return { success: false, errorMessage: 'No step after duplicate' };
+          }
+          return {
+              success: true,
+              newStepIndex: nextIndex,
+              newSectionIndex: nextStep.sectionIndex,
+              newActiveContent: { title: nextStep.label, content: nextStep.content },
+              scrollToTop: true,
+          };
+      }
+      /**
+       * Calculate the previous navigation result (for goToPrevious)
+       */
+      static calculatePreviousNavigation(ctx) {
+          const resolvedIndex = EFPNavigationUtils.resolveCurrentStepIndex(ctx);
+          if (resolvedIndex === -1) {
+              return { success: false, errorMessage: 'Could not resolve current step' };
+          }
+          const prevIndex = EFPNavigationUtils.findPreviousSelectableStep(resolvedIndex, ctx.flatSteps, ctx.sections);
+          if (prevIndex == null) {
+              return { success: false, errorMessage: 'No previous step available' };
+          }
+          const prevStep = ctx.flatSteps[prevIndex];
+          const currentStep = ctx.flatSteps[resolvedIndex];
+          // Check if previous step has the same label and content as current step (duplicate)
+          const isSameContent = currentStep &&
+              currentStep.label === prevStep.label &&
+              currentStep.content === prevStep.content;
+          if (isSameContent) {
+              logger$c.info({
+                  message: `Skipping duplicate step "${prevStep.label}" at index ${prevIndex}, continuing to previous`,
+              });
+              const prevPrevIndex = EFPNavigationUtils.findPreviousSelectableStep(prevIndex, ctx.flatSteps, ctx.sections);
+              if (prevPrevIndex != null) {
+                  const prevPrevStep = ctx.flatSteps[prevPrevIndex];
+                  return {
+                      success: true,
+                      newStepIndex: prevPrevIndex,
+                      newSectionIndex: prevPrevStep.sectionIndex,
+                      newActiveContent: { title: prevPrevStep.label, content: prevPrevStep.content },
+                      scrollToTop: true,
+                  };
+              }
+              return { success: false, errorMessage: 'No step before duplicate' };
+          }
+          return {
+              success: true,
+              newStepIndex: prevIndex,
+              newSectionIndex: prevStep.sectionIndex,
+              newActiveContent: { title: prevStep.label, content: prevStep.content },
+              scrollToTop: true,
+          };
+      }
+      /**
+       * Find the next required step (earliest unanswered, non-skipped question)
+       */
+      static findNextRequiredStep(ctx) {
+          var _a, _b, _c, _d, _e;
+          if (!POWERPOD.workbookQuestionsAndResponses.isLoaded) {
+              logger$c.warn({
+                  message: 'Cannot find next required step: workbook questions and responses not loaded',
+              });
+              return null;
+          }
+          const questionnaire = getQuestionnaireFromStore();
+          if (!((_a = questionnaire === null || questionnaire === void 0 ? void 0 : questionnaire.chapters) === null || _a === void 0 ? void 0 : _a.length)) {
+              logger$c.warn({
+                  message: 'Cannot find next required step: questionnaire not loaded',
+              });
+              return null;
+          }
+          // Iterate through all steps in the My Workbook section (section index 0)
+          for (let i = 0; i < ctx.flatSteps.length; i++) {
+              const step = ctx.flatSteps[i];
+              // Only check steps in My Workbook section
+              if (step.sectionIndex !== 0) {
+                  continue;
+              }
+              // Skip section headers
+              if (step.label.startsWith('Section ')) {
+                  continue;
+              }
+              // For container steps, only skip if they don't have their own questions
+              if (step.isContainer) {
+                  const hasOwnQuestions = ((_c = (_b = step.chapterData) === null || _b === void 0 ? void 0 : _b.questions) === null || _c === void 0 ? void 0 : _c.length) > 0;
+                  if (!hasOwnQuestions) {
+                      continue;
+                  }
+              }
+              // Get the chapter ID for this step
+              const chapterId = step.chapterId ||
+                  ((_d = step.chapterData) === null || _d === void 0 ? void 0 : _d.id) ||
+                  ((_e = step.subchapterData) === null || _e === void 0 ? void 0 : _e.id);
+              if (!chapterId) {
+                  continue;
+              }
+              // Get all questions for this chapter
+              const questions = ctx.getQuestionsForChapter(chapterId);
+              // Find the first unanswered, non-skipped question in this chapter
+              const firstUnansweredQuestion = questions.find((question) => {
+                  var _a, _b;
+                  const entry = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.get(question.id);
+                  const isSkipped = ((_a = entry === null || entry === void 0 ? void 0 : entry.response) === null || _a === void 0 ? void 0 : _a.quartech_chapterskipped) === 100000000;
+                  const hasResponse = ((_b = entry === null || entry === void 0 ? void 0 : entry.response) === null || _b === void 0 ? void 0 : _b.quartech_response) &&
+                      entry.response.quartech_response.trim() !== '';
+                  // Question is required and unanswered if it's not skipped AND has no response
+                  return !isSkipped && !hasResponse;
+              });
+              if (firstUnansweredQuestion) {
+                  logger$c.info({
+                      message: 'Found next required step with unanswered questions',
+                      data: {
+                          stepIndex: i,
+                          stepLabel: step.label,
+                          chapterId,
+                          questionId: firstUnansweredQuestion.id,
+                      },
+                  });
+                  return { stepIndex: i, questionId: firstUnansweredQuestion.id };
+              }
+          }
+          logger$c.info({
+              message: 'No required unanswered questions found after current step',
+          });
+          return null;
+      }
+      /**
+       * Calculate navigation skip result (for handleNavigationSkip)
+       */
+      static calculateSkipNavigation(ctx) {
+          const result = EFPNavigationUtils.findNextRequiredStep(ctx);
+          if (result !== null) {
+              const { stepIndex, questionId } = result;
+              const nextStep = ctx.flatSteps[stepIndex];
+              logger$c.info({
+                  message: 'Navigating to next required step',
+                  data: {
+                      stepIndex,
+                      stepLabel: nextStep.label,
+                      questionId,
+                  },
+              });
+              return {
+                  success: true,
+                  newStepIndex: stepIndex,
+                  newSectionIndex: nextStep.sectionIndex,
+                  newActiveContent: { title: nextStep.label, content: nextStep.content },
+                  scrollToQuestion: { questionId },
+              };
+          }
+          // No required unanswered questions found - all questions are complete
+          logger$c.info({
+              message: 'No required unanswered questions found - navigating to Review & Submit',
+          });
+          if (ctx.canAccessReviewAndSubmit) {
+              // Navigate to Review & Submit section (section index 1)
+              const target = EFPNavigationUtils.navigateToSection(1, ctx.flatSteps, ctx.sections);
+              if (target) {
+                  const step = ctx.flatSteps[target.stepIndex];
+                  logger$c.info({
+                      message: 'Navigating to Review & Submit section',
+                      data: {
+                          stepIndex: target.stepIndex,
+                          stepLabel: step.label,
+                      },
+                  });
+                  return {
+                      success: true,
+                      newStepIndex: target.stepIndex,
+                      newSectionIndex: target.sectionIndex,
+                      newActiveContent: { title: step.label, content: step.content },
+                      scrollToTop: true,
+                  };
+              }
+          }
+          // Cannot access Review & Submit
+          logger$c.warn({
+              message: 'Cannot navigate to Review & Submit - incomplete questions',
+          });
+          return { success: false, showIncompleteAlert: true };
       }
   }
 
@@ -43314,7 +44591,11 @@
       }
   }
 
+  const logger$b = Logger('efp/section-generator');
   class EFPSectionGenerator {
+      // ============================================
+      // Content Rendering Methods (existing)
+      // ============================================
       static renderSubchapterContent(subchapter) {
           var _a;
           ((_a = subchapter.subchapters) === null || _a === void 0 ? void 0 : _a.length) || 0;
@@ -43351,6 +44632,305 @@
         <div style="font-family: var(--body-font); line-height: 1.6; color: var(--sl-color-neutral-700); margin-bottom: 1.5rem; font-size: 1.05rem;">${chapter.description || ''}</div>
       </div>
     `;
+      }
+      // ============================================
+      // Section B: Workbook Items from Store
+      // ============================================
+      static getSectionBItemsFromStore() {
+          var _a;
+          const questionnaire = getQuestionnaireFromStore();
+          // If questionnaire store is not loaded, show loading state
+          if (!((_a = questionnaire === null || questionnaire === void 0 ? void 0 : questionnaire.chapters) === null || _a === void 0 ? void 0 : _a.length)) {
+              logger$b.info({
+                  message: '📋 Questionnaire store not loaded, showing loading state',
+              });
+              return [
+                  {
+                      label: 'Loading Environmental Farm Plan...',
+                      content: `
+            <h3>Loading Environmental Farm Plan Questionnaire</h3>
+            <p>Please wait while we load the questionnaire chapters and questions from the store...</p>
+            <p><em>The questionnaire store is being initialized...</em></p>
+          `,
+                      complete: false,
+                  },
+              ];
+          }
+          const chapters = questionnaire.chapters[0] || [];
+          const items = [];
+          chapters.forEach((chapter) => {
+              // Create the main chapter container (collapsible parent)
+              const chapterItem = {
+                  label: EFPTextUtils.formatChapterTitle(chapter),
+                  title: EFPTextUtils.formatChapterTitle(chapter),
+                  content: EFPSectionGenerator.renderChapterContainerContent(chapter),
+                  complete: chapter.complete || false,
+                  isContainer: true,
+                  chapterId: chapter.id,
+                  chapterData: chapter,
+                  items: [],
+              };
+              // Add all subchapters as direct clickable items under the main chapter
+              if (chapter.subchapters && chapter.subchapters.length > 0) {
+                  chapter.subchapters.forEach((subchapter) => {
+                      const formattedSubchapterTitle = EFPTextUtils.formatChapterTitle(subchapter);
+                      const subchapterItem = {
+                          label: formattedSubchapterTitle,
+                          content: EFPSectionGenerator.renderSubchapterContent(subchapter),
+                          complete: subchapter.complete || false,
+                          chapterId: subchapter.id,
+                          subchapterData: subchapter,
+                      };
+                      // If subchapter has sub-subchapters, add them as nested items
+                      if (subchapter.subchapters && subchapter.subchapters.length > 0) {
+                          subchapterItem.items = subchapter.subchapters.map((subSubchapter) => {
+                              const formattedSubSubTitle = EFPTextUtils.formatChapterTitle(subSubchapter);
+                              return {
+                                  label: formattedSubSubTitle,
+                                  content: EFPSectionGenerator.renderSubchapterContent(subSubchapter),
+                                  complete: subSubchapter.complete || false,
+                                  chapterId: subSubchapter.id,
+                                  subchapterData: subSubchapter,
+                              };
+                          });
+                          subchapterItem.title = subchapterItem.label;
+                      }
+                      chapterItem.items.push(subchapterItem);
+                  });
+              }
+              else {
+                  // If no subchapters, add the main chapter itself as a clickable item
+                  const formattedTitle = EFPTextUtils.formatChapterTitle(chapter);
+                  chapterItem.items.push({
+                      label: formattedTitle,
+                      content: EFPSectionGenerator.renderChapterContent(chapter),
+                      complete: chapter.complete || false,
+                      chapterId: chapter.id,
+                      chapterData: chapter,
+                  });
+              }
+              items.push(chapterItem);
+          });
+          // Add "My Action Plan" chapter from portal page data
+          const myActionPlanItem = EFPSectionGenerator.getMyActionPlanItemsFromPortalPage();
+          items.push(myActionPlanItem);
+          return items;
+      }
+      // ============================================
+      // My Action Plan Items from Portal Page
+      // ============================================
+      static getMyActionPlanItemsFromPortalPage() {
+          var _a, _b;
+          const portalPageName = 'My Action Plan';
+          const portalPageData = (_b = (_a = POWERPOD.state) === null || _a === void 0 ? void 0 : _a.portalPages) === null || _b === void 0 ? void 0 : _b[portalPageName];
+          // If portal page data is not loaded yet, return loading state
+          if (!portalPageData) {
+              logger$b.info({
+                  message: '📄 My Action Plan portal page data not loaded yet, showing loading state',
+              });
+              return {
+                  label: 'My Action Plan',
+                  title: 'My Action Plan',
+                  content: `
+          <div style="display: flex; justify-content: center; align-items: center; min-height: 300px;">
+            <div id="spinner"></div>
+          </div>
+        `,
+                  complete: false,
+                  isContainer: true,
+                  disableExpand: true,
+                  hideSkipChapterCheckbox: true,
+                  items: [
+                      {
+                          label: 'My Action Plan',
+                          content: `
+              <div style="display: flex; justify-content: center; align-items: center; min-height: 300px;">
+                <div id="spinner"></div>
+              </div>
+            `,
+                          complete: false,
+                          hideSkipChapterCheckbox: true,
+                      }
+                  ],
+              };
+          }
+          // Build the content from sections 1-6
+          const sections = [
+              portalPageData.quartech_section1,
+              portalPageData.quartech_section2,
+              portalPageData.quartech_section3,
+              portalPageData.quartech_section4,
+              portalPageData.quartech_section5,
+              portalPageData.quartech_section6,
+          ].filter((section) => section);
+          // Clean up the HTML content to remove problematic font-family styles
+          const cleanedSections = sections.map((section) => {
+              if (!section)
+                  return section;
+              let cleaned = section.replace(/font-family:\s*&quot;Roboto Slab&quot;[^;]*;/gi, '');
+              cleaned = cleaned.replace(/font-family:\s*"Roboto Slab"[^;]*;/gi, '');
+              cleaned = cleaned.replace(/font-family:\s*'Roboto Slab'[^;]*;/gi, '');
+              cleaned = cleaned.replace(/list-style-position:\s*inside/gi, 'list-style-position: outside');
+              return cleaned;
+          });
+          const actionPlanContent = `
+      <div style="font-family: 'BC Sans', 'Noto Sans', Verdana, sans-serif !important;">
+        <style>
+          .action-plan-content * {
+            font-family: 'BC Sans', 'Noto Sans', Verdana, sans-serif !important;
+          }
+          .action-plan-content ul {
+            list-style-position: outside !important;
+            padding-left: 2em !important;
+            margin: 1em 0 !important;
+          }
+          .action-plan-content ol {
+            list-style-position: outside !important;
+            padding-left: 2em !important;
+            margin: 1em 0 !important;
+          }
+          .action-plan-content li {
+            display: list-item !important;
+            padding-left: 0.5em !important;
+            line-height: 1.6 !important;
+          }
+          .action-plan-content h1, .action-plan-content h2, .action-plan-content h3,
+          .action-plan-content h4, .action-plan-content h5, .action-plan-content h6 {
+            font-family: 'BC Sans', 'Noto Sans', Verdana, sans-serif !important;
+          }
+          .action-plan-content p {
+            font-family: 'BC Sans', 'Noto Sans', Verdana, sans-serif !important;
+          }
+        </style>
+        <div class="action-plan-content">
+          ${cleanedSections.join('\n')}
+        </div>
+        <action-plan-table></action-plan-table>
+      </div>
+    `;
+          return {
+              label: 'My Action Plan',
+              title: 'My Action Plan',
+              content: actionPlanContent,
+              complete: false,
+              isContainer: true,
+              disableExpand: true,
+              hideSkipChapterCheckbox: true,
+              items: [
+                  {
+                      label: 'My Action Plan',
+                      content: actionPlanContent,
+                      complete: false,
+                      hideSkipChapterCheckbox: true,
+                  }
+              ],
+          };
+      }
+      // ============================================
+      // Section C: Terms & Conditions from Portal Page
+      // ============================================
+      static getSectionCItemsFromPortalPage() {
+          var _a, _b;
+          const portalPageName = 'Workbook Terms and Conditions Sign-off';
+          const portalPageData = (_b = (_a = POWERPOD.state) === null || _a === void 0 ? void 0 : _a.portalPages) === null || _b === void 0 ? void 0 : _b[portalPageName];
+          // If portal page data is not loaded yet, return loading state
+          if (!portalPageData) {
+              logger$b.info({
+                  message: '📄 Portal page data not loaded yet, showing loading state',
+              });
+              return [
+                  {
+                      label: '',
+                      content: `
+            <div style="display: flex; justify-content: center; align-items: center; min-height: 300px;">
+              <div id="spinner"></div>
+            </div>
+          `,
+                      complete: false,
+                  },
+              ];
+          }
+          // Build the terms and conditions content from sections 1-6
+          const sections = [
+              portalPageData.quartech_section1,
+              portalPageData.quartech_section2,
+              portalPageData.quartech_section3,
+              portalPageData.quartech_section4,
+              portalPageData.quartech_section5,
+              portalPageData.quartech_section6,
+          ].filter((section) => section);
+          // Clean up the HTML content to remove problematic font-family styles
+          const cleanedSections = sections.map((section) => {
+              if (!section)
+                  return section;
+              let cleaned = section.replace(/font-family:\s*&quot;Roboto Slab&quot;[^;]*;/gi, '');
+              cleaned = cleaned.replace(/font-family:\s*"Roboto Slab"[^;]*;/gi, '');
+              cleaned = cleaned.replace(/font-family:\s*'Roboto Slab'[^;]*;/gi, '');
+              cleaned = cleaned.replace(/list-style-position:\s*inside/gi, 'list-style-position: outside');
+              return cleaned;
+          });
+          const termsContent = `
+      <div style="font-family: 'BC Sans', 'Noto Sans', Verdana, sans-serif !important;">
+        <style>
+          .terms-content * {
+            font-family: 'BC Sans', 'Noto Sans', Verdana, sans-serif !important;
+          }
+          .terms-content ul {
+            list-style-position: outside !important;
+            padding-left: 2em !important;
+            margin: 1em 0 !important;
+          }
+          .terms-content ol {
+            list-style-position: outside !important;
+            padding-left: 2em !important;
+            margin: 1em 0 !important;
+          }
+          .terms-content li {
+            display: list-item !important;
+            padding-left: 0.5em !important;
+            line-height: 1.6 !important;
+          }
+          .terms-content h1, .terms-content h2, .terms-content h3,
+          .terms-content h4, .terms-content h5, .terms-content h6 {
+            font-family: 'BC Sans', 'Noto Sans', Verdana, sans-serif !important;
+          }
+          .terms-content p {
+            font-family: 'BC Sans', 'Noto Sans', Verdana, sans-serif !important;
+          }
+        </style>
+        <div class="terms-content">
+          <h3>Environmental Farm Plan Terms & Conditions</h3>
+          <p>Please read the following terms and conditions carefully before proceeding with your Environmental Farm Plan submission.</p>
+          ${cleanedSections.join('\n')}
+        </div>
+      </div>
+    `;
+          return [
+              {
+                  label: 'Terms & Conditions',
+                  content: termsContent,
+                  complete: false,
+                  renderSignOffButtons: true,
+              },
+          ];
+      }
+      // ============================================
+      // Utility: Get All Leaf Items (flatten nested structure)
+      // ============================================
+      static getAllLeafItems(items) {
+          const leafItems = [];
+          const collect = (itemList) => {
+              for (const item of itemList) {
+                  if ('items' in item && Array.isArray(item.items) && item.items.length > 0) {
+                      collect(item.items);
+                  }
+                  else {
+                      leafItems.push(item);
+                  }
+              }
+          };
+          collect(items);
+          return leafItems;
       }
   }
 
@@ -43548,18 +45128,44 @@
   /* Custom spacing for navigation collapsible containers */
   sl-details {
     margin-bottom: 0.75rem !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
   }
 
   sl-details::part(base) {
     padding: 0.25rem !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
   }
 
   sl-details::part(header) {
     padding: 0.5rem 0.75rem !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
   }
 
   sl-details::part(content) {
-    padding: 0.25rem 0.75rem 0.5rem 8js63bd7*0.75rem !important;
+    padding: 0.25rem 0.75rem 0.5rem 0.75rem !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Ensure summary text doesn't expand the container */
+  sl-details [slot="summary"] {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+  }
+
+  sl-details [slot="summary"] span {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   /* Spacing for standalone navigation items after collapsible containers */
@@ -43567,13 +45173,36 @@
     margin-top: 0.5rem !important;
   }
 
-  .sidebar {
-    flex: 0 0 26%;
+  .sidebar,
+  navigation-sidebar {
+    flex: 0 0 30%;
+    width: 30%;
+    max-width: 30%;
     padding: 1rem;
     border-right: 1px solid var(--sl-color-neutral-200);
     font-family: var(--body-font);
     min-height: 100vh;
     min-width: 0; /* Allow flex item to shrink below content size */
+    overflow: hidden; /* Prevent sidebar from growing due to content */
+    box-sizing: border-box;
+  }
+
+  /* Ensure navigation text wraps within sidebar */
+  .sidebar sl-details,
+  .sidebar .nav-subchapter-title,
+  navigation-sidebar sl-details,
+  navigation-sidebar .nav-subchapter-title {
+    overflow: hidden;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+
+  .sidebar sl-details [slot="summary"] span,
+  .sidebar .nav-subchapter-title,
+  navigation-sidebar sl-details [slot="summary"] span,
+  navigation-sidebar .nav-subchapter-title {
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .main-content {
@@ -43590,10 +45219,14 @@
       flex-wrap: wrap; /* Allow wrapping on mobile to stack vertically */
     }
 
-    .sidebar {
+    .sidebar,
+    navigation-sidebar {
       order: 1;
       flex: 0 0 100%;
+      width: 100%;
+      max-width: 100%;
       min-height: auto; /* Remove min-height on mobile to eliminate white space */
+      overflow: visible; /* Allow overflow on mobile since it's full width */
     }
 
     .main-content {
@@ -43778,7 +45411,7 @@
   .subchapter-header {
     background: linear-gradient(135deg, var(--sl-color-neutral-100) 0%, var(--sl-color-neutral-150) 100%);
     padding: 1rem;
-    margin: 1.5rem 0;
+    margin: 0rem 0;
     border-radius: var(--sl-border-radius-small);
     border-left: 3px solid var(--sl-color-neutral-500);
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
@@ -44116,6 +45749,20 @@
     box-shadow: none;
   }
 
+  /* Save status indicator for all question types */
+  .save-status-indicator {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 0.5rem;
+  }
+
+  /* Container for rating questions with status indicator */
+  .rating-input-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
   /* Validation alert styling */
   sl-alert::part(base) {
     font-family: var(--body-font);
@@ -44136,11 +45783,1421 @@
   }
 `;
 
+  const logger$a = Logger('services/WorkbookResponseService');
+  /**
+   * Service responsible for managing workbook responses
+   * Handles CRUD operations, debouncing, and state synchronization
+   */
+  class WorkbookResponseService {
+      constructor() {
+          // Debounce timers for all response saves (questionId -> timer)
+          this.responseSaveDebounceTimers = new Map();
+          // Pending response values (questionId -> response value)
+          this.pendingResponseValues = new Map();
+          // Pending multi-select values (questionId -> selected options array)
+          this.pendingMultiselectValues = new Map();
+          // General save status for ALL question types (questionId -> 'draft' | 'saving' | 'saved')
+          this.responseSaveStatus = new Map();
+          // Legacy: Multiline text save status (kept for backward compatibility, now uses responseSaveStatus)
+          this.multilineTextSaveStatus = new Map();
+          // Multiline text character counts (questionId -> character count)
+          this.multilineTextCharCounts = new Map();
+          // Event listeners for state changes
+          this.eventListeners = new Map();
+          logger$a.info({ message: 'WorkbookResponseService initialized' });
+      }
+      /**
+       * Clean up all pending timers and state
+       */
+      cleanup() {
+          this.responseSaveDebounceTimers.forEach((timer) => {
+              clearTimeout(timer);
+          });
+          this.responseSaveDebounceTimers.clear();
+          this.pendingResponseValues.clear();
+          this.pendingMultiselectValues.clear();
+          this.responseSaveStatus.clear();
+          this.multilineTextSaveStatus.clear();
+          this.multilineTextCharCounts.clear();
+          this.eventListeners.clear();
+          logger$a.info({ message: 'WorkbookResponseService cleaned up' });
+      }
+      /**
+       * Subscribe to service events
+       */
+      on(event, callback) {
+          if (!this.eventListeners.has(event)) {
+              this.eventListeners.set(event, new Set());
+          }
+          this.eventListeners.get(event).add(callback);
+      }
+      /**
+       * Unsubscribe from service events
+       */
+      off(event, callback) {
+          var _a;
+          (_a = this.eventListeners.get(event)) === null || _a === void 0 ? void 0 : _a.delete(callback);
+      }
+      /**
+       * Emit an event to all listeners
+       */
+      emit(event, data) {
+          var _a;
+          (_a = this.eventListeners.get(event)) === null || _a === void 0 ? void 0 : _a.forEach(callback => callback(data));
+      }
+      /**
+       * Get response for a specific question
+       */
+      getResponseForQuestion(questionId) {
+          const questionAndResponse = WorkbookResponseHelper.getQuestionAndResponseFromMemory(questionId);
+          if (questionAndResponse) {
+              return questionAndResponse.response;
+          }
+          // Fallback to old structure for backward compatibility
+          return POWERPOD.workbookResponses.responsesByQuestion.get(questionId) || null;
+      }
+      /**
+       * Get question data for a specific question
+       */
+      getQuestionForQuestion(questionId) {
+          const questionAndResponse = WorkbookResponseHelper.getQuestionAndResponseFromMemory(questionId);
+          return (questionAndResponse === null || questionAndResponse === void 0 ? void 0 : questionAndResponse.question) || null;
+      }
+      /**
+       * Get both question and response data
+       */
+      getQuestionAndResponse(questionId) {
+          const questionAndResponse = WorkbookResponseHelper.getQuestionAndResponseFromMemory(questionId);
+          if (questionAndResponse) {
+              return {
+                  question: questionAndResponse.question,
+                  response: questionAndResponse.response,
+              };
+          }
+          // Fallback to old structure
+          return {
+              question: null,
+              response: this.getResponseForQuestion(questionId),
+          };
+      }
+      /**
+       * Get save status for any question type
+       */
+      getSaveStatus(questionId) {
+          return this.responseSaveStatus.get(questionId) || 'saved';
+      }
+      /**
+       * Get multiline text save status for a question (legacy, uses general status)
+       */
+      getMultilineTextSaveStatus(questionId) {
+          // Use general status, fall back to legacy for backward compatibility
+          return this.responseSaveStatus.get(questionId) || this.multilineTextSaveStatus.get(questionId) || 'saved';
+      }
+      /**
+       * Get character count for multiline text question
+       */
+      getMultilineTextCharCount(questionId) {
+          return this.multilineTextCharCounts.get(questionId) || 0;
+      }
+      /**
+       * Get pending multiselect values for a question
+       */
+      getPendingMultiselectValues(questionId) {
+          return this.pendingMultiselectValues.get(questionId);
+      }
+      /**
+       * Handle rating question change with optimistic updates
+       * UI updates immediately, backend save is debounced
+       */
+      handleRatingChange(questionId, value) {
+          var _a, _b;
+          const responseValue = String(value);
+          logger$a.info({
+              message: `Rating changed for question ${questionId}: ${responseValue}`,
+          });
+          // Store the pending value
+          this.pendingResponseValues.set(questionId, responseValue);
+          // ============================================
+          // OPTIMISTIC UPDATE: Update memory immediately
+          // ============================================
+          const entry = (_b = (_a = POWERPOD.workbookQuestionsAndResponses) === null || _a === void 0 ? void 0 : _a.questionsWithResponses) === null || _b === void 0 ? void 0 : _b.get(questionId);
+          if (entry) {
+              if (entry.response) {
+                  // Update existing response in memory
+                  entry.response.quartech_response = responseValue;
+              }
+              else {
+                  // Create a temporary response object for immediate UI feedback
+                  entry.response = {
+                      quartech_response: responseValue,
+                      _quartech_question_value: questionId,
+                      // Mark as pending save (no ID yet)
+                      _pendingSave: true,
+                  };
+              }
+          }
+          // Set status to 'saving' to show indicator
+          this.responseSaveStatus.set(questionId, 'saving');
+          // Emit event for IMMEDIATE UI update (with saving status)
+          this.emit('response-changed', { questionId, value: responseValue, pending: true, status: 'saving' });
+          this.emit('save-status-changed', { questionId, status: 'saving' });
+          // ============================================
+          // DEBOUNCED BACKEND SAVE
+          // ============================================
+          // Clear any existing debounce timer for this question
+          const existingTimer = this.responseSaveDebounceTimers.get(questionId);
+          if (existingTimer) {
+              clearTimeout(existingTimer);
+          }
+          // Set a new debounce timer (1000ms delay for backend save)
+          const timer = window.setTimeout(() => {
+              this.saveDebouncedResponse(questionId);
+          }, 1000);
+          this.responseSaveDebounceTimers.set(questionId, timer);
+      }
+      /**
+       * Handle multi-select question change with optimistic updates
+       * UI updates immediately, backend save is debounced
+       */
+      handleMultiselectChange(questionId, option, isChecked, validOptions) {
+          var _a, _b;
+          logger$a.info({
+              message: `Multi-select option changed for question ${questionId}: ${option} = ${isChecked}`,
+          });
+          // Get current pending value or existing response
+          let selectedOptions;
+          if (this.pendingMultiselectValues.has(questionId)) {
+              selectedOptions = this.pendingMultiselectValues.get(questionId);
+          }
+          else {
+              const existingResponse = this.getResponseForQuestion(questionId);
+              const currentSelectedString = (existingResponse === null || existingResponse === void 0 ? void 0 : existingResponse.quartech_response) || '';
+              const existingSelectedOptions = currentSelectedString
+                  .split(';')
+                  .map((opt) => opt.trim())
+                  .filter((opt) => opt.length > 0);
+              // Filter to only include options that are valid for the current question
+              selectedOptions = existingSelectedOptions.filter((opt) => validOptions.includes(opt));
+          }
+          // Update the selected options based on checkbox state
+          if (isChecked) {
+              if (!selectedOptions.includes(option)) {
+                  selectedOptions.push(option);
+              }
+          }
+          else {
+              selectedOptions = selectedOptions.filter((opt) => opt !== option);
+          }
+          // Store the pending value
+          this.pendingMultiselectValues.set(questionId, selectedOptions);
+          // ============================================
+          // OPTIMISTIC UPDATE: Update memory immediately
+          // ============================================
+          const responseValue = selectedOptions.join(';');
+          const entry = (_b = (_a = POWERPOD.workbookQuestionsAndResponses) === null || _a === void 0 ? void 0 : _a.questionsWithResponses) === null || _b === void 0 ? void 0 : _b.get(questionId);
+          if (entry) {
+              if (entry.response) {
+                  entry.response.quartech_response = responseValue;
+              }
+              else {
+                  entry.response = {
+                      quartech_response: responseValue,
+                      _quartech_question_value: questionId,
+                      _pendingSave: true,
+                  };
+              }
+          }
+          // Set status to 'saving' to show indicator
+          this.responseSaveStatus.set(questionId, 'saving');
+          // Emit event for IMMEDIATE UI update (with saving status)
+          this.emit('response-changed', { questionId, value: responseValue, pending: true, status: 'saving' });
+          this.emit('save-status-changed', { questionId, status: 'saving' });
+          // ============================================
+          // DEBOUNCED BACKEND SAVE
+          // ============================================
+          // Clear any existing debounce timer for this question
+          const existingTimer = this.responseSaveDebounceTimers.get(questionId);
+          if (existingTimer) {
+              clearTimeout(existingTimer);
+          }
+          // Set a new debounce timer (2000ms delay for backend save)
+          const timer = window.setTimeout(() => {
+              this.saveMultiselectResponse(questionId);
+          }, 2000);
+          this.responseSaveDebounceTimers.set(questionId, timer);
+      }
+      /**
+       * Handle multiline text input with debouncing
+       */
+      handleMultilineTextInput(questionId, value) {
+          logger$a.info({
+              message: `Multiline text input for question ${questionId}`,
+          });
+          // Update character count immediately (no debounce)
+          this.multilineTextCharCounts.set(questionId, value.length);
+          // Store the pending value
+          this.pendingResponseValues.set(questionId, value);
+          // Update status to draft (use unified status)
+          this.responseSaveStatus.set(questionId, 'draft');
+          this.multilineTextSaveStatus.set(questionId, 'draft'); // Keep legacy for backward compat
+          // Emit event for UI update
+          this.emit('multiline-text-status-changed', { questionId, status: 'draft', charCount: value.length });
+          this.emit('save-status-changed', { questionId, status: 'draft' });
+          // Clear any existing debounce timer for this question
+          const existingTimer = this.responseSaveDebounceTimers.get(questionId);
+          if (existingTimer) {
+              clearTimeout(existingTimer);
+          }
+          // Set a new debounce timer (2000ms delay)
+          const timer = window.setTimeout(() => {
+              this.saveMultilineTextResponse(questionId);
+          }, 2000);
+          this.responseSaveDebounceTimers.set(questionId, timer);
+      }
+      /**
+       * Force save any question type (when user clicks the status indicator)
+       */
+      async forceSave(questionId) {
+          const status = this.responseSaveStatus.get(questionId);
+          // Only allow force save if status is 'saving' (debounce pending)
+          if (status !== 'saving' && status !== 'draft') {
+              return;
+          }
+          logger$a.info({
+              message: `Force saving response for question ${questionId}`,
+          });
+          // Clear any existing debounce timer
+          const existingTimer = this.responseSaveDebounceTimers.get(questionId);
+          if (existingTimer) {
+              clearTimeout(existingTimer);
+              this.responseSaveDebounceTimers.delete(questionId);
+          }
+          // Check if it's a multiselect or regular response
+          if (this.pendingMultiselectValues.has(questionId)) {
+              await this.saveMultiselectResponse(questionId);
+          }
+          else if (this.pendingResponseValues.has(questionId)) {
+              // Check if it's multiline text (has char count) or rating
+              if (this.multilineTextCharCounts.has(questionId)) {
+                  await this.saveMultilineTextResponse(questionId);
+              }
+              else {
+                  await this.saveDebouncedResponse(questionId);
+              }
+          }
+      }
+      /**
+       * Force save multiline text (when user clicks the status indicator)
+       * @deprecated Use forceSave() instead
+       */
+      async forceSaveMultilineText(questionId) {
+          const status = this.multilineTextSaveStatus.get(questionId) || this.responseSaveStatus.get(questionId);
+          // Only allow force save if status is 'draft'
+          if (status !== 'draft') {
+              return;
+          }
+          logger$a.info({
+              message: `Force saving multiline text for question ${questionId}`,
+          });
+          // Clear any existing debounce timer
+          const existingTimer = this.responseSaveDebounceTimers.get(questionId);
+          if (existingTimer) {
+              clearTimeout(existingTimer);
+              this.responseSaveDebounceTimers.delete(questionId);
+          }
+          // Save immediately
+          await this.saveMultilineTextResponse(questionId);
+      }
+      /**
+       * Save the debounced response (for rating questions and other text-based responses)
+       */
+      async saveDebouncedResponse(questionId) {
+          try {
+              const responseValue = this.pendingResponseValues.get(questionId);
+              if (responseValue === undefined) {
+                  logger$a.warn({
+                      message: `No pending value found for question ${questionId}`,
+                  });
+                  return;
+              }
+              logger$a.info({
+                  message: `Saving debounced response for question ${questionId}: ${responseValue}`,
+              });
+              // Save the response
+              const responseData = await this.saveRatingResponse(questionId, responseValue);
+              // Update the questionnaire store with the full response data
+              updateQuestionResponse(questionId, responseValue, undefined, responseData);
+              // Update status to 'saved'
+              this.responseSaveStatus.set(questionId, 'saved');
+              // Emit events for UI update
+              this.emit('response-saved', { questionId, responseData });
+              this.emit('save-status-changed', { questionId, status: 'saved' });
+              logger$a.info({
+                  message: `Successfully saved debounced response for question ${questionId}`,
+              });
+              // Clean up
+              this.pendingResponseValues.delete(questionId);
+              this.responseSaveDebounceTimers.delete(questionId);
+          }
+          catch (error) {
+              logger$a.error({
+                  message: `Failed to save debounced response: ${error.message}`,
+              });
+              // Revert status to 'saving' to indicate it's still pending
+              this.responseSaveStatus.set(questionId, 'saving');
+              this.emit('save-status-changed', { questionId, status: 'saving', error: true });
+              // Don't delete pending value on error, so user can retry
+          }
+      }
+      /**
+       * Save the debounced multi-select response
+       */
+      async saveMultiselectResponse(questionId) {
+          try {
+              const selectedOptions = this.pendingMultiselectValues.get(questionId);
+              if (!selectedOptions) {
+                  logger$a.warn({
+                      message: `No pending value found for question ${questionId}`,
+                  });
+                  return;
+              }
+              // Create semicolon-delimited string
+              const newValue = selectedOptions.join(';');
+              logger$a.info({
+                  message: `Saving multi-select value for question ${questionId}: ${newValue}`,
+              });
+              // Save the response
+              const responseData = await this.saveRatingResponse(questionId, newValue);
+              // Update the questionnaire store with the full response data
+              updateQuestionResponse(questionId, newValue, undefined, responseData);
+              // Update status to 'saved'
+              this.responseSaveStatus.set(questionId, 'saved');
+              // Emit events for UI update
+              this.emit('response-saved', { questionId, responseData });
+              this.emit('save-status-changed', { questionId, status: 'saved' });
+              logger$a.info({
+                  message: `Successfully saved multi-select response for question ${questionId}`,
+              });
+              // Clean up
+              this.pendingMultiselectValues.delete(questionId);
+              this.responseSaveDebounceTimers.delete(questionId);
+          }
+          catch (error) {
+              logger$a.error({
+                  message: `Failed to save multi-select response: ${error.message}`,
+              });
+              // Revert status to 'saving' to indicate it's still pending
+              this.responseSaveStatus.set(questionId, 'saving');
+              this.emit('save-status-changed', { questionId, status: 'saving', error: true });
+              // Don't delete pending value on error, so user can retry
+          }
+      }
+      /**
+       * Save the multiline text response
+       */
+      async saveMultilineTextResponse(questionId) {
+          try {
+              const responseValue = this.pendingResponseValues.get(questionId);
+              if (responseValue === undefined) {
+                  logger$a.warn({
+                      message: `No pending value found for question ${questionId}`,
+                  });
+                  return;
+              }
+              logger$a.info({
+                  message: `Saving multiline text response for question ${questionId}`,
+              });
+              // Update status to saving (both unified and legacy)
+              this.responseSaveStatus.set(questionId, 'saving');
+              this.multilineTextSaveStatus.set(questionId, 'saving');
+              this.emit('multiline-text-status-changed', { questionId, status: 'saving' });
+              this.emit('save-status-changed', { questionId, status: 'saving' });
+              // Save the response
+              const responseData = await this.saveRatingResponse(questionId, responseValue);
+              // Update the questionnaire store with the full response data
+              updateQuestionResponse(questionId, responseValue, true, responseData);
+              // Emit event for UI update
+              this.emit('response-saved', { questionId, responseData });
+              logger$a.info({
+                  message: `Successfully saved multiline text response for question ${questionId}`,
+              });
+              // Update status to saved (both unified and legacy)
+              this.responseSaveStatus.set(questionId, 'saved');
+              this.multilineTextSaveStatus.set(questionId, 'saved');
+              this.emit('multiline-text-status-changed', { questionId, status: 'saved' });
+              this.emit('save-status-changed', { questionId, status: 'saved' });
+              // Clean up
+              this.pendingResponseValues.delete(questionId);
+              this.responseSaveDebounceTimers.delete(questionId);
+          }
+          catch (error) {
+              logger$a.error({
+                  message: `Failed to save multiline text response: ${error.message}`,
+              });
+              // Revert status to draft on error (both unified and legacy)
+              this.responseSaveStatus.set(questionId, 'draft');
+              this.multilineTextSaveStatus.set(questionId, 'draft');
+              this.emit('multiline-text-status-changed', { questionId, status: 'draft' });
+              this.emit('save-status-changed', { questionId, status: 'draft', error: true });
+              // Don't delete pending value on error, so user can retry
+          }
+      }
+      /**
+       * Build rating description for Point Rating questions
+       */
+      buildRatingDescription(questionId, ratingValue) {
+          // Only build description for Point Rating questions with numeric values (1-4)
+          const ratingNum = parseInt(String(ratingValue));
+          if (isNaN(ratingNum) || ratingNum < 1 || ratingNum > 4) {
+              return null;
+          }
+          // Get question data from memory
+          const questionData = this.getQuestionForQuestion(questionId);
+          if (!questionData) {
+              return null;
+          }
+          // Check if this is a Point Rating question
+          if (questionData.quartech_questiontype !== 100000001) {
+              return null;
+          }
+          // Get the rating label and description
+          const labelKey = `quartech_rating${ratingNum}overwritelabel`;
+          const descKey = `quartech_rating${ratingNum}description`;
+          const label = questionData[labelKey] || `Risk Rating ${ratingNum}`;
+          const description = questionData[descKey];
+          // Only build description if there's a description field
+          if (!description) {
+              return null;
+          }
+          // Strip HTML tags from description to get plain text
+          const plainDescription = description.replace(/<[^>]*>/g, '').trim();
+          // Build the description in the format: "Rating Label: Description"
+          return `${label}: ${plainDescription}`;
+      }
+      /**
+       * Save rating response (core save method)
+       */
+      async saveRatingResponse(questionId, ratingValue) {
+          var _a, _b, _c;
+          try {
+              const responseText = String(ratingValue);
+              const notes = `Rating: ${ratingValue}`;
+              // Build description for Point Rating questions with descriptions
+              const description = this.buildRatingDescription(questionId, ratingValue);
+              // Check if response already exists
+              const existingResponse = this.getResponseForQuestion(questionId);
+              let responseData;
+              let isNewResponse = false;
+              // Only update if we have an existing response WITH a valid ID
+              if (existingResponse && existingResponse.quartech_workbookresponseid) {
+                  // Update existing response
+                  await WorkbookResponseHelper.updateResponse(existingResponse.quartech_workbookresponseid, responseText, { notes, description });
+                  // Create updated response data
+                  responseData = {
+                      ...existingResponse,
+                      quartech_response: responseText,
+                      quartech_notes: notes,
+                      quartech_description: description,
+                      modifiedon: new Date().toISOString(),
+                  };
+              }
+              else {
+                  // Create new response
+                  isNewResponse = true;
+                  const createResult = (await WorkbookResponseHelper.createResponse(questionId, responseText, { notes, description }));
+                  const workbookId = getWorkbookId();
+                  // Create new response data with all fields from the API response
+                  responseData = {
+                      ...createResult.response,
+                      quartech_workbookresponseid: (_a = createResult.response) === null || _a === void 0 ? void 0 : _a.quartech_workbookresponseid,
+                      quartech_response: responseText,
+                      quartech_notes: notes,
+                      quartech_description: description,
+                      _quartech_question_value: questionId,
+                      _quartech_workbook_value: workbookId,
+                      createdon: ((_b = createResult.response) === null || _b === void 0 ? void 0 : _b.createdon) || new Date().toISOString(),
+                      modifiedon: ((_c = createResult.response) === null || _c === void 0 ? void 0 : _c.modifiedon) || new Date().toISOString(),
+                  };
+                  // CRITICAL: Update memory structures IMMEDIATELY after creation
+                  this.updateMemoryStructuresForRating(questionId, responseData, true);
+              }
+              // Update memory structures for updates (for creates, already done above)
+              if (!isNewResponse) {
+                  this.updateMemoryStructuresForRating(questionId, responseData, false);
+              }
+              // Return the response data for use in questionnaire store
+              return responseData;
+          }
+          catch (error) {
+              logger$a.error({
+                  message: `Failed to save rating response: ${String(error)}`,
+              });
+              throw error;
+          }
+      }
+      /**
+       * Update memory structures for rating responses
+       */
+      updateMemoryStructuresForRating(questionId, responseData, isNewResponse) {
+          try {
+              // Update new nested structure using helper function
+              WorkbookResponseHelper.updateResponseInMemory(questionId, responseData);
+              // Update old structure for backward compatibility
+              POWERPOD.workbookResponses.responsesByQuestion.set(questionId, responseData);
+              if (isNewResponse) {
+                  // Add to beginning of data array (most recent first)
+                  POWERPOD.workbookResponses.data.unshift(responseData);
+              }
+              else {
+                  // Update existing entry in data array
+                  const dataIndex = POWERPOD.workbookResponses.data.findIndex((r) => r.quartech_workbookresponseid === responseData.quartech_workbookresponseid);
+                  if (dataIndex !== -1) {
+                      POWERPOD.workbookResponses.data[dataIndex] = responseData;
+                  }
+              }
+              // Update memory metadata for both structures
+              POWERPOD.workbookResponses.lastUpdated = new Date().toISOString();
+              POWERPOD.workbookQuestionsAndResponses.lastUpdated = new Date().toISOString();
+          }
+          catch (error) {
+              logger$a.error({
+                  message: `Failed to update memory structures for rating: ${String(error)}`,
+              });
+              // Don't throw - this is a memory update issue, not a save issue
+          }
+      }
+  }
+
+  const logger$9 = Logger('services/ChapterManagementService');
+  /**
+   * Service responsible for managing chapter-level operations
+   * Handles chapter skipping, completion tracking, and validation
+   */
+  class ChapterManagementService {
+      constructor() {
+          // Event listeners for state changes
+          this.eventListeners = new Map();
+          // Track in-flight skip operations to prevent race conditions
+          this.pendingSkipOperations = new Map();
+          logger$9.info({ message: 'ChapterManagementService initialized' });
+      }
+      /**
+       * Clean up all state
+       */
+      cleanup() {
+          // Abort any pending operations
+          this.pendingSkipOperations.forEach((op) => op.abortController.abort());
+          this.pendingSkipOperations.clear();
+          this.eventListeners.clear();
+          logger$9.info({ message: 'ChapterManagementService cleaned up' });
+      }
+      /**
+       * Subscribe to service events
+       */
+      on(event, callback) {
+          if (!this.eventListeners.has(event)) {
+              this.eventListeners.set(event, new Set());
+          }
+          this.eventListeners.get(event).add(callback);
+      }
+      /**
+       * Unsubscribe from service events
+       */
+      off(event, callback) {
+          var _a;
+          (_a = this.eventListeners.get(event)) === null || _a === void 0 ? void 0 : _a.delete(callback);
+      }
+      /**
+       * Emit an event to all listeners
+       */
+      emit(event, data) {
+          var _a;
+          (_a = this.eventListeners.get(event)) === null || _a === void 0 ? void 0 : _a.forEach(callback => callback(data));
+      }
+      /**
+       * Check if a chapter is skipped
+       * A chapter is skipped if ALL its questions have quartech_chapterskipped === 100000000
+       */
+      isChapterSkipped(chapterId) {
+          const questions = this.getQuestionsForChapter(chapterId, true); // Exclude preventSkipping subchapters
+          if (questions.length === 0)
+              return false;
+          // Check if ALL questions have quartech_chapterskipped set to YES (100000000)
+          return questions.every(q => {
+              var _a;
+              const entry = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.get(q.id);
+              return ((_a = entry === null || entry === void 0 ? void 0 : entry.response) === null || _a === void 0 ? void 0 : _a.quartech_chapterskipped) === 100000000;
+          });
+      }
+      /**
+       * Check if skipping is prevented for a chapter
+       * quartech_preventskipping is an Int32 field: 100000000 = Yes, 100000001 = No
+       */
+      isSkippingPrevented(chapterId) {
+          const chapter = getChapterFromStore(chapterId);
+          if (!chapter)
+              return false;
+          // Check chapter-level preventSkipping field
+          // Handle both raw integer value (100000000) and mapped boolean (preventSkipping: true)
+          const YES_VALUE = 100000000;
+          if (chapter.quartech_preventskipping === YES_VALUE ||
+              chapter.preventSkipping === true) {
+              return true;
+          }
+          // Check if parent chapter has preventSkipping enabled (cascades down)
+          if (chapter.parentChapterId || chapter._quartech_parentchapter_value) {
+              const parentId = chapter.parentChapterId || chapter._quartech_parentchapter_value;
+              return this.isSkippingPrevented(parentId);
+          }
+          return false;
+      }
+      /**
+       * Check if a subchapter has preventSkipping enabled
+       * Handles both raw integer value and mapped boolean
+       */
+      hasPreventSkipping(subchapter) {
+          const YES_VALUE = 100000000;
+          return subchapter.quartech_preventskipping === YES_VALUE ||
+              subchapter.preventSkipping === true;
+      }
+      /**
+       * Get all questions for a chapter (including subchapters)
+       * @param excludePreventSkipping - If true, exclude questions from subchapters with preventSkipping enabled
+       */
+      getQuestionsForChapter(chapterId, excludePreventSkipping = false) {
+          const chapter = getChapterFromStore(chapterId);
+          if (!chapter)
+              return [];
+          let questions = [...(chapter.questions || [])];
+          // Also collect questions from subchapters
+          if (chapter.subchapters) {
+              const collectQuestionsFromSubchapters = (subchapters) => {
+                  for (const subchapter of subchapters) {
+                      // Skip if preventSkipping is enabled and we're excluding those
+                      if (excludePreventSkipping && this.hasPreventSkipping(subchapter)) {
+                          continue;
+                      }
+                      questions = questions.concat(subchapter.questions || []);
+                      if (subchapter.subchapters) {
+                          collectQuestionsFromSubchapters(subchapter.subchapters);
+                      }
+                  }
+              };
+              collectQuestionsFromSubchapters(chapter.subchapters);
+          }
+          return questions;
+      }
+      /**
+       * Handle chapter skipped checkbox change
+       * Updates all questions in the chapter with the skipped status
+       */
+      async handleChapterSkippedChange(chapterId, isSkipped) {
+          var _a;
+          // ============================================
+          // RACE CONDITION PREVENTION
+          // Cancel any pending operation for this chapter
+          // ============================================
+          const pendingOp = this.pendingSkipOperations.get(chapterId);
+          if (pendingOp) {
+              logger$9.info({
+                  message: `Cancelling pending skip operation for chapter ${chapterId}`,
+                  data: { previousIsSkipped: pendingOp.isSkipped, newIsSkipped: isSkipped },
+              });
+              pendingOp.abortController.abort();
+              this.pendingSkipOperations.delete(chapterId);
+          }
+          // Create new abort controller for this operation
+          const abortController = new AbortController();
+          this.pendingSkipOperations.set(chapterId, { isSkipped, abortController });
+          try {
+              logger$9.info({
+                  message: `Chapter ${chapterId} skipped status changing to: ${isSkipped}`,
+              });
+              // When skipping, exclude questions from subchapters that have preventSkipping enabled
+              // When unskipping, include all questions to restore their state
+              const excludePreventSkipping = isSkipped;
+              const questions = this.getQuestionsForChapter(chapterId, excludePreventSkipping);
+              if (questions.length === 0) {
+                  logger$9.warn({
+                      message: 'Cannot update chapter skipped: no questions found (or all are in prevent-skipping subchapters)',
+                      data: { chapterId, excludePreventSkipping },
+                  });
+                  this.pendingSkipOperations.delete(chapterId);
+                  return;
+              }
+              const workbookId = getWorkbookId();
+              if (!workbookId) {
+                  logger$9.error({
+                      message: 'Cannot update chapter skipped: no workbook ID found',
+                  });
+                  this.pendingSkipOperations.delete(chapterId);
+                  return;
+              }
+              // Set quartech_chapterskipped to YES (100000000) if checked, NO (100000001) if unchecked
+              const chapterSkippedValue = isSkipped ? 100000000 : 100000001;
+              logger$9.info({
+                  message: `Updating chapter skipped status for ${questions.length} questions`,
+                  data: { chapterId, isSkipped, chapterSkippedValue, questionCount: questions.length },
+              });
+              // ============================================
+              // OPTIMISTIC UPDATE: Update memory immediately
+              // ============================================
+              const previousStates = new Map();
+              for (const question of questions) {
+                  const questionId = question.id;
+                  const entry = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.get(questionId);
+                  if (entry === null || entry === void 0 ? void 0 : entry.response) {
+                      // Save previous state for rollback
+                      previousStates.set(questionId, {
+                          skipped: entry.response.quartech_chapterskipped,
+                          response: entry.response.quartech_response,
+                      });
+                      // Optimistically update in memory
+                      entry.response.quartech_chapterskipped = chapterSkippedValue;
+                      if (isSkipped) {
+                          entry.response.quartech_response = '';
+                      }
+                  }
+              }
+              // Emit event for IMMEDIATE UI update (before backend completes)
+              this.emit('chapter-skipped-changed', { chapterId, isSkipped });
+              // ============================================
+              // BACKEND UPDATE: Save to server in background
+              // Use Promise.allSettled to handle partial failures gracefully
+              // ============================================
+              const updatePromises = questions.map(async (question) => {
+                  var _a;
+                  // Check if operation was aborted
+                  if (abortController.signal.aborted) {
+                      throw new Error('Operation aborted');
+                  }
+                  const questionId = question.id;
+                  const entry = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.get(questionId);
+                  // If response exists, update it
+                  if (entry === null || entry === void 0 ? void 0 : entry.response) {
+                      const responseId = entry.response.quartech_workbookresponseid;
+                      await POWERPOD.fetch.patchWorkbookResponseData({
+                          id: responseId,
+                          chapterSkipped: chapterSkippedValue,
+                          response: isSkipped ? '' : (((_a = previousStates.get(questionId)) === null || _a === void 0 ? void 0 : _a.response) || ''),
+                      });
+                      return { questionId, success: true };
+                  }
+                  else {
+                      // If no response exists, create one with chapterSkipped set
+                      await WorkbookResponseHelper.createResponse(questionId, '', {
+                          chapterSkipped: chapterSkippedValue,
+                      });
+                      return { questionId, success: true };
+                  }
+              });
+              // Wait for all backend updates using allSettled
+              const results = await Promise.allSettled(updatePromises);
+              // Check if operation was aborted during execution
+              if (abortController.signal.aborted) {
+                  logger$9.info({
+                      message: `Skip operation for chapter ${chapterId} was aborted`,
+                  });
+                  return;
+              }
+              // Check for failures
+              const failures = results.filter(r => r.status === 'rejected');
+              const successes = results.filter(r => r.status === 'fulfilled');
+              if (failures.length > 0) {
+                  logger$9.error({
+                      message: `${failures.length}/${questions.length} updates failed for chapter ${chapterId}`,
+                      data: { failures: failures.map(f => { var _a; return (_a = f.reason) === null || _a === void 0 ? void 0 : _a.message; }) },
+                  });
+                  // Rollback memory state for failed questions
+                  for (const question of questions) {
+                      const questionId = question.id;
+                      const prevState = previousStates.get(questionId);
+                      const entry = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.get(questionId);
+                      if (prevState && (entry === null || entry === void 0 ? void 0 : entry.response)) {
+                          entry.response.quartech_chapterskipped = prevState.skipped;
+                          if (prevState.response !== undefined) {
+                              entry.response.quartech_response = prevState.response;
+                          }
+                      }
+                  }
+                  // Emit rollback event to refresh UI from actual memory state
+                  this.emit('chapter-skipped-changed', { chapterId, isSkipped: !isSkipped, rollback: true });
+                  throw new Error(`Failed to update ${failures.length} questions`);
+              }
+              logger$9.info({
+                  message: `Successfully updated chapter ${chapterId} skipped status to: ${isSkipped}`,
+                  data: { successCount: successes.length },
+              });
+          }
+          catch (error) {
+              if (error.message === 'Operation aborted') {
+                  logger$9.info({
+                      message: `Skip operation for chapter ${chapterId} was aborted by newer operation`,
+                  });
+                  return;
+              }
+              logger$9.error({
+                  message: `Failed to update chapter skipped status: ${error.message}`,
+              });
+              throw error;
+          }
+          finally {
+              // Clean up pending operation tracker
+              if (((_a = this.pendingSkipOperations.get(chapterId)) === null || _a === void 0 ? void 0 : _a.abortController) === abortController) {
+                  this.pendingSkipOperations.delete(chapterId);
+              }
+          }
+      }
+      /**
+       * Get chapter completion status
+       */
+      getChapterCompletionStatus(chapterId) {
+          const isSkipped = this.isChapterSkipped(chapterId);
+          const questions = this.getQuestionsForChapter(chapterId);
+          const totalQuestions = questions.length;
+          let answeredQuestions = 0;
+          questions.forEach((question) => {
+              const questionId = question.id || question.quartech_questionid;
+              const entry = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.get(questionId);
+              const response = entry === null || entry === void 0 ? void 0 : entry.response;
+              // Question is answered if it has a non-empty response OR if it's skipped
+              if ((response === null || response === void 0 ? void 0 : response.quartech_chapterskipped) === 100000000) {
+                  // Question is skipped, count as answered
+                  answeredQuestions++;
+              }
+              else if ((response === null || response === void 0 ? void 0 : response.quartech_response) && response.quartech_response.trim() !== '') {
+                  // Question has a response
+                  answeredQuestions++;
+              }
+          });
+          // Chapter is complete if:
+          // 1. The entire chapter is skipped, OR
+          // 2. All questions are answered/skipped, OR
+          // 3. Chapter has no questions (empty container chapter)
+          const isComplete = isSkipped || answeredQuestions === totalQuestions || totalQuestions === 0;
+          return {
+              totalQuestions,
+              answeredQuestions,
+              isComplete,
+              isSkipped,
+          };
+      }
+  }
+
+  const logger$8 = Logger('services/WorkbookValidationService');
+  /**
+   * Service responsible for workbook validation
+   * Handles completion checking, validation rules, and access control
+   */
+  class WorkbookValidationService {
+      constructor(chapterService) {
+          this.chapterService = chapterService;
+          logger$8.info({ message: 'WorkbookValidationService initialized' });
+      }
+      /**
+       * Clean up all state
+       */
+      cleanup() {
+          logger$8.info({ message: 'WorkbookValidationService cleaned up' });
+      }
+      /**
+       * Check if user can access Review & Submit
+       * Returns true if all questions are answered or their chapters are skipped
+       */
+      canAccessReviewAndSubmit() {
+          const incompleteChapters = this.getIncompleteChapters();
+          return incompleteChapters.length === 0;
+      }
+      /**
+       * Get list of incomplete chapters (chapters with unanswered questions that are not skipped)
+       */
+      getIncompleteChapters() {
+          const incompleteChapters = [];
+          const chapters = getAllChaptersFromStore();
+          if (!chapters || chapters.length === 0) {
+              return incompleteChapters;
+          }
+          // Iterate through all chapters
+          chapters.forEach((chapter) => {
+              const chapterId = chapter.id || chapter.quartech_chapterid;
+              if (!chapterId)
+                  return;
+              // Skip "My Action Plan" chapter (it's always accessible)
+              if (chapter.quartech_name === 'My Action Plan' || chapter.name === 'My Action Plan') {
+                  return;
+              }
+              const completionStatus = this.chapterService.getChapterCompletionStatus(chapterId);
+              // If chapter is not complete and not skipped, add to incomplete list
+              if (!completionStatus.isComplete && !completionStatus.isSkipped) {
+                  incompleteChapters.push({
+                      chapterId,
+                      chapterName: chapter.quartech_name || chapter.name || 'Unnamed Chapter',
+                      totalQuestions: completionStatus.totalQuestions,
+                      answeredQuestions: completionStatus.answeredQuestions,
+                  });
+              }
+          });
+          return incompleteChapters;
+      }
+      /**
+       * Calculate overall workbook completion percentage
+       * Skipped questions are excluded from the calculation
+       */
+      calculateCompletionPercentage() {
+          var _a;
+          let totalNonSkippedQuestions = 0;
+          let answeredNonSkippedQuestions = 0;
+          // Use the POWERPOD.workbookQuestionsAndResponses structure
+          if (!((_a = POWERPOD.workbookQuestionsAndResponses) === null || _a === void 0 ? void 0 : _a.questionsWithResponses)) {
+              return 0;
+          }
+          POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.forEach((entry, questionId) => {
+              const response = entry.response;
+              // Skip if question is marked as chapter-skipped
+              if ((response === null || response === void 0 ? void 0 : response.quartech_chapterskipped) === 100000000) {
+                  return; // Skip this question
+              }
+              // Count as a non-skipped question
+              totalNonSkippedQuestions++;
+              // Check if answered
+              if ((response === null || response === void 0 ? void 0 : response.quartech_response) && response.quartech_response.trim() !== '') {
+                  answeredNonSkippedQuestions++;
+              }
+          });
+          if (totalNonSkippedQuestions === 0) {
+              return 0;
+          }
+          return Math.round((answeredNonSkippedQuestions / totalNonSkippedQuestions) * 100);
+      }
+      /**
+       * Validate if a question is answered
+       */
+      isQuestionAnswered(questionId) {
+          var _a, _b;
+          const entry = (_b = (_a = POWERPOD.workbookQuestionsAndResponses) === null || _a === void 0 ? void 0 : _a.questionsWithResponses) === null || _b === void 0 ? void 0 : _b.get(questionId);
+          if (!(entry === null || entry === void 0 ? void 0 : entry.response))
+              return false;
+          // Question is answered if it has a response OR is skipped
+          const isSkipped = entry.response.quartech_chapterskipped === 100000000;
+          const hasResponse = entry.response.quartech_response && entry.response.quartech_response.trim() !== '';
+          return isSkipped || hasResponse;
+      }
+      /**
+       * Validate if all questions in a chapter are answered (or chapter is skipped)
+       */
+      isChapterComplete(chapterId) {
+          const completionStatus = this.chapterService.getChapterCompletionStatus(chapterId);
+          return completionStatus.isComplete;
+      }
+      /**
+       * Get validation summary for the entire workbook
+       */
+      getValidationSummary() {
+          let totalChapters = 0;
+          let completeChapters = 0;
+          let incompleteChapters = 0;
+          let skippedChapters = 0;
+          let totalQuestions = 0;
+          let answeredQuestions = 0;
+          const chapters = getAllChaptersFromStore();
+          if (!chapters || chapters.length === 0) {
+              return {
+                  totalChapters: 0,
+                  completeChapters: 0,
+                  incompleteChapters: 0,
+                  skippedChapters: 0,
+                  totalQuestions: 0,
+                  answeredQuestions: 0,
+                  completionPercentage: 0,
+                  canSubmit: false,
+              };
+          }
+          chapters.forEach((chapter) => {
+              const chapterId = chapter.id || chapter.quartech_chapterid;
+              if (!chapterId)
+                  return;
+              // Skip "My Action Plan" chapter
+              if (chapter.quartech_name === 'My Action Plan' || chapter.name === 'My Action Plan') {
+                  return;
+              }
+              totalChapters++;
+              const completionStatus = this.chapterService.getChapterCompletionStatus(chapterId);
+              if (completionStatus.isSkipped) {
+                  skippedChapters++;
+                  completeChapters++; // Skipped chapters count as complete
+              }
+              else {
+                  totalQuestions += completionStatus.totalQuestions;
+                  answeredQuestions += completionStatus.answeredQuestions;
+                  if (completionStatus.isComplete) {
+                      completeChapters++;
+                  }
+                  else {
+                      incompleteChapters++;
+                  }
+              }
+          });
+          const completionPercentage = this.calculateCompletionPercentage();
+          const canSubmit = this.canAccessReviewAndSubmit();
+          return {
+              totalChapters,
+              completeChapters,
+              incompleteChapters,
+              skippedChapters,
+              totalQuestions,
+              answeredQuestions,
+              completionPercentage,
+              canSubmit,
+          };
+      }
+  }
+
+  const logger$7 = Logger('state/WorkbookStateManager');
+  /**
+   * Centralized state manager for workbook data
+   * Provides reactive state updates and abstracts POWERPOD access
+   */
+  class WorkbookStateManager {
+      constructor() {
+          this.eventListeners = new Map();
+          this.state = {
+              workbookId: null,
+              workbookData: null,
+              workbookResponses: [],
+              isLoadingResponses: false,
+              questionnaireStoreLoaded: false,
+              questionsAndResponsesLoaded: false,
+              workbookLocked: false,
+              lastUpdated: null,
+          };
+          logger$7.info({ message: 'WorkbookStateManager initialized' });
+      }
+      /**
+       * Get current state (read-only)
+       */
+      getState() {
+          return { ...this.state };
+      }
+      /**
+       * Subscribe to state changes
+       */
+      on(event, callback) {
+          if (!this.eventListeners.has(event)) {
+              this.eventListeners.set(event, new Set());
+          }
+          this.eventListeners.get(event).add(callback);
+      }
+      /**
+       * Unsubscribe from state changes
+       */
+      off(event, callback) {
+          var _a;
+          (_a = this.eventListeners.get(event)) === null || _a === void 0 ? void 0 : _a.delete(callback);
+      }
+      /**
+       * Emit state change event
+       */
+      emit(event, data) {
+          var _a;
+          (_a = this.eventListeners.get(event)) === null || _a === void 0 ? void 0 : _a.forEach(callback => callback(data));
+      }
+      /**
+       * Update state and emit change event
+       */
+      updateState(updates) {
+          const oldState = { ...this.state };
+          this.state = { ...this.state, ...updates, lastUpdated: new Date().toISOString() };
+          this.emit('state-changed', { oldState, newState: this.state, updates });
+      }
+      /**
+       * Sync state from POWERPOD global object
+       */
+      syncFromPOWERPOD() {
+          var _a, _b, _c, _d;
+          logger$7.info({ message: 'Syncing state from POWERPOD' });
+          const updates = {};
+          // Sync workbook data
+          if ((_a = POWERPOD.workbook) === null || _a === void 0 ? void 0 : _a.data) {
+              updates.workbookData = POWERPOD.workbook.data;
+              updates.workbookId = POWERPOD.workbook.data.quartech_workbookid;
+          }
+          // Sync responses
+          if ((_b = POWERPOD.workbookResponses) === null || _b === void 0 ? void 0 : _b.data) {
+              updates.workbookResponses = POWERPOD.workbookResponses.data;
+          }
+          // Sync questionnaire store loaded status
+          if ((_c = POWERPOD.questionnaire) === null || _c === void 0 ? void 0 : _c.chapters) {
+              updates.questionnaireStoreLoaded = true;
+          }
+          // Sync questions and responses loaded status
+          if ((_d = POWERPOD.workbookQuestionsAndResponses) === null || _d === void 0 ? void 0 : _d.questionsWithResponses) {
+              updates.questionsAndResponsesLoaded = true;
+          }
+          // Check workbook lock status
+          updates.workbookLocked = this.checkWorkbookLocked();
+          this.updateState(updates);
+          logger$7.info({ message: 'State synced from POWERPOD', updates });
+      }
+      /**
+       * Check if workbook is locked (has sign-offs)
+       */
+      checkWorkbookLocked() {
+          var _a;
+          const workbookData = (_a = POWERPOD.workbook) === null || _a === void 0 ? void 0 : _a.data;
+          if (!workbookData) {
+              return false;
+          }
+          // Check for Producer or Planning Advisor sign-off
+          const hasProducerSignOff = workbookData.quartech_producersignoffdate != null;
+          const hasPlanningAdvisorSignOff = workbookData.quartech_planningadvisorsignoffdate != null;
+          return hasProducerSignOff || hasPlanningAdvisorSignOff;
+      }
+      /**
+       * Load workbook responses
+       */
+      async loadWorkbookResponses() {
+          this.updateState({ isLoadingResponses: true });
+          try {
+              logger$7.info({ message: 'Loading workbook responses' });
+              await WorkbookResponseHelper.loadWorkbookResponses();
+              // Sync state after loading
+              this.syncFromPOWERPOD();
+              logger$7.info({ message: 'Workbook responses loaded successfully' });
+          }
+          catch (error) {
+              logger$7.error({
+                  message: `Failed to load workbook responses: ${error.message}`,
+              });
+              throw error;
+          }
+          finally {
+              this.updateState({ isLoadingResponses: false });
+          }
+      }
+      /**
+       * Refresh workbook data from server
+       */
+      async refreshWorkbookData() {
+          // Implementation would fetch fresh data from server
+          // For now, just sync from POWERPOD
+          this.syncFromPOWERPOD();
+      }
+      /**
+       * Clean up state manager
+       */
+      cleanup() {
+          this.eventListeners.clear();
+          logger$7.info({ message: 'WorkbookStateManager cleaned up' });
+      }
+  }
+
+  const logger$6 = Logger('state/NavigationStateManager');
+  /**
+   * Centralized state manager for navigation
+   * Tracks current position, history, and breadcrumbs
+   */
+  class NavigationStateManager {
+      constructor() {
+          this.eventListeners = new Map();
+          this.state = {
+              currentSectionIndex: 0,
+              currentStepIndex: 0,
+              activeContent: null,
+              isNavigating: false,
+              navigationHistory: [],
+              breadcrumbs: [],
+          };
+          logger$6.info({ message: 'NavigationStateManager initialized' });
+      }
+      /**
+       * Get current state (read-only)
+       */
+      getState() {
+          return { ...this.state };
+      }
+      /**
+       * Subscribe to state changes
+       */
+      on(event, callback) {
+          if (!this.eventListeners.has(event)) {
+              this.eventListeners.set(event, new Set());
+          }
+          this.eventListeners.get(event).add(callback);
+      }
+      /**
+       * Unsubscribe from state changes
+       */
+      off(event, callback) {
+          var _a;
+          (_a = this.eventListeners.get(event)) === null || _a === void 0 ? void 0 : _a.delete(callback);
+      }
+      /**
+       * Emit state change event
+       */
+      emit(event, data) {
+          var _a;
+          (_a = this.eventListeners.get(event)) === null || _a === void 0 ? void 0 : _a.forEach(callback => callback(data));
+      }
+      /**
+       * Update state and emit change event
+       */
+      updateState(updates) {
+          const oldState = { ...this.state };
+          this.state = { ...this.state, ...updates };
+          this.emit('state-changed', { oldState, newState: this.state, updates });
+      }
+      /**
+       * Navigate to a specific section and step
+       */
+      navigateTo(sectionIndex, stepIndex, activeContent) {
+          logger$6.info({
+              message: `Navigating to section ${sectionIndex}, step ${stepIndex}`,
+          });
+          // Add to history
+          const history = [...this.state.navigationHistory];
+          history.push({ sectionIndex, stepIndex });
+          // Keep history limited to last 50 entries
+          if (history.length > 50) {
+              history.shift();
+          }
+          this.updateState({
+              currentSectionIndex: sectionIndex,
+              currentStepIndex: stepIndex,
+              activeContent: activeContent || null,
+              navigationHistory: history,
+          });
+          this.emit('navigation-changed', {
+              sectionIndex,
+              stepIndex,
+              activeContent,
+          });
+      }
+      /**
+       * Set navigation in progress
+       */
+      setNavigating(isNavigating) {
+          this.updateState({ isNavigating });
+      }
+      /**
+       * Update breadcrumbs
+       */
+      updateBreadcrumbs(breadcrumbs) {
+          this.updateState({ breadcrumbs });
+      }
+      /**
+       * Go to next step
+       */
+      goToNext(flatSteps) {
+          const nextStepIndex = this.state.currentStepIndex + 1;
+          if (nextStepIndex < flatSteps.length) {
+              const nextStep = flatSteps[nextStepIndex];
+              this.navigateTo(this.state.currentSectionIndex, nextStepIndex, nextStep.content);
+              return true;
+          }
+          return false;
+      }
+      /**
+       * Go to previous step
+       */
+      goToPrevious(flatSteps) {
+          const prevStepIndex = this.state.currentStepIndex - 1;
+          if (prevStepIndex >= 0) {
+              const prevStep = flatSteps[prevStepIndex];
+              this.navigateTo(this.state.currentSectionIndex, prevStepIndex, prevStep.content);
+              return true;
+          }
+          return false;
+      }
+      /**
+       * Get navigation history
+       */
+      getHistory() {
+          return [...this.state.navigationHistory];
+      }
+      /**
+       * Clear navigation history
+       */
+      clearHistory() {
+          this.updateState({ navigationHistory: [] });
+      }
+      /**
+       * Clean up state manager
+       */
+      cleanup() {
+          this.eventListeners.clear();
+          logger$6.info({ message: 'NavigationStateManager cleaned up' });
+      }
+  }
+
+  const logger$5 = Logger('services/ServiceContainer');
+  /**
+   * Service Container - Dependency Injection Container
+   * Manages service lifecycle and dependencies
+   */
+  class ServiceContainer {
+      constructor() {
+          logger$5.info({ message: 'Initializing ServiceContainer' });
+          // Initialize state managers first
+          this.workbookState = new WorkbookStateManager();
+          this.navigationState = new NavigationStateManager();
+          // Initialize services in dependency order
+          this.responseService = new WorkbookResponseService();
+          this.chapterService = new ChapterManagementService();
+          this.validationService = new WorkbookValidationService(this.chapterService);
+          logger$5.info({ message: 'ServiceContainer initialized successfully' });
+      }
+      /**
+       * Get singleton instance
+       */
+      static getInstance() {
+          if (!ServiceContainer.instance) {
+              ServiceContainer.instance = new ServiceContainer();
+          }
+          return ServiceContainer.instance;
+      }
+      /**
+       * Reset singleton instance (useful for testing)
+       */
+      static reset() {
+          if (ServiceContainer.instance) {
+              ServiceContainer.instance.cleanup();
+              ServiceContainer.instance = null;
+          }
+      }
+      /**
+       * Clean up all services
+       */
+      cleanup() {
+          logger$5.info({ message: 'Cleaning up ServiceContainer' });
+          // Clean up services
+          this.responseService.cleanup();
+          this.chapterService.cleanup();
+          this.validationService.cleanup();
+          // Clean up state managers
+          this.workbookState.cleanup();
+          this.navigationState.cleanup();
+          logger$5.info({ message: 'ServiceContainer cleaned up' });
+      }
+  }
+  ServiceContainer.instance = null;
+  /**
+   * Convenience function to get service container instance
+   */
+  function getServices() {
+      return ServiceContainer.getInstance();
+  }
+
   // Create logger instance for EFP components
   const logger$4 = Logger('components/EFPEntryForm');
   let EFPEntryForm = class EFPEntryForm extends s$2 {
+      // ========================================
+      // CONSTRUCTOR
+      // ========================================
       constructor() {
-          super(...arguments);
+          super();
+          // ========================================
+          // REACTIVE PROPERTIES
+          // ========================================
           this.currentSectionIndex = 0;
           this.currentStepIndex = 0;
           this.nestedChapterStructure = [];
@@ -44159,16 +47216,71 @@
               title: 'Introduction to the Environmental Farm Plan (EFP)',
               content: 'The purpose of the EFP is to assess the features and management of your farm to identify environmental risks and develop an action plan.',
           };
-          // Debounce timers for all response saves (questionId -> timer)
-          this.responseSaveDebounceTimers = new Map();
-          // Pending response values (questionId -> response value)
-          this.pendingResponseValues = new Map();
-          // Pending multi-select values (questionId -> selected options array)
-          this.pendingMultiselectValues = new Map();
-          // Multiline text save status (questionId -> 'draft' | 'saving' | 'saved')
-          this.multilineTextSaveStatus = new Map();
-          // Multiline text character counts (questionId -> character count)
-          this.multilineTextCharCounts = new Map();
+          // ========================================
+          // SERVICE EVENT HANDLERS (NEW ARCHITECTURE)
+          // ========================================
+          this.handleServiceResponseSaved = (data) => {
+              logger$4.info({ message: 'Service: Response saved', data });
+              // Trigger re-render to update UI
+              this.responseUpdateCounter++;
+              this.requestUpdate();
+          };
+          // Handler for optimistic response updates (immediate UI feedback)
+          this.handleServiceResponseChanged = (data) => {
+              logger$4.info({ message: 'Service: Response changed (optimistic)', data });
+              // Trigger re-render for immediate UI feedback
+              this.responseUpdateCounter++;
+              this.requestUpdate();
+              // Also update completion status since response may affect it
+              this.updateCompletionAndNavigation();
+          };
+          // Handler for save status changes (saving/saved indicators)
+          this.handleServiceSaveStatusChanged = (data) => {
+              logger$4.info({ message: 'Service: Save status changed', data });
+              // Increment counter to trigger child QuestionRenderer re-renders
+              this.responseUpdateCounter++;
+              this.requestUpdate();
+          };
+          this.handleServiceMultilineStatusChanged = (data) => {
+              logger$4.info({ message: 'Service: Multiline text status changed', data });
+              // Service manages the state, just trigger re-render
+              this.requestUpdate();
+          };
+          this.handleServiceChapterSkippedChanged = (data) => {
+              logger$4.info({ message: 'Service: Chapter skipped changed', data });
+              // If this is a rollback, show a brief error toast
+              if (data === null || data === void 0 ? void 0 : data.rollback) {
+                  logger$4.warn({
+                      message: 'Chapter skip change rolled back due to backend failure',
+                      data: { chapterId: data.chapterId },
+                  });
+                  // Could add toast notification here if desired
+              }
+              // Trigger re-render and update completion
+              // This will read the current memory state (which may have been rolled back)
+              this.updateCompletionAndNavigation();
+          };
+          this.handleServiceWorkbookStateChanged = (data) => {
+              logger$4.info({ message: 'Service: Workbook state changed', data });
+              // Sync local state with service state
+              const state = this.services.workbookState.getState();
+              this.workbookLocked = state.workbookLocked;
+              this.questionnaireStoreLoaded = state.questionnaireStoreLoaded;
+              this.questionsAndResponsesLoaded = state.questionsAndResponsesLoaded;
+              this.isLoadingResponses = state.isLoadingResponses;
+              this.requestUpdate();
+          };
+          this.handleServiceNavigationChanged = (data) => {
+              logger$4.info({ message: 'Service: Navigation changed', data });
+              // Sync local state with navigation state
+              const state = this.services.navigationState.getState();
+              this.currentSectionIndex = state.currentSectionIndex;
+              this.currentStepIndex = state.currentStepIndex;
+              if (state.activeContent) {
+                  this.activeContent = state.activeContent;
+              }
+              this.requestUpdate();
+          };
           // Handler for workbook stats updates
           this.handleStatsUpdated = (event) => {
               var _a;
@@ -44186,7 +47298,8 @@
                   },
               });
               // Update the local completion percentage property to trigger reactive re-render
-              this.currentCompletionPercentage = newPercentage;
+              // REFACTORED: Now uses WorkbookValidationService
+              this.currentCompletionPercentage = this.services.validationService.calculateCompletionPercentage();
               // Increment the response update counter to trigger re-render
               this.responseUpdateCounter++;
               this.requestUpdate();
@@ -44217,10 +47330,29 @@
               // Trigger a re-render to update badge counts
               this.requestUpdate();
           };
+          // Initialize service container
+          this.services = getServices();
+          logger$4.info({ message: 'EFPEntryForm constructor - services initialized' });
       }
       connectedCallback() {
           super.connectedCallback();
           logger$4.info({ message: 'EFPEntryForm connected' });
+          // ========================================
+          // SERVICE EVENT LISTENERS (NEW ARCHITECTURE)
+          // ========================================
+          // Listen for response events from service
+          this.services.responseService.on('response-saved', this.handleServiceResponseSaved);
+          this.services.responseService.on('response-changed', this.handleServiceResponseChanged);
+          this.services.responseService.on('save-status-changed', this.handleServiceSaveStatusChanged);
+          this.services.responseService.on('multiline-text-status-changed', this.handleServiceMultilineStatusChanged);
+          // Listen for chapter skip events from service
+          this.services.chapterService.on('chapter-skipped-changed', this.handleServiceChapterSkippedChanged);
+          // Listen for state changes from state managers
+          this.services.workbookState.on('state-changed', this.handleServiceWorkbookStateChanged);
+          this.services.navigationState.on('navigation-changed', this.handleServiceNavigationChanged);
+          // ========================================
+          // LEGACY INITIALIZATION
+          // ========================================
           // Check if questionnaire store is already loaded
           this.updateQuestionnaireStoreStatus();
           // Set up periodic check for questionnaire store loading
@@ -44236,19 +47368,27 @@
       }
       disconnectedCallback() {
           super.disconnectedCallback();
+          // ========================================
+          // REMOVE SERVICE EVENT LISTENERS (NEW ARCHITECTURE)
+          // ========================================
+          this.services.responseService.off('response-saved', this.handleServiceResponseSaved);
+          this.services.responseService.off('response-changed', this.handleServiceResponseChanged);
+          this.services.responseService.off('save-status-changed', this.handleServiceSaveStatusChanged);
+          this.services.responseService.off('multiline-text-status-changed', this.handleServiceMultilineStatusChanged);
+          this.services.chapterService.off('chapter-skipped-changed', this.handleServiceChapterSkippedChanged);
+          this.services.workbookState.off('state-changed', this.handleServiceWorkbookStateChanged);
+          this.services.navigationState.off('navigation-changed', this.handleServiceNavigationChanged);
+          // ========================================
+          // CLEANUP
+          // ========================================
           // Remove event listeners
           this.removeEventListener('action-plans-updated', this.handleActionPlansUpdated);
           this.removeEventListener('sign-off-changed', this.handleSignOffChanged);
           this.removeEventListener('workbook-stats-updated', this.handleStatsUpdated);
-          // Clear all pending debounce timers
-          this.responseSaveDebounceTimers.forEach((timer) => {
-              clearTimeout(timer);
-          });
-          this.responseSaveDebounceTimers.clear();
-          this.pendingResponseValues.clear();
-          this.pendingMultiselectValues.clear();
+          // Clean up services (they manage their own state)
+          this.services.cleanup();
           logger$4.info({
-              message: 'EFPEntryForm disconnected, cleared pending timers',
+              message: 'EFPEntryForm disconnected, cleaned up services and event listeners',
           });
       }
       // Update the reactive property based on store status
@@ -44353,74 +47493,30 @@
           }
       }
       // Check if all non-skipped questions in My Workbook are answered
+      // REFACTORED: Now uses WorkbookValidationService
       canAccessReviewAndSubmit() {
-          var _a;
-          if (!POWERPOD.workbookQuestionsAndResponses.isLoaded) {
-              // If data not loaded yet, allow access (will show loading state)
-              return true;
-          }
-          const questionnaire = getQuestionnaireFromStore();
-          if (!((_a = questionnaire === null || questionnaire === void 0 ? void 0 : questionnaire.chapters) === null || _a === void 0 ? void 0 : _a.length)) {
-              return true;
-          }
-          // Check all questions in all chapters
-          let hasUnansweredQuestions = false;
-          const incompleteChaptersList = [];
-          const checkChapters = (chapters, parentChapterName = '') => {
-              chapters.forEach((chapter) => {
-                  const incompleteQuestions = [];
-                  // Check questions in this chapter
-                  if (chapter.questions && chapter.questions.length > 0) {
-                      chapter.questions.forEach((question) => {
-                          var _a, _b;
-                          const entry = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.get(question.id);
-                          const isSkipped = ((_a = entry === null || entry === void 0 ? void 0 : entry.response) === null || _a === void 0 ? void 0 : _a.quartech_chapterskipped) === 100000000;
-                          const responseValue = (_b = entry === null || entry === void 0 ? void 0 : entry.response) === null || _b === void 0 ? void 0 : _b.quartech_response;
-                          const hasResponse = responseValue && responseValue.trim() !== '';
-                          // Question is incomplete if it's not skipped AND has no response
-                          if (!isSkipped && !hasResponse) {
-                              hasUnansweredQuestions = true;
-                              const questionName = question.quartech_name || question.name || 'Unknown Question';
-                              incompleteQuestions.push({
-                                  id: question.id,
-                                  name: questionName,
-                                  isSkipped,
-                                  hasResponse: !!hasResponse,
-                                  responseValue: responseValue || undefined,
-                              });
-                          }
-                      });
-                  }
-                  // If this chapter has unanswered questions, add it to the list
-                  if (incompleteQuestions.length > 0) {
-                      const chapterName = chapter.name || chapter.quartech_name || 'Unknown Chapter';
-                      incompleteChaptersList.push({
-                          id: chapter.id,
-                          name: chapterName,
-                          parentChapterName: parentChapterName || undefined,
-                          incompleteQuestions,
-                      });
-                  }
-                  // Recursively check subchapters
-                  if (chapter.subchapters && chapter.subchapters.length > 0) {
-                      const currentChapterName = chapter.name || chapter.quartech_name || '';
-                      checkChapters(chapter.subchapters, currentChapterName);
-                  }
-              });
-          };
-          if (questionnaire.chapters && questionnaire.chapters.length > 0) {
-              checkChapters(questionnaire.chapters[0]);
-          }
-          // Update the incomplete chapters list
-          this.incompleteChapters = incompleteChaptersList;
-          return !hasUnansweredQuestions;
+          logger$4.info({ message: '[NEW ARCHITECTURE] Checking Review & Submit access' });
+          // ========================================
+          // NEW ARCHITECTURE: Delegate to service
+          // ========================================
+          const canAccess = this.services.validationService.canAccessReviewAndSubmit();
+          // Update incomplete chapters list for UI
+          this.incompleteChapters = this.services.validationService.getIncompleteChapters();
+          logger$4.info({
+              message: `Review & Submit access: ${canAccess ? 'ALLOWED' : 'DENIED'}`,
+              data: {
+                  canAccess,
+                  incompleteChaptersCount: this.incompleteChapters.length,
+              },
+          });
+          return canAccess;
       }
       // Show validation alert with incomplete chapters
       showIncompleteQuestionsAlert() {
           this.showValidationAlert = true;
           this.hasTriedToSubmit = true; // Mark that user has tried to submit
           // Build detailed logging info
-          const totalIncompleteQuestions = this.incompleteChapters.reduce((sum, chapter) => { var _a; return sum + ((_a = chapter.incompleteQuestions) === null || _a === void 0 ? void 0 : _a.length) || 0; }, 0);
+          const totalIncompleteQuestions = this.incompleteChapters.reduce((sum, chapter) => sum + (chapter.totalQuestions - chapter.answeredQuestions), 0);
           // Log summary
           logger$4.info({
               message: 'Showing validation alert for incomplete questions',
@@ -44431,24 +47527,14 @@
           });
           // Log detailed breakdown per chapter
           this.incompleteChapters.forEach((chapter) => {
-              var _a, _b;
-              const parentInfo = chapter.parentChapterName
-                  ? ` (under "${chapter.parentChapterName}")`
-                  : '';
               logger$4.info({
-                  message: `📋 Incomplete chapter: "${chapter.name}"${parentInfo}`,
+                  message: `📋 Incomplete chapter: "${chapter.chapterName}"`,
                   data: {
-                      chapterId: chapter.id,
-                      chapterName: chapter.name,
-                      parentChapterName: chapter.parentChapterName,
-                      incompleteQuestionCount: ((_a = chapter.incompleteQuestions) === null || _a === void 0 ? void 0 : _a.length) || 0,
-                      incompleteQuestions: (_b = chapter.incompleteQuestions) === null || _b === void 0 ? void 0 : _b.map((q) => ({
-                          id: q.id,
-                          name: q.name,
-                          isSkipped: q.isSkipped,
-                          hasResponse: q.hasResponse,
-                          responseValue: q.responseValue,
-                      })),
+                      chapterId: chapter.chapterId,
+                      chapterName: chapter.chapterName,
+                      totalQuestions: chapter.totalQuestions,
+                      answeredQuestions: chapter.answeredQuestions,
+                      incompleteQuestionCount: chapter.totalQuestions - chapter.answeredQuestions,
                   },
               });
           });
@@ -44479,254 +47565,49 @@
               },
           ];
       }
-      // Rendering methods
+      // Rendering methods - delegates to QuestionRenderer component
       renderQuestion(question) {
-          var _a, _b;
-          const questionTypeMap = {
-              100000000: 'Yes/No/NA',
-              100000001: 'Point Rating',
-              100000002: 'Multi-select List',
-              100000003: 'Multiline Text',
-              // Add more question types as needed
-          };
-          const questionTypeName = questionTypeMap[question.questionType] || 'Unknown';
-          // Check if this question is disabled (in a skipped chapter)
           const isDisabled = this.isQuestionDisabled(question.id);
-          // Check if this question is incomplete (not skipped and no response)
-          // Only show the red icon if user has tried to submit
-          const entry = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.get(question.id);
-          const isSkipped = ((_a = entry === null || entry === void 0 ? void 0 : entry.response) === null || _a === void 0 ? void 0 : _a.quartech_chapterskipped) === 100000000;
-          const hasResponse = ((_b = entry === null || entry === void 0 ? void 0 : entry.response) === null || _b === void 0 ? void 0 : _b.quartech_response) &&
-              entry.response.quartech_response.trim() !== '';
-          const isIncomplete = !isSkipped && !hasResponse;
-          const showIncompleteIcon = isIncomplete && this.hasTriedToSubmit;
+          const existingResponse = this.getResponseForQuestion(question.id);
+          const actionPlanCount = this.getActionPlanCount(question.id);
           return x `
-      <div
-        class="question-container ${isDisabled ? 'question-disabled' : ''}"
-        data-question-id="${question.id}"
-      >
-        ${question.textAboveQuestion
-            ? x `
-              <div class="question-text">
-                ${o$3(question.textAboveQuestion)}
-              </div>
-            `
-            : ''}
-
-        <div class="question-label">
-          <div class="question-label-text">
-            <span
-              >${o$3(EFPTextUtils.convertNewlinesToBreaks(question.label))}</span
-            >
-            ${question.tooltip
-            ? x `
-                  <sl-tooltip placement="top" style="--max-width: 300px;">
-                    <div slot="content">${o$3(question.tooltip)}</div>
-                    <sl-icon
-                      name="question-circle"
-                      class="question-tooltip-icon"
-                      aria-label="Question help"
-                    ></sl-icon>
-                  </sl-tooltip>
-                `
-            : ''}
-          </div>
-          ${showIncompleteIcon
-            ? x `
-                <sl-icon
-                  name="exclamation-circle"
-                  class="question-incomplete-icon"
-                  aria-label="Incomplete question"
-                ></sl-icon>
-              `
-            : ''}
-        </div>
-
-        ${question.textBelowQuestion
-            ? x `
-              <div class="question-text">
-                ${o$3(question.textBelowQuestion)}
-              </div>
-            `
-            : ''}
-
-        <div class="question-response">
-          ${this.renderQuestionInput(question, questionTypeName, isDisabled)}
-        </div>
-
-        ${this.renderActionPlanButtons(question.id, isDisabled)}
-      </div>
+      <question-renderer
+        .question=${question}
+        .isDisabled=${isDisabled}
+        .hasTriedToSubmit=${this.hasTriedToSubmit}
+        .responseService=${this.services.responseService}
+        .existingResponse=${existingResponse}
+        .actionPlanCount=${actionPlanCount}
+        .updateCounter=${this.responseUpdateCounter}
+        @rating-changed=${this.handleRatingChanged}
+        @multiselect-changed=${this.handleMultiselectChangedEvent}
+        @multiline-text-input=${this.handleMultilineTextInputEvent}
+        @force-save=${this.handleForceSaveEvent}
+        @add-note-to-action-plan=${this.handleAddNoteToActionPlanEvent}
+        @view-existing-actions=${this.handleViewExistingActionsEvent}
+      ></question-renderer>
     `;
       }
-      // Render action plan buttons based on whether action plans exist for this question
-      renderActionPlanButtons(questionId, isDisabled) {
-          const actionPlanCount = this.getActionPlanCount(questionId);
-          const hasActionPlans = actionPlanCount > 0;
-          return x `
-      <div class="question-action-plan-button">
-        ${hasActionPlans
-            ? x `
-              <button
-                class="view-actions-button"
-                @click=${() => this.handleViewExistingActions(questionId)}
-                ?disabled=${isDisabled}
-              >
-                <sl-icon name="eye" aria-hidden="true"></sl-icon>
-                <span>View Existing Actions</span>
-                <sl-badge variant="primary" pill>${actionPlanCount}</sl-badge>
-              </button>
-            `
-            : ''}
-        <button
-          class="add-note-button"
-          @click=${() => this.handleAddNoteToActionPlan(questionId)}
-          ?disabled=${isDisabled}
-        >
-          <sl-icon name="journal-plus" aria-hidden="true"></sl-icon>
-          <span>Add Note to Action Plan</span>
-        </button>
-      </div>
-    `;
+      // Event handlers for QuestionRenderer events
+      handleMultiselectChangedEvent(e) {
+          const { questionId, option, checked } = e.detail;
+          this.handleMultiselectChange(questionId, option, checked);
       }
-      renderQuestionInput(question, questionType, isDisabled = false) {
-          switch (questionType) {
-              case 'Multi-select List':
-                  // Parse the semicolon-separated options from the question
-                  const optionsString = question.multiselectOptions || '';
-                  const options = optionsString
-                      .split(';')
-                      .map((opt) => opt.trim())
-                      .filter((opt) => opt.length > 0);
-                  // Get selected options - prefer pending value over saved response
-                  let selectedOptions;
-                  if (this.pendingMultiselectValues.has(question.id)) {
-                      // Use pending value if user is actively selecting
-                      selectedOptions = this.pendingMultiselectValues.get(question.id);
-                  }
-                  else {
-                      // Otherwise get from existing response
-                      const existingResponse = this.getResponseForQuestion(question.id);
-                      const selectedOptionsString = (existingResponse === null || existingResponse === void 0 ? void 0 : existingResponse.quartech_response) || '';
-                      const existingSelectedOptions = selectedOptionsString
-                          .split(';')
-                          .map((opt) => opt.trim())
-                          .filter((opt) => opt.length > 0);
-                      // Filter to only include options that are valid for the current question
-                      // This prevents old/invalid options from being displayed as checked
-                      selectedOptions = existingSelectedOptions.filter((opt) => options.includes(opt));
-                  }
-                  return x `
-          <div class="multiselect-list-container">
-            ${options.map((option) => {
-                    const isChecked = selectedOptions.includes(option);
-                    return x `
-                <div class="multiselect-option">
-                  <label
-                    style="display: flex; align-items: center; gap: 0.5rem; cursor: ${isDisabled ? 'not-allowed' : 'pointer'}; padding: 0.5rem 0; opacity: ${isDisabled ? '0.6' : '1'};"
-                  >
-                    <input
-                      type="checkbox"
-                      .checked=${isChecked}
-                      ?disabled=${isDisabled}
-                      @change=${(e) => this.handleMultiselectChange(question.id, option, e.target.checked)}
-                      style="transform: scale(1.2);"
-                    />
-                    <span>${option}</span>
-                  </label>
-                </div>
-              `;
-                })}
-          </div>
-        `;
-              case 'Yes/No/NA':
-              case 'Point Rating':
-                  // Get existing response value for this question
-                  const existingResponse2 = this.getResponseForQuestion(question.id);
-                  const selectedValue = (existingResponse2 === null || existingResponse2 === void 0 ? void 0 : existingResponse2.quartech_response) || '';
-                  // Prepare rating metadata for Point Rating questions
-                  const ratingMetadata = questionType === 'Point Rating'
-                      ? {
-                          rating1OverwriteLabel: question.rating1OverwriteLabel,
-                          rating1Description: question.rating1Description,
-                          rating2OverwriteLabel: question.rating2OverwriteLabel,
-                          rating2Description: question.rating2Description,
-                          rating3OverwriteLabel: question.rating3OverwriteLabel,
-                          rating3Description: question.rating3Description,
-                          rating4OverwriteLabel: question.rating4OverwriteLabel,
-                          rating4Description: question.rating4Description,
-                      }
-                      : {};
-                  return x `
-          <rating-question
-            .questionId=${question.id}
-            .questionType=${questionType}
-            .selectedValue=${selectedValue}
-            .ratingMetadata=${ratingMetadata}
-            .disabled=${isDisabled}
-            @rating-changed=${this.handleRatingChanged}
-          ></rating-question>
-        `;
-              case 'Multiline Text':
-                  // Get existing response value for this question
-                  const existingResponse3 = this.getResponseForQuestion(question.id);
-                  const textValue = (existingResponse3 === null || existingResponse3 === void 0 ? void 0 : existingResponse3.quartech_response) || '';
-                  const saveStatus = this.multilineTextSaveStatus.get(question.id) || 'saved';
-                  // Use tracked character count if available, otherwise use text value length
-                  const charCount = this.multilineTextCharCounts.has(question.id)
-                      ? this.multilineTextCharCounts.get(question.id)
-                      : textValue.length;
-                  const maxChars = 5000;
-                  const isOverLimit = charCount > maxChars;
-                  return x `
-          <div class="multiline-text-container">
-            <sl-textarea
-              label="Your response"
-              name="question-${question.id}"
-              rows="6"
-              placeholder="Enter your response..."
-              maxlength="${maxChars}"
-              .value=${textValue}
-              ?disabled=${isDisabled}
-              @sl-input=${(e) => this.handleMultilineTextInput(question.id, e.target.value)}
-            ></sl-textarea>
-            <div class="multiline-text-footer">
-              <div class="character-counter ${isOverLimit ? 'over-limit' : ''}">
-                ${charCount} / ${maxChars} characters
-              </div>
-              <div class="multiline-text-status">
-                <span
-                  class="status-indicator status-${saveStatus}"
-                  @click=${() => this.handleForceSave(question.id)}
-                  role="button"
-                  tabindex="0"
-                  @keydown=${(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault();
-                        this.handleForceSave(question.id);
-                    }
-                }}
-                >
-                  ${saveStatus === 'draft'
-                    ? '📝 Draft (click to save)'
-                    : saveStatus === 'saving'
-                        ? '⏳ Saving...'
-                        : '✓ Saved'}
-                </span>
-              </div>
-            </div>
-          </div>
-        `;
-              default:
-                  return x `
-          <sl-textarea
-            label="Your response"
-            name="question-${question.id}"
-            rows="3"
-            placeholder="Enter your response..."
-            ?disabled=${isDisabled}
-          ></sl-textarea>
-        `;
-          }
+      handleMultilineTextInputEvent(e) {
+          const { questionId, value } = e.detail;
+          this.handleMultilineTextInput(questionId, value);
+      }
+      handleForceSaveEvent(e) {
+          const { questionId } = e.detail;
+          this.handleForceSave(questionId);
+      }
+      handleAddNoteToActionPlanEvent(e) {
+          const { questionId } = e.detail;
+          this.handleAddNoteToActionPlan(questionId);
+      }
+      handleViewExistingActionsEvent(e) {
+          const { questionId } = e.detail;
+          this.handleViewExistingActions(questionId);
       }
       renderSectionNotApplicableCheckbox() {
           // Only show checkbox when viewing a chapter/subchapter in My Workbook section
@@ -44810,22 +47691,15 @@
     `;
       }
       // Check if the current chapter should be marked as skipped
+      // REFACTORED: Now uses ChapterManagementService
       isChapterSkipped() {
           const chapterId = this.getCurrentChapterId();
           if (!chapterId)
               return false;
-          // Exclude questions from children with preventSkipping: Yes
-          // This ensures that chapters with preventSkipping: Yes don't show as checked
-          // even when their parent is skipped
-          const questions = this.getQuestionsForCurrentChapter(chapterId, true);
-          if (questions.length === 0)
-              return false;
-          // Check if ALL questions (excluding those from preventSkipping children) have quartech_chapterskipped set to YES (100000000)
-          return questions.every(q => {
-              var _a;
-              const entry = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.get(q.id);
-              return ((_a = entry === null || entry === void 0 ? void 0 : entry.response) === null || _a === void 0 ? void 0 : _a.quartech_chapterskipped) === 100000000;
-          });
+          // ========================================
+          // NEW ARCHITECTURE: Delegate to service
+          // ========================================
+          return this.services.chapterService.isChapterSkipped(chapterId);
       }
       // Check if a specific question is in a skipped chapter or if workbook is locked
       isQuestionDisabled(questionId) {
@@ -44839,64 +47713,21 @@
           return ((_a = entry === null || entry === void 0 ? void 0 : entry.response) === null || _a === void 0 ? void 0 : _a.quartech_chapterskipped) === 100000000;
       }
       // Check if a chapter (by ID) is skipped
-      isChapterSkippedById(chapterId) {
-          if (!chapterId)
-              return false;
-          // Exclude questions from children with preventSkipping: Yes
-          const questions = this.getQuestionsForCurrentChapter(chapterId, true);
-          if (questions.length === 0)
-              return false;
-          // Check if ALL questions (excluding those from preventSkipping children) have quartech_chapterskipped set to YES (100000000)
-          return questions.every(q => {
-              var _a;
-              const entry = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.get(q.id);
-              return ((_a = entry === null || entry === void 0 ? void 0 : entry.response) === null || _a === void 0 ? void 0 : _a.quartech_chapterskipped) === 100000000;
-          });
+      // Note: Currently unused but may be needed for future features
+      _isChapterSkippedById(chapterId) {
+          return EFPCompletionUtils.isChapterSkippedById(chapterId, (id, excludePreventSkipping) => this.getQuestionsForCurrentChapter(id, excludePreventSkipping));
       }
       // Check if skipping is prevented for the current chapter
       // This cascades: if a parent has preventSkipping: Yes, all children are also prevented from skipping
+      // REFACTORED: Now uses ChapterManagementService
       isSkippingPrevented() {
-          const currentStep = this.flatSteps[this.currentStepIndex];
-          if (!currentStep)
+          const chapterId = this.getCurrentChapterId();
+          if (!chapterId)
               return false;
-          // Get the current chapter/subchapter and check its preventSkipping
-          let currentChapter = null;
-          let parentChapterId = null;
-          // Determine the current chapter and its parent
-          if (currentStep.subchapterData) {
-              // This is a subchapter or sub-subchapter
-              currentChapter = currentStep.subchapterData;
-              parentChapterId = currentChapter.parentChapterId;
-          }
-          else if (currentStep.chapterData) {
-              // This is a leaf chapter
-              currentChapter = currentStep.chapterData;
-              parentChapterId = currentChapter.parentChapterId;
-          }
-          else if (currentStep.isContainer && currentStep.chapterId) {
-              // This is a container chapter
-              currentChapter = getChapterFromStore(currentStep.chapterId);
-              parentChapterId = currentChapter === null || currentChapter === void 0 ? void 0 : currentChapter.parentChapterId;
-          }
-          // Check if the current chapter itself has preventSkipping
-          if ((currentChapter === null || currentChapter === void 0 ? void 0 : currentChapter.preventSkipping) === true) {
-              return true;
-          }
-          // Check if any parent chapter has preventSkipping (cascade effect)
-          if (parentChapterId) {
-              const parentChapter = getChapterFromStore(parentChapterId);
-              if ((parentChapter === null || parentChapter === void 0 ? void 0 : parentChapter.preventSkipping) === true) {
-                  return true;
-              }
-              // Check grandparent if parent has a parent (for 3-level hierarchy)
-              if (parentChapter === null || parentChapter === void 0 ? void 0 : parentChapter.parentChapterId) {
-                  const grandparentChapter = getChapterFromStore(parentChapter.parentChapterId);
-                  if ((grandparentChapter === null || grandparentChapter === void 0 ? void 0 : grandparentChapter.preventSkipping) === true) {
-                      return true;
-                  }
-              }
-          }
-          return false;
+          // ========================================
+          // NEW ARCHITECTURE: Delegate to service
+          // ========================================
+          return this.services.chapterService.isSkippingPrevented(chapterId);
       }
       // Get the chapter ID for the current step
       getCurrentChapterId() {
@@ -44943,7 +47774,8 @@
           return questions;
       }
       // Handle checkbox change event
-      async handleChapterSkippedChange(event) {
+      // REFACTORED: Now uses ChapterManagementService with optimistic updates
+      handleChapterSkippedChange(event) {
           const checkbox = event.target;
           const isChecked = checkbox.checked;
           const chapterId = this.getCurrentChapterId();
@@ -44953,187 +47785,29 @@
               });
               return;
           }
-          // When skipping (isChecked = true), exclude questions from children with preventSkipping: Yes
-          // When unskipping (isChecked = false), include all questions
-          const excludePreventSkipping = isChecked;
-          const questions = this.getQuestionsForCurrentChapter(chapterId, excludePreventSkipping);
-          if (questions.length === 0) {
-              logger$4.warn({
-                  message: 'Cannot update chapter skipped: no questions found',
-                  data: { chapterId, excludePreventSkipping },
-              });
-              return;
-          }
-          const workbookId = getWorkbookId();
-          if (!workbookId) {
-              logger$4.error({
-                  message: 'Cannot update chapter skipped: no workbook ID found',
-              });
-              return;
-          }
-          // Set quartech_chapterskipped to YES (100000000) if checked, NO (100000001) if unchecked
-          const chapterSkippedValue = isChecked ? 100000000 : 100000001;
-          // Log information about excluded children (if any)
-          if (excludePreventSkipping) {
-              getChapterFromStore(chapterId);
-              const allQuestions = this.getQuestionsForCurrentChapter(chapterId, false);
-              const excludedCount = allQuestions.length - questions.length;
-              if (excludedCount > 0) {
-                  logger$4.info({
-                      message: `Skipping chapter: excluding ${excludedCount} questions from children with preventSkipping: Yes`,
-                      data: { chapterId, totalQuestions: allQuestions.length, questionsToSkip: questions.length, excludedQuestions: excludedCount },
-                  });
-              }
-          }
           logger$4.info({
-              message: `Updating chapter skipped status for ${questions.length} questions`,
-              data: { chapterId, isChecked, chapterSkippedValue, questionCount: questions.length, excludePreventSkipping },
-          });
-          // STEP 1: Optimistically update in-memory data and questionnaire store FIRST
-          // This makes the UI respond instantly without waiting for API calls
-          questions.forEach((question) => {
-              const questionId = question.id;
-              const entry = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.get(questionId);
-              if (entry === null || entry === void 0 ? void 0 : entry.response) {
-                  // Update existing response in memory
-                  entry.response.quartech_chapterskipped = chapterSkippedValue;
-                  if (isChecked) {
-                      entry.response.quartech_response = '';
-                  }
-                  // Update questionnaire store immediately
-                  updateQuestionResponse(questionId, entry.response.quartech_response, undefined, entry.response);
-              }
-              else {
-                  // Create a temporary response object in memory for questions without responses
-                  const tempResponse = {
-                      quartech_workbookresponseid: null, // Will be set after API call
-                      quartech_response: '',
-                      quartech_chapterskipped: chapterSkippedValue,
-                      _quartech_question_value: questionId,
-                      _quartech_workbook_value: workbookId,
-                  };
-                  // Update in-memory structure
-                  if (!entry) {
-                      POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.set(questionId, {
-                          question: question,
-                          response: tempResponse,
-                      });
-                  }
-                  else {
-                      entry.response = tempResponse;
-                  }
-                  // Update questionnaire store immediately
-                  updateQuestionResponse(questionId, '', undefined, tempResponse);
-              }
-          });
-          // STEP 2: Trigger UI update immediately (before API calls complete)
-          const { updateQuestionnaireCompletion } = await Promise.resolve().then(function () { return questionnaire; });
-          updateQuestionnaireCompletion();
-          // Manually update the completion percentage immediately
-          if (POWERPOD.workbookQuestionsAndResponses.isLoaded) {
-              this.currentCompletionPercentage = POWERPOD.workbookQuestionsAndResponses.stats.completionPercentage;
-              logger$4.info({
-                  message: `📊 Manually updated completion percentage after skip/unskip`,
-                  data: {
-                      completionPercentage: this.currentCompletionPercentage,
-                      stats: POWERPOD.workbookQuestionsAndResponses.stats
-                  },
-              });
-          }
-          this.responseUpdateCounter++; // Trigger re-render for validation
-          this.requestUpdate();
-          logger$4.info({
-              message: `Optimistically updated ${questions.length} questions in memory and store`,
+              message: `[NEW ARCHITECTURE] Handling chapter skip change for ${chapterId}`,
               data: { chapterId, isChecked },
           });
-          // STEP 3: Make API calls in the background (non-blocking)
-          // Use Promise.allSettled to continue even if some requests fail
-          const updatePromises = questions.map(async (question) => {
-              var _a;
-              const questionId = question.id;
-              const entry = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.get(questionId);
-              // If response exists, update it
-              if ((_a = entry === null || entry === void 0 ? void 0 : entry.response) === null || _a === void 0 ? void 0 : _a.quartech_workbookresponseid) {
-                  const responseId = entry.response.quartech_workbookresponseid;
-                  try {
-                      await POWERPOD.fetch.patchWorkbookResponseData({
-                          id: responseId,
-                          chapterSkipped: chapterSkippedValue,
-                          response: isChecked ? '' : entry.response.quartech_response,
-                      });
-                      logger$4.info({
-                          message: `API: Updated response for question ${questionId}`,
-                          data: { questionId, responseId, chapterSkippedValue },
-                      });
-                  }
-                  catch (error) {
-                      logger$4.error({
-                          message: `API: Failed to update response for question ${questionId}`,
-                          data: { questionId, responseId, error: error.message },
-                      });
-                      throw error; // Re-throw to be caught by Promise.allSettled
-                  }
-              }
-              else {
-                  // If no response exists, create one with chapterSkipped set
-                  try {
-                      const createdResponse = await WorkbookResponseHelper.createResponse(questionId, '', {
-                          chapterSkipped: chapterSkippedValue,
-                      });
-                      // Update the response ID in memory now that we have it from the API
-                      if ((createdResponse === null || createdResponse === void 0 ? void 0 : createdResponse.response) && (entry === null || entry === void 0 ? void 0 : entry.response)) {
-                          entry.response.quartech_workbookresponseid = createdResponse.response.quartech_workbookresponseid;
-                      }
-                      logger$4.info({
-                          message: `API: Created response for question ${questionId}`,
-                          data: { questionId, chapterSkippedValue },
-                      });
-                  }
-                  catch (error) {
-                      logger$4.error({
-                          message: `API: Failed to create response for question ${questionId}`,
-                          data: { questionId, error: error.message },
-                      });
-                      throw error; // Re-throw to be caught by Promise.allSettled
-                  }
-              }
-          });
-          // Wait for all API calls to complete (or fail)
-          const results = await Promise.allSettled(updatePromises);
-          // Count successes and failures
-          const succeeded = results.filter(r => r.status === 'fulfilled').length;
-          const failed = results.filter(r => r.status === 'rejected').length;
-          if (failed > 0) {
-              logger$4.warn({
-                  message: `API: Completed with ${failed} failures out of ${questions.length} requests`,
-                  data: { chapterId, succeeded, failed, total: questions.length },
-              });
-          }
-          else {
+          // ========================================
+          // NEW ARCHITECTURE: Delegate to service
+          // Service emits 'chapter-skipped-changed' event immediately for instant UI update
+          // Backend updates happen in background
+          // ========================================
+          this.services.chapterService.handleChapterSkippedChange(chapterId, isChecked)
+              .then(() => {
               logger$4.info({
-                  message: `API: Successfully completed all ${succeeded} requests`,
-                  data: { chapterId, succeeded },
+                  message: `Successfully ${isChecked ? 'skipped' : 'unskipped'} chapter`,
+                  data: { chapterId, isChecked },
               });
-          }
-          // Final UI update after API calls complete (in case any failed and need to be reverted)
-          // Note: We already updated the UI optimistically, so this is just a safety measure
-          if (failed === 0) {
-              logger$4.info({
-                  message: `Successfully ${isChecked ? 'skipped' : 'unskipped'} chapter with ${questions.length} questions`,
-                  data: { chapterId, isChecked, questionCount: questions.length },
+          })
+              .catch((error) => {
+              logger$4.error({
+                  message: `Failed to handle chapter skip change: ${error.message}`,
+                  data: { chapterId, isChecked },
               });
-          }
-          else {
-              // If some requests failed, we might want to show a warning to the user
-              // For now, just log it - the optimistic update is already applied
-              logger$4.warn({
-                  message: `Chapter ${isChecked ? 'skip' : 'unskip'} completed with errors`,
-                  data: { chapterId, isChecked, succeeded, failed },
-              });
-          }
-          logger$4.info({
-              message: 'Finished updating chapter skipped status',
-              data: { chapterId, isChecked, questionCount: questions.length },
+              // Rollback event was already emitted by service, but trigger re-render just in case
+              this.requestUpdate();
           });
       }
       renderSubchapter(subchapter) {
@@ -45206,422 +47880,41 @@
     `;
       }
       renderMainContent() {
-          return EFPRenderUtils.renderMainContent(this.currentSectionIndex, this.flatSteps, this.currentStepIndex, this.activeContent, x, o$3, (subchapterData) => this.renderSubchapter(subchapterData), (chapterData) => this.renderChapter(chapterData), (subchapterData) => this.renderContainerSubchapter(subchapterData), (chapterData) => this.renderContainerChapter(chapterData));
+          const currentStep = this.flatSteps[this.currentStepIndex];
+          // Check if this step should render sign-off buttons
+          const shouldRenderSignOffButtons = currentStep && 'renderSignOffButtons' in currentStep && currentStep.renderSignOffButtons;
+          const mainContent = EFPRenderUtils.renderMainContent(this.currentSectionIndex, this.flatSteps, this.currentStepIndex, this.activeContent, x, o$3, (subchapterData) => this.renderSubchapter(subchapterData), (chapterData) => this.renderChapter(chapterData), (subchapterData) => this.renderContainerSubchapter(subchapterData), (chapterData) => this.renderContainerChapter(chapterData));
+          // If sign-off buttons should be rendered, append them as a live component
+          if (shouldRenderSignOffButtons) {
+              return x `
+        ${mainContent}
+        <workbook-sign-off-buttons></workbook-sign-off-buttons>
+      `;
+          }
+          return mainContent;
       }
       // Generate Section B items directly from questionnaire store
       getSectionBItemsFromStore() {
-          var _a;
-          const questionnaire = getQuestionnaireFromStore();
-          // If questionnaire store is not loaded, show loading state
-          if (!((_a = questionnaire === null || questionnaire === void 0 ? void 0 : questionnaire.chapters) === null || _a === void 0 ? void 0 : _a.length)) {
-              logger$4.info({
-                  message: '📋 Questionnaire store not loaded, showing loading state',
-              });
-              return [
-                  {
-                      label: 'Loading Environmental Farm Plan...',
-                      content: `
-            <h3>Loading Environmental Farm Plan Questionnaire</h3>
-            <p>Please wait while we load the questionnaire chapters and questions from the store...</p>
-            <p><em>The questionnaire store is being initialized...</em></p>
-          `,
-                      complete: false,
-                  },
-              ];
-          }
-          const chapters = questionnaire.chapters[0] || [];
-          const items = [];
-          chapters.forEach((chapter) => {
-              // Create the main chapter container (collapsible parent)
-              const chapterItem = {
-                  label: EFPTextUtils.formatChapterTitle(chapter),
-                  title: EFPTextUtils.formatChapterTitle(chapter),
-                  content: EFPSectionGenerator.renderChapterContainerContent(chapter), // We now want to display the description for containers
-                  complete: chapter.complete || false, // Use completion from store
-                  isContainer: true,
-                  chapterId: chapter.id, // Store chapter ID for completion lookup
-                  chapterData: chapter, // Store chapter data for rendering questions when container is clicked
-                  items: [],
-              };
-              // Add all subchapters as direct clickable items under the main chapter
-              if (chapter.subchapters && chapter.subchapters.length > 0) {
-                  chapter.subchapters.forEach((subchapter) => {
-                      // Add the subchapter as a clickable item
-                      const formattedSubchapterTitle = EFPTextUtils.formatChapterTitle(subchapter);
-                      const subchapterItem = {
-                          label: formattedSubchapterTitle,
-                          content: EFPSectionGenerator.renderSubchapterContent(subchapter),
-                          complete: subchapter.complete || false, // Use completion from store
-                          chapterId: subchapter.id, // Store chapter ID for completion lookup
-                          subchapterData: subchapter, // Keep for backward compatibility
-                      };
-                      // If subchapter has sub-subchapters, add them as nested items
-                      if (subchapter.subchapters && subchapter.subchapters.length > 0) {
-                          subchapterItem.items = subchapter.subchapters.map((subSubchapter) => {
-                              // Format sub-subchapter title
-                              const formattedSubSubTitle = EFPTextUtils.formatChapterTitle(subSubchapter);
-                              return {
-                                  label: formattedSubSubTitle,
-                                  content: EFPSectionGenerator.renderSubchapterContent(subSubchapter),
-                                  complete: subSubchapter.complete || false, // Use completion from store
-                                  chapterId: subSubchapter.id, // Store chapter ID for completion lookup
-                                  subchapterData: subSubchapter, // Keep for backward compatibility
-                              };
-                          });
-                          // Add title property for sl-details rendering
-                          subchapterItem.title = subchapterItem.label;
-                      }
-                      // Always add the subchapter to the main chapter items
-                      chapterItem.items.push(subchapterItem);
-                  });
-              }
-              else {
-                  // If no subchapters, add the main chapter itself as a clickable item
-                  const formattedTitle = EFPTextUtils.formatChapterTitle(chapter);
-                  chapterItem.items.push({
-                      label: formattedTitle,
-                      content: EFPSectionGenerator.renderChapterContent(chapter),
-                      complete: chapter.complete || false, // Use completion from store
-                      chapterId: chapter.id, // Store chapter ID for completion lookup
-                      chapterData: chapter, // Keep for backward compatibility
-                  });
-              }
-              items.push(chapterItem);
-          });
-          // Add "My Action Plan" chapter from portal page data
-          const myActionPlanItem = this.getMyActionPlanItemsFromPortalPage();
-          items.push(myActionPlanItem);
-          return items;
+          return EFPSectionGenerator.getSectionBItemsFromStore();
       }
-      // Generate My Action Plan items from portal page data
-      getMyActionPlanItemsFromPortalPage() {
-          var _a, _b;
-          const portalPageName = 'My Action Plan';
-          const portalPageData = (_b = (_a = POWERPOD.state) === null || _a === void 0 ? void 0 : _a.portalPages) === null || _b === void 0 ? void 0 : _b[portalPageName];
-          // If portal page data is not loaded yet, return loading state
-          if (!portalPageData) {
-              logger$4.info({
-                  message: '📄 My Action Plan portal page data not loaded yet, showing loading state',
-              });
-              return {
-                  label: 'My Action Plan',
-                  title: 'My Action Plan',
-                  content: `
-          <div style="display: flex; justify-content: center; align-items: center; min-height: 300px;">
-            <div id="spinner"></div>
-          </div>
-        `,
-                  complete: false,
-                  isContainer: true,
-                  disableExpand: true,
-                  hideSkipChapterCheckbox: true,
-                  items: [
-                      {
-                          label: 'My Action Plan',
-                          content: `
-              <div style="display: flex; justify-content: center; align-items: center; min-height: 300px;">
-                <div id="spinner"></div>
-              </div>
-            `,
-                          complete: false,
-                          hideSkipChapterCheckbox: true,
-                      }
-                  ],
-              };
-          }
-          // Build the content from sections 1-6
-          const sections = [
-              portalPageData.quartech_section1,
-              portalPageData.quartech_section2,
-              portalPageData.quartech_section3,
-              portalPageData.quartech_section4,
-              portalPageData.quartech_section5,
-              portalPageData.quartech_section6,
-          ].filter((section) => section); // Filter out null/undefined sections
-          // Clean up the HTML content to remove problematic font-family styles
-          const cleanedSections = sections.map((section) => {
-              if (!section)
-                  return section;
-              // Replace Roboto Slab font-family with BC Sans
-              let cleaned = section.replace(/font-family:\s*&quot;Roboto Slab&quot;[^;]*;/gi, '');
-              cleaned = cleaned.replace(/font-family:\s*"Roboto Slab"[^;]*;/gi, '');
-              cleaned = cleaned.replace(/font-family:\s*'Roboto Slab'[^;]*;/gi, '');
-              // Also replace list-style-position: inside with outside
-              cleaned = cleaned.replace(/list-style-position:\s*inside/gi, 'list-style-position: outside');
-              return cleaned;
-          });
-          const actionPlanContent = `
-      <div style="font-family: 'BC Sans', 'Noto Sans', Verdana, sans-serif !important;">
-        <style>
-          .action-plan-content * {
-            font-family: 'BC Sans', 'Noto Sans', Verdana, sans-serif !important;
-          }
-          .action-plan-content ul {
-            list-style-position: outside !important;
-            padding-left: 2em !important;
-            margin: 1em 0 !important;
-          }
-          .action-plan-content ol {
-            list-style-position: outside !important;
-            padding-left: 2em !important;
-            margin: 1em 0 !important;
-          }
-          .action-plan-content li {
-            display: list-item !important;
-            padding-left: 0.5em !important;
-            line-height: 1.6 !important;
-          }
-          .action-plan-content h1, .action-plan-content h2, .action-plan-content h3,
-          .action-plan-content h4, .action-plan-content h5, .action-plan-content h6 {
-            font-family: 'BC Sans', 'Noto Sans', Verdana, sans-serif !important;
-          }
-          .action-plan-content p {
-            font-family: 'BC Sans', 'Noto Sans', Verdana, sans-serif !important;
-          }
-        </style>
-        <div class="action-plan-content">
-          ${cleanedSections.join('\n')}
-        </div>
-        <action-plan-table></action-plan-table>
-      </div>
-    `;
+      getSectionCItemsFromPortalPage() {
+          return EFPSectionGenerator.getSectionCItemsFromPortalPage();
+      }
+      // Completion context for utility methods
+      getCompletionContext() {
           return {
-              label: 'My Action Plan',
-              title: 'My Action Plan',
-              content: actionPlanContent,
-              complete: false,
-              isContainer: true,
-              disableExpand: true,
-              hideSkipChapterCheckbox: true,
-              items: [
-                  {
-                      label: 'My Action Plan',
-                      content: actionPlanContent,
-                      complete: false,
-                      hideSkipChapterCheckbox: true,
-                  }
-              ],
+              hasTriedToSubmit: this.hasTriedToSubmit,
+              getQuestionsForChapter: (chapterId, excludePreventSkipping) => this.getQuestionsForCurrentChapter(chapterId, excludePreventSkipping),
           };
       }
-      // Generate Section C items from portal page data
-      getSectionCItemsFromPortalPage() {
-          var _a, _b;
-          const portalPageName = 'Workbook Terms and Conditions Sign-off';
-          const portalPageData = (_b = (_a = POWERPOD.state) === null || _a === void 0 ? void 0 : _a.portalPages) === null || _b === void 0 ? void 0 : _b[portalPageName];
-          // If portal page data is not loaded yet, return loading state
-          if (!portalPageData) {
-              logger$4.info({
-                  message: '📄 Portal page data not loaded yet, showing loading state',
-              });
-              return [
-                  {
-                      label: '',
-                      content: `
-            <div style="display: flex; justify-content: center; align-items: center; min-height: 300px;">
-              <div id="spinner"></div>
-            </div>
-          `,
-                      complete: false,
-                  },
-              ];
-          }
-          // Build the terms and conditions content from sections 1-6
-          const sections = [
-              portalPageData.quartech_section1,
-              portalPageData.quartech_section2,
-              portalPageData.quartech_section3,
-              portalPageData.quartech_section4,
-              portalPageData.quartech_section5,
-              portalPageData.quartech_section6,
-          ].filter((section) => section); // Filter out null/undefined sections
-          // Clean up the HTML content to remove problematic font-family styles
-          const cleanedSections = sections.map((section) => {
-              if (!section)
-                  return section;
-              // Replace Roboto Slab font-family with BC Sans
-              let cleaned = section.replace(/font-family:\s*&quot;Roboto Slab&quot;[^;]*;/gi, '');
-              cleaned = cleaned.replace(/font-family:\s*"Roboto Slab"[^;]*;/gi, '');
-              cleaned = cleaned.replace(/font-family:\s*'Roboto Slab'[^;]*;/gi, '');
-              // Also replace list-style-position: inside with outside
-              cleaned = cleaned.replace(/list-style-position:\s*inside/gi, 'list-style-position: outside');
-              return cleaned;
-          });
-          const termsContent = `
-      <div style="font-family: 'BC Sans', 'Noto Sans', Verdana, sans-serif !important;">
-        <style>
-          .terms-content * {
-            font-family: 'BC Sans', 'Noto Sans', Verdana, sans-serif !important;
-          }
-          .terms-content ul {
-            list-style-position: outside !important;
-            padding-left: 2em !important;
-            margin: 1em 0 !important;
-          }
-          .terms-content ol {
-            list-style-position: outside !important;
-            padding-left: 2em !important;
-            margin: 1em 0 !important;
-          }
-          .terms-content li {
-            display: list-item !important;
-            padding-left: 0.5em !important;
-            line-height: 1.6 !important;
-          }
-          .terms-content h1, .terms-content h2, .terms-content h3,
-          .terms-content h4, .terms-content h5, .terms-content h6 {
-            font-family: 'BC Sans', 'Noto Sans', Verdana, sans-serif !important;
-          }
-          .terms-content p {
-            font-family: 'BC Sans', 'Noto Sans', Verdana, sans-serif !important;
-          }
-        </style>
-        <div class="terms-content">
-          <h3>Environmental Farm Plan Terms & Conditions</h3>
-          <p>Please read the following terms and conditions carefully before proceeding with your Environmental Farm Plan submission.</p>
-          ${cleanedSections.join('\n')}
-        </div>
-        <workbook-sign-off-buttons></workbook-sign-off-buttons>
-      </div>
-    `;
-          return [
-              {
-                  label: 'Terms & Conditions',
-                  content: termsContent,
-                  complete: false,
-              },
-          ];
-      }
-      // Get completion status from questionnaire store for navigation items
       getCompletionFromStore(item) {
-          if (!isQuestionnaireLoaded()) {
-              // Fallback to item's current complete status
-              return item.complete || false;
-          }
-          try {
-              // Check if this is a chapter item (new chapterId property from store)
-              if (item.chapterId) {
-                  const chapter = getChapterFromStore(item.chapterId);
-                  const storeComplete = (chapter === null || chapter === void 0 ? void 0 : chapter.complete) || false;
-                  return storeComplete;
-              }
-              // Check if this is a question item
-              if (item.questionId) {
-                  const question = getQuestionFromStore(item.questionId);
-                  const storeComplete = (question === null || question === void 0 ? void 0 : question.complete) || false;
-                  return storeComplete;
-              }
-              // For nested items (containers), check children completion
-              if ('items' in item && Array.isArray(item.items)) {
-                  // All child items must be complete for parent to be complete
-                  const childrenComplete = item.items.every((child) => this.getCompletionFromStore(child));
-                  return childrenComplete;
-              }
-              // Fallback to item's current status
-              return item.complete || false;
-          }
-          catch (error) {
-              logger$4.warn({
-                  message: `Failed to get completion from questionnaire store: ${String(error)}`,
-              });
-              return item.complete || false;
-          }
+          return EFPCompletionUtils.getCompletionFromStore(item);
       }
-      // Get section completion status from questionnaire store
       getSectionCompletionFromStore(section) {
-          // For My Workbook, use questionnaire store completion
-          if (section.tab === 'My Workbook' && isQuestionnaireLoaded()) {
-              try {
-                  // Import questionnaire stats dynamically to avoid circular imports
-                  const questionnaire = getQuestionnaireFromStore();
-                  if (questionnaire) {
-                      // Calculate completion based on questionnaire store data
-                      // Section is complete if all questions are either answered OR skipped
-                      let totalQuestions = 0;
-                      let completedOrSkippedQuestions = 0;
-                      const countInChapters = (chapters) => {
-                          chapters.forEach((chapter) => {
-                              if (chapter.questions) {
-                                  chapter.questions.forEach((question) => {
-                                      var _a, _b;
-                                      totalQuestions++;
-                                      // Check if question is complete or skipped
-                                      const entry = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.get(question.id);
-                                      const isSkipped = ((_a = entry === null || entry === void 0 ? void 0 : entry.response) === null || _a === void 0 ? void 0 : _a.quartech_chapterskipped) === 100000000;
-                                      const hasResponse = ((_b = entry === null || entry === void 0 ? void 0 : entry.response) === null || _b === void 0 ? void 0 : _b.quartech_response) &&
-                                          entry.response.quartech_response.trim() !== '';
-                                      // Question is complete if it's skipped OR has a response
-                                      if (isSkipped || hasResponse) {
-                                          completedOrSkippedQuestions++;
-                                      }
-                                  });
-                              }
-                              if (chapter.subchapters) {
-                                  countInChapters(chapter.subchapters);
-                              }
-                          });
-                      };
-                      if (questionnaire.chapters && questionnaire.chapters.length > 0) {
-                          countInChapters(questionnaire.chapters[0]);
-                      }
-                      // Section is complete if all questions are either answered or skipped
-                      return totalQuestions > 0 && completedOrSkippedQuestions === totalQuestions;
-                  }
-              }
-              catch (error) {
-                  logger$4.warn({
-                      message: `Failed to get section completion from questionnaire store: ${String(error)}`,
-                  });
-              }
-          }
-          // Fallback to existing logic
-          return EFPCompletionUtils.isSectionComplete(section);
+          return EFPCompletionUtils.getSectionCompletionFromStore(section);
       }
-      // Get section skipped status from questionnaire store
       getSectionSkippedFromStore(section) {
-          // Only check for My Workbook section
-          if (section.tab !== 'My Workbook') {
-              return false;
-          }
-          if (!POWERPOD.workbookQuestionsAndResponses.isLoaded) {
-              return false;
-          }
-          try {
-              const questionnaire = getQuestionnaireFromStore();
-              if (!questionnaire) {
-                  return false;
-              }
-              // Check if ALL questions in the section are skipped
-              let totalQuestions = 0;
-              let skippedQuestions = 0;
-              const countInChapters = (chapters) => {
-                  chapters.forEach((chapter) => {
-                      if (chapter.questions) {
-                          chapter.questions.forEach((question) => {
-                              var _a;
-                              totalQuestions++;
-                              const entry = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.get(question.id);
-                              if (((_a = entry === null || entry === void 0 ? void 0 : entry.response) === null || _a === void 0 ? void 0 : _a.quartech_chapterskipped) === 100000000) {
-                                  skippedQuestions++;
-                              }
-                          });
-                      }
-                      if (chapter.subchapters) {
-                          countInChapters(chapter.subchapters);
-                      }
-                  });
-              };
-              if (questionnaire.chapters && questionnaire.chapters.length > 0) {
-                  countInChapters(questionnaire.chapters[0]);
-              }
-              // Section is skipped if all questions are skipped
-              return totalQuestions > 0 && skippedQuestions === totalQuestions;
-          }
-          catch (error) {
-              logger$4.warn({
-                  message: `Failed to get section skipped status: ${String(error)}`,
-              });
-              return false;
-          }
+          return EFPCompletionUtils.getSectionSkippedFromStore(section);
       }
       // Public API methods
       updateNestedChapterStructure(nestedStructure) {
@@ -45685,292 +47978,86 @@
           }
           return EFPCompletionUtils.calculateOverallCompletion(this.sections);
       }
-      // Navigation methods
+      // Navigation methods - creates context for navigation utilities
+      getNavigationContext() {
+          return {
+              currentStepIndex: this.currentStepIndex,
+              flatSteps: this.flatSteps,
+              sections: this.sections,
+              activeContentTitle: this.activeContent.title,
+              canAccessReviewAndSubmit: this.canAccessReviewAndSubmit(),
+              getQuestionsForChapter: (chapterId) => this.getQuestionsForCurrentChapter(chapterId),
+          };
+      }
+      // Apply navigation result to component state
+      applyNavigationResult(result) {
+          if (!result.success) {
+              if (result.showIncompleteAlert) {
+                  this.showIncompleteQuestionsAlert();
+              }
+              return;
+          }
+          this.isNavigating = true;
+          if (result.newStepIndex !== undefined) {
+              this.currentStepIndex = result.newStepIndex;
+          }
+          if (result.newSectionIndex !== undefined) {
+              this.currentSectionIndex = result.newSectionIndex;
+          }
+          if (result.newActiveContent) {
+              this.activeContent = result.newActiveContent;
+              this.updateNavigationState(result.newActiveContent.title);
+          }
+          // Handle scrolling
+          this.updateComplete.then(() => {
+              var _a;
+              if (result.scrollToQuestion) {
+                  // Small delay to ensure DOM is fully rendered
+                  setTimeout(() => {
+                      var _a;
+                      const questionElement = (_a = this.shadowRoot) === null || _a === void 0 ? void 0 : _a.querySelector(`[data-question-id="${result.scrollToQuestion.questionId}"]`);
+                      if (questionElement) {
+                          questionElement.classList.add('question-highlight');
+                          questionElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                          setTimeout(() => {
+                              questionElement.classList.remove('question-highlight');
+                          }, 3000);
+                      }
+                  }, 200);
+              }
+              else if (result.scrollToTop) {
+                  const mainContent = (_a = this.shadowRoot) === null || _a === void 0 ? void 0 : _a.querySelector('main.main-content');
+                  if (mainContent) {
+                      mainContent.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }
+              }
+          });
+          setTimeout(() => {
+              this.isNavigating = false;
+          }, 100);
+          this.requestUpdate();
+      }
       goToNext() {
           var _a;
           logger$4.info({
               message: `goToNext called, current step: ${this.currentStepIndex}, ${(_a = this.flatSteps[this.currentStepIndex]) === null || _a === void 0 ? void 0 : _a.label}`,
           });
-          // Handle case where currentStepIndex is -1 (step not found in flatSteps)
-          if (this.currentStepIndex === -1) {
-              logger$4.warn({
-                  message: 'currentStepIndex is -1, trying to find current step by activeContent title',
-              });
-              const foundIndex = this.flatSteps.findIndex((step) => step.label === this.activeContent.title);
-              if (foundIndex !== -1) {
-                  logger$4.info({
-                      message: `Found current step "${this.activeContent.title}" at index ${foundIndex}`,
-                  });
-                  this.currentStepIndex = foundIndex;
-              }
-              else {
-                  logger$4.error({
-                      message: `Could not find current step "${this.activeContent.title}" in flatSteps`,
-                  });
-                  return; // Don't proceed with navigation if we can't find current position
-              }
-          }
-          const currentStep = this.flatSteps[this.currentStepIndex];
-          let nextIndex = EFPNavigationUtils.findNextSelectableStep(this.currentStepIndex, this.flatSteps, this.sections);
-          if (nextIndex != null) {
-              let nextStep = this.flatSteps[nextIndex];
-              // When crossing section boundaries, navigate to the first content step in the new section
-              // This matches the behavior of clicking the section tab directly
-              if (currentStep && nextStep.sectionIndex !== currentStep.sectionIndex) {
-                  const firstContentStep = EFPNavigationUtils.findFirstSelectableStepInSection(nextStep.sectionIndex, this.flatSteps, this.sections);
-                  if (firstContentStep) {
-                      logger$4.info({
-                          message: `Crossing to section ${nextStep.sectionIndex}, navigating to first content step "${firstContentStep.step.label}"`,
-                      });
-                      nextIndex = firstContentStep.index;
-                      nextStep = firstContentStep.step;
-                  }
-              }
-              // Block navigation to "Review & Submit" section if there are incomplete questions
-              if (nextStep.sectionIndex === 1 && !this.canAccessReviewAndSubmit()) {
-                  this.showIncompleteQuestionsAlert();
-                  logger$4.info({
-                      message: 'Prevented navigation to Review & Submit - incomplete questions',
-                  });
-                  return;
-              }
-              // Check if next step has the same label and content as current step
-              // This can happen with duplicate entries like "My Action Plan"
-              const isSameContent = currentStep &&
-                  currentStep.label === nextStep.label &&
-                  currentStep.content === nextStep.content;
-              if (isSameContent) {
-                  logger$4.info({
-                      message: `Skipping duplicate step "${nextStep.label}" at index ${nextIndex}, continuing to next`,
-                  });
-                  // Skip this duplicate and go to the next step
-                  const nextNextIndex = EFPNavigationUtils.findNextSelectableStep(nextIndex, this.flatSteps, this.sections);
-                  if (nextNextIndex != null) {
-                      const nextNextStep = this.flatSteps[nextNextIndex];
-                      // Block navigation to "Review & Submit" section if there are incomplete questions
-                      if (nextNextStep.sectionIndex === 1 && !this.canAccessReviewAndSubmit()) {
-                          this.showIncompleteQuestionsAlert();
-                          logger$4.info({
-                              message: 'Prevented navigation to Review & Submit - incomplete questions',
-                          });
-                          return;
-                      }
-                      this.isNavigating = true;
-                      this.currentStepIndex = nextNextIndex;
-                      this.currentSectionIndex = nextNextStep.sectionIndex;
-                      this.activeContent = { title: nextNextStep.label, content: nextNextStep.content };
-                      this.updateNavigationState(nextNextStep.label);
-                      // Scroll to top of main content to provide visual feedback
-                      this.updateComplete.then(() => {
-                          var _a;
-                          const mainContent = (_a = this.shadowRoot) === null || _a === void 0 ? void 0 : _a.querySelector('main.main-content');
-                          if (mainContent) {
-                              mainContent.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                          }
-                      });
-                      setTimeout(() => {
-                          this.isNavigating = false;
-                      }, 100);
-                      this.requestUpdate();
-                  }
-                  return;
-              }
-              this.isNavigating = true;
-              this.currentStepIndex = nextIndex;
-              this.currentSectionIndex = nextStep.sectionIndex;
-              this.activeContent = { title: nextStep.label, content: nextStep.content };
-              this.updateNavigationState(nextStep.label);
-              // Scroll to top of main content to provide visual feedback
-              this.updateComplete.then(() => {
-                  var _a;
-                  const mainContent = (_a = this.shadowRoot) === null || _a === void 0 ? void 0 : _a.querySelector('main.main-content');
-                  if (mainContent) {
-                      mainContent.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                  }
-              });
-              setTimeout(() => {
-                  this.isNavigating = false;
-              }, 100);
-              this.requestUpdate();
-          }
+          const ctx = this.getNavigationContext();
+          const result = EFPNavigationUtils.calculateNextNavigation(ctx);
+          this.applyNavigationResult(result);
       }
-      // Find the next required step (earliest unanswered, non-skipped question)
-      findNextRequiredStep() {
-          var _a, _b, _c, _d, _e;
-          if (!POWERPOD.workbookQuestionsAndResponses.isLoaded) {
-              logger$4.warn({
-                  message: 'Cannot find next required step: workbook questions and responses not loaded',
-              });
-              return null;
-          }
-          const questionnaire = getQuestionnaireFromStore();
-          if (!((_a = questionnaire === null || questionnaire === void 0 ? void 0 : questionnaire.chapters) === null || _a === void 0 ? void 0 : _a.length)) {
-              logger$4.warn({
-                  message: 'Cannot find next required step: questionnaire not loaded',
-              });
-              return null;
-          }
-          // Start searching from the beginning to find the earliest required question
-          const startIndex = 0;
-          // Iterate through all steps in the My Workbook section (section index 0)
-          for (let i = startIndex; i < this.flatSteps.length; i++) {
-              const step = this.flatSteps[i];
-              // Only check steps in My Workbook section
-              if (step.sectionIndex !== 0) {
-                  continue;
-              }
-              // Skip section headers
-              if (step.label.startsWith('Section ')) {
-                  continue;
-              }
-              // For container steps, only skip if they don't have their own questions
-              if (step.isContainer) {
-                  const hasOwnQuestions = ((_c = (_b = step.chapterData) === null || _b === void 0 ? void 0 : _b.questions) === null || _c === void 0 ? void 0 : _c.length) > 0;
-                  if (!hasOwnQuestions) {
-                      continue;
-                  }
-              }
-              // Get the chapter ID for this step
-              const chapterId = step.chapterId ||
-                  ((_d = step.chapterData) === null || _d === void 0 ? void 0 : _d.id) ||
-                  ((_e = step.subchapterData) === null || _e === void 0 ? void 0 : _e.id);
-              if (!chapterId) {
-                  continue;
-              }
-              // Get all questions for this chapter
-              const questions = this.getQuestionsForCurrentChapter(chapterId);
-              // Find the first unanswered, non-skipped question in this chapter
-              const firstUnansweredQuestion = questions.find((question) => {
-                  var _a, _b;
-                  const entry = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.get(question.id);
-                  const isSkipped = ((_a = entry === null || entry === void 0 ? void 0 : entry.response) === null || _a === void 0 ? void 0 : _a.quartech_chapterskipped) === 100000000;
-                  const hasResponse = ((_b = entry === null || entry === void 0 ? void 0 : entry.response) === null || _b === void 0 ? void 0 : _b.quartech_response) &&
-                      entry.response.quartech_response.trim() !== '';
-                  // Question is required and unanswered if it's not skipped AND has no response
-                  return !isSkipped && !hasResponse;
-              });
-              if (firstUnansweredQuestion) {
-                  logger$4.info({
-                      message: 'Found next required step with unanswered questions',
-                      data: {
-                          stepIndex: i,
-                          stepLabel: step.label,
-                          chapterId,
-                          questionId: firstUnansweredQuestion.id,
-                      },
-                  });
-                  return { stepIndex: i, questionId: firstUnansweredQuestion.id };
-              }
-          }
-          logger$4.info({
-              message: 'No required unanswered questions found after current step',
-          });
-          return null;
+      // Note: Currently unused but may be needed for future features
+      _findNextRequiredStep() {
+          return EFPNavigationUtils.findNextRequiredStep(this.getNavigationContext());
       }
       // Navigation event handlers
       handleNavigationPrevious() {
           this.goToPrevious();
       }
-      handleNavigationSkip(event) {
-          // Find the next required question that hasn't been skipped or completed
-          const result = this.findNextRequiredStep();
-          if (result !== null) {
-              const { stepIndex, questionId } = result;
-              const nextStep = this.flatSteps[stepIndex];
-              logger$4.info({
-                  message: 'Navigating to next required step',
-                  data: {
-                      stepIndex,
-                      stepLabel: nextStep.label,
-                      questionId,
-                  },
-              });
-              this.isNavigating = true;
-              this.currentStepIndex = stepIndex;
-              this.currentSectionIndex = nextStep.sectionIndex;
-              this.activeContent = { title: nextStep.label, content: nextStep.content };
-              this.updateNavigationState(nextStep.label);
-              // Scroll to and highlight the specific question
-              this.updateComplete.then(() => {
-                  // Small delay to ensure DOM is fully rendered
-                  setTimeout(() => {
-                      var _a;
-                      const questionElement = (_a = this.shadowRoot) === null || _a === void 0 ? void 0 : _a.querySelector(`[data-question-id="${questionId}"]`);
-                      if (questionElement) {
-                          // Add highlight class
-                          questionElement.classList.add('question-highlight');
-                          // Scroll to the question with some offset for better visibility
-                          questionElement.scrollIntoView({
-                              behavior: 'smooth',
-                              block: 'center'
-                          });
-                          // Remove highlight after 3 seconds
-                          setTimeout(() => {
-                              questionElement.classList.remove('question-highlight');
-                          }, 3000);
-                          logger$4.info({
-                              message: 'Scrolled to and highlighted question',
-                              data: { questionId },
-                          });
-                      }
-                      else {
-                          logger$4.warn({
-                              message: 'Could not find question element to scroll to',
-                              data: { questionId },
-                          });
-                      }
-                  }, 200);
-              });
-              setTimeout(() => {
-                  this.isNavigating = false;
-              }, 100);
-              this.requestUpdate();
-          }
-          else {
-              // No required unanswered questions found - all questions are complete
-              logger$4.info({
-                  message: 'No required unanswered questions found - navigating to Review & Submit',
-              });
-              // Check if all questions are complete (can access Review & Submit)
-              if (this.canAccessReviewAndSubmit()) {
-                  // Navigate to Review & Submit section (section index 1)
-                  const target = EFPNavigationUtils.navigateToSection(1, this.flatSteps, this.sections);
-                  if (target) {
-                      const step = this.flatSteps[target.stepIndex];
-                      logger$4.info({
-                          message: 'Navigating to Review & Submit section',
-                          data: {
-                              stepIndex: target.stepIndex,
-                              stepLabel: step.label,
-                          },
-                      });
-                      this.isNavigating = true;
-                      this.currentStepIndex = target.stepIndex;
-                      this.currentSectionIndex = target.sectionIndex;
-                      this.activeContent = { title: step.label, content: step.content };
-                      this.updateNavigationState(step.label);
-                      // Scroll to top of main content
-                      this.updateComplete.then(() => {
-                          var _a;
-                          const mainContent = (_a = this.shadowRoot) === null || _a === void 0 ? void 0 : _a.querySelector('main.main-content');
-                          if (mainContent) {
-                              mainContent.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                          }
-                      });
-                      setTimeout(() => {
-                          this.isNavigating = false;
-                      }, 100);
-                      this.requestUpdate();
-                  }
-              }
-              else {
-                  // Should not happen, but show alert just in case
-                  logger$4.warn({
-                      message: 'Cannot navigate to Review & Submit - incomplete questions',
-                  });
-                  this.showIncompleteQuestionsAlert();
-              }
-          }
+      handleNavigationSkip(_event) {
+          const ctx = this.getNavigationContext();
+          const result = EFPNavigationUtils.calculateSkipNavigation(ctx);
+          this.applyNavigationResult(result);
       }
       handleNavigationContinue() {
           // goToNext handles all validation including Review & Submit blocking
@@ -45988,9 +48075,11 @@
               // Prevent navigation and show alert
               this.showIncompleteQuestionsAlert();
               // Stay on current section by resetting the tab
+              // The sl-tab-group is inside the navigation-sidebar component's shadow root
               setTimeout(() => {
-                  var _a;
-                  const tabGroup = (_a = this.shadowRoot) === null || _a === void 0 ? void 0 : _a.querySelector('sl-tab-group');
+                  var _a, _b;
+                  const sidebar = (_a = this.shadowRoot) === null || _a === void 0 ? void 0 : _a.querySelector('navigation-sidebar');
+                  const tabGroup = (_b = sidebar === null || sidebar === void 0 ? void 0 : sidebar.shadowRoot) === null || _b === void 0 ? void 0 : _b.querySelector('sl-tab-group');
                   if (tabGroup) {
                       tabGroup.show(`section-${this.currentSectionIndex}`);
                   }
@@ -46019,18 +48108,8 @@
               logger$4.info({
                   message: `Rating changed for question ${questionId}: ${value}`,
               });
-              // Store the pending value
-              this.pendingResponseValues.set(questionId, String(value));
-              // Clear any existing debounce timer for this question
-              const existingTimer = this.responseSaveDebounceTimers.get(questionId);
-              if (existingTimer) {
-                  clearTimeout(existingTimer);
-              }
-              // Set a new debounce timer (1000ms delay)
-              const timer = window.setTimeout(() => {
-                  this.saveDebouncedResponse(questionId);
-              }, 1000);
-              this.responseSaveDebounceTimers.set(questionId, timer);
+              // Delegate to service
+              this.services.responseService.handleRatingChange(questionId, value);
               // Also call the original handler for any additional processing
               EFPEventUtils.handleRatingChanged(event, (questionId, value) => {
                   logger$4.info({
@@ -46040,12 +48119,12 @@
           }
           catch (error) {
               logger$4.error({
-                  message: `Failed to save rating response: ${error.message}`,
+                  message: `Failed to handle rating change: ${error.message}`,
               });
-              // Still call the original handler even if save fails
+              // Still call the original handler even if service fails
               EFPEventUtils.handleRatingChanged(event, (questionId, value) => {
                   logger$4.info({
-                      message: `Rating stored locally for question ${questionId}: ${value} (save failed)`,
+                      message: `Rating stored locally for question ${questionId}: ${value} (service failed)`,
                   });
               });
           }
@@ -46105,129 +48184,13 @@
                   .split(';')
                   .map((opt) => opt.trim())
                   .filter((opt) => opt.length > 0);
-              // Get current pending value or existing response
-              let selectedOptions;
-              if (this.pendingMultiselectValues.has(questionId)) {
-                  // Use pending value if it exists
-                  selectedOptions = this.pendingMultiselectValues.get(questionId);
-              }
-              else {
-                  // Start with an empty array and only add valid options from existing response
-                  const existingResponse = this.getResponseForQuestion(questionId);
-                  const currentSelectedString = (existingResponse === null || existingResponse === void 0 ? void 0 : existingResponse.quartech_response) || '';
-                  const existingSelectedOptions = currentSelectedString
-                      .split(';')
-                      .map((opt) => opt.trim())
-                      .filter((opt) => opt.length > 0);
-                  // Filter to only include options that are valid for the current question
-                  selectedOptions = existingSelectedOptions.filter((opt) => validOptions.includes(opt));
-                  logger$4.info({
-                      message: `Filtered existing response for question ${questionId}`,
-                      data: {
-                          existingOptions: existingSelectedOptions,
-                          validOptions: validOptions,
-                          filteredOptions: selectedOptions,
-                      },
-                  });
-              }
-              // Update the selected options based on checkbox state
-              if (isChecked) {
-                  // Add option if not already present
-                  if (!selectedOptions.includes(option)) {
-                      selectedOptions.push(option);
-                  }
-              }
-              else {
-                  // Remove option
-                  selectedOptions = selectedOptions.filter((opt) => opt !== option);
-              }
-              // Store the pending value
-              this.pendingMultiselectValues.set(questionId, selectedOptions);
-              // Clear any existing debounce timer for this question
-              const existingTimer = this.responseSaveDebounceTimers.get(questionId);
-              if (existingTimer) {
-                  clearTimeout(existingTimer);
-              }
-              // Set a new debounce timer (2000ms delay)
-              const timer = window.setTimeout(() => {
-                  this.saveMultiselectResponse(questionId);
-              }, 2000);
-              this.responseSaveDebounceTimers.set(questionId, timer);
+              // Delegate to service
+              this.services.responseService.handleMultiselectChange(questionId, option, isChecked, validOptions);
           }
           catch (error) {
               logger$4.error({
                   message: `Failed to handle multi-select change: ${error.message}`,
               });
-          }
-      }
-      // Save the debounced response (for rating questions and other text-based responses)
-      async saveDebouncedResponse(questionId) {
-          try {
-              const responseValue = this.pendingResponseValues.get(questionId);
-              if (responseValue === undefined) {
-                  logger$4.warn({
-                      message: `No pending value found for question ${questionId}`,
-                  });
-                  return;
-              }
-              logger$4.info({
-                  message: `Saving debounced response for question ${questionId}: ${responseValue}`,
-              });
-              // Save the response
-              const responseData = await this.saveRatingResponse(questionId, responseValue);
-              // Update the questionnaire store with the full response data
-              // Let updateQuestionResponse auto-calculate completion based on response content
-              updateQuestionResponse(questionId, responseValue, undefined, responseData);
-              this.responseUpdateCounter++; // Trigger re-render for validation
-              this.requestUpdate(); // Force immediate UI update
-              logger$4.info({
-                  message: `Successfully saved debounced response for question ${questionId}`,
-              });
-              // Clean up
-              this.pendingResponseValues.delete(questionId);
-              this.responseSaveDebounceTimers.delete(questionId);
-          }
-          catch (error) {
-              logger$4.error({
-                  message: `Failed to save debounced response: ${error.message}`,
-              });
-              // Don't delete pending value on error, so user can retry
-          }
-      }
-      // Save the debounced multi-select response
-      async saveMultiselectResponse(questionId) {
-          try {
-              const selectedOptions = this.pendingMultiselectValues.get(questionId);
-              if (!selectedOptions) {
-                  logger$4.warn({
-                      message: `No pending value found for question ${questionId}`,
-                  });
-                  return;
-              }
-              // Create semicolon-delimited string
-              const newValue = selectedOptions.join(';');
-              logger$4.info({
-                  message: `Saving multi-select value for question ${questionId}: ${newValue}`,
-              });
-              // Save the response
-              const responseData = await this.saveRatingResponse(questionId, newValue);
-              // Update the questionnaire store with the full response data
-              // Let updateQuestionResponse auto-calculate completion based on response content
-              updateQuestionResponse(questionId, newValue, undefined, responseData);
-              this.responseUpdateCounter++; // Trigger re-render for validation
-              this.requestUpdate(); // Force immediate UI update
-              logger$4.info({
-                  message: `Successfully saved multi-select response for question ${questionId}`,
-              });
-              // Clean up
-              this.pendingMultiselectValues.delete(questionId);
-              this.responseSaveDebounceTimers.delete(questionId);
-          }
-          catch (error) {
-              logger$4.error({
-                  message: `Failed to save multi-select response: ${error.message}`,
-              });
-              // Don't delete pending value on error, so user can retry
           }
       }
       // Handle multiline text input with debounced save
@@ -46236,24 +48199,8 @@
               logger$4.info({
                   message: `Multiline text input for question ${questionId}`,
               });
-              // Update character count immediately (no debounce)
-              this.multilineTextCharCounts.set(questionId, value.length);
-              // Store the pending value
-              this.pendingResponseValues.set(questionId, value);
-              // Update status to draft
-              this.multilineTextSaveStatus.set(questionId, 'draft');
-              // Request update to re-render with new character count
-              this.requestUpdate();
-              // Clear any existing debounce timer for this question
-              const existingTimer = this.responseSaveDebounceTimers.get(questionId);
-              if (existingTimer) {
-                  clearTimeout(existingTimer);
-              }
-              // Set a new debounce timer (2000ms delay)
-              const timer = window.setTimeout(() => {
-                  this.saveMultilineTextResponse(questionId);
-              }, 2000);
-              this.responseSaveDebounceTimers.set(questionId, timer);
+              // Delegate to service
+              this.services.responseService.handleMultilineTextInput(questionId, value);
           }
           catch (error) {
               logger$4.error({
@@ -46264,195 +48211,16 @@
       // Force save multiline text (when user clicks the status indicator)
       async handleForceSave(questionId) {
           try {
-              const status = this.multilineTextSaveStatus.get(questionId);
-              // Only allow force save if status is 'draft'
-              if (status !== 'draft') {
-                  return;
-              }
               logger$4.info({
                   message: `Force saving multiline text for question ${questionId}`,
               });
-              // Clear any existing debounce timer
-              const existingTimer = this.responseSaveDebounceTimers.get(questionId);
-              if (existingTimer) {
-                  clearTimeout(existingTimer);
-                  this.responseSaveDebounceTimers.delete(questionId);
-              }
-              // Save immediately
-              await this.saveMultilineTextResponse(questionId);
+              // Delegate to service
+              await this.services.responseService.forceSaveMultilineText(questionId);
           }
           catch (error) {
               logger$4.error({
                   message: `Failed to force save multiline text: ${error.message}`,
               });
-          }
-      }
-      // Save the multiline text response
-      async saveMultilineTextResponse(questionId) {
-          try {
-              const responseValue = this.pendingResponseValues.get(questionId);
-              if (responseValue === undefined) {
-                  logger$4.warn({
-                      message: `No pending value found for question ${questionId}`,
-                  });
-                  return;
-              }
-              logger$4.info({
-                  message: `Saving multiline text response for question ${questionId}`,
-              });
-              // Update status to saving
-              this.multilineTextSaveStatus.set(questionId, 'saving');
-              this.requestUpdate();
-              // Save the response
-              const responseData = await this.saveRatingResponse(questionId, responseValue);
-              // Update the questionnaire store with the full response data
-              updateQuestionResponse(questionId, responseValue, true, responseData);
-              this.responseUpdateCounter++; // Trigger re-render for validation
-              this.requestUpdate(); // Force immediate UI update
-              logger$4.info({
-                  message: `Successfully saved multiline text response for question ${questionId}`,
-              });
-              // Update status to saved
-              this.multilineTextSaveStatus.set(questionId, 'saved');
-              this.requestUpdate();
-              // Clean up
-              this.pendingResponseValues.delete(questionId);
-              this.responseSaveDebounceTimers.delete(questionId);
-          }
-          catch (error) {
-              logger$4.error({
-                  message: `Failed to save multiline text response: ${error.message}`,
-              });
-              // Revert status to draft on error
-              this.multilineTextSaveStatus.set(questionId, 'draft');
-              this.requestUpdate();
-              // Don't delete pending value on error, so user can retry
-          }
-      }
-      // Helper method to build rating description for Point Rating questions
-      buildRatingDescription(questionId, ratingValue) {
-          // Only build description for Point Rating questions with numeric values (1-4)
-          const ratingNum = parseInt(String(ratingValue));
-          if (isNaN(ratingNum) || ratingNum < 1 || ratingNum > 4) {
-              return null;
-          }
-          // Get question data from memory
-          const questionData = this.getQuestionForQuestion(questionId);
-          if (!questionData) {
-              return null;
-          }
-          // Check if this is a Point Rating question
-          if (questionData.quartech_questiontype !== 100000001) {
-              // 100000001 is Point Rating
-              return null;
-          }
-          // Get the rating label and description
-          const labelKey = `quartech_rating${ratingNum}overwritelabel`;
-          const descKey = `quartech_rating${ratingNum}description`;
-          const label = questionData[labelKey] || `Risk Rating ${ratingNum}`;
-          const description = questionData[descKey];
-          // Only build description if there's a description field
-          if (!description) {
-              return null;
-          }
-          // Strip HTML tags from description to get plain text
-          const plainDescription = description.replace(/<[^>]*>/g, '').trim();
-          // Build the description in the format: "Rating Label: Description"
-          return `${label}: ${plainDescription}`;
-      }
-      // Helper method to save rating responses
-      async saveRatingResponse(questionId, ratingValue) {
-          var _a, _b, _c;
-          try {
-              const responseText = String(ratingValue);
-              const notes = `Rating: ${ratingValue}`;
-              // Build description for Point Rating questions with descriptions
-              const description = this.buildRatingDescription(questionId, ratingValue);
-              // Check if response already exists
-              const existingResponse = this.getResponseForQuestion(questionId);
-              let responseData;
-              let isNewResponse = false;
-              // Only update if we have an existing response WITH a valid ID
-              if (existingResponse && existingResponse.quartech_workbookresponseid) {
-                  // Update existing response
-                  await WorkbookResponseHelper.updateResponse(existingResponse.quartech_workbookresponseid, responseText, { notes, description });
-                  // Create updated response data
-                  responseData = {
-                      ...existingResponse,
-                      quartech_response: responseText,
-                      quartech_notes: notes,
-                      quartech_description: description,
-                      modifiedon: new Date().toISOString(),
-                  };
-              }
-              else {
-                  // Create new response (either no response exists, or existing response lacks valid ID)
-                  isNewResponse = true;
-                  const createResult = (await WorkbookResponseHelper.createResponse(questionId, responseText, { notes, description }));
-                  const workbookId = getWorkbookId();
-                  // Create new response data with all fields from the API response
-                  responseData = {
-                      ...createResult.response,
-                      quartech_workbookresponseid: (_a = createResult.response) === null || _a === void 0 ? void 0 : _a.quartech_workbookresponseid,
-                      quartech_response: responseText,
-                      quartech_notes: notes,
-                      quartech_description: description,
-                      _quartech_question_value: questionId,
-                      _quartech_workbook_value: workbookId,
-                      createdon: ((_b = createResult.response) === null || _b === void 0 ? void 0 : _b.createdon) || new Date().toISOString(),
-                      modifiedon: ((_c = createResult.response) === null || _c === void 0 ? void 0 : _c.modifiedon) || new Date().toISOString(),
-                  };
-                  // CRITICAL: Update memory structures IMMEDIATELY after creation
-                  // This ensures subsequent rapid saves will find the response and update instead of creating duplicates
-                  this.updateMemoryStructuresForRating(questionId, responseData, true);
-              }
-              // Update memory structures for updates (for creates, already done above)
-              if (!isNewResponse) {
-                  this.updateMemoryStructuresForRating(questionId, responseData, false);
-              }
-              // Update completion and navigation icons
-              this.updateCompletionAndNavigation();
-              // Trigger re-render (already called by updateCompletionAndNavigation, but keeping for clarity)
-              this.requestUpdate();
-              // Return the response data for use in questionnaire store
-              return responseData;
-          }
-          catch (error) {
-              logger$4.error({
-                  message: `Failed to save rating response: ${String(error)}`,
-              });
-              throw error;
-          }
-      }
-      // Update memory structures for rating responses
-      async updateMemoryStructuresForRating(questionId, responseData, isNewResponse) {
-          try {
-              // Update new nested structure using helper function
-              WorkbookResponseHelper.updateResponseInMemory(questionId, responseData);
-              // Update old structure for backward compatibility
-              POWERPOD.workbookResponses.responsesByQuestion.set(questionId, responseData);
-              if (isNewResponse) {
-                  // Add to beginning of data array (most recent first)
-                  POWERPOD.workbookResponses.data.unshift(responseData);
-              }
-              else {
-                  // Update existing entry in data array
-                  const dataIndex = POWERPOD.workbookResponses.data.findIndex((r) => r.quartech_workbookresponseid ===
-                      responseData.quartech_workbookresponseid);
-                  if (dataIndex !== -1) {
-                      POWERPOD.workbookResponses.data[dataIndex] = responseData;
-                  }
-              }
-              // Update memory metadata for both structures
-              POWERPOD.workbookResponses.lastUpdated = new Date().toISOString();
-              POWERPOD.workbookQuestionsAndResponses.lastUpdated =
-                  new Date().toISOString();
-          }
-          catch (error) {
-              logger$4.error({
-                  message: `Failed to update memory structures for rating: ${String(error)}`,
-              });
-              // Don't throw - this is a memory update issue, not a save issue
           }
       }
       // Navigation item click event handler
@@ -46494,80 +48262,9 @@
           logger$4.info({
               message: `goToPrevious called, current step: ${this.currentStepIndex}, ${(_a = this.flatSteps[this.currentStepIndex]) === null || _a === void 0 ? void 0 : _a.label}`,
           });
-          // Handle case where currentStepIndex is -1 (step not found in flatSteps)
-          if (this.currentStepIndex === -1) {
-              logger$4.warn({
-                  message: 'currentStepIndex is -1, trying to find current step by activeContent title',
-              });
-              const foundIndex = this.flatSteps.findIndex((step) => step.label === this.activeContent.title);
-              if (foundIndex !== -1) {
-                  logger$4.info({
-                      message: `Found current step "${this.activeContent.title}" at index ${foundIndex}`,
-                  });
-                  this.currentStepIndex = foundIndex;
-              }
-              else {
-                  logger$4.error({
-                      message: `Could not find current step "${this.activeContent.title}" in flatSteps`,
-                  });
-                  return; // Don't proceed with navigation if we can't find current position
-              }
-          }
-          const prevIndex = EFPNavigationUtils.findPreviousSelectableStep(this.currentStepIndex, this.flatSteps, this.sections);
-          if (prevIndex != null) {
-              const prevStep = this.flatSteps[prevIndex];
-              // Check if previous step has the same label and content as current step
-              // This can happen with duplicate entries like "My Action Plan"
-              const currentStep = this.flatSteps[this.currentStepIndex];
-              const isSameContent = currentStep &&
-                  currentStep.label === prevStep.label &&
-                  currentStep.content === prevStep.content;
-              if (isSameContent) {
-                  logger$4.info({
-                      message: `Skipping duplicate step "${prevStep.label}" at index ${prevIndex}, continuing to previous`,
-                  });
-                  // Skip this duplicate and go to the previous step
-                  const prevPrevIndex = EFPNavigationUtils.findPreviousSelectableStep(prevIndex, this.flatSteps, this.sections);
-                  if (prevPrevIndex != null) {
-                      const prevPrevStep = this.flatSteps[prevPrevIndex];
-                      this.isNavigating = true;
-                      this.currentStepIndex = prevPrevIndex;
-                      this.currentSectionIndex = prevPrevStep.sectionIndex;
-                      this.activeContent = { title: prevPrevStep.label, content: prevPrevStep.content };
-                      this.updateNavigationState(prevPrevStep.label);
-                      // Scroll to top of main content to provide visual feedback
-                      this.updateComplete.then(() => {
-                          var _a;
-                          const mainContent = (_a = this.shadowRoot) === null || _a === void 0 ? void 0 : _a.querySelector('main.main-content');
-                          if (mainContent) {
-                              mainContent.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                          }
-                      });
-                      setTimeout(() => {
-                          this.isNavigating = false;
-                      }, 100);
-                      this.requestUpdate();
-                  }
-                  return;
-              }
-              this.isNavigating = true;
-              this.currentStepIndex = prevIndex;
-              this.currentSectionIndex = prevStep.sectionIndex;
-              this.activeContent = { title: prevStep.label, content: prevStep.content };
-              this.updateNavigationState(prevStep.label);
-              // Scroll to top of main content to provide visual feedback
-              this.updateComplete.then(() => {
-                  var _a;
-                  const mainContent = (_a = this.shadowRoot) === null || _a === void 0 ? void 0 : _a.querySelector('main.main-content');
-                  if (mainContent) {
-                      mainContent.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                  }
-              });
-              setTimeout(() => {
-                  this.isNavigating = false;
-              }, 100);
-              this.requestUpdate();
-          }
+          const ctx = this.getNavigationContext();
+          const result = EFPNavigationUtils.calculatePreviousNavigation(ctx);
+          this.applyNavigationResult(result);
       }
       get flatSteps() {
           return EFPNavigationUtils.getFlatStepsFromSections(this.sections);
@@ -46653,103 +48350,16 @@
       renderItems(items) {
           return EFPRenderUtils.renderItems(items, x, this.activeContent.title, (item) => this.handleItemClick(item), (items) => this.renderItems(items), (item) => this.getCompletionFromStore(item), (item) => this.getSkippedFromStore(item), (item) => this.getIncompleteFromStore(item));
       }
-      // Check if there are any incomplete children with preventSkipping: Yes
-      // A child is incomplete if it has any questions that are not skipped and not answered
-      hasIncompletePreventSkippingChildren(subchapters) {
-          for (const subchapter of subchapters) {
-              // Check if this subchapter has preventSkipping: Yes
-              if (subchapter.preventSkipping === true) {
-                  // Check if this subchapter is incomplete
-                  const questions = subchapter.questions || [];
-                  const hasIncompleteQuestions = questions.some((question) => {
-                      var _a, _b;
-                      const entry = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.get(question.id);
-                      const isSkipped = ((_a = entry === null || entry === void 0 ? void 0 : entry.response) === null || _a === void 0 ? void 0 : _a.quartech_chapterskipped) === 100000000;
-                      const hasResponse = ((_b = entry === null || entry === void 0 ? void 0 : entry.response) === null || _b === void 0 ? void 0 : _b.quartech_response) &&
-                          entry.response.quartech_response.trim() !== '';
-                      // Question is incomplete if it's not skipped AND has no response
-                      return !isSkipped && !hasResponse;
-                  });
-                  if (hasIncompleteQuestions) {
-                      return true;
-                  }
-              }
-              // Recursively check sub-subchapters
-              if (subchapter.subchapters) {
-                  if (this.hasIncompletePreventSkippingChildren(subchapter.subchapters)) {
-                      return true;
-                  }
-              }
-          }
-          return false;
+      // Delegate to EFPCompletionUtils
+      // Note: Currently unused but may be needed for future features
+      _hasIncompletePreventSkippingChildren(subchapters) {
+          return EFPCompletionUtils.hasIncompletePreventSkippingChildren(subchapters);
       }
-      // Get skipped status for an item from the store
       getSkippedFromStore(item) {
-          // Only check for chapters (not questions or other items)
-          if (!item.chapterId) {
-              return false;
-          }
-          try {
-              // First check if the chapter is skipped (excluding preventSkipping children)
-              const isSkipped = this.isChapterSkippedById(item.chapterId);
-              if (!isSkipped) {
-                  return false;
-              }
-              // If skipped, also check if there are any incomplete children with preventSkipping: Yes
-              // A chapter should only show as skipped if all preventSkipping children are completed
-              const chapter = getChapterFromStore(item.chapterId);
-              if (chapter === null || chapter === void 0 ? void 0 : chapter.subchapters) {
-                  const hasIncompletePreventSkippingChildren = this.hasIncompletePreventSkippingChildren(chapter.subchapters);
-                  if (hasIncompletePreventSkippingChildren) {
-                      // Don't show as skipped if there are incomplete mandatory children
-                      return false;
-                  }
-              }
-              return true;
-          }
-          catch (error) {
-              logger$4.error({
-                  message: 'Error checking chapter skipped status',
-                  data: { chapterId: item.chapterId, error: error.message },
-              });
-              return false;
-          }
+          return EFPCompletionUtils.getSkippedFromStore(item, (chapterId, excludePreventSkipping) => this.getQuestionsForCurrentChapter(chapterId, excludePreventSkipping));
       }
-      // Get incomplete status for an item from the store
-      // Returns true if the chapter has any incomplete (not skipped and no response) questions
-      // Only returns true if user has tried to submit
       getIncompleteFromStore(item) {
-          // Only show incomplete status if user has tried to submit
-          if (!this.hasTriedToSubmit) {
-              return false;
-          }
-          // Only check for chapters (not questions or other items)
-          if (!item.chapterId) {
-              return false;
-          }
-          try {
-              const questions = this.getQuestionsForCurrentChapter(item.chapterId);
-              if (questions.length === 0) {
-                  return false;
-              }
-              // Check if any question is incomplete (not skipped AND has no response)
-              return questions.some((question) => {
-                  var _a, _b;
-                  const entry = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.get(question.id);
-                  const isSkipped = ((_a = entry === null || entry === void 0 ? void 0 : entry.response) === null || _a === void 0 ? void 0 : _a.quartech_chapterskipped) === 100000000;
-                  const hasResponse = ((_b = entry === null || entry === void 0 ? void 0 : entry.response) === null || _b === void 0 ? void 0 : _b.quartech_response) &&
-                      entry.response.quartech_response.trim() !== '';
-                  // Question is incomplete if it's not skipped AND has no response
-                  return !isSkipped && !hasResponse;
-              });
-          }
-          catch (error) {
-              logger$4.error({
-                  message: 'Error checking chapter incomplete status',
-                  data: { chapterId: item.chapterId, error: error.message },
-              });
-              return false;
-          }
+          return EFPCompletionUtils.getIncompleteFromStore(item, this.getCompletionContext());
       }
       updated(changedProps) {
           if (changedProps.has('currentStepIndex')) {
@@ -46839,7 +48449,8 @@
               // Update the reactive property to trigger re-render
               this.questionsAndResponsesLoaded = true;
               // Initialize the completion percentage from loaded stats
-              this.currentCompletionPercentage = result.stats.completionPercentage;
+              // REFACTORED: Now uses WorkbookValidationService
+              this.currentCompletionPercentage = this.services.validationService.calculateCompletionPercentage();
               logger$4.info({
                   message: `Loaded ${result.stats.totalQuestions} questions with ${result.stats.answeredQuestions} responses (${result.stats.completionPercentage}% complete)`,
               });
@@ -46863,8 +48474,9 @@
       syncFromPOWERPOD() {
           this.workbookResponses = POWERPOD.workbookResponses.data;
           // Sync completion percentage from POWERPOD stats
+          // REFACTORED: Now uses WorkbookValidationService
           if (POWERPOD.workbookQuestionsAndResponses.isLoaded) {
-              this.currentCompletionPercentage = POWERPOD.workbookQuestionsAndResponses.stats.completionPercentage;
+              this.currentCompletionPercentage = this.services.validationService.calculateCompletionPercentage();
           }
           // Update completion and navigation icons
           this.updateCompletionAndNavigation();
@@ -46878,9 +48490,6 @@
           // Log current completion status
           const completionPercent = this.completionPercent;
           logger$4.info({ message: `📊 Overall completion: ${completionPercent}%` });
-          if (POWERPOD.workbookQuestionsAndResponses.isLoaded) {
-              POWERPOD.workbookQuestionsAndResponses.stats;
-          }
       }
       // Update section completion status using questionnaire store
       updateSectionCompletionStatus() {
@@ -46911,7 +48520,6 @@
               return;
           }
           const questionsWithResponses = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses;
-          POWERPOD.workbookQuestionsAndResponses.questionsByChapter;
           // Update section completion based on chapter completion
           this.sections.forEach((section) => {
               this.updateSectionItemsCompletion(section.items, questionsWithResponses);
@@ -46992,19 +48600,7 @@
       }
       // Helper method to get all leaf items from a nested structure
       getAllLeafItems(items) {
-          const leafItems = [];
-          const collect = (itemList) => {
-              for (const item of itemList) {
-                  if ('items' in item && Array.isArray(item.items)) {
-                      collect(item.items);
-                  }
-                  else {
-                      leafItems.push(item);
-                  }
-              }
-          };
-          collect(items);
-          return leafItems;
+          return EFPSectionGenerator.getAllLeafItems(items);
       }
       // Helper method to get response for a specific question
       getResponseForQuestion(questionId) {
@@ -47171,6 +48767,25 @@
       </div>
     `;
       }
+      // Helper methods for NavigationSidebar
+      getSectionCompletionMap() {
+          const map = new Map();
+          this.sections.forEach((section, index) => {
+              map.set(index, this.getSectionCompletionFromStore(section));
+          });
+          return map;
+      }
+      getSectionSkippedMap() {
+          const map = new Map();
+          this.sections.forEach((section, index) => {
+              map.set(index, this.getSectionSkippedFromStore(section));
+          });
+          return map;
+      }
+      handleSidebarSectionChange(e) {
+          const { sectionIndex } = e.detail;
+          this.handleSectionChange(sectionIndex);
+      }
       render() {
           var _a;
           const workbookData = getWorkbookData();
@@ -47180,94 +48795,30 @@
           return x `
       <div class="container">
         <!-- Sidebar -->
-        <aside class="sidebar">
-          <div class="card">
-            <div><strong>Workbook ID:</strong> ${workbookId}</div>
-            <div><strong>Workbook Name:</strong> ${workbookName}</div>
-            <div><strong>Status:</strong> ${workbookStatus}</div>
-          </div>
-
-          <sl-tab-group
-            .activeTab=${`section-${this.currentSectionIndex}`}
-            @sl-tab-show=${(e) => {
-            const tabIndex = parseInt(e.detail.name.replace('section-', ''));
-            this.handleSectionChange(tabIndex);
-        }}
-          >
-            ${this.sections.map((section, index) => {
-            const isActive = index === this.currentSectionIndex;
-            const isComplete = this.getSectionCompletionFromStore(section);
-            const isSkipped = this.getSectionSkippedFromStore(section);
-            // Determine icon based on state: skipped > complete > incomplete
-            let icon;
-            let color;
-            if (isSkipped) {
-                icon = 'skip-forward-circle';
-                color = isActive ? 'orange' : '#d97706'; // yellow color
-            }
-            else if (isComplete) {
-                icon = 'check-circle';
-                color = '#22c55e'; // green - always green when completed
-            }
-            else {
-                icon = 'pencil';
-                color = isActive ? 'orange' : 'gray';
-            }
-            return x `
-                <sl-tab slot="nav" panel="section-${index}">
-                  <sl-icon
-                    name=${icon}
-                    style="color: ${color}; margin-right: 0.5rem;"
-                  ></sl-icon>
-                  <span style=${isActive ? 'font-weight: bold;' : ''}
-                    >${section.tab}</span
-                  >
-                </sl-tab>
-              `;
-        })}
-            ${this.sections.map((section, index) => x `
-                <sl-tab-panel name="section-${index}">
-                  <div class="card">
-                    <strong>${section.title}</strong>
-                  </div>
-                  ${this.renderItems(section.items)}
-                </sl-tab-panel>
-              `)}
-          </sl-tab-group>
-        </aside>
+        <navigation-sidebar
+          .workbookId=${workbookId}
+          .workbookName=${workbookName}
+          .workbookStatus=${workbookStatus}
+          .sections=${this.sections}
+          .currentSectionIndex=${this.currentSectionIndex}
+          .sectionCompletion=${this.getSectionCompletionMap()}
+          .sectionSkipped=${this.getSectionSkippedMap()}
+          @section-change=${this.handleSidebarSectionChange}
+        >
+          ${this.sections.map((section, index) => x `
+              <div slot="section-${index}-items">
+                ${this.renderItems(section.items)}
+              </div>
+            `)}
+        </navigation-sidebar>
 
         <!-- Main Content -->
         <main class="main-content">
-          <div class="card">
-            <strong
-              >${POWERPOD.workbookQuestionsAndResponses.isLoaded
+          <progress-header
+            .completionPercentage=${POWERPOD.workbookQuestionsAndResponses.isLoaded
             ? this.currentCompletionPercentage
-            : this.completionPercent}%
-              Complete</strong
-            >
-            <div
-              style="
-              width: 100%;
-              height: 0.75rem;
-              background-color: #e5e7eb;
-              border-radius: 0.375rem;
-              margin-top: 0.5rem;
-              overflow: hidden;
-            "
-            >
-              <div
-                style="
-                height: 100%;
-                background-color: #3b82f6;
-                border-radius: 0.375rem;
-                transition: width 0.3s ease;
-                width: ${POWERPOD.workbookQuestionsAndResponses.isLoaded
-            ? this.currentCompletionPercentage
-            : this.completionPercent}%;
-              "
-              ></div>
-            </div>
-          </div>
+            : this.completionPercent}
+          ></progress-header>
 
           <!-- Navigation buttons above content -->
           <navigation-buttons
@@ -47412,12 +48963,6 @@
   __decorate([
       e$6('#global-action-plan-table')
   ], EFPEntryForm.prototype, "actionPlanTableEl", void 0);
-  __decorate([
-      n$4({ type: Object, attribute: false })
-  ], EFPEntryForm.prototype, "multilineTextSaveStatus", void 0);
-  __decorate([
-      n$4({ type: Object, attribute: false })
-  ], EFPEntryForm.prototype, "multilineTextCharCounts", void 0);
   EFPEntryForm = __decorate([
       t$1('efp-entry-form')
   ], EFPEntryForm);
@@ -47830,7 +49375,7 @@
       };
     };
     // @ts-ignore
-    POWERPOD.version = '4.6.6';
+    POWERPOD.version = '4.6.7';
     // @ts-ignore
     window.powerpod = POWERPOD;
   }

@@ -39,18 +39,44 @@ export const efpEntryFormStyles = css`
   /* Custom spacing for navigation collapsible containers */
   sl-details {
     margin-bottom: 0.75rem !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
   }
 
   sl-details::part(base) {
     padding: 0.25rem !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
   }
 
   sl-details::part(header) {
     padding: 0.5rem 0.75rem !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
   }
 
   sl-details::part(content) {
-    padding: 0.25rem 0.75rem 0.5rem 8js63bd7*0.75rem !important;
+    padding: 0.25rem 0.75rem 0.5rem 0.75rem !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Ensure summary text doesn't expand the container */
+  sl-details [slot="summary"] {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+  }
+
+  sl-details [slot="summary"] span {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   /* Spacing for standalone navigation items after collapsible containers */
@@ -58,13 +84,36 @@ export const efpEntryFormStyles = css`
     margin-top: 0.5rem !important;
   }
 
-  .sidebar {
-    flex: 0 0 26%;
+  .sidebar,
+  navigation-sidebar {
+    flex: 0 0 30%;
+    width: 30%;
+    max-width: 30%;
     padding: 1rem;
     border-right: 1px solid var(--sl-color-neutral-200);
     font-family: var(--body-font);
     min-height: 100vh;
     min-width: 0; /* Allow flex item to shrink below content size */
+    overflow: hidden; /* Prevent sidebar from growing due to content */
+    box-sizing: border-box;
+  }
+
+  /* Ensure navigation text wraps within sidebar */
+  .sidebar sl-details,
+  .sidebar .nav-subchapter-title,
+  navigation-sidebar sl-details,
+  navigation-sidebar .nav-subchapter-title {
+    overflow: hidden;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+
+  .sidebar sl-details [slot="summary"] span,
+  .sidebar .nav-subchapter-title,
+  navigation-sidebar sl-details [slot="summary"] span,
+  navigation-sidebar .nav-subchapter-title {
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .main-content {
@@ -81,10 +130,14 @@ export const efpEntryFormStyles = css`
       flex-wrap: wrap; /* Allow wrapping on mobile to stack vertically */
     }
 
-    .sidebar {
+    .sidebar,
+    navigation-sidebar {
       order: 1;
       flex: 0 0 100%;
+      width: 100%;
+      max-width: 100%;
       min-height: auto; /* Remove min-height on mobile to eliminate white space */
+      overflow: visible; /* Allow overflow on mobile since it's full width */
     }
 
     .main-content {
@@ -269,7 +322,7 @@ export const efpEntryFormStyles = css`
   .subchapter-header {
     background: linear-gradient(135deg, var(--sl-color-neutral-100) 0%, var(--sl-color-neutral-150) 100%);
     padding: 1rem;
-    margin: 1.5rem 0;
+    margin: 0rem 0;
     border-radius: var(--sl-border-radius-small);
     border-left: 3px solid var(--sl-color-neutral-500);
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
@@ -605,6 +658,20 @@ export const efpEntryFormStyles = css`
   .status-saved:hover {
     transform: none;
     box-shadow: none;
+  }
+
+  /* Save status indicator for all question types */
+  .save-status-indicator {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 0.5rem;
+  }
+
+  /* Container for rating questions with status indicator */
+  .rating-input-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
   }
 
   /* Validation alert styling */

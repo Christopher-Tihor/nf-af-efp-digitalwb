@@ -41,6 +41,7 @@ declare class ActionPlanTable extends LitElement {
     deleteDialog: any;
     viewActionsDialog: any;
     static styles: import("lit").CSSResult[];
+    private handleExternalActionPlansUpdate;
     connectedCallback(): void;
     disconnectedCallback(): void;
     private loadActionPlans;

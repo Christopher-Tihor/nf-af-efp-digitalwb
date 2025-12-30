@@ -1,7 +1,8 @@
 /**
  * Parse user roles from the DOM element with id 'pp-user-roles'
- * The element's textContent contains role names separated by whitespace
- * Example: '\n    EFP ProducerAdministratorsAuthenticated Users\n  '
+ * The element's textContent can be either:
+ * 1. JSON array format: '[{"Name":"EFP Producer"},{"Name":"Administrators"}]'
+ * 2. Concatenated string format: 'EFP ProducerAdministratorsAuthenticated Users'
  *
  * @returns {string[]} Array of role names
  */

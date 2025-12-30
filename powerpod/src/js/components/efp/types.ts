@@ -8,6 +8,7 @@ export interface EFPStep {
   subchapterData?: any;
   isContainer?: boolean;
   hideSkipChapterCheckbox?: boolean; // If true, the "This section does not apply" checkbox will be hidden
+  renderSignOffButtons?: boolean; // If true, render sign-off buttons component after content
 }
 
 export interface EFPSectionItem {
@@ -23,6 +24,7 @@ export interface EFPSectionItem {
   chapterId?: string;
   disableExpand?: boolean; // If true, item will not be expandable even if it has items
   hideSkipChapterCheckbox?: boolean; // If true, the "This section does not apply" checkbox will be hidden
+  renderSignOffButtons?: boolean; // If true, render sign-off buttons component after content
 }
 
 export interface EFPSection {

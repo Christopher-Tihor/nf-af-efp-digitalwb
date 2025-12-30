@@ -8,6 +8,7 @@ export interface EFPStep {
     subchapterData?: any;
     isContainer?: boolean;
     hideSkipChapterCheckbox?: boolean;
+    renderSignOffButtons?: boolean;
 }
 export interface EFPSectionItem {
     label: string;
@@ -22,6 +23,7 @@ export interface EFPSectionItem {
     chapterId?: string;
     disableExpand?: boolean;
     hideSkipChapterCheckbox?: boolean;
+    renderSignOffButtons?: boolean;
 }
 export interface EFPSection {
     tab: string;

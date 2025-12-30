@@ -204,6 +204,37 @@ export function getQuestionnaireFromStore() {
 }
 
 /**
+ * Get all chapters from the store (flattened list including subchapters)
+ * @returns {Array} Array of all chapters
+ */
+export function getAllChaptersFromStore() {
+  const questionnaire = getQuestionnaireFromStore();
+  if (!questionnaire?.chapters) {
+    return [];
+  }
+
+  const allChapters = [];
+
+  // Recursively collect all chapters and subchapters
+  const collectChapters = (chapters) => {
+    for (const chapterGroup of chapters) {
+      if (Array.isArray(chapterGroup)) {
+        for (const chapter of chapterGroup) {
+          allChapters.push(chapter);
+          // Recursively collect subchapters
+          if (chapter.subchapters) {
+            collectChapters([chapter.subchapters]);
+          }
+        }
+      }
+    }
+  };
+
+  collectChapters(questionnaire.chapters);
+  return allChapters;
+}
+
+/**
  * Get a specific chapter by ID from the store
  * @param {string} chapterId - The chapter ID to find
  * @returns {Object|null} The chapter object or null if not found

@@ -20,6 +20,9 @@ import './RatingQuestion';
 import './EFPBreadcrumbs';
 import './WorkbookSignOffButtons';
 import './ActionPlanTable';
+import './ProgressHeader';
+import './NavigationSidebar';
+import './QuestionRenderer';
 import WorkbookResponseHelper, { getChapterIdForQuestion } from '../common/workbookResponseHelper.js';
 import { getWorkbookId, getWorkbookData } from '../common/workbookUtils.js';
 import { getWorkbookDataById } from '../common/fetch.js';
@@ -30,19 +33,19 @@ import {
   getQuestionnaireFromStore,
   getChapterFromStore,
   getQuestionFromStore,
-  updateQuestionResponse,
   isQuestionnaireLoaded,
-  updateChapterCompletion,
 } from '../common/questionnaire.js';
 import { EFPEventUtils } from './efp/event-utils.js';
-import { EFPTextUtils } from './efp/text-utils.js';
-import { EFPCompletionUtils } from './efp/completion-utils.js';
-import { EFPNavigationUtils } from './efp/navigation-utils.js';
+import { EFPCompletionUtils, CompletionContext } from './efp/completion-utils.js';
+import { EFPNavigationUtils, NavigationContext, NavigationResult } from './efp/navigation-utils.js';
 import { EFPLifecycleUtils } from './efp/lifecycle-utils.js';
 import { EFPSectionGenerator } from './efp/section-generator.js';
 import { EFPRenderUtils } from './efp/render-utils.js';
 
 import { efpEntryFormStyles } from './EFPEntryForm.styles';
+
+// Service layer imports
+import { ServiceContainer, getServices } from '../services/ServiceContainer.js';
 
 // Shared type definitions
 import {
@@ -62,6 +65,14 @@ const logger = Logger('components/EFPEntryForm');
 
 @customElement('efp-entry-form')
 export class EFPEntryForm extends LitElement {
+  // ========================================
+  // SERVICE LAYER (NEW ARCHITECTURE)
+  // ========================================
+  private services: ServiceContainer;
+
+  // ========================================
+  // REACTIVE PROPERTIES
+  // ========================================
   @property({ type: Number }) currentSectionIndex = 0;
   @property({ type: Number }) currentStepIndex = 0;
   @property({ type: Array, attribute: false }) nestedChapterStructure: any[] =
@@ -76,16 +87,10 @@ export class EFPEntryForm extends LitElement {
   @property({ type: Boolean, attribute: false }) showValidationAlert = false;
   @property({ type: Boolean, attribute: false }) hasTriedToSubmit = false; // Track if user has tried to navigate to Review & Submit
   @property({ type: Array, attribute: false }) incompleteChapters: Array<{
-    id: string;
-    name: string;
-    parentChapterName?: string;
-    incompleteQuestions: Array<{
-      id: string;
-      name: string;
-      isSkipped: boolean;
-      hasResponse: boolean;
-      responseValue?: string;
-    }>;
+    chapterId: string;
+    chapterName: string;
+    totalQuestions: number;
+    answeredQuestions: number;
   }> = [];
   @property({ type: Number, attribute: false }) responseUpdateCounter = 0; // Triggers re-render when responses change
   @property({ type: Number, attribute: false }) currentCompletionPercentage = 0; // Local copy of completion percentage for reactive rendering
@@ -95,6 +100,10 @@ export class EFPEntryForm extends LitElement {
     content:
       'The purpose of the EFP is to assess the features and management of your farm to identify environmental risks and develop an action plan.',
   };
+
+  // ========================================
+  // QUERY SELECTORS
+  // ========================================
   @query('sl-tab-group') tabGroupEl!: HTMLElement & {
     show: (tabName: string) => void;
   };
@@ -106,24 +115,41 @@ export class EFPEntryForm extends LitElement {
     openViewActionsDialog: (questionId: string) => void;
   };
 
-  // Debounce timers for all response saves (questionId -> timer)
-  private responseSaveDebounceTimers: Map<string, number> = new Map();
-  // Pending response values (questionId -> response value)
-  private pendingResponseValues: Map<string, string> = new Map();
-  // Pending multi-select values (questionId -> selected options array)
-  private pendingMultiselectValues: Map<string, string[]> = new Map();
-  // Multiline text save status (questionId -> 'draft' | 'saving' | 'saved')
-  @property({ type: Object, attribute: false })
-  private multilineTextSaveStatus: Map<string, 'draft' | 'saving' | 'saved'> =
-    new Map();
-  // Multiline text character counts (questionId -> character count)
-  @property({ type: Object, attribute: false })
-  private multilineTextCharCounts: Map<string, number> = new Map();
+
+
+  // ========================================
+  // CONSTRUCTOR
+  // ========================================
+  constructor() {
+    super();
+    // Initialize service container
+    this.services = getServices();
+    logger.info({ message: 'EFPEntryForm constructor - services initialized' });
+  }
 
   connectedCallback() {
     super.connectedCallback();
     logger.info({ message: 'EFPEntryForm connected' });
 
+    // ========================================
+    // SERVICE EVENT LISTENERS (NEW ARCHITECTURE)
+    // ========================================
+    // Listen for response events from service
+    this.services.responseService.on('response-saved', this.handleServiceResponseSaved);
+    this.services.responseService.on('response-changed', this.handleServiceResponseChanged);
+    this.services.responseService.on('save-status-changed', this.handleServiceSaveStatusChanged);
+    this.services.responseService.on('multiline-text-status-changed', this.handleServiceMultilineStatusChanged);
+
+    // Listen for chapter skip events from service
+    this.services.chapterService.on('chapter-skipped-changed', this.handleServiceChapterSkippedChanged);
+
+    // Listen for state changes from state managers
+    this.services.workbookState.on('state-changed', this.handleServiceWorkbookStateChanged);
+    this.services.navigationState.on('navigation-changed', this.handleServiceNavigationChanged);
+
+    // ========================================
+    // LEGACY INITIALIZATION
+    // ========================================
     // Check if questionnaire store is already loaded
     this.updateQuestionnaireStoreStatus();
 
@@ -143,6 +169,80 @@ export class EFPEntryForm extends LitElement {
     this.addEventListener('workbook-stats-updated', this.handleStatsUpdated as EventListener);
   }
 
+  // ========================================
+  // SERVICE EVENT HANDLERS (NEW ARCHITECTURE)
+  // ========================================
+  private handleServiceResponseSaved = (data: any) => {
+    logger.info({ message: 'Service: Response saved', data });
+    // Trigger re-render to update UI
+    this.responseUpdateCounter++;
+    this.requestUpdate();
+  };
+
+  // Handler for optimistic response updates (immediate UI feedback)
+  private handleServiceResponseChanged = (data: any) => {
+    logger.info({ message: 'Service: Response changed (optimistic)', data });
+    // Trigger re-render for immediate UI feedback
+    this.responseUpdateCounter++;
+    this.requestUpdate();
+    // Also update completion status since response may affect it
+    this.updateCompletionAndNavigation();
+  };
+
+  // Handler for save status changes (saving/saved indicators)
+  private handleServiceSaveStatusChanged = (data: any) => {
+    logger.info({ message: 'Service: Save status changed', data });
+    // Increment counter to trigger child QuestionRenderer re-renders
+    this.responseUpdateCounter++;
+    this.requestUpdate();
+  };
+
+  private handleServiceMultilineStatusChanged = (data: any) => {
+    logger.info({ message: 'Service: Multiline text status changed', data });
+    // Service manages the state, just trigger re-render
+    this.requestUpdate();
+  };
+
+  private handleServiceChapterSkippedChanged = (data: any) => {
+    logger.info({ message: 'Service: Chapter skipped changed', data });
+
+    // If this is a rollback, show a brief error toast
+    if (data?.rollback) {
+      logger.warn({
+        message: 'Chapter skip change rolled back due to backend failure',
+        data: { chapterId: data.chapterId },
+      });
+      // Could add toast notification here if desired
+    }
+
+    // Trigger re-render and update completion
+    // This will read the current memory state (which may have been rolled back)
+    this.updateCompletionAndNavigation();
+  };
+
+  private handleServiceWorkbookStateChanged = (data: any) => {
+    logger.info({ message: 'Service: Workbook state changed', data });
+    // Sync local state with service state
+    const state = this.services.workbookState.getState();
+    this.workbookLocked = state.workbookLocked;
+    this.questionnaireStoreLoaded = state.questionnaireStoreLoaded;
+    this.questionsAndResponsesLoaded = state.questionsAndResponsesLoaded;
+    this.isLoadingResponses = state.isLoadingResponses;
+    this.requestUpdate();
+  };
+
+  private handleServiceNavigationChanged = (data: any) => {
+    logger.info({ message: 'Service: Navigation changed', data });
+    // Sync local state with navigation state
+    const state = this.services.navigationState.getState();
+    this.currentSectionIndex = state.currentSectionIndex;
+    this.currentStepIndex = state.currentStepIndex;
+    if (state.activeContent) {
+      this.activeContent = state.activeContent;
+    }
+    this.requestUpdate();
+  };
+
   // Handler for workbook stats updates
   private handleStatsUpdated = (event: Event) => {
     const customEvent = event as CustomEvent;
@@ -161,7 +261,8 @@ export class EFPEntryForm extends LitElement {
     });
 
     // Update the local completion percentage property to trigger reactive re-render
-    this.currentCompletionPercentage = newPercentage;
+    // REFACTORED: Now uses WorkbookValidationService
+    this.currentCompletionPercentage = this.services.validationService.calculateCompletionPercentage();
 
     // Increment the response update counter to trigger re-render
     this.responseUpdateCounter++;
@@ -176,21 +277,30 @@ export class EFPEntryForm extends LitElement {
   disconnectedCallback() {
     super.disconnectedCallback();
 
+    // ========================================
+    // REMOVE SERVICE EVENT LISTENERS (NEW ARCHITECTURE)
+    // ========================================
+    this.services.responseService.off('response-saved', this.handleServiceResponseSaved);
+    this.services.responseService.off('response-changed', this.handleServiceResponseChanged);
+    this.services.responseService.off('save-status-changed', this.handleServiceSaveStatusChanged);
+    this.services.responseService.off('multiline-text-status-changed', this.handleServiceMultilineStatusChanged);
+    this.services.chapterService.off('chapter-skipped-changed', this.handleServiceChapterSkippedChanged);
+    this.services.workbookState.off('state-changed', this.handleServiceWorkbookStateChanged);
+    this.services.navigationState.off('navigation-changed', this.handleServiceNavigationChanged);
+
+    // ========================================
+    // CLEANUP
+    // ========================================
     // Remove event listeners
     this.removeEventListener('action-plans-updated', this.handleActionPlansUpdated as EventListener);
     this.removeEventListener('sign-off-changed', this.handleSignOffChanged as EventListener);
     this.removeEventListener('workbook-stats-updated', this.handleStatsUpdated as EventListener);
 
-    // Clear all pending debounce timers
-    this.responseSaveDebounceTimers.forEach((timer) => {
-      clearTimeout(timer);
-    });
-    this.responseSaveDebounceTimers.clear();
-    this.pendingResponseValues.clear();
-    this.pendingMultiselectValues.clear();
+    // Clean up services (they manage their own state)
+    this.services.cleanup();
 
     logger.info({
-      message: 'EFPEntryForm disconnected, cleared pending timers',
+      message: 'EFPEntryForm disconnected, cleaned up services and event listeners',
     });
   }
 
@@ -339,92 +449,27 @@ export class EFPEntryForm extends LitElement {
   }
 
   // Check if all non-skipped questions in My Workbook are answered
+  // REFACTORED: Now uses WorkbookValidationService
   private canAccessReviewAndSubmit(): boolean {
-    if (!POWERPOD.workbookQuestionsAndResponses.isLoaded) {
-      // If data not loaded yet, allow access (will show loading state)
-      return true;
-    }
+    logger.info({ message: '[NEW ARCHITECTURE] Checking Review & Submit access' });
 
-    const questionnaire = getQuestionnaireFromStore();
-    if (!questionnaire?.chapters?.length) {
-      return true;
-    }
+    // ========================================
+    // NEW ARCHITECTURE: Delegate to service
+    // ========================================
+    const canAccess = this.services.validationService.canAccessReviewAndSubmit();
 
-    // Check all questions in all chapters
-    let hasUnansweredQuestions = false;
-    const incompleteChaptersList: Array<{
-      id: string;
-      name: string;
-      parentChapterName?: string;
-      incompleteQuestions: Array<{
-        id: string;
-        name: string;
-        isSkipped: boolean;
-        hasResponse: boolean;
-        responseValue?: string;
-      }>;
-    }> = [];
+    // Update incomplete chapters list for UI
+    this.incompleteChapters = this.services.validationService.getIncompleteChapters();
 
-    const checkChapters = (chapters: any[], parentChapterName: string = '') => {
-      chapters.forEach((chapter: any) => {
-        const incompleteQuestions: Array<{
-          id: string;
-          name: string;
-          isSkipped: boolean;
-          hasResponse: boolean;
-          responseValue?: string;
-        }> = [];
+    logger.info({
+      message: `Review & Submit access: ${canAccess ? 'ALLOWED' : 'DENIED'}`,
+      data: {
+        canAccess,
+        incompleteChaptersCount: this.incompleteChapters.length,
+      },
+    });
 
-        // Check questions in this chapter
-        if (chapter.questions && chapter.questions.length > 0) {
-          chapter.questions.forEach((question: any) => {
-            const entry = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.get(question.id);
-            const isSkipped = entry?.response?.quartech_chapterskipped === 100000000;
-            const responseValue = entry?.response?.quartech_response;
-            const hasResponse = responseValue && responseValue.trim() !== '';
-
-            // Question is incomplete if it's not skipped AND has no response
-            if (!isSkipped && !hasResponse) {
-              hasUnansweredQuestions = true;
-              const questionName = question.quartech_name || question.name || 'Unknown Question';
-              incompleteQuestions.push({
-                id: question.id,
-                name: questionName,
-                isSkipped,
-                hasResponse: !!hasResponse,
-                responseValue: responseValue || undefined,
-              });
-            }
-          });
-        }
-
-        // If this chapter has unanswered questions, add it to the list
-        if (incompleteQuestions.length > 0) {
-          const chapterName = chapter.name || chapter.quartech_name || 'Unknown Chapter';
-          incompleteChaptersList.push({
-            id: chapter.id,
-            name: chapterName,
-            parentChapterName: parentChapterName || undefined,
-            incompleteQuestions,
-          });
-        }
-
-        // Recursively check subchapters
-        if (chapter.subchapters && chapter.subchapters.length > 0) {
-          const currentChapterName = chapter.name || chapter.quartech_name || '';
-          checkChapters(chapter.subchapters, currentChapterName);
-        }
-      });
-    };
-
-    if (questionnaire.chapters && questionnaire.chapters.length > 0) {
-      checkChapters(questionnaire.chapters[0]);
-    }
-
-    // Update the incomplete chapters list
-    this.incompleteChapters = incompleteChaptersList;
-
-    return !hasUnansweredQuestions;
+    return canAccess;
   }
 
   // Show validation alert with incomplete chapters
@@ -434,7 +479,7 @@ export class EFPEntryForm extends LitElement {
 
     // Build detailed logging info
     const totalIncompleteQuestions = this.incompleteChapters.reduce(
-      (sum, chapter) => sum + (chapter as any).incompleteQuestions?.length || 0,
+      (sum, chapter) => sum + (chapter.totalQuestions - chapter.answeredQuestions),
       0
     );
 
@@ -448,24 +493,15 @@ export class EFPEntryForm extends LitElement {
     });
 
     // Log detailed breakdown per chapter
-    this.incompleteChapters.forEach((chapter: any) => {
-      const parentInfo = chapter.parentChapterName
-        ? ` (under "${chapter.parentChapterName}")`
-        : '';
+    this.incompleteChapters.forEach((chapter) => {
       logger.info({
-        message: `📋 Incomplete chapter: "${chapter.name}"${parentInfo}`,
+        message: `📋 Incomplete chapter: "${chapter.chapterName}"`,
         data: {
-          chapterId: chapter.id,
-          chapterName: chapter.name,
-          parentChapterName: chapter.parentChapterName,
-          incompleteQuestionCount: chapter.incompleteQuestions?.length || 0,
-          incompleteQuestions: chapter.incompleteQuestions?.map((q: any) => ({
-            id: q.id,
-            name: q.name,
-            isSkipped: q.isSkipped,
-            hasResponse: q.hasResponse,
-            responseValue: q.responseValue,
-          })),
+          chapterId: chapter.chapterId,
+          chapterName: chapter.chapterName,
+          totalQuestions: chapter.totalQuestions,
+          answeredQuestions: chapter.answeredQuestions,
+          incompleteQuestionCount: chapter.totalQuestions - chapter.answeredQuestions,
         },
       });
     });
@@ -501,286 +537,55 @@ export class EFPEntryForm extends LitElement {
     ];
   }
 
-  // Rendering methods
+  // Rendering methods - delegates to QuestionRenderer component
   private renderQuestion(question: any) {
-    const questionTypeMap: { [key: number]: string } = {
-      100000000: 'Yes/No/NA',
-      100000001: 'Point Rating',
-      100000002: 'Multi-select List',
-      100000003: 'Multiline Text',
-      // Add more question types as needed
-    };
-
-    const questionTypeName =
-      questionTypeMap[question.questionType] || 'Unknown';
-
-    // Check if this question is disabled (in a skipped chapter)
     const isDisabled = this.isQuestionDisabled(question.id);
-
-    // Check if this question is incomplete (not skipped and no response)
-    // Only show the red icon if user has tried to submit
-    const entry = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.get(question.id);
-    const isSkipped = entry?.response?.quartech_chapterskipped === 100000000;
-    const hasResponse = entry?.response?.quartech_response &&
-                       entry.response.quartech_response.trim() !== '';
-    const isIncomplete = !isSkipped && !hasResponse;
-    const showIncompleteIcon = isIncomplete && this.hasTriedToSubmit;
+    const existingResponse = this.getResponseForQuestion(question.id);
+    const actionPlanCount = this.getActionPlanCount(question.id);
 
     return html`
-      <div
-        class="question-container ${isDisabled ? 'question-disabled' : ''}"
-        data-question-id="${question.id}"
-      >
-        ${question.textAboveQuestion
-          ? html`
-              <div class="question-text">
-                ${unsafeHTML(question.textAboveQuestion)}
-              </div>
-            `
-          : ''}
-
-        <div class="question-label">
-          <div class="question-label-text">
-            <span
-              >${unsafeHTML(
-                EFPTextUtils.convertNewlinesToBreaks(question.label)
-              )}</span
-            >
-            ${question.tooltip
-              ? html`
-                  <sl-tooltip placement="top" style="--max-width: 300px;">
-                    <div slot="content">${unsafeHTML(question.tooltip)}</div>
-                    <sl-icon
-                      name="question-circle"
-                      class="question-tooltip-icon"
-                      aria-label="Question help"
-                    ></sl-icon>
-                  </sl-tooltip>
-                `
-              : ''}
-          </div>
-          ${showIncompleteIcon
-            ? html`
-                <sl-icon
-                  name="exclamation-circle"
-                  class="question-incomplete-icon"
-                  aria-label="Incomplete question"
-                ></sl-icon>
-              `
-            : ''}
-        </div>
-
-        ${question.textBelowQuestion
-          ? html`
-              <div class="question-text">
-                ${unsafeHTML(question.textBelowQuestion)}
-              </div>
-            `
-          : ''}
-
-        <div class="question-response">
-          ${this.renderQuestionInput(question, questionTypeName, isDisabled)}
-        </div>
-
-        ${this.renderActionPlanButtons(question.id, isDisabled)}
-      </div>
+      <question-renderer
+        .question=${question}
+        .isDisabled=${isDisabled}
+        .hasTriedToSubmit=${this.hasTriedToSubmit}
+        .responseService=${this.services.responseService}
+        .existingResponse=${existingResponse}
+        .actionPlanCount=${actionPlanCount}
+        .updateCounter=${this.responseUpdateCounter}
+        @rating-changed=${this.handleRatingChanged}
+        @multiselect-changed=${this.handleMultiselectChangedEvent}
+        @multiline-text-input=${this.handleMultilineTextInputEvent}
+        @force-save=${this.handleForceSaveEvent}
+        @add-note-to-action-plan=${this.handleAddNoteToActionPlanEvent}
+        @view-existing-actions=${this.handleViewExistingActionsEvent}
+      ></question-renderer>
     `;
   }
 
-  // Render action plan buttons based on whether action plans exist for this question
-  private renderActionPlanButtons(questionId: string, isDisabled: boolean) {
-    const actionPlanCount = this.getActionPlanCount(questionId);
-    const hasActionPlans = actionPlanCount > 0;
-
-    return html`
-      <div class="question-action-plan-button">
-        ${hasActionPlans
-          ? html`
-              <button
-                class="view-actions-button"
-                @click=${() => this.handleViewExistingActions(questionId)}
-                ?disabled=${isDisabled}
-              >
-                <sl-icon name="eye" aria-hidden="true"></sl-icon>
-                <span>View Existing Actions</span>
-                <sl-badge variant="primary" pill>${actionPlanCount}</sl-badge>
-              </button>
-            `
-          : ''}
-        <button
-          class="add-note-button"
-          @click=${() => this.handleAddNoteToActionPlan(questionId)}
-          ?disabled=${isDisabled}
-        >
-          <sl-icon name="journal-plus" aria-hidden="true"></sl-icon>
-          <span>Add Note to Action Plan</span>
-        </button>
-      </div>
-    `;
+  // Event handlers for QuestionRenderer events
+  private handleMultiselectChangedEvent(e: CustomEvent) {
+    const { questionId, option, checked } = e.detail;
+    this.handleMultiselectChange(questionId, option, checked);
   }
 
-  private renderQuestionInput(question: any, questionType: string, isDisabled: boolean = false) {
-    switch (questionType) {
-      case 'Multi-select List':
-        // Parse the semicolon-separated options from the question
-        const optionsString = question.multiselectOptions || '';
-        const options = optionsString
-          .split(';')
-          .map((opt: string) => opt.trim())
-          .filter((opt: string) => opt.length > 0);
+  private handleMultilineTextInputEvent(e: CustomEvent) {
+    const { questionId, value } = e.detail;
+    this.handleMultilineTextInput(questionId, value);
+  }
 
-        // Get selected options - prefer pending value over saved response
-        let selectedOptions: string[];
-        if (this.pendingMultiselectValues.has(question.id)) {
-          // Use pending value if user is actively selecting
-          selectedOptions = this.pendingMultiselectValues.get(question.id)!;
-        } else {
-          // Otherwise get from existing response
-          const existingResponse = this.getResponseForQuestion(question.id);
-          const selectedOptionsString =
-            existingResponse?.quartech_response || '';
-          const existingSelectedOptions = selectedOptionsString
-            .split(';')
-            .map((opt: string) => opt.trim())
-            .filter((opt: string) => opt.length > 0);
+  private handleForceSaveEvent(e: CustomEvent) {
+    const { questionId } = e.detail;
+    this.handleForceSave(questionId);
+  }
 
-          // Filter to only include options that are valid for the current question
-          // This prevents old/invalid options from being displayed as checked
-          selectedOptions = existingSelectedOptions.filter((opt: string) =>
-            options.includes(opt)
-          );
-        }
+  private handleAddNoteToActionPlanEvent(e: CustomEvent) {
+    const { questionId } = e.detail;
+    this.handleAddNoteToActionPlan(questionId);
+  }
 
-        return html`
-          <div class="multiselect-list-container">
-            ${options.map((option: string) => {
-              const isChecked = selectedOptions.includes(option);
-              return html`
-                <div class="multiselect-option">
-                  <label
-                    style="display: flex; align-items: center; gap: 0.5rem; cursor: ${isDisabled ? 'not-allowed' : 'pointer'}; padding: 0.5rem 0; opacity: ${isDisabled ? '0.6' : '1'};"
-                  >
-                    <input
-                      type="checkbox"
-                      .checked=${isChecked}
-                      ?disabled=${isDisabled}
-                      @change=${(e: Event) =>
-                        this.handleMultiselectChange(
-                          question.id,
-                          option,
-                          (e.target as HTMLInputElement).checked
-                        )}
-                      style="transform: scale(1.2);"
-                    />
-                    <span>${option}</span>
-                  </label>
-                </div>
-              `;
-            })}
-          </div>
-        `;
-
-      case 'Yes/No/NA':
-      case 'Point Rating':
-        // Get existing response value for this question
-        const existingResponse2 = this.getResponseForQuestion(question.id);
-        const selectedValue = existingResponse2?.quartech_response || '';
-
-        // Prepare rating metadata for Point Rating questions
-        const ratingMetadata =
-          questionType === 'Point Rating'
-            ? {
-                rating1OverwriteLabel: question.rating1OverwriteLabel,
-                rating1Description: question.rating1Description,
-                rating2OverwriteLabel: question.rating2OverwriteLabel,
-                rating2Description: question.rating2Description,
-                rating3OverwriteLabel: question.rating3OverwriteLabel,
-                rating3Description: question.rating3Description,
-                rating4OverwriteLabel: question.rating4OverwriteLabel,
-                rating4Description: question.rating4Description,
-              }
-            : {};
-
-        return html`
-          <rating-question
-            .questionId=${question.id}
-            .questionType=${questionType}
-            .selectedValue=${selectedValue}
-            .ratingMetadata=${ratingMetadata}
-            .disabled=${isDisabled}
-            @rating-changed=${this.handleRatingChanged}
-          ></rating-question>
-        `;
-
-      case 'Multiline Text':
-        // Get existing response value for this question
-        const existingResponse3 = this.getResponseForQuestion(question.id);
-        const textValue = existingResponse3?.quartech_response || '';
-        const saveStatus =
-          this.multilineTextSaveStatus.get(question.id) || 'saved';
-
-        // Use tracked character count if available, otherwise use text value length
-        const charCount = this.multilineTextCharCounts.has(question.id)
-          ? this.multilineTextCharCounts.get(question.id)!
-          : textValue.length;
-        const maxChars = 5000;
-        const isOverLimit = charCount > maxChars;
-
-        return html`
-          <div class="multiline-text-container">
-            <sl-textarea
-              label="Your response"
-              name="question-${question.id}"
-              rows="6"
-              placeholder="Enter your response..."
-              maxlength="${maxChars}"
-              .value=${textValue}
-              ?disabled=${isDisabled}
-              @sl-input=${(e: Event) =>
-                this.handleMultilineTextInput(
-                  question.id,
-                  (e.target as any).value
-                )}
-            ></sl-textarea>
-            <div class="multiline-text-footer">
-              <div class="character-counter ${isOverLimit ? 'over-limit' : ''}">
-                ${charCount} / ${maxChars} characters
-              </div>
-              <div class="multiline-text-status">
-                <span
-                  class="status-indicator status-${saveStatus}"
-                  @click=${() => this.handleForceSave(question.id)}
-                  role="button"
-                  tabindex="0"
-                  @keydown=${(e: KeyboardEvent) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault();
-                      this.handleForceSave(question.id);
-                    }
-                  }}
-                >
-                  ${saveStatus === 'draft'
-                    ? '📝 Draft (click to save)'
-                    : saveStatus === 'saving'
-                    ? '⏳ Saving...'
-                    : '✓ Saved'}
-                </span>
-              </div>
-            </div>
-          </div>
-        `;
-
-      default:
-        return html`
-          <sl-textarea
-            label="Your response"
-            name="question-${question.id}"
-            rows="3"
-            placeholder="Enter your response..."
-            ?disabled=${isDisabled}
-          ></sl-textarea>
-        `;
-    }
+  private handleViewExistingActionsEvent(e: CustomEvent) {
+    const { questionId } = e.detail;
+    this.handleViewExistingActions(questionId);
   }
 
   private renderSectionNotApplicableCheckbox() {
@@ -876,21 +681,15 @@ export class EFPEntryForm extends LitElement {
   }
 
   // Check if the current chapter should be marked as skipped
+  // REFACTORED: Now uses ChapterManagementService
   private isChapterSkipped(): boolean {
     const chapterId = this.getCurrentChapterId();
     if (!chapterId) return false;
 
-    // Exclude questions from children with preventSkipping: Yes
-    // This ensures that chapters with preventSkipping: Yes don't show as checked
-    // even when their parent is skipped
-    const questions = this.getQuestionsForCurrentChapter(chapterId, true);
-    if (questions.length === 0) return false;
-
-    // Check if ALL questions (excluding those from preventSkipping children) have quartech_chapterskipped set to YES (100000000)
-    return questions.every(q => {
-      const entry = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.get(q.id);
-      return entry?.response?.quartech_chapterskipped === 100000000;
-    });
+    // ========================================
+    // NEW ARCHITECTURE: Delegate to service
+    // ========================================
+    return this.services.chapterService.isChapterSkipped(chapterId);
   }
 
   // Check if a specific question is in a skipped chapter or if workbook is locked
@@ -906,67 +705,25 @@ export class EFPEntryForm extends LitElement {
   }
 
   // Check if a chapter (by ID) is skipped
-  private isChapterSkippedById(chapterId: string): boolean {
-    if (!chapterId) return false;
-
-    // Exclude questions from children with preventSkipping: Yes
-    const questions = this.getQuestionsForCurrentChapter(chapterId, true);
-    if (questions.length === 0) return false;
-
-    // Check if ALL questions (excluding those from preventSkipping children) have quartech_chapterskipped set to YES (100000000)
-    return questions.every(q => {
-      const entry = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.get(q.id);
-      return entry?.response?.quartech_chapterskipped === 100000000;
-    });
+  // Note: Currently unused but may be needed for future features
+  private _isChapterSkippedById(chapterId: string): boolean {
+    return EFPCompletionUtils.isChapterSkippedById(
+      chapterId,
+      (id, excludePreventSkipping) => this.getQuestionsForCurrentChapter(id, excludePreventSkipping)
+    );
   }
 
   // Check if skipping is prevented for the current chapter
   // This cascades: if a parent has preventSkipping: Yes, all children are also prevented from skipping
+  // REFACTORED: Now uses ChapterManagementService
   private isSkippingPrevented(): boolean {
-    const currentStep = this.flatSteps[this.currentStepIndex];
-    if (!currentStep) return false;
+    const chapterId = this.getCurrentChapterId();
+    if (!chapterId) return false;
 
-    // Get the current chapter/subchapter and check its preventSkipping
-    let currentChapter = null;
-    let parentChapterId = null;
-
-    // Determine the current chapter and its parent
-    if (currentStep.subchapterData) {
-      // This is a subchapter or sub-subchapter
-      currentChapter = currentStep.subchapterData;
-      parentChapterId = currentChapter.parentChapterId;
-    } else if (currentStep.chapterData) {
-      // This is a leaf chapter
-      currentChapter = currentStep.chapterData;
-      parentChapterId = currentChapter.parentChapterId;
-    } else if (currentStep.isContainer && currentStep.chapterId) {
-      // This is a container chapter
-      currentChapter = getChapterFromStore(currentStep.chapterId);
-      parentChapterId = currentChapter?.parentChapterId;
-    }
-
-    // Check if the current chapter itself has preventSkipping
-    if (currentChapter?.preventSkipping === true) {
-      return true;
-    }
-
-    // Check if any parent chapter has preventSkipping (cascade effect)
-    if (parentChapterId) {
-      const parentChapter = getChapterFromStore(parentChapterId);
-      if (parentChapter?.preventSkipping === true) {
-        return true;
-      }
-
-      // Check grandparent if parent has a parent (for 3-level hierarchy)
-      if (parentChapter?.parentChapterId) {
-        const grandparentChapter = getChapterFromStore(parentChapter.parentChapterId);
-        if (grandparentChapter?.preventSkipping === true) {
-          return true;
-        }
-      }
-    }
-
-    return false;
+    // ========================================
+    // NEW ARCHITECTURE: Delegate to service
+    // ========================================
+    return this.services.chapterService.isSkippingPrevented(chapterId);
   }
 
   // Get the chapter ID for the current step
@@ -1022,7 +779,8 @@ export class EFPEntryForm extends LitElement {
   }
 
   // Handle checkbox change event
-  private async handleChapterSkippedChange(event: CustomEvent) {
+  // REFACTORED: Now uses ChapterManagementService with optimistic updates
+  private handleChapterSkippedChange(event: CustomEvent) {
     const checkbox = event.target as any;
     const isChecked = checkbox.checked;
 
@@ -1034,203 +792,31 @@ export class EFPEntryForm extends LitElement {
       return;
     }
 
-    // When skipping (isChecked = true), exclude questions from children with preventSkipping: Yes
-    // When unskipping (isChecked = false), include all questions
-    const excludePreventSkipping = isChecked;
-    const questions = this.getQuestionsForCurrentChapter(chapterId, excludePreventSkipping);
-
-    if (questions.length === 0) {
-      logger.warn({
-        message: 'Cannot update chapter skipped: no questions found',
-        data: { chapterId, excludePreventSkipping },
-      });
-      return;
-    }
-
-    const workbookId = getWorkbookId();
-    if (!workbookId) {
-      logger.error({
-        message: 'Cannot update chapter skipped: no workbook ID found',
-      });
-      return;
-    }
-
-    // Set quartech_chapterskipped to YES (100000000) if checked, NO (100000001) if unchecked
-    const chapterSkippedValue = isChecked ? 100000000 : 100000001;
-
-    // Log information about excluded children (if any)
-    if (excludePreventSkipping) {
-      const chapter = getChapterFromStore(chapterId);
-      const allQuestions = this.getQuestionsForCurrentChapter(chapterId, false);
-      const excludedCount = allQuestions.length - questions.length;
-      if (excludedCount > 0) {
-        logger.info({
-          message: `Skipping chapter: excluding ${excludedCount} questions from children with preventSkipping: Yes`,
-          data: { chapterId, totalQuestions: allQuestions.length, questionsToSkip: questions.length, excludedQuestions: excludedCount },
-        });
-      }
-    }
-
     logger.info({
-      message: `Updating chapter skipped status for ${questions.length} questions`,
-      data: { chapterId, isChecked, chapterSkippedValue, questionCount: questions.length, excludePreventSkipping },
-    });
-
-    // STEP 1: Optimistically update in-memory data and questionnaire store FIRST
-    // This makes the UI respond instantly without waiting for API calls
-    questions.forEach((question) => {
-      const questionId = question.id;
-      const entry = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.get(questionId);
-
-      if (entry?.response) {
-        // Update existing response in memory
-        entry.response.quartech_chapterskipped = chapterSkippedValue;
-        if (isChecked) {
-          entry.response.quartech_response = '';
-        }
-        // Update questionnaire store immediately
-        updateQuestionResponse(questionId, entry.response.quartech_response, undefined, entry.response);
-      } else {
-        // Create a temporary response object in memory for questions without responses
-        const tempResponse = {
-          quartech_workbookresponseid: null, // Will be set after API call
-          quartech_response: '',
-          quartech_chapterskipped: chapterSkippedValue,
-          _quartech_question_value: questionId,
-          _quartech_workbook_value: workbookId,
-        };
-
-        // Update in-memory structure
-        if (!entry) {
-          POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.set(questionId, {
-            question: question,
-            response: tempResponse,
-          });
-        } else {
-          entry.response = tempResponse;
-        }
-
-        // Update questionnaire store immediately
-        updateQuestionResponse(questionId, '', undefined, tempResponse);
-      }
-    });
-
-    // STEP 2: Trigger UI update immediately (before API calls complete)
-    const { updateQuestionnaireCompletion } = await import('../common/questionnaire.js');
-    updateQuestionnaireCompletion();
-
-    // Manually update the completion percentage immediately
-    if (POWERPOD.workbookQuestionsAndResponses.isLoaded) {
-      this.currentCompletionPercentage = POWERPOD.workbookQuestionsAndResponses.stats.completionPercentage;
-      logger.info({
-        message: `📊 Manually updated completion percentage after skip/unskip`,
-        data: {
-          completionPercentage: this.currentCompletionPercentage,
-          stats: POWERPOD.workbookQuestionsAndResponses.stats
-        },
-      });
-    }
-
-    this.responseUpdateCounter++; // Trigger re-render for validation
-    this.requestUpdate();
-
-    logger.info({
-      message: `Optimistically updated ${questions.length} questions in memory and store`,
+      message: `[NEW ARCHITECTURE] Handling chapter skip change for ${chapterId}`,
       data: { chapterId, isChecked },
     });
 
-    // STEP 3: Make API calls in the background (non-blocking)
-    // Use Promise.allSettled to continue even if some requests fail
-    const updatePromises = questions.map(async (question) => {
-      const questionId = question.id;
-      const entry = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.get(questionId);
-
-      // If response exists, update it
-      if (entry?.response?.quartech_workbookresponseid) {
-        const responseId = entry.response.quartech_workbookresponseid;
-        try {
-          await POWERPOD.fetch.patchWorkbookResponseData({
-            id: responseId,
-            chapterSkipped: chapterSkippedValue,
-            response: isChecked ? '' : entry.response.quartech_response,
-          });
-
-          logger.info({
-            message: `API: Updated response for question ${questionId}`,
-            data: { questionId, responseId, chapterSkippedValue },
-          });
-        } catch (error) {
-          logger.error({
-            message: `API: Failed to update response for question ${questionId}`,
-            data: { questionId, responseId, error: (error as Error).message },
-          });
-          throw error; // Re-throw to be caught by Promise.allSettled
-        }
-      } else {
-        // If no response exists, create one with chapterSkipped set
-        try {
-          const createdResponse = await WorkbookResponseHelper.createResponse(questionId, '', {
-            chapterSkipped: chapterSkippedValue,
-          });
-
-          // Update the response ID in memory now that we have it from the API
-          if (createdResponse?.response && entry?.response) {
-            entry.response.quartech_workbookresponseid = createdResponse.response.quartech_workbookresponseid;
-          }
-
-          logger.info({
-            message: `API: Created response for question ${questionId}`,
-            data: { questionId, chapterSkippedValue },
-          });
-        } catch (error) {
-          logger.error({
-            message: `API: Failed to create response for question ${questionId}`,
-            data: { questionId, error: (error as Error).message },
-          });
-          throw error; // Re-throw to be caught by Promise.allSettled
-        }
-      }
-    });
-
-    // Wait for all API calls to complete (or fail)
-    const results = await Promise.allSettled(updatePromises);
-
-    // Count successes and failures
-    const succeeded = results.filter(r => r.status === 'fulfilled').length;
-    const failed = results.filter(r => r.status === 'rejected').length;
-
-    if (failed > 0) {
-      logger.warn({
-        message: `API: Completed with ${failed} failures out of ${questions.length} requests`,
-        data: { chapterId, succeeded, failed, total: questions.length },
+    // ========================================
+    // NEW ARCHITECTURE: Delegate to service
+    // Service emits 'chapter-skipped-changed' event immediately for instant UI update
+    // Backend updates happen in background
+    // ========================================
+    this.services.chapterService.handleChapterSkippedChange(chapterId, isChecked)
+      .then(() => {
+        logger.info({
+          message: `Successfully ${isChecked ? 'skipped' : 'unskipped'} chapter`,
+          data: { chapterId, isChecked },
+        });
+      })
+      .catch((error: Error) => {
+        logger.error({
+          message: `Failed to handle chapter skip change: ${error.message}`,
+          data: { chapterId, isChecked },
+        });
+        // Rollback event was already emitted by service, but trigger re-render just in case
+        this.requestUpdate();
       });
-    } else {
-      logger.info({
-        message: `API: Successfully completed all ${succeeded} requests`,
-        data: { chapterId, succeeded },
-      });
-    }
-
-    // Final UI update after API calls complete (in case any failed and need to be reverted)
-    // Note: We already updated the UI optimistically, so this is just a safety measure
-    if (failed === 0) {
-      logger.info({
-        message: `Successfully ${isChecked ? 'skipped' : 'unskipped'} chapter with ${questions.length} questions`,
-        data: { chapterId, isChecked, questionCount: questions.length },
-      });
-    } else {
-      // If some requests failed, we might want to show a warning to the user
-      // For now, just log it - the optimistic update is already applied
-      logger.warn({
-        message: `Chapter ${isChecked ? 'skip' : 'unskip'} completed with errors`,
-        data: { chapterId, isChecked, succeeded, failed },
-      });
-    }
-
-    logger.info({
-      message: 'Finished updating chapter skipped status',
-      data: { chapterId, isChecked, questionCount: questions.length },
-    });
   }
 
   private renderSubchapter(subchapter: any) {
@@ -1320,7 +906,12 @@ export class EFPEntryForm extends LitElement {
   }
 
   private renderMainContent() {
-    return EFPRenderUtils.renderMainContent(
+    const currentStep = this.flatSteps[this.currentStepIndex];
+
+    // Check if this step should render sign-off buttons
+    const shouldRenderSignOffButtons = currentStep && 'renderSignOffButtons' in currentStep && (currentStep as any).renderSignOffButtons;
+
+    const mainContent = EFPRenderUtils.renderMainContent(
       this.currentSectionIndex,
       this.flatSteps,
       this.currentStepIndex,
@@ -1332,481 +923,46 @@ export class EFPEntryForm extends LitElement {
       (subchapterData: any) => this.renderContainerSubchapter(subchapterData),
       (chapterData: any) => this.renderContainerChapter(chapterData)
     );
+
+    // If sign-off buttons should be rendered, append them as a live component
+    if (shouldRenderSignOffButtons) {
+      return html`
+        ${mainContent}
+        <workbook-sign-off-buttons></workbook-sign-off-buttons>
+      `;
+    }
+
+    return mainContent;
   }
 
   // Generate Section B items directly from questionnaire store
   private getSectionBItemsFromStore(): EFPSectionItem[] {
-    const questionnaire: any = getQuestionnaireFromStore();
-
-    // If questionnaire store is not loaded, show loading state
-    if (!questionnaire?.chapters?.length) {
-      logger.info({
-        message: '📋 Questionnaire store not loaded, showing loading state',
-      });
-      return [
-        {
-          label: 'Loading Environmental Farm Plan...',
-          content: `
-            <h3>Loading Environmental Farm Plan Questionnaire</h3>
-            <p>Please wait while we load the questionnaire chapters and questions from the store...</p>
-            <p><em>The questionnaire store is being initialized...</em></p>
-          `,
-          complete: false,
-        },
-      ];
-    }
-
-    const chapters = questionnaire.chapters[0] || [];
-    const items: EFPSectionItem[] = [];
-
-    chapters.forEach((chapter: any) => {
-      // Create the main chapter container (collapsible parent)
-      const chapterItem: EFPSectionItem = {
-        label: EFPTextUtils.formatChapterTitle(chapter),
-        title: EFPTextUtils.formatChapterTitle(chapter),
-        content: EFPSectionGenerator.renderChapterContainerContent(chapter), // We now want to display the description for containers
-        complete: chapter.complete || false, // Use completion from store
-        isContainer: true,
-        chapterId: chapter.id, // Store chapter ID for completion lookup
-        chapterData: chapter, // Store chapter data for rendering questions when container is clicked
-        items: [],
-      };
-
-      // Add all subchapters as direct clickable items under the main chapter
-      if (chapter.subchapters && chapter.subchapters.length > 0) {
-        chapter.subchapters.forEach((subchapter: any) => {
-          // Add the subchapter as a clickable item
-          const formattedSubchapterTitle =
-            EFPTextUtils.formatChapterTitle(subchapter);
-          const subchapterItem: EFPSectionItem = {
-            label: formattedSubchapterTitle,
-            content: EFPSectionGenerator.renderSubchapterContent(subchapter),
-            complete: subchapter.complete || false, // Use completion from store
-            chapterId: subchapter.id, // Store chapter ID for completion lookup
-            subchapterData: subchapter, // Keep for backward compatibility
-          };
-
-          // If subchapter has sub-subchapters, add them as nested items
-          if (subchapter.subchapters && subchapter.subchapters.length > 0) {
-            subchapterItem.items = subchapter.subchapters.map(
-              (subSubchapter: any) => {
-                // Format sub-subchapter title
-                const formattedSubSubTitle =
-                  EFPTextUtils.formatChapterTitle(subSubchapter);
-
-                return {
-                  label: formattedSubSubTitle,
-                  content:
-                    EFPSectionGenerator.renderSubchapterContent(subSubchapter),
-                  complete: subSubchapter.complete || false, // Use completion from store
-                  chapterId: subSubchapter.id, // Store chapter ID for completion lookup
-                  subchapterData: subSubchapter, // Keep for backward compatibility
-                };
-              }
-            );
-
-            // Add title property for sl-details rendering
-            subchapterItem.title = subchapterItem.label;
-          }
-
-          // Always add the subchapter to the main chapter items
-          chapterItem.items!.push(subchapterItem);
-        });
-      } else {
-        // If no subchapters, add the main chapter itself as a clickable item
-        const formattedTitle = EFPTextUtils.formatChapterTitle(chapter);
-        chapterItem.items!.push({
-          label: formattedTitle,
-          content: EFPSectionGenerator.renderChapterContent(chapter),
-          complete: chapter.complete || false, // Use completion from store
-          chapterId: chapter.id, // Store chapter ID for completion lookup
-          chapterData: chapter, // Keep for backward compatibility
-        });
-      }
-
-      items.push(chapterItem);
-    });
-
-    // Add "My Action Plan" chapter from portal page data
-    const myActionPlanItem = this.getMyActionPlanItemsFromPortalPage();
-    items.push(myActionPlanItem);
-
-    return items;
+    return EFPSectionGenerator.getSectionBItemsFromStore();
   }
 
-  // Generate My Action Plan items from portal page data
-  private getMyActionPlanItemsFromPortalPage(): EFPSectionItem {
-    const portalPageName = 'My Action Plan';
-    const portalPageData = POWERPOD.state?.portalPages?.[portalPageName];
+  private getSectionCItemsFromPortalPage(): EFPSectionItem[] {
+    return EFPSectionGenerator.getSectionCItemsFromPortalPage();
+  }
 
-    // If portal page data is not loaded yet, return loading state
-    if (!portalPageData) {
-      logger.info({
-        message: '📄 My Action Plan portal page data not loaded yet, showing loading state',
-      });
-      return {
-        label: 'My Action Plan',
-        title: 'My Action Plan',
-        content: `
-          <div style="display: flex; justify-content: center; align-items: center; min-height: 300px;">
-            <div id="spinner"></div>
-          </div>
-        `,
-        complete: false,
-        isContainer: true,
-        disableExpand: true,
-        hideSkipChapterCheckbox: true,
-        items: [
-          {
-            label: 'My Action Plan',
-            content: `
-              <div style="display: flex; justify-content: center; align-items: center; min-height: 300px;">
-                <div id="spinner"></div>
-              </div>
-            `,
-            complete: false,
-            hideSkipChapterCheckbox: true,
-          }
-        ],
-      };
-    }
-
-    // Build the content from sections 1-6
-    const sections = [
-      portalPageData.quartech_section1,
-      portalPageData.quartech_section2,
-      portalPageData.quartech_section3,
-      portalPageData.quartech_section4,
-      portalPageData.quartech_section5,
-      portalPageData.quartech_section6,
-    ].filter((section) => section); // Filter out null/undefined sections
-
-    // Clean up the HTML content to remove problematic font-family styles
-    const cleanedSections = sections.map((section) => {
-      if (!section) return section;
-      // Replace Roboto Slab font-family with BC Sans
-      let cleaned = section.replace(
-        /font-family:\s*&quot;Roboto Slab&quot;[^;]*;/gi,
-        ''
-      );
-      cleaned = cleaned.replace(/font-family:\s*"Roboto Slab"[^;]*;/gi, '');
-      cleaned = cleaned.replace(/font-family:\s*'Roboto Slab'[^;]*;/gi, '');
-      // Also replace list-style-position: inside with outside
-      cleaned = cleaned.replace(
-        /list-style-position:\s*inside/gi,
-        'list-style-position: outside'
-      );
-      return cleaned;
-    });
-
-    const actionPlanContent = `
-      <div style="font-family: 'BC Sans', 'Noto Sans', Verdana, sans-serif !important;">
-        <style>
-          .action-plan-content * {
-            font-family: 'BC Sans', 'Noto Sans', Verdana, sans-serif !important;
-          }
-          .action-plan-content ul {
-            list-style-position: outside !important;
-            padding-left: 2em !important;
-            margin: 1em 0 !important;
-          }
-          .action-plan-content ol {
-            list-style-position: outside !important;
-            padding-left: 2em !important;
-            margin: 1em 0 !important;
-          }
-          .action-plan-content li {
-            display: list-item !important;
-            padding-left: 0.5em !important;
-            line-height: 1.6 !important;
-          }
-          .action-plan-content h1, .action-plan-content h2, .action-plan-content h3,
-          .action-plan-content h4, .action-plan-content h5, .action-plan-content h6 {
-            font-family: 'BC Sans', 'Noto Sans', Verdana, sans-serif !important;
-          }
-          .action-plan-content p {
-            font-family: 'BC Sans', 'Noto Sans', Verdana, sans-serif !important;
-          }
-        </style>
-        <div class="action-plan-content">
-          ${cleanedSections.join('\n')}
-        </div>
-        <action-plan-table></action-plan-table>
-      </div>
-    `;
-
+  // Completion context for utility methods
+  private getCompletionContext(): CompletionContext {
     return {
-      label: 'My Action Plan',
-      title: 'My Action Plan',
-      content: actionPlanContent,
-      complete: false,
-      isContainer: true,
-      disableExpand: true,
-      hideSkipChapterCheckbox: true,
-      items: [
-        {
-          label: 'My Action Plan',
-          content: actionPlanContent,
-          complete: false,
-          hideSkipChapterCheckbox: true,
-        }
-      ],
+      hasTriedToSubmit: this.hasTriedToSubmit,
+      getQuestionsForChapter: (chapterId: string, excludePreventSkipping?: boolean) =>
+        this.getQuestionsForCurrentChapter(chapterId, excludePreventSkipping),
     };
   }
 
-  // Generate Section C items from portal page data
-  private getSectionCItemsFromPortalPage(): EFPSectionItem[] {
-    const portalPageName = 'Workbook Terms and Conditions Sign-off';
-    const portalPageData = POWERPOD.state?.portalPages?.[portalPageName];
-
-    // If portal page data is not loaded yet, return loading state
-    if (!portalPageData) {
-      logger.info({
-        message: '📄 Portal page data not loaded yet, showing loading state',
-      });
-      return [
-        {
-          label: '',
-          content: `
-            <div style="display: flex; justify-content: center; align-items: center; min-height: 300px;">
-              <div id="spinner"></div>
-            </div>
-          `,
-          complete: false,
-        },
-      ];
-    }
-
-    // Build the terms and conditions content from sections 1-6
-    const sections = [
-      portalPageData.quartech_section1,
-      portalPageData.quartech_section2,
-      portalPageData.quartech_section3,
-      portalPageData.quartech_section4,
-      portalPageData.quartech_section5,
-      portalPageData.quartech_section6,
-    ].filter((section) => section); // Filter out null/undefined sections
-
-    // Clean up the HTML content to remove problematic font-family styles
-    const cleanedSections = sections.map((section) => {
-      if (!section) return section;
-      // Replace Roboto Slab font-family with BC Sans
-      let cleaned = section.replace(
-        /font-family:\s*&quot;Roboto Slab&quot;[^;]*;/gi,
-        ''
-      );
-      cleaned = cleaned.replace(/font-family:\s*"Roboto Slab"[^;]*;/gi, '');
-      cleaned = cleaned.replace(/font-family:\s*'Roboto Slab'[^;]*;/gi, '');
-      // Also replace list-style-position: inside with outside
-      cleaned = cleaned.replace(
-        /list-style-position:\s*inside/gi,
-        'list-style-position: outside'
-      );
-      return cleaned;
-    });
-
-    const termsContent = `
-      <div style="font-family: 'BC Sans', 'Noto Sans', Verdana, sans-serif !important;">
-        <style>
-          .terms-content * {
-            font-family: 'BC Sans', 'Noto Sans', Verdana, sans-serif !important;
-          }
-          .terms-content ul {
-            list-style-position: outside !important;
-            padding-left: 2em !important;
-            margin: 1em 0 !important;
-          }
-          .terms-content ol {
-            list-style-position: outside !important;
-            padding-left: 2em !important;
-            margin: 1em 0 !important;
-          }
-          .terms-content li {
-            display: list-item !important;
-            padding-left: 0.5em !important;
-            line-height: 1.6 !important;
-          }
-          .terms-content h1, .terms-content h2, .terms-content h3,
-          .terms-content h4, .terms-content h5, .terms-content h6 {
-            font-family: 'BC Sans', 'Noto Sans', Verdana, sans-serif !important;
-          }
-          .terms-content p {
-            font-family: 'BC Sans', 'Noto Sans', Verdana, sans-serif !important;
-          }
-        </style>
-        <div class="terms-content">
-          <h3>Environmental Farm Plan Terms & Conditions</h3>
-          <p>Please read the following terms and conditions carefully before proceeding with your Environmental Farm Plan submission.</p>
-          ${cleanedSections.join('\n')}
-        </div>
-        <workbook-sign-off-buttons></workbook-sign-off-buttons>
-      </div>
-    `;
-
-    return [
-      {
-        label: 'Terms & Conditions',
-        content: termsContent,
-        complete: false,
-      },
-    ];
-  }
-
-  // Get completion status from questionnaire store for navigation items
   private getCompletionFromStore(item: any): boolean {
-    if (!isQuestionnaireLoaded()) {
-      // Fallback to item's current complete status
-
-      return item.complete || false;
-    }
-
-    try {
-      // Check if this is a chapter item (new chapterId property from store)
-      if (item.chapterId) {
-        const chapter = getChapterFromStore(item.chapterId);
-        const storeComplete = chapter?.complete || false;
-
-        return storeComplete;
-      }
-
-      // Check if this is a question item
-      if (item.questionId) {
-        const question = getQuestionFromStore(item.questionId);
-        const storeComplete = question?.complete || false;
-
-        return storeComplete;
-      }
-
-      // For nested items (containers), check children completion
-      if ('items' in item && Array.isArray(item.items)) {
-        // All child items must be complete for parent to be complete
-        const childrenComplete = item.items.every((child: any) =>
-          this.getCompletionFromStore(child)
-        );
-
-        return childrenComplete;
-      }
-
-      // Fallback to item's current status
-
-      return item.complete || false;
-    } catch (error) {
-      logger.warn({
-        message: `Failed to get completion from questionnaire store: ${String(
-          error
-        )}`,
-      });
-      return item.complete || false;
-    }
+    return EFPCompletionUtils.getCompletionFromStore(item);
   }
 
-  // Get section completion status from questionnaire store
   private getSectionCompletionFromStore(section: any): boolean {
-    // For My Workbook, use questionnaire store completion
-    if (section.tab === 'My Workbook' && isQuestionnaireLoaded()) {
-      try {
-        // Import questionnaire stats dynamically to avoid circular imports
-        const questionnaire = getQuestionnaireFromStore();
-        if (questionnaire) {
-          // Calculate completion based on questionnaire store data
-          // Section is complete if all questions are either answered OR skipped
-          let totalQuestions = 0;
-          let completedOrSkippedQuestions = 0;
-
-          const countInChapters = (chapters: any[]) => {
-            chapters.forEach((chapter: any) => {
-              if (chapter.questions) {
-                chapter.questions.forEach((question: any) => {
-                  totalQuestions++;
-
-                  // Check if question is complete or skipped
-                  const entry = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.get(question.id);
-                  const isSkipped = entry?.response?.quartech_chapterskipped === 100000000;
-                  const hasResponse = entry?.response?.quartech_response &&
-                                     entry.response.quartech_response.trim() !== '';
-
-                  // Question is complete if it's skipped OR has a response
-                  if (isSkipped || hasResponse) {
-                    completedOrSkippedQuestions++;
-                  }
-                });
-              }
-              if (chapter.subchapters) {
-                countInChapters(chapter.subchapters);
-              }
-            });
-          };
-
-          if (questionnaire.chapters && questionnaire.chapters.length > 0) {
-            countInChapters(questionnaire.chapters[0]);
-          }
-
-          // Section is complete if all questions are either answered or skipped
-          return totalQuestions > 0 && completedOrSkippedQuestions === totalQuestions;
-        }
-      } catch (error) {
-        logger.warn({
-          message: `Failed to get section completion from questionnaire store: ${String(
-            error
-          )}`,
-        });
-      }
-    }
-
-    // Fallback to existing logic
-    return EFPCompletionUtils.isSectionComplete(section);
+    return EFPCompletionUtils.getSectionCompletionFromStore(section);
   }
 
-  // Get section skipped status from questionnaire store
   private getSectionSkippedFromStore(section: any): boolean {
-    // Only check for My Workbook section
-    if (section.tab !== 'My Workbook') {
-      return false;
-    }
-
-    if (!POWERPOD.workbookQuestionsAndResponses.isLoaded) {
-      return false;
-    }
-
-    try {
-      const questionnaire = getQuestionnaireFromStore();
-      if (!questionnaire) {
-        return false;
-      }
-
-      // Check if ALL questions in the section are skipped
-      let totalQuestions = 0;
-      let skippedQuestions = 0;
-
-      const countInChapters = (chapters: any[]) => {
-        chapters.forEach((chapter: any) => {
-          if (chapter.questions) {
-            chapter.questions.forEach((question: any) => {
-              totalQuestions++;
-              const entry = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.get(question.id);
-              if (entry?.response?.quartech_chapterskipped === 100000000) {
-                skippedQuestions++;
-              }
-            });
-          }
-          if (chapter.subchapters) {
-            countInChapters(chapter.subchapters);
-          }
-        });
-      };
-
-      if (questionnaire.chapters && questionnaire.chapters.length > 0) {
-        countInChapters(questionnaire.chapters[0]);
-      }
-
-      // Section is skipped if all questions are skipped
-      return totalQuestions > 0 && skippedQuestions === totalQuestions;
-    } catch (error) {
-      logger.warn({
-        message: `Failed to get section skipped status: ${String(error)}`,
-      });
-      return false;
-    }
+    return EFPCompletionUtils.getSectionSkippedFromStore(section);
   }
 
   // Public API methods
@@ -1887,7 +1043,70 @@ export class EFPEntryForm extends LitElement {
     return EFPCompletionUtils.calculateOverallCompletion(this.sections);
   }
 
-  // Navigation methods
+  // Navigation methods - creates context for navigation utilities
+  private getNavigationContext(): NavigationContext {
+    return {
+      currentStepIndex: this.currentStepIndex,
+      flatSteps: this.flatSteps,
+      sections: this.sections,
+      activeContentTitle: this.activeContent.title,
+      canAccessReviewAndSubmit: this.canAccessReviewAndSubmit(),
+      getQuestionsForChapter: (chapterId: string) => this.getQuestionsForCurrentChapter(chapterId),
+    };
+  }
+
+  // Apply navigation result to component state
+  private applyNavigationResult(result: NavigationResult): void {
+    if (!result.success) {
+      if (result.showIncompleteAlert) {
+        this.showIncompleteQuestionsAlert();
+      }
+      return;
+    }
+
+    this.isNavigating = true;
+    if (result.newStepIndex !== undefined) {
+      this.currentStepIndex = result.newStepIndex;
+    }
+    if (result.newSectionIndex !== undefined) {
+      this.currentSectionIndex = result.newSectionIndex;
+    }
+    if (result.newActiveContent) {
+      this.activeContent = result.newActiveContent;
+      this.updateNavigationState(result.newActiveContent.title);
+    }
+
+    // Handle scrolling
+    this.updateComplete.then(() => {
+      if (result.scrollToQuestion) {
+        // Small delay to ensure DOM is fully rendered
+        setTimeout(() => {
+          const questionElement = this.shadowRoot?.querySelector(
+            `[data-question-id="${result.scrollToQuestion!.questionId}"]`
+          ) as HTMLElement;
+
+          if (questionElement) {
+            questionElement.classList.add('question-highlight');
+            questionElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            setTimeout(() => {
+              questionElement.classList.remove('question-highlight');
+            }, 3000);
+          }
+        }, 200);
+      } else if (result.scrollToTop) {
+        const mainContent = this.shadowRoot?.querySelector('main.main-content');
+        if (mainContent) {
+          mainContent.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }
+    });
+
+    setTimeout(() => {
+      this.isNavigating = false;
+    }, 100);
+    this.requestUpdate();
+  }
+
   private goToNext() {
     logger.info({
       message: `goToNext called, current step: ${this.currentStepIndex}, ${
@@ -1895,219 +1114,14 @@ export class EFPEntryForm extends LitElement {
       }`,
     });
 
-    // Handle case where currentStepIndex is -1 (step not found in flatSteps)
-    if (this.currentStepIndex === -1) {
-      logger.warn({
-        message:
-          'currentStepIndex is -1, trying to find current step by activeContent title',
-      });
-      const foundIndex = this.flatSteps.findIndex(
-        (step) => step.label === this.activeContent.title
-      );
-      if (foundIndex !== -1) {
-        logger.info({
-          message: `Found current step "${this.activeContent.title}" at index ${foundIndex}`,
-        });
-        this.currentStepIndex = foundIndex;
-      } else {
-        logger.error({
-          message: `Could not find current step "${this.activeContent.title}" in flatSteps`,
-        });
-        return; // Don't proceed with navigation if we can't find current position
-      }
-    }
-
-    const currentStep = this.flatSteps[this.currentStepIndex];
-    let nextIndex = EFPNavigationUtils.findNextSelectableStep(
-      this.currentStepIndex,
-      this.flatSteps,
-      this.sections
-    );
-    if (nextIndex != null) {
-      let nextStep = this.flatSteps[nextIndex];
-
-      // When crossing section boundaries, navigate to the first content step in the new section
-      // This matches the behavior of clicking the section tab directly
-      if (currentStep && nextStep.sectionIndex !== currentStep.sectionIndex) {
-        const firstContentStep = EFPNavigationUtils.findFirstSelectableStepInSection(
-          nextStep.sectionIndex,
-          this.flatSteps,
-          this.sections
-        );
-        if (firstContentStep) {
-          logger.info({
-            message: `Crossing to section ${nextStep.sectionIndex}, navigating to first content step "${firstContentStep.step.label}"`,
-          });
-          nextIndex = firstContentStep.index;
-          nextStep = firstContentStep.step;
-        }
-      }
-
-      // Block navigation to "Review & Submit" section if there are incomplete questions
-      if (nextStep.sectionIndex === 1 && !this.canAccessReviewAndSubmit()) {
-        this.showIncompleteQuestionsAlert();
-        logger.info({
-          message: 'Prevented navigation to Review & Submit - incomplete questions',
-        });
-        return;
-      }
-
-      // Check if next step has the same label and content as current step
-      // This can happen with duplicate entries like "My Action Plan"
-      const isSameContent = currentStep &&
-        currentStep.label === nextStep.label &&
-        currentStep.content === nextStep.content;
-
-      if (isSameContent) {
-        logger.info({
-          message: `Skipping duplicate step "${nextStep.label}" at index ${nextIndex}, continuing to next`,
-        });
-
-        // Skip this duplicate and go to the next step
-        const nextNextIndex = EFPNavigationUtils.findNextSelectableStep(
-          nextIndex,
-          this.flatSteps,
-          this.sections
-        );
-
-        if (nextNextIndex != null) {
-          const nextNextStep = this.flatSteps[nextNextIndex];
-
-          // Block navigation to "Review & Submit" section if there are incomplete questions
-          if (nextNextStep.sectionIndex === 1 && !this.canAccessReviewAndSubmit()) {
-            this.showIncompleteQuestionsAlert();
-            logger.info({
-              message: 'Prevented navigation to Review & Submit - incomplete questions',
-            });
-            return;
-          }
-
-          this.isNavigating = true;
-          this.currentStepIndex = nextNextIndex;
-          this.currentSectionIndex = nextNextStep.sectionIndex;
-          this.activeContent = { title: nextNextStep.label, content: nextNextStep.content };
-          this.updateNavigationState(nextNextStep.label);
-
-          // Scroll to top of main content to provide visual feedback
-          this.updateComplete.then(() => {
-            const mainContent = this.shadowRoot?.querySelector('main.main-content');
-            if (mainContent) {
-              mainContent.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
-          });
-
-          setTimeout(() => {
-            this.isNavigating = false;
-          }, 100);
-          this.requestUpdate();
-        }
-        return;
-      }
-
-      this.isNavigating = true;
-      this.currentStepIndex = nextIndex;
-      this.currentSectionIndex = nextStep.sectionIndex;
-      this.activeContent = { title: nextStep.label, content: nextStep.content };
-      this.updateNavigationState(nextStep.label);
-
-      // Scroll to top of main content to provide visual feedback
-      this.updateComplete.then(() => {
-        const mainContent = this.shadowRoot?.querySelector('main.main-content');
-        if (mainContent) {
-          mainContent.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-      });
-
-      setTimeout(() => {
-        this.isNavigating = false;
-      }, 100);
-      this.requestUpdate();
-    }
+    const ctx = this.getNavigationContext();
+    const result = EFPNavigationUtils.calculateNextNavigation(ctx);
+    this.applyNavigationResult(result);
   }
 
-  // Find the next required step (earliest unanswered, non-skipped question)
-  private findNextRequiredStep(): { stepIndex: number; questionId: string } | null {
-    if (!POWERPOD.workbookQuestionsAndResponses.isLoaded) {
-      logger.warn({
-        message: 'Cannot find next required step: workbook questions and responses not loaded',
-      });
-      return null;
-    }
-
-    const questionnaire = getQuestionnaireFromStore();
-    if (!questionnaire?.chapters?.length) {
-      logger.warn({
-        message: 'Cannot find next required step: questionnaire not loaded',
-      });
-      return null;
-    }
-
-    // Start searching from the beginning to find the earliest required question
-    const startIndex = 0;
-
-    // Iterate through all steps in the My Workbook section (section index 0)
-    for (let i = startIndex; i < this.flatSteps.length; i++) {
-      const step = this.flatSteps[i];
-
-      // Only check steps in My Workbook section
-      if (step.sectionIndex !== 0) {
-        continue;
-      }
-
-      // Skip section headers
-      if (step.label.startsWith('Section ')) {
-        continue;
-      }
-
-      // For container steps, only skip if they don't have their own questions
-      if (step.isContainer) {
-        const hasOwnQuestions = step.chapterData?.questions?.length > 0;
-        if (!hasOwnQuestions) {
-          continue;
-        }
-      }
-
-      // Get the chapter ID for this step
-      const chapterId = step.chapterId ||
-                       step.chapterData?.id ||
-                       step.subchapterData?.id;
-
-      if (!chapterId) {
-        continue;
-      }
-
-      // Get all questions for this chapter
-      const questions = this.getQuestionsForCurrentChapter(chapterId);
-
-      // Find the first unanswered, non-skipped question in this chapter
-      const firstUnansweredQuestion = questions.find((question: any) => {
-        const entry = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.get(question.id);
-        const isSkipped = entry?.response?.quartech_chapterskipped === 100000000;
-        const hasResponse = entry?.response?.quartech_response &&
-                           entry.response.quartech_response.trim() !== '';
-
-        // Question is required and unanswered if it's not skipped AND has no response
-        return !isSkipped && !hasResponse;
-      });
-
-      if (firstUnansweredQuestion) {
-        logger.info({
-          message: 'Found next required step with unanswered questions',
-          data: {
-            stepIndex: i,
-            stepLabel: step.label,
-            chapterId,
-            questionId: firstUnansweredQuestion.id,
-          },
-        });
-        return { stepIndex: i, questionId: firstUnansweredQuestion.id };
-      }
-    }
-
-    logger.info({
-      message: 'No required unanswered questions found after current step',
-    });
-    return null;
+  // Note: Currently unused but may be needed for future features
+  private _findNextRequiredStep(): { stepIndex: number; questionId: string } | null {
+    return EFPNavigationUtils.findNextRequiredStep(this.getNavigationContext());
   }
 
   // Navigation event handlers
@@ -2115,122 +1129,10 @@ export class EFPEntryForm extends LitElement {
     this.goToPrevious();
   }
 
-  private handleNavigationSkip(event: CustomEvent) {
-    // Find the next required question that hasn't been skipped or completed
-    const result = this.findNextRequiredStep();
-
-    if (result !== null) {
-      const { stepIndex, questionId } = result;
-      const nextStep = this.flatSteps[stepIndex];
-
-      logger.info({
-        message: 'Navigating to next required step',
-        data: {
-          stepIndex,
-          stepLabel: nextStep.label,
-          questionId,
-        },
-      });
-
-      this.isNavigating = true;
-      this.currentStepIndex = stepIndex;
-      this.currentSectionIndex = nextStep.sectionIndex;
-      this.activeContent = { title: nextStep.label, content: nextStep.content };
-      this.updateNavigationState(nextStep.label);
-
-      // Scroll to and highlight the specific question
-      this.updateComplete.then(() => {
-        // Small delay to ensure DOM is fully rendered
-        setTimeout(() => {
-          const questionElement = this.shadowRoot?.querySelector(
-            `[data-question-id="${questionId}"]`
-          ) as HTMLElement;
-
-          if (questionElement) {
-            // Add highlight class
-            questionElement.classList.add('question-highlight');
-
-            // Scroll to the question with some offset for better visibility
-            questionElement.scrollIntoView({
-              behavior: 'smooth',
-              block: 'center'
-            });
-
-            // Remove highlight after 3 seconds
-            setTimeout(() => {
-              questionElement.classList.remove('question-highlight');
-            }, 3000);
-
-            logger.info({
-              message: 'Scrolled to and highlighted question',
-              data: { questionId },
-            });
-          } else {
-            logger.warn({
-              message: 'Could not find question element to scroll to',
-              data: { questionId },
-            });
-          }
-        }, 200);
-      });
-
-      setTimeout(() => {
-        this.isNavigating = false;
-      }, 100);
-      this.requestUpdate();
-    } else {
-      // No required unanswered questions found - all questions are complete
-      logger.info({
-        message: 'No required unanswered questions found - navigating to Review & Submit',
-      });
-
-      // Check if all questions are complete (can access Review & Submit)
-      if (this.canAccessReviewAndSubmit()) {
-        // Navigate to Review & Submit section (section index 1)
-        const target = EFPNavigationUtils.navigateToSection(
-          1,
-          this.flatSteps,
-          this.sections
-        );
-
-        if (target) {
-          const step = this.flatSteps[target.stepIndex];
-
-          logger.info({
-            message: 'Navigating to Review & Submit section',
-            data: {
-              stepIndex: target.stepIndex,
-              stepLabel: step.label,
-            },
-          });
-
-          this.isNavigating = true;
-          this.currentStepIndex = target.stepIndex;
-          this.currentSectionIndex = target.sectionIndex;
-          this.activeContent = { title: step.label, content: step.content };
-          this.updateNavigationState(step.label);
-
-          // Scroll to top of main content
-          this.updateComplete.then(() => {
-            const mainContent = this.shadowRoot?.querySelector('main.main-content');
-            if (mainContent) {
-              mainContent.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
-          });
-
-          setTimeout(() => {
-            this.isNavigating = false;
-          }, 100);
-          this.requestUpdate();
-        }
-      } else {
-        // Should not happen, but show alert just in case
-        logger.warn({
-          message: 'Cannot navigate to Review & Submit - incomplete questions',
-        });
-        this.showIncompleteQuestionsAlert();
-      }
-    }
+  private handleNavigationSkip(_event: CustomEvent) {
+    const ctx = this.getNavigationContext();
+    const result = EFPNavigationUtils.calculateSkipNavigation(ctx);
+    this.applyNavigationResult(result);
   }
 
   private handleNavigationContinue() {
@@ -2252,8 +1154,10 @@ export class EFPEntryForm extends LitElement {
       this.showIncompleteQuestionsAlert();
 
       // Stay on current section by resetting the tab
+      // The sl-tab-group is inside the navigation-sidebar component's shadow root
       setTimeout(() => {
-        const tabGroup = this.shadowRoot?.querySelector('sl-tab-group') as any;
+        const sidebar = this.shadowRoot?.querySelector('navigation-sidebar');
+        const tabGroup = sidebar?.shadowRoot?.querySelector('sl-tab-group') as any;
         if (tabGroup) {
           tabGroup.show(`section-${this.currentSectionIndex}`);
         }
@@ -2295,21 +1199,8 @@ export class EFPEntryForm extends LitElement {
         message: `Rating changed for question ${questionId}: ${value}`,
       });
 
-      // Store the pending value
-      this.pendingResponseValues.set(questionId, String(value));
-
-      // Clear any existing debounce timer for this question
-      const existingTimer = this.responseSaveDebounceTimers.get(questionId);
-      if (existingTimer) {
-        clearTimeout(existingTimer);
-      }
-
-      // Set a new debounce timer (1000ms delay)
-      const timer = window.setTimeout(() => {
-        this.saveDebouncedResponse(questionId);
-      }, 1000);
-
-      this.responseSaveDebounceTimers.set(questionId, timer);
+      // Delegate to service
+      this.services.responseService.handleRatingChange(questionId, value);
 
       // Also call the original handler for any additional processing
       EFPEventUtils.handleRatingChanged(
@@ -2322,15 +1213,15 @@ export class EFPEntryForm extends LitElement {
       );
     } catch (error) {
       logger.error({
-        message: `Failed to save rating response: ${(error as Error).message}`,
+        message: `Failed to handle rating change: ${(error as Error).message}`,
       });
 
-      // Still call the original handler even if save fails
+      // Still call the original handler even if service fails
       EFPEventUtils.handleRatingChanged(
         event,
         (questionId: string, value: any) => {
           logger.info({
-            message: `Rating stored locally for question ${questionId}: ${value} (save failed)`,
+            message: `Rating stored locally for question ${questionId}: ${value} (service failed)`,
           });
         }
       );
@@ -2396,163 +1287,26 @@ export class EFPEntryForm extends LitElement {
 
       // Get the valid options for this question
       const question = getQuestionFromStore(questionId);
-      const optionsString = question?.multiselectOptions || '';
+      const optionsString = (question as any)?.multiselectOptions || '';
       const validOptions = optionsString
         .split(';')
         .map((opt: string) => opt.trim())
         .filter((opt: string) => opt.length > 0);
 
-      // Get current pending value or existing response
-      let selectedOptions: string[];
-      if (this.pendingMultiselectValues.has(questionId)) {
-        // Use pending value if it exists
-        selectedOptions = this.pendingMultiselectValues.get(questionId)!;
-      } else {
-        // Start with an empty array and only add valid options from existing response
-        const existingResponse = this.getResponseForQuestion(questionId);
-        const currentSelectedString = existingResponse?.quartech_response || '';
-        const existingSelectedOptions = currentSelectedString
-          .split(';')
-          .map((opt: string) => opt.trim())
-          .filter((opt: string) => opt.length > 0);
+      // Delegate to service
+      this.services.responseService.handleMultiselectChange(
+        questionId,
+        option,
+        isChecked,
+        validOptions
+      );
 
-        // Filter to only include options that are valid for the current question
-        selectedOptions = existingSelectedOptions.filter((opt: string) =>
-          validOptions.includes(opt)
-        );
-
-        logger.info({
-          message: `Filtered existing response for question ${questionId}`,
-          data: {
-            existingOptions: existingSelectedOptions,
-            validOptions: validOptions,
-            filteredOptions: selectedOptions,
-          },
-        });
-      }
-
-      // Update the selected options based on checkbox state
-      if (isChecked) {
-        // Add option if not already present
-        if (!selectedOptions.includes(option)) {
-          selectedOptions.push(option);
-        }
-      } else {
-        // Remove option
-        selectedOptions = selectedOptions.filter(
-          (opt: string) => opt !== option
-        );
-      }
-
-      // Store the pending value
-      this.pendingMultiselectValues.set(questionId, selectedOptions);
-
-      // Clear any existing debounce timer for this question
-      const existingTimer = this.responseSaveDebounceTimers.get(questionId);
-      if (existingTimer) {
-        clearTimeout(existingTimer);
-      }
-
-      // Set a new debounce timer (2000ms delay)
-      const timer = window.setTimeout(() => {
-        this.saveMultiselectResponse(questionId);
-      }, 2000);
-
-      this.responseSaveDebounceTimers.set(questionId, timer);
     } catch (error) {
       logger.error({
         message: `Failed to handle multi-select change: ${
           (error as Error).message
         }`,
       });
-    }
-  }
-
-  // Save the debounced response (for rating questions and other text-based responses)
-  private async saveDebouncedResponse(questionId: string) {
-    try {
-      const responseValue = this.pendingResponseValues.get(questionId);
-      if (responseValue === undefined) {
-        logger.warn({
-          message: `No pending value found for question ${questionId}`,
-        });
-        return;
-      }
-
-      logger.info({
-        message: `Saving debounced response for question ${questionId}: ${responseValue}`,
-      });
-
-      // Save the response
-      const responseData = await this.saveRatingResponse(
-        questionId,
-        responseValue
-      );
-
-      // Update the questionnaire store with the full response data
-      // Let updateQuestionResponse auto-calculate completion based on response content
-      updateQuestionResponse(questionId, responseValue, undefined, responseData);
-      this.responseUpdateCounter++; // Trigger re-render for validation
-      this.requestUpdate(); // Force immediate UI update
-
-      logger.info({
-        message: `Successfully saved debounced response for question ${questionId}`,
-      });
-
-      // Clean up
-      this.pendingResponseValues.delete(questionId);
-      this.responseSaveDebounceTimers.delete(questionId);
-    } catch (error) {
-      logger.error({
-        message: `Failed to save debounced response: ${
-          (error as Error).message
-        }`,
-      });
-      // Don't delete pending value on error, so user can retry
-    }
-  }
-
-  // Save the debounced multi-select response
-  private async saveMultiselectResponse(questionId: string) {
-    try {
-      const selectedOptions = this.pendingMultiselectValues.get(questionId);
-      if (!selectedOptions) {
-        logger.warn({
-          message: `No pending value found for question ${questionId}`,
-        });
-        return;
-      }
-
-      // Create semicolon-delimited string
-      const newValue = selectedOptions.join(';');
-
-      logger.info({
-        message: `Saving multi-select value for question ${questionId}: ${newValue}`,
-      });
-
-      // Save the response
-      const responseData = await this.saveRatingResponse(questionId, newValue);
-
-      // Update the questionnaire store with the full response data
-      // Let updateQuestionResponse auto-calculate completion based on response content
-      updateQuestionResponse(questionId, newValue, undefined, responseData);
-      this.responseUpdateCounter++; // Trigger re-render for validation
-      this.requestUpdate(); // Force immediate UI update
-
-      logger.info({
-        message: `Successfully saved multi-select response for question ${questionId}`,
-      });
-
-      // Clean up
-      this.pendingMultiselectValues.delete(questionId);
-      this.responseSaveDebounceTimers.delete(questionId);
-    } catch (error) {
-      logger.error({
-        message: `Failed to save multi-select response: ${
-          (error as Error).message
-        }`,
-      });
-      // Don't delete pending value on error, so user can retry
     }
   }
 
@@ -2563,30 +1317,9 @@ export class EFPEntryForm extends LitElement {
         message: `Multiline text input for question ${questionId}`,
       });
 
-      // Update character count immediately (no debounce)
-      this.multilineTextCharCounts.set(questionId, value.length);
+      // Delegate to service
+      this.services.responseService.handleMultilineTextInput(questionId, value);
 
-      // Store the pending value
-      this.pendingResponseValues.set(questionId, value);
-
-      // Update status to draft
-      this.multilineTextSaveStatus.set(questionId, 'draft');
-
-      // Request update to re-render with new character count
-      this.requestUpdate();
-
-      // Clear any existing debounce timer for this question
-      const existingTimer = this.responseSaveDebounceTimers.get(questionId);
-      if (existingTimer) {
-        clearTimeout(existingTimer);
-      }
-
-      // Set a new debounce timer (2000ms delay)
-      const timer = window.setTimeout(() => {
-        this.saveMultilineTextResponse(questionId);
-      }, 2000);
-
-      this.responseSaveDebounceTimers.set(questionId, timer);
     } catch (error) {
       logger.error({
         message: `Failed to handle multiline text input: ${
@@ -2599,265 +1332,21 @@ export class EFPEntryForm extends LitElement {
   // Force save multiline text (when user clicks the status indicator)
   private async handleForceSave(questionId: string) {
     try {
-      const status = this.multilineTextSaveStatus.get(questionId);
-
-      // Only allow force save if status is 'draft'
-      if (status !== 'draft') {
-        return;
-      }
-
       logger.info({
         message: `Force saving multiline text for question ${questionId}`,
       });
 
-      // Clear any existing debounce timer
-      const existingTimer = this.responseSaveDebounceTimers.get(questionId);
-      if (existingTimer) {
-        clearTimeout(existingTimer);
-        this.responseSaveDebounceTimers.delete(questionId);
-      }
+      // Delegate to service
+      await this.services.responseService.forceSaveMultilineText(questionId);
 
-      // Save immediately
-      await this.saveMultilineTextResponse(questionId);
     } catch (error) {
       logger.error({
-        message: `Failed to force save multiline text: ${
-          (error as Error).message
-        }`,
+        message: `Failed to force save multiline text: ${(error as Error).message}`,
       });
     }
   }
 
-  // Save the multiline text response
-  private async saveMultilineTextResponse(questionId: string) {
-    try {
-      const responseValue = this.pendingResponseValues.get(questionId);
-      if (responseValue === undefined) {
-        logger.warn({
-          message: `No pending value found for question ${questionId}`,
-        });
-        return;
-      }
 
-      logger.info({
-        message: `Saving multiline text response for question ${questionId}`,
-      });
-
-      // Update status to saving
-      this.multilineTextSaveStatus.set(questionId, 'saving');
-      this.requestUpdate();
-
-      // Save the response
-      const responseData = await this.saveRatingResponse(
-        questionId,
-        responseValue
-      );
-
-      // Update the questionnaire store with the full response data
-      updateQuestionResponse(questionId, responseValue, true, responseData);
-      this.responseUpdateCounter++; // Trigger re-render for validation
-      this.requestUpdate(); // Force immediate UI update
-
-      logger.info({
-        message: `Successfully saved multiline text response for question ${questionId}`,
-      });
-
-      // Update status to saved
-      this.multilineTextSaveStatus.set(questionId, 'saved');
-      this.requestUpdate();
-
-      // Clean up
-      this.pendingResponseValues.delete(questionId);
-      this.responseSaveDebounceTimers.delete(questionId);
-    } catch (error) {
-      logger.error({
-        message: `Failed to save multiline text response: ${
-          (error as Error).message
-        }`,
-      });
-      // Revert status to draft on error
-      this.multilineTextSaveStatus.set(questionId, 'draft');
-      this.requestUpdate();
-      // Don't delete pending value on error, so user can retry
-    }
-  }
-
-  // Helper method to build rating description for Point Rating questions
-  private buildRatingDescription(
-    questionId: string,
-    ratingValue: any
-  ): string | null {
-    // Only build description for Point Rating questions with numeric values (1-4)
-    const ratingNum = parseInt(String(ratingValue));
-    if (isNaN(ratingNum) || ratingNum < 1 || ratingNum > 4) {
-      return null;
-    }
-
-    // Get question data from memory
-    const questionData = this.getQuestionForQuestion(questionId);
-    if (!questionData) {
-      return null;
-    }
-
-    // Check if this is a Point Rating question
-    if (questionData.quartech_questiontype !== 100000001) {
-      // 100000001 is Point Rating
-      return null;
-    }
-
-    // Get the rating label and description
-    const labelKey = `quartech_rating${ratingNum}overwritelabel`;
-    const descKey = `quartech_rating${ratingNum}description`;
-
-    const label = questionData[labelKey] || `Risk Rating ${ratingNum}`;
-    const description = questionData[descKey];
-
-    // Only build description if there's a description field
-    if (!description) {
-      return null;
-    }
-
-    // Strip HTML tags from description to get plain text
-    const plainDescription = description.replace(/<[^>]*>/g, '').trim();
-
-    // Build the description in the format: "Rating Label: Description"
-    return `${label}: ${plainDescription}`;
-  }
-
-  // Helper method to save rating responses
-  private async saveRatingResponse(
-    questionId: string,
-    ratingValue: any
-  ): Promise<any> {
-    try {
-      const responseText = String(ratingValue);
-      const notes = `Rating: ${ratingValue}`;
-
-      // Build description for Point Rating questions with descriptions
-      const description = this.buildRatingDescription(questionId, ratingValue);
-
-      // Check if response already exists
-      const existingResponse = this.getResponseForQuestion(questionId);
-
-      let responseData;
-      let isNewResponse = false;
-
-      // Only update if we have an existing response WITH a valid ID
-      if (existingResponse && existingResponse.quartech_workbookresponseid) {
-        // Update existing response
-
-        await WorkbookResponseHelper.updateResponse(
-          existingResponse.quartech_workbookresponseid,
-          responseText,
-          { notes, description }
-        );
-
-        // Create updated response data
-        responseData = {
-          ...existingResponse,
-          quartech_response: responseText,
-          quartech_notes: notes,
-          quartech_description: description,
-          modifiedon: new Date().toISOString(),
-        };
-      } else {
-        // Create new response (either no response exists, or existing response lacks valid ID)
-        isNewResponse = true;
-
-        const createResult = (await WorkbookResponseHelper.createResponse(
-          questionId,
-          responseText,
-          { notes, description }
-        )) as any;
-
-        const workbookId = getWorkbookId();
-
-        // Create new response data with all fields from the API response
-        responseData = {
-          ...createResult.response,
-          quartech_workbookresponseid:
-            createResult.response?.quartech_workbookresponseid,
-          quartech_response: responseText,
-          quartech_notes: notes,
-          quartech_description: description,
-          _quartech_question_value: questionId,
-          _quartech_workbook_value: workbookId,
-          createdon:
-            createResult.response?.createdon || new Date().toISOString(),
-          modifiedon:
-            createResult.response?.modifiedon || new Date().toISOString(),
-        };
-
-        // CRITICAL: Update memory structures IMMEDIATELY after creation
-        // This ensures subsequent rapid saves will find the response and update instead of creating duplicates
-        this.updateMemoryStructuresForRating(questionId, responseData, true);
-      }
-
-      // Update memory structures for updates (for creates, already done above)
-      if (!isNewResponse) {
-        this.updateMemoryStructuresForRating(questionId, responseData, false);
-      }
-
-      // Update completion and navigation icons
-      this.updateCompletionAndNavigation();
-
-      // Trigger re-render (already called by updateCompletionAndNavigation, but keeping for clarity)
-      this.requestUpdate();
-
-      // Return the response data for use in questionnaire store
-      return responseData;
-    } catch (error) {
-      logger.error({
-        message: `Failed to save rating response: ${String(error)}`,
-      });
-      throw error;
-    }
-  }
-
-  // Update memory structures for rating responses
-  private async updateMemoryStructuresForRating(
-    questionId: string,
-    responseData: any,
-    isNewResponse: boolean
-  ) {
-    try {
-      // Update new nested structure using helper function
-      WorkbookResponseHelper.updateResponseInMemory(questionId, responseData);
-
-      // Update old structure for backward compatibility
-      POWERPOD.workbookResponses.responsesByQuestion.set(
-        questionId,
-        responseData
-      );
-
-      if (isNewResponse) {
-        // Add to beginning of data array (most recent first)
-        POWERPOD.workbookResponses.data.unshift(responseData);
-      } else {
-        // Update existing entry in data array
-        const dataIndex = POWERPOD.workbookResponses.data.findIndex(
-          (r: any) =>
-            r.quartech_workbookresponseid ===
-            responseData.quartech_workbookresponseid
-        );
-        if (dataIndex !== -1) {
-          POWERPOD.workbookResponses.data[dataIndex] = responseData;
-        }
-      }
-
-      // Update memory metadata for both structures
-      POWERPOD.workbookResponses.lastUpdated = new Date().toISOString();
-      POWERPOD.workbookQuestionsAndResponses.lastUpdated =
-        new Date().toISOString();
-    } catch (error) {
-      logger.error({
-        message: `Failed to update memory structures for rating: ${String(
-          error
-        )}`,
-      });
-      // Don't throw - this is a memory update issue, not a save issue
-    }
-  }
 
   // Navigation item click event handler
   private handleItemClick(item: EFPSectionItem) {
@@ -2913,98 +1402,9 @@ export class EFPEntryForm extends LitElement {
       }`,
     });
 
-    // Handle case where currentStepIndex is -1 (step not found in flatSteps)
-    if (this.currentStepIndex === -1) {
-      logger.warn({
-        message:
-          'currentStepIndex is -1, trying to find current step by activeContent title',
-      });
-      const foundIndex = this.flatSteps.findIndex(
-        (step) => step.label === this.activeContent.title
-      );
-      if (foundIndex !== -1) {
-        logger.info({
-          message: `Found current step "${this.activeContent.title}" at index ${foundIndex}`,
-        });
-        this.currentStepIndex = foundIndex;
-      } else {
-        logger.error({
-          message: `Could not find current step "${this.activeContent.title}" in flatSteps`,
-        });
-        return; // Don't proceed with navigation if we can't find current position
-      }
-    }
-
-    const prevIndex = EFPNavigationUtils.findPreviousSelectableStep(
-      this.currentStepIndex,
-      this.flatSteps,
-      this.sections
-    );
-    if (prevIndex != null) {
-      const prevStep = this.flatSteps[prevIndex];
-
-      // Check if previous step has the same label and content as current step
-      // This can happen with duplicate entries like "My Action Plan"
-      const currentStep = this.flatSteps[this.currentStepIndex];
-      const isSameContent = currentStep &&
-        currentStep.label === prevStep.label &&
-        currentStep.content === prevStep.content;
-
-      if (isSameContent) {
-        logger.info({
-          message: `Skipping duplicate step "${prevStep.label}" at index ${prevIndex}, continuing to previous`,
-        });
-
-        // Skip this duplicate and go to the previous step
-        const prevPrevIndex = EFPNavigationUtils.findPreviousSelectableStep(
-          prevIndex,
-          this.flatSteps,
-          this.sections
-        );
-
-        if (prevPrevIndex != null) {
-          const prevPrevStep = this.flatSteps[prevPrevIndex];
-          this.isNavigating = true;
-          this.currentStepIndex = prevPrevIndex;
-          this.currentSectionIndex = prevPrevStep.sectionIndex;
-          this.activeContent = { title: prevPrevStep.label, content: prevPrevStep.content };
-          this.updateNavigationState(prevPrevStep.label);
-
-          // Scroll to top of main content to provide visual feedback
-          this.updateComplete.then(() => {
-            const mainContent = this.shadowRoot?.querySelector('main.main-content');
-            if (mainContent) {
-              mainContent.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
-          });
-
-          setTimeout(() => {
-            this.isNavigating = false;
-          }, 100);
-          this.requestUpdate();
-        }
-        return;
-      }
-
-      this.isNavigating = true;
-      this.currentStepIndex = prevIndex;
-      this.currentSectionIndex = prevStep.sectionIndex;
-      this.activeContent = { title: prevStep.label, content: prevStep.content };
-      this.updateNavigationState(prevStep.label);
-
-      // Scroll to top of main content to provide visual feedback
-      this.updateComplete.then(() => {
-        const mainContent = this.shadowRoot?.querySelector('main.main-content');
-        if (mainContent) {
-          mainContent.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-      });
-
-      setTimeout(() => {
-        this.isNavigating = false;
-      }, 100);
-      this.requestUpdate();
-    }
+    const ctx = this.getNavigationContext();
+    const result = EFPNavigationUtils.calculatePreviousNavigation(ctx);
+    this.applyNavigationResult(result);
   }
 
   private get flatSteps(): EFPStep[] {
@@ -3126,113 +1526,21 @@ export class EFPEntryForm extends LitElement {
     );
   }
 
-  // Check if there are any incomplete children with preventSkipping: Yes
-  // A child is incomplete if it has any questions that are not skipped and not answered
-  private hasIncompletePreventSkippingChildren(subchapters: any[]): boolean {
-    for (const subchapter of subchapters) {
-      // Check if this subchapter has preventSkipping: Yes
-      if (subchapter.preventSkipping === true) {
-        // Check if this subchapter is incomplete
-        const questions = subchapter.questions || [];
-        const hasIncompleteQuestions = questions.some((question: any) => {
-          const entry = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.get(question.id);
-          const isSkipped = entry?.response?.quartech_chapterskipped === 100000000;
-          const hasResponse = entry?.response?.quartech_response &&
-                             entry.response.quartech_response.trim() !== '';
-
-          // Question is incomplete if it's not skipped AND has no response
-          return !isSkipped && !hasResponse;
-        });
-
-        if (hasIncompleteQuestions) {
-          return true;
-        }
-      }
-
-      // Recursively check sub-subchapters
-      if (subchapter.subchapters) {
-        if (this.hasIncompletePreventSkippingChildren(subchapter.subchapters)) {
-          return true;
-        }
-      }
-    }
-
-    return false;
+  // Delegate to EFPCompletionUtils
+  // Note: Currently unused but may be needed for future features
+  private _hasIncompletePreventSkippingChildren(subchapters: any[]): boolean {
+    return EFPCompletionUtils.hasIncompletePreventSkippingChildren(subchapters);
   }
 
-  // Get skipped status for an item from the store
   private getSkippedFromStore(item: EFPSectionItem): boolean {
-    // Only check for chapters (not questions or other items)
-    if (!item.chapterId) {
-      return false;
-    }
-
-    try {
-      // First check if the chapter is skipped (excluding preventSkipping children)
-      const isSkipped = this.isChapterSkippedById(item.chapterId);
-
-      if (!isSkipped) {
-        return false;
-      }
-
-      // If skipped, also check if there are any incomplete children with preventSkipping: Yes
-      // A chapter should only show as skipped if all preventSkipping children are completed
-      const chapter = getChapterFromStore(item.chapterId);
-      if (chapter?.subchapters) {
-        const hasIncompletePreventSkippingChildren = this.hasIncompletePreventSkippingChildren(chapter.subchapters);
-        if (hasIncompletePreventSkippingChildren) {
-          // Don't show as skipped if there are incomplete mandatory children
-          return false;
-        }
-      }
-
-      return true;
-    } catch (error) {
-      logger.error({
-        message: 'Error checking chapter skipped status',
-        data: { chapterId: item.chapterId, error: (error as Error).message },
-      });
-      return false;
-    }
+    return EFPCompletionUtils.getSkippedFromStore(
+      item,
+      (chapterId, excludePreventSkipping) => this.getQuestionsForCurrentChapter(chapterId, excludePreventSkipping)
+    );
   }
 
-  // Get incomplete status for an item from the store
-  // Returns true if the chapter has any incomplete (not skipped and no response) questions
-  // Only returns true if user has tried to submit
   private getIncompleteFromStore(item: EFPSectionItem): boolean {
-    // Only show incomplete status if user has tried to submit
-    if (!this.hasTriedToSubmit) {
-      return false;
-    }
-
-    // Only check for chapters (not questions or other items)
-    if (!item.chapterId) {
-      return false;
-    }
-
-    try {
-      const questions = this.getQuestionsForCurrentChapter(item.chapterId);
-      if (questions.length === 0) {
-        return false;
-      }
-
-      // Check if any question is incomplete (not skipped AND has no response)
-      return questions.some((question: any) => {
-        const entry = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.get(question.id);
-        const isSkipped = entry?.response?.quartech_chapterskipped === 100000000;
-        const hasResponse = entry?.response?.quartech_response &&
-                           entry.response.quartech_response.trim() !== '';
-
-        // Question is incomplete if it's not skipped AND has no response
-        return !isSkipped && !hasResponse;
-      });
-    } catch (error) {
-      logger.error({
-        message: 'Error checking chapter incomplete status',
-        data: { chapterId: item.chapterId, error: (error as Error).message },
-      });
-      return false;
-    }
+    return EFPCompletionUtils.getIncompleteFromStore(item, this.getCompletionContext());
   }
 
   updated(changedProps: Map<string, unknown>) {
@@ -3361,7 +1669,8 @@ export class EFPEntryForm extends LitElement {
       this.questionsAndResponsesLoaded = true;
 
       // Initialize the completion percentage from loaded stats
-      this.currentCompletionPercentage = result.stats.completionPercentage;
+      // REFACTORED: Now uses WorkbookValidationService
+      this.currentCompletionPercentage = this.services.validationService.calculateCompletionPercentage();
 
       logger.info({
         message: `Loaded ${result.stats.totalQuestions} questions with ${result.stats.answeredQuestions} responses (${result.stats.completionPercentage}% complete)`,
@@ -3388,8 +1697,9 @@ export class EFPEntryForm extends LitElement {
     this.workbookResponses = POWERPOD.workbookResponses.data;
 
     // Sync completion percentage from POWERPOD stats
+    // REFACTORED: Now uses WorkbookValidationService
     if (POWERPOD.workbookQuestionsAndResponses.isLoaded) {
-      this.currentCompletionPercentage = POWERPOD.workbookQuestionsAndResponses.stats.completionPercentage;
+      this.currentCompletionPercentage = this.services.validationService.calculateCompletionPercentage();
     }
 
     // Update completion and navigation icons
@@ -3407,10 +1717,6 @@ export class EFPEntryForm extends LitElement {
     // Log current completion status
     const completionPercent = this.completionPercent;
     logger.info({ message: `📊 Overall completion: ${completionPercent}%` });
-
-    if (POWERPOD.workbookQuestionsAndResponses.isLoaded) {
-      const stats = POWERPOD.workbookQuestionsAndResponses.stats;
-    }
   }
 
   // Update section completion status using questionnaire store
@@ -3448,8 +1754,6 @@ export class EFPEntryForm extends LitElement {
 
     const questionsWithResponses =
       POWERPOD.workbookQuestionsAndResponses.questionsWithResponses;
-    const questionsByChapter =
-      POWERPOD.workbookQuestionsAndResponses.questionsByChapter;
 
     // Update section completion based on chapter completion
     this.sections.forEach((section) => {
@@ -3545,20 +1849,7 @@ export class EFPEntryForm extends LitElement {
 
   // Helper method to get all leaf items from a nested structure
   private getAllLeafItems(items: any[]): any[] {
-    const leafItems: any[] = [];
-
-    const collect = (itemList: any[]) => {
-      for (const item of itemList) {
-        if ('items' in item && Array.isArray(item.items)) {
-          collect(item.items);
-        } else {
-          leafItems.push(item);
-        }
-      }
-    };
-
-    collect(items);
-    return leafItems;
+    return EFPSectionGenerator.getAllLeafItems(items);
   }
 
   // Helper method to get response for a specific question
@@ -3800,6 +2091,28 @@ export class EFPEntryForm extends LitElement {
     `;
   }
 
+  // Helper methods for NavigationSidebar
+  private getSectionCompletionMap(): Map<number, boolean> {
+    const map = new Map<number, boolean>();
+    this.sections.forEach((section, index) => {
+      map.set(index, this.getSectionCompletionFromStore(section));
+    });
+    return map;
+  }
+
+  private getSectionSkippedMap(): Map<number, boolean> {
+    const map = new Map<number, boolean>();
+    this.sections.forEach((section, index) => {
+      map.set(index, this.getSectionSkippedFromStore(section));
+    });
+    return map;
+  }
+
+  private handleSidebarSectionChange(e: CustomEvent) {
+    const { sectionIndex } = e.detail;
+    this.handleSectionChange(sectionIndex);
+  }
+
   render() {
     const workbookData = getWorkbookData() as any;
     const workbookId = workbookData?.quartech_digitalworkbookid || 'N/A';
@@ -3809,97 +2122,32 @@ export class EFPEntryForm extends LitElement {
     return html`
       <div class="container">
         <!-- Sidebar -->
-        <aside class="sidebar">
-          <div class="card">
-            <div><strong>Workbook ID:</strong> ${workbookId}</div>
-            <div><strong>Workbook Name:</strong> ${workbookName}</div>
-            <div><strong>Status:</strong> ${workbookStatus}</div>
-          </div>
-
-          <sl-tab-group
-            .activeTab=${`section-${this.currentSectionIndex}`}
-            @sl-tab-show=${(e: CustomEvent) => {
-              const tabIndex = parseInt(e.detail.name.replace('section-', ''));
-              this.handleSectionChange(tabIndex);
-            }}
-          >
-            ${this.sections.map((section, index) => {
-              const isActive = index === this.currentSectionIndex;
-              const isComplete = this.getSectionCompletionFromStore(section);
-              const isSkipped = this.getSectionSkippedFromStore(section);
-
-              // Determine icon based on state: skipped > complete > incomplete
-              let icon: string;
-              let color: string;
-
-              if (isSkipped) {
-                icon = 'skip-forward-circle';
-                color = isActive ? 'orange' : '#d97706'; // yellow color
-              } else if (isComplete) {
-                icon = 'check-circle';
-                color = '#22c55e'; // green - always green when completed
-              } else {
-                icon = 'pencil';
-                color = isActive ? 'orange' : 'gray';
-              }
-
-              return html`
-                <sl-tab slot="nav" panel="section-${index}">
-                  <sl-icon
-                    name=${icon}
-                    style="color: ${color}; margin-right: 0.5rem;"
-                  ></sl-icon>
-                  <span style=${isActive ? 'font-weight: bold;' : ''}
-                    >${section.tab}</span
-                  >
-                </sl-tab>
-              `;
-            })}
-            ${this.sections.map(
-              (section, index) => html`
-                <sl-tab-panel name="section-${index}">
-                  <div class="card">
-                    <strong>${section.title}</strong>
-                  </div>
-                  ${this.renderItems(section.items)}
-                </sl-tab-panel>
-              `
-            )}
-          </sl-tab-group>
-        </aside>
+        <navigation-sidebar
+          .workbookId=${workbookId}
+          .workbookName=${workbookName}
+          .workbookStatus=${workbookStatus}
+          .sections=${this.sections}
+          .currentSectionIndex=${this.currentSectionIndex}
+          .sectionCompletion=${this.getSectionCompletionMap()}
+          .sectionSkipped=${this.getSectionSkippedMap()}
+          @section-change=${this.handleSidebarSectionChange}
+        >
+          ${this.sections.map(
+            (section, index) => html`
+              <div slot="section-${index}-items">
+                ${this.renderItems(section.items)}
+              </div>
+            `
+          )}
+        </navigation-sidebar>
 
         <!-- Main Content -->
         <main class="main-content">
-          <div class="card">
-            <strong
-              >${POWERPOD.workbookQuestionsAndResponses.isLoaded
-                ? this.currentCompletionPercentage
-                : this.completionPercent}%
-              Complete</strong
-            >
-            <div
-              style="
-              width: 100%;
-              height: 0.75rem;
-              background-color: #e5e7eb;
-              border-radius: 0.375rem;
-              margin-top: 0.5rem;
-              overflow: hidden;
-            "
-            >
-              <div
-                style="
-                height: 100%;
-                background-color: #3b82f6;
-                border-radius: 0.375rem;
-                transition: width 0.3s ease;
-                width: ${POWERPOD.workbookQuestionsAndResponses.isLoaded
-                  ? this.currentCompletionPercentage
-                  : this.completionPercent}%;
-              "
-              ></div>
-            </div>
-          </div>
+          <progress-header
+            .completionPercentage=${POWERPOD.workbookQuestionsAndResponses.isLoaded
+              ? this.currentCompletionPercentage
+              : this.completionPercent}
+          ></progress-header>
 
           <!-- Navigation buttons above content -->
           <navigation-buttons

@@ -17,11 +17,15 @@ import './RatingQuestion';
 import './EFPBreadcrumbs';
 import './WorkbookSignOffButtons';
 import './ActionPlanTable';
+import './ProgressHeader';
+import './NavigationSidebar';
+import './QuestionRenderer';
 interface EFPActiveContent {
     title: string;
     content: string;
 }
 export declare class EFPEntryForm extends LitElement {
+    private services;
     currentSectionIndex: number;
     currentStepIndex: number;
     nestedChapterStructure: any[];
@@ -33,16 +37,10 @@ export declare class EFPEntryForm extends LitElement {
     showValidationAlert: boolean;
     hasTriedToSubmit: boolean;
     incompleteChapters: Array<{
-        id: string;
-        name: string;
-        parentChapterName?: string;
-        incompleteQuestions: Array<{
-            id: string;
-            name: string;
-            isSkipped: boolean;
-            hasResponse: boolean;
-            responseValue?: string;
-        }>;
+        chapterId: string;
+        chapterName: string;
+        totalQuestions: number;
+        answeredQuestions: number;
     }>;
     responseUpdateCounter: number;
     currentCompletionPercentage: number;
@@ -57,12 +55,15 @@ export declare class EFPEntryForm extends LitElement {
         getActionPlansForQuestion: (questionId: string) => any[];
         openViewActionsDialog: (questionId: string) => void;
     };
-    private responseSaveDebounceTimers;
-    private pendingResponseValues;
-    private pendingMultiselectValues;
-    private multilineTextSaveStatus;
-    private multilineTextCharCounts;
+    constructor();
     connectedCallback(): void;
+    private handleServiceResponseSaved;
+    private handleServiceResponseChanged;
+    private handleServiceSaveStatusChanged;
+    private handleServiceMultilineStatusChanged;
+    private handleServiceChapterSkippedChanged;
+    private handleServiceWorkbookStateChanged;
+    private handleServiceNavigationChanged;
     private handleStatsUpdated;
     disconnectedCallback(): void;
     private handleSignOffChanged;
@@ -78,13 +79,16 @@ export declare class EFPEntryForm extends LitElement {
     static styles: import("lit").CSSResult;
     private get sections();
     private renderQuestion;
-    private renderActionPlanButtons;
-    private renderQuestionInput;
+    private handleMultiselectChangedEvent;
+    private handleMultilineTextInputEvent;
+    private handleForceSaveEvent;
+    private handleAddNoteToActionPlanEvent;
+    private handleViewExistingActionsEvent;
     private renderSectionNotApplicableCheckbox;
     private renderLockIcon;
     private isChapterSkipped;
     private isQuestionDisabled;
-    private isChapterSkippedById;
+    private _isChapterSkippedById;
     private isSkippingPrevented;
     private getCurrentChapterId;
     private getQuestionsForCurrentChapter;
@@ -96,15 +100,17 @@ export declare class EFPEntryForm extends LitElement {
     private renderContainerChapter;
     private renderMainContent;
     private getSectionBItemsFromStore;
-    private getMyActionPlanItemsFromPortalPage;
     private getSectionCItemsFromPortalPage;
+    private getCompletionContext;
     private getCompletionFromStore;
     private getSectionCompletionFromStore;
     private getSectionSkippedFromStore;
     updateNestedChapterStructure(nestedStructure: any[]): void;
     private get completionPercent();
+    private getNavigationContext;
+    private applyNavigationResult;
     private goToNext;
-    private findNextRequiredStep;
+    private _findNextRequiredStep;
     private handleNavigationPrevious;
     private handleNavigationSkip;
     private handleNavigationContinue;
@@ -115,14 +121,8 @@ export declare class EFPEntryForm extends LitElement {
     private handleAddNoteToActionPlan;
     private handleViewExistingActions;
     private handleMultiselectChange;
-    private saveDebouncedResponse;
-    private saveMultiselectResponse;
     private handleMultilineTextInput;
     private handleForceSave;
-    private saveMultilineTextResponse;
-    private buildRatingDescription;
-    private saveRatingResponse;
-    private updateMemoryStructuresForRating;
     private handleItemClick;
     private updateNavigationState;
     private goToPrevious;
@@ -133,7 +133,7 @@ export declare class EFPEntryForm extends LitElement {
     private navigateToSection;
     private navigateToHierarchyItem;
     private renderItems;
-    private hasIncompletePreventSkippingChildren;
+    private _hasIncompletePreventSkippingChildren;
     private getSkippedFromStore;
     private getIncompleteFromStore;
     updated(changedProps: Map<string, unknown>): void;
@@ -155,6 +155,9 @@ export declare class EFPEntryForm extends LitElement {
     };
     renderResponseInfo(questionId: string): string;
     renderResponsesSummary(): string;
+    private getSectionCompletionMap;
+    private getSectionSkippedMap;
+    private handleSidebarSectionChange;
     render(): import("lit-html").TemplateResult<1>;
 }
 export {};

@@ -12,6 +12,11 @@ export function loadQuestionnaireIntoStore(nestedChapterStructure: any[], forceR
  */
 export function getQuestionnaireFromStore(): Object | null;
 /**
+ * Get all chapters from the store (flattened list including subchapters)
+ * @returns {Array} Array of all chapters
+ */
+export function getAllChaptersFromStore(): any[];
+/**
  * Get a specific chapter by ID from the store
  * @param {string} chapterId - The chapter ID to find
  * @returns {Object|null} The chapter object or null if not found

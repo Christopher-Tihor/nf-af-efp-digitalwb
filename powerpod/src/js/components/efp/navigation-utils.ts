@@ -1,8 +1,32 @@
 import { Logger } from '../../common/logger.js';
+import { POWERPOD } from '../../common/constants.js';
+import { getQuestionnaireFromStore } from '../../common/questionnaire.js';
 
 import { EFPStep, EFPSection, EFPSectionItem } from './types.js';
 
 const logger = Logger('components/efp/navigation-utils');
+
+// Navigation context for passing component state to utility methods
+export interface NavigationContext {
+  currentStepIndex: number;
+  flatSteps: EFPStep[];
+  sections: EFPSection[];
+  activeContentTitle: string;
+  canAccessReviewAndSubmit: boolean;
+  getQuestionsForChapter: (chapterId: string) => any[];
+}
+
+// Result of navigation operation
+export interface NavigationResult {
+  success: boolean;
+  newStepIndex?: number;
+  newSectionIndex?: number;
+  newActiveContent?: { title: string; content: string };
+  scrollToTop?: boolean;
+  scrollToQuestion?: { questionId: string };
+  showIncompleteAlert?: boolean;
+  errorMessage?: string;
+}
 
 export class EFPNavigationUtils {
   static isStepContainer(step: EFPStep, sections: EFPSection[]): boolean {
@@ -218,6 +242,10 @@ export class EFPNavigationUtils {
             stepItem.hideSkipChapterCheckbox = item.hideSkipChapterCheckbox;
           }
 
+          if (item.renderSignOffButtons) {
+            stepItem.renderSignOffButtons = item.renderSignOffButtons;
+          }
+
           result.push(stepItem);
         }
       }
@@ -317,6 +345,340 @@ export class EFPNavigationUtils {
     }
 
     return { stepIndex: first.index, sectionIndex: first.step.sectionIndex };
+  }
+
+  // ============================================
+  // Navigation Operations (use NavigationContext)
+  // ============================================
+
+  /**
+   * Resolves the current step index when it's -1 by matching active content title
+   */
+  static resolveCurrentStepIndex(ctx: NavigationContext): number {
+    if (ctx.currentStepIndex !== -1) {
+      return ctx.currentStepIndex;
+    }
+
+    logger.warn({
+      message: 'currentStepIndex is -1, trying to find current step by activeContent title',
+    });
+
+    const foundIndex = ctx.flatSteps.findIndex(
+      (step) => step.label === ctx.activeContentTitle
+    );
+
+    if (foundIndex !== -1) {
+      logger.info({
+        message: `Found current step "${ctx.activeContentTitle}" at index ${foundIndex}`,
+      });
+      return foundIndex;
+    }
+
+    logger.error({
+      message: `Could not find current step "${ctx.activeContentTitle}" in flatSteps`,
+    });
+    return -1;
+  }
+
+  /**
+   * Calculate the next navigation result (for goToNext)
+   */
+  static calculateNextNavigation(ctx: NavigationContext): NavigationResult {
+    const resolvedIndex = EFPNavigationUtils.resolveCurrentStepIndex(ctx);
+    if (resolvedIndex === -1) {
+      return { success: false, errorMessage: 'Could not resolve current step' };
+    }
+
+    const currentStep = ctx.flatSteps[resolvedIndex];
+    let nextIndex = EFPNavigationUtils.findNextSelectableStep(
+      resolvedIndex,
+      ctx.flatSteps,
+      ctx.sections
+    );
+
+    if (nextIndex == null) {
+      return { success: false, errorMessage: 'No next step available' };
+    }
+
+    let nextStep = ctx.flatSteps[nextIndex];
+
+    // When crossing section boundaries, navigate to the first content step in the new section
+    if (currentStep && nextStep.sectionIndex !== currentStep.sectionIndex) {
+      const firstContentStep = EFPNavigationUtils.findFirstSelectableStepInSection(
+        nextStep.sectionIndex,
+        ctx.flatSteps,
+        ctx.sections
+      );
+      if (firstContentStep) {
+        logger.info({
+          message: `Crossing to section ${nextStep.sectionIndex}, navigating to first content step "${firstContentStep.step.label}"`,
+        });
+        nextIndex = firstContentStep.index;
+        nextStep = firstContentStep.step;
+      }
+    }
+
+    // Block navigation to "Review & Submit" section if there are incomplete questions
+    if (nextStep.sectionIndex === 1 && !ctx.canAccessReviewAndSubmit) {
+      return { success: false, showIncompleteAlert: true };
+    }
+
+    // Check if next step has the same label and content as current step (duplicate)
+    const isSameContent = currentStep &&
+      currentStep.label === nextStep.label &&
+      currentStep.content === nextStep.content;
+
+    if (isSameContent) {
+      logger.info({
+        message: `Skipping duplicate step "${nextStep.label}" at index ${nextIndex}, continuing to next`,
+      });
+
+      // Skip this duplicate and go to the next step
+      const nextNextIndex = EFPNavigationUtils.findNextSelectableStep(
+        nextIndex,
+        ctx.flatSteps,
+        ctx.sections
+      );
+
+      if (nextNextIndex != null) {
+        const nextNextStep = ctx.flatSteps[nextNextIndex];
+
+        // Block navigation to "Review & Submit" section if there are incomplete questions
+        if (nextNextStep.sectionIndex === 1 && !ctx.canAccessReviewAndSubmit) {
+          return { success: false, showIncompleteAlert: true };
+        }
+
+        return {
+          success: true,
+          newStepIndex: nextNextIndex,
+          newSectionIndex: nextNextStep.sectionIndex,
+          newActiveContent: { title: nextNextStep.label, content: nextNextStep.content },
+          scrollToTop: true,
+        };
+      }
+      return { success: false, errorMessage: 'No step after duplicate' };
+    }
+
+    return {
+      success: true,
+      newStepIndex: nextIndex,
+      newSectionIndex: nextStep.sectionIndex,
+      newActiveContent: { title: nextStep.label, content: nextStep.content },
+      scrollToTop: true,
+    };
+  }
+
+  /**
+   * Calculate the previous navigation result (for goToPrevious)
+   */
+  static calculatePreviousNavigation(ctx: NavigationContext): NavigationResult {
+    const resolvedIndex = EFPNavigationUtils.resolveCurrentStepIndex(ctx);
+    if (resolvedIndex === -1) {
+      return { success: false, errorMessage: 'Could not resolve current step' };
+    }
+
+    const prevIndex = EFPNavigationUtils.findPreviousSelectableStep(
+      resolvedIndex,
+      ctx.flatSteps,
+      ctx.sections
+    );
+
+    if (prevIndex == null) {
+      return { success: false, errorMessage: 'No previous step available' };
+    }
+
+    const prevStep = ctx.flatSteps[prevIndex];
+    const currentStep = ctx.flatSteps[resolvedIndex];
+
+    // Check if previous step has the same label and content as current step (duplicate)
+    const isSameContent = currentStep &&
+      currentStep.label === prevStep.label &&
+      currentStep.content === prevStep.content;
+
+    if (isSameContent) {
+      logger.info({
+        message: `Skipping duplicate step "${prevStep.label}" at index ${prevIndex}, continuing to previous`,
+      });
+
+      const prevPrevIndex = EFPNavigationUtils.findPreviousSelectableStep(
+        prevIndex,
+        ctx.flatSteps,
+        ctx.sections
+      );
+
+      if (prevPrevIndex != null) {
+        const prevPrevStep = ctx.flatSteps[prevPrevIndex];
+        return {
+          success: true,
+          newStepIndex: prevPrevIndex,
+          newSectionIndex: prevPrevStep.sectionIndex,
+          newActiveContent: { title: prevPrevStep.label, content: prevPrevStep.content },
+          scrollToTop: true,
+        };
+      }
+      return { success: false, errorMessage: 'No step before duplicate' };
+    }
+
+    return {
+      success: true,
+      newStepIndex: prevIndex,
+      newSectionIndex: prevStep.sectionIndex,
+      newActiveContent: { title: prevStep.label, content: prevStep.content },
+      scrollToTop: true,
+    };
+  }
+
+  /**
+   * Find the next required step (earliest unanswered, non-skipped question)
+   */
+  static findNextRequiredStep(ctx: NavigationContext): { stepIndex: number; questionId: string } | null {
+    if (!POWERPOD.workbookQuestionsAndResponses.isLoaded) {
+      logger.warn({
+        message: 'Cannot find next required step: workbook questions and responses not loaded',
+      });
+      return null;
+    }
+
+    const questionnaire: any = getQuestionnaireFromStore();
+    if (!questionnaire?.chapters?.length) {
+      logger.warn({
+        message: 'Cannot find next required step: questionnaire not loaded',
+      });
+      return null;
+    }
+
+    // Iterate through all steps in the My Workbook section (section index 0)
+    for (let i = 0; i < ctx.flatSteps.length; i++) {
+      const step = ctx.flatSteps[i];
+
+      // Only check steps in My Workbook section
+      if (step.sectionIndex !== 0) {
+        continue;
+      }
+
+      // Skip section headers
+      if (step.label.startsWith('Section ')) {
+        continue;
+      }
+
+      // For container steps, only skip if they don't have their own questions
+      if (step.isContainer) {
+        const hasOwnQuestions = step.chapterData?.questions?.length > 0;
+        if (!hasOwnQuestions) {
+          continue;
+        }
+      }
+
+      // Get the chapter ID for this step
+      const chapterId = step.chapterId ||
+                       step.chapterData?.id ||
+                       step.subchapterData?.id;
+
+      if (!chapterId) {
+        continue;
+      }
+
+      // Get all questions for this chapter
+      const questions = ctx.getQuestionsForChapter(chapterId);
+
+      // Find the first unanswered, non-skipped question in this chapter
+      const firstUnansweredQuestion = questions.find((question: any) => {
+        const entry = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.get(question.id);
+        const isSkipped = entry?.response?.quartech_chapterskipped === 100000000;
+        const hasResponse = entry?.response?.quartech_response &&
+                           entry.response.quartech_response.trim() !== '';
+
+        // Question is required and unanswered if it's not skipped AND has no response
+        return !isSkipped && !hasResponse;
+      });
+
+      if (firstUnansweredQuestion) {
+        logger.info({
+          message: 'Found next required step with unanswered questions',
+          data: {
+            stepIndex: i,
+            stepLabel: step.label,
+            chapterId,
+            questionId: firstUnansweredQuestion.id,
+          },
+        });
+        return { stepIndex: i, questionId: firstUnansweredQuestion.id };
+      }
+    }
+
+    logger.info({
+      message: 'No required unanswered questions found after current step',
+    });
+    return null;
+  }
+
+  /**
+   * Calculate navigation skip result (for handleNavigationSkip)
+   */
+  static calculateSkipNavigation(ctx: NavigationContext): NavigationResult {
+    const result = EFPNavigationUtils.findNextRequiredStep(ctx);
+
+    if (result !== null) {
+      const { stepIndex, questionId } = result;
+      const nextStep = ctx.flatSteps[stepIndex];
+
+      logger.info({
+        message: 'Navigating to next required step',
+        data: {
+          stepIndex,
+          stepLabel: nextStep.label,
+          questionId,
+        },
+      });
+
+      return {
+        success: true,
+        newStepIndex: stepIndex,
+        newSectionIndex: nextStep.sectionIndex,
+        newActiveContent: { title: nextStep.label, content: nextStep.content },
+        scrollToQuestion: { questionId },
+      };
+    }
+
+    // No required unanswered questions found - all questions are complete
+    logger.info({
+      message: 'No required unanswered questions found - navigating to Review & Submit',
+    });
+
+    if (ctx.canAccessReviewAndSubmit) {
+      // Navigate to Review & Submit section (section index 1)
+      const target = EFPNavigationUtils.navigateToSection(
+        1,
+        ctx.flatSteps,
+        ctx.sections
+      );
+
+      if (target) {
+        const step = ctx.flatSteps[target.stepIndex];
+
+        logger.info({
+          message: 'Navigating to Review & Submit section',
+          data: {
+            stepIndex: target.stepIndex,
+            stepLabel: step.label,
+          },
+        });
+
+        return {
+          success: true,
+          newStepIndex: target.stepIndex,
+          newSectionIndex: target.sectionIndex,
+          newActiveContent: { title: step.label, content: step.content },
+          scrollToTop: true,
+        };
+      }
+    }
+
+    // Cannot access Review & Submit
+    logger.warn({
+      message: 'Cannot navigate to Review & Submit - incomplete questions',
+    });
+    return { success: false, showIncompleteAlert: true };
   }
 }
 

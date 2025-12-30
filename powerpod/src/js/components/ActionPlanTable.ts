@@ -183,6 +183,19 @@ class ActionPlanTable extends LitElement {
     `,
   ];
 
+  // Bound handler for action-plans-updated event from other instances
+  private handleExternalActionPlansUpdate = (event: Event) => {
+    // Only reload if the event came from a different instance
+    if (event.target !== this) {
+      logger.info({
+        fn: 'handleExternalActionPlansUpdate',
+        message: 'Action plans updated by another instance, reloading',
+      });
+      // Pass false to prevent dispatching another event (avoid infinite loop)
+      this.loadActionPlans(false);
+    }
+  };
+
   connectedCallback(): void {
     super.connectedCallback();
     this.loadActionPlans();
@@ -199,14 +212,18 @@ class ActionPlanTable extends LitElement {
         this.requestUpdate();
       }
     });
+
+    // Listen for action plan updates from other instances to keep data in sync
+    document.addEventListener('action-plans-updated', this.handleExternalActionPlansUpdate);
   }
 
   disconnectedCallback(): void {
     super.disconnectedCallback();
-    // Note: PubSub doesn't have unsubscribe, but component cleanup happens automatically
+    // Remove the document-level event listener
+    document.removeEventListener('action-plans-updated', this.handleExternalActionPlansUpdate);
   }
 
-  private async loadActionPlans() {
+  private async loadActionPlans(dispatchEvent: boolean = true) {
     try {
       this.loading = true;
       this.error = null;
@@ -219,7 +236,7 @@ class ActionPlanTable extends LitElement {
       logger.info({
         fn: 'loadActionPlans',
         message: 'Fetching action plans',
-        data: { workbookId },
+        data: { workbookId, dispatchEvent },
       });
 
       const result = await getActionPlansData();
@@ -240,11 +257,14 @@ class ActionPlanTable extends LitElement {
       });
 
       // Dispatch event to notify other components that action plans have been updated
-      this.dispatchEvent(new CustomEvent('action-plans-updated', {
-        bubbles: true,
-        composed: true,
-        detail: { count: this.actionPlans.length }
-      }));
+      // Only dispatch if this is a primary load (not triggered by external update)
+      if (dispatchEvent) {
+        this.dispatchEvent(new CustomEvent('action-plans-updated', {
+          bubbles: true,
+          composed: true,
+          detail: { count: this.actionPlans.length }
+        }));
+      }
     } catch (err) {
       this.error = err instanceof Error ? err.message : 'Failed to load action plans';
       logger.error({
