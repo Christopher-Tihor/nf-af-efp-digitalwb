@@ -508,7 +508,8 @@ export class WorkbookResponseService {
       const responseData = await this.saveRatingResponse(questionId, responseValue);
 
       // Update the questionnaire store with the full response data
-      updateQuestionResponse(questionId, responseValue, true, responseData);
+      // Pass undefined for 'complete' to let auto-calculation determine completion based on whether response is empty
+      updateQuestionResponse(questionId, responseValue, undefined, responseData);
 
       // Emit event for UI update
       this.emit('response-saved', { questionId, responseData });

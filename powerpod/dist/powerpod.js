@@ -47249,7 +47249,8 @@
               // Save the response
               const responseData = await this.saveRatingResponse(questionId, responseValue);
               // Update the questionnaire store with the full response data
-              updateQuestionResponse(questionId, responseValue, true, responseData);
+              // Pass undefined for 'complete' to let auto-calculation determine completion based on whether response is empty
+              updateQuestionResponse(questionId, responseValue, undefined, responseData);
               // Emit event for UI update
               this.emit('response-saved', { questionId, responseData });
               logger$a.info({
@@ -48452,6 +48453,8 @@
           });
           if (stepIndex >= 0 && stepIndex < this.flatSteps.length) {
               const step = this.flatSteps[stepIndex];
+              // Set navigating flag to prevent handleSectionChange from overriding our navigation
+              this.isNavigating = true;
               this.currentStepIndex = stepIndex;
               this.currentSectionIndex = step.sectionIndex;
               this.activeContent = {
@@ -48460,13 +48463,21 @@
               };
               this.updateNavigationState(step.label);
               this.requestUpdate();
+              // Clear navigating flag after a short delay
+              setTimeout(() => {
+                  this.isNavigating = false;
+              }, 100);
               // If navigating to a specific question, scroll to it and highlight after render
               if (questionId) {
                   this.updateComplete.then(() => {
-                      // Small delay to ensure DOM is fully rendered
+                      // Longer delay to ensure DOM is fully rendered after section change
                       setTimeout(() => {
                           var _a;
                           const questionElement = (_a = this.shadowRoot) === null || _a === void 0 ? void 0 : _a.querySelector(`[data-question-id="${questionId}"]`);
+                          logger$4.info({
+                              message: 'Searching for question element to scroll',
+                              data: { questionId, found: !!questionElement },
+                          });
                           if (questionElement) {
                               questionElement.classList.add('question-highlight');
                               questionElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -48474,7 +48485,25 @@
                                   questionElement.classList.remove('question-highlight');
                               }, 3000);
                           }
-                      }, 200);
+                          else {
+                              // If not found, try again after another delay (section switch may take longer)
+                              setTimeout(() => {
+                                  var _a;
+                                  const retryElement = (_a = this.shadowRoot) === null || _a === void 0 ? void 0 : _a.querySelector(`[data-question-id="${questionId}"]`);
+                                  logger$4.info({
+                                      message: 'Retry searching for question element',
+                                      data: { questionId, found: !!retryElement },
+                                  });
+                                  if (retryElement) {
+                                      retryElement.classList.add('question-highlight');
+                                      retryElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                      setTimeout(() => {
+                                          retryElement.classList.remove('question-highlight');
+                                      }, 3000);
+                                  }
+                              }, 300);
+                          }
+                      }, 300);
                   });
               }
           }

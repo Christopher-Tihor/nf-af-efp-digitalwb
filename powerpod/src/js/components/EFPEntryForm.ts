@@ -369,6 +369,10 @@ export class EFPEntryForm extends LitElement {
 
     if (stepIndex >= 0 && stepIndex < this.flatSteps.length) {
       const step = this.flatSteps[stepIndex];
+
+      // Set navigating flag to prevent handleSectionChange from overriding our navigation
+      this.isNavigating = true;
+
       this.currentStepIndex = stepIndex;
       this.currentSectionIndex = step.sectionIndex;
 
@@ -380,14 +384,24 @@ export class EFPEntryForm extends LitElement {
       this.updateNavigationState(step.label);
       this.requestUpdate();
 
+      // Clear navigating flag after a short delay
+      setTimeout(() => {
+        this.isNavigating = false;
+      }, 100);
+
       // If navigating to a specific question, scroll to it and highlight after render
       if (questionId) {
         this.updateComplete.then(() => {
-          // Small delay to ensure DOM is fully rendered
+          // Longer delay to ensure DOM is fully rendered after section change
           setTimeout(() => {
             const questionElement = this.shadowRoot?.querySelector(
               `[data-question-id="${questionId}"]`
             ) as HTMLElement;
+
+            logger.info({
+              message: 'Searching for question element to scroll',
+              data: { questionId, found: !!questionElement },
+            });
 
             if (questionElement) {
               questionElement.classList.add('question-highlight');
@@ -395,8 +409,28 @@ export class EFPEntryForm extends LitElement {
               setTimeout(() => {
                 questionElement.classList.remove('question-highlight');
               }, 3000);
+            } else {
+              // If not found, try again after another delay (section switch may take longer)
+              setTimeout(() => {
+                const retryElement = this.shadowRoot?.querySelector(
+                  `[data-question-id="${questionId}"]`
+                ) as HTMLElement;
+
+                logger.info({
+                  message: 'Retry searching for question element',
+                  data: { questionId, found: !!retryElement },
+                });
+
+                if (retryElement) {
+                  retryElement.classList.add('question-highlight');
+                  retryElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                  setTimeout(() => {
+                    retryElement.classList.remove('question-highlight');
+                  }, 3000);
+                }
+              }, 300);
             }
-          }, 200);
+          }, 300);
         });
       }
     }
