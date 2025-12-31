@@ -1,5 +1,5 @@
 /*!
-* powerpod 4.6.9
+* powerpod 4.7.0
 * https://github.com/bcgov/nr-af-pods/powerpod
 *
 * @license GPLv3 for open source use only
@@ -32364,30 +32364,172 @@
 
   var logger$p = Logger('pages/myEfpWorkbooks');
   var EFP_ID_FIELD_NAME = 'quartech_iafid';
+  var MODAL_IFRAME_SELECTOR = '.modal-form iframe';
+  var POLL_INTERVAL_MS = 500;
+  var MAX_POLL_ATTEMPTS = 120; // 60 seconds max
+
+  // Track if mask has been applied to avoid duplicates
+  var maskApplied = false;
   function initMyEfpWorkbooks() {
     logger$p.info({
       fn: initMyEfpWorkbooks,
       message: 'initializing My EFP Workbooks page'
     });
 
-    // Wait for DOM to be ready, then apply the EFP ID mask
-    applyEfpIdMask();
+    // Reset state in case of re-initialization
+    maskApplied = false;
+
+    // Start watching for the modal iframe
+    watchForModalIframe();
   }
-  function applyEfpIdMask() {
-    // Check if the field exists
-    var efpIdField = document.getElementById(EFP_ID_FIELD_NAME);
-    if (efpIdField) {
-      logger$p.info({
-        fn: applyEfpIdMask,
-        message: "Found EFP ID field, applying mask"
-      });
-      maskInput(EFP_ID_FIELD_NAME, FieldMaskType.EfpId);
-    } else {
-      logger$p.info({
-        fn: applyEfpIdMask,
-        message: "EFP ID field not found on page, skipping mask"
-      });
+
+  /**
+   * Finds the EFP ID field, checking both the main document and any modal iframes
+   * @returns {HTMLInputElement | null}
+   */
+  function findEfpIdField() {
+    // First check the main document
+    var mainDocField = document.getElementById(EFP_ID_FIELD_NAME);
+    if (mainDocField) {
+      return /** @type {HTMLInputElement} */mainDocField;
     }
+
+    // Check inside modal iframes
+    var iframes = document.querySelectorAll(MODAL_IFRAME_SELECTOR);
+    var _iterator = _createForOfIteratorHelper(iframes),
+      _step;
+    try {
+      for (_iterator.s(); !(_step = _iterator.n()).done;) {
+        var iframe = _step.value;
+        try {
+          var _iframeEl$contentWind;
+          var iframeEl = /** @type {HTMLIFrameElement} */iframe;
+          var iframeDoc = iframeEl.contentDocument || ((_iframeEl$contentWind = iframeEl.contentWindow) === null || _iframeEl$contentWind === void 0 ? void 0 : _iframeEl$contentWind.document);
+          if (iframeDoc) {
+            var field = iframeDoc.getElementById(EFP_ID_FIELD_NAME);
+            if (field) {
+              return /** @type {HTMLInputElement} */field;
+            }
+          }
+        } catch (e) {
+          // Cross-origin iframe, skip it
+          logger$p.info({
+            fn: findEfpIdField,
+            message: 'Could not access iframe content (likely cross-origin)'
+          });
+        }
+      }
+    } catch (err) {
+      _iterator.e(err);
+    } finally {
+      _iterator.f();
+    }
+    return null;
+  }
+
+  /**
+   * Applies the EFP ID mask directly to a field element (works for iframe fields)
+   * @param {HTMLInputElement} field
+   */
+  function applyMaskToField(field) {
+    // Add placeholder to show expected format
+    field.placeholder = MaskTypeFormat.EfpId;
+
+    // Prefill "EFP-" when the field is focused and empty
+    field.addEventListener('focus', function () {
+      if (!field.value || field.value.trim() === '') {
+        field.value = 'EFP-';
+        // Position cursor at the end
+        setTimeout(function () {
+          field.setSelectionRange(field.value.length, field.value.length);
+        }, 0);
+      }
+    });
+
+    // Add placeholder styling to the iframe's document
+    var fieldDoc = field.ownerDocument;
+    if (fieldDoc && !fieldDoc.getElementById('efp-id-placeholder-style')) {
+      var style = fieldDoc.createElement('style');
+      style.id = 'efp-id-placeholder-style';
+      style.textContent = "\n      #".concat(EFP_ID_FIELD_NAME, "::placeholder {\n        color: #999 !important;\n        opacity: 1 !important;\n      }\n      #").concat(EFP_ID_FIELD_NAME, "::-webkit-input-placeholder {\n        color: #999 !important;\n        opacity: 1 !important;\n      }\n      #").concat(EFP_ID_FIELD_NAME, "::-moz-placeholder {\n        color: #999 !important;\n        opacity: 1 !important;\n      }\n      #").concat(EFP_ID_FIELD_NAME, ":-ms-input-placeholder {\n        color: #999 !important;\n        opacity: 1 !important;\n      }\n    ");
+      fieldDoc.head.appendChild(style);
+    }
+    useScript(Scripts.jquerymask, function () {
+      // Use the main window's jQuery since that's where the mask plugin is loaded
+      // jQuery can still manipulate DOM elements from iframes
+      // @ts-ignore
+      var $ = window.$ || window.jQuery;
+      if ($ && typeof $.fn.mask === 'function') {
+        $(field).mask(MaskTypeFormat.EfpId);
+        logger$p.info({
+          fn: applyMaskToField,
+          message: 'Successfully applied EFP ID mask to field'
+        });
+      } else {
+        logger$p.error({
+          fn: applyMaskToField,
+          message: 'jQuery or mask plugin not available'
+        });
+      }
+    });
+  }
+
+  /**
+   * Uses polling to watch for the modal iframe and the field inside it
+   */
+  function watchForModalIframe() {
+    logger$p.info({
+      fn: watchForModalIframe,
+      message: 'Setting up polling to watch for modal iframe with EFP ID field'
+    });
+    var pollAttempts = 0;
+    /** @type {ReturnType<typeof setInterval> | null} */
+    var intervalId = null;
+
+    // Cleanup function
+    var cleanup = function cleanup() {
+      if (intervalId) {
+        clearInterval(intervalId);
+        intervalId = null;
+      }
+      logger$p.info({
+        fn: watchForModalIframe,
+        message: 'Polling stopped'
+      });
+    };
+
+    // Polling to check for the field
+    intervalId = setInterval(function () {
+      pollAttempts++;
+      if (maskApplied) {
+        cleanup();
+        return;
+      }
+      var field = findEfpIdField();
+      if (field) {
+        logger$p.info({
+          fn: watchForModalIframe,
+          message: 'EFP ID field found, applying mask'
+        });
+        applyMaskToField(field);
+        maskApplied = true;
+        cleanup();
+        return;
+      }
+
+      // Stop polling after max attempts
+      if (pollAttempts >= MAX_POLL_ATTEMPTS) {
+        logger$p.warn({
+          fn: watchForModalIframe,
+          message: "Stopped polling after ".concat(MAX_POLL_ATTEMPTS, " attempts - field not found")
+        });
+        cleanup();
+      }
+    }, POLL_INTERVAL_MS);
+    logger$p.info({
+      fn: watchForModalIframe,
+      message: "Polling started (every ".concat(POLL_INTERVAL_MS, "ms, max ").concat(MAX_POLL_ATTEMPTS, " attempts)")
+    });
   }
 
   var logger$o = Logger('common/workbook');
@@ -50319,7 +50461,7 @@
       };
     };
     // @ts-ignore
-    POWERPOD.version = '4.6.9';
+    POWERPOD.version = '4.7.0';
     // @ts-ignore
     window.powerpod = POWERPOD;
   }
