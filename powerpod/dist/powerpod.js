@@ -48151,14 +48151,21 @@
               };
               this.updateNavigationState(step.label);
               this.requestUpdate();
-              // If navigating to a specific question, scroll to it after render
+              // If navigating to a specific question, scroll to it and highlight after render
               if (questionId) {
                   this.updateComplete.then(() => {
-                      var _a;
-                      const questionEl = (_a = this.shadowRoot) === null || _a === void 0 ? void 0 : _a.querySelector(`[data-question-id="${questionId}"]`);
-                      if (questionEl) {
-                          questionEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                      }
+                      // Small delay to ensure DOM is fully rendered
+                      setTimeout(() => {
+                          var _a;
+                          const questionElement = (_a = this.shadowRoot) === null || _a === void 0 ? void 0 : _a.querySelector(`[data-question-id="${questionId}"]`);
+                          if (questionElement) {
+                              questionElement.classList.add('question-highlight');
+                              questionElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                              setTimeout(() => {
+                                  questionElement.classList.remove('question-highlight');
+                              }, 3000);
+                          }
+                      }, 200);
                   });
               }
           }

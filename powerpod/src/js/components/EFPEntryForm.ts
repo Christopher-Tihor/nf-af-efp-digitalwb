@@ -380,13 +380,23 @@ export class EFPEntryForm extends LitElement {
       this.updateNavigationState(step.label);
       this.requestUpdate();
 
-      // If navigating to a specific question, scroll to it after render
+      // If navigating to a specific question, scroll to it and highlight after render
       if (questionId) {
         this.updateComplete.then(() => {
-          const questionEl = this.shadowRoot?.querySelector(`[data-question-id="${questionId}"]`);
-          if (questionEl) {
-            questionEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          }
+          // Small delay to ensure DOM is fully rendered
+          setTimeout(() => {
+            const questionElement = this.shadowRoot?.querySelector(
+              `[data-question-id="${questionId}"]`
+            ) as HTMLElement;
+
+            if (questionElement) {
+              questionElement.classList.add('question-highlight');
+              questionElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              setTimeout(() => {
+                questionElement.classList.remove('question-highlight');
+              }, 3000);
+            }
+          }, 200);
         });
       }
     }
