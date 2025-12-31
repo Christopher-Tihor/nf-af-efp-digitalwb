@@ -45,6 +45,12 @@ export declare class EFPEntryForm extends LitElement {
     }>;
     responseUpdateCounter: number;
     currentCompletionPercentage: number;
+    /**
+     * Controls whether the form uses full-width layout (true) or narrow/constrained layout (false).
+     * Set to true to expand the form to use the entire window width.
+     * Set to false to use the default narrow layout constrained by parent containers.
+     */
+    fullWidthLayout: boolean;
     private isNavigating;
     private pendingURLNavigation;
     private hasAppliedURLNavigation;
@@ -65,6 +71,25 @@ export declare class EFPEntryForm extends LitElement {
     };
     constructor();
     connectedCallback(): void;
+    /**
+     * Updates the layout mode based on the fullWidthLayout property.
+     * Call this when the property changes to switch between layouts.
+     */
+    private updateLayoutMode;
+    /**
+     * Applies full-width layout by modifying parent container styles.
+     * This breaks out of Bootstrap/portal container constraints.
+     */
+    private applyFullWidthLayout;
+    /**
+     * Removes full-width layout and restores default narrow layout.
+     */
+    private removeFullWidthLayout;
+    /**
+     * Sets or clears inline styles on parent container elements.
+     * @param fullWidth - If true, applies full-width styles; if false, clears them.
+     */
+    private setParentContainerStyles;
     private handleServiceResponseSaved;
     private handleServiceResponseChanged;
     private handleServiceSaveStatusChanged;

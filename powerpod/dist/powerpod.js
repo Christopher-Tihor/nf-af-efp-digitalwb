@@ -48477,6 +48477,12 @@
           this.incompleteChapters = [];
           this.responseUpdateCounter = 0; // Triggers re-render when responses change
           this.currentCompletionPercentage = 0; // Local copy of completion percentage for reactive rendering
+          /**
+           * Controls whether the form uses full-width layout (true) or narrow/constrained layout (false).
+           * Set to true to expand the form to use the entire window width.
+           * Set to false to use the default narrow layout constrained by parent containers.
+           */
+          this.fullWidthLayout = false;
           this.isNavigating = false; // Flag to prevent tab change interference
           this.pendingURLNavigation = null; // Stores URL params to apply after questionnaire loads
           this.hasAppliedURLNavigation = false; // Prevents re-applying URL navigation
@@ -48699,6 +48705,119 @@
           window.addEventListener('popstate', this.handlePopState);
           // Subscribe to store state changes for portal page data loading
           store.events.subscribe('stateChange', this.handleStoreStateChange);
+          // Apply layout based on fullWidthLayout property
+          this.updateLayoutMode();
+      }
+      /**
+       * Updates the layout mode based on the fullWidthLayout property.
+       * Call this when the property changes to switch between layouts.
+       */
+      updateLayoutMode() {
+          if (this.fullWidthLayout) {
+              this.applyFullWidthLayout();
+          }
+          else {
+              this.removeFullWidthLayout();
+          }
+      }
+      /**
+       * Applies full-width layout by modifying parent container styles.
+       * This breaks out of Bootstrap/portal container constraints.
+       */
+      applyFullWidthLayout() {
+          // Inject global styles if not already present
+          if (!document.getElementById('efp-full-width-styles')) {
+              const style = document.createElement('style');
+              style.id = 'efp-full-width-styles';
+              style.textContent = `
+        /* EFP Workbook Full Width Layout */
+        main.container:has(efp-entry-form[full-width-layout]),
+        main.container:has(efp-entry-form:not([full-width-layout="false"])),
+        main.container:has(.efpEntryFormContainer) {
+          max-width: 100% !important;
+          width: 100% !important;
+          padding-left: 0 !important;
+          padding-right: 0 !important;
+        }
+
+        main.container:has(efp-entry-form[full-width-layout]) > .row,
+        main.container:has(efp-entry-form:not([full-width-layout="false"])) > .row,
+        main.container:has(.efpEntryFormContainer) > .row {
+          margin-left: 0 !important;
+          margin-right: 0 !important;
+          padding-left: 0 !important;
+          padding-right: 0 !important;
+        }
+
+        main.container:has(efp-entry-form[full-width-layout]) .container,
+        main.container:has(efp-entry-form:not([full-width-layout="false"])) .container,
+        main.container:has(.efpEntryFormContainer) .container {
+          max-width: 100% !important;
+          width: 100% !important;
+        }
+
+        .efpEntryFormContainer:has(efp-entry-form[full-width-layout]),
+        .efpEntryFormContainer:has(efp-entry-form:not([full-width-layout="false"])) {
+          max-width: 100% !important;
+          width: 100% !important;
+        }
+
+        efp-entry-form[full-width-layout],
+        efp-entry-form:not([full-width-layout="false"]) {
+          display: block;
+          width: 100%;
+        }
+      `;
+              document.head.appendChild(style);
+          }
+          // Also directly modify parent elements for browsers that don't support :has()
+          this.setParentContainerStyles(true);
+      }
+      /**
+       * Removes full-width layout and restores default narrow layout.
+       */
+      removeFullWidthLayout() {
+          // Remove the injected styles
+          const styleEl = document.getElementById('efp-full-width-styles');
+          if (styleEl) {
+              styleEl.remove();
+          }
+          // Restore parent elements to their default styles
+          this.setParentContainerStyles(false);
+      }
+      /**
+       * Sets or clears inline styles on parent container elements.
+       * @param fullWidth - If true, applies full-width styles; if false, clears them.
+       */
+      setParentContainerStyles(fullWidth) {
+          let parent = this.parentElement;
+          while (parent && parent !== document.body) {
+              if (parent.classList.contains('container') || parent.tagName === 'MAIN') {
+                  if (fullWidth) {
+                      parent.style.maxWidth = '100%';
+                      parent.style.width = '100%';
+                      parent.style.paddingLeft = '0';
+                      parent.style.paddingRight = '0';
+                  }
+                  else {
+                      parent.style.maxWidth = '';
+                      parent.style.width = '';
+                      parent.style.paddingLeft = '';
+                      parent.style.paddingRight = '';
+                  }
+              }
+              if (parent.classList.contains('row')) {
+                  if (fullWidth) {
+                      parent.style.marginLeft = '0';
+                      parent.style.marginRight = '0';
+                  }
+                  else {
+                      parent.style.marginLeft = '';
+                      parent.style.marginRight = '';
+                  }
+              }
+              parent = parent.parentElement;
+          }
       }
       disconnectedCallback() {
           super.disconnectedCallback();
@@ -49882,6 +50001,10 @@
           return EFPCompletionUtils.getIncompleteFromStore(item, this.getCompletionContext());
       }
       updated(changedProps) {
+          // Handle layout mode changes
+          if (changedProps.has('fullWidthLayout')) {
+              this.updateLayoutMode();
+          }
           if (changedProps.has('currentStepIndex')) {
               EFPLifecycleUtils.handleStepIndexChange(this.currentStepIndex, this.flatSteps, this.activeContent, (newContent) => {
                   this.activeContent = newContent;
@@ -50481,6 +50604,9 @@
   __decorate([
       n$4({ type: Number, attribute: false })
   ], EFPEntryForm.prototype, "currentCompletionPercentage", void 0);
+  __decorate([
+      n$4({ type: Boolean, attribute: 'full-width-layout' })
+  ], EFPEntryForm.prototype, "fullWidthLayout", void 0);
   __decorate([
       n$4({ type: Object })
   ], EFPEntryForm.prototype, "activeContent", void 0);
