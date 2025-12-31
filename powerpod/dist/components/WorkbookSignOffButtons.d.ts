@@ -47,13 +47,12 @@ export declare class WorkbookSignOffButtons extends LitElement {
     /**
      * Check if PA sign-off button should be enabled
      * Enable sign-off only when:
-     * - Workbook in Assigned status OR Producer Signed status (meaning Producer has signed)
+     * - Workbook in Assigned status OR Producer Signed status (meaning Producer has signed) OR Validated status
      *
      * Disable sign-off for:
      * - Workbook in Draft status (unless debug mode is enabled)
      * - PA Signed (for the PA - they already signed)
      * - Workbook in Completed status
-     * - Workbook in Validated status
      * - Workbook in Expired status
      */
     private canPASignOff;
@@ -68,13 +67,12 @@ export declare class WorkbookSignOffButtons extends LitElement {
     /**
      * Check if Producer sign-off button should be enabled
      * Enable sign-off only when:
-     * - Workbook in Assigned status OR PA Signed status (meaning PA has signed)
+     * - Workbook in Assigned status OR PA Signed status (meaning PA has signed) OR Validated status
      *
      * Disable sign-off for:
      * - Workbook in Draft status (unless debug mode is enabled)
      * - Producer Signed (for the Producer - they already signed)
      * - Workbook in Completed status
-     * - Workbook in Validated status
      * - Workbook in Expired status
      */
     private canProducerSignOff;
