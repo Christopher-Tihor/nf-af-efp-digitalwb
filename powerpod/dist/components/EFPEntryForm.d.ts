@@ -102,6 +102,7 @@ export declare class EFPEntryForm extends LitElement {
     private handleSignOffChanged;
     private handleActionPlansUpdated;
     private handleGlobalKeyDown;
+    private handleLayoutToggle;
     private handlePopState;
     private openSearchDialog;
     private handleSearchNavigate;

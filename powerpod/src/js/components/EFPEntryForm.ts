@@ -495,6 +495,16 @@ export class EFPEntryForm extends LitElement {
     }
   };
 
+  // Handle layout toggle from ProgressHeader
+  private handleLayoutToggle = (event: CustomEvent) => {
+    const { fullWidthLayout } = event.detail;
+    logger.info({
+      message: 'Layout toggle clicked',
+      data: { newValue: fullWidthLayout },
+    });
+    this.fullWidthLayout = fullWidthLayout;
+  };
+
   // Handle browser back/forward navigation
   private handlePopState = (event: PopStateEvent) => {
     logger.info({
@@ -2602,6 +2612,8 @@ export class EFPEntryForm extends LitElement {
             .completionPercentage=${POWERPOD.workbookQuestionsAndResponses.isLoaded
               ? this.currentCompletionPercentage
               : this.completionPercent}
+            .fullWidthLayout=${this.fullWidthLayout}
+            @layout-toggle=${this.handleLayoutToggle}
           ></progress-header>
 
           <!-- Navigation buttons above content -->

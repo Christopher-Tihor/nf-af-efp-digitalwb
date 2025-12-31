@@ -43585,6 +43585,8 @@
       t$1('action-plan-table')
   ], ActionPlanTable);
 
+  SlIconButton.define("sl-icon-button");
+
   /**
    * ProgressHeader Component
    *
@@ -43594,11 +43596,36 @@
       constructor() {
           super(...arguments);
           this.completionPercentage = 0;
+          this.fullWidthLayout = false;
+      }
+      handleLayoutToggle() {
+          this.dispatchEvent(new CustomEvent('layout-toggle', {
+              bubbles: true,
+              composed: true,
+              detail: { fullWidthLayout: !this.fullWidthLayout },
+          }));
       }
       render() {
+          const tooltipText = this.fullWidthLayout
+              ? 'Switch to narrow layout'
+              : 'Switch to full-width layout';
+          const iconName = this.fullWidthLayout
+              ? 'arrows-angle-contract'
+              : 'arrows-angle-expand';
           return x `
       <div class="card">
-        <strong>${this.completionPercentage}% Complete</strong>
+        <div class="header-row">
+          <strong>${this.completionPercentage}% Complete</strong>
+          <div class="layout-toggle">
+            <sl-tooltip content="${tooltipText}">
+              <sl-icon-button
+                name="${iconName}"
+                label="${tooltipText}"
+                @click=${this.handleLayoutToggle}
+              ></sl-icon-button>
+            </sl-tooltip>
+          </div>
+        </div>
         <div class="progress-bar-container">
           <div
             class="progress-bar-fill"
@@ -43624,6 +43651,13 @@
       box-shadow: var(--sl-shadow-x-small);
     }
 
+    .header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+    }
+
     .card strong {
       font-weight: 600;
       color: var(--sl-color-neutral-700);
@@ -43645,10 +43679,28 @@
       border-radius: 0.375rem;
       transition: width 0.3s ease;
     }
+
+    .layout-toggle {
+      display: flex;
+      align-items: center;
+    }
+
+    .layout-toggle sl-icon-button::part(base) {
+      font-size: 1.25rem;
+      color: var(--sl-color-neutral-600);
+      transition: color 0.2s ease;
+    }
+
+    .layout-toggle sl-icon-button::part(base):hover {
+      color: var(--sl-color-primary-600);
+    }
   `;
   __decorate([
       n$4({ type: Number })
   ], ProgressHeader.prototype, "completionPercentage", void 0);
+  __decorate([
+      n$4({ type: Boolean })
+  ], ProgressHeader.prototype, "fullWidthLayout", void 0);
   ProgressHeader = __decorate([
       t$1('progress-header')
   ], ProgressHeader);
@@ -48613,6 +48665,15 @@
                   this.openSearchDialog();
               }
           };
+          // Handle layout toggle from ProgressHeader
+          this.handleLayoutToggle = (event) => {
+              const { fullWidthLayout } = event.detail;
+              logger$4.info({
+                  message: 'Layout toggle clicked',
+                  data: { newValue: fullWidthLayout },
+              });
+              this.fullWidthLayout = fullWidthLayout;
+          };
           // Handle browser back/forward navigation
           this.handlePopState = (event) => {
               var _a, _b;
@@ -50461,6 +50522,8 @@
             .completionPercentage=${POWERPOD.workbookQuestionsAndResponses.isLoaded
             ? this.currentCompletionPercentage
             : this.completionPercent}
+            .fullWidthLayout=${this.fullWidthLayout}
+            @layout-toggle=${this.handleLayoutToggle}
           ></progress-header>
 
           <!-- Navigation buttons above content -->
