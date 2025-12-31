@@ -1129,6 +1129,64 @@
       });
       state.workbookLocked = payload.locked;
       return state;
+    },
+    setActionPlans: function setActionPlans(state, payload) {
+      var _payload$plans;
+      logger$13.info({
+        fn: this.setActionPlans,
+        message: 'Set action plans in state',
+        data: {
+          count: ((_payload$plans = payload.plans) === null || _payload$plans === void 0 ? void 0 : _payload$plans.length) || 0
+        }
+      });
+      state.actionPlans = {
+        isLoaded: true,
+        plans: payload.plans || []
+      };
+      return state;
+    },
+    addActionPlan: function addActionPlan(state, payload) {
+      logger$13.info({
+        fn: this.addActionPlan,
+        message: 'Add action plan to state',
+        data: {
+          actionPlan: payload.actionPlan
+        }
+      });
+      if (!state.actionPlans.plans) {
+        state.actionPlans.plans = [];
+      }
+      state.actionPlans.plans.push(payload.actionPlan);
+      return state;
+    },
+    updateActionPlan: function updateActionPlan(state, payload) {
+      logger$13.info({
+        fn: this.updateActionPlan,
+        message: 'Update action plan in state',
+        data: {
+          actionPlanId: payload.actionPlanId
+        }
+      });
+      var index = state.actionPlans.plans.findIndex(function (plan) {
+        return plan.quartech_actionplanid === payload.actionPlanId;
+      });
+      if (index !== -1) {
+        state.actionPlans.plans[index] = _objectSpread2(_objectSpread2({}, state.actionPlans.plans[index]), payload.updates);
+      }
+      return state;
+    },
+    removeActionPlan: function removeActionPlan(state, payload) {
+      logger$13.info({
+        fn: this.removeActionPlan,
+        message: 'Remove action plan from state',
+        data: {
+          actionPlanId: payload.actionPlanId
+        }
+      });
+      state.actionPlans.plans = state.actionPlans.plans.filter(function (plan) {
+        return plan.quartech_actionplanid !== payload.actionPlanId;
+      });
+      return state;
     }
   };
 
@@ -1139,7 +1197,11 @@
     questionnaire: {},
     portalPages: {},
     userRoles: [],
-    workbookLocked: false
+    workbookLocked: false,
+    actionPlans: {
+      isLoaded: false,
+      plans: []
+    }
   };
 
   var PubSub = /*#__PURE__*/function () {
@@ -35369,10 +35431,219 @@
 
   var logger$k = Logger('common/actionPlanHelper');
 
+  // ============================================
+  // Store-based Action Plan Cache Functions
+  // ============================================
+
+  /**
+   * Get action plans from store (cached)
+   * @returns {Object} The action plans state { isLoaded: boolean, plans: Array }
+   */
+  function getActionPlansFromStore() {
+    return store.state.actionPlans || {
+      isLoaded: false,
+      plans: []
+    };
+  }
+
+  /**
+   * Check if action plans are loaded in store
+   * @returns {boolean} Whether action plans are loaded
+   */
+  function areActionPlansLoaded() {
+    var _store$state$actionPl;
+    return ((_store$state$actionPl = store.state.actionPlans) === null || _store$state$actionPl === void 0 ? void 0 : _store$state$actionPl.isLoaded) === true;
+  }
+
+  /**
+   * Get action plans for a specific workbook from store
+   * @param {string} workbookId - The workbook ID to filter by
+   * @returns {Array} Array of action plans for the workbook
+   */
+  function getActionPlansForWorkbook(workbookId) {
+    var _getActionPlansFromSt = getActionPlansFromStore(),
+      plans = _getActionPlansFromSt.plans;
+    if (!workbookId || !plans) return [];
+    return plans.filter(function (plan) {
+      return plan._quartech_workbook_value === workbookId;
+    });
+  }
+
+  /**
+   * Get action plans for a specific question from store
+   * @param {string} questionId - The question ID to filter by
+   * @returns {Array} Array of action plans for the question
+   */
+  function getActionPlansForQuestion(questionId) {
+    var _getActionPlansFromSt2 = getActionPlansFromStore(),
+      plans = _getActionPlansFromSt2.plans;
+    if (!questionId || !plans) return [];
+    return plans.filter(function (plan) {
+      return plan._quartech_workbookquestion_value === questionId;
+    });
+  }
+
+  /**
+   * Load action plans into store from API
+   * Only fetches from API if not already loaded (unless forceRefresh is true)
+   * @param {boolean} forceRefresh - Force refresh from API even if already loaded
+   * @returns {Promise<Array>} Array of action plans
+   */
+  function loadActionPlansIntoStore() {
+    return _loadActionPlansIntoStore.apply(this, arguments);
+  }
+
+  /**
+   * Add a new action plan to the store (after API creation)
+   * @param {Object} actionPlan - The action plan to add
+   */
+  function _loadActionPlansIntoStore() {
+    _loadActionPlansIntoStore = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee() {
+      var forceRefresh,
+        _store$state$actionPl2,
+        _result$data,
+        result,
+        plans,
+        _args = arguments;
+      return _regeneratorRuntime().wrap(function _callee$(_context) {
+        while (1) switch (_context.prev = _context.next) {
+          case 0:
+            forceRefresh = _args.length > 0 && _args[0] !== undefined ? _args[0] : false;
+            if (!(!forceRefresh && areActionPlansLoaded())) {
+              _context.next = 4;
+              break;
+            }
+            logger$k.info({
+              fn: loadActionPlansIntoStore,
+              message: 'Action plans already loaded in store, using cached data',
+              data: {
+                count: ((_store$state$actionPl2 = store.state.actionPlans.plans) === null || _store$state$actionPl2 === void 0 ? void 0 : _store$state$actionPl2.length) || 0
+              }
+            });
+            return _context.abrupt("return", store.state.actionPlans.plans);
+          case 4:
+            _context.prev = 4;
+            logger$k.info({
+              fn: loadActionPlansIntoStore,
+              message: 'Fetching action plans from API',
+              data: {
+                forceRefresh: forceRefresh
+              }
+            });
+            _context.next = 8;
+            return getActionPlansData();
+          case 8:
+            result = _context.sent;
+            plans = (result === null || result === void 0 || (_result$data = result.data) === null || _result$data === void 0 ? void 0 : _result$data.value) || []; // Store in the centralized store
+            store.commit('setActionPlans', {
+              plans: plans
+            });
+            logger$k.info({
+              fn: loadActionPlansIntoStore,
+              message: 'Action plans loaded into store',
+              data: {
+                count: plans.length
+              }
+            });
+            return _context.abrupt("return", plans);
+          case 15:
+            _context.prev = 15;
+            _context.t0 = _context["catch"](4);
+            logger$k.error({
+              fn: loadActionPlansIntoStore,
+              message: 'Failed to load action plans into store',
+              data: {
+                error: _context.t0
+              }
+            });
+            throw _context.t0;
+          case 19:
+          case "end":
+            return _context.stop();
+        }
+      }, _callee, null, [[4, 15]]);
+    }));
+    return _loadActionPlansIntoStore.apply(this, arguments);
+  }
+  function addActionPlanToStore(actionPlan) {
+    if (!actionPlan) return;
+    store.commit('addActionPlan', {
+      actionPlan: actionPlan
+    });
+    logger$k.info({
+      fn: addActionPlanToStore,
+      message: 'Action plan added to store',
+      data: {
+        actionPlanId: actionPlan.quartech_actionplanid
+      }
+    });
+  }
+
+  /**
+   * Update an action plan in the store (after API update)
+   * @param {string} actionPlanId - The ID of the action plan to update
+   * @param {Object} updates - The updates to apply
+   */
+  function updateActionPlanInStore(actionPlanId, updates) {
+    if (!actionPlanId) return;
+    store.commit('updateActionPlan', {
+      actionPlanId: actionPlanId,
+      updates: updates
+    });
+    logger$k.info({
+      fn: updateActionPlanInStore,
+      message: 'Action plan updated in store',
+      data: {
+        actionPlanId: actionPlanId
+      }
+    });
+  }
+
+  /**
+   * Remove an action plan from the store (after API deletion)
+   * @param {string} actionPlanId - The ID of the action plan to remove
+   */
+  function removeActionPlanFromStore(actionPlanId) {
+    if (!actionPlanId) return;
+    store.commit('removeActionPlan', {
+      actionPlanId: actionPlanId
+    });
+    logger$k.info({
+      fn: removeActionPlanFromStore,
+      message: 'Action plan removed from store',
+      data: {
+        actionPlanId: actionPlanId
+      }
+    });
+  }
+
+  /**
+   * Refresh action plans in store from API
+   * Always fetches from API regardless of cache state
+   * @returns {Promise<Array>} Array of action plans
+   */
+  function refreshActionPlansInStore() {
+    return _refreshActionPlansInStore.apply(this, arguments);
+  }
+
   /**
    * Get all action plans
    * @returns {Promise<Object>} Action plans data
    */
+  function _refreshActionPlansInStore() {
+    _refreshActionPlansInStore = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee2() {
+      return _regeneratorRuntime().wrap(function _callee2$(_context2) {
+        while (1) switch (_context2.prev = _context2.next) {
+          case 0:
+            return _context2.abrupt("return", loadActionPlansIntoStore(true));
+          case 1:
+          case "end":
+            return _context2.stop();
+        }
+      }, _callee2);
+    }));
+    return _refreshActionPlansInStore.apply(this, arguments);
+  }
   function getActionPlans() {
     return _getActionPlans.apply(this, arguments);
   }
@@ -35386,21 +35657,21 @@
    * @returns {Promise<Object>} Result of the creation
    */
   function _getActionPlans() {
-    _getActionPlans = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee() {
-      var _result$data, _result$data2, _result$data3, _result$data4, result, actionPlans;
-      return _regeneratorRuntime().wrap(function _callee$(_context) {
-        while (1) switch (_context.prev = _context.next) {
+    _getActionPlans = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee3() {
+      var _result$data2, _result$data3, _result$data4, _result$data5, result, actionPlans;
+      return _regeneratorRuntime().wrap(function _callee3$(_context3) {
+        while (1) switch (_context3.prev = _context3.next) {
           case 0:
-            _context.prev = 0;
+            _context3.prev = 0;
             logger$k.info({
               fn: getActionPlans,
               message: 'Fetching all action plans'
             });
-            _context.next = 4;
+            _context3.next = 4;
             return getActionPlansData();
           case 4:
-            result = _context.sent;
-            actionPlans = (result === null || result === void 0 || (_result$data = result.data) === null || _result$data === void 0 ? void 0 : _result$data.value) || [];
+            result = _context3.sent;
+            actionPlans = (result === null || result === void 0 || (_result$data2 = result.data) === null || _result$data2 === void 0 ? void 0 : _result$data2.value) || [];
             logger$k.info({
               fn: getActionPlans,
               message: 'Action plans fetched successfully',
@@ -35408,31 +35679,31 @@
                 count: actionPlans.length
               }
             });
-            return _context.abrupt("return", {
+            return _context3.abrupt("return", {
               success: true,
               actionPlans: actionPlans,
-              totalCount: (result === null || result === void 0 || (_result$data2 = result.data) === null || _result$data2 === void 0 ? void 0 : _result$data2['@odata.count']) || actionPlans.length,
+              totalCount: (result === null || result === void 0 || (_result$data3 = result.data) === null || _result$data3 === void 0 ? void 0 : _result$data3['@odata.count']) || actionPlans.length,
               metadata: {
-                context: result === null || result === void 0 || (_result$data3 = result.data) === null || _result$data3 === void 0 ? void 0 : _result$data3['@odata.context'],
-                nextLink: result === null || result === void 0 || (_result$data4 = result.data) === null || _result$data4 === void 0 ? void 0 : _result$data4['@odata.nextLink']
+                context: result === null || result === void 0 || (_result$data4 = result.data) === null || _result$data4 === void 0 ? void 0 : _result$data4['@odata.context'],
+                nextLink: result === null || result === void 0 || (_result$data5 = result.data) === null || _result$data5 === void 0 ? void 0 : _result$data5['@odata.nextLink']
               }
             });
           case 10:
-            _context.prev = 10;
-            _context.t0 = _context["catch"](0);
+            _context3.prev = 10;
+            _context3.t0 = _context3["catch"](0);
             logger$k.error({
               fn: getActionPlans,
               message: 'Failed to fetch action plans',
               data: {
-                error: _context.t0
+                error: _context3.t0
               }
             });
-            throw _context.t0;
+            throw _context3.t0;
           case 14:
           case "end":
-            return _context.stop();
+            return _context3.stop();
         }
-      }, _callee, null, [[0, 10]]);
+      }, _callee3, null, [[0, 10]]);
     }));
     return _getActionPlans.apply(this, arguments);
   }
@@ -35445,19 +35716,19 @@
    * Usage: POWERPOD.actionPlanHelper.createTest("My action item")
    */
   function _createActionPlan() {
-    _createActionPlan = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee2(workbookId, action) {
+    _createActionPlan = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee4(workbookId, action) {
       var chapterId,
         questionId,
         result,
-        _args2 = arguments;
-      return _regeneratorRuntime().wrap(function _callee2$(_context2) {
-        while (1) switch (_context2.prev = _context2.next) {
+        _args4 = arguments;
+      return _regeneratorRuntime().wrap(function _callee4$(_context4) {
+        while (1) switch (_context4.prev = _context4.next) {
           case 0:
-            chapterId = _args2.length > 2 && _args2[2] !== undefined ? _args2[2] : null;
-            questionId = _args2.length > 3 && _args2[3] !== undefined ? _args2[3] : null;
-            _context2.prev = 2;
+            chapterId = _args4.length > 2 && _args4[2] !== undefined ? _args4[2] : null;
+            questionId = _args4.length > 3 && _args4[3] !== undefined ? _args4[3] : null;
+            _context4.prev = 2;
             if (!(!workbookId || !action)) {
-              _context2.next = 5;
+              _context4.next = 5;
               break;
             }
             throw new Error('workbookId and action are required');
@@ -35472,7 +35743,7 @@
                 questionId: questionId
               }
             });
-            _context2.next = 8;
+            _context4.next = 8;
             return postActionPlanData({
               workbookId: workbookId,
               action: action,
@@ -35480,7 +35751,7 @@
               questionId: questionId
             });
           case 8:
-            result = _context2.sent;
+            result = _context4.sent;
             logger$k.info({
               fn: createActionPlan,
               message: 'Action plan created successfully',
@@ -35488,30 +35759,30 @@
                 result: result
               }
             });
-            return _context2.abrupt("return", {
+            return _context4.abrupt("return", {
               success: true,
               result: result
             });
           case 13:
-            _context2.prev = 13;
-            _context2.t0 = _context2["catch"](2);
+            _context4.prev = 13;
+            _context4.t0 = _context4["catch"](2);
             logger$k.error({
               fn: createActionPlan,
               message: 'Failed to create action plan',
               data: {
-                error: _context2.t0,
+                error: _context4.t0,
                 workbookId: workbookId,
                 action: action,
                 chapterId: chapterId,
                 questionId: questionId
               }
             });
-            throw _context2.t0;
+            throw _context4.t0;
           case 17:
           case "end":
-            return _context2.stop();
+            return _context4.stop();
         }
-      }, _callee2, null, [[2, 13]]);
+      }, _callee4, null, [[2, 13]]);
     }));
     return _createActionPlan.apply(this, arguments);
   }
@@ -35523,24 +35794,24 @@
    * Usage: POWERPOD.actionPlanHelper.createMultiple(["Action 1", "Action 2", "Action 3"])
    */
   function _createTest() {
-    _createTest = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee3(action) {
+    _createTest = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee5(action) {
       var chapterId,
         questionId,
         workbookId,
         result,
-        _args3 = arguments;
-      return _regeneratorRuntime().wrap(function _callee3$(_context3) {
-        while (1) switch (_context3.prev = _context3.next) {
+        _args5 = arguments;
+      return _regeneratorRuntime().wrap(function _callee5$(_context5) {
+        while (1) switch (_context5.prev = _context5.next) {
           case 0:
-            chapterId = _args3.length > 1 && _args3[1] !== undefined ? _args3[1] : null;
-            questionId = _args3.length > 2 && _args3[2] !== undefined ? _args3[2] : null;
+            chapterId = _args5.length > 1 && _args5[1] !== undefined ? _args5[1] : null;
+            questionId = _args5.length > 2 && _args5[2] !== undefined ? _args5[2] : null;
             workbookId = getCurrentWorkbookId();
             if (workbookId) {
-              _context3.next = 6;
+              _context5.next = 6;
               break;
             }
             console.error('No workbook ID found. Make sure you are on a workbook page.');
-            return _context3.abrupt("return");
+            return _context5.abrupt("return");
           case 6:
             console.log('Creating test action plan...', {
               workbookId: workbookId,
@@ -35548,17 +35819,17 @@
               chapterId: chapterId,
               questionId: questionId
             });
-            _context3.next = 9;
+            _context5.next = 9;
             return createActionPlan(workbookId, action, chapterId, questionId);
           case 9:
-            result = _context3.sent;
+            result = _context5.sent;
             console.log('✅ Action plan created:', result);
-            return _context3.abrupt("return", result);
+            return _context5.abrupt("return", result);
           case 12:
           case "end":
-            return _context3.stop();
+            return _context5.stop();
         }
-      }, _callee3);
+      }, _callee5);
     }));
     return _createTest.apply(this, arguments);
   }
@@ -35570,7 +35841,7 @@
    * Usage: POWERPOD.actionPlanHelper.getAll()
    */
   function _createMultiple() {
-    _createMultiple = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee4(actions) {
+    _createMultiple = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee6(actions) {
       var chapterId,
         questionId,
         workbookId,
@@ -35579,66 +35850,66 @@
         _step,
         action,
         result,
-        _args4 = arguments;
-      return _regeneratorRuntime().wrap(function _callee4$(_context4) {
-        while (1) switch (_context4.prev = _context4.next) {
+        _args6 = arguments;
+      return _regeneratorRuntime().wrap(function _callee6$(_context6) {
+        while (1) switch (_context6.prev = _context6.next) {
           case 0:
-            chapterId = _args4.length > 1 && _args4[1] !== undefined ? _args4[1] : null;
-            questionId = _args4.length > 2 && _args4[2] !== undefined ? _args4[2] : null;
+            chapterId = _args6.length > 1 && _args6[1] !== undefined ? _args6[1] : null;
+            questionId = _args6.length > 2 && _args6[2] !== undefined ? _args6[2] : null;
             workbookId = getCurrentWorkbookId();
             if (workbookId) {
-              _context4.next = 6;
+              _context6.next = 6;
               break;
             }
             console.error('No workbook ID found. Make sure you are on a workbook page.');
-            return _context4.abrupt("return");
+            return _context6.abrupt("return");
           case 6:
             console.log("Creating ".concat(actions.length, " test action plans..."));
             results = [];
             _iterator = _createForOfIteratorHelper(actions);
-            _context4.prev = 9;
+            _context6.prev = 9;
             _iterator.s();
           case 11:
             if ((_step = _iterator.n()).done) {
-              _context4.next = 26;
+              _context6.next = 26;
               break;
             }
             action = _step.value;
-            _context4.prev = 13;
-            _context4.next = 16;
+            _context6.prev = 13;
+            _context6.next = 16;
             return createActionPlan(workbookId, action, chapterId, questionId);
           case 16:
-            result = _context4.sent;
+            result = _context6.sent;
             results.push(result);
             console.log("\u2705 Created: \"".concat(action, "\""));
-            _context4.next = 24;
+            _context6.next = 24;
             break;
           case 21:
-            _context4.prev = 21;
-            _context4.t0 = _context4["catch"](13);
-            console.error("\u274C Failed to create: \"".concat(action, "\""), _context4.t0);
+            _context6.prev = 21;
+            _context6.t0 = _context6["catch"](13);
+            console.error("\u274C Failed to create: \"".concat(action, "\""), _context6.t0);
           case 24:
-            _context4.next = 11;
+            _context6.next = 11;
             break;
           case 26:
-            _context4.next = 31;
+            _context6.next = 31;
             break;
           case 28:
-            _context4.prev = 28;
-            _context4.t1 = _context4["catch"](9);
-            _iterator.e(_context4.t1);
+            _context6.prev = 28;
+            _context6.t1 = _context6["catch"](9);
+            _iterator.e(_context6.t1);
           case 31:
-            _context4.prev = 31;
+            _context6.prev = 31;
             _iterator.f();
-            return _context4.finish(31);
+            return _context6.finish(31);
           case 34:
             console.log("\u2705 Created ".concat(results.length, " of ").concat(actions.length, " action plans"));
-            return _context4.abrupt("return", results);
+            return _context6.abrupt("return", results);
           case 36:
           case "end":
-            return _context4.stop();
+            return _context6.stop();
         }
-      }, _callee4, null, [[9, 28, 31, 34], [13, 21]]);
+      }, _callee6, null, [[9, 28, 31, 34], [13, 21]]);
     }));
     return _createMultiple.apply(this, arguments);
   }
@@ -35646,29 +35917,39 @@
     return _getAll.apply(this, arguments);
   } // Maintain backward compatibility by creating an object with all functions
   function _getAll() {
-    _getAll = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee5() {
+    _getAll = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee7() {
       var result;
-      return _regeneratorRuntime().wrap(function _callee5$(_context5) {
-        while (1) switch (_context5.prev = _context5.next) {
+      return _regeneratorRuntime().wrap(function _callee7$(_context7) {
+        while (1) switch (_context7.prev = _context7.next) {
           case 0:
             console.log('Fetching all action plans...');
-            _context5.next = 3;
+            _context7.next = 3;
             return getActionPlans();
           case 3:
-            result = _context5.sent;
+            result = _context7.sent;
             console.log("\u2705 Found ".concat(result.totalCount, " action plans:"), result.actionPlans);
-            return _context5.abrupt("return", result);
+            return _context7.abrupt("return", result);
           case 6:
           case "end":
-            return _context5.stop();
+            return _context7.stop();
         }
-      }, _callee5);
+      }, _callee7);
     }));
     return _getAll.apply(this, arguments);
   }
   var ActionPlanHelper = {
     getActionPlans: getActionPlans,
     createActionPlan: createActionPlan,
+    // Store-based cache functions
+    getActionPlansFromStore: getActionPlansFromStore,
+    areActionPlansLoaded: areActionPlansLoaded,
+    getActionPlansForWorkbook: getActionPlansForWorkbook,
+    getActionPlansForQuestion: getActionPlansForQuestion,
+    loadActionPlansIntoStore: loadActionPlansIntoStore,
+    addActionPlanToStore: addActionPlanToStore,
+    updateActionPlanInStore: updateActionPlanInStore,
+    removeActionPlanFromStore: removeActionPlanFromStore,
+    refreshActionPlansInStore: refreshActionPlansInStore,
     // Test helpers
     createTest: createTest,
     createMultiple: createMultiple,
@@ -42064,8 +42345,9 @@
           this.loadActionPlans();
           this.loadChaptersAndQuestions();
           // Subscribe to store changes to update when questionnaire data loads
+          // and when action plans are updated
           store.events.subscribe('stateChange', (state) => {
-              var _a, _b;
+              var _a, _b, _c;
               if (((_b = (_a = state.questionnaire) === null || _a === void 0 ? void 0 : _a.chapters) === null || _b === void 0 ? void 0 : _b.length) > 0 && this.chapters.length === 0) {
                   logger$h.info({
                       fn: 'connectedCallback',
@@ -42073,6 +42355,23 @@
                   });
                   this.loadChaptersAndQuestions();
                   this.requestUpdate();
+              }
+              // Update local action plans when store changes
+              if ((_c = state.actionPlans) === null || _c === void 0 ? void 0 : _c.isLoaded) {
+                  const workbookId = getCurrentWorkbookId();
+                  if (workbookId) {
+                      const cachedPlans = getActionPlansForWorkbook(workbookId);
+                      // Only update if there's a difference in count to avoid unnecessary re-renders
+                      if (cachedPlans.length !== this.actionPlans.length) {
+                          logger$h.info({
+                              fn: 'connectedCallback',
+                              message: 'Action plans updated in store, syncing local state',
+                              data: { cachedCount: cachedPlans.length, localCount: this.actionPlans.length },
+                          });
+                          this.actionPlans = cachedPlans;
+                          this.requestUpdate();
+                      }
+                  }
               }
           });
           // Listen for action plan updates from other instances to keep data in sync
@@ -42083,8 +42382,7 @@
           // Remove the document-level event listener
           document.removeEventListener('action-plans-updated', this.handleExternalActionPlansUpdate);
       }
-      async loadActionPlans(dispatchEvent = true) {
-          var _a;
+      async loadActionPlans(dispatchEvent = true, forceRefresh = false) {
           try {
               this.loading = true;
               this.error = null;
@@ -42092,22 +42390,37 @@
               if (!workbookId) {
                   throw new Error('No workbook ID found');
               }
-              logger$h.info({
-                  fn: 'loadActionPlans',
-                  message: 'Fetching action plans',
-                  data: { workbookId, dispatchEvent },
-              });
-              const result = await getActionPlansData();
-              if (!((_a = result === null || result === void 0 ? void 0 : result.data) === null || _a === void 0 ? void 0 : _a.value)) {
-                  throw new Error('Invalid response from action plans API');
+              // Check if action plans are already loaded in store and we don't need to refresh
+              if (!forceRefresh && areActionPlansLoaded()) {
+                  logger$h.info({
+                      fn: 'loadActionPlans',
+                      message: 'Using cached action plans from store',
+                      data: { workbookId },
+                  });
+                  // Get action plans for this workbook from store
+                  this.actionPlans = getActionPlansForWorkbook(workbookId);
+                  logger$h.info({
+                      fn: 'loadActionPlans',
+                      message: 'Action plans loaded from cache',
+                      data: { count: this.actionPlans.length },
+                  });
               }
-              // Filter action plans for current workbook
-              this.actionPlans = result.data.value.filter((plan) => plan._quartech_workbook_value === workbookId);
-              logger$h.info({
-                  fn: 'loadActionPlans',
-                  message: 'Action plans loaded successfully',
-                  data: { count: this.actionPlans.length },
-              });
+              else {
+                  logger$h.info({
+                      fn: 'loadActionPlans',
+                      message: 'Fetching action plans from API',
+                      data: { workbookId, dispatchEvent, forceRefresh },
+                  });
+                  // Load action plans into store (will fetch from API)
+                  await loadActionPlansIntoStore(forceRefresh);
+                  // Get action plans for this workbook from store
+                  this.actionPlans = getActionPlansForWorkbook(workbookId);
+                  logger$h.info({
+                      fn: 'loadActionPlans',
+                      message: 'Action plans loaded from API and cached in store',
+                      data: { count: this.actionPlans.length },
+                  });
+              }
               // Dispatch event to notify other components that action plans have been updated
               // Only dispatch if this is a primary load (not triggered by external update)
               if (dispatchEvent) {
@@ -42350,8 +42663,8 @@
                   fn: 'handleEditActionPlan',
                   message: 'Action plan updated successfully',
               });
-              // Reload action plans
-              await this.loadActionPlans();
+              // Reload action plans (force refresh from API to get the updated plan)
+              await this.loadActionPlans(true, true);
               // Close dialog
               this.closeEditDialog();
           }
@@ -42395,15 +42708,27 @@
                       actionPlanId: this.deletingPlan.quartech_actionplanid,
                   },
               });
+              const deletedPlanId = this.deletingPlan.quartech_actionplanid;
               await deleteActionPlanData({
-                  actionPlanId: this.deletingPlan.quartech_actionplanid,
+                  actionPlanId: deletedPlanId,
               });
               logger$h.info({
                   fn: 'handleDeleteActionPlan',
                   message: 'Action plan deleted successfully',
               });
-              // Reload action plans
-              await this.loadActionPlans();
+              // Remove from store cache directly (no need to refetch from API)
+              removeActionPlanFromStore(deletedPlanId);
+              // Update local action plans from store cache
+              const workbookId = getCurrentWorkbookId();
+              if (workbookId) {
+                  this.actionPlans = getActionPlansForWorkbook(workbookId);
+              }
+              // Dispatch event to notify other components
+              this.dispatchEvent(new CustomEvent('action-plans-updated', {
+                  bubbles: true,
+                  composed: true,
+                  detail: { count: this.actionPlans.length }
+              }));
               // Close dialog
               this.closeDeleteDialog();
           }
@@ -42450,8 +42775,8 @@
                   fn: 'handleCreateActionPlan',
                   message: 'Action plan created successfully',
               });
-              // Reload action plans
-              await this.loadActionPlans();
+              // Reload action plans (force refresh from API to get the newly created plan)
+              await this.loadActionPlans(true, true);
               // Close dialog
               this.closeCreateDialog();
           }

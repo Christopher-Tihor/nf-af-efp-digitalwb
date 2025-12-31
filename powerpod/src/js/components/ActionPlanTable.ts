@@ -9,9 +9,15 @@ import '@shoelace-style/shoelace/dist/components/badge/badge.js';
 import { LitElement, css, html, unsafeCSS } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { Logger } from '../common/logger';
-import { getActionPlansData, postActionPlanData, patchActionPlanData, deleteActionPlanData } from '../common/fetch';
+import { postActionPlanData, patchActionPlanData, deleteActionPlanData } from '../common/fetch';
 import { getCurrentWorkbookId } from '../common/workbookUtils';
 import { getQuestionnaireFromStore, getQuestionFromStore } from '../common/questionnaire';
+import {
+  areActionPlansLoaded,
+  getActionPlansForWorkbook,
+  loadActionPlansIntoStore,
+  removeActionPlanFromStore,
+} from '../common/actionPlanHelper.js';
 import store from '../store/index.js';
 import './SearchableDropdown.js';
 import type { DropdownOption } from './SearchableDropdown.js';
@@ -202,6 +208,7 @@ class ActionPlanTable extends LitElement {
     this.loadChaptersAndQuestions();
 
     // Subscribe to store changes to update when questionnaire data loads
+    // and when action plans are updated
     store.events.subscribe('stateChange', (state: any) => {
       if (state.questionnaire?.chapters?.length > 0 && this.chapters.length === 0) {
         logger.info({
@@ -210,6 +217,24 @@ class ActionPlanTable extends LitElement {
         });
         this.loadChaptersAndQuestions();
         this.requestUpdate();
+      }
+
+      // Update local action plans when store changes
+      if (state.actionPlans?.isLoaded) {
+        const workbookId = getCurrentWorkbookId();
+        if (workbookId) {
+          const cachedPlans = getActionPlansForWorkbook(workbookId) as ActionPlan[];
+          // Only update if there's a difference in count to avoid unnecessary re-renders
+          if (cachedPlans.length !== this.actionPlans.length) {
+            logger.info({
+              fn: 'connectedCallback',
+              message: 'Action plans updated in store, syncing local state',
+              data: { cachedCount: cachedPlans.length, localCount: this.actionPlans.length },
+            });
+            this.actionPlans = cachedPlans;
+            this.requestUpdate();
+          }
+        }
       }
     });
 
@@ -223,7 +248,7 @@ class ActionPlanTable extends LitElement {
     document.removeEventListener('action-plans-updated', this.handleExternalActionPlansUpdate);
   }
 
-  private async loadActionPlans(dispatchEvent: boolean = true) {
+  private async loadActionPlans(dispatchEvent: boolean = true, forceRefresh: boolean = false) {
     try {
       this.loading = true;
       this.error = null;
@@ -233,28 +258,41 @@ class ActionPlanTable extends LitElement {
         throw new Error('No workbook ID found');
       }
 
-      logger.info({
-        fn: 'loadActionPlans',
-        message: 'Fetching action plans',
-        data: { workbookId, dispatchEvent },
-      });
+      // Check if action plans are already loaded in store and we don't need to refresh
+      if (!forceRefresh && areActionPlansLoaded()) {
+        logger.info({
+          fn: 'loadActionPlans',
+          message: 'Using cached action plans from store',
+          data: { workbookId },
+        });
 
-      const result = await getActionPlansData();
+        // Get action plans for this workbook from store
+        this.actionPlans = getActionPlansForWorkbook(workbookId) as ActionPlan[];
 
-      if (!result?.data?.value) {
-        throw new Error('Invalid response from action plans API');
+        logger.info({
+          fn: 'loadActionPlans',
+          message: 'Action plans loaded from cache',
+          data: { count: this.actionPlans.length },
+        });
+      } else {
+        logger.info({
+          fn: 'loadActionPlans',
+          message: 'Fetching action plans from API',
+          data: { workbookId, dispatchEvent, forceRefresh },
+        });
+
+        // Load action plans into store (will fetch from API)
+        await loadActionPlansIntoStore(forceRefresh);
+
+        // Get action plans for this workbook from store
+        this.actionPlans = getActionPlansForWorkbook(workbookId) as ActionPlan[];
+
+        logger.info({
+          fn: 'loadActionPlans',
+          message: 'Action plans loaded from API and cached in store',
+          data: { count: this.actionPlans.length },
+        });
       }
-
-      // Filter action plans for current workbook
-      this.actionPlans = result.data.value.filter(
-        (plan: ActionPlan) => plan._quartech_workbook_value === workbookId
-      );
-
-      logger.info({
-        fn: 'loadActionPlans',
-        message: 'Action plans loaded successfully',
-        data: { count: this.actionPlans.length },
-      });
 
       // Dispatch event to notify other components that action plans have been updated
       // Only dispatch if this is a primary load (not triggered by external update)
@@ -525,8 +563,8 @@ class ActionPlanTable extends LitElement {
         message: 'Action plan updated successfully',
       });
 
-      // Reload action plans
-      await this.loadActionPlans();
+      // Reload action plans (force refresh from API to get the updated plan)
+      await this.loadActionPlans(true, true);
 
       // Close dialog
       this.closeEditDialog();
@@ -574,8 +612,10 @@ class ActionPlanTable extends LitElement {
         },
       });
 
+      const deletedPlanId = this.deletingPlan.quartech_actionplanid;
+
       await deleteActionPlanData({
-        actionPlanId: this.deletingPlan.quartech_actionplanid,
+        actionPlanId: deletedPlanId,
       });
 
       logger.info({
@@ -583,8 +623,21 @@ class ActionPlanTable extends LitElement {
         message: 'Action plan deleted successfully',
       });
 
-      // Reload action plans
-      await this.loadActionPlans();
+      // Remove from store cache directly (no need to refetch from API)
+      removeActionPlanFromStore(deletedPlanId);
+
+      // Update local action plans from store cache
+      const workbookId = getCurrentWorkbookId();
+      if (workbookId) {
+        this.actionPlans = getActionPlansForWorkbook(workbookId) as ActionPlan[];
+      }
+
+      // Dispatch event to notify other components
+      this.dispatchEvent(new CustomEvent('action-plans-updated', {
+        bubbles: true,
+        composed: true,
+        detail: { count: this.actionPlans.length }
+      }));
 
       // Close dialog
       this.closeDeleteDialog();
@@ -637,8 +690,8 @@ class ActionPlanTable extends LitElement {
         message: 'Action plan created successfully',
       });
 
-      // Reload action plans
-      await this.loadActionPlans();
+      // Reload action plans (force refresh from API to get the newly created plan)
+      await this.loadActionPlans(true, true);
 
       // Close dialog
       this.closeCreateDialog();

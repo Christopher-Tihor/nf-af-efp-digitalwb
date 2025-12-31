@@ -11,5 +11,9 @@ declare namespace _default {
     function setPortalPageData(state: any, payload: any): any;
     function setUserRoles(state: any, payload: any): any;
     function setWorkbookLocked(state: any, payload: any): any;
+    function setActionPlans(state: any, payload: any): any;
+    function addActionPlan(state: any, payload: any): any;
+    function updateActionPlan(state: any, payload: any): any;
+    function removeActionPlan(state: any, payload: any): any;
 }
 export default _default;

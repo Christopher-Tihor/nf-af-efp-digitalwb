@@ -6,5 +6,9 @@ declare namespace _default {
     let portalPages: {};
     let userRoles: never[];
     let workbookLocked: boolean;
+    namespace actionPlans {
+        let isLoaded: boolean;
+        let plans: never[];
+    }
 }
 export default _default;

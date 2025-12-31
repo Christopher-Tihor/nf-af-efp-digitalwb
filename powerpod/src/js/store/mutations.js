@@ -207,4 +207,56 @@ export default {
     state.workbookLocked = payload.locked;
     return state;
   },
+  setActionPlans(state, payload) {
+    logger.info({
+      fn: this.setActionPlans,
+      message: 'Set action plans in state',
+      data: { count: payload.plans?.length || 0 },
+    });
+    state.actionPlans = {
+      isLoaded: true,
+      plans: payload.plans || [],
+    };
+    return state;
+  },
+  addActionPlan(state, payload) {
+    logger.info({
+      fn: this.addActionPlan,
+      message: 'Add action plan to state',
+      data: { actionPlan: payload.actionPlan },
+    });
+    if (!state.actionPlans.plans) {
+      state.actionPlans.plans = [];
+    }
+    state.actionPlans.plans.push(payload.actionPlan);
+    return state;
+  },
+  updateActionPlan(state, payload) {
+    logger.info({
+      fn: this.updateActionPlan,
+      message: 'Update action plan in state',
+      data: { actionPlanId: payload.actionPlanId },
+    });
+    const index = state.actionPlans.plans.findIndex(
+      (plan) => plan.quartech_actionplanid === payload.actionPlanId
+    );
+    if (index !== -1) {
+      state.actionPlans.plans[index] = {
+        ...state.actionPlans.plans[index],
+        ...payload.updates,
+      };
+    }
+    return state;
+  },
+  removeActionPlan(state, payload) {
+    logger.info({
+      fn: this.removeActionPlan,
+      message: 'Remove action plan from state',
+      data: { actionPlanId: payload.actionPlanId },
+    });
+    state.actionPlans.plans = state.actionPlans.plans.filter(
+      (plan) => plan.quartech_actionplanid !== payload.actionPlanId
+    );
+    return state;
+  },
 };

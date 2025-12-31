@@ -5,5 +5,9 @@ export default {
   questionnaire: {},
   portalPages: {},
   userRoles: [],
-  workbookLocked: false
+  workbookLocked: false,
+  actionPlans: {
+    isLoaded: false,
+    plans: [],
+  },
 };
