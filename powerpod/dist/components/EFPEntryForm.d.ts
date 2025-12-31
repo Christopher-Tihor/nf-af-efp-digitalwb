@@ -46,6 +46,9 @@ export declare class EFPEntryForm extends LitElement {
     responseUpdateCounter: number;
     currentCompletionPercentage: number;
     private isNavigating;
+    private pendingURLNavigation;
+    private hasAppliedURLNavigation;
+    private myActionPlanPortalPageLoaded;
     activeContent: EFPActiveContent;
     tabGroupEl: HTMLElement & {
         show: (tabName: string) => void;
@@ -74,9 +77,13 @@ export declare class EFPEntryForm extends LitElement {
     private handleSignOffChanged;
     private handleActionPlansUpdated;
     private handleGlobalKeyDown;
+    private handlePopState;
     private openSearchDialog;
     private handleSearchNavigate;
     private updateQuestionnaireStoreStatus;
+    private applyPendingURLNavigation;
+    private handleStoreStateChange;
+    private refreshActiveContentForMyActionPlan;
     private setupQuestionnaireStoreWatcher;
     private isWorkbookLocked;
     private updateWorkbookLockStatus;

@@ -42,6 +42,13 @@ import { EFPNavigationUtils, NavigationContext, NavigationResult } from './efp/n
 import { EFPLifecycleUtils } from './efp/lifecycle-utils.js';
 import { EFPSectionGenerator } from './efp/section-generator.js';
 import { EFPRenderUtils } from './efp/render-utils.js';
+import {
+  parseNavigationURL,
+  resolveNavigationFromURL,
+  updateNavigationURL,
+  hasNavigationParams,
+  URLNavigationParams,
+} from './efp/url-navigation.js';
 
 import { efpEntryFormStyles } from './EFPEntryForm.styles';
 
@@ -96,6 +103,9 @@ export class EFPEntryForm extends LitElement {
   @property({ type: Number, attribute: false }) responseUpdateCounter = 0; // Triggers re-render when responses change
   @property({ type: Number, attribute: false }) currentCompletionPercentage = 0; // Local copy of completion percentage for reactive rendering
   private isNavigating = false; // Flag to prevent tab change interference
+  private pendingURLNavigation: URLNavigationParams | null = null; // Stores URL params to apply after questionnaire loads
+  private hasAppliedURLNavigation = false; // Prevents re-applying URL navigation
+  private myActionPlanPortalPageLoaded = false; // Tracks if My Action Plan portal page data is loaded
   @property({ type: Object }) activeContent: EFPActiveContent = {
     title: 'Introduction to the Environmental Farm Plan (EFP)',
     content:
@@ -176,6 +186,12 @@ export class EFPEntryForm extends LitElement {
 
     // Listen for CMD+K / Ctrl+K to open search dialog
     document.addEventListener('keydown', this.handleGlobalKeyDown);
+
+    // Listen for browser back/forward navigation
+    window.addEventListener('popstate', this.handlePopState);
+
+    // Subscribe to store state changes for portal page data loading
+    store.events.subscribe('stateChange', this.handleStoreStateChange);
   }
 
   // ========================================
@@ -308,6 +324,9 @@ export class EFPEntryForm extends LitElement {
     // Remove global keyboard listener
     document.removeEventListener('keydown', this.handleGlobalKeyDown);
 
+    // Remove browser back/forward navigation listener
+    window.removeEventListener('popstate', this.handlePopState);
+
     // Clean up services (they manage their own state)
     this.services.cleanup();
 
@@ -352,6 +371,45 @@ export class EFPEntryForm extends LitElement {
     }
   };
 
+  // Handle browser back/forward navigation
+  private handlePopState = (event: PopStateEvent) => {
+    logger.info({
+      message: 'Browser popstate event - navigating from URL',
+      data: { state: event.state },
+    });
+
+    // Try to restore from state first (most reliable)
+    if (event.state?.stepIndex !== undefined && event.state?.sectionIndex !== undefined) {
+      const { stepIndex, sectionIndex } = event.state;
+      if (stepIndex >= 0 && stepIndex < this.flatSteps.length) {
+        const step = this.flatSteps[stepIndex];
+        this.currentStepIndex = stepIndex;
+        this.currentSectionIndex = sectionIndex;
+        this.activeContent = { title: step.label, content: step.content };
+        this.updateNavigationState(step.label);
+        this.requestUpdate();
+        return;
+      }
+    }
+
+    // Fall back to parsing URL
+    const params = parseNavigationURL();
+    const target = resolveNavigationFromURL(
+      params,
+      this.flatSteps,
+      this.sections,
+      () => this.canAccessReviewAndSubmit()
+    );
+
+    if (target) {
+      this.currentStepIndex = target.stepIndex;
+      this.currentSectionIndex = target.sectionIndex;
+      this.activeContent = { title: target.step.label, content: target.step.content };
+      this.updateNavigationState(target.step.label);
+      this.requestUpdate();
+    }
+  };
+
   // Open the search dialog
   private openSearchDialog() {
     logger.info({ message: 'Opening search dialog (CMD+K)' });
@@ -382,6 +440,7 @@ export class EFPEntryForm extends LitElement {
       };
 
       this.updateNavigationState(step.label);
+      updateNavigationURL(stepIndex, step.sectionIndex, this.flatSteps, true);
       this.requestUpdate();
 
       // Clear navigating flag after a short delay
@@ -446,7 +505,102 @@ export class EFPEntryForm extends LitElement {
         message: '📋 Questionnaire store loaded, updating navigation',
       });
 
+      // Apply pending URL navigation if any
+      this.applyPendingURLNavigation();
+
       this.requestUpdate(); // Force re-render when store becomes available
+    }
+  }
+
+  // Apply pending URL navigation after questionnaire store loads
+  private applyPendingURLNavigation() {
+    if (!this.pendingURLNavigation || this.hasAppliedURLNavigation) {
+      return;
+    }
+
+    logger.info({
+      message: 'Applying pending URL navigation',
+      data: this.pendingURLNavigation,
+    });
+
+    const urlTarget = resolveNavigationFromURL(
+      this.pendingURLNavigation,
+      this.flatSteps,
+      this.sections,
+      () => this.canAccessReviewAndSubmit()
+    );
+
+    if (urlTarget) {
+      // Check if navigating to My Action Plan - if so, also check portal page data
+      const isMyActionPlan = urlTarget.step.label === 'My Action Plan';
+      if (isMyActionPlan && !this.myActionPlanPortalPageLoaded) {
+        logger.info({
+          message: 'Deferring My Action Plan navigation until portal page data loads',
+        });
+        // Keep pending navigation - handleStoreStateChange will re-trigger when data loads
+        return;
+      }
+
+      this.hasAppliedURLNavigation = true;
+      this.pendingURLNavigation = null;
+
+      this.currentStepIndex = urlTarget.stepIndex;
+      this.currentSectionIndex = urlTarget.sectionIndex;
+      this.activeContent = { title: urlTarget.step.label, content: urlTarget.step.content };
+      this.updateNavigationState(urlTarget.step.label);
+
+      // Replace state to ensure history state is set
+      updateNavigationURL(urlTarget.stepIndex, urlTarget.sectionIndex, this.flatSteps, false);
+
+      logger.info({
+        message: 'Successfully applied pending URL navigation',
+        data: { stepIndex: urlTarget.stepIndex, label: urlTarget.step.label },
+      });
+    } else {
+      logger.warn({
+        message: 'Could not resolve pending URL navigation',
+        data: this.pendingURLNavigation,
+      });
+      this.pendingURLNavigation = null;
+    }
+  }
+
+  // Handler for store state changes (bound method for proper cleanup)
+  private handleStoreStateChange = (state: any) => {
+    // Check if My Action Plan portal page data just loaded
+    const portalPageData = state.portalPages?.['My Action Plan'];
+    if (portalPageData && !this.myActionPlanPortalPageLoaded) {
+      this.myActionPlanPortalPageLoaded = true;
+
+      logger.info({
+        message: 'My Action Plan portal page data loaded, checking if content refresh needed',
+      });
+
+      // If we're currently viewing My Action Plan, refresh the content
+      if (this.activeContent?.title === 'My Action Plan') {
+        this.refreshActiveContentForMyActionPlan();
+      }
+
+      // Also try applying pending URL navigation if it was waiting for portal page data
+      if (this.pendingURLNavigation && this.questionnaireStoreLoaded) {
+        this.applyPendingURLNavigation();
+      }
+    }
+  };
+
+  // Refresh active content when My Action Plan portal page data loads
+  private refreshActiveContentForMyActionPlan() {
+    // Find the My Action Plan step in flatSteps and update activeContent
+    const myActionPlanStep = this.flatSteps.find(s => s.label === 'My Action Plan');
+    if (myActionPlanStep) {
+      logger.info({
+        message: 'Refreshing My Action Plan content with loaded portal page data',
+      });
+      this.activeContent = {
+        title: myActionPlanStep.label,
+        content: myActionPlanStep.content,
+      };
+      this.requestUpdate();
     }
   }
 
@@ -1181,6 +1335,11 @@ export class EFPEntryForm extends LitElement {
       this.updateNavigationState(result.newActiveContent.title);
     }
 
+    // Update URL with new navigation state (add to history for back/forward support)
+    if (result.newStepIndex !== undefined && result.newSectionIndex !== undefined) {
+      updateNavigationURL(result.newStepIndex, result.newSectionIndex, this.flatSteps, true);
+    }
+
     // Handle scrolling
     this.updateComplete.then(() => {
       if (result.scrollToQuestion) {
@@ -1287,6 +1446,9 @@ export class EFPEntryForm extends LitElement {
             content: step.content,
           };
         }
+
+        // Update URL with new navigation state
+        updateNavigationURL(stepIndex, sectionIndex, this.flatSteps, true);
 
         // Force a re-render
         this.requestUpdate();
@@ -1461,6 +1623,7 @@ export class EFPEntryForm extends LitElement {
       (stepIndex: number, sectionIndex: number) => {
         this.currentStepIndex = stepIndex;
         this.currentSectionIndex = sectionIndex;
+        updateNavigationURL(stepIndex, sectionIndex, this.flatSteps, true);
       },
       (label: string) => this.updateNavigationState(label)
     );
@@ -1527,6 +1690,55 @@ export class EFPEntryForm extends LitElement {
       return;
     }
 
+    // Check URL for navigation params first
+    if (hasNavigationParams() && !this.hasAppliedURLNavigation) {
+      const params = parseNavigationURL();
+
+      // Check if questionnaire store is loaded - if not, store params for later
+      if (!this.questionnaireStoreLoaded) {
+        logger.info({
+          message: 'Questionnaire store not loaded, deferring URL navigation',
+          data: params,
+        });
+        this.pendingURLNavigation = params;
+        // Don't update URL yet - keep the original URL params
+        // Navigate to loading state for now
+        const target = EFPNavigationUtils.navigateToSection(0, this.flatSteps, this.sections);
+        if (target) {
+          const step = this.flatSteps[target.stepIndex];
+          this.currentStepIndex = target.stepIndex;
+          this.currentSectionIndex = target.sectionIndex;
+          this.activeContent = { title: step.label, content: step.content };
+        }
+        return;
+      }
+
+      // Store is loaded, apply URL navigation
+      const urlTarget = resolveNavigationFromURL(
+        params,
+        this.flatSteps,
+        this.sections,
+        () => this.canAccessReviewAndSubmit()
+      );
+
+      if (urlTarget) {
+        logger.info({
+          message: 'Initializing navigation from URL params',
+          data: { stepIndex: urlTarget.stepIndex, label: urlTarget.step.label },
+        });
+
+        this.hasAppliedURLNavigation = true;
+        this.currentStepIndex = urlTarget.stepIndex;
+        this.currentSectionIndex = urlTarget.sectionIndex;
+        this.activeContent = { title: urlTarget.step.label, content: urlTarget.step.content };
+        this.updateNavigationState(urlTarget.step.label);
+
+        // Replace state to ensure history state is set
+        updateNavigationURL(urlTarget.stepIndex, urlTarget.sectionIndex, this.flatSteps, false);
+        return;
+      }
+    }
+
     // Navigate to first selectable step in the first section via utils
     const target = EFPNavigationUtils.navigateToSection(
       0,
@@ -1539,6 +1751,11 @@ export class EFPEntryForm extends LitElement {
       this.currentSectionIndex = target.sectionIndex;
       this.activeContent = { title: step.label, content: step.content };
       this.updateNavigationState(step.label);
+
+      // Set initial URL state (without adding to history) - but only if no pending navigation
+      if (!this.pendingURLNavigation) {
+        updateNavigationURL(target.stepIndex, target.sectionIndex, this.flatSteps, false);
+      }
     }
   }
 
@@ -1571,11 +1788,13 @@ export class EFPEntryForm extends LitElement {
       this.currentSectionIndex = target.sectionIndex;
       this.activeContent = { title: step.label, content: step.content };
       this.updateNavigationState(step.label);
+      updateNavigationURL(target.stepIndex, target.sectionIndex, this.flatSteps, true);
       this.requestUpdate();
     } else {
       // Fallback to first step
       this.currentStepIndex = 0;
       this.currentSectionIndex = 0;
+      updateNavigationURL(0, 0, this.flatSteps, true);
       this.requestUpdate();
     }
   }
@@ -1592,6 +1811,7 @@ export class EFPEntryForm extends LitElement {
       this.currentSectionIndex = target.sectionIndex;
       this.activeContent = { title: step.label, content: step.content };
       this.updateNavigationState(step.label);
+      updateNavigationURL(target.stepIndex, target.sectionIndex, this.flatSteps, true);
       this.requestUpdate();
     }
   }
@@ -1612,8 +1832,9 @@ export class EFPEntryForm extends LitElement {
         content: hierarchyStep.content,
       };
 
-      // Update navigation state
+      // Update navigation state and URL
       this.updateNavigationState(hierarchyStep.label);
+      updateNavigationURL(hierarchyStepIndex, hierarchyStep.sectionIndex, this.flatSteps, true);
       this.requestUpdate();
     }
   }
