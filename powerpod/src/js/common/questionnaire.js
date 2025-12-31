@@ -596,7 +596,15 @@ function isQuestionCompleteOrSkipped(question) {
     return true;
   }
 
-  // Check if question is skipped
+  // Check if question is skipped using the LIVE data from POWERPOD.workbookQuestionsAndResponses
+  // This is important because optimistic updates (like skip/unskip) update this data first
+  // before the questionnaire store's question.responseData is updated
+  const liveEntry = POWERPOD.workbookQuestionsAndResponses?.questionsWithResponses?.get(question.id);
+  if (liveEntry?.response?.quartech_chapterskipped === 100000000) {
+    return true;
+  }
+
+  // Fallback to question.responseData for cases where POWERPOD data isn't loaded yet
   if (question.responseData?.quartech_chapterskipped === 100000000) {
     return true;
   }

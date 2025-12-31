@@ -33806,7 +33806,7 @@
     return _refreshQuestionnaireResponses.apply(this, arguments);
   }
   function isQuestionCompleteOrSkipped(question) {
-    var _question$responseDat;
+    var _POWERPOD$workbookQue, _liveEntry$response, _question$responseDat;
     // A question is considered "done" if it's either:
     // 1. Complete (has non-empty response), OR
     // 2. Skipped (quartech_chapterskipped === 100000000)
@@ -33814,7 +33814,15 @@
       return true;
     }
 
-    // Check if question is skipped
+    // Check if question is skipped using the LIVE data from POWERPOD.workbookQuestionsAndResponses
+    // This is important because optimistic updates (like skip/unskip) update this data first
+    // before the questionnaire store's question.responseData is updated
+    var liveEntry = (_POWERPOD$workbookQue = POWERPOD.workbookQuestionsAndResponses) === null || _POWERPOD$workbookQue === void 0 || (_POWERPOD$workbookQue = _POWERPOD$workbookQue.questionsWithResponses) === null || _POWERPOD$workbookQue === void 0 ? void 0 : _POWERPOD$workbookQue.get(question.id);
+    if ((liveEntry === null || liveEntry === void 0 || (_liveEntry$response = liveEntry.response) === null || _liveEntry$response === void 0 ? void 0 : _liveEntry$response.quartech_chapterskipped) === 100000000) {
+      return true;
+    }
+
+    // Fallback to question.responseData for cases where POWERPOD data isn't loaded yet
     if (((_question$responseDat = question.responseData) === null || _question$responseDat === void 0 ? void 0 : _question$responseDat.quartech_chapterskipped) === 100000000) {
       return true;
     }
