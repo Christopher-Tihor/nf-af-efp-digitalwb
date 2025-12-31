@@ -20,6 +20,7 @@ import './ActionPlanTable';
 import './ProgressHeader';
 import './NavigationSidebar';
 import './QuestionRenderer';
+import './WorkbookSearchDialog';
 interface EFPActiveContent {
     title: string;
     content: string;
@@ -55,6 +56,10 @@ export declare class EFPEntryForm extends LitElement {
         getActionPlansForQuestion: (questionId: string) => any[];
         openViewActionsDialog: (questionId: string) => void;
     };
+    searchDialogEl: HTMLElement & {
+        show: () => void;
+        hide: () => void;
+    };
     constructor();
     connectedCallback(): void;
     private handleServiceResponseSaved;
@@ -68,6 +73,9 @@ export declare class EFPEntryForm extends LitElement {
     disconnectedCallback(): void;
     private handleSignOffChanged;
     private handleActionPlansUpdated;
+    private handleGlobalKeyDown;
+    private openSearchDialog;
+    private handleSearchNavigate;
     private updateQuestionnaireStoreStatus;
     private setupQuestionnaireStoreWatcher;
     private isWorkbookLocked;

@@ -23,6 +23,7 @@ import './ActionPlanTable';
 import './ProgressHeader';
 import './NavigationSidebar';
 import './QuestionRenderer';
+import './WorkbookSearchDialog';
 import WorkbookResponseHelper, { getChapterIdForQuestion } from '../common/workbookResponseHelper.js';
 import { getWorkbookId, getWorkbookData } from '../common/workbookUtils.js';
 import { getWorkbookDataById } from '../common/fetch.js';
@@ -115,6 +116,11 @@ export class EFPEntryForm extends LitElement {
     openViewActionsDialog: (questionId: string) => void;
   };
 
+  @query('workbook-search-dialog') searchDialogEl!: HTMLElement & {
+    show: () => void;
+    hide: () => void;
+  };
+
 
 
   // ========================================
@@ -167,6 +173,9 @@ export class EFPEntryForm extends LitElement {
 
     // Listen for workbook stats updates to trigger re-render of progress bar
     this.addEventListener('workbook-stats-updated', this.handleStatsUpdated as EventListener);
+
+    // Listen for CMD+K / Ctrl+K to open search dialog
+    document.addEventListener('keydown', this.handleGlobalKeyDown);
   }
 
   // ========================================
@@ -296,6 +305,9 @@ export class EFPEntryForm extends LitElement {
     this.removeEventListener('sign-off-changed', this.handleSignOffChanged as EventListener);
     this.removeEventListener('workbook-stats-updated', this.handleStatsUpdated as EventListener);
 
+    // Remove global keyboard listener
+    document.removeEventListener('keydown', this.handleGlobalKeyDown);
+
     // Clean up services (they manage their own state)
     this.services.cleanup();
 
@@ -330,6 +342,55 @@ export class EFPEntryForm extends LitElement {
     // Trigger a re-render to update badge counts
     this.requestUpdate();
   };
+
+  // Handle global keyboard shortcuts (CMD+K / Ctrl+K for search)
+  private handleGlobalKeyDown = (e: KeyboardEvent) => {
+    // Check for CMD+K (Mac) or Ctrl+K (Windows/Linux)
+    if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+      e.preventDefault();
+      this.openSearchDialog();
+    }
+  };
+
+  // Open the search dialog
+  private openSearchDialog() {
+    logger.info({ message: 'Opening search dialog (CMD+K)' });
+    this.searchDialogEl?.show();
+  }
+
+  // Handle navigation from search results
+  private handleSearchNavigate(e: CustomEvent) {
+    const { stepIndex, chapterId, questionId } = e.detail;
+
+    logger.info({
+      message: 'Navigating from search result',
+      data: { stepIndex, chapterId, questionId },
+    });
+
+    if (stepIndex >= 0 && stepIndex < this.flatSteps.length) {
+      const step = this.flatSteps[stepIndex];
+      this.currentStepIndex = stepIndex;
+      this.currentSectionIndex = step.sectionIndex;
+
+      this.activeContent = {
+        title: step.label,
+        content: step.content,
+      };
+
+      this.updateNavigationState(step.label);
+      this.requestUpdate();
+
+      // If navigating to a specific question, scroll to it after render
+      if (questionId) {
+        this.updateComplete.then(() => {
+          const questionEl = this.shadowRoot?.querySelector(`[data-question-id="${questionId}"]`);
+          if (questionEl) {
+            questionEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        });
+      }
+    }
+  }
 
   // Update the reactive property based on store status
   private updateQuestionnaireStoreStatus() {
@@ -2237,6 +2298,13 @@ export class EFPEntryForm extends LitElement {
           id="global-action-plan-table"
           hide-table
         ></action-plan-table>
+
+        <!-- CMD+K Search Dialog -->
+        <workbook-search-dialog
+          .flatSteps=${this.flatSteps}
+          .sections=${this.sections}
+          @search-navigate=${this.handleSearchNavigate}
+        ></workbook-search-dialog>
       </div>
     `;
   }
