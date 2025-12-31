@@ -1,5 +1,5 @@
 /*!
-* powerpod 4.7.0
+* powerpod 4.7.1
 * https://github.com/bcgov/nr-af-pods/powerpod
 *
 * @license GPLv3 for open source use only
@@ -44443,6 +44443,42 @@
                               }
                           });
                       }
+                      // Search sub-subchapters (nested subchapters)
+                      if (subchapter.subchapters) {
+                          subchapter.subchapters.forEach((subSubchapter) => {
+                              const subSubchapterTitle = EFPTextUtils.formatChapterTitle(subSubchapter);
+                              const subSubchapterStepIndex = this.findStepIndexByLabel(subSubchapterTitle);
+                              if (subSubchapterTitle.toLowerCase().includes(query)) {
+                                  results.push({
+                                      type: 'subchapter',
+                                      id: subSubchapter.id,
+                                      title: subSubchapterTitle,
+                                      parentTitle: subchapterTitle,
+                                      chapterId: subSubchapter.id,
+                                      stepIndex: subSubchapterStepIndex,
+                                  });
+                              }
+                              // Search questions in sub-subchapter
+                              if (subSubchapter.questions) {
+                                  subSubchapter.questions.forEach((question) => {
+                                      const questionLabel = question.label || question.name || '';
+                                      const questionText = question.textBelowQuestion || '';
+                                      const searchText = `${questionLabel} ${questionText}`.toLowerCase();
+                                      if (searchText.includes(query)) {
+                                          results.push({
+                                              type: 'question',
+                                              id: question.id,
+                                              title: this.stripHtml(questionLabel) || `Question ${question.order}`,
+                                              parentTitle: subSubchapterTitle,
+                                              chapterId: subSubchapter.id,
+                                              questionText: this.stripHtml(questionText).substring(0, 100),
+                                              stepIndex: subSubchapterStepIndex,
+                                          });
+                                      }
+                                  });
+                              }
+                          });
+                      }
                   });
               }
               // Search questions in chapter (if no subchapters)
@@ -50461,7 +50497,7 @@
       };
     };
     // @ts-ignore
-    POWERPOD.version = '4.7.0';
+    POWERPOD.version = '4.7.1';
     // @ts-ignore
     window.powerpod = POWERPOD;
   }
