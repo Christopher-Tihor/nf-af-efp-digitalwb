@@ -12,6 +12,7 @@ export const ClaimPaths: string[];
 export const ApplicationPaths: string[];
 export const HomePaths: string[];
 export const WorkbookPaths: string[];
+export const MyEfpWorkbooksPaths: string[];
 export namespace Form {
     let Application: string;
     let Claim: string;
@@ -20,6 +21,7 @@ export namespace Form {
 }
 export namespace Page {
     let Home: string;
+    let MyEfpWorkbooks: string;
 }
 export namespace BrowserInformationType {
     let Information: number;

@@ -23,6 +23,7 @@ export const ClaimPaths = ['/claim/', '/claim-dev/'];
 export const ApplicationPaths = ['/application/', '/application-dev/'];
 export const HomePaths = ['/', '/home-dev/'];
 export const WorkbookPaths = ['/efpworkbook/', '/efpworkbook-dev/', '/efpworkbook-dev2/'];
+export const MyEfpWorkbooksPaths = ['/my-efp-workbooks/', '/my-efp-workbooks-dev/'];
 
 export const Form = {
   Application: 'Application',
@@ -33,6 +34,7 @@ export const Form = {
 
 export const Page = {
   Home: 'Home',
+  MyEfpWorkbooks: 'MyEfpWorkbooks',
 };
 
 export const BrowserInformationType = {

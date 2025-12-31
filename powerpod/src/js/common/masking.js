@@ -10,6 +10,7 @@ export const FieldMaskType = {
   PhoneNumber: 'PhoneNumber',
   Number: 'Number',
   Email: 'Email',
+  EfpId: 'EfpId',
 };
 
 // map mask type to jquery mask format
@@ -17,6 +18,7 @@ export const MaskTypeFormat = {
   CRA: '000000000',
   PostalCode: 'S0S 0S0',
   PhoneNumber: '(000) 000-0000',
+  EfpId: 'EFP-000000-00000',
 };
 
 export function maskInput(fieldName, type) {
@@ -36,6 +38,7 @@ export function maskInput(fieldName, type) {
       case FieldMaskType.CRA:
       case FieldMaskType.PostalCode:
       case FieldMaskType.PhoneNumber:
+      case FieldMaskType.EfpId:
         // @ts-ignore
         $(`#${fieldName}`)?.mask(MaskTypeFormat[type]);
         break;

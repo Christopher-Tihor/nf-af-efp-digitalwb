@@ -3,6 +3,7 @@ import {
   ClaimPaths,
   Form,
   HomePaths,
+  MyEfpWorkbooksPaths,
   Page,
   POWERPOD,
   win,
@@ -23,6 +24,7 @@ import './components/CommoditiesMultiSelect.ts';
 import './components/ExpenseInvoicesTable.ts';
 import './components/EFPBreadcrumbs.ts';
 import { initHome } from './pages/home.js';
+import { initMyEfpWorkbooks } from './pages/myEfpWorkbooks.js';
 import { initWorkbook } from './workbook/workbook.js';
 
 const logger = Logger('powerpod');
@@ -40,6 +42,9 @@ export default function powerpod(options) {
     } else if (ApplicationPaths.some((appPath) => path.includes(appPath))) {
       logger.info({ message: `auto-detected ${Form.Application} form` });
       setOption('form', Form.Application);
+    } else if (MyEfpWorkbooksPaths.some((myEfpPath) => path.includes(myEfpPath))) {
+      logger.info({ message: `auto-detected ${Page.MyEfpWorkbooks} page` });
+      setOption('page', Page.MyEfpWorkbooks);
     } else if (HomePaths.some((appPath) => path.includes(appPath))) {
       logger.info({ message: `auto-detected ${Page.Home} page` });
       setOption('page', Page.Home);
@@ -89,9 +94,22 @@ export default function powerpod(options) {
       initWorkbook();
       break;
     default:
-      logger.warn({
-        message: 'init with no form type defined in options',
-      });
+      // If no form type is defined, check for page type
+      switch (getOptions().page) {
+        case Page.MyEfpWorkbooks:
+          logger.info({ message: `initializing ${Page.MyEfpWorkbooks} page` });
+          initMyEfpWorkbooks();
+          break;
+        case Page.Home:
+          logger.info({ message: `initializing ${Page.Home} page` });
+          initHome();
+          break;
+        default:
+          logger.warn({
+            message: 'init with no form or page type defined in options',
+          });
+          break;
+      }
       break;
   }
 
@@ -107,7 +125,7 @@ function setAPI() {
     };
   };
   // @ts-ignore
-  POWERPOD.version = '4.6.9';
+  POWERPOD.version = '4.7.0';
   // @ts-ignore
   window.powerpod = POWERPOD;
 }
