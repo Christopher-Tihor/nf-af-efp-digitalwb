@@ -20,8 +20,14 @@ export interface EFPSectionItem {
     title?: string;
     disableExpand?: boolean;
     chapterId?: string;
+    chapterData?: any;
+    subchapterData?: any;
 }
 export declare class EFPRenderUtils {
     static renderMainContent(currentSectionIndex: number, flatSteps: EFPStep[], currentStepIndex: number, activeContent: EFPActiveContent, html: any, unsafeHTML: any, renderSubchapter: (subchapterData: any) => any, renderChapter: (chapterData: any) => any, renderContainerSubchapter: (subchapterData: any) => any, renderContainerChapter: (chapterData: any) => any): any;
+    /**
+     * Check if an item has any questions (directly or in nested subchapters)
+     */
+    private static hasQuestions;
     static renderItems(items: EFPSectionItem[], html: any, activeContentTitle: string, onItemClick: (item: EFPSectionItem) => void, renderItems: (items: EFPSectionItem[]) => any, getCompletion?: (item: EFPSectionItem) => boolean, getSkipped?: (item: EFPSectionItem) => boolean, getIncomplete?: (item: EFPSectionItem) => boolean): any;
 }

@@ -6,6 +6,7 @@ import {
   getChapterFromStore,
   getQuestionFromStore,
 } from '../../common/questionnaire.js';
+import { getChapterById } from '../../common/chaptersAndQuestionsUtils.js';
 import { EFPSection, EFPSectionItem } from './types.js';
 
 const logger = Logger('components/efp/completion-utils');
@@ -316,4 +317,181 @@ export class EFPCompletionUtils {
     }
   }
 }
+
+// ============================================================
+// Console Debug Helpers - Exposed on POWERPOD.completionUtils
+// ============================================================
+
+/**
+ * Check if a specific question is complete
+ */
+function isQuestionComplete(questionId: string): boolean {
+  const entry = POWERPOD.workbookQuestionsAndResponses?.questionsWithResponses?.get(questionId);
+  if (!entry?.response) return false;
+
+  const isSkipped = entry.response.quartech_chapterskipped === 100000000;
+  const hasResponse = entry.response.quartech_response && entry.response.quartech_response.trim() !== '';
+
+  return isSkipped || hasResponse;
+}
+
+interface QuestionResult {
+  questionId: string;
+  questionName: string;
+  chapterId: string | null;
+  chapterName: string | null;
+  question: any;
+  response: any;
+}
+
+/**
+ * Get all incomplete questions
+ */
+function getIncompleteQuestions(): QuestionResult[] {
+  const incomplete: QuestionResult[] = [];
+
+  if (!POWERPOD.workbookQuestionsAndResponses?.questionsWithResponses) {
+    return incomplete;
+  }
+
+  POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.forEach((entry: any, questionId: string) => {
+    const response = entry.response;
+    const isSkipped = response?.quartech_chapterskipped === 100000000;
+    const hasResponse = response?.quartech_response && response.quartech_response.trim() !== '';
+
+    if (!isSkipped && !hasResponse) {
+      const chapterId = entry.question?._quartech_chapter_value || null;
+      const chapter = chapterId ? getChapterById(chapterId) : null;
+
+      incomplete.push({
+        questionId,
+        questionName: entry.question?.quartech_name || 'Unknown',
+        chapterId,
+        chapterName: chapter?.quartech_name || null,
+        question: entry.question,
+        response: entry.response,
+      });
+    }
+  });
+
+  return incomplete;
+}
+
+/**
+ * Get all complete questions
+ */
+function getCompleteQuestions(): QuestionResult[] {
+  const complete: QuestionResult[] = [];
+
+  if (!POWERPOD.workbookQuestionsAndResponses?.questionsWithResponses) {
+    return complete;
+  }
+
+  POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.forEach((entry: any, questionId: string) => {
+    const response = entry.response;
+    const isSkipped = response?.quartech_chapterskipped === 100000000;
+    const hasResponse = response?.quartech_response && response.quartech_response.trim() !== '';
+
+    if (isSkipped || hasResponse) {
+      const chapterId = entry.question?._quartech_chapter_value || null;
+      const chapter = chapterId ? getChapterById(chapterId) : null;
+
+      complete.push({
+        questionId,
+        questionName: entry.question?.quartech_name || 'Unknown',
+        chapterId,
+        chapterName: chapter?.quartech_name || null,
+        question: entry.question,
+        response: entry.response,
+      });
+    }
+  });
+
+  return complete;
+}
+
+/**
+ * Get completion summary for all questions
+ */
+function getCompletionSummary(): {
+  total: number;
+  complete: number;
+  incomplete: number;
+  skipped: number;
+  percentage: number;
+} {
+  let total = 0;
+  let complete = 0;
+  let incomplete = 0;
+  let skipped = 0;
+
+  if (!POWERPOD.workbookQuestionsAndResponses?.questionsWithResponses) {
+    return { total, complete, incomplete, skipped, percentage: 0 };
+  }
+
+  POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.forEach((entry: any) => {
+    total++;
+    const response = entry.response;
+    const isSkipped = response?.quartech_chapterskipped === 100000000;
+    const hasResponse = response?.quartech_response && response.quartech_response.trim() !== '';
+
+    if (isSkipped) {
+      skipped++;
+      complete++;
+    } else if (hasResponse) {
+      complete++;
+    } else {
+      incomplete++;
+    }
+  });
+
+  const percentage = total > 0 ? Math.round((complete / total) * 100) : 0;
+
+  return { total, complete, incomplete, skipped, percentage };
+}
+
+/**
+ * Get question details by ID
+ */
+function getQuestionDetails(questionId: string): {
+  questionId: string;
+  questionName: string;
+  chapterId: string | null;
+  chapterName: string | null;
+  question: any;
+  response: any;
+  isComplete: boolean;
+  isSkipped: boolean;
+} | null {
+  const entry = POWERPOD.workbookQuestionsAndResponses?.questionsWithResponses?.get(questionId);
+  if (!entry) return null;
+
+  const response = entry.response;
+  const isSkipped = response?.quartech_chapterskipped === 100000000;
+  const hasResponse = response?.quartech_response && response.quartech_response.trim() !== '';
+
+  const chapterId = entry.question?._quartech_chapter_value || null;
+  const chapter = chapterId ? getChapterById(chapterId) : null;
+
+  return {
+    questionId,
+    questionName: entry.question?.quartech_name || 'Unknown',
+    chapterId,
+    chapterName: chapter?.quartech_name || null,
+    question: entry.question,
+    response: entry.response,
+    isComplete: isSkipped || hasResponse,
+    isSkipped,
+  };
+}
+
+// Export debug helpers to POWERPOD global object
+POWERPOD.completionUtils = {
+  isQuestionComplete,
+  getIncompleteQuestions,
+  getCompleteQuestions,
+  getCompletionSummary,
+  getQuestionDetails,
+  EFPCompletionUtils,
+};
 

@@ -32802,6 +32802,19 @@
   }
 
   /**
+   * Gets a specific chapter by ID
+   * @param {string} chapterId - The chapter ID to find
+   * @returns {Object|null} The chapter object or null if not found
+   */
+  function getChapterById(chapterId) {
+    var chapters = getStoredChaptersData();
+    if (!(chapters !== null && chapters !== void 0 && chapters.value)) return null;
+    return chapters.value.find(function (chapter) {
+      return chapter.quartech_chapterid === chapterId;
+    }) || null;
+  }
+
+  /**
    * Determines the hierarchy level based on order number
    * @param {number} order - Order like 4, 4.1, 4.11, 4.12, 4.2, 5.1
    * @returns {Object} Hierarchy info with level, mainChapter, subChapter, subSubChapter
@@ -45154,6 +45167,143 @@
           }
       }
   }
+  // ============================================================
+  // Console Debug Helpers - Exposed on POWERPOD.completionUtils
+  // ============================================================
+  /**
+   * Check if a specific question is complete
+   */
+  function isQuestionComplete(questionId) {
+      var _a, _b;
+      const entry = (_b = (_a = POWERPOD.workbookQuestionsAndResponses) === null || _a === void 0 ? void 0 : _a.questionsWithResponses) === null || _b === void 0 ? void 0 : _b.get(questionId);
+      if (!(entry === null || entry === void 0 ? void 0 : entry.response))
+          return false;
+      const isSkipped = entry.response.quartech_chapterskipped === 100000000;
+      const hasResponse = entry.response.quartech_response && entry.response.quartech_response.trim() !== '';
+      return isSkipped || hasResponse;
+  }
+  /**
+   * Get all incomplete questions
+   */
+  function getIncompleteQuestions() {
+      var _a;
+      const incomplete = [];
+      if (!((_a = POWERPOD.workbookQuestionsAndResponses) === null || _a === void 0 ? void 0 : _a.questionsWithResponses)) {
+          return incomplete;
+      }
+      POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.forEach((entry, questionId) => {
+          var _a, _b;
+          const response = entry.response;
+          const isSkipped = (response === null || response === void 0 ? void 0 : response.quartech_chapterskipped) === 100000000;
+          const hasResponse = (response === null || response === void 0 ? void 0 : response.quartech_response) && response.quartech_response.trim() !== '';
+          if (!isSkipped && !hasResponse) {
+              const chapterId = ((_a = entry.question) === null || _a === void 0 ? void 0 : _a._quartech_chapter_value) || null;
+              const chapter = chapterId ? getChapterById(chapterId) : null;
+              incomplete.push({
+                  questionId,
+                  questionName: ((_b = entry.question) === null || _b === void 0 ? void 0 : _b.quartech_name) || 'Unknown',
+                  chapterId,
+                  chapterName: (chapter === null || chapter === void 0 ? void 0 : chapter.quartech_name) || null,
+                  question: entry.question,
+                  response: entry.response,
+              });
+          }
+      });
+      return incomplete;
+  }
+  /**
+   * Get all complete questions
+   */
+  function getCompleteQuestions() {
+      var _a;
+      const complete = [];
+      if (!((_a = POWERPOD.workbookQuestionsAndResponses) === null || _a === void 0 ? void 0 : _a.questionsWithResponses)) {
+          return complete;
+      }
+      POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.forEach((entry, questionId) => {
+          var _a, _b;
+          const response = entry.response;
+          const isSkipped = (response === null || response === void 0 ? void 0 : response.quartech_chapterskipped) === 100000000;
+          const hasResponse = (response === null || response === void 0 ? void 0 : response.quartech_response) && response.quartech_response.trim() !== '';
+          if (isSkipped || hasResponse) {
+              const chapterId = ((_a = entry.question) === null || _a === void 0 ? void 0 : _a._quartech_chapter_value) || null;
+              const chapter = chapterId ? getChapterById(chapterId) : null;
+              complete.push({
+                  questionId,
+                  questionName: ((_b = entry.question) === null || _b === void 0 ? void 0 : _b.quartech_name) || 'Unknown',
+                  chapterId,
+                  chapterName: (chapter === null || chapter === void 0 ? void 0 : chapter.quartech_name) || null,
+                  question: entry.question,
+                  response: entry.response,
+              });
+          }
+      });
+      return complete;
+  }
+  /**
+   * Get completion summary for all questions
+   */
+  function getCompletionSummary() {
+      var _a;
+      let total = 0;
+      let complete = 0;
+      let incomplete = 0;
+      let skipped = 0;
+      if (!((_a = POWERPOD.workbookQuestionsAndResponses) === null || _a === void 0 ? void 0 : _a.questionsWithResponses)) {
+          return { total, complete, incomplete, skipped, percentage: 0 };
+      }
+      POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.forEach((entry) => {
+          total++;
+          const response = entry.response;
+          const isSkipped = (response === null || response === void 0 ? void 0 : response.quartech_chapterskipped) === 100000000;
+          const hasResponse = (response === null || response === void 0 ? void 0 : response.quartech_response) && response.quartech_response.trim() !== '';
+          if (isSkipped) {
+              skipped++;
+              complete++;
+          }
+          else if (hasResponse) {
+              complete++;
+          }
+          else {
+              incomplete++;
+          }
+      });
+      const percentage = total > 0 ? Math.round((complete / total) * 100) : 0;
+      return { total, complete, incomplete, skipped, percentage };
+  }
+  /**
+   * Get question details by ID
+   */
+  function getQuestionDetails(questionId) {
+      var _a, _b, _c, _d;
+      const entry = (_b = (_a = POWERPOD.workbookQuestionsAndResponses) === null || _a === void 0 ? void 0 : _a.questionsWithResponses) === null || _b === void 0 ? void 0 : _b.get(questionId);
+      if (!entry)
+          return null;
+      const response = entry.response;
+      const isSkipped = (response === null || response === void 0 ? void 0 : response.quartech_chapterskipped) === 100000000;
+      const hasResponse = (response === null || response === void 0 ? void 0 : response.quartech_response) && response.quartech_response.trim() !== '';
+      const chapterId = ((_c = entry.question) === null || _c === void 0 ? void 0 : _c._quartech_chapter_value) || null;
+      const chapter = chapterId ? getChapterById(chapterId) : null;
+      return {
+          questionId,
+          questionName: ((_d = entry.question) === null || _d === void 0 ? void 0 : _d.quartech_name) || 'Unknown',
+          chapterId,
+          chapterName: (chapter === null || chapter === void 0 ? void 0 : chapter.quartech_name) || null,
+          question: entry.question,
+          response: entry.response,
+          isComplete: isSkipped || hasResponse,
+          isSkipped,
+      };
+  }
+  // Export debug helpers to POWERPOD global object
+  POWERPOD.completionUtils = {
+      isQuestionComplete,
+      getIncompleteQuestions,
+      getCompleteQuestions,
+      getCompletionSummary,
+      getQuestionDetails,
+      EFPCompletionUtils,
+  };
 
   const logger$d = Logger('components/efp/navigation-utils');
   class EFPNavigationUtils {
@@ -45532,7 +45682,7 @@
        * Find the next required step (earliest unanswered, non-skipped question)
        */
       static findNextRequiredStep(ctx) {
-          var _a, _b, _c, _d, _e;
+          var _a, _b, _c;
           if (!POWERPOD.workbookQuestionsAndResponses.isLoaded) {
               logger$d.warn({
                   message: 'Cannot find next required step: workbook questions and responses not loaded',
@@ -45564,17 +45714,17 @@
                       continue;
                   }
               }
-              // Get the chapter ID for this step
-              const chapterId = step.chapterId ||
-                  ((_d = step.chapterData) === null || _d === void 0 ? void 0 : _d.id) ||
-                  ((_e = step.subchapterData) === null || _e === void 0 ? void 0 : _e.id);
-              if (!chapterId) {
+              // Get the chapter/subchapter data for this step
+              const chapterData = step.subchapterData || step.chapterData;
+              if (!chapterData) {
                   continue;
               }
-              // Get all questions for this chapter
-              const questions = ctx.getQuestionsForChapter(chapterId);
-              // Find the first unanswered, non-skipped question in this chapter
-              const firstUnansweredQuestion = questions.find((question) => {
+              // IMPORTANT: Only check the step's OWN questions, not subchapter questions
+              // This ensures we navigate to the actual step containing the question,
+              // not a parent container step
+              const ownQuestions = chapterData.questions || [];
+              // Find the first unanswered, non-skipped question in this step's own questions
+              const firstUnansweredQuestion = ownQuestions.find((question) => {
                   var _a, _b;
                   const entry = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.get(question.id);
                   const isSkipped = ((_a = entry === null || entry === void 0 ? void 0 : entry.response) === null || _a === void 0 ? void 0 : _a.quartech_chapterskipped) === 100000000;
@@ -45584,6 +45734,7 @@
                   return !isSkipped && !hasResponse;
               });
               if (firstUnansweredQuestion) {
+                  const chapterId = step.chapterId || chapterData.id;
                   logger$d.info({
                       message: 'Found next required step with unanswered questions',
                       data: {
@@ -46062,35 +46213,92 @@
           // Default content rendering
           return html `<div>${unsafeHTML(activeContent.content)}</div>`;
       }
+      /**
+       * Check if an item has any questions (directly or in nested subchapters)
+       */
+      static hasQuestions(item) {
+          var _a, _b, _c, _d, _e, _f, _g, _h, _j;
+          // Check direct questions on chapter or subchapter data
+          const chapterQuestions = ((_b = (_a = item.chapterData) === null || _a === void 0 ? void 0 : _a.questions) === null || _b === void 0 ? void 0 : _b.length) || 0;
+          const subchapterQuestions = ((_d = (_c = item.subchapterData) === null || _c === void 0 ? void 0 : _c.questions) === null || _d === void 0 ? void 0 : _d.length) || 0;
+          if (chapterQuestions > 0 || subchapterQuestions > 0) {
+              return true;
+          }
+          // Check nested subchapters in chapter data
+          if ((_e = item.chapterData) === null || _e === void 0 ? void 0 : _e.subchapters) {
+              for (const sub of item.chapterData.subchapters) {
+                  if (((_f = sub.questions) === null || _f === void 0 ? void 0 : _f.length) > 0) {
+                      return true;
+                  }
+                  // Check nested subchapters recursively
+                  if (sub.subchapters) {
+                      for (const nestedSub of sub.subchapters) {
+                          if (((_g = nestedSub.questions) === null || _g === void 0 ? void 0 : _g.length) > 0) {
+                              return true;
+                          }
+                      }
+                  }
+              }
+          }
+          // Check nested subchapters in subchapter data
+          if ((_h = item.subchapterData) === null || _h === void 0 ? void 0 : _h.subchapters) {
+              for (const sub of item.subchapterData.subchapters) {
+                  if (((_j = sub.questions) === null || _j === void 0 ? void 0 : _j.length) > 0) {
+                      return true;
+                  }
+              }
+          }
+          // Check nested items
+          if (item.items) {
+              for (const childItem of item.items) {
+                  if (EFPRenderUtils.hasQuestions(childItem)) {
+                      return true;
+                  }
+              }
+          }
+          return false;
+      }
       static renderItems(items, html, activeContentTitle, onItemClick, renderItems, getCompletion, getSkipped, getIncomplete) {
           return items.map((item) => {
               const isComplete = getCompletion ? getCompletion(item) : (item.complete || false);
               const isSkipped = getSkipped ? getSkipped(item) : false;
               const hasIncompleteQuestions = getIncomplete ? getIncomplete(item) : false;
+              // Check if the item has any questions - if not, don't show an icon
+              const itemHasQuestions = EFPRenderUtils.hasQuestions(item);
               // Determine icon based on state: skipped > complete > incomplete with unanswered > incomplete
-              let iconName;
-              let iconColor;
-              if (isSkipped) {
-                  iconName = 'skip-forward-circle';
-                  iconColor = 'var(--sl-color-primary-600)'; // blue - intentional action
-              }
-              else if (isComplete) {
-                  iconName = 'check-circle';
-                  iconColor = 'var(--sl-color-success-600)'; // green - completed
-              }
-              else if (hasIncompleteQuestions) {
-                  iconName = 'exclamation-circle';
-                  iconColor = 'var(--sl-color-danger-600)'; // red - has incomplete questions
-              }
-              else {
-                  iconName = 'pencil-square';
-                  iconColor = 'var(--sl-color-neutral-600)'; // gray - not started/in progress
+              // Only show icon if the item has questions
+              let iconName = null;
+              let iconColor = '';
+              if (itemHasQuestions) {
+                  if (isSkipped) {
+                      iconName = 'skip-forward-circle';
+                      iconColor = 'var(--sl-color-primary-600)'; // blue - intentional action
+                  }
+                  else if (isComplete) {
+                      iconName = 'check-circle';
+                      iconColor = 'var(--sl-color-success-600)'; // green - completed
+                  }
+                  else if (hasIncompleteQuestions) {
+                      iconName = 'exclamation-circle';
+                      iconColor = 'var(--sl-color-danger-600)'; // red - has incomplete questions
+                  }
+                  else {
+                      iconName = 'pencil-square';
+                      iconColor = 'var(--sl-color-neutral-600)'; // gray - not started/in progress
+                  }
               }
               // Determine item capabilities based on content
               const hasContent = item.content && item.content.trim() !== '';
               const hasSubitems = 'items' in item && Array.isArray(item.items) && item.items.length > 0;
               // Check if expansion is disabled
               const isExpandDisabled = item.disableExpand === true;
+              // Helper to render icon conditionally
+              const renderIcon = () => iconName ? html `
+        <sl-icon
+          name=${iconName}
+          style="color: ${iconColor}"
+        ></sl-icon>
+      ` : '';
               // If disableExpand is true, render as non-expandable container that clicks first item
               if (isExpandDisabled && hasSubitems) {
                   // Get the first item to click when the container is clicked
@@ -46113,10 +46321,7 @@
             "
             @click=${() => onItemClick(firstItem)}
           >
-            <sl-icon
-              name=${iconName}
-              style="color: ${iconColor}"
-            ></sl-icon>
+            ${renderIcon()}
             <span>${item.title || item.label}</span>
           </div>
         `;
@@ -46136,10 +46341,7 @@
                     onItemClick(item);
                 }}
             >
-              <sl-icon
-                name=${iconName}
-                style="color: ${iconColor}"
-              ></sl-icon>
+              ${renderIcon()}
               <span>${item.title || item.label}</span>
             </div>
             ${EFPRenderUtils.renderItems(item.items || [], html, activeContentTitle, onItemClick, renderItems, getCompletion, getSkipped, getIncomplete)}
@@ -46151,10 +46353,7 @@
                   return html `
           <sl-details data-container-title="${item.title || item.label}">
             <div slot="summary" style="display: flex; align-items: center; gap: 8px;">
-              <sl-icon
-                name=${iconName}
-                style="color: ${iconColor}"
-              ></sl-icon>
+              ${renderIcon()}
               <span>${item.title || item.label}</span>
             </div>
             ${EFPRenderUtils.renderItems(item.items || [], html, activeContentTitle, onItemClick, renderItems, getCompletion, getSkipped, getIncomplete)}
@@ -46171,10 +46370,7 @@
                     : 'font-weight: 500;'}
             @click=${() => onItemClick(item)}
           >
-            <sl-icon
-              name=${iconName}
-              style="color: ${iconColor}"
-            ></sl-icon>
+            ${renderIcon()}
             ${item.label}
           </div>
         `;

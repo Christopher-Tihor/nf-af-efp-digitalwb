@@ -569,20 +569,20 @@ export class EFPNavigationUtils {
         }
       }
 
-      // Get the chapter ID for this step
-      const chapterId = step.chapterId ||
-                       step.chapterData?.id ||
-                       step.subchapterData?.id;
+      // Get the chapter/subchapter data for this step
+      const chapterData = step.subchapterData || step.chapterData;
 
-      if (!chapterId) {
+      if (!chapterData) {
         continue;
       }
 
-      // Get all questions for this chapter
-      const questions = ctx.getQuestionsForChapter(chapterId);
+      // IMPORTANT: Only check the step's OWN questions, not subchapter questions
+      // This ensures we navigate to the actual step containing the question,
+      // not a parent container step
+      const ownQuestions = chapterData.questions || [];
 
-      // Find the first unanswered, non-skipped question in this chapter
-      const firstUnansweredQuestion = questions.find((question: any) => {
+      // Find the first unanswered, non-skipped question in this step's own questions
+      const firstUnansweredQuestion = ownQuestions.find((question: any) => {
         const entry = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.get(question.id);
         const isSkipped = entry?.response?.quartech_chapterskipped === 100000000;
         const hasResponse = entry?.response?.quartech_response &&
@@ -593,6 +593,7 @@ export class EFPNavigationUtils {
       });
 
       if (firstUnansweredQuestion) {
+        const chapterId = step.chapterId || chapterData.id;
         logger.info({
           message: 'Found next required step with unanswered questions',
           data: {

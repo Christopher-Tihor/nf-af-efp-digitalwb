@@ -23,6 +23,8 @@ export interface EFPSectionItem {
   title?: string;
   disableExpand?: boolean; // If true, item will not be expandable even if it has items
   chapterId?: string; // Chapter ID for checking incomplete questions
+  chapterData?: any; // Chapter data with questions and subchapters
+  subchapterData?: any; // Subchapter data with questions
 }
 
 export class EFPRenderUtils {
@@ -73,6 +75,56 @@ export class EFPRenderUtils {
     return html`<div>${unsafeHTML(activeContent.content)}</div>`;
   }
 
+  /**
+   * Check if an item has any questions (directly or in nested subchapters)
+   */
+  private static hasQuestions(item: EFPSectionItem): boolean {
+    // Check direct questions on chapter or subchapter data
+    const chapterQuestions = item.chapterData?.questions?.length || 0;
+    const subchapterQuestions = item.subchapterData?.questions?.length || 0;
+
+    if (chapterQuestions > 0 || subchapterQuestions > 0) {
+      return true;
+    }
+
+    // Check nested subchapters in chapter data
+    if (item.chapterData?.subchapters) {
+      for (const sub of item.chapterData.subchapters) {
+        if (sub.questions?.length > 0) {
+          return true;
+        }
+        // Check nested subchapters recursively
+        if (sub.subchapters) {
+          for (const nestedSub of sub.subchapters) {
+            if (nestedSub.questions?.length > 0) {
+              return true;
+            }
+          }
+        }
+      }
+    }
+
+    // Check nested subchapters in subchapter data
+    if (item.subchapterData?.subchapters) {
+      for (const sub of item.subchapterData.subchapters) {
+        if (sub.questions?.length > 0) {
+          return true;
+        }
+      }
+    }
+
+    // Check nested items
+    if (item.items) {
+      for (const childItem of item.items) {
+        if (EFPRenderUtils.hasQuestions(childItem)) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
   static renderItems(
     items: EFPSectionItem[],
     html: any,
@@ -88,22 +140,28 @@ export class EFPRenderUtils {
       const isSkipped = getSkipped ? getSkipped(item) : false;
       const hasIncompleteQuestions = getIncomplete ? getIncomplete(item) : false;
 
-      // Determine icon based on state: skipped > complete > incomplete with unanswered > incomplete
-      let iconName: string;
-      let iconColor: string;
+      // Check if the item has any questions - if not, don't show an icon
+      const itemHasQuestions = EFPRenderUtils.hasQuestions(item);
 
-      if (isSkipped) {
-        iconName = 'skip-forward-circle';
-        iconColor = 'var(--sl-color-primary-600)'; // blue - intentional action
-      } else if (isComplete) {
-        iconName = 'check-circle';
-        iconColor = 'var(--sl-color-success-600)'; // green - completed
-      } else if (hasIncompleteQuestions) {
-        iconName = 'exclamation-circle';
-        iconColor = 'var(--sl-color-danger-600)'; // red - has incomplete questions
-      } else {
-        iconName = 'pencil-square';
-        iconColor = 'var(--sl-color-neutral-600)'; // gray - not started/in progress
+      // Determine icon based on state: skipped > complete > incomplete with unanswered > incomplete
+      // Only show icon if the item has questions
+      let iconName: string | null = null;
+      let iconColor: string = '';
+
+      if (itemHasQuestions) {
+        if (isSkipped) {
+          iconName = 'skip-forward-circle';
+          iconColor = 'var(--sl-color-primary-600)'; // blue - intentional action
+        } else if (isComplete) {
+          iconName = 'check-circle';
+          iconColor = 'var(--sl-color-success-600)'; // green - completed
+        } else if (hasIncompleteQuestions) {
+          iconName = 'exclamation-circle';
+          iconColor = 'var(--sl-color-danger-600)'; // red - has incomplete questions
+        } else {
+          iconName = 'pencil-square';
+          iconColor = 'var(--sl-color-neutral-600)'; // gray - not started/in progress
+        }
       }
 
       // Determine item capabilities based on content
@@ -112,6 +170,14 @@ export class EFPRenderUtils {
 
       // Check if expansion is disabled
       const isExpandDisabled = item.disableExpand === true;
+
+      // Helper to render icon conditionally
+      const renderIcon = () => iconName ? html`
+        <sl-icon
+          name=${iconName}
+          style="color: ${iconColor}"
+        ></sl-icon>
+      ` : '';
 
       // If disableExpand is true, render as non-expandable container that clicks first item
       if (isExpandDisabled && hasSubitems) {
@@ -135,10 +201,7 @@ export class EFPRenderUtils {
             "
             @click=${() => onItemClick(firstItem)}
           >
-            <sl-icon
-              name=${iconName}
-              style="color: ${iconColor}"
-            ></sl-icon>
+            ${renderIcon()}
             <span>${item.title || item.label}</span>
           </div>
         `;
@@ -159,10 +222,7 @@ export class EFPRenderUtils {
                 onItemClick(item);
               }}
             >
-              <sl-icon
-                name=${iconName}
-                style="color: ${iconColor}"
-              ></sl-icon>
+              ${renderIcon()}
               <span>${item.title || item.label}</span>
             </div>
             ${EFPRenderUtils.renderItems(item.items || [], html, activeContentTitle, onItemClick, renderItems, getCompletion, getSkipped, getIncomplete)}
@@ -173,10 +233,7 @@ export class EFPRenderUtils {
         return html`
           <sl-details data-container-title="${item.title || item.label}">
             <div slot="summary" style="display: flex; align-items: center; gap: 8px;">
-              <sl-icon
-                name=${iconName}
-                style="color: ${iconColor}"
-              ></sl-icon>
+              ${renderIcon()}
               <span>${item.title || item.label}</span>
             </div>
             ${EFPRenderUtils.renderItems(item.items || [], html, activeContentTitle, onItemClick, renderItems, getCompletion, getSkipped, getIncomplete)}
@@ -192,10 +249,7 @@ export class EFPRenderUtils {
               : 'font-weight: 500;'}
             @click=${() => onItemClick(item)}
           >
-            <sl-icon
-              name=${iconName}
-              style="color: ${iconColor}"
-            ></sl-icon>
+            ${renderIcon()}
             ${item.label}
           </div>
         `;
