@@ -45152,11 +45152,15 @@
       }
       /**
        * Check if a subchapter (from data model) is skipped
+       *
+       * IMPORTANT: Items without questions should return FALSE (not skipped)
+       * This prevents the checkbox from appearing checked on fresh workbooks
+       * for chapters that simply have no questions.
        */
       static isSubchapterSkipped(subchapter, getQuestionsForChapter) {
           var _a;
           if (!(subchapter === null || subchapter === void 0 ? void 0 : subchapter.id))
-              return true; // No ID means no questions, treat as skipped
+              return false; // No ID means can't check, default to not skipped
           // Check if this subchapter has questions
           const hasQuestions = ((_a = subchapter.questions) === null || _a === void 0 ? void 0 : _a.length) > 0;
           // If this subchapter has its own subchapters, check if ALL of them are skipped
@@ -45174,7 +45178,7 @@
               // If no subchapters have questions, consider the parent's own questions
               if (subchaptersWithQuestions.length === 0) {
                   if (!hasQuestions)
-                      return true; // No questions anywhere, treat as skipped
+                      return false; // No questions anywhere, NOT skipped
                   return EFPCompletionUtils.isChapterSkippedById(subchapter.id, getQuestionsForChapter);
               }
               // Check if all subchapters with questions are skipped
@@ -45182,7 +45186,7 @@
           }
           // For leaf subchapters, check if all questions are skipped
           if (!hasQuestions)
-              return true; // No questions, treat as skipped
+              return false; // No questions, NOT skipped
           return EFPCompletionUtils.isChapterSkippedById(subchapter.id, getQuestionsForChapter);
       }
       /**
@@ -45195,23 +45199,25 @@
        *
        * For leaf chapters (no subchapters):
        * - Show as skipped if all questions are skipped
+       *
+       * IMPORTANT: Items without questions should return FALSE (not skipped)
+       * This prevents the checkbox from appearing checked on fresh workbooks.
        */
       static getSkippedFromStore(item, getQuestionsForChapter) {
-          // Items without questions should not affect parent status
-          // Return true (skipped) so they don't break the "all children skipped" check
+          // Items without chapterId - check children if available
           if (!item.chapterId) {
               // If this item has no chapterId but has children, check the children
               if ('items' in item && Array.isArray(item.items) && item.items.length > 0) {
                   const childrenWithQuestions = item.items.filter(child => EFPCompletionUtils.itemHasQuestions(child));
-                  // If no children have questions, treat as skipped
+                  // If no children have questions, treat as NOT skipped (fresh workbook case)
                   if (childrenWithQuestions.length === 0) {
-                      return true;
+                      return false;
                   }
                   // Check if all children with questions are skipped
                   return childrenWithQuestions.every((childItem) => EFPCompletionUtils.getSkippedFromStore(childItem, getQuestionsForChapter));
               }
-              // No chapterId and no children - treat as skipped (no questions to skip)
-              return true;
+              // No chapterId and no children - treat as NOT skipped
+              return false;
           }
           try {
               const chapter = getChapterFromStore(item.chapterId);
@@ -48069,15 +48075,42 @@
        * A chapter is skipped if ALL its questions have quartech_chapterskipped === 100000000
        */
       isChapterSkipped(chapterId) {
+          var _a, _b, _c;
+          const chapter = getChapterFromStore(chapterId);
           const questions = this.getQuestionsForChapter(chapterId, true); // Exclude preventSkipping subchapters
-          if (questions.length === 0)
-              return false;
-          // Check if ALL questions have quartech_chapterskipped set to YES (100000000)
-          return questions.every(q => {
-              var _a;
-              const entry = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.get(q.id);
-              return ((_a = entry === null || entry === void 0 ? void 0 : entry.response) === null || _a === void 0 ? void 0 : _a.quartech_chapterskipped) === 100000000;
+          console.log('[isChapterSkipped] DEBUG:', {
+              chapterId,
+              chapterFound: !!chapter,
+              chapterName: (chapter === null || chapter === void 0 ? void 0 : chapter.name) || (chapter === null || chapter === void 0 ? void 0 : chapter.label) || 'unknown',
+              questionsCount: questions.length,
+              mapSize: POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.size,
+              isLoaded: POWERPOD.workbookQuestionsAndResponses.isLoaded,
+              subchaptersCount: ((_a = chapter === null || chapter === void 0 ? void 0 : chapter.subchapters) === null || _a === void 0 ? void 0 : _a.length) || 0
           });
+          if (questions.length === 0) {
+              console.log('[isChapterSkipped] No questions found for chapter, returning FALSE', { chapterId });
+              return false;
+          }
+          // Check if ALL questions have quartech_chapterskipped set to YES (100000000)
+          let allSkipped = true;
+          for (const q of questions) {
+              const entry = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.get(q.id);
+              const isSkipped = ((_b = entry === null || entry === void 0 ? void 0 : entry.response) === null || _b === void 0 ? void 0 : _b.quartech_chapterskipped) === 100000000;
+              console.log('[isChapterSkipped] Question check:', {
+                  questionId: q.id,
+                  questionName: q.name || q.label,
+                  entryExists: !!entry,
+                  responseExists: !!(entry === null || entry === void 0 ? void 0 : entry.response),
+                  chapterSkippedValue: (_c = entry === null || entry === void 0 ? void 0 : entry.response) === null || _c === void 0 ? void 0 : _c.quartech_chapterskipped,
+                  isSkipped
+              });
+              if (!isSkipped) {
+                  allSkipped = false;
+                  // Continue to log all questions for debugging
+              }
+          }
+          console.log('[isChapterSkipped] Final result:', { chapterId, result: allSkipped, questionsChecked: questions.length });
+          return allSkipped;
       }
       /**
        * Check if skipping is prevented for a chapter

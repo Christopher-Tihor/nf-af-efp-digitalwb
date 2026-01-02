@@ -61,14 +61,48 @@ export class ChapterManagementService {
    * A chapter is skipped if ALL its questions have quartech_chapterskipped === 100000000
    */
   isChapterSkipped(chapterId: string): boolean {
+    const chapter = getChapterFromStore(chapterId) as any;
     const questions = this.getQuestionsForChapter(chapterId, true); // Exclude preventSkipping subchapters
-    if (questions.length === 0) return false;
+
+    console.log('[isChapterSkipped] DEBUG:', {
+      chapterId,
+      chapterFound: !!chapter,
+      chapterName: chapter?.name || chapter?.label || 'unknown',
+      questionsCount: questions.length,
+      mapSize: POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.size,
+      isLoaded: POWERPOD.workbookQuestionsAndResponses.isLoaded,
+      subchaptersCount: chapter?.subchapters?.length || 0
+    });
+
+    if (questions.length === 0) {
+      console.log('[isChapterSkipped] No questions found for chapter, returning FALSE', { chapterId });
+      return false;
+    }
 
     // Check if ALL questions have quartech_chapterskipped set to YES (100000000)
-    return questions.every(q => {
+    let allSkipped = true;
+    for (const q of questions) {
       const entry = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.get(q.id);
-      return entry?.response?.quartech_chapterskipped === 100000000;
-    });
+      const isSkipped = entry?.response?.quartech_chapterskipped === 100000000;
+
+      console.log('[isChapterSkipped] Question check:', {
+        questionId: q.id,
+        questionName: q.name || q.label,
+        entryExists: !!entry,
+        responseExists: !!entry?.response,
+        chapterSkippedValue: entry?.response?.quartech_chapterskipped,
+        isSkipped
+      });
+
+      if (!isSkipped) {
+        allSkipped = false;
+        // Continue to log all questions for debugging
+      }
+    }
+
+    console.log('[isChapterSkipped] Final result:', { chapterId, result: allSkipped, questionsChecked: questions.length });
+
+    return allSkipped;
   }
 
   /**

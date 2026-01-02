@@ -33,6 +33,10 @@ export declare class EFPCompletionUtils {
     private static itemHasQuestions;
     /**
      * Check if a subchapter (from data model) is skipped
+     *
+     * IMPORTANT: Items without questions should return FALSE (not skipped)
+     * This prevents the checkbox from appearing checked on fresh workbooks
+     * for chapters that simply have no questions.
      */
     private static isSubchapterSkipped;
     /**
@@ -45,6 +49,9 @@ export declare class EFPCompletionUtils {
      *
      * For leaf chapters (no subchapters):
      * - Show as skipped if all questions are skipped
+     *
+     * IMPORTANT: Items without questions should return FALSE (not skipped)
+     * This prevents the checkbox from appearing checked on fresh workbooks.
      */
     static getSkippedFromStore(item: EFPSectionItem, getQuestionsForChapter: (chapterId: string, excludePreventSkipping?: boolean) => any[]): boolean;
     /**

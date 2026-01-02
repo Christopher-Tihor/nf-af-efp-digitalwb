@@ -295,12 +295,16 @@ export class EFPCompletionUtils {
 
   /**
    * Check if a subchapter (from data model) is skipped
+   *
+   * IMPORTANT: Items without questions should return FALSE (not skipped)
+   * This prevents the checkbox from appearing checked on fresh workbooks
+   * for chapters that simply have no questions.
    */
   private static isSubchapterSkipped(
     subchapter: any,
     getQuestionsForChapter: (chapterId: string, excludePreventSkipping?: boolean) => any[]
   ): boolean {
-    if (!subchapter?.id) return true; // No ID means no questions, treat as skipped
+    if (!subchapter?.id) return false; // No ID means can't check, default to not skipped
 
     // Check if this subchapter has questions
     const hasQuestions = subchapter.questions?.length > 0;
@@ -318,7 +322,7 @@ export class EFPCompletionUtils {
 
       // If no subchapters have questions, consider the parent's own questions
       if (subchaptersWithQuestions.length === 0) {
-        if (!hasQuestions) return true; // No questions anywhere, treat as skipped
+        if (!hasQuestions) return false; // No questions anywhere, NOT skipped
         return EFPCompletionUtils.isChapterSkippedById(subchapter.id, getQuestionsForChapter);
       }
 
@@ -329,7 +333,7 @@ export class EFPCompletionUtils {
     }
 
     // For leaf subchapters, check if all questions are skipped
-    if (!hasQuestions) return true; // No questions, treat as skipped
+    if (!hasQuestions) return false; // No questions, NOT skipped
     return EFPCompletionUtils.isChapterSkippedById(subchapter.id, getQuestionsForChapter);
   }
 
@@ -343,13 +347,15 @@ export class EFPCompletionUtils {
    *
    * For leaf chapters (no subchapters):
    * - Show as skipped if all questions are skipped
+   *
+   * IMPORTANT: Items without questions should return FALSE (not skipped)
+   * This prevents the checkbox from appearing checked on fresh workbooks.
    */
   static getSkippedFromStore(
     item: EFPSectionItem,
     getQuestionsForChapter: (chapterId: string, excludePreventSkipping?: boolean) => any[]
   ): boolean {
-    // Items without questions should not affect parent status
-    // Return true (skipped) so they don't break the "all children skipped" check
+    // Items without chapterId - check children if available
     if (!item.chapterId) {
       // If this item has no chapterId but has children, check the children
       if ('items' in item && Array.isArray(item.items) && item.items.length > 0) {
@@ -357,9 +363,9 @@ export class EFPCompletionUtils {
           EFPCompletionUtils.itemHasQuestions(child)
         );
 
-        // If no children have questions, treat as skipped
+        // If no children have questions, treat as NOT skipped (fresh workbook case)
         if (childrenWithQuestions.length === 0) {
-          return true;
+          return false;
         }
 
         // Check if all children with questions are skipped
@@ -367,8 +373,8 @@ export class EFPCompletionUtils {
           EFPCompletionUtils.getSkippedFromStore(childItem, getQuestionsForChapter)
         );
       }
-      // No chapterId and no children - treat as skipped (no questions to skip)
-      return true;
+      // No chapterId and no children - treat as NOT skipped
+      return false;
     }
 
     try {
