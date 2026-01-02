@@ -45106,18 +45106,154 @@
           });
       }
       /**
+       * Check if an item has any questions (directly or in nested subchapters)
+       * Duplicated from EFPRenderUtils to avoid circular dependency
+       */
+      static itemHasQuestions(item) {
+          var _a, _b, _c, _d, _e, _f, _g, _h, _j;
+          // Check direct questions on chapter or subchapter data
+          const chapterQuestions = ((_b = (_a = item.chapterData) === null || _a === void 0 ? void 0 : _a.questions) === null || _b === void 0 ? void 0 : _b.length) || 0;
+          const subchapterQuestions = ((_d = (_c = item.subchapterData) === null || _c === void 0 ? void 0 : _c.questions) === null || _d === void 0 ? void 0 : _d.length) || 0;
+          if (chapterQuestions > 0 || subchapterQuestions > 0) {
+              return true;
+          }
+          // Check nested subchapters in chapter data
+          if ((_e = item.chapterData) === null || _e === void 0 ? void 0 : _e.subchapters) {
+              for (const sub of item.chapterData.subchapters) {
+                  if (((_f = sub.questions) === null || _f === void 0 ? void 0 : _f.length) > 0) {
+                      return true;
+                  }
+                  if (sub.subchapters) {
+                      for (const nestedSub of sub.subchapters) {
+                          if (((_g = nestedSub.questions) === null || _g === void 0 ? void 0 : _g.length) > 0) {
+                              return true;
+                          }
+                      }
+                  }
+              }
+          }
+          // Check nested subchapters in subchapter data
+          if ((_h = item.subchapterData) === null || _h === void 0 ? void 0 : _h.subchapters) {
+              for (const sub of item.subchapterData.subchapters) {
+                  if (((_j = sub.questions) === null || _j === void 0 ? void 0 : _j.length) > 0) {
+                      return true;
+                  }
+              }
+          }
+          // Check nested items
+          if (item.items) {
+              for (const childItem of item.items) {
+                  if (EFPCompletionUtils.itemHasQuestions(childItem)) {
+                      return true;
+                  }
+              }
+          }
+          return false;
+      }
+      /**
+       * Check if a subchapter (from data model) is skipped
+       */
+      static isSubchapterSkipped(subchapter, getQuestionsForChapter) {
+          var _a;
+          if (!(subchapter === null || subchapter === void 0 ? void 0 : subchapter.id))
+              return true; // No ID means no questions, treat as skipped
+          // Check if this subchapter has questions
+          const hasQuestions = ((_a = subchapter.questions) === null || _a === void 0 ? void 0 : _a.length) > 0;
+          // If this subchapter has its own subchapters, check if ALL of them are skipped
+          if (subchapter.subchapters && subchapter.subchapters.length > 0) {
+              const subchaptersWithQuestions = subchapter.subchapters.filter((sub) => {
+                  var _a;
+                  // Check if sub has questions directly or in nested subchapters
+                  if (((_a = sub.questions) === null || _a === void 0 ? void 0 : _a.length) > 0)
+                      return true;
+                  if (sub.subchapters) {
+                      return sub.subchapters.some((nested) => { var _a; return ((_a = nested.questions) === null || _a === void 0 ? void 0 : _a.length) > 0; });
+                  }
+                  return false;
+              });
+              // If no subchapters have questions, consider the parent's own questions
+              if (subchaptersWithQuestions.length === 0) {
+                  if (!hasQuestions)
+                      return true; // No questions anywhere, treat as skipped
+                  return EFPCompletionUtils.isChapterSkippedById(subchapter.id, getQuestionsForChapter);
+              }
+              // Check if all subchapters with questions are skipped
+              return subchaptersWithQuestions.every((sub) => EFPCompletionUtils.isSubchapterSkipped(sub, getQuestionsForChapter));
+          }
+          // For leaf subchapters, check if all questions are skipped
+          if (!hasQuestions)
+              return true; // No questions, treat as skipped
+          return EFPCompletionUtils.isChapterSkippedById(subchapter.id, getQuestionsForChapter);
+      }
+      /**
        * Get skipped status for an item from the store
+       *
+       * For parent chapters with subchapters:
+       * - Show as skipped ONLY if ALL subchapters (with questions) are skipped
+       * - Items without questions are ignored when determining parent status
+       * - If some subchapters are skipped but others are not, show as complete (not skipped)
+       *
+       * For leaf chapters (no subchapters):
+       * - Show as skipped if all questions are skipped
        */
       static getSkippedFromStore(item, getQuestionsForChapter) {
+          // Items without questions should not affect parent status
+          // Return true (skipped) so they don't break the "all children skipped" check
           if (!item.chapterId) {
-              return false;
+              // If this item has no chapterId but has children, check the children
+              if ('items' in item && Array.isArray(item.items) && item.items.length > 0) {
+                  const childrenWithQuestions = item.items.filter(child => EFPCompletionUtils.itemHasQuestions(child));
+                  // If no children have questions, treat as skipped
+                  if (childrenWithQuestions.length === 0) {
+                      return true;
+                  }
+                  // Check if all children with questions are skipped
+                  return childrenWithQuestions.every((childItem) => EFPCompletionUtils.getSkippedFromStore(childItem, getQuestionsForChapter));
+              }
+              // No chapterId and no children - treat as skipped (no questions to skip)
+              return true;
           }
           try {
+              const chapter = getChapterFromStore(item.chapterId);
+              // For items with subitems (parent chapters), check if ALL subitems with questions are skipped
+              if ('items' in item && Array.isArray(item.items) && item.items.length > 0) {
+                  // Filter to only children that have questions
+                  const childrenWithQuestions = item.items.filter(child => EFPCompletionUtils.itemHasQuestions(child));
+                  // If no children have questions, check the parent's own questions
+                  if (childrenWithQuestions.length === 0) {
+                      return EFPCompletionUtils.isChapterSkippedById(item.chapterId, getQuestionsForChapter);
+                  }
+                  // Check if ALL child items with questions are skipped
+                  const allChildrenSkipped = childrenWithQuestions.every((childItem) => EFPCompletionUtils.getSkippedFromStore(childItem, getQuestionsForChapter));
+                  // Parent is only skipped if ALL children with questions are skipped
+                  return allChildrenSkipped;
+              }
+              // For chapters with subchapters in the data model (but not in items), check subchapters
+              if ((chapter === null || chapter === void 0 ? void 0 : chapter.subchapters) && chapter.subchapters.length > 0) {
+                  // Filter to only subchapters that have questions
+                  const subchaptersWithQuestions = chapter.subchapters.filter((sub) => {
+                      var _a;
+                      if (((_a = sub.questions) === null || _a === void 0 ? void 0 : _a.length) > 0)
+                          return true;
+                      if (sub.subchapters) {
+                          return sub.subchapters.some((nested) => { var _a; return ((_a = nested.questions) === null || _a === void 0 ? void 0 : _a.length) > 0; });
+                      }
+                      return false;
+                  });
+                  // If no subchapters have questions, check the parent's own questions
+                  if (subchaptersWithQuestions.length === 0) {
+                      return EFPCompletionUtils.isChapterSkippedById(item.chapterId, getQuestionsForChapter);
+                  }
+                  const allSubchaptersSkipped = subchaptersWithQuestions.every((subchapter) => EFPCompletionUtils.isSubchapterSkipped(subchapter, getQuestionsForChapter));
+                  // Parent is only skipped if ALL subchapters with questions are skipped
+                  return allSubchaptersSkipped;
+              }
+              // For leaf chapters (no subchapters), use the original logic
               const isSkipped = EFPCompletionUtils.isChapterSkippedById(item.chapterId, getQuestionsForChapter);
               if (!isSkipped) {
                   return false;
               }
-              const chapter = getChapterFromStore(item.chapterId);
+              // Additional check for preventSkipping children
               if (chapter === null || chapter === void 0 ? void 0 : chapter.subchapters) {
                   const hasIncomplete = EFPCompletionUtils.hasIncompletePreventSkippingChildren(chapter.subchapters);
                   if (hasIncomplete) {
