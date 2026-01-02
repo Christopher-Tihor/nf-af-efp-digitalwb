@@ -1,15 +1,40 @@
-import { ChapterManagementService } from '../../js/services/ChapterManagementService.ts';
+// Mock Logger before importing ChapterManagementService
+jest.mock('../../js/common/logger.js', () => ({
+  Logger: () => ({
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+    debug: jest.fn(),
+  }),
+}));
 
-// Mock global POWERPOD object
-global.POWERPOD = {
+// Create a shared POWERPOD object that will be used by both the test and the mocked module
+// This needs to be defined before the mock factory is called
+const mockQuestionsWithResponses = new Map();
+const mockPOWERPOD = {
   workbookQuestionsAndResponses: {
-    questionsWithResponses: new Map(),
+    questionsWithResponses: mockQuestionsWithResponses,
     isLoaded: true,
   },
   fetch: {
     patchWorkbookResponseData: jest.fn().mockResolvedValue({}),
   },
 };
+
+// Mock constants to use our shared POWERPOD object
+jest.mock('../../js/common/constants.js', () => {
+  return {
+    get POWERPOD() {
+      return mockPOWERPOD;
+    },
+    YES_VALUE: 100000000,
+  };
+});
+
+import { ChapterManagementService } from '../../js/services/ChapterManagementService.ts';
+
+// Also set global.POWERPOD for backward compatibility
+global.POWERPOD = mockPOWERPOD;
 
 // Mock questionnaire functions
 jest.mock('../../js/common/questionnaire.js', () => ({
@@ -52,7 +77,7 @@ describe('ChapterManagementService', () => {
   describe('isChapterSkipped', () => {
     test('should return true when all questions are skipped', () => {
       const chapterId = 'chapter1';
-      
+
       // Mock chapter with questions
       getChapterFromStore.mockReturnValue({
         id: chapterId,
@@ -101,7 +126,7 @@ describe('ChapterManagementService', () => {
 
     test('should exclude questions from preventSkipping subchapters', () => {
       const chapterId = 'chapter1';
-      
+
       getChapterFromStore.mockReturnValue({
         id: chapterId,
         questions: [{ id: 'q1' }],
@@ -121,6 +146,83 @@ describe('ChapterManagementService', () => {
       });
 
       expect(service.isChapterSkipped(chapterId)).toBe(true);
+    });
+
+    test('should return false when response is null (fresh workbook)', () => {
+      const chapterId = 'chapter1';
+
+      getChapterFromStore.mockReturnValue({
+        id: chapterId,
+        questions: [
+          { id: 'q1' },
+          { id: 'q2' },
+        ],
+      });
+
+      // Fresh workbook: questions exist but responses are null
+      global.POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.set('q1', {
+        question: { id: 'q1' },
+        response: null,
+      });
+      global.POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.set('q2', {
+        question: { id: 'q2' },
+        response: null,
+      });
+
+      expect(service.isChapterSkipped(chapterId)).toBe(false);
+    });
+
+    test('should return false when questions are not in the map', () => {
+      const chapterId = 'chapter1';
+
+      getChapterFromStore.mockReturnValue({
+        id: chapterId,
+        questions: [
+          { id: 'q1' },
+          { id: 'q2' },
+        ],
+      });
+
+      // Map is empty - questions not loaded yet
+      // (questionsWithResponses is already cleared in beforeEach)
+
+      expect(service.isChapterSkipped(chapterId)).toBe(false);
+    });
+
+    test('should return false for parent chapter with only preventSkipping subchapters (fresh workbook)', () => {
+      const chapterId = 'chapter1';
+
+      // Parent chapter has no direct questions, only subchapters with preventSkipping
+      getChapterFromStore.mockReturnValue({
+        id: chapterId,
+        questions: [], // No direct questions
+        subchapters: [
+          {
+            id: 'subchapter1',
+            preventSkipping: true,
+            questions: [{ id: 'q1' }],
+          },
+          {
+            id: 'subchapter2',
+            preventSkipping: true,
+            questions: [{ id: 'q2' }],
+          },
+        ],
+      });
+
+      // Fresh workbook: questions exist but responses are null
+      global.POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.set('q1', {
+        question: { id: 'q1' },
+        response: null,
+      });
+      global.POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.set('q2', {
+        question: { id: 'q2' },
+        response: null,
+      });
+
+      // Should return false because there are no skippable questions
+      // (all questions are in preventSkipping subchapters)
+      expect(service.isChapterSkipped(chapterId)).toBe(false);
     });
   });
 
