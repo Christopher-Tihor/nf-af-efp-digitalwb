@@ -2173,10 +2173,17 @@ export class EFPEntryForm extends LitElement {
 
   // Update completion tracking and navigation icons based on current responses
   private updateCompletionAndNavigation() {
+    // OPTIMISTIC UI UPDATE: Immediately update the completion percentage from memory
+    // This ensures the progress bar reflects the optimistically-updated memory state
+    if (POWERPOD.workbookQuestionsAndResponses.isLoaded) {
+      this.currentCompletionPercentage = this.services.validationService.calculateCompletionPercentage();
+    }
+
     // Update section completion status based on workbook responses
     this.updateSectionCompletionStatus();
 
     // Trigger re-render to update progress bar and navigation icons
+    // The navigation sidebar will re-compute section completion from the already-updated memory
     this.requestUpdate();
 
     // Log current completion status
@@ -2197,6 +2204,9 @@ export class EFPEntryForm extends LitElement {
             logger.info({
               message: '✅ Updated completion using questionnaire store',
             });
+            // IMPORTANT: Trigger another re-render after async update completes
+            // This ensures the navigation menu reflects the updated completion status
+            this.requestUpdate();
           }
         );
         return;
