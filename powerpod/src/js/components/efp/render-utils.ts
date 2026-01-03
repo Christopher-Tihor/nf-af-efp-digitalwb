@@ -133,22 +133,38 @@ export class EFPRenderUtils {
     renderItems: (items: EFPSectionItem[]) => any,
     getCompletion?: (item: EFPSectionItem) => boolean,
     getSkipped?: (item: EFPSectionItem) => boolean,
-    getIncomplete?: (item: EFPSectionItem) => boolean
+    getIncomplete?: (item: EFPSectionItem) => boolean,
+    getVisited?: (item: EFPSectionItem) => boolean
   ): any {
+    // Pre-compute: check if ANY sibling in this items array has been interacted with
+    // (skipped or completed). This indicates the parent level was visited.
+    const anySiblingInteracted = items.some((sibling) => {
+      const siblingSkipped = getSkipped ? getSkipped(sibling) : false;
+      const siblingComplete = getCompletion ? getCompletion(sibling) : false;
+      return siblingSkipped || siblingComplete;
+    });
+
     return items.map((item) => {
       const isComplete = getCompletion ? getCompletion(item) : (item.complete || false);
       const isSkipped = getSkipped ? getSkipped(item) : false;
       const hasIncompleteQuestions = getIncomplete ? getIncomplete(item) : false;
+      const isVisited = getVisited ? getVisited(item) : false;
 
-      // Check if the item has any questions - if not, don't show an icon
+      // Check if the item has any questions
       const itemHasQuestions = EFPRenderUtils.hasQuestions(item);
 
-      // Determine icon based on state: skipped > complete > incomplete with unanswered > incomplete
-      // Only show icon if the item has questions
+      // For items without questions, also consider them "visited" if any sibling
+      // has been skipped or completed (indicates the parent was visited)
+      const effectiveIsVisited = isVisited || (!itemHasQuestions && anySiblingInteracted);
+
+      // Determine icon based on state
+      // For items WITH questions: skipped > complete > incomplete with unanswered > incomplete
+      // For items WITHOUT questions: show edit icon, complete only when visited
       let iconName: string | null = null;
       let iconColor: string = '';
 
       if (itemHasQuestions) {
+        // Standard icon logic for items with questions
         if (isSkipped) {
           iconName = 'skip-forward-circle';
           iconColor = 'var(--sl-color-primary-600)'; // blue - intentional action
@@ -161,6 +177,15 @@ export class EFPRenderUtils {
         } else {
           iconName = 'pencil-square';
           iconColor = 'var(--sl-color-neutral-600)'; // gray - not started/in progress
+        }
+      } else {
+        // For items without questions: show edit icon until visited, then show complete
+        if (effectiveIsVisited) {
+          iconName = 'check-circle';
+          iconColor = 'var(--sl-color-success-600)'; // green - visited/completed
+        } else {
+          iconName = 'pencil-square';
+          iconColor = 'var(--sl-color-neutral-600)'; // gray - not yet visited
         }
       }
 
@@ -225,7 +250,7 @@ export class EFPRenderUtils {
               ${renderIcon()}
               <span>${item.title || item.label}</span>
             </div>
-            ${EFPRenderUtils.renderItems(item.items || [], html, activeContentTitle, onItemClick, renderItems, getCompletion, getSkipped, getIncomplete)}
+            ${EFPRenderUtils.renderItems(item.items || [], html, activeContentTitle, onItemClick, renderItems, getCompletion, getSkipped, getIncomplete, getVisited)}
           </sl-details>
         `;
       } else if (hasSubitems) {
@@ -236,7 +261,7 @@ export class EFPRenderUtils {
               ${renderIcon()}
               <span>${item.title || item.label}</span>
             </div>
-            ${EFPRenderUtils.renderItems(item.items || [], html, activeContentTitle, onItemClick, renderItems, getCompletion, getSkipped, getIncomplete)}
+            ${EFPRenderUtils.renderItems(item.items || [], html, activeContentTitle, onItemClick, renderItems, getCompletion, getSkipped, getIncomplete, getVisited)}
           </sl-details>
         `;
       } else {

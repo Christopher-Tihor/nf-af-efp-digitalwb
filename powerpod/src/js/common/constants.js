@@ -217,4 +217,7 @@ export const POWERPOD = {
     lastUpdated: /** @type {string|null} */ (null),
     error: /** @type {string|null} */ (null),
   },
+  // Track visited chapters for no-question chapter status icons
+  // Chapters without questions show edit icon until visited, then show complete
+  visitedChapters: /** @type {Set<string>} */ (new Set()),
 };

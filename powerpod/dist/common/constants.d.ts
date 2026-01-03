@@ -173,4 +173,5 @@ export namespace POWERPOD {
         let error_2: string | null;
         export { error_2 as error };
     }
+    let visitedChapters: Set<string>;
 }

@@ -1751,6 +1751,9 @@ export class EFPEntryForm extends LitElement {
 
   // Navigation item click event handler
   private handleItemClick(item: EFPSectionItem) {
+    // Mark the chapter as visited for no-question chapter status icons
+    this.markChapterAsVisited(item);
+
     EFPEventUtils.handleItemClick(
       item,
       this.flatSteps,
@@ -1982,7 +1985,8 @@ export class EFPEntryForm extends LitElement {
       (items: EFPSectionItem[]) => this.renderItems(items),
       (item: EFPSectionItem) => this.getCompletionFromStore(item),
       (item: EFPSectionItem) => this.getSkippedFromStore(item),
-      (item: EFPSectionItem) => this.getIncompleteFromStore(item)
+      (item: EFPSectionItem) => this.getIncompleteFromStore(item),
+      (item: EFPSectionItem) => this.getVisitedFromStore(item)
     );
   }
 
@@ -2001,6 +2005,118 @@ export class EFPEntryForm extends LitElement {
 
   private getIncompleteFromStore(item: EFPSectionItem): boolean {
     return EFPCompletionUtils.getIncompleteFromStore(item, this.getCompletionContext());
+  }
+
+  /**
+   * Mark a chapter (and optionally its parents) as visited.
+   * This is used for chapters without questions to determine their completion status.
+   */
+  private markChapterAsVisited(item: EFPSectionItem): void {
+    // Get the chapter ID from the item
+    const chapterId = item.chapterId || item.chapterData?.id || item.subchapterData?.id;
+    if (chapterId) {
+      POWERPOD.visitedChapters.add(chapterId);
+    }
+  }
+
+  /**
+   * Check if a chapter or any of its subchapters have been visited.
+   * Also checks if any sibling has been interacted with (skipped or has responses),
+   * which indicates the parent was visited at some point.
+   * Used to determine whether to show edit or complete icon for chapters without questions.
+   */
+  private getVisitedFromStore(item: EFPSectionItem): boolean {
+    // Check if this specific item has been visited
+    const chapterId = item.chapterId || item.chapterData?.id || item.subchapterData?.id;
+    if (chapterId && POWERPOD.visitedChapters.has(chapterId)) {
+      return true;
+    }
+
+    // Check subchapters in chapterData for visits or interactions
+    if (item.chapterData?.subchapters) {
+      for (const sub of item.chapterData.subchapters) {
+        if (POWERPOD.visitedChapters.has(sub.id)) {
+          return true;
+        }
+        // Check if any sibling subchapter has been interacted with (skipped or has responses)
+        if (this.hasChapterBeenInteractedWith(sub.id)) {
+          return true;
+        }
+        // Check nested subchapters
+        if (sub.subchapters) {
+          for (const nestedSub of sub.subchapters) {
+            if (POWERPOD.visitedChapters.has(nestedSub.id)) {
+              return true;
+            }
+            if (this.hasChapterBeenInteractedWith(nestedSub.id)) {
+              return true;
+            }
+          }
+        }
+      }
+    }
+
+    // Check subchapters in subchapterData for visits or interactions
+    if (item.subchapterData?.subchapters) {
+      for (const sub of item.subchapterData.subchapters) {
+        if (POWERPOD.visitedChapters.has(sub.id)) {
+          return true;
+        }
+        if (this.hasChapterBeenInteractedWith(sub.id)) {
+          return true;
+        }
+      }
+    }
+
+    // Check nested items
+    if (item.items) {
+      for (const childItem of item.items) {
+        if (this.getVisitedFromStore(childItem)) {
+          return true;
+        }
+        // Also check if any sibling item has been interacted with
+        const siblingChapterId = childItem.chapterId || childItem.chapterData?.id || childItem.subchapterData?.id;
+        if (siblingChapterId && this.hasChapterBeenInteractedWith(siblingChapterId)) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
+  /**
+   * Check if a chapter has been interacted with (has any questions skipped or answered).
+   * This is used to determine if siblings of a no-question chapter have been touched,
+   * indicating the parent was visited.
+   */
+  private hasChapterBeenInteractedWith(chapterId: string): boolean {
+    if (!chapterId || !POWERPOD.workbookQuestionsAndResponses?.isLoaded) {
+      return false;
+    }
+
+    // Get questions for this chapter
+    const questions = this.getQuestionsForCurrentChapter(chapterId, false);
+    if (questions.length === 0) {
+      return false;
+    }
+
+    // Check if any question has been skipped or has a response
+    for (const question of questions) {
+      const entry = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.get(question.id);
+      if (entry?.response) {
+        // Check if skipped
+        if (entry.response.quartech_chapterskipped === 100000000) {
+          return true;
+        }
+        // Check if has a response
+        if (entry.response.quartech_response && entry.response.quartech_response.trim() !== '') {
+          return true;
+        }
+      }
+    }
+
+    return false;
   }
 
   updated(changedProps: Map<string, unknown>) {

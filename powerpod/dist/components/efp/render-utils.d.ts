@@ -29,5 +29,5 @@ export declare class EFPRenderUtils {
      * Check if an item has any questions (directly or in nested subchapters)
      */
     private static hasQuestions;
-    static renderItems(items: EFPSectionItem[], html: any, activeContentTitle: string, onItemClick: (item: EFPSectionItem) => void, renderItems: (items: EFPSectionItem[]) => any, getCompletion?: (item: EFPSectionItem) => boolean, getSkipped?: (item: EFPSectionItem) => boolean, getIncomplete?: (item: EFPSectionItem) => boolean): any;
+    static renderItems(items: EFPSectionItem[], html: any, activeContentTitle: string, onItemClick: (item: EFPSectionItem) => void, renderItems: (items: EFPSectionItem[]) => any, getCompletion?: (item: EFPSectionItem) => boolean, getSkipped?: (item: EFPSectionItem) => boolean, getIncomplete?: (item: EFPSectionItem) => boolean, getVisited?: (item: EFPSectionItem) => boolean): any;
 }

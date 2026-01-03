@@ -177,6 +177,24 @@ export declare class EFPEntryForm extends LitElement {
     private _hasIncompletePreventSkippingChildren;
     private getSkippedFromStore;
     private getIncompleteFromStore;
+    /**
+     * Mark a chapter (and optionally its parents) as visited.
+     * This is used for chapters without questions to determine their completion status.
+     */
+    private markChapterAsVisited;
+    /**
+     * Check if a chapter or any of its subchapters have been visited.
+     * Also checks if any sibling has been interacted with (skipped or has responses),
+     * which indicates the parent was visited at some point.
+     * Used to determine whether to show edit or complete icon for chapters without questions.
+     */
+    private getVisitedFromStore;
+    /**
+     * Check if a chapter has been interacted with (has any questions skipped or answered).
+     * This is used to determine if siblings of a no-question chapter have been touched,
+     * indicating the parent was visited.
+     */
+    private hasChapterBeenInteractedWith;
     updated(changedProps: Map<string, unknown>): void;
     firstUpdated(): void;
     willUpdate(changedProps: Map<string, unknown>): void;
