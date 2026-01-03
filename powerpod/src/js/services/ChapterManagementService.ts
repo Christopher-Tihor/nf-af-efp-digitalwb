@@ -233,23 +233,42 @@ export class ChapterManagementService {
       // ============================================
       // OPTIMISTIC UPDATE: Update memory immediately
       // ============================================
-      const previousStates: Map<string, { skipped: number | undefined, response: string | undefined }> = new Map();
+      const previousStates: Map<string, { skipped: number | undefined, response: string | undefined, hadResponse: boolean }> = new Map();
 
       for (const question of questions) {
         const questionId = question.id;
         const entry = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.get(questionId);
 
-        if (entry?.response) {
-          // Save previous state for rollback
-          previousStates.set(questionId, {
-            skipped: entry.response.quartech_chapterskipped,
-            response: entry.response.quartech_response,
-          });
+        if (entry) {
+          if (entry.response) {
+            // Save previous state for rollback
+            previousStates.set(questionId, {
+              skipped: entry.response.quartech_chapterskipped,
+              response: entry.response.quartech_response,
+              hadResponse: true,
+            });
 
-          // Optimistically update in memory
-          entry.response.quartech_chapterskipped = chapterSkippedValue;
-          if (isSkipped) {
-            entry.response.quartech_response = '';
+            // Optimistically update in memory
+            entry.response.quartech_chapterskipped = chapterSkippedValue;
+            if (isSkipped) {
+              entry.response.quartech_response = '';
+            }
+          } else {
+            // Create a temporary response object for immediate UI feedback
+            // This ensures the skipped status is reflected in the nav menu immediately
+            previousStates.set(questionId, {
+              skipped: undefined,
+              response: undefined,
+              hadResponse: false,
+            });
+
+            entry.response = {
+              quartech_response: '',
+              quartech_chapterskipped: chapterSkippedValue,
+              _quartech_question_value: questionId,
+              // Mark as pending save (no ID yet)
+              _pendingSave: true,
+            };
           }
         }
       }
@@ -268,22 +287,30 @@ export class ChapterManagementService {
         }
 
         const questionId = question.id;
-        const entry = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.get(questionId);
+        const prevState = previousStates.get(questionId);
 
-        // If response exists, update it
-        if (entry?.response) {
-          const responseId = entry.response.quartech_workbookresponseid;
+        // Check if there was a real response before (with an ID in the backend)
+        // We now create temporary responses optimistically, so we check hadResponse flag
+        if (prevState?.hadResponse) {
+          const entry = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.get(questionId);
+          const responseId = entry?.response?.quartech_workbookresponseid;
           await POWERPOD.fetch.patchWorkbookResponseData({
             id: responseId,
             chapterSkipped: chapterSkippedValue,
-            response: isSkipped ? '' : (previousStates.get(questionId)?.response || ''),
+            response: isSkipped ? '' : (prevState.response || ''),
           });
           return { questionId, success: true };
         } else {
-          // If no response exists, create one with chapterSkipped set
-          await WorkbookResponseHelper.createResponse(questionId, '', {
+          // If no response existed before, create one with chapterSkipped set
+          const result = await WorkbookResponseHelper.createResponse(questionId, '', {
             chapterSkipped: chapterSkippedValue,
           });
+          // Update the temporary response with the real ID from the backend
+          const entry = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.get(questionId);
+          if (entry?.response && result?.responseId) {
+            entry.response.quartech_workbookresponseid = result.responseId;
+            delete entry.response._pendingSave;
+          }
           return { questionId, success: true };
         }
       });
@@ -315,10 +342,16 @@ export class ChapterManagementService {
           const prevState = previousStates.get(questionId);
           const entry = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.get(questionId);
 
-          if (prevState && entry?.response) {
-            entry.response.quartech_chapterskipped = prevState.skipped;
-            if (prevState.response !== undefined) {
-              entry.response.quartech_response = prevState.response;
+          if (prevState && entry) {
+            if (!prevState.hadResponse) {
+              // Remove the temporary response we created
+              entry.response = undefined;
+            } else if (entry.response) {
+              // Restore previous state
+              entry.response.quartech_chapterskipped = prevState.skipped;
+              if (prevState.response !== undefined) {
+                entry.response.quartech_response = prevState.response;
+              }
             }
           }
         }
