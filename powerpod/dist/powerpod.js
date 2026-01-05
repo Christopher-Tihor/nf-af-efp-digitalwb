@@ -1,5 +1,5 @@
 /*!
-* powerpod 4.7.2
+* powerpod 4.7.3
 * https://github.com/bcgov/nr-af-pods/powerpod
 *
 * @license GPLv3 for open source use only
@@ -35129,6 +35129,8 @@
             }
 
             // Then, add responses to their corresponding questions
+            // Only add responses for questions that exist in the active questions list
+            // Responses for inactive questions (not in the list) are skipped
             responses.forEach(function (response) {
               var questionId = response._quartech_question_value;
               if (questionId) {
@@ -35136,14 +35138,9 @@
                   // Update existing question entry
                   var entry = questionsWithResponses.get(questionId);
                   entry.response = response;
-                } else {
-                  // Create entry for response without question data
-                  questionsWithResponses.set(questionId, {
-                    question: null,
-                    // Question data not available
-                    response: response
-                  });
                 }
+                // Skip responses for inactive questions (those not in our active questions list)
+                // These questions have been filtered out at the API level (statecode eq 0)
               }
             });
 
@@ -51660,7 +51657,7 @@
       };
     };
     // @ts-ignore
-    POWERPOD.version = '4.7.2';
+    POWERPOD.version = '4.7.3';
     // @ts-ignore
     window.powerpod = POWERPOD;
   }

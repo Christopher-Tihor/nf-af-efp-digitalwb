@@ -769,6 +769,8 @@ export async function loadQuestionsAndResponses(workbookId, options = {}) {
     }
 
     // Then, add responses to their corresponding questions
+    // Only add responses for questions that exist in the active questions list
+    // Responses for inactive questions (not in the list) are skipped
     responses.forEach(response => {
       const questionId = response._quartech_question_value;
 
@@ -777,13 +779,9 @@ export async function loadQuestionsAndResponses(workbookId, options = {}) {
           // Update existing question entry
           const entry = questionsWithResponses.get(questionId);
           entry.response = response;
-        } else {
-          // Create entry for response without question data
-          questionsWithResponses.set(questionId, {
-            question: null, // Question data not available
-            response: response
-          });
         }
+        // Skip responses for inactive questions (those not in our active questions list)
+        // These questions have been filtered out at the API level (statecode eq 0)
       }
     });
 
