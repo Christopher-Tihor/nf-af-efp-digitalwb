@@ -1,7 +1,7 @@
 import { POWERPOD } from './constants.js';
 import { Logger } from './logger.js';
 import { getCurrentWorkbookId } from './workbookUtils.js';
-import { loadChaptersAndQuestions, getStoredQuestionsData, isChaptersAndQuestionsLoaded } from './chaptersAndQuestionsUtils.js';
+import { loadChaptersAndQuestions, getStoredQuestionsData, getStoredChaptersData, isChaptersAndQuestionsLoaded } from './chaptersAndQuestionsUtils.js';
 import { updateQuestionResponse, isQuestionnaireLoaded, getQuestionFromStore } from './questionnaire.js';
 
 const logger = Logger('common/workbookResponseHelper');
@@ -729,10 +729,29 @@ export async function loadQuestionsAndResponses(workbookId, options = {}) {
     const questionsWithResponses = new Map();
     const questionsByChapter = new Map();
 
+    // Build a set of active chapter IDs for quick lookup
+    // Only include questions whose parent chapter is active
+    const chaptersData = getStoredChaptersData();
+    const activeChapterIds = new Set();
+    if (chaptersData?.value) {
+      chaptersData.value.forEach(chapter => {
+        activeChapterIds.add(chapter.quartech_chapterid);
+      });
+    }
+    console.log(`Found ${activeChapterIds.size} active chapters`);
+
     // First, add all questions (if we have them)
+    // Only include questions whose parent chapter is active
+    let skippedQuestionsCount = 0;
     questions.forEach(question => {
       const questionId = question.quartech_workbookquestionid;
       const chapterId = question._quartech_chapter_value;
+
+      // Skip questions that belong to inactive chapters
+      if (chapterId && !activeChapterIds.has(chapterId)) {
+        skippedQuestionsCount++;
+        return; // Skip this question
+      }
 
       if (questionId) {
         questionsWithResponses.set(questionId, {
@@ -753,7 +772,7 @@ export async function loadQuestionsAndResponses(workbookId, options = {}) {
       }
     });
 
-    console.log(`Processed ${questions.length} questions into nested structure`);
+    console.log(`Processed ${questions.length - skippedQuestionsCount} questions into nested structure (skipped ${skippedQuestionsCount} questions from inactive chapters)`);
     console.log(`Questions organized into ${questionsByChapter.size} chapters`);
 
     // Debug: Log some sample question data

@@ -1,5 +1,5 @@
 /*!
-* powerpod 4.7.3
+* powerpod 4.7.4
 * https://github.com/bcgov/nr-af-pods/powerpod
 *
 * @license GPLv3 for open source use only
@@ -35005,6 +35005,9 @@
         responses,
         questionsWithResponses,
         questionsByChapter,
+        chaptersData,
+        activeChapterIds,
+        skippedQuestionsCount,
         totalQuestions,
         answeredQuestions,
         skippedQuestions,
@@ -35091,10 +35094,29 @@
 
             // Create nested structure
             questionsWithResponses = new Map();
-            questionsByChapter = new Map(); // First, add all questions (if we have them)
+            questionsByChapter = new Map(); // Build a set of active chapter IDs for quick lookup
+            // Only include questions whose parent chapter is active
+            chaptersData = getStoredChaptersData();
+            activeChapterIds = new Set();
+            if (chaptersData !== null && chaptersData !== void 0 && chaptersData.value) {
+              chaptersData.value.forEach(function (chapter) {
+                activeChapterIds.add(chapter.quartech_chapterid);
+              });
+            }
+            console.log("Found ".concat(activeChapterIds.size, " active chapters"));
+
+            // First, add all questions (if we have them)
+            // Only include questions whose parent chapter is active
+            skippedQuestionsCount = 0;
             questions.forEach(function (question) {
               var questionId = question.quartech_workbookquestionid;
               var chapterId = question._quartech_chapter_value;
+
+              // Skip questions that belong to inactive chapters
+              if (chapterId && !activeChapterIds.has(chapterId)) {
+                skippedQuestionsCount++;
+                return; // Skip this question
+              }
               if (questionId) {
                 questionsWithResponses.set(questionId, {
                   question: question,
@@ -35113,7 +35135,7 @@
                 }
               }
             });
-            console.log("Processed ".concat(questions.length, " questions into nested structure"));
+            console.log("Processed ".concat(questions.length - skippedQuestionsCount, " questions into nested structure (skipped ").concat(skippedQuestionsCount, " questions from inactive chapters)"));
             console.log("Questions organized into ".concat(questionsByChapter.size, " chapters"));
 
             // Debug: Log some sample question data
@@ -35238,8 +35260,8 @@
               }
             }
             return _context9.abrupt("return", getQuestionsAndResponsesFromMemory());
-          case 60:
-            _context9.prev = 60;
+          case 65:
+            _context9.prev = 65;
             _context9.t1 = _context9["catch"](1);
             logger$m.error({
               fn: 'loadQuestionsAndResponses',
@@ -35251,15 +35273,15 @@
             });
             POWERPOD.workbookQuestionsAndResponses.error = _context9.t1.message || 'Failed to load questions and responses';
             throw _context9.t1;
-          case 65:
-            _context9.prev = 65;
+          case 70:
+            _context9.prev = 70;
             POWERPOD.workbookQuestionsAndResponses.isLoading = false;
-            return _context9.finish(65);
-          case 68:
+            return _context9.finish(70);
+          case 73:
           case "end":
             return _context9.stop();
         }
-      }, _callee9, null, [[1, 60, 65, 68], [9, 24]]);
+      }, _callee9, null, [[1, 65, 70, 73], [9, 24]]);
     }));
     return _loadQuestionsAndResponses.apply(this, arguments);
   }
@@ -51657,7 +51679,7 @@
       };
     };
     // @ts-ignore
-    POWERPOD.version = '4.7.3';
+    POWERPOD.version = '4.7.4';
     // @ts-ignore
     window.powerpod = POWERPOD;
   }
