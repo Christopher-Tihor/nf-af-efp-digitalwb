@@ -431,8 +431,8 @@ export class RatingQuestion extends LitElement {
     const isSelected = this.selectedValue === option.value;
     const isNA = option.value === 'na';
 
-    // For Point Rating with descriptions, use card layout
-    if (this.questionType === 'Point Rating' && this.hasRatingDescriptions()) {
+    // For Point Rating, always use card layout (with or without descriptions)
+    if (this.questionType === 'Point Rating') {
       // N/A card (compact, no description)
       if (isNA) {
         return html`

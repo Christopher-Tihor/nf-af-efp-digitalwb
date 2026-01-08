@@ -1,5 +1,5 @@
 /*!
-* powerpod 4.7.5
+* powerpod 4.7.6
 * https://github.com/bcgov/nr-af-pods/powerpod
 *
 * @license GPLv3 for open source use only
@@ -39239,8 +39239,8 @@
       renderRatingOption(option) {
           const isSelected = this.selectedValue === option.value;
           const isNA = option.value === 'na';
-          // For Point Rating with descriptions, use card layout
-          if (this.questionType === 'Point Rating' && this.hasRatingDescriptions()) {
+          // For Point Rating, always use card layout (with or without descriptions)
+          if (this.questionType === 'Point Rating') {
               // N/A card (compact, no description)
               if (isNA) {
                   return x `
@@ -47967,14 +47967,14 @@
           const descKey = `quartech_rating${ratingNum}description`;
           const label = questionData[labelKey] || `Risk Rating ${ratingNum}`;
           const description = questionData[descKey];
-          // Only build description if there's a description field
-          if (!description) {
-              return null;
+          // If there's a description, include it; otherwise just use the label
+          if (description) {
+              // Strip HTML tags from description to get plain text
+              const plainDescription = description.replace(/<[^>]*>/g, '').trim();
+              return `${label}: ${plainDescription}`;
           }
-          // Strip HTML tags from description to get plain text
-          const plainDescription = description.replace(/<[^>]*>/g, '').trim();
-          // Build the description in the format: "Rating Label: Description"
-          return `${label}: ${plainDescription}`;
+          // Always return at least the label for Point Rating questions
+          return label;
       }
       /**
        * Save rating response (core save method)
@@ -51679,7 +51679,7 @@
       };
     };
     // @ts-ignore
-    POWERPOD.version = '4.7.5';
+    POWERPOD.version = '4.7.6';
     // @ts-ignore
     window.powerpod = POWERPOD;
   }

@@ -568,16 +568,15 @@ export class WorkbookResponseService {
     const label = questionData[labelKey] || `Risk Rating ${ratingNum}`;
     const description = questionData[descKey];
 
-    // Only build description if there's a description field
-    if (!description) {
-      return null;
+    // If there's a description, include it; otherwise just use the label
+    if (description) {
+      // Strip HTML tags from description to get plain text
+      const plainDescription = description.replace(/<[^>]*>/g, '').trim();
+      return `${label}: ${plainDescription}`;
     }
 
-    // Strip HTML tags from description to get plain text
-    const plainDescription = description.replace(/<[^>]*>/g, '').trim();
-
-    // Build the description in the format: "Rating Label: Description"
-    return `${label}: ${plainDescription}`;
+    // Always return at least the label for Point Rating questions
+    return label;
   }
 
   /**
