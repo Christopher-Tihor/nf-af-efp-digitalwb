@@ -347,7 +347,7 @@ export class WorkbookSignOffButtons extends LitElement {
   /**
    * Check if PA sign-off button should be enabled
    * Enable sign-off only when:
-   * - Workbook in Assigned status OR Producer Signed status (meaning Producer has signed) OR Validated status
+   * - Workbook in Assigned status OR Producer Signed status (meaning Producer has signed)
    *
    * Disable sign-off for:
    * - Workbook in Draft status (unless debug mode is enabled)
@@ -371,11 +371,10 @@ export class WorkbookSignOffButtons extends LitElement {
       return true;
     }
 
-    // Can sign if workbook is in Assigned status, Producer Signed status, or Validated status
-    // This allows PA to sign when workbook is assigned, after Producer has signed, or when validated
+    // Can sign if workbook is in Assigned status or Producer Signed status
+    // This allows PA to sign when workbook is assigned or after Producer has signed
     return this.workbookStatus === WORKBOOK_STATUS.ASSIGNED ||
-           this.workbookStatus === WORKBOOK_STATUS.PRODUCER_SIGNED ||
-           this.workbookStatus === WORKBOOK_STATUS.VALIDATED;
+           this.workbookStatus === WORKBOOK_STATUS.PRODUCER_SIGNED;
   }
 
   /**
@@ -406,7 +405,7 @@ export class WorkbookSignOffButtons extends LitElement {
   /**
    * Check if Producer sign-off button should be enabled
    * Enable sign-off only when:
-   * - Workbook in Assigned status OR PA Signed status (meaning PA has signed) OR Validated status
+   * - Workbook in Assigned status OR PA Signed status (meaning PA has signed)
    *
    * Disable sign-off for:
    * - Workbook in Draft status (unless debug mode is enabled)
@@ -430,11 +429,10 @@ export class WorkbookSignOffButtons extends LitElement {
       return true;
     }
 
-    // Can sign if workbook is in Assigned status, PA Signed status, or Validated status
-    // This allows Producer to sign when workbook is assigned, after PA has signed, or when validated
+    // Can sign if workbook is in Assigned status or PA Signed status
+    // This allows Producer to sign when workbook is assigned or after PA has signed
     return this.workbookStatus === WORKBOOK_STATUS.ASSIGNED ||
-           this.workbookStatus === WORKBOOK_STATUS.PA_SIGNED ||
-           this.workbookStatus === WORKBOOK_STATUS.VALIDATED;
+           this.workbookStatus === WORKBOOK_STATUS.PA_SIGNED;
   }
 
   /**
@@ -496,9 +494,8 @@ export class WorkbookSignOffButtons extends LitElement {
     }
 
     if (this.workbookStatus !== WORKBOOK_STATUS.ASSIGNED &&
-        this.workbookStatus !== WORKBOOK_STATUS.PRODUCER_SIGNED &&
-        this.workbookStatus !== WORKBOOK_STATUS.VALIDATED) {
-      return 'You can only sign off when the workbook is in Assigned, Validated status, or after the Producer has signed.';
+        this.workbookStatus !== WORKBOOK_STATUS.PRODUCER_SIGNED) {
+      return 'You can only sign off when the workbook is in Assigned status, or after the Producer has signed.';
     }
 
     return 'Sign-off is currently disabled.';
@@ -538,9 +535,8 @@ export class WorkbookSignOffButtons extends LitElement {
     }
 
     if (this.workbookStatus !== WORKBOOK_STATUS.ASSIGNED &&
-        this.workbookStatus !== WORKBOOK_STATUS.PA_SIGNED &&
-        this.workbookStatus !== WORKBOOK_STATUS.VALIDATED) {
-      return 'You can only sign off when the workbook is in Assigned, Validated status, or after the PA has signed.';
+        this.workbookStatus !== WORKBOOK_STATUS.PA_SIGNED) {
+      return 'You can only sign off when the workbook is in Assigned status, or after the PA has signed.';
     }
 
     return 'Sign-off is currently disabled.';
