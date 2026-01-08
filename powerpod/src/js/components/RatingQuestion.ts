@@ -214,18 +214,55 @@ export class RatingQuestion extends LitElement {
 
     /* Color schemes for Yes/No/NA */
     .rating-box.yes {
-      background-color: #8bc34a;
+      background-color: #12436D;
       color: white;
     }
 
     .rating-box.no {
-      background-color: #f44336;
+      background-color: #D4351C;
       color: white;
     }
 
     .rating-box.unknown {
-      background-color: #ffeb3b;
+      background-color: #e0e0e0;
       color: #333;
+    }
+
+    /* Yes/No/NA card header colors */
+    .rating-card.yes .rating-card-header {
+      background-color: #12436D;
+      color: white;
+    }
+
+    .rating-card.no .rating-card-header {
+      background-color: #D4351C;
+      color: white;
+    }
+
+    .rating-card.unknown .rating-card-header {
+      background-color: #e0e0e0;
+      color: #333;
+    }
+
+    /* Yes/No/NA compact card styles (narrower like N/A) */
+    .rating-card.yes,
+    .rating-card.no,
+    .rating-card.na,
+    .rating-card.unknown {
+      flex: 0 0 auto;
+      min-width: 100px;
+      max-width: 120px;
+      padding: 0;
+    }
+
+    /* Make header fill entire card for Yes/No/NA/Unknown */
+    .rating-card.yes .rating-card-header,
+    .rating-card.no .rating-card-header,
+    .rating-card.na .rating-card-header,
+    .rating-card.unknown .rating-card-header {
+      margin: 0;
+      border-radius: 6px;
+      padding: 0.75rem 1rem;
     }
 
     /* Color schemes for Point Rating - Blue-to-Red Sequential Scale */
@@ -294,7 +331,10 @@ export class RatingQuestion extends LitElement {
         flex: 0 0 auto;
       }
 
-      .rating-card.na {
+      .rating-card.na,
+      .rating-card.yes,
+      .rating-card.no,
+      .rating-card.unknown {
         width: 100%;
         min-width: unset;
         max-width: unset;
@@ -330,7 +370,10 @@ export class RatingQuestion extends LitElement {
         padding: 0.75rem;
       }
 
-      .rating-card.na {
+      .rating-card.na,
+      .rating-card.yes,
+      .rating-card.no,
+      .rating-card.unknown {
         width: 100%;
         max-width: 100%;
         box-sizing: border-box;
@@ -354,8 +397,8 @@ export class RatingQuestion extends LitElement {
         return [
           { value: 'yes', label: 'Yes', color: 'yes' },
           { value: 'no', label: 'No', color: 'no' },
-          { value: 'unknown', label: '?', color: 'unknown' },
-          { value: 'na', label: 'N/A', color: 'na' }
+          { value: 'na', label: 'N/A', color: 'na' },
+          { value: 'unknown', label: '?', color: 'unknown' }
         ];
 
       case 'Point Rating':
@@ -430,6 +473,7 @@ export class RatingQuestion extends LitElement {
   private renderRatingOption(option: RatingOption) {
     const isSelected = this.selectedValue === option.value;
     const isNA = option.value === 'na';
+    const isUnknown = option.value === 'unknown';
 
     // For Point Rating, always use card layout (with or without descriptions)
     if (this.questionType === 'Point Rating') {
@@ -467,7 +511,34 @@ export class RatingQuestion extends LitElement {
       `;
     }
 
-    // For Yes/No/NA or Point Rating without descriptions, use compact button layout
+    // For Yes/No/NA, use card layout consistent with Point Rating
+    if (this.questionType === 'Yes/No/NA') {
+      // N/A and Unknown cards (compact, no description)
+      if (isNA || isUnknown) {
+        return html`
+          <div
+            class="rating-card ${option.color} ${isSelected ? 'selected' : ''} ${this.disabled ? 'disabled' : ''}"
+            @click=${() => this.handleOptionClick(option.value)}
+            title="${isNA ? 'Not Applicable' : 'Unknown'}"
+          >
+            <div class="rating-card-header">${option.label}</div>
+          </div>
+        `;
+      }
+
+      // Yes/No cards
+      return html`
+        <div
+          class="rating-card ${option.color} ${isSelected ? 'selected' : ''} ${this.disabled ? 'disabled' : ''}"
+          @click=${() => this.handleOptionClick(option.value)}
+          title="${option.label}"
+        >
+          <div class="rating-card-header">${option.label}</div>
+        </div>
+      `;
+    }
+
+    // Fallback: use compact button layout
     return html`
       <div
         class="rating-box ${option.color} ${isSelected ? 'selected' : ''} ${this.disabled ? 'disabled' : ''}"
