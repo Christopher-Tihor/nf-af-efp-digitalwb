@@ -1,5 +1,5 @@
 /*!
-* powerpod 4.7.7
+* powerpod 4.7.8
 * https://github.com/bcgov/nr-af-pods/powerpod
 *
 * @license GPLv3 for open source use only
@@ -39178,9 +39178,10 @@
                       { value: 'unknown', label: '?', color: 'unknown' }
                   ];
               case 'Point Rating':
-                  // 4-point system with N/A option first
+                  // 4-point system with N/A and Unknown options first
                   const options = [
                       { value: 'na', label: 'N/A', color: 'na' },
+                      { value: 'unknown', label: '?', color: 'unknown' },
                       { value: '1', label: ((_a = this.ratingMetadata) === null || _a === void 0 ? void 0 : _a.rating1OverwriteLabel) || '1', color: 'rating-1' },
                       { value: '2', label: ((_b = this.ratingMetadata) === null || _b === void 0 ? void 0 : _b.rating2OverwriteLabel) || '2', color: 'rating-2' },
                       { value: '3', label: ((_c = this.ratingMetadata) === null || _c === void 0 ? void 0 : _c.rating3OverwriteLabel) || '3', color: 'rating-3' },
@@ -39254,6 +39255,18 @@
           </div>
         `;
               }
+              // Unknown card (compact, no description)
+              if (isUnknown) {
+                  return x `
+          <div
+            class="rating-card unknown ${isSelected ? 'selected' : ''} ${this.disabled ? 'disabled' : ''}"
+            @click=${() => this.handleOptionClick(option.value)}
+            title="Unknown"
+          >
+            <div class="rating-card-header">?</div>
+          </div>
+        `;
+              }
               // Rating cards with descriptions
               const ratingNum = parseInt(option.value);
               const label = this.getRatingLabel(ratingNum);
@@ -39315,6 +39328,23 @@
           const optionsToRender = this.options.length > 0
               ? this.options
               : this.getDefaultOptions(this.questionType);
+          // For Point Rating, use two-column layout with N/A and ? stacked on left
+          if (this.questionType === 'Point Rating') {
+              const leftColumnOptions = optionsToRender.filter(o => o.value === 'na' || o.value === 'unknown');
+              const rightColumnOptions = optionsToRender.filter(o => o.value !== 'na' && o.value !== 'unknown');
+              return x `
+        <div class="rating-container">
+          <div class="rating-layout">
+            <div class="rating-left-column">
+              ${leftColumnOptions.map(option => this.renderRatingOption(option))}
+            </div>
+            <div class="rating-right-column">
+              ${rightColumnOptions.map(option => this.renderRatingOption(option))}
+            </div>
+          </div>
+        </div>
+      `;
+          }
           return x `
       <div class="rating-container">
         <div class="rating-options">
@@ -39342,6 +39372,30 @@
       flex-direction: row;
       width: 100%;
       box-sizing: border-box;
+    }
+
+    /* Two-column layout for Point Rating: N/A and ? stacked on left, ratings on right */
+    .rating-layout {
+      display: flex;
+      gap: 0.5rem;
+      align-items: stretch;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .rating-left-column {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      flex: 0 0 auto;
+    }
+
+    .rating-right-column {
+      display: flex;
+      flex-direction: row;
+      gap: 0.5rem;
+      flex: 1;
+      align-items: stretch;
     }
 
     /* Compact button style (for Yes/No/NA and Point Rating without descriptions) */
@@ -39435,20 +39489,52 @@
     }
 
     .rating-card.na {
-      background-color: white;
+      background-color: #e0e0e0;
       color: #333;
       flex: 0 0 auto;
-      min-width: 100px;
-      max-width: 120px;
+      min-width: 70px;
+      max-width: 80px;
+      overflow: hidden;
     }
 
     .rating-card.na .rating-card-header {
-      text-align: left;
+      text-align: center;
       background-color: #e0e0e0;
       color: #333;
-      margin: -1rem -1rem 0 -1rem;
-      padding: 0.75rem 1rem;
-      border-radius: 8px 8px 0 0;
+    }
+
+    /* Unknown (?) specific styles */
+    .rating-card.unknown {
+      background-color: #e0e0e0;
+      color: #333;
+      flex: 0 0 auto;
+      min-width: 70px;
+      max-width: 80px;
+      overflow: hidden;
+    }
+
+    .rating-card.unknown .rating-card-header {
+      text-align: center;
+      background-color: #e0e0e0;
+      color: #333;
+    }
+
+    /* N/A and Unknown in left column for Point Rating */
+    .rating-left-column .rating-card.na,
+    .rating-left-column .rating-card.unknown {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .rating-left-column .rating-card.na .rating-card-header,
+    .rating-left-column .rating-card.unknown .rating-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      width: 100%;
     }
 
     /* Disabled states */
@@ -39606,10 +39692,31 @@
       color: white;
     }
 
-    /* Narrow devices - switch to vertical layout (5 rows) */
+    /* Narrow devices - switch to vertical layout */
     @media (max-width: 992px) {
       .rating-options {
         flex-direction: column;
+      }
+
+      .rating-layout {
+        flex-direction: column;
+      }
+
+      .rating-left-column {
+        flex-direction: row;
+        width: 100%;
+      }
+
+      .rating-left-column .rating-card.na,
+      .rating-left-column .rating-card.unknown {
+        flex: 0 0 auto;
+        min-width: 70px;
+        max-width: 80px;
+      }
+
+      .rating-right-column {
+        flex-direction: column;
+        width: 100%;
       }
 
       .rating-card {
@@ -39618,10 +39725,8 @@
         flex: 0 0 auto;
       }
 
-      .rating-card.na,
       .rating-card.yes,
-      .rating-card.no,
-      .rating-card.unknown {
+      .rating-card.no {
         width: 100%;
         min-width: unset;
         max-width: unset;
@@ -39643,7 +39748,8 @@
         margin: 0.5rem 0;
       }
 
-      .rating-options {
+      .rating-options,
+      .rating-layout {
         gap: 0.5rem;
         width: 100%;
         max-width: 100%;
@@ -39657,13 +39763,18 @@
         padding: 0.75rem;
       }
 
-      .rating-card.na,
       .rating-card.yes,
-      .rating-card.no,
-      .rating-card.unknown {
+      .rating-card.no {
         width: 100%;
         max-width: 100%;
         box-sizing: border-box;
+      }
+
+      .rating-left-column .rating-card.na,
+      .rating-left-column .rating-card.unknown {
+        min-width: 60px;
+        max-width: 70px;
+        padding: 0;
       }
 
       .rating-card-header {
@@ -51744,7 +51855,7 @@
       };
     };
     // @ts-ignore
-    POWERPOD.version = '4.7.7';
+    POWERPOD.version = '4.7.8';
     // @ts-ignore
     window.powerpod = POWERPOD;
   }
