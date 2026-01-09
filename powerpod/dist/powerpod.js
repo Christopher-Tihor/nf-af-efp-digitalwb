@@ -1,5 +1,5 @@
 /*!
-* powerpod 4.7.8
+* powerpod 4.8.0
 * https://github.com/bcgov/nr-af-pods/powerpod
 *
 * @license GPLv3 for open source use only
@@ -43364,21 +43364,21 @@
           return x `
       <div class="action-plan-container" style="${this.hideTable ? 'display: none;' : ''}">
         <div class="header-row">
-          <h3>Action Plans</h3>
+          <h3>Actions</h3>
           <sl-button variant="primary" @click=${this.openCreateDialog}>
-            Create Action Plan
+            Create Action
           </sl-button>
         </div>
 
         ${this.loading
             ? x `<div class="loading-message">
               <sl-spinner style="font-size: 3rem;"></sl-spinner>
-              <div>Loading action plans...</div>
+              <div>Loading actions...</div>
             </div>`
             : this.error
                 ? x `<div class="error-message">Error: ${this.error}</div>`
                 : this.actionPlans.length === 0
-                    ? x `<div class="empty-message">No action plans found. Click "Create Action Plan" to add one.</div>`
+                    ? x `<div class="empty-message">No actions found. Click "Create Action" to add one.</div>`
                     : x `
               <div class="table-container">
                 <table class="table table-striped">
@@ -43386,9 +43386,9 @@
                     <tr>
                       <th>Chapter</th>
                       <th>Question</th>
-                      <th>Action</th>
+                      <th>Description</th>
                       <th>Created On</th>
-                      <th>Actions</th>
+                      <th></th>
                     </tr>
                   </thead>
                   <tbody>
@@ -43416,8 +43416,8 @@
             `}
       </div>
 
-        <!-- Create Action Plan Dialog -->
-        <sl-dialog id="create-dialog" label="Create Action Plan">
+        <!-- Create Action Dialog -->
+        <sl-dialog id="create-dialog" label="Create Action">
           <div class="form-field">
             <searchable-dropdown
               id="chapter-dropdown"
@@ -43468,8 +43468,8 @@
           </div>
         </sl-dialog>
 
-        <!-- Edit Action Plan Dialog -->
-        <sl-dialog id="edit-dialog" label="Edit Action Plan">
+        <!-- Edit Action Dialog -->
+        <sl-dialog id="edit-dialog" label="Edit Action">
           <div class="form-field">
             <searchable-dropdown
               id="edit-chapter-dropdown"
@@ -43521,8 +43521,8 @@
         </sl-dialog>
 
         <!-- Delete Confirmation Dialog -->
-        <sl-dialog id="delete-dialog" label="Delete Action Plan">
-          <p class="delete-warning">Are you sure you want to delete this action plan? This action cannot be undone.</p>
+        <sl-dialog id="delete-dialog" label="Delete Action">
+          <p class="delete-warning">Are you sure you want to delete this action? This cannot be undone.</p>
 
           ${this.deletingPlan ? x `
             <div class="delete-plan-details">
@@ -43531,7 +43531,7 @@
                 <dd>${this.getChapterName(this.deletingPlan._quartech_chapter_value)}</dd>
                 <dt>Question</dt>
                 <dd>${this.getQuestionLabel(this.deletingPlan._quartech_workbookquestion_value)}</dd>
-                <dt>Action</dt>
+                <dt>Description</dt>
                 <dd>${this.deletingPlan.quartech_action}</dd>
               </dl>
             </div>
@@ -43552,22 +43552,22 @@
         </sl-dialog>
 
         <!-- View Existing Actions Dialog -->
-        <sl-dialog id="view-actions-dialog" label="Existing Action Plans">
+        <sl-dialog id="view-actions-dialog" label="Existing Actions">
           ${this.viewingQuestionId ? x `
             <div style="margin-bottom: 1rem;">
               <strong>Question:</strong> ${this.getQuestionLabel(this.viewingQuestionId)}
             </div>
 
             ${this.getActionPlansForQuestion(this.viewingQuestionId).length === 0
-            ? x `<div class="empty-message">No action plans found for this question.</div>`
+            ? x `<div class="empty-message">No actions found for this question.</div>`
             : x `
                   <div class="table-container">
                     <table class="table table-striped">
                       <thead>
                         <tr>
-                          <th>Action</th>
+                          <th>Description</th>
                           <th>Created On</th>
-                          <th>Actions</th>
+                          <th></th>
                         </tr>
                       </thead>
                       <tbody>
@@ -51854,7 +51854,7 @@
       };
     };
     // @ts-ignore
-    POWERPOD.version = '4.7.8';
+    POWERPOD.version = '4.8.0';
     // @ts-ignore
     window.powerpod = POWERPOD;
   }
