@@ -245,8 +245,7 @@ export class RatingQuestion extends LitElement {
     .rating-box.selected,
     .rating-card.selected {
       border-color: #000;
-      border-width: 4px;
-      box-shadow: 0 0 0 3px #FFD700, 0 4px 12px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 0 0 4px #FFD700, 0 4px 12px rgba(0, 0, 0, 0.3);
       transform: translateY(-2px);
     }
 
