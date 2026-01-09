@@ -1,5 +1,5 @@
 /*!
-* powerpod 4.8.0
+* powerpod 4.8.1
 * https://github.com/bcgov/nr-af-pods/powerpod
 *
 * @license GPLv3 for open source use only
@@ -43387,7 +43387,6 @@
                       <th>Chapter</th>
                       <th>Question</th>
                       <th>Description</th>
-                      <th>Created On</th>
                       <th></th>
                     </tr>
                   </thead>
@@ -43397,7 +43396,6 @@
                           <td>${this.getChapterName(plan._quartech_chapter_value)}</td>
                           <td>${this.getQuestionLabel(plan._quartech_workbookquestion_value)}</td>
                           <td>${plan.quartech_action}</td>
-                          <td>${this.formatDate(plan.createdon, plan['createdon@OData.Community.Display.V1.FormattedValue'])}</td>
                           <td>
                             <div class="action-buttons">
                               <sl-button size="small" variant="default" @click=${() => this.openEditDialog(plan)}>
@@ -43566,7 +43564,6 @@
                       <thead>
                         <tr>
                           <th>Description</th>
-                          <th>Created On</th>
                           <th></th>
                         </tr>
                       </thead>
@@ -43574,7 +43571,6 @@
                         ${this.getActionPlansForQuestion(this.viewingQuestionId).map((plan) => x `
                             <tr>
                               <td>${plan.quartech_action}</td>
-                              <td>${this.formatDate(plan.createdon, plan['createdon@OData.Community.Display.V1.FormattedValue'])}</td>
                               <td>
                                 <div class="action-buttons">
                                   <sl-button size="small" variant="default" @click=${() => this.openEditDialog(plan)}>
@@ -43698,6 +43694,7 @@
       .action-buttons {
         display: flex;
         gap: 0.5rem;
+        justify-content: flex-end;
       }
 
       .action-buttons sl-button::part(base) {
@@ -51854,7 +51851,7 @@
       };
     };
     // @ts-ignore
-    POWERPOD.version = '4.8.0';
+    POWERPOD.version = '4.8.1';
     // @ts-ignore
     window.powerpod = POWERPOD;
   }

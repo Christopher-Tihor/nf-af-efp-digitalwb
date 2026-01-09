@@ -158,6 +158,7 @@ class ActionPlanTable extends LitElement {
       .action-buttons {
         display: flex;
         gap: 0.5rem;
+        justify-content: flex-end;
       }
 
       .action-buttons sl-button::part(base) {
@@ -819,7 +820,6 @@ class ActionPlanTable extends LitElement {
                       <th>Chapter</th>
                       <th>Question</th>
                       <th>Description</th>
-                      <th>Created On</th>
                       <th></th>
                     </tr>
                   </thead>
@@ -830,7 +830,6 @@ class ActionPlanTable extends LitElement {
                           <td>${this.getChapterName(plan._quartech_chapter_value)}</td>
                           <td>${this.getQuestionLabel(plan._quartech_workbookquestion_value)}</td>
                           <td>${plan.quartech_action}</td>
-                          <td>${this.formatDate(plan.createdon, plan['createdon@OData.Community.Display.V1.FormattedValue'])}</td>
                           <td>
                             <div class="action-buttons">
                               <sl-button size="small" variant="default" @click=${() => this.openEditDialog(plan)}>
@@ -1000,7 +999,6 @@ class ActionPlanTable extends LitElement {
                       <thead>
                         <tr>
                           <th>Description</th>
-                          <th>Created On</th>
                           <th></th>
                         </tr>
                       </thead>
@@ -1009,7 +1007,6 @@ class ActionPlanTable extends LitElement {
                           (plan) => html`
                             <tr>
                               <td>${plan.quartech_action}</td>
-                              <td>${this.formatDate(plan.createdon, plan['createdon@OData.Community.Display.V1.FormattedValue'])}</td>
                               <td>
                                 <div class="action-buttons">
                                   <sl-button size="small" variant="default" @click=${() => this.openEditDialog(plan)}>
