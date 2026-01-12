@@ -257,21 +257,24 @@ export const efpEntryFormStyles = css`
   .question-label-text {
     flex: 1;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 0.5rem;
   }
 
   .question-tooltip-icon {
     color: var(--sl-color-neutral-500);
     cursor: help;
-    font-size: 1.2rem !important;
-    width: 1.2rem !important;
-    height: 1.2rem !important;
-    min-width: 1.2rem !important;
-    min-height: 1.2rem !important;
+    font-size: 1.25rem !important;
+    width: 1.25rem !important;
+    height: 1.25rem !important;
+    min-width: 1.25rem !important;
+    min-height: 1.25rem !important;
     flex-shrink: 0;
-    display: inline-block;
-    vertical-align: middle;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    /* Align with first line of text (line-height 1.4 * font-size 1.1rem) */
+    margin-top: calc((1.4 * 1.1rem - 1.25rem) / 2);
   }
 
   .question-tooltip-icon:hover {
@@ -280,14 +283,18 @@ export const efpEntryFormStyles = css`
 
   .question-incomplete-icon {
     color: var(--sl-color-danger-600);
-    font-size: 1.5rem !important;
-    width: 1.5rem !important;
-    height: 1.5rem !important;
-    min-width: 1.5rem !important;
-    min-height: 1.5rem !important;
+    font-size: 1.25rem !important;
+    width: 1.25rem !important;
+    height: 1.25rem !important;
+    min-width: 1.25rem !important;
+    min-height: 1.25rem !important;
     flex-shrink: 0;
     margin-left: auto;
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    /* Align with first line of text (line-height 1.4 * font-size 1.1rem) */
+    margin-top: calc((1.4 * 1.1rem - 1.25rem) / 2);
   }
 
   .question-text {
