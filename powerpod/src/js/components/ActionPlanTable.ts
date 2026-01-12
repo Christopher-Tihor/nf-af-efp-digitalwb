@@ -6,6 +6,8 @@ import '@shoelace-style/shoelace/dist/components/textarea/textarea.js';
 import '@shoelace-style/shoelace/dist/components/alert/alert.js';
 import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
 import '@shoelace-style/shoelace/dist/components/badge/badge.js';
+import '@shoelace-style/shoelace/dist/components/icon/icon.js';
+import '@shoelace-style/shoelace/dist/components/tooltip/tooltip.js';
 import { LitElement, css, html, unsafeCSS } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { Logger } from '../common/logger';
@@ -70,6 +72,14 @@ class ActionPlanTable extends LitElement {
       :host {
         display: block;
         font-family: 'BC Sans', 'Noto Sans', Verdana, sans-serif;
+
+        /* BC Gov Design System Color Tokens */
+        --bcgov-blue: #003366;
+        --bcgov-blue-70: #1a5a96;
+        --bcgov-white: #ffffff;
+        --bcgov-focus: #3399ff;
+        --bcgov-secondary-hover: #edebe9;
+        --bcgov-danger: #d8292f;
       }
 
       .action-plan-container {
@@ -157,17 +167,67 @@ class ActionPlanTable extends LitElement {
 
       .action-buttons {
         display: flex;
-        gap: 0.5rem;
+        gap: 0.25rem;
         justify-content: flex-end;
       }
 
-      .action-buttons sl-button::part(base) {
-        padding: 0.25rem 0.5rem;
-        font-size: 0.875rem;
+      /* BC Gov Icon Button Styling - Edit */
+      .action-buttons .icon-btn-edit::part(base) {
+        background-color: var(--bcgov-blue, #003366);
+        border: none;
+        border-radius: 4px;
+        color: var(--bcgov-white, #ffffff);
+        padding: 0;
+        min-width: 2rem;
+        width: 2rem;
+        height: 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .action-buttons .icon-btn-edit:hover::part(base) {
+        background-color: var(--bcgov-blue-70, #1a5a96);
+      }
+
+      .action-buttons .icon-btn-edit:focus-visible::part(base) {
+        outline: 3px solid var(--bcgov-focus, #3399ff);
+        outline-offset: 2px;
+      }
+
+      /* BC Gov Icon Button Styling - Delete */
+      .action-buttons .icon-btn-delete::part(base) {
+        background-color: var(--bcgov-blue, #003366);
+        border: none;
+        border-radius: 4px;
+        color: var(--bcgov-white, #ffffff);
+        padding: 0;
+        min-width: 2rem;
+        width: 2rem;
+        height: 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .action-buttons .icon-btn-delete:hover::part(base) {
+        background-color: var(--bcgov-blue-70, #1a5a96);
+      }
+
+      .action-buttons .icon-btn-delete:focus-visible::part(base) {
+        outline: 3px solid var(--bcgov-focus, #3399ff);
+        outline-offset: 2px;
+      }
+
+      .action-buttons sl-icon {
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
       }
 
       .delete-warning {
-        color: #dc3545;
+        color: #d8292f;
         margin-bottom: 1rem;
       }
 
@@ -832,12 +892,16 @@ class ActionPlanTable extends LitElement {
                           <td>${plan.quartech_action}</td>
                           <td>
                             <div class="action-buttons">
-                              <sl-button size="small" variant="default" @click=${() => this.openEditDialog(plan)}>
-                                Edit
-                              </sl-button>
-                              <sl-button size="small" variant="danger" @click=${() => this.openDeleteDialog(plan)}>
-                                Delete
-                              </sl-button>
+                              <sl-tooltip content="Edit">
+                                <sl-button size="small" class="icon-btn-edit" @click=${() => this.openEditDialog(plan)}>
+                                  <sl-icon name="pencil"></sl-icon>
+                                </sl-button>
+                              </sl-tooltip>
+                              <sl-tooltip content="Delete">
+                                <sl-button size="small" class="icon-btn-delete" @click=${() => this.openDeleteDialog(plan)}>
+                                  <sl-icon name="trash"></sl-icon>
+                                </sl-button>
+                              </sl-tooltip>
                             </div>
                           </td>
                         </tr>
@@ -1009,12 +1073,16 @@ class ActionPlanTable extends LitElement {
                               <td>${plan.quartech_action}</td>
                               <td>
                                 <div class="action-buttons">
-                                  <sl-button size="small" variant="default" @click=${() => this.openEditDialog(plan)}>
-                                    Edit
-                                  </sl-button>
-                                  <sl-button size="small" variant="danger" @click=${() => this.openDeleteDialog(plan)}>
-                                    Delete
-                                  </sl-button>
+                                  <sl-tooltip content="Edit">
+                                    <sl-button size="small" class="icon-btn-edit" @click=${() => this.openEditDialog(plan)}>
+                                      <sl-icon name="pencil"></sl-icon>
+                                    </sl-button>
+                                  </sl-tooltip>
+                                  <sl-tooltip content="Delete">
+                                    <sl-button size="small" class="icon-btn-delete" @click=${() => this.openDeleteDialog(plan)}>
+                                      <sl-icon name="trash"></sl-icon>
+                                    </sl-button>
+                                  </sl-tooltip>
                                 </div>
                               </td>
                             </tr>
