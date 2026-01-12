@@ -1510,10 +1510,6 @@ body {
   overflow: hidden;
 }
 
-h1 {
-  font-size: 36px !important;
-}
-
 h2 {
   font-size: 24px !important;
 }
@@ -1625,4 +1621,83 @@ div[dir='rtl']
   .styled-h2
   h2:not(.accordion h2, table h2, .callout h2, .iframe-video-embed h2):before {
   right: 0;
+}
+
+/* ==========================================================================
+   BC Gov Dark Theme Dropdown Overrides
+   Overrides portalbasictheme.css gold styles with dark navy theme
+   ========================================================================== */
+
+/* Base dropdown menu - dark navy background */
+.dropdown-menu {
+  background-color: #38598A !important;
+  color: #ffffff !important;
+  border: 1px solid #2D4A73 !important;
+  border-radius: 4px !important;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Navbar dropdown menu */
+.navbar-dark .navbar-nav .show.dropdown-menu {
+  background-color: #38598A !important;
+  border: 1px solid #2D4A73 !important;
+  border-radius: 4px !important;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Dropdown links - legacy Bootstrap pattern */
+.dropdown-menu > li > a,
+.navbar-dark .navbar-nav .show.dropdown-menu > li > a {
+  display: block !important;
+  padding: 10px 16px !important;
+  color: #ffffff !important;
+  text-decoration: none !important;
+  background-color: transparent !important;
+}
+
+.dropdown-menu > li > a:hover,
+.dropdown-menu > li > a:focus,
+.navbar-dark .navbar-nav .show.dropdown-menu > li > a:hover,
+.navbar-dark .navbar-nav .show.dropdown-menu > li > a:focus {
+  background-color: #2D4A73 !important;
+  color: #fcba19 !important;
+  text-decoration: none !important;
+}
+
+.dropdown-menu > .active > a,
+.dropdown-menu > .active > a:hover,
+.dropdown-menu > .active > a:focus,
+.navbar-dark .navbar-nav .show.dropdown-menu > .active > a,
+.navbar-dark .navbar-nav .show.dropdown-menu > .active > a:hover,
+.navbar-dark .navbar-nav .show.dropdown-menu > .active > a:focus {
+  background-color: #1E3A5F !important;
+  color: #fcba19 !important;
+  text-decoration: none !important;
+}
+
+/* Bootstrap 5 dropdown-item support */
+.dropdown-menu .dropdown-item {
+  display: block !important;
+  padding: 10px 16px !important;
+  color: #ffffff !important;
+  text-decoration: none !important;
+  background-color: transparent !important;
+}
+
+.dropdown-menu .dropdown-item:hover,
+.dropdown-menu .dropdown-item:focus {
+  background-color: #2D4A73 !important;
+  color: #fcba19 !important;
+  text-decoration: none !important;
+}
+
+.dropdown-menu .dropdown-item:active,
+.dropdown-menu .dropdown-item.active {
+  background-color: #1E3A5F !important;
+  color: #fcba19 !important;
+}
+
+/* Dropdown divider */
+.dropdown-menu .dropdown-divider {
+  border-top: 1px solid rgba(255, 255, 255, 0.2) !important;
 }

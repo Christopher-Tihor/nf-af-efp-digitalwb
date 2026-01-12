@@ -16,7 +16,7 @@
     --bcgov-text: #313132;
     --bcgov-muted: #666;
     --bcgov-link: #1a5a96;
-    --bcgov-bg: #fafafa;
+    --bcgov-bg: #fafafa; 
     --bcgov-info-bg: #e6f4f9;
     --bcgov-info-border: #1a5a96;
   }
@@ -198,16 +198,29 @@
     margin: 0 12px;
   }
 
-  /* Dropdown menu styling */
+  /* Dropdown menu styling - Dark theme matching BC Gov sidebar */
   .navbar-dark .dropdown-menu {
-    border: 1px solid #dcdcdc !important;
+    background-color: #38598A !important;  /* BC Gov sidebar blue */
+    border: 1px solid #2D4A73 !important;
+    border-radius: 4px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   }
   .navbar-dark .dropdown-menu .dropdown-item {
-    color: var(--bcgov-blue-70) !important;
+    color: #ffffff !important;
+    padding: 10px 16px;
   }
-  .navbar-dark .dropdown-menu .dropdown-item:hover {
-    background: #000 !important;
-    color: white !important;
+  .navbar-dark .dropdown-menu .dropdown-item:hover,
+  .navbar-dark .dropdown-menu .dropdown-item:focus {
+    background-color: #2D4A73 !important;  /* Slightly darker on hover */
+    color: var(--bcgov-gold) !important;   /* Gold text on hover */
+  }
+  .navbar-dark .dropdown-menu .dropdown-item.active,
+  .navbar-dark .dropdown-menu .dropdown-item:active {
+    background-color: #1E3A5F !important;  /* Active state */
+    color: var(--bcgov-gold) !important;
+  }
+  .navbar-dark .dropdown-menu .dropdown-divider {
+    border-top-color: rgba(255, 255, 255, 0.2) !important;
   }
   .bcgov-content h2 {
     color: black !important;

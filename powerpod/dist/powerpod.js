@@ -1,5 +1,5 @@
 /*!
-* powerpod 4.8.2
+* powerpod 4.8.3
 * https://github.com/bcgov/nr-af-pods/powerpod
 *
 * @license GPLv3 for open source use only
@@ -52100,7 +52100,7 @@
       };
     };
     // @ts-ignore
-    POWERPOD.version = '4.8.2';
+    POWERPOD.version = '4.8.3';
     // @ts-ignore
     window.powerpod = POWERPOD;
   }
