@@ -819,7 +819,7 @@ template {
 .react-datepicker__year-text:hover {
   border-radius: 0.3rem;
   background-color: none;
-  outline: 1px solid #013366;
+  outline: 1px solid #1d3a69;
 }
 
 .react-datepicker__day--today,
@@ -1285,7 +1285,7 @@ a:active,
 a:focus,
 a:hover {
   color: #2378c7 !important;
-  text-decoration: underline !important;
+  text-decoration: none !important;
 }
 
 a.link-with-arrow,
@@ -1351,7 +1351,7 @@ button.btn-primary:focus,
 button.btn-primary:hover {
   background-color: rgba(0, 51, 102, 0.8);
   color: #fff;
-  text-decoration: underline !important;
+  text-decoration: none !important;
 }
 
 a.btn-primary:focus,
@@ -1385,7 +1385,7 @@ button.btn-primary-light {
 a.btn-primary-light:hover,
 button.btn-primary-light:hover {
   background-color: #e6e6e6;
-  text-decoration: underline !important;
+  text-decoration: none !important;
 }
 
 .bcgov-dark-background a.btn-primary:focus,
@@ -1393,7 +1393,7 @@ button.btn-primary-light:hover {
 a.btn-primary-light:focus,
 button.btn-primary-light:focus {
   background-color: #e6e6e6;
-  text-decoration: underline !important;
+  text-decoration: none !important;
   outline: 3px solid #39f;
 }
 
@@ -1526,7 +1526,6 @@ ol li,
 ul li {
   font-size: 16px !important;
   list-style-position: outside; /* undo the inside setting */
-  margin-bottom: 8px !important;
 }
 
 ol ol,
@@ -1630,17 +1629,17 @@ div[dir='rtl']
 
 /* Base dropdown menu - dark navy background */
 .dropdown-menu {
-  background-color: #38598A !important;
+  background-color: #013366 !important;
   color: #ffffff !important;
-  border: 1px solid #2D4A73 !important;
+  border: 1px solid #013366 !important;
   border-radius: 4px !important;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2) !important;
 }
 
 /* Navbar dropdown menu */
 .navbar-dark .navbar-nav .show.dropdown-menu {
-  background-color: #38598A !important;
-  border: 1px solid #2D4A73 !important;
+  background-color: #013366 !important;
+  border: 1px solid #013366 !important;
   border-radius: 4px !important;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2) !important;
 }
@@ -1652,15 +1651,15 @@ div[dir='rtl']
   padding: 10px 16px !important;
   color: #ffffff !important;
   text-decoration: none !important;
-  background-color: transparent !important;
+  background-color: #013366 !important;
 }
 
 .dropdown-menu > li > a:hover,
 .dropdown-menu > li > a:focus,
 .navbar-dark .navbar-nav .show.dropdown-menu > li > a:hover,
 .navbar-dark .navbar-nav .show.dropdown-menu > li > a:focus {
-  background-color: #2D4A73 !important;
-  color: #fcba19 !important;
+  background-color: #1E5189 !important;
+  color: #ffffff !important;
   text-decoration: none !important;
 }
 
@@ -1670,8 +1669,8 @@ div[dir='rtl']
 .navbar-dark .navbar-nav .show.dropdown-menu > .active > a,
 .navbar-dark .navbar-nav .show.dropdown-menu > .active > a:hover,
 .navbar-dark .navbar-nav .show.dropdown-menu > .active > a:focus {
-  background-color: #1E3A5F !important;
-  color: #fcba19 !important;
+  background-color: #1E5189 !important;
+  color: #ffffff !important;
   text-decoration: none !important;
 }
 
@@ -1681,23 +1680,195 @@ div[dir='rtl']
   padding: 10px 16px !important;
   color: #ffffff !important;
   text-decoration: none !important;
-  background-color: transparent !important;
+  background-color: #013366 !important;
 }
 
 .dropdown-menu .dropdown-item:hover,
 .dropdown-menu .dropdown-item:focus {
-  background-color: #2D4A73 !important;
-  color: #fcba19 !important;
+  background-color: #1E5189 !important;
+  color: #ffffff !important;
   text-decoration: none !important;
 }
 
 .dropdown-menu .dropdown-item:active,
 .dropdown-menu .dropdown-item.active {
-  background-color: #1E3A5F !important;
-  color: #fcba19 !important;
+  background-color: #1E5189 !important;
+  color: #ffffff !important;
 }
 
 /* Dropdown divider */
 .dropdown-menu .dropdown-divider {
   border-top: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+/* ==========================================================================
+   Main Navigation Menu Items
+   ========================================================================== */
+
+/* Base nav link styling */
+.navbar .nav.navbar-nav.weblinks .nav-item .nav-link {
+  background-color: #1d3a69 !important;
+  color: #ffffff !important;
+  padding: 10px 16px !important;
+  text-decoration: none !important;
+}
+
+/* Nav link hover state */
+.navbar .nav.navbar-nav.weblinks .nav-item .nav-link:hover {
+  background-color: #1E5189 !important;
+  color: #ffffff !important;
+}
+
+/* Nav link focus state */
+.navbar .nav.navbar-nav.weblinks .nav-item .nav-link:focus,
+.navbar .nav.navbar-nav.weblinks .nav-item .nav-link:focus-visible {
+  background-color: #1E5189 !important;
+  outline: 2px solid #3399ff !important;
+  outline-offset: -2px !important;
+}
+
+/* Active nav item - using aria-current for accessibility */
+.navbar .nav.navbar-nav.weblinks .nav-item .nav-link[aria-current="page"],
+.navbar .nav.navbar-nav.weblinks .nav-item.active .nav-link {
+  background-color: #1d3a69 !important;
+  border-bottom: 3px solid #FCBA19 !important;
+  color: #ffffff !important;
+}
+
+/* Active nav item hover */
+.navbar .nav.navbar-nav.weblinks .nav-item .nav-link[aria-current="page"]:hover,
+.navbar .nav.navbar-nav.weblinks .nav-item.active .nav-link:hover {
+  background-color: #1E5189 !important;
+}
+
+/* Dropdown toggle in navbar */
+.navbar .nav.navbar-nav.weblinks .nav-item.dropdown .nav-link.dropdown-toggle {
+  background-color: #1d3a69 !important;
+  color: #ffffff !important;
+}
+
+.navbar .nav.navbar-nav.weblinks .nav-item.dropdown .nav-link.dropdown-toggle:hover {
+  background-color: #1E5189 !important;
+}
+
+/* ==========================================================================
+   Action Menu Dropdown - Entity List Tables
+   Matches the BC Gov icon button styling from ActionPlanTable
+   ========================================================================== */
+
+/* Action dropdown trigger button */
+.dropdown.action .btn {
+  background-color: #003366 !important;
+  border: none !important;
+  border-radius: 4px !important;
+  color: #ffffff !important;
+  padding: 0 !important;
+  min-width: 2rem !important;
+  width: 2rem !important;
+  height: 2rem !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.dropdown.action .btn:hover {
+  background-color: #1a5a96 !important;
+}
+
+.dropdown.action .btn:focus,
+.dropdown.action .btn:focus-visible {
+  background-color: #003366 !important;
+  outline: 3px solid #3399ff !important;
+  outline-offset: 2px !important;
+}
+
+/* Action dropdown menu items - icon buttons */
+.dropdown.action .dropdown-menu .dropdown-item {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background-color: #003366 !important;
+  color: #ffffff !important;
+  border-radius: 4px !important;
+  min-width: 2rem !important;
+  width: 2rem !important;
+  height: 2rem !important;
+  padding: 0 !important;
+  margin: 0.25rem !important;
+}
+
+.dropdown.action .dropdown-menu .dropdown-item:hover {
+  background-color: #1a5a96 !important;
+  color: #ffffff !important;
+}
+
+.dropdown.action .dropdown-menu .dropdown-item:focus,
+.dropdown.action .dropdown-menu .dropdown-item:focus-visible {
+  background-color: #003366 !important;
+  outline: 3px solid #3399ff !important;
+  outline-offset: 2px !important;
+}
+
+/* Action dropdown menu styling */
+.dropdown.action .dropdown-menu {
+  display: flex !important;
+  flex-direction: row !important;
+  gap: 0.25rem !important;
+  padding: 0.25rem !important;
+  min-width: auto !important;
+  background-color: #ffffff !important;
+  border: 1px solid #d6d6d6 !important;
+}
+
+/* Remove default list styling */
+.dropdown.action .dropdown-menu li {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* Icon styling within action buttons */
+.dropdown.action .dropdown-menu .dropdown-item .fa,
+.dropdown.action .dropdown-menu .dropdown-item .fa-solid {
+  font-size: 0.875rem;
+}
+
+/* ==========================================================================
+   Create Action Button - Entity List Tables
+   Ensures "Start a New EFP Workbook" button matches BC Gov primary styling
+   ========================================================================== */
+
+a.btn-primary.action.create-action,
+a.action.create-action.btn-primary {
+  display: inline-block !important;
+  padding: 10px 20px !important;
+  margin: 0.5rem !important;
+  border-radius: 4px !important;
+  text-decoration: none !important;
+  background-color: #003366 !important;
+  color: #ffffff !important;
+  cursor: pointer !important;
+  border: none !important;
+  text-align: center !important;
+  font-family: 'BC Sans', 'Noto Sans', Verdana, sans-serif !important;
+  font-weight: 600 !important;
+  font-size: 16px !important;
+  line-height: 1.5 !important;
+}
+
+a.btn-primary.action.create-action:hover,
+a.action.create-action.btn-primary:hover {
+  background-color: #1a5a96 !important;
+  color: #ffffff !important;
+  text-decoration: none !important;
+}
+
+a.btn-primary.action.create-action:focus,
+a.btn-primary.action.create-action:focus-visible,
+a.action.create-action.btn-primary:focus,
+a.action.create-action.btn-primary:focus-visible {
+  background-color: #003366 !important;
+  color: #ffffff !important;
+  outline: 3px solid #3399ff !important;
+  outline-offset: 2px !important;
 }
