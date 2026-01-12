@@ -47223,18 +47223,18 @@
     box-sizing: border-box !important;
   }
 
-  /* Ensure summary text doesn't expand the container */
+  /* Ensure summary text wraps within container */
   sl-details [slot="summary"] {
     width: 100% !important;
     max-width: 100% !important;
-    overflow: hidden !important;
   }
 
   sl-details [slot="summary"] span {
     display: block;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    white-space: normal;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    line-height: 1.4;
   }
 
   /* Spacing for standalone navigation items after collapsible containers */
@@ -47252,7 +47252,8 @@
     font-family: var(--body-font);
     min-height: 100vh;
     min-width: 0; /* Allow flex item to shrink below content size */
-    overflow: hidden; /* Prevent sidebar from growing due to content */
+    overflow-x: hidden; /* Prevent horizontal overflow */
+    overflow-y: auto; /* Allow vertical scrolling if needed */
     box-sizing: border-box;
   }
 
@@ -47261,7 +47262,6 @@
   .sidebar .nav-subchapter-title,
   navigation-sidebar sl-details,
   navigation-sidebar .nav-subchapter-title {
-    overflow: hidden;
     word-wrap: break-word;
     overflow-wrap: break-word;
   }
@@ -47270,8 +47270,9 @@
   .sidebar .nav-subchapter-title,
   navigation-sidebar sl-details [slot="summary"] span,
   navigation-sidebar .nav-subchapter-title {
-    overflow: hidden;
-    text-overflow: ellipsis;
+    white-space: normal;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
   }
 
   .main-content {
