@@ -3,6 +3,19 @@
 .sl-theme-light {
   color-scheme: light;
 
+  /* BC Gov Design System Color Tokens */
+  --bcgov-blue: #003366;
+  --bcgov-blue-70: #1a5a96;
+  --bcgov-blue-hover: rgba(0, 51, 102, 0.8);
+  --bcgov-gold: #fcba19;
+  --bcgov-text: #313132;
+  --bcgov-white: #ffffff;
+  --bcgov-focus: #3399ff;
+  --bcgov-disabled: #757575;
+  --bcgov-secondary-hover: #edebe9;
+  --bcgov-success: #2e8540;
+  --bcgov-success-hover: #1e6330;
+
   --sl-color-gray-50: hsl(0 0% 97.5%);
   --sl-color-gray-100: hsl(240 4.8% 95.9%);
   --sl-color-gray-200: hsl(240 5.9% 90%);
@@ -219,17 +232,18 @@
   --sl-color-rose-900: hsl(341.5 75.5% 30.4%);
   --sl-color-rose-950: hsl(341.3 70.1% 17.1%);
 
-  --sl-color-primary-50: var(--sl-color-sky-50);
-  --sl-color-primary-100: var(--sl-color-sky-100);
-  --sl-color-primary-200: var(--sl-color-sky-200);
-  --sl-color-primary-300: var(--sl-color-sky-300);
-  --sl-color-primary-400: var(--sl-color-sky-400);
-  --sl-color-primary-500: var(--sl-color-sky-500);
-  --sl-color-primary-600: var(--sl-color-sky-600);
-  --sl-color-primary-700: var(--sl-color-sky-700);
-  --sl-color-primary-800: var(--sl-color-sky-800);
-  --sl-color-primary-900: var(--sl-color-sky-900);
-  --sl-color-primary-950: var(--sl-color-sky-950);
+  /* BC Gov Blue Primary Color Palette */
+  --sl-color-primary-50: hsl(210 100% 97%);
+  --sl-color-primary-100: hsl(210 100% 94%);
+  --sl-color-primary-200: hsl(210 92% 85%);
+  --sl-color-primary-300: hsl(210 85% 72%);
+  --sl-color-primary-400: hsl(210 78% 55%);
+  --sl-color-primary-500: #1a5a96; /* BC Gov Blue 70 - main button color */
+  --sl-color-primary-600: #003366; /* BC Gov Blue - primary brand */
+  --sl-color-primary-700: hsl(210 100% 16%);
+  --sl-color-primary-800: hsl(210 100% 13%);
+  --sl-color-primary-900: hsl(210 100% 10%);
+  --sl-color-primary-950: hsl(210 100% 6%);
 
   --sl-color-success-50: var(--sl-color-green-50);
   --sl-color-success-100: var(--sl-color-green-100);
@@ -346,7 +360,8 @@
   --sl-line-height-loose: 2.2;
   --sl-line-height-looser: 2.6;
 
-  --sl-focus-ring-color: var(--sl-color-primary-600);
+  /* BC Gov focus state - uses accessible blue focus ring */
+  --sl-focus-ring-color: var(--bcgov-focus, #3399ff);
   --sl-focus-ring-style: solid;
   --sl-focus-ring-width: 3px;
   --sl-focus-ring: var(--sl-focus-ring-style) var(--sl-focus-ring-width)
@@ -479,4 +494,61 @@
 .sl-toast-stack sl-alert::part(base) {
   box-shadow: var(--sl-shadow-large);
 }
+
+/* ==========================================================================
+   BC Gov Design System Button Overrides
+   ========================================================================== */
+
+/* Primary Button - BC Gov Blue */
+sl-button[variant="primary"]::part(base) {
+  background-color: var(--bcgov-blue-70, #1a5a96);
+  border-color: var(--bcgov-blue-70, #1a5a96);
+  color: var(--bcgov-white, #ffffff);
+}
+
+sl-button[variant="primary"]:hover::part(base) {
+  background-color: var(--bcgov-blue, #003366);
+  border-color: var(--bcgov-blue, #003366);
+}
+
+sl-button[variant="primary"]:focus-visible::part(base) {
+  outline: 3px solid var(--bcgov-focus, #3399ff);
+  outline-offset: 2px;
+}
+
+sl-button[variant="primary"][disabled]::part(base) {
+  background-color: var(--bcgov-disabled, #757575);
+  border-color: var(--bcgov-disabled, #757575);
+  opacity: 0.65;
+}
+
+/* Secondary/Default Button - Outline style */
+sl-button[variant="default"]::part(base),
+sl-button:not([variant])::part(base) {
+  background-color: var(--bcgov-white, #ffffff);
+  border-color: var(--bcgov-blue-70, #1a5a96);
+  color: var(--bcgov-blue-70, #1a5a96);
+}
+
+sl-button[variant="default"]:hover::part(base),
+sl-button:not([variant]):hover::part(base) {
+  background-color: var(--bcgov-secondary-hover, #edebe9);
+}
+
+sl-button[variant="default"]:focus-visible::part(base),
+sl-button:not([variant]):focus-visible::part(base) {
+  outline: 3px solid var(--bcgov-focus, #3399ff);
+  outline-offset: 2px;
+}
+
+/* Text/Link Button */
+sl-button[variant="text"]::part(base) {
+  color: var(--bcgov-blue-70, #1a5a96);
+}
+
+sl-button[variant="text"]:hover::part(base) {
+  color: var(--bcgov-blue, #003366);
+  text-decoration: underline;
+}
+
 /*# sourceMappingURL=shoelace.css.map */

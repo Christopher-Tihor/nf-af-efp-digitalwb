@@ -31,13 +31,14 @@ export function addSaveButton() {
     });
     return;
   }
+  // BC Gov Design System button styling - using success green for Save action
   const saveBtnHtml = `
-    <input 
+    <input
       type="button"
       value="Save"
       id="quartechSaveBtn"
-      class="btn button next submit-btn"
-      style="color: #FFFFFF;border-color: #277493;border-radius: 2px;font-family: Arial;font-weight: 600;font-size: 14px;padding: 6px 20px;width: fit-content;border-style: solid;background-color: #3E9327;color: #FFFFFF;" 
+      class="btn button next submit-btn bcgov-save-btn"
+      style="color: #ffffff; background-color: #2e8540; border: 1px solid #2e8540; border-radius: 4px; font-family: 'BCSans', 'BC Sans', Arial, sans-serif; font-weight: 600; font-size: 14px; padding: 10px 20px; width: fit-content; cursor: pointer;"
       nonactionlinkbutton="true"
     >
   `;

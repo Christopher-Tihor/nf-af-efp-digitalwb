@@ -19,6 +19,10 @@ export class ProgressHeader extends LitElement {
   static styles = css`
     :host {
       display: block;
+      /* BC Gov Design System Color Tokens */
+      --bcgov-blue: #003366;
+      --bcgov-blue-70: #1a5a96;
+      --bcgov-focus: #3399ff;
     }
 
     .card {
@@ -55,7 +59,7 @@ export class ProgressHeader extends LitElement {
 
     .progress-bar-fill {
       height: 100%;
-      background-color: #3b82f6;
+      background-color: var(--bcgov-blue-70);
       border-radius: 0.375rem;
       transition: width 0.3s ease;
     }
@@ -72,7 +76,7 @@ export class ProgressHeader extends LitElement {
     }
 
     .layout-toggle sl-icon-button::part(base):hover {
-      color: var(--sl-color-primary-600);
+      color: var(--bcgov-blue-70);
     }
   `;
 
