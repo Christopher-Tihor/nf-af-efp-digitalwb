@@ -1277,6 +1277,24 @@ template {
   border: 1px solid #2e5dd7;
 }
 
+/* Form inputs - ensure border remains visible on focus
+   Default border: #949494
+   Focus border: #2e5dd7 (BC Gov blue)
+*/
+input[type='text']:focus,
+input[type='email']:focus,
+input[type='password']:focus,
+input[type='tel']:focus,
+input[type='number']:focus,
+input[type='url']:focus,
+input[type='search']:focus,
+textarea:focus,
+select:focus {
+  border-color: #949494 !important;
+  outline: 2px solid #2e5dd7 !important;
+  outline-offset: -1px;
+}
+
 a {
   color: #1a5a96 !important;
   text-decoration: none !important;
@@ -1395,7 +1413,8 @@ a.bcgov-link-dark-background:hover {
 }
 
 a.btn-primary,
-button.btn-primary {
+button.btn-primary,
+input.btn-primary {
   display: inline-block;
   padding: 10px 20px;
   border-radius: 4px;
@@ -1403,28 +1422,75 @@ button.btn-primary {
   background-color: #036;
   color: #fff;
   cursor: pointer;
-  border: none;
+  border: 1px solid #036;
   text-align: center;
 }
 
 a.btn-primary:focus,
 a.btn-primary:hover,
 button.btn-primary:focus,
-button.btn-primary:hover {
+button.btn-primary:hover,
+input.btn-primary:focus,
+input.btn-primary:hover {
   background-color: rgba(0, 51, 102, 0.8);
   color: #fff;
+  border-color: rgba(0, 51, 102, 0.8) !important;
   text-decoration: none !important;
 }
 
 a.btn-primary:focus,
-button.btn-primary:focus {
+button.btn-primary:focus,
+input.btn-primary:focus {
   outline: 3px solid #39f;
 }
 
 a.btn-primary:disabled,
-button.btn-primary:disabled {
+button.btn-primary:disabled,
+input.btn-primary:disabled {
   background-color: #757575;
   color: #fff;
+  text-decoration: none;
+}
+
+/* Secondary button (btn-default)
+   Standard colors:
+   - Border: #353433
+   - Text: #2D2D2D
+   - Background: #fff
+   - Hover background: #EDEBE9
+*/
+a.btn-default,
+button.btn-default {
+  display: inline-block;
+  padding: 10px 20px;
+  border-radius: 4px;
+  text-decoration: none;
+  background-color: #fff;
+  color: #2D2D2D !important;
+  cursor: pointer;
+  border: 1px solid #353433 !important;
+  text-align: center;
+}
+
+a.btn-default:hover,
+button.btn-default:hover {
+  background-color: #EDEBE9;
+  color: #2D2D2D !important;
+  border-color: #353433 !important;
+  text-decoration: none !important;
+}
+
+a.btn-default:focus,
+button.btn-default:focus {
+  background-color: #fff;
+  outline: 3px solid #353433;
+}
+
+a.btn-default:disabled,
+button.btn-default:disabled {
+  background-color: #f5f5f5;
+  border-color: #757575;
+  color: #757575;
   text-decoration: none;
 }
 
@@ -1489,7 +1555,7 @@ button.btn-secondary:hover {
 a.btn-secondary:focus,
 button.btn-secondary:focus {
   background-color: #fff;
-  outline: 2px solid #2e5dd7;
+  outline: 1px solid #2e5dd7;
 }
 
 a.btn-secondary:disabled,
@@ -2061,4 +2127,9 @@ a.action.create-action.btn-primary:focus-visible {
   opacity: 0.65;
   cursor: not-allowed;
   pointer-events: none;
+}
+
+/* Footer */
+footer .footer-bottom {
+  margin-top: 16px;
 }
