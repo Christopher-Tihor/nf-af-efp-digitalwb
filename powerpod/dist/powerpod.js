@@ -47532,6 +47532,12 @@
     border-radius: var(--sl-border-radius-medium);
     border-left: 4px solid var(--sl-color-primary-600);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+  }
+
+  .chapter-header img {
+    max-width: 100%;
+    height: auto;
   }
 
   .chapter-header h3 {
