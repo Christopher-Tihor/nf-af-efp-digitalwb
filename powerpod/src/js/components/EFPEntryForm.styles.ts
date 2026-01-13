@@ -425,22 +425,22 @@ export const efpEntryFormStyles = css`
   }
 
   .add-note-button {
-    background-color: var(--bcgov-blue-70, #1a5a96);
+    background-color: var(--bcgov-blue, #003366);
     color: var(--bcgov-white, #ffffff);
   }
 
   .view-actions-button {
-    background-color: var(--bcgov-blue-70, #1a5a96);
+    background-color: var(--bcgov-blue, #003366);
     color: var(--bcgov-white, #ffffff);
   }
 
   .add-note-button:hover:not(:disabled) {
-    background-color: var(--bcgov-blue, #003366);
+    background-color: var(--bcgov-blue-70, #1a5a96);
     transform: translateY(-1px);
   }
 
   .view-actions-button:hover:not(:disabled) {
-    background-color: var(--bcgov-blue, #003366);
+    background-color: var(--bcgov-blue-70, #1a5a96);
     transform: translateY(-1px);
   }
 
@@ -712,14 +712,14 @@ export const efpEntryFormStyles = css`
 
   /* BC Gov Primary Button */
   sl-button[variant="primary"]::part(base) {
-    background-color: var(--bcgov-blue-70);
-    border-color: var(--bcgov-blue-70);
+    background-color: var(--bcgov-blue);
+    border-color: var(--bcgov-blue);
     color: var(--bcgov-white);
   }
 
   sl-button[variant="primary"]:hover::part(base) {
-    background-color: var(--bcgov-blue);
-    border-color: var(--bcgov-blue);
+    background-color: var(--bcgov-blue-70);
+    border-color: var(--bcgov-blue-70);
   }
 
   sl-button[variant="primary"]:focus-visible::part(base) {

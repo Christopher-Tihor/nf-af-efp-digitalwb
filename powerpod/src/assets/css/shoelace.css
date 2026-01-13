@@ -501,14 +501,14 @@
 
 /* Primary Button - BC Gov Blue */
 sl-button[variant="primary"]::part(base) {
-  background-color: var(--bcgov-blue-70, #1a5a96);
-  border-color: var(--bcgov-blue-70, #1a5a96);
+  background-color: var(--bcgov-blue, #003366);
+  border-color: var(--bcgov-blue, #003366);
   color: var(--bcgov-white, #ffffff);
 }
 
 sl-button[variant="primary"]:hover::part(base) {
-  background-color: var(--bcgov-blue, #003366);
-  border-color: var(--bcgov-blue, #003366);
+  background-color: var(--bcgov-blue-70, #1a5a96);
+  border-color: var(--bcgov-blue-70, #1a5a96);
 }
 
 sl-button[variant="primary"]:focus-visible::part(base) {

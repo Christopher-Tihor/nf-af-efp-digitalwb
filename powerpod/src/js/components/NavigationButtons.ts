@@ -32,14 +32,14 @@ export class NavigationButtons extends LitElement {
 
     /* BC Gov Primary Button - Continue */
     sl-button[variant="primary"]::part(base) {
-      background-color: var(--bcgov-blue-70);
-      border-color: var(--bcgov-blue-70);
+      background-color: var(--bcgov-blue);
+      border-color: var(--bcgov-blue);
       color: var(--bcgov-white);
     }
 
     sl-button[variant="primary"]:hover::part(base) {
-      background-color: var(--bcgov-blue);
-      border-color: var(--bcgov-blue);
+      background-color: var(--bcgov-blue-70);
+      border-color: var(--bcgov-blue-70);
     }
 
     sl-button[variant="primary"]:focus-visible::part(base) {
