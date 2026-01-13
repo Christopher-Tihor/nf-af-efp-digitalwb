@@ -165,6 +165,49 @@ class ActionPlanTable extends LitElement {
         font-family: 'BC Sans', 'Noto Sans', Verdana, sans-serif;
       }
 
+      /* BC Gov Primary Button */
+      sl-button[variant="primary"]::part(base) {
+        background-color: var(--bcgov-blue, #003366);
+        border-color: var(--bcgov-blue, #003366);
+        color: var(--bcgov-white, #ffffff);
+      }
+
+      sl-button[variant="primary"]:hover::part(base) {
+        background-color: var(--bcgov-blue-70, #1a5a96);
+        border-color: var(--bcgov-blue-70, #1a5a96);
+      }
+
+      sl-button[variant="primary"]:focus-visible::part(base) {
+        outline: 3px solid var(--bcgov-focus, #3399ff);
+        outline-offset: 2px;
+      }
+
+      sl-button[variant="primary"][disabled]::part(base) {
+        background-color: var(--bcgov-disabled, #757575);
+        border-color: var(--bcgov-disabled, #757575);
+        opacity: 0.65;
+      }
+
+      /* BC Gov Secondary Button */
+      sl-button[variant="default"]::part(base) {
+        background-color: var(--bcgov-white, #ffffff);
+        border-color: var(--bcgov-blue-70, #1a5a96);
+        color: var(--bcgov-blue-70, #1a5a96);
+      }
+
+      sl-button[variant="default"]:hover::part(base) {
+        background-color: var(--bcgov-secondary-hover, #edebe9);
+      }
+
+      sl-button[variant="default"]:focus-visible::part(base) {
+        outline: 3px solid var(--bcgov-focus, #3399ff);
+        outline-offset: 2px;
+      }
+
+      sl-button[variant="default"][disabled]::part(base) {
+        opacity: 0.65;
+      }
+
       .action-buttons {
         display: flex;
         gap: 0.25rem;
@@ -1039,7 +1082,7 @@ class ActionPlanTable extends LitElement {
               Cancel
             </sl-button>
             <sl-button
-              variant="danger"
+              variant="primary"
               @click=${this.handleDeleteActionPlan}
               ?loading=${this.deleting}
             >
