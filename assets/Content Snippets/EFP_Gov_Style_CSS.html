@@ -3,7 +3,7 @@
     -------------------
     FILE INFO
     -------------------
-    version: 1.0.6
+    version: 1.1.0
     name: EFP_Gov_Style_CSS
     type: Content Snippet
     description: This is the CSS used on the Home Page.
@@ -60,7 +60,7 @@
   /* Links */
   .bcgov-page a {
     color: var(--bcgov-link);
-    text-decoration: underline;
+    text-decoration: none !important;
   }
   .bcgov-page a:hover {
     text-decoration: none;
@@ -77,7 +77,7 @@
     text-decoration: none !important;
     display: inline-block;
     font-weight: 800;
-    font-size: 16px;
+    font-size: 16px !important;
   }
   .bcgov-page .button1:hover,
   .bcgov-btn--primary:hover {
@@ -189,8 +189,20 @@
   .navbar-dark .username:hover,
   .navbar-dark .navbar-brand:hover,
   .navbar-dark .siteTitle:hover {
-    color: var(--bcgov-gold) !important;
-    text-decoration: underline !important;
+    color: #FFFFFF !important;
+    text-decoration: none !important;
+    text-decoration-line: none !important;
+  }
+
+  .siteTitle .custom-sitetitle {
+    text-decoration: none !important;
+    text-decoration-line: none !important;
+  }
+
+  .siteTitle:hover .custom-sitetitle:hover {
+    color: #FFFFFF !important;
+    text-decoration: none !important;
+    text-decoration-line: none !important;
   }
 
   /* Vertical nav dividers */

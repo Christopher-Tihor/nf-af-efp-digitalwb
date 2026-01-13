@@ -50,6 +50,7 @@
   text-decoration: none !important;
   display: inline-block;
   font-weight: 600;
+  font-size: 16px !important;
 }
 .bcgov-content .button1:hover {
   background: var(--bcgov-blue-70, #1a5a96) !important;
