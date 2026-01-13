@@ -1,9 +1,7 @@
 import { LitElement, html, css, PropertyValues } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
-import '@shoelace-style/shoelace/dist/components/tab-group/tab-group.js';
-import '@shoelace-style/shoelace/dist/components/tab/tab.js';
-import '@shoelace-style/shoelace/dist/components/tab-panel/tab-panel.js';
+import { customElement, property } from 'lit/decorators.js';
 import '@shoelace-style/shoelace/dist/components/icon/icon.js';
+import '@shoelace-style/shoelace/dist/components/divider/divider.js';
 import { Logger } from '../common/logger.js';
 import type { EFPSection } from './efp/types.js';
 
@@ -13,6 +11,8 @@ const logger = Logger('components/NavigationSidebar');
  * NavigationSidebar Component
  *
  * Displays workbook information and section navigation with completion status
+ * Chapters are shown directly without tabs.
+ * "Review & Submit" is displayed as a dedicated section below "My Action Plan".
  */
 @customElement('navigation-sidebar')
 export class NavigationSidebar extends LitElement {
@@ -23,8 +23,6 @@ export class NavigationSidebar extends LitElement {
   @property({ type: Number }) currentSectionIndex = 0;
   @property({ type: Object }) sectionCompletion: Map<number, boolean> = new Map();
   @property({ type: Object }) sectionSkipped: Map<number, boolean> = new Map();
-
-  @query('sl-tab-group') tabGroupEl!: HTMLElement & { show: (tabName: string) => void };
 
   static styles = css`
     :host {
@@ -58,27 +56,79 @@ export class NavigationSidebar extends LitElement {
       color: var(--sl-color-neutral-700);
     }
 
-    sl-tab-group {
-      --indicator-color: var(--sl-color-primary-600);
+    .section-title {
+      font-weight: 600;
+      color: var(--sl-color-neutral-700);
+      margin-bottom: 0.5rem;
+    }
+
+    .chapters-container {
       width: 100%;
       max-width: 100%;
       overflow: hidden;
     }
 
-    sl-tab-group::part(nav) {
+    /* Review & Submit dedicated section - matches secondary button styling */
+    .review-submit-section {
+      margin-top: 0;
+      padding: 1rem;
+      background-color: #ffffff;
+      border: 1px solid #1a5a96;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .review-submit-section:hover {
+      background-color: #edebe9;
+    }
+
+    .review-submit-section:focus {
+      background-color: #ffffff;
+      outline: 3px solid #3399ff;
+      outline-offset: 2px;
+    }
+
+    .review-submit-section.active {
+      background-color: #F0F9FF;
+    }
+
+    .review-submit-content {
       display: flex;
-      justify-content: center;
+      align-items: center;
+      gap: 0.75rem;
     }
 
-    sl-tab::part(base) {
-      padding: 0.75rem 1rem;
+    .review-submit-icon {
+      font-size: 1.5rem;
+      color: #1a5a96;
     }
 
-    sl-tab-panel {
-      padding: 0;
-      width: 100%;
-      max-width: 100%;
-      overflow: hidden;
+    .review-submit-text {
+      flex: 1;
+    }
+
+    .review-submit-title {
+      font-weight: 700;
+      font-size: 1rem;
+      color: #1a5a96;
+      margin: 0;
+    }
+
+    .review-submit-subtitle {
+      font-size: 0.85rem;
+      color: #000000;
+      margin: 0.25rem 0 0 0;
+    }
+
+    .review-submit-arrow {
+      font-size: 1.25rem;
+      color: #1a5a96;
+      transition: transform 0.2s ease;
+    }
+
+    .review-submit-section:hover .review-submit-arrow {
+      transform: translateX(4px);
     }
 
     /* Ensure slotted content doesn't expand the sidebar */
@@ -93,39 +143,41 @@ export class NavigationSidebar extends LitElement {
   protected updated(changedProps: PropertyValues) {
     super.updated(changedProps);
 
-    // Sync tab group with currentSectionIndex when it changes programmatically
-    if (changedProps.has('currentSectionIndex') && this.tabGroupEl) {
-      const activeTab = `section-${this.currentSectionIndex}`;
-      this.tabGroupEl.show?.(activeTab);
+    // Log section index changes for debugging
+    if (changedProps.has('currentSectionIndex')) {
       logger.info({
-        message: `Tab group synced to section ${this.currentSectionIndex}`,
+        message: `Section index changed to ${this.currentSectionIndex}`,
       });
     }
   }
 
-  private handleSectionChange(tabIndex: number) {
+  private handleReviewSubmitClick() {
+    // Navigate to Review & Submit section (index 1)
     logger.info({
-      message: `Section tab changed to index ${tabIndex}`,
+      message: 'Review & Submit section clicked',
     });
 
     this.dispatchEvent(
       new CustomEvent('section-change', {
-        detail: { sectionIndex: tabIndex },
+        detail: { sectionIndex: 1 },
         bubbles: true,
         composed: true,
       })
     );
   }
 
-  private getSectionCompletion(_section: EFPSection, index: number): boolean {
-    return this.sectionCompletion.get(index) || false;
-  }
-
-  private getSectionSkipped(_section: EFPSection, index: number): boolean {
-    return this.sectionSkipped.get(index) || false;
+  // Check if the "My Workbook" section is complete (for Review & Submit readiness)
+  private isWorkbookComplete(): boolean {
+    // Section 0 is "My Workbook"
+    return this.sectionCompletion.get(0) || false;
   }
 
   render() {
+    // Get the first section (My Workbook) which contains all chapters
+    const myWorkbookSection = this.sections[0];
+    const isReviewSubmitActive = this.currentSectionIndex === 1;
+    const workbookComplete = this.isWorkbookComplete();
+
     return html`
       <!-- Workbook Info Card -->
       <div class="card">
@@ -134,57 +186,49 @@ export class NavigationSidebar extends LitElement {
         <div><strong>Status:</strong> ${this.workbookStatus}</div>
       </div>
 
-      <!-- Section Tabs -->
-      <sl-tab-group
-        no-scroll-controls
-        @sl-tab-show=${(e: CustomEvent) => {
-          const tabIndex = parseInt(e.detail.name.replace('section-', ''));
-          this.handleSectionChange(tabIndex);
+      <!-- Section Title -->
+      ${myWorkbookSection ? html`
+        <div class="card">
+          <strong class="section-title">${myWorkbookSection.title}</strong>
+        </div>
+      ` : ''}
+
+      <!-- Chapters (directly displayed, no tabs) -->
+      <div class="chapters-container">
+        <slot name="section-0-items"></slot>
+      </div>
+
+      <!-- Review & Submit Dedicated Section -->
+      <div
+        class="review-submit-section ${isReviewSubmitActive ? 'active' : ''}"
+        tabindex="0"
+        role="button"
+        aria-label="Review and Submit your Environmental Farm Plan"
+        @click=${this.handleReviewSubmitClick}
+        @keydown=${(e: KeyboardEvent) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            this.handleReviewSubmitClick();
+          }
         }}
       >
-        ${this.sections.map((section, index) => {
-          const isActive = index === this.currentSectionIndex;
-          const isComplete = this.getSectionCompletion(section, index);
-          const isSkipped = this.getSectionSkipped(section, index);
-
-          // Determine icon based on state: skipped > complete > incomplete
-          let icon: string;
-          let color: string;
-
-          if (isSkipped) {
-            icon = 'skip-forward-circle';
-            color = isActive ? 'orange' : '#d97706'; // yellow color
-          } else if (isComplete) {
-            icon = 'check-circle';
-            color = '#22c55e'; // green - always green when completed
-          } else {
-            icon = 'pencil';
-            color = isActive ? 'orange' : 'gray';
-          }
-
-          return html`
-            <sl-tab slot="nav" panel="section-${index}">
-              <sl-icon
-                name=${icon}
-                style="color: ${color}; margin-right: 0.5rem;"
-              ></sl-icon>
-              <span style=${isActive ? 'font-weight: bold;' : ''}
-                >${section.tab}</span
-              >
-            </sl-tab>
-          `;
-        })}
-        ${this.sections.map(
-          (section, index) => html`
-            <sl-tab-panel name="section-${index}">
-              <div class="card">
-                <strong>${section.title}</strong>
-              </div>
-              <slot name="section-${index}-items"></slot>
-            </sl-tab-panel>
-          `
-        )}
-      </sl-tab-group>
+        <div class="review-submit-content">
+          <sl-icon
+            name="${workbookComplete ? 'check-circle-fill' : 'send'}"
+            class="review-submit-icon"
+            style="color: ${workbookComplete ? 'var(--sl-color-success-600)' : 'var(--sl-color-primary-700)'};"
+          ></sl-icon>
+          <div class="review-submit-text">
+            <p class="review-submit-title">Review & Submit</p>
+            <p class="review-submit-subtitle">
+              ${workbookComplete
+                ? 'Ready to submit your workbook'
+                : 'Complete all questions to submit'}
+            </p>
+          </div>
+          <sl-icon name="arrow-right" class="review-submit-arrow"></sl-icon>
+        </div>
+      </div>
     `;
   }
 }

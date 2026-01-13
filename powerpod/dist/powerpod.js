@@ -1,5 +1,5 @@
 /*!
-* powerpod 4.8.8
+* powerpod 4.8.9
 * https://github.com/bcgov/nr-af-pods/powerpod
 *
 * @license GPLv3 for open source use only
@@ -44176,11 +44176,58 @@
       t$1('progress-header')
   ], ProgressHeader);
 
+  // src/components/divider/divider.styles.ts
+  var divider_styles_default = i$4`
+  :host {
+    --color: var(--sl-panel-border-color);
+    --width: var(--sl-panel-border-width);
+    --spacing: var(--sl-spacing-medium);
+  }
+
+  :host(:not([vertical])) {
+    display: block;
+    border-top: solid var(--width) var(--color);
+    margin: var(--spacing) 0;
+  }
+
+  :host([vertical]) {
+    display: inline-block;
+    height: 100%;
+    border-left: solid var(--width) var(--color);
+    margin: 0 var(--spacing);
+  }
+`;
+
+  var SlDivider = class extends ShoelaceElement {
+    constructor() {
+      super(...arguments);
+      this.vertical = false;
+    }
+    connectedCallback() {
+      super.connectedCallback();
+      this.setAttribute("role", "separator");
+    }
+    handleVerticalChange() {
+      this.setAttribute("aria-orientation", this.vertical ? "vertical" : "horizontal");
+    }
+  };
+  SlDivider.styles = [component_styles_default, divider_styles_default];
+  __decorateClass([
+    n$4({ type: Boolean, reflect: true })
+  ], SlDivider.prototype, "vertical", 2);
+  __decorateClass([
+    watch("vertical")
+  ], SlDivider.prototype, "handleVerticalChange", 1);
+
+  SlDivider.define("sl-divider");
+
   const logger$h = Logger('components/NavigationSidebar');
   /**
    * NavigationSidebar Component
    *
    * Displays workbook information and section navigation with completion status
+   * Chapters are shown directly without tabs.
+   * "Review & Submit" is displayed as a dedicated section below "My Action Plan".
    */
   let NavigationSidebar = class NavigationSidebar extends s$2 {
       constructor() {
@@ -44194,34 +44241,35 @@
           this.sectionSkipped = new Map();
       }
       updated(changedProps) {
-          var _a, _b;
           super.updated(changedProps);
-          // Sync tab group with currentSectionIndex when it changes programmatically
-          if (changedProps.has('currentSectionIndex') && this.tabGroupEl) {
-              const activeTab = `section-${this.currentSectionIndex}`;
-              (_b = (_a = this.tabGroupEl).show) === null || _b === void 0 ? void 0 : _b.call(_a, activeTab);
+          // Log section index changes for debugging
+          if (changedProps.has('currentSectionIndex')) {
               logger$h.info({
-                  message: `Tab group synced to section ${this.currentSectionIndex}`,
+                  message: `Section index changed to ${this.currentSectionIndex}`,
               });
           }
       }
-      handleSectionChange(tabIndex) {
+      handleReviewSubmitClick() {
+          // Navigate to Review & Submit section (index 1)
           logger$h.info({
-              message: `Section tab changed to index ${tabIndex}`,
+              message: 'Review & Submit section clicked',
           });
           this.dispatchEvent(new CustomEvent('section-change', {
-              detail: { sectionIndex: tabIndex },
+              detail: { sectionIndex: 1 },
               bubbles: true,
               composed: true,
           }));
       }
-      getSectionCompletion(_section, index) {
-          return this.sectionCompletion.get(index) || false;
-      }
-      getSectionSkipped(_section, index) {
-          return this.sectionSkipped.get(index) || false;
+      // Check if the "My Workbook" section is complete (for Review & Submit readiness)
+      isWorkbookComplete() {
+          // Section 0 is "My Workbook"
+          return this.sectionCompletion.get(0) || false;
       }
       render() {
+          // Get the first section (My Workbook) which contains all chapters
+          const myWorkbookSection = this.sections[0];
+          const isReviewSubmitActive = this.currentSectionIndex === 1;
+          const workbookComplete = this.isWorkbookComplete();
           return x `
       <!-- Workbook Info Card -->
       <div class="card">
@@ -44230,54 +44278,49 @@
         <div><strong>Status:</strong> ${this.workbookStatus}</div>
       </div>
 
-      <!-- Section Tabs -->
-      <sl-tab-group
-        no-scroll-controls
-        @sl-tab-show=${(e) => {
-            const tabIndex = parseInt(e.detail.name.replace('section-', ''));
-            this.handleSectionChange(tabIndex);
+      <!-- Section Title -->
+      ${myWorkbookSection ? x `
+        <div class="card">
+          <strong class="section-title">${myWorkbookSection.title}</strong>
+        </div>
+      ` : ''}
+
+      <!-- Chapters (directly displayed, no tabs) -->
+      <div class="chapters-container">
+        <slot name="section-0-items"></slot>
+      </div>
+
+      <!-- Review & Submit Dedicated Section -->
+      <div
+        class="review-submit-section ${isReviewSubmitActive ? 'active' : ''}"
+        tabindex="0"
+        role="button"
+        aria-label="Review and Submit your Environmental Farm Plan"
+        @click=${this.handleReviewSubmitClick}
+        @keydown=${(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                this.handleReviewSubmitClick();
+            }
         }}
       >
-        ${this.sections.map((section, index) => {
-            const isActive = index === this.currentSectionIndex;
-            const isComplete = this.getSectionCompletion(section, index);
-            const isSkipped = this.getSectionSkipped(section, index);
-            // Determine icon based on state: skipped > complete > incomplete
-            let icon;
-            let color;
-            if (isSkipped) {
-                icon = 'skip-forward-circle';
-                color = isActive ? 'orange' : '#d97706'; // yellow color
-            }
-            else if (isComplete) {
-                icon = 'check-circle';
-                color = '#22c55e'; // green - always green when completed
-            }
-            else {
-                icon = 'pencil';
-                color = isActive ? 'orange' : 'gray';
-            }
-            return x `
-            <sl-tab slot="nav" panel="section-${index}">
-              <sl-icon
-                name=${icon}
-                style="color: ${color}; margin-right: 0.5rem;"
-              ></sl-icon>
-              <span style=${isActive ? 'font-weight: bold;' : ''}
-                >${section.tab}</span
-              >
-            </sl-tab>
-          `;
-        })}
-        ${this.sections.map((section, index) => x `
-            <sl-tab-panel name="section-${index}">
-              <div class="card">
-                <strong>${section.title}</strong>
-              </div>
-              <slot name="section-${index}-items"></slot>
-            </sl-tab-panel>
-          `)}
-      </sl-tab-group>
+        <div class="review-submit-content">
+          <sl-icon
+            name="${workbookComplete ? 'check-circle-fill' : 'send'}"
+            class="review-submit-icon"
+            style="color: ${workbookComplete ? 'var(--sl-color-success-600)' : 'var(--sl-color-primary-700)'};"
+          ></sl-icon>
+          <div class="review-submit-text">
+            <p class="review-submit-title">Review & Submit</p>
+            <p class="review-submit-subtitle">
+              ${workbookComplete
+            ? 'Ready to submit your workbook'
+            : 'Complete all questions to submit'}
+            </p>
+          </div>
+          <sl-icon name="arrow-right" class="review-submit-arrow"></sl-icon>
+        </div>
+      </div>
     `;
       }
   };
@@ -44313,27 +44356,79 @@
       color: var(--sl-color-neutral-700);
     }
 
-    sl-tab-group {
-      --indicator-color: var(--sl-color-primary-600);
+    .section-title {
+      font-weight: 600;
+      color: var(--sl-color-neutral-700);
+      margin-bottom: 0.5rem;
+    }
+
+    .chapters-container {
       width: 100%;
       max-width: 100%;
       overflow: hidden;
     }
 
-    sl-tab-group::part(nav) {
+    /* Review & Submit dedicated section - matches secondary button styling */
+    .review-submit-section {
+      margin-top: 0;
+      padding: 1rem;
+      background-color: #ffffff;
+      border: 1px solid #1a5a96;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .review-submit-section:hover {
+      background-color: #edebe9;
+    }
+
+    .review-submit-section:focus {
+      background-color: #ffffff;
+      outline: 3px solid #3399ff;
+      outline-offset: 2px;
+    }
+
+    .review-submit-section.active {
+      background-color: #F0F9FF;
+    }
+
+    .review-submit-content {
       display: flex;
-      justify-content: center;
+      align-items: center;
+      gap: 0.75rem;
     }
 
-    sl-tab::part(base) {
-      padding: 0.75rem 1rem;
+    .review-submit-icon {
+      font-size: 1.5rem;
+      color: #1a5a96;
     }
 
-    sl-tab-panel {
-      padding: 0;
-      width: 100%;
-      max-width: 100%;
-      overflow: hidden;
+    .review-submit-text {
+      flex: 1;
+    }
+
+    .review-submit-title {
+      font-weight: 700;
+      font-size: 1rem;
+      color: #1a5a96;
+      margin: 0;
+    }
+
+    .review-submit-subtitle {
+      font-size: 0.85rem;
+      color: #000000;
+      margin: 0.25rem 0 0 0;
+    }
+
+    .review-submit-arrow {
+      font-size: 1.25rem;
+      color: #1a5a96;
+      transition: transform 0.2s ease;
+    }
+
+    .review-submit-section:hover .review-submit-arrow {
+      transform: translateX(4px);
     }
 
     /* Ensure slotted content doesn't expand the sidebar */
@@ -44365,9 +44460,6 @@
   __decorate([
       n$4({ type: Object })
   ], NavigationSidebar.prototype, "sectionSkipped", void 0);
-  __decorate([
-      e$6('sl-tab-group')
-  ], NavigationSidebar.prototype, "tabGroupEl", void 0);
   NavigationSidebar = __decorate([
       t$1('navigation-sidebar')
   ], NavigationSidebar);
@@ -44834,51 +44926,6 @@
   QuestionRenderer = __decorate([
       t$1('question-renderer')
   ], QuestionRenderer);
-
-  // src/components/divider/divider.styles.ts
-  var divider_styles_default = i$4`
-  :host {
-    --color: var(--sl-panel-border-color);
-    --width: var(--sl-panel-border-width);
-    --spacing: var(--sl-spacing-medium);
-  }
-
-  :host(:not([vertical])) {
-    display: block;
-    border-top: solid var(--width) var(--color);
-    margin: var(--spacing) 0;
-  }
-
-  :host([vertical]) {
-    display: inline-block;
-    height: 100%;
-    border-left: solid var(--width) var(--color);
-    margin: 0 var(--spacing);
-  }
-`;
-
-  var SlDivider = class extends ShoelaceElement {
-    constructor() {
-      super(...arguments);
-      this.vertical = false;
-    }
-    connectedCallback() {
-      super.connectedCallback();
-      this.setAttribute("role", "separator");
-    }
-    handleVerticalChange() {
-      this.setAttribute("aria-orientation", this.vertical ? "vertical" : "horizontal");
-    }
-  };
-  SlDivider.styles = [component_styles_default, divider_styles_default];
-  __decorateClass([
-    n$4({ type: Boolean, reflect: true })
-  ], SlDivider.prototype, "vertical", 2);
-  __decorateClass([
-    watch("vertical")
-  ], SlDivider.prototype, "handleVerticalChange", 1);
-
-  SlDivider.define("sl-divider");
 
   const logger$g = Logger('components/WorkbookSearchDialog');
   let WorkbookSearchDialog = class WorkbookSearchDialog extends s$2 {
@@ -52215,7 +52262,7 @@
       };
     };
     // @ts-ignore
-    POWERPOD.version = '4.8.8';
+    POWERPOD.version = '4.8.9';
     // @ts-ignore
     window.powerpod = POWERPOD;
   }
