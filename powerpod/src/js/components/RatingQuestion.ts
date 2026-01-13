@@ -401,7 +401,18 @@ export class RatingQuestion extends LitElement {
     /* Narrow devices - switch to vertical layout */
     @media (max-width: 992px) {
       .rating-options {
-        flex-direction: column;
+        flex-direction: row;
+        flex-wrap: wrap;
+      }
+
+      /* Yes/No/NA/Unknown cards in 2-column grid on narrow screens */
+      .rating-options .rating-card.yes,
+      .rating-options .rating-card.no,
+      .rating-options .rating-card.na,
+      .rating-options .rating-card.unknown {
+        flex: 1 1 calc(50% - 0.25rem);
+        min-width: 0;
+        max-width: none;
       }
 
       .rating-layout {
@@ -415,9 +426,9 @@ export class RatingQuestion extends LitElement {
 
       .rating-left-column .rating-card.na,
       .rating-left-column .rating-card.unknown {
-        flex: 0 0 auto;
-        min-width: 70px;
-        max-width: 80px;
+        flex: 1 1 0;
+        min-width: 0;
+        max-width: none;
       }
 
       .rating-right-column {
@@ -429,13 +440,6 @@ export class RatingQuestion extends LitElement {
         width: 100%;
         min-width: unset;
         flex: 0 0 auto;
-      }
-
-      .rating-card.yes,
-      .rating-card.no {
-        width: 100%;
-        min-width: unset;
-        max-width: unset;
       }
 
       .rating-card-header {
@@ -469,17 +473,23 @@ export class RatingQuestion extends LitElement {
         padding: 0.75rem;
       }
 
-      .rating-card.yes,
-      .rating-card.no {
-        width: 100%;
-        max-width: 100%;
+      /* Yes/No/NA/Unknown cards in 2-column grid on mobile */
+      .rating-options .rating-card.yes,
+      .rating-options .rating-card.no,
+      .rating-options .rating-card.na,
+      .rating-options .rating-card.unknown {
+        flex: 1 1 calc(50% - 0.25rem);
+        min-width: 0;
+        max-width: none;
         box-sizing: border-box;
+        padding: 0;
       }
 
       .rating-left-column .rating-card.na,
       .rating-left-column .rating-card.unknown {
-        min-width: 60px;
-        max-width: 70px;
+        flex: 1 1 0;
+        min-width: 0;
+        max-width: none;
         padding: 0;
       }
 
