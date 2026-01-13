@@ -2,7 +2,7 @@
   -------------------
   FILE INFO
   -------------------
-  version: 1.0.7
+  version: 1.1.1
   name: Home Page Web Template
   type: Web Template/HTML
   description: Dynamic Liquid HTML that renders logged-in or logged-out content for the home page.
@@ -61,72 +61,73 @@ Fetch the portal page content for the chosen internalName
 
 <div class="row sectionBlockLayout text-start bcgov-page" style="display:flex;flex-wrap:wrap;margin:0;min-height:auto;padding:8px;">
   <div class="container">
+    <div class="col-lg-12 columnBlockLayout" style="flex-grow: 1; display: flex; flex-direction: column; min-width: 300px; padding: 16px; margin: 0px 0px;">
+      <div class="bcgov-content">
+        <h2 class="styled-h2">Welcome to the BC Environmental Farm Plan Workbook</h2>
 
-    <div class="bcgov-content">
-      <h2>Welcome to the BC Environmental Farm Plan Workbook</h2>
+        {% if efpProducer %}
+          <div style="margin:8px 0 16px;">
+            <a href="/my-efp-workbooks/" class="button1 btn">Create workbook</a>
+          </div>
+        {% elsif isAuthenticated %}
+          <div style="margin:8px 0 16px;">
+            <!-- No create workbook button for planning advisors and other authenticated users -->
+          </div>
+        {% else %}
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin:8px 0 16px;">
+            <a href="/SignIn?returnUrl=%2F" class="button1 btn">Sign in</a>
+            <a href="/Account/Login/Register?returnUrl=%2F" class="button2 btn">Create account</a>
+          </div>
+        {% endif %}
+      </div>
 
-      {% if efpProducer %}
-        <div style="margin:8px 0 16px;">
-          <a href="/my-efp-workbooks/" class="button1 btn">Create workbook</a>
-        </div>
-      {% elsif isAuthenticated %}
-        <div style="margin:8px 0 16px;">
-          <!-- No create workbook button for planning advisors and other authenticated users -->
-        </div>
+      {% if content %}
+
+        {% if isAuthenticated %}
+          {% if content.quartech_section1 %}
+            <section>{{ content.quartech_section1 }}</section>
+          {% endif %}
+          {% if content.quartech_section2 %}
+            <section>{{ content.quartech_section2 }}</section>
+          {% endif %}
+          {% if content.quartech_section3 %}
+            <section>{{ content.quartech_section3 }}</section>
+          {% endif %}
+          {% if content.quartech_section4 %}
+            <section>{{ content.quartech_section4 }}</section>
+          {% endif %}
+          {% if content.quartech_section5 %}
+            <section>{{ content.quartech_section5 }}</section>
+          {% endif %}
+          {% if content.quartech_section6 %}
+            <section>{{ content.quartech_section6 }}</section>
+          {% endif %}
+
+        {% else %}
+          {% if content.quartech_section1 %}
+            <section>{{ content.quartech_section1 }}</section>
+          {% endif %}
+          {% if content.quartech_section2 %}
+            <section>{{ content.quartech_section2 }}</section>
+          {% endif %}
+          {% if content.quartech_section3 %}
+            <section>{{ content.quartech_section3 }}</section>
+          {% endif %}
+          {% if content.quartech_section4 %}
+            <section>{{ content.quartech_section4 }}</section>
+          {% endif %}
+          {% if content.quartech_section5 %}
+            <section>{{ content.quartech_section5 }}</section>
+          {% endif %}
+          {% if content.quartech_section6 %}
+            <section>{{ content.quartech_section6 }}</section>
+          {% endif %}
+        {% endif %}
+
       {% else %}
-        <div style="display:flex;gap:10px;flex-wrap:wrap;margin:8px 0 16px;">
-          <a href="/SignIn?returnUrl=%2F" class="button1 btn">Sign in</a>
-          <a href="/Account/Login/Register?returnUrl=%2F" class="button2 btn">Create account</a>
-        </div>
+        <section>No content found for {{ internalName }}.</section>
       {% endif %}
+
     </div>
-
-    {% if content %}
-
-      {% if isAuthenticated %}
-        {% if content.quartech_section1 %}
-          <section>{{ content.quartech_section1 }}</section>
-        {% endif %}
-        {% if content.quartech_section2 %}
-          <section>{{ content.quartech_section2 }}</section>
-        {% endif %}
-        {% if content.quartech_section3 %}
-          <section>{{ content.quartech_section3 }}</section>
-        {% endif %}
-        {% if content.quartech_section4 %}
-          <section>{{ content.quartech_section4 }}</section>
-        {% endif %}
-        {% if content.quartech_section5 %}
-          <section>{{ content.quartech_section5 }}</section>
-        {% endif %}
-        {% if content.quartech_section6 %}
-          <section>{{ content.quartech_section6 }}</section>
-        {% endif %}
-
-      {% else %}
-        {% if content.quartech_section1 %}
-          <section>{{ content.quartech_section1 }}</section>
-        {% endif %}
-        {% if content.quartech_section2 %}
-          <section>{{ content.quartech_section2 }}</section>
-        {% endif %}
-        {% if content.quartech_section3 %}
-          <section>{{ content.quartech_section3 }}</section>
-        {% endif %}
-        {% if content.quartech_section4 %}
-          <section>{{ content.quartech_section4 }}</section>
-        {% endif %}
-        {% if content.quartech_section5 %}
-          <section>{{ content.quartech_section5 }}</section>
-        {% endif %}
-        {% if content.quartech_section6 %}
-          <section>{{ content.quartech_section6 }}</section>
-        {% endif %}
-      {% endif %}
-
-    {% else %}
-      <section>No content found for {{ internalName }}.</section>
-    {% endif %}
-
   </div>
 </div>
