@@ -55,6 +55,7 @@ export class RatingQuestion extends LitElement {
       flex-direction: row;
       width: 100%;
       box-sizing: border-box;
+      padding-top: 10px; /* Space for selected checkmark badge */
     }
 
     /* Two-column layout for Point Rating: N/A and ? stacked on left, ratings on right */
@@ -64,6 +65,7 @@ export class RatingQuestion extends LitElement {
       align-items: stretch;
       width: 100%;
       box-sizing: border-box;
+      padding-top: 10px; /* Space for selected checkmark badge */
     }
 
     .rating-left-column {
@@ -71,6 +73,9 @@ export class RatingQuestion extends LitElement {
       flex-direction: column;
       gap: 0.5rem;
       flex: 0 0 auto;
+      overflow: visible;
+      padding-top: 10px; /* Space for checkmark badge */
+      margin-top: -10px; /* Offset the padding to maintain alignment */
     }
 
     .rating-right-column {
@@ -177,7 +182,6 @@ export class RatingQuestion extends LitElement {
       flex: 0 0 auto;
       min-width: 70px;
       max-width: 80px;
-      overflow: hidden;
     }
 
     .rating-card.na .rating-card-header {
@@ -193,7 +197,6 @@ export class RatingQuestion extends LitElement {
       flex: 0 0 auto;
       min-width: 70px;
       max-width: 80px;
-      overflow: hidden;
     }
 
     .rating-card.unknown .rating-card-header {
@@ -207,8 +210,9 @@ export class RatingQuestion extends LitElement {
     .rating-left-column .rating-card.unknown {
       flex: 1;
       display: flex;
-      align-items: center;
-      justify-content: center;
+      align-items: stretch;
+      justify-content: stretch;
+      overflow: hidden;
     }
 
     .rating-left-column .rating-card.na .rating-card-header,
@@ -216,8 +220,7 @@ export class RatingQuestion extends LitElement {
       display: flex;
       align-items: center;
       justify-content: center;
-      height: 100%;
-      width: 100%;
+      flex: 1;
     }
 
     /* Disabled states */
@@ -265,6 +268,26 @@ export class RatingQuestion extends LitElement {
       font-weight: bold;
       font-size: 1rem;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Smaller badge-style checkmark for compact Yes/No/NA/Unknown cards */
+    .rating-card.yes.selected::before,
+    .rating-card.no.selected::before,
+    .rating-card.na.selected::before,
+    .rating-card.unknown.selected::before {
+      top: -8px;
+      right: -8px;
+      width: 20px;
+      height: 20px;
+      font-size: 0.75rem;
+      border: 2px solid white;
+    }
+
+    /* For left column N/A/? cards, position checkmark inside to avoid clipping */
+    .rating-left-column .rating-card.na.selected::before,
+    .rating-left-column .rating-card.unknown.selected::before {
+      top: 4px;
+      right: 4px;
     }
 
     /* Color schemes for Yes/No/NA */
@@ -318,6 +341,7 @@ export class RatingQuestion extends LitElement {
       margin: 0;
       border-radius: 6px;
       padding: 0.75rem 1rem;
+      text-align: center;
     }
 
     /* Color schemes for Point Rating - Blue-to-Red Sequential Scale */
@@ -482,14 +506,14 @@ export class RatingQuestion extends LitElement {
         ];
 
       case 'Point Rating':
-        // 4-point system with N/A and Unknown options first
+        // 4-point system with N/A and Unknown options after ratings
         const options: RatingOption[] = [
-          { value: 'na', label: 'N/A', color: 'na' },
-          { value: 'unknown', label: '?', color: 'unknown' },
           { value: '1', label: this.ratingMetadata?.rating1OverwriteLabel || '1', color: 'rating-1' },
           { value: '2', label: this.ratingMetadata?.rating2OverwriteLabel || '2', color: 'rating-2' },
           { value: '3', label: this.ratingMetadata?.rating3OverwriteLabel || '3', color: 'rating-3' },
-          { value: '4', label: this.ratingMetadata?.rating4OverwriteLabel || '4', color: 'rating-4' }
+          { value: '4', label: this.ratingMetadata?.rating4OverwriteLabel || '4', color: 'rating-4' },
+          { value: 'na', label: 'N/A', color: 'na' },
+          { value: 'unknown', label: '?', color: 'unknown' }
         ];
         return options;
 
@@ -651,19 +675,19 @@ export class RatingQuestion extends LitElement {
       ? this.options
       : this.getDefaultOptions(this.questionType);
 
-    // For Point Rating, use two-column layout with N/A and ? stacked on left
+    // For Point Rating, render all options in a single row with N/A and ? at the end
     if (this.questionType === 'Point Rating') {
-      const leftColumnOptions = optionsToRender.filter(o => o.value === 'na' || o.value === 'unknown');
-      const rightColumnOptions = optionsToRender.filter(o => o.value !== 'na' && o.value !== 'unknown');
+      const ratingOptions = optionsToRender.filter(o => o.value !== 'na' && o.value !== 'unknown');
+      const naUnknownOptions = optionsToRender.filter(o => o.value === 'na' || o.value === 'unknown');
 
       return html`
         <div class="rating-container">
           <div class="rating-layout">
-            <div class="rating-left-column">
-              ${leftColumnOptions.map(option => this.renderRatingOption(option))}
-            </div>
             <div class="rating-right-column">
-              ${rightColumnOptions.map(option => this.renderRatingOption(option))}
+              ${ratingOptions.map(option => this.renderRatingOption(option))}
+            </div>
+            <div class="rating-left-column">
+              ${naUnknownOptions.map(option => this.renderRatingOption(option))}
             </div>
           </div>
         </div>
