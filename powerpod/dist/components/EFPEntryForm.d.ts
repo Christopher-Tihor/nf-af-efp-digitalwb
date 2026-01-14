@@ -112,6 +112,8 @@ export declare class EFPEntryForm extends LitElement {
     private refreshActiveContentForMyActionPlan;
     private setupQuestionnaireStoreWatcher;
     private isWorkbookLocked;
+    private getPASigned;
+    private getProducerSigned;
     private updateWorkbookLockStatus;
     private refreshWorkbookData;
     private canAccessReviewAndSubmit;

@@ -30,6 +30,7 @@ import { getWorkbookDataById } from '../common/fetch.js';
 import { POWERPOD, YES_VALUE } from '../common/constants.js';
 import { Logger } from '../common/logger.js';
 import store from '../store/index.js';
+import { hasRole } from '../common/userRoles.js';
 import {
   getQuestionnaireFromStore,
   getChapterFromStore,
@@ -767,6 +768,22 @@ export class EFPEntryForm extends LitElement {
     const producerSigned = workbookData.quartech_producersigned === YES_INT;
 
     return paSigned || producerSigned;
+  }
+
+  // Check if PA has signed off
+  private getPASigned(): boolean {
+    const workbookData = getWorkbookData();
+    if (!workbookData) return false;
+    const YES_INT = parseInt(YES_VALUE, 10);
+    return (workbookData as any).quartech_pasigned === YES_INT;
+  }
+
+  // Check if Producer has signed off
+  private getProducerSigned(): boolean {
+    const workbookData = getWorkbookData();
+    if (!workbookData) return false;
+    const YES_INT = parseInt(YES_VALUE, 10);
+    return (workbookData as any).quartech_producersigned === YES_INT;
   }
 
   // Update workbook lock status in component state and store
@@ -2721,6 +2738,10 @@ export class EFPEntryForm extends LitElement {
           .currentSectionIndex=${this.currentSectionIndex}
           .sectionCompletion=${this.getSectionCompletionMap()}
           .sectionSkipped=${this.getSectionSkippedMap()}
+          .paSigned=${this.getPASigned()}
+          .producerSigned=${this.getProducerSigned()}
+          .isPA=${hasRole('EFP Planning Advisor')}
+          .isProducer=${hasRole('EFP Producer')}
           @section-change=${this.handleSidebarSectionChange}
         >
           ${this.sections.map(

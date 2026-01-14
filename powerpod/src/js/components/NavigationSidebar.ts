@@ -23,6 +23,10 @@ export class NavigationSidebar extends LitElement {
   @property({ type: Number }) currentSectionIndex = 0;
   @property({ type: Object }) sectionCompletion: Map<number, boolean> = new Map();
   @property({ type: Object }) sectionSkipped: Map<number, boolean> = new Map();
+  @property({ type: Boolean }) paSigned = false;
+  @property({ type: Boolean }) producerSigned = false;
+  @property({ type: Boolean }) isPA = false;
+  @property({ type: Boolean }) isProducer = false;
 
   static styles = css`
     :host {
@@ -172,11 +176,47 @@ export class NavigationSidebar extends LitElement {
     return this.sectionCompletion.get(0) || false;
   }
 
+  // Check if the current user has signed off
+  private hasCurrentUserSignedOff(): boolean {
+    // PA user signed off if they're PA and paSigned is true
+    if (this.isPA && this.paSigned) return true;
+    // Producer user signed off if they're Producer and producerSigned is true
+    if (this.isProducer && this.producerSigned) return true;
+    return false;
+  }
+
+  // Get the appropriate icon name based on workbook state
+  private getReviewSubmitIcon(): string {
+    // If current user has signed off, show checkmark
+    if (this.hasCurrentUserSignedOff()) {
+      return 'check-circle-fill';
+    }
+    // If all questions answered, show paper plane
+    if (this.isWorkbookComplete()) {
+      return 'send';
+    }
+    // In progress - show list task icon
+    return 'list-task';
+  }
+
+  // Get the subtitle text based on workbook state
+  private getReviewSubmitSubtitle(): string {
+    if (this.hasCurrentUserSignedOff()) {
+      return 'You have signed off on this workbook';
+    }
+    if (this.isWorkbookComplete()) {
+      return 'Ready to submit your workbook';
+    }
+    return 'Complete all questions to submit';
+  }
+
   render() {
     // Get the first section (My Workbook) which contains all chapters
     const myWorkbookSection = this.sections[0];
     const isReviewSubmitActive = this.currentSectionIndex === 1;
-    const workbookComplete = this.isWorkbookComplete();
+    const iconName = this.getReviewSubmitIcon();
+    const subtitle = this.getReviewSubmitSubtitle();
+    const hasUserSignedOff = this.hasCurrentUserSignedOff();
 
     return html`
       <!-- Workbook Info Card -->
@@ -214,17 +254,13 @@ export class NavigationSidebar extends LitElement {
       >
         <div class="review-submit-content">
           <sl-icon
-            name="${workbookComplete ? 'check-circle-fill' : 'send'}"
+            name="${iconName}"
             class="review-submit-icon"
-            style="color: ${workbookComplete ? 'var(--sl-color-success-600)' : 'var(--sl-color-primary-700)'};"
+            style="color: ${hasUserSignedOff ? 'var(--sl-color-success-600)' : '#1a5a96'};"
           ></sl-icon>
           <div class="review-submit-text">
             <p class="review-submit-title">Review & Submit</p>
-            <p class="review-submit-subtitle">
-              ${workbookComplete
-                ? 'Ready to submit your workbook'
-                : 'Complete all questions to submit'}
-            </p>
+            <p class="review-submit-subtitle">${subtitle}</p>
           </div>
           <sl-icon name="arrow-right" class="review-submit-arrow"></sl-icon>
         </div>

@@ -590,22 +590,44 @@ export async function refreshQuestionnaireResponses(workbookId) {
  */
 function isQuestionCompleteOrSkipped(question) {
   // A question is considered "done" if it's either:
-  // 1. Complete (has non-empty response), OR
-  // 2. Skipped (quartech_chapterskipped === 100000000)
-  if (question.complete) {
-    return true;
-  }
+  // 1. Skipped (quartech_chapterskipped === 100000000), OR
+  // 2. Complete (has non-empty response)
+  //
+  // IMPORTANT: We MUST check LIVE data FIRST because optimistic updates (like skip/unskip)
+  // update the POWERPOD.workbookQuestionsAndResponses data before the questionnaire store's
+  // question.complete or question.responseData gets updated.
+  //
+  // BUG FIX: Previously, we checked question.complete first, but that value is stale
+  // after unskipping. When a user unskips a chapter, the LIVE data has quartech_chapterskipped
+  // set to 100000001 (not skipped) and potentially empty quartech_response, but the stale
+  // question.complete may still be true from before, causing the navigation to incorrectly
+  // show a "complete" icon instead of "incomplete".
 
-  // Check if question is skipped using the LIVE data from POWERPOD.workbookQuestionsAndResponses
-  // This is important because optimistic updates (like skip/unskip) update this data first
-  // before the questionnaire store's question.responseData is updated
+  // Check LIVE data from POWERPOD.workbookQuestionsAndResponses first (most authoritative source)
   const liveEntry = POWERPOD.workbookQuestionsAndResponses?.questionsWithResponses?.get(question.id);
-  if (liveEntry?.response?.quartech_chapterskipped === 100000000) {
-    return true;
+  if (liveEntry?.response) {
+    // Check if skipped using LIVE data
+    if (liveEntry.response.quartech_chapterskipped === 100000000) {
+      return true;
+    }
+
+    // Check if has non-empty response using LIVE data
+    const liveResponse = liveEntry.response.quartech_response;
+    if (liveResponse && liveResponse.trim() !== '') {
+      return true;
+    }
+
+    // LIVE data exists but is NOT skipped and has NO response = incomplete
+    return false;
   }
 
   // Fallback to question.responseData for cases where POWERPOD data isn't loaded yet
   if (question.responseData?.quartech_chapterskipped === 100000000) {
+    return true;
+  }
+
+  // Fallback to question.complete for cases where POWERPOD data isn't loaded
+  if (question.complete) {
     return true;
   }
 

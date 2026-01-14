@@ -17,10 +17,17 @@ export declare class NavigationSidebar extends LitElement {
     currentSectionIndex: number;
     sectionCompletion: Map<number, boolean>;
     sectionSkipped: Map<number, boolean>;
+    paSigned: boolean;
+    producerSigned: boolean;
+    isPA: boolean;
+    isProducer: boolean;
     static styles: import("lit").CSSResult;
     protected updated(changedProps: PropertyValues): void;
     private handleReviewSubmitClick;
     private isWorkbookComplete;
+    private hasCurrentUserSignedOff;
+    private getReviewSubmitIcon;
+    private getReviewSubmitSubtitle;
     render(): import("lit-html").TemplateResult<1>;
 }
 declare global {

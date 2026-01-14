@@ -33823,24 +33823,46 @@
     return _refreshQuestionnaireResponses.apply(this, arguments);
   }
   function isQuestionCompleteOrSkipped(question) {
-    var _POWERPOD$workbookQue, _liveEntry$response, _question$responseDat;
+    var _POWERPOD$workbookQue, _question$responseDat;
     // A question is considered "done" if it's either:
-    // 1. Complete (has non-empty response), OR
-    // 2. Skipped (quartech_chapterskipped === 100000000)
-    if (question.complete) {
-      return true;
-    }
+    // 1. Skipped (quartech_chapterskipped === 100000000), OR
+    // 2. Complete (has non-empty response)
+    //
+    // IMPORTANT: We MUST check LIVE data FIRST because optimistic updates (like skip/unskip)
+    // update the POWERPOD.workbookQuestionsAndResponses data before the questionnaire store's
+    // question.complete or question.responseData gets updated.
+    //
+    // BUG FIX: Previously, we checked question.complete first, but that value is stale
+    // after unskipping. When a user unskips a chapter, the LIVE data has quartech_chapterskipped
+    // set to 100000001 (not skipped) and potentially empty quartech_response, but the stale
+    // question.complete may still be true from before, causing the navigation to incorrectly
+    // show a "complete" icon instead of "incomplete".
 
-    // Check if question is skipped using the LIVE data from POWERPOD.workbookQuestionsAndResponses
-    // This is important because optimistic updates (like skip/unskip) update this data first
-    // before the questionnaire store's question.responseData is updated
+    // Check LIVE data from POWERPOD.workbookQuestionsAndResponses first (most authoritative source)
     var liveEntry = (_POWERPOD$workbookQue = POWERPOD.workbookQuestionsAndResponses) === null || _POWERPOD$workbookQue === void 0 || (_POWERPOD$workbookQue = _POWERPOD$workbookQue.questionsWithResponses) === null || _POWERPOD$workbookQue === void 0 ? void 0 : _POWERPOD$workbookQue.get(question.id);
-    if ((liveEntry === null || liveEntry === void 0 || (_liveEntry$response = liveEntry.response) === null || _liveEntry$response === void 0 ? void 0 : _liveEntry$response.quartech_chapterskipped) === 100000000) {
-      return true;
+    if (liveEntry !== null && liveEntry !== void 0 && liveEntry.response) {
+      // Check if skipped using LIVE data
+      if (liveEntry.response.quartech_chapterskipped === 100000000) {
+        return true;
+      }
+
+      // Check if has non-empty response using LIVE data
+      var liveResponse = liveEntry.response.quartech_response;
+      if (liveResponse && liveResponse.trim() !== '') {
+        return true;
+      }
+
+      // LIVE data exists but is NOT skipped and has NO response = incomplete
+      return false;
     }
 
     // Fallback to question.responseData for cases where POWERPOD data isn't loaded yet
     if (((_question$responseDat = question.responseData) === null || _question$responseDat === void 0 ? void 0 : _question$responseDat.quartech_chapterskipped) === 100000000) {
+      return true;
+    }
+
+    // Fallback to question.complete for cases where POWERPOD data isn't loaded
+    if (question.complete) {
       return true;
     }
     return false;
@@ -44239,6 +44261,10 @@
           this.currentSectionIndex = 0;
           this.sectionCompletion = new Map();
           this.sectionSkipped = new Map();
+          this.paSigned = false;
+          this.producerSigned = false;
+          this.isPA = false;
+          this.isProducer = false;
       }
       updated(changedProps) {
           super.updated(changedProps);
@@ -44265,11 +44291,46 @@
           // Section 0 is "My Workbook"
           return this.sectionCompletion.get(0) || false;
       }
+      // Check if the current user has signed off
+      hasCurrentUserSignedOff() {
+          // PA user signed off if they're PA and paSigned is true
+          if (this.isPA && this.paSigned)
+              return true;
+          // Producer user signed off if they're Producer and producerSigned is true
+          if (this.isProducer && this.producerSigned)
+              return true;
+          return false;
+      }
+      // Get the appropriate icon name based on workbook state
+      getReviewSubmitIcon() {
+          // If current user has signed off, show checkmark
+          if (this.hasCurrentUserSignedOff()) {
+              return 'check-circle-fill';
+          }
+          // If all questions answered, show paper plane
+          if (this.isWorkbookComplete()) {
+              return 'send';
+          }
+          // In progress - show list task icon
+          return 'list-task';
+      }
+      // Get the subtitle text based on workbook state
+      getReviewSubmitSubtitle() {
+          if (this.hasCurrentUserSignedOff()) {
+              return 'You have signed off on this workbook';
+          }
+          if (this.isWorkbookComplete()) {
+              return 'Ready to submit your workbook';
+          }
+          return 'Complete all questions to submit';
+      }
       render() {
           // Get the first section (My Workbook) which contains all chapters
           const myWorkbookSection = this.sections[0];
           const isReviewSubmitActive = this.currentSectionIndex === 1;
-          const workbookComplete = this.isWorkbookComplete();
+          const iconName = this.getReviewSubmitIcon();
+          const subtitle = this.getReviewSubmitSubtitle();
+          const hasUserSignedOff = this.hasCurrentUserSignedOff();
           return x `
       <!-- Workbook Info Card -->
       <div class="card">
@@ -44306,17 +44367,13 @@
       >
         <div class="review-submit-content">
           <sl-icon
-            name="${workbookComplete ? 'check-circle-fill' : 'send'}"
+            name="${iconName}"
             class="review-submit-icon"
-            style="color: ${workbookComplete ? 'var(--sl-color-success-600)' : 'var(--sl-color-primary-700)'};"
+            style="color: ${hasUserSignedOff ? 'var(--sl-color-success-600)' : '#1a5a96'};"
           ></sl-icon>
           <div class="review-submit-text">
             <p class="review-submit-title">Review & Submit</p>
-            <p class="review-submit-subtitle">
-              ${workbookComplete
-            ? 'Ready to submit your workbook'
-            : 'Complete all questions to submit'}
-            </p>
+            <p class="review-submit-subtitle">${subtitle}</p>
           </div>
           <sl-icon name="arrow-right" class="review-submit-arrow"></sl-icon>
         </div>
@@ -44460,6 +44517,18 @@
   __decorate([
       n$4({ type: Object })
   ], NavigationSidebar.prototype, "sectionSkipped", void 0);
+  __decorate([
+      n$4({ type: Boolean })
+  ], NavigationSidebar.prototype, "paSigned", void 0);
+  __decorate([
+      n$4({ type: Boolean })
+  ], NavigationSidebar.prototype, "producerSigned", void 0);
+  __decorate([
+      n$4({ type: Boolean })
+  ], NavigationSidebar.prototype, "isPA", void 0);
+  __decorate([
+      n$4({ type: Boolean })
+  ], NavigationSidebar.prototype, "isProducer", void 0);
   NavigationSidebar = __decorate([
       t$1('navigation-sidebar')
   ], NavigationSidebar);
@@ -50104,6 +50173,22 @@
           const producerSigned = workbookData.quartech_producersigned === YES_INT;
           return paSigned || producerSigned;
       }
+      // Check if PA has signed off
+      getPASigned() {
+          const workbookData = getWorkbookData();
+          if (!workbookData)
+              return false;
+          const YES_INT = parseInt(YES_VALUE, 10);
+          return workbookData.quartech_pasigned === YES_INT;
+      }
+      // Check if Producer has signed off
+      getProducerSigned() {
+          const workbookData = getWorkbookData();
+          if (!workbookData)
+              return false;
+          const YES_INT = parseInt(YES_VALUE, 10);
+          return workbookData.quartech_producersigned === YES_INT;
+      }
       // Update workbook lock status in component state and store
       updateWorkbookLockStatus() {
           const isLocked = this.isWorkbookLocked();
@@ -51651,6 +51736,10 @@
           .currentSectionIndex=${this.currentSectionIndex}
           .sectionCompletion=${this.getSectionCompletionMap()}
           .sectionSkipped=${this.getSectionSkippedMap()}
+          .paSigned=${this.getPASigned()}
+          .producerSigned=${this.getProducerSigned()}
+          .isPA=${hasRole('EFP Planning Advisor')}
+          .isProducer=${hasRole('EFP Producer')}
           @section-change=${this.handleSidebarSectionChange}
         >
           ${this.sections.map((section, index) => x `
