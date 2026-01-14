@@ -1,5 +1,5 @@
 /*!
-* powerpod 4.8.9
+* powerpod 4.9.0
 * https://github.com/bcgov/nr-af-pods/powerpod
 *
 * @license GPLv3 for open source use only
@@ -47954,6 +47954,17 @@
     word-wrap: break-word;
   }
 
+  /* Constrain images within content areas to prevent overflow */
+  .main-content img,
+  .chapter-content img,
+  .subchapter-content img,
+  .question-text img,
+  .question-container img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+  }
+
   /* Multiline text container and status indicator */
   .multiline-text-container {
     display: flex;
@@ -52351,7 +52362,7 @@
       };
     };
     // @ts-ignore
-    POWERPOD.version = '4.8.9';
+    POWERPOD.version = '4.9.0';
     // @ts-ignore
     window.powerpod = POWERPOD;
   }

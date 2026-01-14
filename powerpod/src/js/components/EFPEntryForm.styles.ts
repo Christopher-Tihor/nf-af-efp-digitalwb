@@ -612,6 +612,17 @@ export const efpEntryFormStyles = css`
     word-wrap: break-word;
   }
 
+  /* Constrain images within content areas to prevent overflow */
+  .main-content img,
+  .chapter-content img,
+  .subchapter-content img,
+  .question-text img,
+  .question-container img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+  }
+
   /* Multiline text container and status indicator */
   .multiline-text-container {
     display: flex;
