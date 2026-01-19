@@ -2218,6 +2218,16 @@ a.action.create-action.btn-primary:focus-visible {
    Ensures footer stays at bottom even with minimal content
    ========================================================================== */
 
+/* Main content wrapper should grow to fill available space */
+.wrapper-body,
+.wrapper,
+#content_form,
+main,
+.content-wrapper {
+  flex: 1 0 auto;
+}
+
+/* Universal sticky footer */
 footer.footer {
   margin-top: auto !important;
   flex-shrink: 0;
