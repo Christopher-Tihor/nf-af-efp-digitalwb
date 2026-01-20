@@ -1,4 +1,3 @@
-import * as utils from './common/utils.js';
 import { POWERPOD, win, doc, Form } from './common/constants.js';
 import powerpod from './powerpod.js';
 import { getOptions } from './common/options.js';

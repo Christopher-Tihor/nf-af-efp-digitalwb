@@ -51,8 +51,6 @@ if [ -z "$new_version" ]; then
 fi
 
 files_to_update=(
-    "assets/application/js/application.js"
-    "assets/claim/js/claim.js"
     "powerpod/package.json"
     "powerpod/rollup.config.js"
     "powerpod/src/js/powerpod.js"
@@ -61,16 +59,6 @@ files_to_update=(
 for file_path in "${files_to_update[@]}"; do
     if [ -f "$file_path" ]; then
         case "$file_path" in
-            *"application.js" | *"claim.js")
-                # Prompt user before updating JavaScript files
-                read -p "Do you want to update $file_path? [Y/N]: " answer
-                if [[ "$answer" == "Y" || "$answer" == "y" ]]; then
-                    sed -i '' -E "s/powerpod-[0-9]+\.[0-9]+\.[0-9]+\.min\.js/powerpod-$new_version.min.js/g" "$file_path"
-                    echo "Updated $file_path with new version $new_version"
-                else
-                    echo "Skipping $file_path"
-                fi
-                ;;
             "powerpod/package.json")
                 # Update version number in package.json
                 sed -i '' -E "s/\"version\": \"[0-9]+\.[0-9]+\.[0-9]+\"/\"version\": \"$new_version\"/g" "$file_path"

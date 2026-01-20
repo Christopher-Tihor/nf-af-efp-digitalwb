@@ -1,8 +1,3 @@
-import {
-  displayActiveFieldErrors,
-  displayValidationErrors,
-} from '../common/fieldValidation.js';
-import { hideQuestion, showFieldRow } from '../common/html.js';
 import { Logger } from '../common/logger.js';
 
 const logger = Logger('store/mutations');
@@ -133,7 +128,6 @@ export default {
       return state;
     }
     state.validationError = payload;
-    displayValidationErrors(state.validationError);
     return state;
   },
   addValidationError(state, payload) {
@@ -148,7 +142,6 @@ export default {
     }
     const currentState = state.validationError;
     state.validationError = currentState.concat(payload);
-    displayValidationErrors(state.validationError);
     return state;
   },
   removeValidationError(state, payload) {
@@ -163,7 +156,6 @@ export default {
     }
     const currentState = state.validationError;
     state.validationError = currentState.replace(payload, '');
-    displayValidationErrors(state.validationError);
     return state;
   },
   addToFieldOrder(state, payload) {

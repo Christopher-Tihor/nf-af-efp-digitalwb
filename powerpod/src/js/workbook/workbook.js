@@ -1,5 +1,5 @@
 import { Logger } from '../common/logger.js';
-import { preloadRequestVerificationToken } from '../common/dynamics.ts';
+import { preloadRequestVerificationToken } from '../common/requestVerification.js';
 import { hideLoadingAnimation } from '../common/loading.js';
 import {
   getWorkbookId,

@@ -1,6 +1,5 @@
 import store from '../store';
 import { doc, POWERPOD } from './constants';
-import { getControlType, getControlValue } from './html';
 import { Logger } from './logger';
 
 const logger = Logger('common/components');

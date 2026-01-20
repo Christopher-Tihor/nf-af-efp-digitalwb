@@ -13,17 +13,8 @@ import { getOptions, setOption, setOptions } from './common/options.js';
 import './common/scripts.js';
 import './common/fetch.js';
 import './common/env.ts';
-import './common/program.ts';
-import './common/form.js';
 import { Logger } from './common/logger.js';
-import { initApplication } from './application/application.js';
-import { initClaim } from './claim/claim.js';
-import './components/ExpenseReportTable.ts';
-import './components/ClaimInfoGridVLB.ts';
-import './components/CommoditiesMultiSelect.ts';
-import './components/ExpenseInvoicesTable.ts';
 import './components/EFPBreadcrumbs.ts';
-import { initHome } from './pages/home.js';
 import { initMyEfpWorkbooks } from './pages/myEfpWorkbooks.js';
 import { initWorkbook } from './workbook/workbook.js';
 
@@ -100,10 +91,6 @@ export default function powerpod(options) {
           logger.info({ message: `initializing ${Page.MyEfpWorkbooks} page` });
           initMyEfpWorkbooks();
           break;
-        case Page.Home:
-          logger.info({ message: `initializing ${Page.Home} page` });
-          initHome();
-          break;
         default:
           logger.warn({
             message: 'init with no form or page type defined in options',
@@ -125,7 +112,7 @@ function setAPI() {
     };
   };
   // @ts-ignore
-  POWERPOD.version = '4.9.1';
+  POWERPOD.version = '4.9.3';
   // @ts-ignore
   window.powerpod = POWERPOD;
 }

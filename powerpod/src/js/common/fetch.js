@@ -1,5 +1,5 @@
 import { Form, POWERPOD } from './constants.js';
-import { getRequestVerificationToken } from './dynamics.ts';
+import { getRequestVerificationToken } from './requestVerification.js';
 import { Logger } from './logger.js';
 
 const logger = Logger('common/fetch');

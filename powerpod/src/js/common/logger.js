@@ -1,4 +1,4 @@
-import { Environment, win, POWERPOD } from './constants.js';
+import { POWERPOD } from './constants.js';
 import { getOptions } from './options.js';
 
 POWERPOD.logger = {
