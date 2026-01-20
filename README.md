@@ -18,8 +18,6 @@ npm run build    # Production build
 npm test         # Run tests
 ```
 
-The built bundle (`dist/powerpod.min.js`) gets uploaded to Power Pages as a Web File.
-
 ## Local Development
 
 You don't want to upload a new Web File every time you make a change. Instead, serve the bundle locally and redirect the browser to load it from your machine.
@@ -299,6 +297,7 @@ Quick reference for common tasks:
 | Add/update program configuration | See `powerpod/README.md` for JSON config format |
 | Write tests | `powerpod/src/test/` directory |
 | Debug in Storybook | `powerpod/src/js/components/*.stories.ts` |
+| Review UI customizations | [`docs/CUSTOMIZATION_INVENTORY.md`](docs/CUSTOMIZATION_INVENTORY.md) |
 
 ---
 
