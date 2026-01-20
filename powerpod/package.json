@@ -13,7 +13,7 @@
     "devtest": "jest --config=./jest.config.dev.cjs  --verbose --watchAll",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
-    "serve": "wds --root-dir ./dist --port 80 --node-resolve --watch",
+    "serve": "http-server ./dist -p 8080 -c-1 --cors",
     "start": "npm run server"
   },
   "repository": {
