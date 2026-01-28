@@ -17,7 +17,7 @@ export const Hosts = {
     'af-pods-test.powerappsportals.com',
     'af-efp-test.powerappsportals.com',
   ],
-  [Environment.PROD]: ['af-pods.powerappsportals.com'],
+  [Environment.PROD]: ['af-pods.powerappsportals.com', 'af-efp.powerappsportals.com'],
 };
 export const ClaimPaths = ['/claim/', '/claim-dev/'];
 export const ApplicationPaths = ['/application/', '/application-dev/'];
