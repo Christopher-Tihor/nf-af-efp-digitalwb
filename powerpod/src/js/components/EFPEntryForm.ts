@@ -1561,6 +1561,12 @@ export class EFPEntryForm extends LitElement {
     return this.currentStepIndex >= this.flatSteps.length - 1;
   }
 
+  // Check if we're on the Terms & Conditions page (final page)
+  private get isOnTermsAndConditionsPage(): boolean {
+    const currentStep = this.flatSteps[this.currentStepIndex];
+    return currentStep?.label === 'Terms & Conditions';
+  }
+
   // Section navigation event handler
   private handleSectionChange(newSectionIndex: number) {
     // Check if trying to navigate to "Review & Submit" (section index 1)
@@ -2763,15 +2769,17 @@ export class EFPEntryForm extends LitElement {
             @layout-toggle=${this.handleLayoutToggle}
           ></progress-header>
 
-          <!-- Navigation buttons above content -->
-          <navigation-buttons
-            .isPreviousDisabled=${this.currentStepIndex === 0}
-            .isContinueDisabled=${this.isContinueButtonDisabled}
-            .sectionsLength=${this.sections.length}
-            @previous-clicked=${this.handleNavigationPrevious}
-            @skip-clicked=${this.handleNavigationSkip}
-            @continue-clicked=${this.handleNavigationContinue}
-          ></navigation-buttons>
+          <!-- Navigation buttons above content (hidden on Terms & Conditions page) -->
+          ${!this.isOnTermsAndConditionsPage ? html`
+            <navigation-buttons
+              .isPreviousDisabled=${this.currentStepIndex === 0}
+              .isContinueDisabled=${this.isContinueButtonDisabled}
+              .sectionsLength=${this.sections.length}
+              @previous-clicked=${this.handleNavigationPrevious}
+              @skip-clicked=${this.handleNavigationSkip}
+              @continue-clicked=${this.handleNavigationContinue}
+            ></navigation-buttons>
+          ` : ''}
 
           <!-- Validation Dialog for Incomplete Questions -->
           <sl-dialog
@@ -2800,7 +2808,7 @@ export class EFPEntryForm extends LitElement {
               }}
             >
               <sl-icon slot="prefix" name="arrow-right-circle"></sl-icon>
-              Skip to Next Required Step
+              Next Unanswered Question
             </sl-button>
             <sl-button
               slot="footer"
@@ -2835,15 +2843,17 @@ export class EFPEntryForm extends LitElement {
             <slot></slot>
           </div>
 
-          <!-- Navigation buttons below content -->
-          <navigation-buttons
-            .isPreviousDisabled=${this.currentStepIndex === 0}
-            .isContinueDisabled=${this.isContinueButtonDisabled}
-            .sectionsLength=${this.sections.length}
-            @previous-clicked=${this.handleNavigationPrevious}
-            @skip-clicked=${this.handleNavigationSkip}
-            @continue-clicked=${this.handleNavigationContinue}
-          ></navigation-buttons>
+          <!-- Navigation buttons below content (hidden on Terms & Conditions page) -->
+          ${!this.isOnTermsAndConditionsPage ? html`
+            <navigation-buttons
+              .isPreviousDisabled=${this.currentStepIndex === 0}
+              .isContinueDisabled=${this.isContinueButtonDisabled}
+              .sectionsLength=${this.sections.length}
+              @previous-clicked=${this.handleNavigationPrevious}
+              @skip-clicked=${this.handleNavigationSkip}
+              @continue-clicked=${this.handleNavigationContinue}
+            ></navigation-buttons>
+          ` : ''}
         </main>
 
         <!-- Global Action Plan Table (hidden, used for creating action plans from questions) -->

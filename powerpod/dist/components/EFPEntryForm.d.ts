@@ -158,6 +158,7 @@ export declare class EFPEntryForm extends LitElement {
     private handleNavigationSkip;
     private handleNavigationContinue;
     private get isContinueButtonDisabled();
+    private get isOnTermsAndConditionsPage();
     private handleSectionChange;
     private handleRatingChanged;
     private getActionPlanCount;

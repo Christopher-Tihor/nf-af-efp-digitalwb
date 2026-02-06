@@ -121,29 +121,11 @@ export class NavigationButtons extends LitElement {
     return html`
       <div class="navigation-card">
         <sl-button
-          variant="default"
-          size="large"
-          ?disabled=${this.isPreviousDisabled}
-          @click=${this.handlePrevious}
-        >
-          <sl-icon name="chevron-left"></sl-icon>
-          Previous
-        </sl-button>
-
-        <sl-button
-          variant="text"
-          @click=${this.handleSkip}
-        >
-          Skip to Next Required Step
-        </sl-button>
-
-        <sl-button
           variant="primary"
           size="large"
-          ?disabled=${this.isContinueDisabled}
-          @click=${this.handleContinue}
+          @click=${this.handleSkip}
         >
-          Continue
+          Next Unanswered Question
         </sl-button>
       </div>
     `;

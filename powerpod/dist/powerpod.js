@@ -1,5 +1,5 @@
 /*!
-* powerpod 4.9.9
+* powerpod 5.0.0
 * https://github.com/bcgov/nr-af-pods/powerpod
 *
 * @license GPLv3 for open source use only
@@ -15687,29 +15687,11 @@
           return x `
       <div class="navigation-card">
         <sl-button
-          variant="default"
-          size="large"
-          ?disabled=${this.isPreviousDisabled}
-          @click=${this.handlePrevious}
-        >
-          <sl-icon name="chevron-left"></sl-icon>
-          Previous
-        </sl-button>
-
-        <sl-button
-          variant="text"
-          @click=${this.handleSkip}
-        >
-          Skip to Next Required Step
-        </sl-button>
-
-        <sl-button
           variant="primary"
           size="large"
-          ?disabled=${this.isContinueDisabled}
-          @click=${this.handleContinue}
+          @click=${this.handleSkip}
         >
-          Continue
+          Next Unanswered Question
         </sl-button>
       </div>
     `;
@@ -27426,6 +27408,11 @@
           // Only disable at the last step
           return this.currentStepIndex >= this.flatSteps.length - 1;
       }
+      // Check if we're on the Terms & Conditions page (final page)
+      get isOnTermsAndConditionsPage() {
+          const currentStep = this.flatSteps[this.currentStepIndex];
+          return (currentStep === null || currentStep === void 0 ? void 0 : currentStep.label) === 'Terms & Conditions';
+      }
       // Section navigation event handler
       handleSectionChange(newSectionIndex) {
           // Check if trying to navigate to "Review & Submit" (section index 1)
@@ -28353,15 +28340,17 @@
             @layout-toggle=${this.handleLayoutToggle}
           ></progress-header>
 
-          <!-- Navigation buttons above content -->
-          <navigation-buttons
-            .isPreviousDisabled=${this.currentStepIndex === 0}
-            .isContinueDisabled=${this.isContinueButtonDisabled}
-            .sectionsLength=${this.sections.length}
-            @previous-clicked=${this.handleNavigationPrevious}
-            @skip-clicked=${this.handleNavigationSkip}
-            @continue-clicked=${this.handleNavigationContinue}
-          ></navigation-buttons>
+          <!-- Navigation buttons above content (hidden on Terms & Conditions page) -->
+          ${!this.isOnTermsAndConditionsPage ? x `
+            <navigation-buttons
+              .isPreviousDisabled=${this.currentStepIndex === 0}
+              .isContinueDisabled=${this.isContinueButtonDisabled}
+              .sectionsLength=${this.sections.length}
+              @previous-clicked=${this.handleNavigationPrevious}
+              @skip-clicked=${this.handleNavigationSkip}
+              @continue-clicked=${this.handleNavigationContinue}
+            ></navigation-buttons>
+          ` : ''}
 
           <!-- Validation Dialog for Incomplete Questions -->
           <sl-dialog
@@ -28391,7 +28380,7 @@
         }}
             >
               <sl-icon slot="prefix" name="arrow-right-circle"></sl-icon>
-              Skip to Next Required Step
+              Next Unanswered Question
             </sl-button>
             <sl-button
               slot="footer"
@@ -28427,15 +28416,17 @@
             <slot></slot>
           </div>
 
-          <!-- Navigation buttons below content -->
-          <navigation-buttons
-            .isPreviousDisabled=${this.currentStepIndex === 0}
-            .isContinueDisabled=${this.isContinueButtonDisabled}
-            .sectionsLength=${this.sections.length}
-            @previous-clicked=${this.handleNavigationPrevious}
-            @skip-clicked=${this.handleNavigationSkip}
-            @continue-clicked=${this.handleNavigationContinue}
-          ></navigation-buttons>
+          <!-- Navigation buttons below content (hidden on Terms & Conditions page) -->
+          ${!this.isOnTermsAndConditionsPage ? x `
+            <navigation-buttons
+              .isPreviousDisabled=${this.currentStepIndex === 0}
+              .isContinueDisabled=${this.isContinueButtonDisabled}
+              .sectionsLength=${this.sections.length}
+              @previous-clicked=${this.handleNavigationPrevious}
+              @skip-clicked=${this.handleNavigationSkip}
+              @continue-clicked=${this.handleNavigationContinue}
+            ></navigation-buttons>
+          ` : ''}
         </main>
 
         <!-- Global Action Plan Table (hidden, used for creating action plans from questions) -->
@@ -28939,7 +28930,7 @@
       };
     };
     // @ts-ignore
-    POWERPOD.version = '4.9.9';
+    POWERPOD.version = '5.0.0';
     // @ts-ignore
     window.powerpod = POWERPOD;
   }
