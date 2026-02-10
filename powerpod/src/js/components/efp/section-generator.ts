@@ -349,8 +349,6 @@ export class EFPSectionGenerator {
           }
         </style>
         <div class="terms-content">
-          <h3>Environmental Farm Plan Terms & Conditions</h3>
-          <p>Please read the following terms and conditions carefully before proceeding with your Environmental Farm Plan submission.</p>
           ${cleanedSections.join('\n')}
         </div>
       </div>

@@ -2836,7 +2836,7 @@ export class EFPEntryForm extends LitElement {
               @breadcrumb-navigate=${this.handleBreadcrumbNavigation}
             ></efp-breadcrumbs>
             ${this.renderSectionNotApplicableCheckbox()}
-            <h2>${this.activeContent.title}</h2>
+            ${(this.flatSteps[this.currentStepIndex] as any)?.renderSignOffButtons ? '' : html`<h2>${this.activeContent.title}</h2>`}
             ${this.renderMainContent()}
 
             <!-- Slot for light DOM content (e.g., action plan) -->

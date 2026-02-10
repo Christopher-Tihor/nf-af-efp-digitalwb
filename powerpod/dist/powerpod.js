@@ -23444,8 +23444,6 @@
           }
         </style>
         <div class="terms-content">
-          <h3>Environmental Farm Plan Terms & Conditions</h3>
-          <p>Please read the following terms and conditions carefully before proceeding with your Environmental Farm Plan submission.</p>
           ${cleanedSections.join('\n')}
         </div>
       </div>
@@ -28320,7 +28318,7 @@
           this.handleSectionChange(sectionIndex);
       }
       render() {
-          var _a;
+          var _a, _b;
           const workbookData = getWorkbookData();
           const workbookId = (workbookData === null || workbookData === void 0 ? void 0 : workbookData.quartech_digitalworkbookid) || 'N/A';
           const workbookName = (workbookData === null || workbookData === void 0 ? void 0 : workbookData.quartech_name) || 'N/A';
@@ -28428,7 +28426,7 @@
               @breadcrumb-navigate=${this.handleBreadcrumbNavigation}
             ></efp-breadcrumbs>
             ${this.renderSectionNotApplicableCheckbox()}
-            <h2>${this.activeContent.title}</h2>
+            ${((_b = this.flatSteps[this.currentStepIndex]) === null || _b === void 0 ? void 0 : _b.renderSignOffButtons) ? '' : x `<h2>${this.activeContent.title}</h2>`}
             ${this.renderMainContent()}
 
             <!-- Slot for light DOM content (e.g., action plan) -->
