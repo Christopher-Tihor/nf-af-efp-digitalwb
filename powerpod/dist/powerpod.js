@@ -1,5 +1,5 @@
 /*!
-* powerpod 5.0.0
+* powerpod 5.0.2
 * https://github.com/bcgov/nr-af-pods/powerpod
 *
 * @license GPLv3 for open source use only
@@ -22960,10 +22960,67 @@
           };
       }
       /**
-       * Find the next required step (earliest unanswered, non-skipped question)
+       * Check if a step at a given index has an unanswered, non-skipped question.
+       * Returns the step index and question ID if found, or null otherwise.
+       */
+      static checkStepForUnansweredQuestion(i, ctx) {
+          var _a, _b;
+          const step = ctx.flatSteps[i];
+          // Only check steps in My Workbook section
+          if (step.sectionIndex !== 0) {
+              return null;
+          }
+          // Skip section headers
+          if (step.label.startsWith('Section ')) {
+              return null;
+          }
+          // For container steps, only skip if they don't have their own questions
+          if (step.isContainer) {
+              const hasOwnQuestions = ((_b = (_a = step.chapterData) === null || _a === void 0 ? void 0 : _a.questions) === null || _b === void 0 ? void 0 : _b.length) > 0;
+              if (!hasOwnQuestions) {
+                  return null;
+              }
+          }
+          // Get the chapter/subchapter data for this step
+          const chapterData = step.subchapterData || step.chapterData;
+          if (!chapterData) {
+              return null;
+          }
+          // IMPORTANT: Only check the step's OWN questions, not subchapter questions
+          // This ensures we navigate to the actual step containing the question,
+          // not a parent container step
+          const ownQuestions = chapterData.questions || [];
+          // Find the first unanswered, non-skipped question in this step's own questions
+          const firstUnansweredQuestion = ownQuestions.find((question) => {
+              var _a, _b;
+              const entry = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.get(question.id);
+              const isSkipped = ((_a = entry === null || entry === void 0 ? void 0 : entry.response) === null || _a === void 0 ? void 0 : _a.quartech_chapterskipped) === 100000000;
+              const hasResponse = ((_b = entry === null || entry === void 0 ? void 0 : entry.response) === null || _b === void 0 ? void 0 : _b.quartech_response) &&
+                  entry.response.quartech_response.trim() !== '';
+              // Question is required and unanswered if it's not skipped AND has no response
+              return !isSkipped && !hasResponse;
+          });
+          if (firstUnansweredQuestion) {
+              const chapterId = step.chapterId || chapterData.id;
+              logger$d.info({
+                  message: 'Found next required step with unanswered questions',
+                  data: {
+                      stepIndex: i,
+                      stepLabel: step.label,
+                      chapterId,
+                      questionId: firstUnansweredQuestion.id,
+                  },
+              });
+              return { stepIndex: i, questionId: firstUnansweredQuestion.id };
+          }
+          return null;
+      }
+      /**
+       * Find the next required step (next unanswered, non-skipped question)
+       * Searches forward from the current step, wrapping around to the beginning if needed.
        */
       static findNextRequiredStep(ctx) {
-          var _a, _b, _c;
+          var _a;
           if (!POWERPOD.workbookQuestionsAndResponses.isLoaded) {
               logger$d.warn({
                   message: 'Cannot find next required step: workbook questions and responses not loaded',
@@ -22977,59 +23034,21 @@
               });
               return null;
           }
-          // Iterate through all steps in the My Workbook section (section index 0)
-          for (let i = 0; i < ctx.flatSteps.length; i++) {
-              const step = ctx.flatSteps[i];
-              // Only check steps in My Workbook section
-              if (step.sectionIndex !== 0) {
-                  continue;
-              }
-              // Skip section headers
-              if (step.label.startsWith('Section ')) {
-                  continue;
-              }
-              // For container steps, only skip if they don't have their own questions
-              if (step.isContainer) {
-                  const hasOwnQuestions = ((_c = (_b = step.chapterData) === null || _b === void 0 ? void 0 : _b.questions) === null || _c === void 0 ? void 0 : _c.length) > 0;
-                  if (!hasOwnQuestions) {
-                      continue;
-                  }
-              }
-              // Get the chapter/subchapter data for this step
-              const chapterData = step.subchapterData || step.chapterData;
-              if (!chapterData) {
-                  continue;
-              }
-              // IMPORTANT: Only check the step's OWN questions, not subchapter questions
-              // This ensures we navigate to the actual step containing the question,
-              // not a parent container step
-              const ownQuestions = chapterData.questions || [];
-              // Find the first unanswered, non-skipped question in this step's own questions
-              const firstUnansweredQuestion = ownQuestions.find((question) => {
-                  var _a, _b;
-                  const entry = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.get(question.id);
-                  const isSkipped = ((_a = entry === null || entry === void 0 ? void 0 : entry.response) === null || _a === void 0 ? void 0 : _a.quartech_chapterskipped) === 100000000;
-                  const hasResponse = ((_b = entry === null || entry === void 0 ? void 0 : entry.response) === null || _b === void 0 ? void 0 : _b.quartech_response) &&
-                      entry.response.quartech_response.trim() !== '';
-                  // Question is required and unanswered if it's not skipped AND has no response
-                  return !isSkipped && !hasResponse;
-              });
-              if (firstUnansweredQuestion) {
-                  const chapterId = step.chapterId || chapterData.id;
-                  logger$d.info({
-                      message: 'Found next required step with unanswered questions',
-                      data: {
-                          stepIndex: i,
-                          stepLabel: step.label,
-                          chapterId,
-                          questionId: firstUnansweredQuestion.id,
-                      },
-                  });
-                  return { stepIndex: i, questionId: firstUnansweredQuestion.id };
-              }
+          const totalSteps = ctx.flatSteps.length;
+          // Search forward from the step AFTER the current one
+          for (let i = ctx.currentStepIndex + 1; i < totalSteps; i++) {
+              const result = EFPNavigationUtils.checkStepForUnansweredQuestion(i, ctx);
+              if (result)
+                  return result;
+          }
+          // Wrap around: search from the beginning up to (and including) the current step
+          for (let i = 0; i <= ctx.currentStepIndex; i++) {
+              const result = EFPNavigationUtils.checkStepForUnansweredQuestion(i, ctx);
+              if (result)
+                  return result;
           }
           logger$d.info({
-              message: 'No required unanswered questions found after current step',
+              message: 'No required unanswered questions found in workbook',
           });
           return null;
       }
@@ -28930,7 +28949,7 @@
       };
     };
     // @ts-ignore
-    POWERPOD.version = '5.0.0';
+    POWERPOD.version = '5.0.2';
     // @ts-ignore
     window.powerpod = POWERPOD;
   }

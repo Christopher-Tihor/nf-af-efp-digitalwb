@@ -529,7 +529,76 @@ export class EFPNavigationUtils {
   }
 
   /**
-   * Find the next required step (earliest unanswered, non-skipped question)
+   * Check if a step at a given index has an unanswered, non-skipped question.
+   * Returns the step index and question ID if found, or null otherwise.
+   */
+  private static checkStepForUnansweredQuestion(
+    i: number,
+    ctx: NavigationContext
+  ): { stepIndex: number; questionId: string } | null {
+    const step = ctx.flatSteps[i];
+
+    // Only check steps in My Workbook section
+    if (step.sectionIndex !== 0) {
+      return null;
+    }
+
+    // Skip section headers
+    if (step.label.startsWith('Section ')) {
+      return null;
+    }
+
+    // For container steps, only skip if they don't have their own questions
+    if (step.isContainer) {
+      const hasOwnQuestions = step.chapterData?.questions?.length > 0;
+      if (!hasOwnQuestions) {
+        return null;
+      }
+    }
+
+    // Get the chapter/subchapter data for this step
+    const chapterData = step.subchapterData || step.chapterData;
+
+    if (!chapterData) {
+      return null;
+    }
+
+    // IMPORTANT: Only check the step's OWN questions, not subchapter questions
+    // This ensures we navigate to the actual step containing the question,
+    // not a parent container step
+    const ownQuestions = chapterData.questions || [];
+
+    // Find the first unanswered, non-skipped question in this step's own questions
+    const firstUnansweredQuestion = ownQuestions.find((question: any) => {
+      const entry = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.get(question.id);
+      const isSkipped = entry?.response?.quartech_chapterskipped === 100000000;
+      const hasResponse = entry?.response?.quartech_response &&
+                         entry.response.quartech_response.trim() !== '';
+
+      // Question is required and unanswered if it's not skipped AND has no response
+      return !isSkipped && !hasResponse;
+    });
+
+    if (firstUnansweredQuestion) {
+      const chapterId = step.chapterId || chapterData.id;
+      logger.info({
+        message: 'Found next required step with unanswered questions',
+        data: {
+          stepIndex: i,
+          stepLabel: step.label,
+          chapterId,
+          questionId: firstUnansweredQuestion.id,
+        },
+      });
+      return { stepIndex: i, questionId: firstUnansweredQuestion.id };
+    }
+
+    return null;
+  }
+
+  /**
+   * Find the next required step (next unanswered, non-skipped question)
+   * Searches forward from the current step, wrapping around to the beginning if needed.
    */
   static findNextRequiredStep(ctx: NavigationContext): { stepIndex: number; questionId: string } | null {
     if (!POWERPOD.workbookQuestionsAndResponses.isLoaded) {
@@ -547,68 +616,22 @@ export class EFPNavigationUtils {
       return null;
     }
 
-    // Iterate through all steps in the My Workbook section (section index 0)
-    for (let i = 0; i < ctx.flatSteps.length; i++) {
-      const step = ctx.flatSteps[i];
+    const totalSteps = ctx.flatSteps.length;
 
-      // Only check steps in My Workbook section
-      if (step.sectionIndex !== 0) {
-        continue;
-      }
+    // Search forward from the step AFTER the current one
+    for (let i = ctx.currentStepIndex + 1; i < totalSteps; i++) {
+      const result = EFPNavigationUtils.checkStepForUnansweredQuestion(i, ctx);
+      if (result) return result;
+    }
 
-      // Skip section headers
-      if (step.label.startsWith('Section ')) {
-        continue;
-      }
-
-      // For container steps, only skip if they don't have their own questions
-      if (step.isContainer) {
-        const hasOwnQuestions = step.chapterData?.questions?.length > 0;
-        if (!hasOwnQuestions) {
-          continue;
-        }
-      }
-
-      // Get the chapter/subchapter data for this step
-      const chapterData = step.subchapterData || step.chapterData;
-
-      if (!chapterData) {
-        continue;
-      }
-
-      // IMPORTANT: Only check the step's OWN questions, not subchapter questions
-      // This ensures we navigate to the actual step containing the question,
-      // not a parent container step
-      const ownQuestions = chapterData.questions || [];
-
-      // Find the first unanswered, non-skipped question in this step's own questions
-      const firstUnansweredQuestion = ownQuestions.find((question: any) => {
-        const entry = POWERPOD.workbookQuestionsAndResponses.questionsWithResponses.get(question.id);
-        const isSkipped = entry?.response?.quartech_chapterskipped === 100000000;
-        const hasResponse = entry?.response?.quartech_response &&
-                           entry.response.quartech_response.trim() !== '';
-
-        // Question is required and unanswered if it's not skipped AND has no response
-        return !isSkipped && !hasResponse;
-      });
-
-      if (firstUnansweredQuestion) {
-        const chapterId = step.chapterId || chapterData.id;
-        logger.info({
-          message: 'Found next required step with unanswered questions',
-          data: {
-            stepIndex: i,
-            stepLabel: step.label,
-            chapterId,
-            questionId: firstUnansweredQuestion.id,
-          },
-        });
-        return { stepIndex: i, questionId: firstUnansweredQuestion.id };
-      }
+    // Wrap around: search from the beginning up to (and including) the current step
+    for (let i = 0; i <= ctx.currentStepIndex; i++) {
+      const result = EFPNavigationUtils.checkStepForUnansweredQuestion(i, ctx);
+      if (result) return result;
     }
 
     logger.info({
-      message: 'No required unanswered questions found after current step',
+      message: 'No required unanswered questions found in workbook',
     });
     return null;
   }

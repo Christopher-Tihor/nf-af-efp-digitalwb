@@ -58,7 +58,13 @@ export declare class EFPNavigationUtils {
      */
     static calculatePreviousNavigation(ctx: NavigationContext): NavigationResult;
     /**
-     * Find the next required step (earliest unanswered, non-skipped question)
+     * Check if a step at a given index has an unanswered, non-skipped question.
+     * Returns the step index and question ID if found, or null otherwise.
+     */
+    private static checkStepForUnansweredQuestion;
+    /**
+     * Find the next required step (next unanswered, non-skipped question)
+     * Searches forward from the current step, wrapping around to the beginning if needed.
      */
     static findNextRequiredStep(ctx: NavigationContext): {
         stepIndex: number;
