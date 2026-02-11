@@ -1,5 +1,5 @@
 /*!
-* powerpod 5.0.2
+* powerpod 5.0.3
 * https://github.com/bcgov/nr-af-pods/powerpod
 *
 * @license GPLv3 for open source use only
@@ -23450,7 +23450,7 @@
     `;
           return [
               {
-                  label: 'Terms & Conditions',
+                  label: 'Complete',
                   content: termsContent,
                   complete: false,
                   renderSignOffButtons: true,
@@ -27428,7 +27428,7 @@
       // Check if we're on the Terms & Conditions page (final page)
       get isOnTermsAndConditionsPage() {
           const currentStep = this.flatSteps[this.currentStepIndex];
-          return (currentStep === null || currentStep === void 0 ? void 0 : currentStep.label) === 'Terms & Conditions';
+          return (currentStep === null || currentStep === void 0 ? void 0 : currentStep.label) === 'Complete';
       }
       // Section navigation event handler
       handleSectionChange(newSectionIndex) {
@@ -28947,7 +28947,7 @@
       };
     };
     // @ts-ignore
-    POWERPOD.version = '5.0.2';
+    POWERPOD.version = '5.0.3';
     // @ts-ignore
     window.powerpod = POWERPOD;
   }

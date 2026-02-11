@@ -356,7 +356,7 @@ export class EFPSectionGenerator {
 
     return [
       {
-        label: 'Terms & Conditions',
+        label: 'Complete',
         content: termsContent,
         complete: false,
         renderSignOffButtons: true,

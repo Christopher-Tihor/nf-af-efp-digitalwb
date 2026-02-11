@@ -1564,7 +1564,7 @@ export class EFPEntryForm extends LitElement {
   // Check if we're on the Terms & Conditions page (final page)
   private get isOnTermsAndConditionsPage(): boolean {
     const currentStep = this.flatSteps[this.currentStepIndex];
-    return currentStep?.label === 'Terms & Conditions';
+    return currentStep?.label === 'Complete';
   }
 
   // Section navigation event handler
