@@ -178,6 +178,7 @@ export class WorkbookSignOffButtons extends LitElement {
   @state() private isLoading: boolean = false;
   @state() private showPAButton: boolean = false;
   @state() private showProducerButton: boolean = false;
+  @state() private showPAStatus: boolean = false;
   @state() private workbookStatus: number | null = null;
 
   static styles = css`
@@ -331,20 +332,27 @@ export class WorkbookSignOffButtons extends LitElement {
     if (debugRoleOverride !== null) {
       switch (debugRoleOverride) {
         case 'producer':
+          // Producer sees PA status indicator (no button), no Producer sign-off
           this.showPAButton = false;
-          this.showProducerButton = true;
+          this.showProducerButton = false;
+          this.showPAStatus = true;
           break;
         case 'advisor':
+          // PA sees their own status with button
           this.showPAButton = true;
           this.showProducerButton = false;
+          this.showPAStatus = true;
           break;
         case 'both':
+          // Show PA status with button (Producer sign-off removed)
           this.showPAButton = true;
-          this.showProducerButton = true;
+          this.showProducerButton = false;
+          this.showPAStatus = true;
           break;
         case 'none':
           this.showPAButton = false;
           this.showProducerButton = false;
+          this.showPAStatus = false;
           break;
       }
 
@@ -355,12 +363,15 @@ export class WorkbookSignOffButtons extends LitElement {
           debugRoleOverride,
           showPAButton: this.showPAButton,
           showProducerButton: this.showProducerButton,
+          showPAStatus: this.showPAStatus,
         },
       });
     } else {
       // Use actual user roles
+      // PA sees their sign-off button; Producer sees PA status only (no buttons)
       this.showPAButton = hasRole('EFP Planning Advisor');
-      this.showProducerButton = hasRole('EFP Producer');
+      this.showProducerButton = false; // Producer sign-off UI removed
+      this.showPAStatus = hasRole('EFP Planning Advisor') || hasRole('EFP Producer');
 
       logger.info({
         fn: 'checkUserRoles',
@@ -368,6 +379,7 @@ export class WorkbookSignOffButtons extends LitElement {
         data: {
           showPAButton: this.showPAButton,
           showProducerButton: this.showProducerButton,
+          showPAStatus: this.showPAStatus,
         },
       });
     }
@@ -691,35 +703,30 @@ export class WorkbookSignOffButtons extends LitElement {
   }
 
   render() {
-    if (!this.showPAButton && !this.showProducerButton) {
+    // Show component if PA status row should be visible (for both PA and Producer roles)
+    if (!this.showPAStatus) {
       return html``;
     }
 
-    // Determine button states for PA
+    // Determine button states for PA (only relevant when showPAButton is true)
     const canPASign = this.canPASignOff();
     const canPACancel = this.canPACancelSignOff();
     const isPAButtonEnabled = canPASign || canPACancel;
     const paTooltip = !isPAButtonEnabled ? this.getPADisabledTooltip() : '';
 
-    // Determine button states for Producer
-    const canProducerSign = this.canProducerSignOff();
-    const canProducerCancel = this.canProducerCancelSignOff();
-    const isProducerButtonEnabled = canProducerSign || canProducerCancel;
-    const producerTooltip = !isProducerButtonEnabled ? this.getProducerDisabledTooltip() : '';
-
     return html`
       <div class="sign-off-container">
         <div class="sign-off-title">Sign-Off</div>
 
-        ${this.showPAButton ? html`
-          <div class="sign-off-row">
-            <div class="sign-off-label">Planning Advisor:</div>
-            <div class="sign-off-status">
-              ${this.paSigned
-                ? html`<span class="status-signed">✓ Signed</span>`
-                : html`<span class="status-not-signed">⚠ Not signed</span>`
-              }
-            </div>
+        <div class="sign-off-row">
+          <div class="sign-off-label">Planning Advisor:</div>
+          <div class="sign-off-status">
+            ${this.paSigned
+              ? html`<span class="status-signed">✓ Signed</span>`
+              : html`<span class="status-not-signed">⚠ Not signed</span>`
+            }
+          </div>
+          ${this.showPAButton ? html`
             ${!isPAButtonEnabled ? html`
               <sl-tooltip content=${paTooltip}>
                 <sl-button
@@ -729,7 +736,7 @@ export class WorkbookSignOffButtons extends LitElement {
                   ?disabled=${!isPAButtonEnabled}
                   @click=${this.handlePASignOff}
                 >
-                  ${this.paSigned ? 'Clear Sign-Off' : 'Sign-Off (PA)'}
+                  ${this.paSigned ? 'Clear Sign-Off' : 'Sign-Off'}
                 </sl-button>
               </sl-tooltip>
             ` : html`
@@ -740,46 +747,11 @@ export class WorkbookSignOffButtons extends LitElement {
                 ?disabled=${!isPAButtonEnabled}
                 @click=${this.handlePASignOff}
               >
-                ${this.paSigned ? 'Clear Sign-Off' : 'Sign-Off (PA)'}
+                ${this.paSigned ? 'Clear Sign-Off' : 'Sign-Off'}
               </sl-button>
             `}
-          </div>
-        ` : ''}
-
-        ${this.showProducerButton ? html`
-          <div class="sign-off-row">
-            <div class="sign-off-label">Producer:</div>
-            <div class="sign-off-status">
-              ${this.producerSigned
-                ? html`<span class="status-signed">✓ Signed</span>`
-                : html`<span class="status-not-signed">⚠ Not signed</span>`
-              }
-            </div>
-            ${!isProducerButtonEnabled ? html`
-              <sl-tooltip content=${producerTooltip}>
-                <sl-button
-                  variant=${this.producerSigned ? 'default' : 'primary'}
-                  size="medium"
-                  ?loading=${this.isLoading}
-                  ?disabled=${!isProducerButtonEnabled}
-                  @click=${this.handleProducerSignOff}
-                >
-                  ${this.producerSigned ? 'Clear Sign-Off' : 'Sign-Off (Producer)'}
-                </sl-button>
-              </sl-tooltip>
-            ` : html`
-              <sl-button
-                variant=${this.producerSigned ? 'default' : 'primary'}
-                size="medium"
-                ?loading=${this.isLoading}
-                ?disabled=${!isProducerButtonEnabled}
-                @click=${this.handleProducerSignOff}
-              >
-                ${this.producerSigned ? 'Clear Sign-Off' : 'Sign-Off (Producer)'}
-              </sl-button>
-            `}
-          </div>
-        ` : ''}
+          ` : ''}
+        </div>
       </div>
     `;
   }

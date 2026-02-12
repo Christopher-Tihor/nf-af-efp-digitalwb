@@ -37,6 +37,7 @@ export declare class WorkbookSignOffButtons extends LitElement {
     private isLoading;
     private showPAButton;
     private showProducerButton;
+    private showPAStatus;
     private workbookStatus;
     static styles: import("lit").CSSResult;
     connectedCallback(): void;

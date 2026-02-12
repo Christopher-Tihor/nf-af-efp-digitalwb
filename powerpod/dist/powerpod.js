@@ -1,5 +1,5 @@
 /*!
-* powerpod 5.0.3
+* powerpod 5.0.4
 * https://github.com/bcgov/nr-af-pods/powerpod
 *
 * @license GPLv3 for open source use only
@@ -16817,6 +16817,7 @@
           this.isLoading = false;
           this.showPAButton = false;
           this.showProducerButton = false;
+          this.showPAStatus = false;
           this.workbookStatus = null;
           // Handle workbook data refreshed event
           this.handleWorkbookDataRefreshed = (event) => {
@@ -16849,20 +16850,27 @@
           if (debugRoleOverride !== null) {
               switch (debugRoleOverride) {
                   case 'producer':
+                      // Producer sees PA status indicator (no button), no Producer sign-off
                       this.showPAButton = false;
-                      this.showProducerButton = true;
+                      this.showProducerButton = false;
+                      this.showPAStatus = true;
                       break;
                   case 'advisor':
+                      // PA sees their own status with button
                       this.showPAButton = true;
                       this.showProducerButton = false;
+                      this.showPAStatus = true;
                       break;
                   case 'both':
+                      // Show PA status with button (Producer sign-off removed)
                       this.showPAButton = true;
-                      this.showProducerButton = true;
+                      this.showProducerButton = false;
+                      this.showPAStatus = true;
                       break;
                   case 'none':
                       this.showPAButton = false;
                       this.showProducerButton = false;
+                      this.showPAStatus = false;
                       break;
               }
               logger$j.info({
@@ -16872,19 +16880,23 @@
                       debugRoleOverride,
                       showPAButton: this.showPAButton,
                       showProducerButton: this.showProducerButton,
+                      showPAStatus: this.showPAStatus,
                   },
               });
           }
           else {
               // Use actual user roles
+              // PA sees their sign-off button; Producer sees PA status only (no buttons)
               this.showPAButton = hasRole('EFP Planning Advisor');
-              this.showProducerButton = hasRole('EFP Producer');
+              this.showProducerButton = false; // Producer sign-off UI removed
+              this.showPAStatus = hasRole('EFP Planning Advisor') || hasRole('EFP Producer');
               logger$j.info({
                   fn: 'checkUserRoles',
                   message: 'Checked user roles for sign-off buttons',
                   data: {
                       showPAButton: this.showPAButton,
                       showProducerButton: this.showProducerButton,
+                      showPAStatus: this.showPAStatus,
                   },
               });
           }
@@ -17170,31 +17182,27 @@
           }
       }
       render() {
-          if (!this.showPAButton && !this.showProducerButton) {
+          // Show component if PA status row should be visible (for both PA and Producer roles)
+          if (!this.showPAStatus) {
               return x ``;
           }
-          // Determine button states for PA
+          // Determine button states for PA (only relevant when showPAButton is true)
           const canPASign = this.canPASignOff();
           const canPACancel = this.canPACancelSignOff();
           const isPAButtonEnabled = canPASign || canPACancel;
           const paTooltip = !isPAButtonEnabled ? this.getPADisabledTooltip() : '';
-          // Determine button states for Producer
-          const canProducerSign = this.canProducerSignOff();
-          const canProducerCancel = this.canProducerCancelSignOff();
-          const isProducerButtonEnabled = canProducerSign || canProducerCancel;
-          const producerTooltip = !isProducerButtonEnabled ? this.getProducerDisabledTooltip() : '';
           return x `
       <div class="sign-off-container">
         <div class="sign-off-title">Sign-Off</div>
 
-        ${this.showPAButton ? x `
-          <div class="sign-off-row">
-            <div class="sign-off-label">Planning Advisor:</div>
-            <div class="sign-off-status">
-              ${this.paSigned
+        <div class="sign-off-row">
+          <div class="sign-off-label">Planning Advisor:</div>
+          <div class="sign-off-status">
+            ${this.paSigned
             ? x `<span class="status-signed">✓ Signed</span>`
             : x `<span class="status-not-signed">⚠ Not signed</span>`}
-            </div>
+          </div>
+          ${this.showPAButton ? x `
             ${!isPAButtonEnabled ? x `
               <sl-tooltip content=${paTooltip}>
                 <sl-button
@@ -17204,7 +17212,7 @@
                   ?disabled=${!isPAButtonEnabled}
                   @click=${this.handlePASignOff}
                 >
-                  ${this.paSigned ? 'Clear Sign-Off' : 'Sign-Off (PA)'}
+                  ${this.paSigned ? 'Clear Sign-Off' : 'Sign-Off'}
                 </sl-button>
               </sl-tooltip>
             ` : x `
@@ -17215,45 +17223,11 @@
                 ?disabled=${!isPAButtonEnabled}
                 @click=${this.handlePASignOff}
               >
-                ${this.paSigned ? 'Clear Sign-Off' : 'Sign-Off (PA)'}
+                ${this.paSigned ? 'Clear Sign-Off' : 'Sign-Off'}
               </sl-button>
             `}
-          </div>
-        ` : ''}
-
-        ${this.showProducerButton ? x `
-          <div class="sign-off-row">
-            <div class="sign-off-label">Producer:</div>
-            <div class="sign-off-status">
-              ${this.producerSigned
-            ? x `<span class="status-signed">✓ Signed</span>`
-            : x `<span class="status-not-signed">⚠ Not signed</span>`}
-            </div>
-            ${!isProducerButtonEnabled ? x `
-              <sl-tooltip content=${producerTooltip}>
-                <sl-button
-                  variant=${this.producerSigned ? 'default' : 'primary'}
-                  size="medium"
-                  ?loading=${this.isLoading}
-                  ?disabled=${!isProducerButtonEnabled}
-                  @click=${this.handleProducerSignOff}
-                >
-                  ${this.producerSigned ? 'Clear Sign-Off' : 'Sign-Off (Producer)'}
-                </sl-button>
-              </sl-tooltip>
-            ` : x `
-              <sl-button
-                variant=${this.producerSigned ? 'default' : 'primary'}
-                size="medium"
-                ?loading=${this.isLoading}
-                ?disabled=${!isProducerButtonEnabled}
-                @click=${this.handleProducerSignOff}
-              >
-                ${this.producerSigned ? 'Clear Sign-Off' : 'Sign-Off (Producer)'}
-              </sl-button>
-            `}
-          </div>
-        ` : ''}
+          ` : ''}
+        </div>
       </div>
     `;
       }
@@ -17387,6 +17361,9 @@
   __decorate([
       r$1()
   ], WorkbookSignOffButtons.prototype, "showProducerButton", void 0);
+  __decorate([
+      r$1()
+  ], WorkbookSignOffButtons.prototype, "showPAStatus", void 0);
   __decorate([
       r$1()
   ], WorkbookSignOffButtons.prototype, "workbookStatus", void 0);
@@ -28947,7 +28924,7 @@
       };
     };
     // @ts-ignore
-    POWERPOD.version = '5.0.3';
+    POWERPOD.version = '5.0.4';
     // @ts-ignore
     window.powerpod = POWERPOD;
   }
