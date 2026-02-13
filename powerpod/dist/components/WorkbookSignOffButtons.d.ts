@@ -12,11 +12,12 @@
  *   - disableSignOffDebugging()     // Restores normal Draft status requirement
  *   - enableClearSignOffDebugging() // Allows clearing sign-off even when both have signed
  *   - disableClearSignOffDebugging()// Restores normal clear sign-off restriction
- *   - setSignOffRole('producer')    // Show only Producer sign-off button
- *   - setSignOffRole('advisor')     // Show only Planning Advisor sign-off button
- *   - setSignOffRole('both')        // Show both sign-off buttons
- *   - setSignOffRole('none')        // Hide all sign-off buttons
+ *   - setSignOffRole('producer')    // Show PA status only (no button)
+ *   - setSignOffRole('advisor')     // Show PA status with sign-off button
+ *   - setSignOffRole('both')        // Show PA status with sign-off button
+ *   - setSignOffRole('none')        // Hide all sign-off UI
  *   - resetSignOffRole()            // Restore actual user roles
+ *   - forceClearSignOff()           // Force clear PA sign-off (bypasses all restrictions)
  *   - getSignOffDebugStatus()       // Display current debug settings
  */
 import { LitElement } from 'lit';
@@ -29,6 +30,7 @@ declare global {
         setSignOffRole: (role: 'producer' | 'advisor' | 'both' | 'none') => void;
         resetSignOffRole: () => void;
         getSignOffDebugStatus: () => void;
+        forceClearSignOff: () => Promise<void>;
     }
 }
 export declare class WorkbookSignOffButtons extends LitElement {
@@ -62,6 +64,7 @@ export declare class WorkbookSignOffButtons extends LitElement {
      * Enable cancel sign-off only for:
      * - PA Signed (for the PA)
      * - UNLESS both PA and Producer have signed (then disable Clear Sign-Off)
+     * - UNLESS workbook is in Completed status (then disable Clear Sign-Off)
      *   (can be bypassed with debug mode)
      */
     private canPACancelSignOff;

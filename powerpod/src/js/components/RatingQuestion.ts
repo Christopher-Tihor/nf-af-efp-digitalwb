@@ -50,6 +50,7 @@ export class RatingQuestion extends LitElement {
 
     .rating-options {
       display: flex;
+      flex-wrap: wrap;
       gap: 0.5rem;
       align-items: stretch;
       flex-direction: row;
@@ -81,8 +82,10 @@ export class RatingQuestion extends LitElement {
     .rating-right-column {
       display: flex;
       flex-direction: row;
+      flex-wrap: wrap;
       gap: 0.5rem;
       flex: 1;
+      min-width: 0;
       align-items: stretch;
     }
 
@@ -109,7 +112,7 @@ export class RatingQuestion extends LitElement {
     /* Card style (for Point Rating with descriptions) */
     .rating-card {
       flex: 1 1 0;
-      min-width: 140px;
+      min-width: 0;
       border: 2px solid #333;
       border-radius: 8px;
       display: flex;
@@ -122,6 +125,8 @@ export class RatingQuestion extends LitElement {
       position: relative;
       background-color: white;
       box-sizing: border-box;
+      overflow-wrap: break-word;
+      word-break: break-word;
     }
 
     .rating-card-header {
@@ -130,6 +135,8 @@ export class RatingQuestion extends LitElement {
       margin: -1rem -1rem 0 -1rem;
       padding: 0.75rem 1rem;
       border-radius: 8px 8px 0 0;
+      overflow-wrap: break-word;
+      word-break: break-word;
     }
 
     .rating-card-description {

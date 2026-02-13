@@ -1,5 +1,5 @@
 /*!
-* powerpod 5.0.4
+* powerpod 5.0.5
 * https://github.com/bcgov/nr-af-pods/powerpod
 *
 * @license GPLv3 for open source use only
@@ -16014,6 +16014,7 @@
 
     .rating-options {
       display: flex;
+      flex-wrap: wrap;
       gap: 0.5rem;
       align-items: stretch;
       flex-direction: row;
@@ -16045,8 +16046,10 @@
     .rating-right-column {
       display: flex;
       flex-direction: row;
+      flex-wrap: wrap;
       gap: 0.5rem;
       flex: 1;
+      min-width: 0;
       align-items: stretch;
     }
 
@@ -16073,7 +16076,7 @@
     /* Card style (for Point Rating with descriptions) */
     .rating-card {
       flex: 1 1 0;
-      min-width: 140px;
+      min-width: 0;
       border: 2px solid #333;
       border-radius: 8px;
       display: flex;
@@ -16086,6 +16089,8 @@
       position: relative;
       background-color: white;
       box-sizing: border-box;
+      overflow-wrap: break-word;
+      word-break: break-word;
     }
 
     .rating-card-header {
@@ -16094,6 +16099,8 @@
       margin: -1rem -1rem 0 -1rem;
       padding: 0.75rem 1rem;
       border-radius: 8px 8px 0 0;
+      overflow-wrap: break-word;
+      word-break: break-word;
     }
 
     .rating-card-description {
@@ -16682,11 +16689,12 @@
    *   - disableSignOffDebugging()     // Restores normal Draft status requirement
    *   - enableClearSignOffDebugging() // Allows clearing sign-off even when both have signed
    *   - disableClearSignOffDebugging()// Restores normal clear sign-off restriction
-   *   - setSignOffRole('producer')    // Show only Producer sign-off button
-   *   - setSignOffRole('advisor')     // Show only Planning Advisor sign-off button
-   *   - setSignOffRole('both')        // Show both sign-off buttons
-   *   - setSignOffRole('none')        // Hide all sign-off buttons
+   *   - setSignOffRole('producer')    // Show PA status only (no button)
+   *   - setSignOffRole('advisor')     // Show PA status with sign-off button
+   *   - setSignOffRole('both')        // Show PA status with sign-off button
+   *   - setSignOffRole('none')        // Hide all sign-off UI
    *   - resetSignOffRole()            // Restore actual user roles
+   *   - forceClearSignOff()           // Force clear PA sign-off (bypasses all restrictions)
    *   - getSignOffDebugStatus()       // Display current debug settings
    */
   const logger$j = Logger('components/WorkbookSignOffButtons');
@@ -16788,6 +16796,35 @@
           (_a = el.requestUpdate) === null || _a === void 0 ? void 0 : _a.call(el);
       });
   };
+  // Force clear PA sign-off - bypasses all restrictions (Completed status, both signed, etc.)
+  window.forceClearSignOff = async () => {
+      const workbookId = getCurrentWorkbookId();
+      if (!workbookId) {
+          console.error('❌ No workbook ID found. Make sure you are on a workbook page.');
+          return;
+      }
+      try {
+          console.log('🐛 Force clearing PA sign-off...');
+          const fieldData = { quartech_pasigned: NO_INT };
+          await patchWorkbookData({ id: workbookId, fieldData });
+          // Update cached workbook data
+          const workbookData = getWorkbookData();
+          if (workbookData) {
+              workbookData.quartech_pasigned = NO_INT;
+          }
+          // Update all sign-off button instances
+          document.querySelectorAll('workbook-sign-off-buttons').forEach((el) => {
+              var _a, _b;
+              el.paSigned = false;
+              (_a = el.loadSignOffData) === null || _a === void 0 ? void 0 : _a.call(el);
+              (_b = el.requestUpdate) === null || _b === void 0 ? void 0 : _b.call(el);
+          });
+          console.log('✅ PA sign-off forcefully cleared. Reload the page to see updated workbook status.');
+      }
+      catch (error) {
+          console.error('❌ Failed to force clear sign-off:', error);
+      }
+  };
   // Get current debug status
   window.getSignOffDebugStatus = () => {
       const status = {
@@ -16806,6 +16843,7 @@
       console.log('  - disableClearSignOffDebugging()');
       console.log('  - setSignOffRole("producer" | "advisor" | "both" | "none")');
       console.log('  - resetSignOffRole()');
+      console.log('  - forceClearSignOff()');
       console.log('  - getSignOffDebugStatus()');
       return status;
   };
@@ -16958,6 +16996,7 @@
        * Enable cancel sign-off only for:
        * - PA Signed (for the PA)
        * - UNLESS both PA and Producer have signed (then disable Clear Sign-Off)
+       * - UNLESS workbook is in Completed status (then disable Clear Sign-Off)
        *   (can be bypassed with debug mode)
        */
       canPACancelSignOff() {
@@ -16972,6 +17011,10 @@
           }
           // If both PA and Producer have signed, disable Clear Sign-Off
           if (this.paSigned && this.producerSigned) {
+              return false;
+          }
+          // If workbook is in Completed status, disable Clear Sign-Off
+          if (this.workbookStatus === WORKBOOK_STATUS.COMPLETED) {
               return false;
           }
           return this.paSigned;
@@ -17034,6 +17077,14 @@
        */
       getPADisabledTooltip() {
           if (this.paSigned) {
+              // If workbook is Completed, show completed message
+              if (this.workbookStatus === WORKBOOK_STATUS.COMPLETED) {
+                  // In debug mode, show debug message
+                  if (debugClearSignOffEnabled) {
+                      return '🐛 DEBUG MODE: Clear Sign-Off restriction is bypassed';
+                  }
+                  return 'Cannot clear sign-off when the workbook is in Completed status.';
+              }
               // If both have signed, show different message
               if (this.producerSigned) {
                   // In debug mode, show debug message
@@ -17190,7 +17241,6 @@
           const canPASign = this.canPASignOff();
           const canPACancel = this.canPACancelSignOff();
           const isPAButtonEnabled = canPASign || canPACancel;
-          const paTooltip = !isPAButtonEnabled ? this.getPADisabledTooltip() : '';
           return x `
       <div class="sign-off-container">
         <div class="sign-off-title">Sign-Off</div>
@@ -17202,30 +17252,15 @@
             ? x `<span class="status-signed">✓ Signed</span>`
             : x `<span class="status-not-signed">⚠ Not signed</span>`}
           </div>
-          ${this.showPAButton ? x `
-            ${!isPAButtonEnabled ? x `
-              <sl-tooltip content=${paTooltip}>
-                <sl-button
-                  variant=${this.paSigned ? 'default' : 'primary'}
-                  size="medium"
-                  ?loading=${this.isLoading}
-                  ?disabled=${!isPAButtonEnabled}
-                  @click=${this.handlePASignOff}
-                >
-                  ${this.paSigned ? 'Clear Sign-Off' : 'Sign-Off'}
-                </sl-button>
-              </sl-tooltip>
-            ` : x `
+          ${this.showPAButton && isPAButtonEnabled ? x `
               <sl-button
                 variant=${this.paSigned ? 'default' : 'primary'}
                 size="medium"
                 ?loading=${this.isLoading}
-                ?disabled=${!isPAButtonEnabled}
                 @click=${this.handlePASignOff}
               >
                 ${this.paSigned ? 'Clear Sign-Off' : 'Sign-Off'}
               </sl-button>
-            `}
           ` : ''}
         </div>
       </div>
@@ -28924,7 +28959,7 @@
       };
     };
     // @ts-ignore
-    POWERPOD.version = '5.0.4';
+    POWERPOD.version = '5.0.5';
     // @ts-ignore
     window.powerpod = POWERPOD;
   }
